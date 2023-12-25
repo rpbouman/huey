@@ -1,0 +1,284 @@
+.attributeUi .attributeUiNode {
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead {
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .expander {
+  padding: 2px;
+  color: rgb(200,200,200);
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .expander:hover {
+  color: black;
+}
+
+.attributeUi .attributeUiNode[data-state=collapsed] > .attributeUiNodeHead > .expander:before {
+  font-family: tabler-icons !important;
+  /* square-rounded-plus */
+  content: "\f63f";
+  font-size: 14px;
+}
+
+.attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeHead > .expander:before {
+  font-family: tabler-icons !important;
+  /* square-rounded-minus */
+  content: "\f63e";
+  font-size: 14px;
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .icon {
+  display: inline-block;
+  font-family: tabler-icons !important;
+  font-size: 18px;
+  width: 24px;
+  padding: 3px;
+  text-align: center;
+}
+
+/**
+*
+* Data type icons
+*
+*/
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=VARCHAR] > .attributeUiNodeHead > .icon:before {
+  /* letter T */
+  content: "\ec63";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type*=INT] > .attributeUiNodeHead > .icon:before {
+  /* 123 */
+  content: "\f554";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type^=DECIMAL] > .attributeUiNodeHead > .icon:before,
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=DOUBLE] > .attributeUiNodeHead > .icon:before,
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=REAL] > .attributeUiNodeHead > .icon:before {
+  /* decimal */
+  content: "\fa26";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type*=TIMESTAMP] > .attributeUiNodeHead > .icon:before {
+  /* calendar-clock */
+  content: "\fd2e";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=DATE] > .attributeUiNodeHead > .icon:before {
+  /* calendar */
+  content: "\ea53";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=TIME] > .attributeUiNodeHead > .icon:before {
+  /* clock */
+  content: "\ea70";
+}
+
+/**
+*
+* Derivation icons
+*
+*/
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=year] > .attributeUiNodeHead > .icon:before {
+  /* letter-y */
+  content: "\ec68";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=quarter] > .attributeUiNodeHead > .icon:before {
+  /* letter q */
+  content: "\ec60";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=month] > .attributeUiNodeHead > .icon:before {
+  /* letter m */
+  content: "\ec5c";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=week] > .attributeUiNodeHead > .icon:before {
+  /* letter w */
+  content: "\ec66";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of year"] > .attributeUiNodeHead > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of month"] > .attributeUiNodeHead > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of week"] > .attributeUiNodeHead > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=hour] > .attributeUiNodeHead > .icon:before {
+  /* letter-h */
+  content: "\ec57";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=minute] > .attributeUiNodeHead > .icon:before {
+  /* letter-m-small */
+  content: "\fcd3";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=second] > .attributeUiNodeHead > .icon:before {
+  /* letter-s */
+  content: "\ec62";
+}
+
+/**
+*
+* Aggregator icons
+*
+*/
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=count] > .attributeUiNodeHead > .icon:before {
+  /* tallymarks */
+  content: "\ec4a";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct count"] > .attributeUiNodeHead > .icon:before {
+  /* tallymark-4 */
+  content: "\ec49";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=max] > .attributeUiNodeHead > .icon:before {
+  /* math-max */
+  content: "\f0f5";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=min] > .attributeUiNodeHead > .icon:before {
+  /* math-min */
+  content: "\f0f6";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=list] > .attributeUiNodeHead > .icon:before {
+  /* list */
+  content: "\eb6b";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct list"] > .attributeUiNodeHead > .icon:before {
+  /* list details */
+  content: "\ef40";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=sum] > .attributeUiNodeHead > .icon:before {
+  /* sum */
+  content: "\eb73";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=avg] > .attributeUiNodeHead > .icon:before {
+  /* math-avg */
+  content: "\f0f4";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=median] > .attributeUiNodeHead > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=mode] > .attributeUiNodeHead > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=stdev] > .attributeUiNodeHead > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+/**
+*
+* Label
+*
+*/
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
+  max-width: calc(100% - 130px);
+  vertical-align: text-bottom;
+}
+
+/**
+*
+* Axis Buttons
+*
+*/
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton {
+  display: block;
+  float: inline-end;
+  padding-top:2px;
+  width: 20px;
+  font-size: 16px;
+  font-family: tabler-icons !important;
+  color: rgb(200,200,200);
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:hover {
+  color: black;
+}
+
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=rows]:before {
+  font-family: tabler-icons !important;
+  /* table-column */
+  /* 
+    It may seem backward that we're using the table-column icon for the rows axis, 
+    but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+  */
+  content: "\faff";
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=columns]:before {
+  font-family: tabler-icons !important;
+  /* table-row */
+  /* 
+    It may seem backward that we're using the table-row icon for the columns axis, 
+    but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+  */
+  content: "\fb00";
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells]:before {
+  font-family: tabler-icons !important;
+  /* layout grid */
+  content: "\edba";
+}
+
+.attributeUi .attributeUiNode[data-nodetype=column] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells],
+.attributeUi .attributeUiNode[data-nodetype=derived] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells] {
+  visibility:hidden;
+}
+
+.attributeUi .attributeUiNode[data-nodetype=aggregate] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=columns],
+.attributeUi .attributeUiNode[data-nodetype=aggregate] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=rows] {
+  visibility:hidden;
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton > input[type=checkbox] {
+  display: none;
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:has(> input[type=checkbox]:checked) {
+  color: black;
+}
+
+.attributeUi .attributeUiNode > .attributeUiNodeBody {
+  padding-left: 32px;
+}
+
+.attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeBody {
+  display: block;
+}
+
+.attributeUi .attributeUiNode[data-state=collapsed] > .attributeUiNodeBody {
+  display: none;
+}

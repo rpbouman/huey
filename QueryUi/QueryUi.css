@@ -1,0 +1,281 @@
+.queryUi {
+  width: 100%;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis {
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .axisIcon,
+.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton
+{
+  width: 20px;
+  font-size: 16px;
+  font-family: tabler-icons !important;
+  color: rgb(200,200,200);
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:before {
+  /* table-row */
+  content: "\fb00";
+}
+/* axis icon is a button to flip the non-cells axes */
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:hover:before {
+  /* table-column */
+  content: "\faff";
+  color: black;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:before {
+  /* table-column */
+  content: "\faff";
+}
+/* axis icon is a button to flip the non-cells axes */
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:hover:before{
+  /* table-row */
+  content: "\fb00";
+  color: black;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:before {
+  content: "\edba";
+}
+
+.queryUi[data-cellsaxisplacement=columns] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+  color: black;
+  /* table-column */
+  content: "\faff";
+}
+
+.queryUi[data-cellsaxisplacement=rows] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+  color: black;
+  /* table-row */
+  content: "\fb00";
+}
+
+/*
+*/
+
+.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:before {
+  /* trash */
+  content: "\eb41";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:hover {
+  color: black;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .label {
+  /* this is to ensure minimum height so we don't see displacement after adding items. */
+  height: 25px;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .label:before {
+  content: 'Columns:'
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .label:before {
+  content: 'Rows:'
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=cells] > .label:before {
+  content: 'Cells:'
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items {
+  border-color: rgb(200,200,200);
+  border-radius: 15px;
+  border-style: solid;
+  border-width: 1px;
+  width: 100%;
+}
+
+/**
+* axis item
+*/
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem {
+  display: inline-block;
+  background-color: rgb(240,240,240);
+  border-radius: 15px;  
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgb(200,200,200);
+  margin-top: 1px 2px 1px 0px;
+  margin-left: 2px;
+}
+
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiLabel {
+  padding: 2px 4px 2px 4px;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator] > .icon, 
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation] > .icon, 
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
+  width: 20px;
+  font-size: 16px;
+  font-family: tabler-icons !important;
+}
+
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
+  color: rgb(200,200,200);
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button:hover {
+  color: black;
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:first-child > .button.queryAxisItemUiMoveLeftButton {
+  width: 2px;
+  font-size: 0px;
+}
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:not(:first-child) > .queryAxisItemUiMoveLeftButton:before {
+  /* chevron left */
+  content: "\ea60";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:last-child > .button.queryAxisItemUiMoveRightButton {
+  width: 2px;
+  font-size: 0px;
+}
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:not(:last-child) > .queryAxisItemUiMoveRightButton:before {
+  /* chevron right */
+  content: "\ea61";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiRemoveButton:before {
+  /* trash */
+  content: "\eb41";
+}
+
+/**
+*
+* Move axis button
+*
+*/
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .items > .queryUiAxisItem > .queryAxisItemUiMoveToAxisButton:before {
+  /* table-column */
+  content: "\faff";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .items > .queryUiAxisItem > .queryAxisItemUiMoveToAxisButton:before {
+  /* table-row */
+  content: "\fb00";
+}
+
+/**
+*
+* Derivation icons
+*
+*/
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=year] > .queryAxisItemUiIcon:before {
+  /* letter-y */
+  content: "\ec68";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=quarter] > .queryAxisItemUiIcon:before {
+  /* letter q */
+  content: "\ec60";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=month] > .queryAxisItemUiIcon:before {
+  /* letter m */
+  content: "\ec5c";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=week] > .queryAxisItemUiIcon:before {
+  /* letter w */
+  content: "\ec66";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of year"] > .queryAxisItemUiIcon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of month"] > .queryAxisItemUiIcon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of week"] > .queryAxisItemUiIcon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=hour] > .queryAxisItemUiIcon:before {
+  /* letter-h */
+  content: "\ec57";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=minute] > .queryAxisItemUiIcon:before {
+  /* letter-m-small */
+  content: "\fcd3";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=second] > .queryAxisItemUiIcon:before {
+  /* letter-s */
+  content: "\ec62";
+}
+
+
+/**
+*
+* Aggregator icons
+*
+*/
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=count] > .queryAxisItemUiIcon:before {
+  /* tallymarks */
+  content: "\ec4a";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator="distinct count"] > .queryAxisItemUiIcon:before {
+  /* tallymark-4 */
+  content: "\ec49";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=max] > .queryAxisItemUiIcon:before {
+  /* math-max */
+  content: "\f0f5";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=min] > .queryAxisItemUiIcon:before {
+  /* math-min */
+  content: "\f0f6";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=list] > .queryAxisItemUiIcon:before {
+  /* list */
+  content: "\eb6b";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator="distinct list"] > .queryAxisItemUiIcon:before {
+  /* list details */
+  content: "\ef40";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=sum] > .queryAxisItemUiIcon:before {
+  /* sum */
+  content: "\eb73";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=avg] > .queryAxisItemUiIcon:before {
+  /* math-avg */
+  content: "\f0f4";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=median] > .queryAxisItemUiIcon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=mode] > .queryAxisItemUiIcon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=stdev] > .queryAxisItemUiIcon:before {
+  /* calculator */
+  content: "\eb80";
+}

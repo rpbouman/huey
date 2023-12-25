@@ -1,0 +1,11 @@
+      .resizeHorizontal {
+        resize: horizontal;
+        overflow-x: auto;
+        position: relative;
+      }
+
+      .resizeVertical {
+        resize: vertical;
+        overflow-x: auto;
+        position: relative;
+      }
