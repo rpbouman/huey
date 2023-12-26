@@ -1,0 +1,27 @@
+.pivotTableUiContainer {
+  overflow: scroll;
+}
+
+.pivotTableUiContainer > .pivotTableSizer {
+}
+
+.pivotTableUiContainer > .pivotTableSizer > .pivotTableColumnsSizer {
+  height: 0px;
+}
+
+.pivotTableUiContainer > .pivotTableSizer > .pivotTableRowsSizer {
+  width: 0px;
+}
+
+.pivotTableUi {
+  display: table;
+  table-layout: fixed;
+}
+
+.pivotTableUiHeader {
+  display: table-header-group
+}
+
+.pivotTableUiBody {
+  display: table-row-group
+}

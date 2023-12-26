@@ -69,7 +69,7 @@ class QueryAxis {
   }
 }
 
-class QueryModel {
+class QueryModel extends EventEmitter {
   
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
@@ -80,10 +80,21 @@ class QueryModel {
     rows: new QueryAxis(),
     cells: new QueryAxis()
   };
-  #eventListeners = {};
+  
+  #cellheadersaxis = QueryModel.AXIS_COLUMNS;
+  
+  #datasource = undefined;
+  
+  setCellHeadersAxis(cellheadersaxis) {
+    this.#cellheadersaxis = cellheadersaxis;
+  }
   
   getQueryAxis(axisId){
     return this.#axes[axisId];
+  }
+  
+  setDatasource(datasource){
+    this.#datasource = datasource;
   }
   
   findItem(config){
@@ -159,7 +170,7 @@ class QueryModel {
     }
     var addedItem = this.#addItem(config);
 
-    this.#fireEvent('change', {
+    this.fireEvent('change', {
       
     });
 
@@ -177,7 +188,7 @@ class QueryModel {
     var axis = this.getQueryAxis(axisId);
     var removedItem = axis.removeItem(item);
     removedItem.axis = axisId;
-    this.#fireEvent('change', {
+    this.fireEvent('change', {
       
     });
 
@@ -200,7 +211,7 @@ class QueryModel {
       axis.clear();
     }
     
-    this.#fireEvent('change', {
+    this.fireEvent('change', {
       
     });
   }
@@ -215,70 +226,11 @@ class QueryModel {
     axis1.setItems(axis2Items);
     axis2.setItems(axis1Items);
     
-    this.#fireEvent('change', {
+    this.fireEvent('change', {
       
     });
   }
   
-  #checkEventType(eventType){
-    switch(eventType) {
-      case 'change':
-        break;
-      default:
-        throw new Error(`Unrecognized event type ${type}`);
-    }
-  }
-  
-  #checkListenerType(listener){
-    var typeOfListener = typeof listener;
-    if (typeOfListener !== 'function'){
-      throw new Error(`Listener should be of type 'function', not '${typeOfListener}'`);
-    }
-  }
-  
-  addEventListener(eventType, listener){
-    this.#checkEventType(eventType);
-    this.#checkListenerType(listener);    
-    
-    var eventListeners = this.#eventListeners[eventType];
-    if (!eventListeners) {
-      this.#eventListeners[eventType] = eventListeners = [];
-    }
-    
-    if (eventListeners.indexOf(listener) !== -1) {
-      return;
-    }
-    eventListeners.push(listener);
-  }
-  
-  removeEventListener(eventType, listener){
-    this.#checkEventType(eventType);
-    this.#checkListenerType(listener);    
-    
-    var eventListeners = this.#eventListeners[eventType];
-    if (!eventListeners) {
-      return 0;
-    }
-    
-    var count = 0;
-    while (eventListeners.indexOf(listener) !== -1){
-      eventListeners.splice(index, 1);
-      count += 1;
-    };
-    return count;
-  }
-  
-  #fireEvent(eventType, eventData) {
-    var eventListeners = this.#eventListeners[eventType];
-    if (!eventListeners) {
-      return;
-    }
-    var event = new Event(eventType);
-    event.eventData = eventData;
-    eventListeners.forEach(function(listener){
-      listener.call(null, event);
-    });
-  }
 }
 
 var queryModel;

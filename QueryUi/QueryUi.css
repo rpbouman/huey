@@ -40,13 +40,13 @@
   content: "\edba";
 }
 
-.queryUi[data-cellsaxisplacement=columns] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+.queryUi[data-cellheadersaxis=columns] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
   color: black;
   /* table-column */
   content: "\faff";
 }
 
-.queryUi[data-cellsaxisplacement=rows] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+.queryUi[data-cellheadersaxis=rows] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
   color: black;
   /* table-row */
   content: "\fb00";

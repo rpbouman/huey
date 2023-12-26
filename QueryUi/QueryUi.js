@@ -11,18 +11,19 @@ function flipQueryUiAxisButtonClicked(queryAxisUi){
       break;
     case QueryModel.AXIS_CELLS:
       var queryUi = queryAxisUi.parentNode.parentNode;
-      var cellsaxisplacement = queryUi.getAttribute('data-cellsaxisplacement');
-      switch (cellsaxisplacement) {
+      var cellheadersaxis = queryUi.getAttribute('data-cellheadersaxis');
+      switch (cellheadersaxis) {
         case QueryModel.AXIS_COLUMNS:
-          cellsaxisplacement = QueryModel.AXIS_ROWS;
+          cellheadersaxis = QueryModel.AXIS_ROWS;
           break;
         case QueryModel.AXIS_ROWS:
-          cellsaxisplacement = QueryModel.AXIS_COLUMNS;
+          cellheadersaxis = QueryModel.AXIS_COLUMNS;
           break;
         default:
-          throw new Error(`Unrecognized cellaxisplacement ${cellsaxisplacement}`);
+          throw new Error(`Unrecognized cellaxisplacement ${cellheadersaxis}`);
       }
-      queryUi.setAttribute('data-cellsaxisplacement', cellsaxisplacement);
+      queryUi.setAttribute('data-cellheadersaxis', cellheadersaxis);
+      queryMode.setCellHeadersAxis(cellheadersaxis);
       break;
   }
 }

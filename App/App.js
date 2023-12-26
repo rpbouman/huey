@@ -77,16 +77,30 @@ function handleUpload(event){
   }
 }
 
+
+
 function handleFileSelected(event){
   var registeredFiles = byId('registeredFiles');
   var fileName = registeredFiles.value;
   if (fileName === ''){
-    // TODO: clear the UI
     return;
   }
-  var sql = `SUMMARIZE SELECT * FROM "${fileName}" USING SAMPLE 10000 ROWS`;
+  
+  var datasource = {
+    type: 'file',
+    fileName: fileName
+  };
+  
+  var sql = getSQLForDataProfile(datasource, 1000);
   kwikDb.connection.query(sql)
   .then(function(resultset){
+    queryModel.clear();
+    var metadata = 
+    queryModel.setDatasource({
+      type: 'file',
+      fileName: fileName,
+      metadata: metadata
+    });
     renderAttributeUi(resultset);
   })
   .catch(function(err){
@@ -103,4 +117,5 @@ function initApplication(){
   initQueryModel();
   initAttributeUi();
   initQueryUi();
+  initPivotTableUi();
 }
