@@ -10,10 +10,12 @@ class PivotTableUi {
   #tuples = {
     columns: {
       count: 0,
+      offset: 0,
       data: []
     },
     rows: {
       count: 0,
+      offset: 0,
       data: []
     }
   };
@@ -27,10 +29,21 @@ class PivotTableUi {
     queryModel.addEventListener('change', function(event){
       this.updatePivotTableUi();
     }.bind(this));
-   
+    
+    var container = this.#getInnerContainerDom();
+    container.addEventListener(
+      'scroll', 
+      this.#handleInnerContainerScrolled.bind(this)
+    );
   }
   
-  renderHeader() {
+  #handleInnerContainerScrolled(event){
+    var target = event.target;
+    var left = target.scrollLeft;
+    var top = target.scrollTop;
+  }
+  
+  #renderHeader() {
     var tableHeaderDom = this.#getTableHeaderDom();
     var tableBodyDom = this.#getTableBodyDom();
     
@@ -307,7 +320,7 @@ class PivotTableUi {
             var headerRow = headerRows.item(j);
             var cells = headerRow.childNodes;
             var lastCell = cells.item(physicalColumnsAdded - 1);
-            headerRow.removeChild(lastCell);
+            //headerRow.removeChild(lastCell);
           }
           return;
         }
@@ -410,7 +423,7 @@ class PivotTableUi {
           // remove the last added row to ensure it fits in the container
           // we need it to it or else the "sticky" positioning won't work as intended
           // TODO: mabe position the table explicitly to achieve the sticky effect so we don't need to remove the ultimate row/column
-          tableBodyDom.removeChild(bodyRow);
+          //tableBodyDom.removeChild(bodyRow);
           return;
         }          
       }            
@@ -422,10 +435,12 @@ class PivotTableUi {
     this.#tuples = {
       columns: {
         count: 0,
+        offset: 0,
         data: []
       },
       rows: {
         count: 0,
+        offset: 0,
         data: []
       }
     };
@@ -445,20 +460,21 @@ class PivotTableUi {
     innerContainerDom.style.display = '';
     tableDom.style.display = '';
     
-    this.renderHeader();
+    this.#renderHeader();
     
     var limit = 25;
     this.#executeAxisQuery(QueryModel.AXIS_COLUMNS, limit, 0)
     .then(function(numRows, totalNumerOfRows){
       this.#renderColumns(Math.min(numRows, limit));
       this.#updateHorizontalSizer(numRows, limit);
-      tableDom.style.width = '99.99%';
+      tableDom.style.width = innerContainerDom.clientWidth + 'px';
     }.bind(this));
 
     this.#executeAxisQuery(QueryModel.AXIS_ROWS, limit, 0)
     .then(function(numRows, totalNumerOfRows){
       this.#renderRows(Math.min(numRows, limit));
       this.#updateVerticalSizer(numRows, limit);
+      tableDom.style.height = innerContainerDom.clientHeight + 'px';
     }.bind(this));
   }
   

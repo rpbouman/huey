@@ -148,10 +148,21 @@ function renderAttributeUiNode(config){
   return node;
 }
 
-function renderAttributeUi(columnSummary){
+function clearAttributeUi(showBusy){
   var attributesUi = byId('attributeUi');
-  attributesUi.innerHTML = '';
-  
+  var content;
+  if (showBusy) {
+    content = '<div class="loader"></div>';
+  }
+  else {
+    content = '';
+  }
+  attributesUi.innerHTML = content;
+}
+
+function renderAttributeUi(columnSummary){
+  clearAttributeUi();
+  var attributesUi = byId('attributeUi');
   for (var i = 0; i < columnSummary.numRows; i++){
     var row = columnSummary.get(i);
     var node = renderAttributeUiNode({

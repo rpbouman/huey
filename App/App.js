@@ -75,8 +75,6 @@ function handleUpload(event){
   }
 }
 
-
-
 function handleFileSelected(event){
   var registeredFiles = byId('registeredFiles');
   var fileName = registeredFiles.value;
@@ -88,7 +86,7 @@ function handleFileSelected(event){
     type: 'file',
     fileName: fileName
   };
-  
+  clearAttributeUi(true);
   var sql = getSQLForDataProfile(datasource, 100);
   kwikDb.connection.query(sql)
   .then(function(resultset){
