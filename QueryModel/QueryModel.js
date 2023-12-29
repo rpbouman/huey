@@ -87,14 +87,37 @@ class QueryModel extends EventEmitter {
   
   setCellHeadersAxis(cellheadersaxis) {
     this.#cellheadersaxis = cellheadersaxis;
+    this.fireEvent('change', {
+      
+    });
+  }
+  
+  getCellHeadersAxis(){
+    return this.#cellheadersaxis;
   }
   
   getQueryAxis(axisId){
     return this.#axes[axisId];
   }
   
+  getColumnsAxis(){
+    return this.getQueryAxis(QueryModel.AXIS_COLUMNS);
+  }
+  
+  getRowsAxis(){
+    return this.getQueryAxis(QueryModel.AXIS_ROWS);
+  }
+
+  getCellsAxis(){
+    return this.getQueryAxis(QueryModel.AXIS_CELLS);
+  }
+  
   setDatasource(datasource){
     this.#datasource = datasource;
+  }
+  
+  getDatasource(){
+    return Object.assign({}, this.#datasource);
   }
   
   findItem(config){

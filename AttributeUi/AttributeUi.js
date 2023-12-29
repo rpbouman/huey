@@ -164,63 +164,78 @@ function renderAttributeUi(columnSummary){
 
 var aggregators = {
   'count': {
-    
+    expressionTemplate: 'COUNT( ${columnName} )'
   },
   'distinct count': {
-    
+    expressionTemplate: 'COUNT( DISTINCT ${columnName} )'
   },
   'min': {
-    
+    expressionTemplate: 'MIN( ${columnName} )'
   },
   'max': {
-    
+    expressionTemplate: 'MAX( ${columnName} )'
   },
   'list': {
-    
+    expressionTemplate: 'LIST( ${columnName} )'
   },
   'distinct list': {
-    
+    expressionTemplate: 'LIST( DISTINCT ${columnName} )'
   },
   'sum': {
-    numeric: true
+    numeric: true,
+    expressionTemplate: 'SUM( ${columnName} )'
   },
   'avg': {
-    numeric: true
+    numeric: true,
+    expressionTemplate: 'AVG( ${columnName} )'
   },
   'median': {
-    numeric: true
+    numeric: true,
+    expressionTemplate: 'MEDIAN( ${columnName} )'
   },
   'mode': {
-    numeric: true
+    numeric: true,
+    expressionTemplate: 'MODE( ${columnName} )'
   },
   'stdev': {
-    numeric: true
+    numeric: true,
+    expressionTemplate: 'STDDEV_SAMP( ${columnName} )'
   }
 }
 
 var dateFields = {
   'year': {
+    expressionTemplate: "YEAR( ${columnName} )"
   },
   'quarter': {
+    expressionTemplate: "QUARTER( ${columnName} )"
   },
   'month': {
+    expressionTemplate: "MONTH( ${columnName} )"
   },
   'week': {
+    expressionTemplate: "WEEK( ${columnName} )"
   },
   'day of year': {
+    expressionTemplate: "DAYOFYEAR( ${columnName} )"
   },
   'day of month': {
+    expressionTemplate: "DAYOFMONTH( ${columnName} )"
   },
   'day of week': {
+    expressionTemplate: "DAYOFWEEK( ${columnName} )"
   }
 };
 
 var timeFields = {
   'hour': {
+    expressionTemplate: "HOUR( ${columnName} )"
   },
   'minute': {
+    expressionTemplate: "MINUTE( ${columnName} )"
   },
   'second': {
+    expressionTemplate: "SECOND( ${columnName} )"
   }
 };
 

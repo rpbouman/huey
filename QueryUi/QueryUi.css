@@ -95,11 +95,11 @@
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem {
   display: inline-block;
-  background-color: rgb(240,240,240);
+  background-color: rgb(250,250,250);
+  border-color: rgb(200,200,200);
   border-radius: 15px;  
   border-style: solid;
   border-width: 1px;
-  border-color: rgb(200,200,200);
   margin-top: 1px 2px 1px 0px;
   margin-left: 2px;
 }

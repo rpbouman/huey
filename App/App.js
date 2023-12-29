@@ -32,8 +32,6 @@ function initDuckdbVersion(){
     }
     var layout = byId('layout');
     layout.style.display = '';
-    layout.disabled = '';
-    
   })
   .catch(function(){
     console.error(`Error fetching duckdb version info.`);
@@ -91,7 +89,7 @@ function handleFileSelected(event){
     fileName: fileName
   };
   
-  var sql = getSQLForDataProfile(datasource, 1000);
+  var sql = getSQLForDataProfile(datasource, 100);
   kwikDb.connection.query(sql)
   .then(function(resultset){
     queryModel.clear();

@@ -4,6 +4,7 @@ body, html {
   height: 100%;
   margin: 0px;
   padding: 0px;
+  overflow:hidden;
 }
 
 body {
@@ -33,6 +34,7 @@ body {
 
 .sidebar {
   width: 15vw;
+  height: calc(100vh - 46px);
   max-width: calc(100vw - 14px);
   border-style: none solid solid solid;
   border-color: rgb(222,222,222);
@@ -40,6 +42,12 @@ body {
   grid-column: 1/1;
   grid-row: 2/ span 2;
   padding: 4px;
+}
+
+.workarea {
+  grid-column: 2/2;
+  grid-row: 2/2;
+  height: calc(100vh - 38px);
 }
 
 .button {
@@ -61,7 +69,9 @@ select {
   border-style: solid;
   border-width: 1px;
   border-color: rgb(222,222,222);
-  border-radius: 12px;
+  border-radius: 14px;
+  height: 28px;
+  padding: 0px 2px 0px 2px;
 }
 
 select:focus {

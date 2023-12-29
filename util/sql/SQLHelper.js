@@ -104,8 +104,92 @@ function getSQLForDataProfile(datasource, sampleSize) {
   
 }
 
-function getSQLForQueryModelAxis(queryAxis){
-  var items = queryAxis;
+function getSqlForAggregatedQueryAxisItem(item){
+  var columnName = item.columnName;
+  var quotedColumnName = getQuotedIdentifier(columnName);
+  var aggregator = item.aggregator;
+  var aggregatorInfo = aggregators[aggregator];
+  var expressionTemplate = aggregatorInfo.expressionTemplate;
+  var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
+  return expression;
+}
+
+function getSqlForDerivedQueryAxisItem(item){
+  var columnName = item.columnName;
+  var quotedColumnName = getQuotedIdentifier(columnName);
+  var derivation = item.derivation;
+  var derivationInfo;
+  derivationInfo = dateFields[derivation] || timeFields[derivation];
+  var expressionTemplate = derivationInfo.expressionTemplate;
+  var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
+  return expression;
+}
+
+function getSQLSelectExpressionsForQueryModelAxis(queryModel, axisId, includeCountAll){
+  var queryAxis = queryModel.getQueryAxis(axisId);
+  var items = queryAxis.getItems();
+  if (!items.length) {
+    return undefined;
+  }
+  var selectListExpressions = [];
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var columnName = item.columnName;
+    var quotedColumnName = getQuotedIdentifier(columnName);
+    var selectListExpression;
+    if (item.aggregator) {
+      selectListExpression = getSqlForAggregatedQueryAxisItem(item);
+    }
+    else
+    if (item.derivation) {
+      selectListExpression = getSqlForDerivedQueryAxisItem(item);
+    }
+    else {
+      selectListExpression = quotedColumnName;
+    }
+    selectListExpressions.push(selectListExpression);
+  }
+  
+  if (includeCountAll) {
+    selectListExpressions.push('COUNT(*) OVER ()');
+  }
+  return selectListExpressions;
+}
+
+function getSQLForQueryModelAxis(queryModel, axisId, includeCountAll){
+  var queryAxis = queryModel.getQueryAxis(axisId);
+  var items = queryAxis.getItems();
+  if (!items.length) {
+    return undefined;
+  }
+  var selectListExpressions = getSQLSelectExpressionsForQueryModelAxis(
+    queryModel, 
+    axisId, 
+    includeCountAll
+  );
+  var groupByExpressions = [];
+  var orderByExpressions = [];
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var selectListExpression = selectListExpressions[i];
+    groupByExpressions.push(selectListExpression);
+    var sortDirection = item.sortDirection;
+    if (!sortDirection) {
+      sortDirection = 'ASC';
+    }
+    var orderByExpression = `${selectListExpression} ${sortDirection}` ;
+    orderByExpressions.push(orderByExpression);
+  }
+  
+  var datasource = queryModel.getDatasource();
+  var fromClause = getSQLFromClauseForDatasource(datasource);
+  var sql = `
+    SELECT ${selectListExpressions.join('\n,')}
+    ${fromClause} 
+    GROUP BY ${groupByExpressions.join('\n,')}
+    ORDER BY ${orderByExpressions.join('\n,')}
+  `;
+  return sql;
 }
 
 function getSQLForQueryModel(){

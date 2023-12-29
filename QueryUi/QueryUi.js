@@ -23,7 +23,7 @@ function flipQueryUiAxisButtonClicked(queryAxisUi){
           throw new Error(`Unrecognized cellaxisplacement ${cellheadersaxis}`);
       }
       queryUi.setAttribute('data-cellheadersaxis', cellheadersaxis);
-      queryMode.setCellHeadersAxis(cellheadersaxis);
+      queryModel.setCellHeadersAxis(cellheadersaxis);
       break;
   }
 }
