@@ -423,7 +423,6 @@ class PivotTableUi {
     var containerDom = this.#getInnerContainerDom();
     var innerContainerWidth = containerDom.clientWidth;
     var tableDom = this.#getTableDom();
-    tableDom.style.width = '';
     var initialTableDomWidth = tableDom.clientWidth;
     var physicalColumnsAdded = 0;
     
@@ -534,7 +533,6 @@ class PivotTableUi {
             var lastCell = cells.item(physicalColumnsAdded - 1);
             //headerRow.removeChild(lastCell);
           }
-          tableDom.style.width = '100%';
           return;
         }
       }        
@@ -646,7 +644,36 @@ class PivotTableUi {
       }            
     }
   }
+  
+  #renderCells(){
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var tableHeaderRows = tableHeaderDom.childNodes;
+    var firstTableHeaderRow = tableHeaderRows.item(0);
+    var firstTableHeaderRowCells = firstTableHeaderRow.cells;
     
+    var columnAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    var columnOffset = columnAxisSizeInfo.headers.columnCount;
+    var columnCount = columnAxisSizeInfo.headers.columnCount + columnAxisSizeInfo.columns.columnCount;
+
+    var tableBodyDom = this.#getTableBodyDom();
+    var tableBodyDomRows = tableBodyDom.childNodes;
+    
+    for (var i = 0; i < tableBodyDomRows.length - 1; i++){
+      var bodyRow = tableBodyDomRows.item(i);
+      for (var j = columnOffset; j < columnCount; j++){
+        
+        var cell = createEl('div', {
+          "class": "pivotTableUiCell"
+        });
+        bodyRow.appendChild(cell);
+        var label = createEl('span', {
+          "class": "pivotTableUiCellLabel"
+        }, '');
+        cell.appendChild(label);
+      }
+    }
+  }
+  
   updatePivotTableUi(){
     this.clear();
     this.#tuples = {
@@ -664,17 +691,32 @@ class PivotTableUi {
     
     this.#renderHeader();
     
-    this.#executeAxisQuery(QueryModel.AXIS_COLUMNS, this.#tuples.columns.pageSize, 0)
-    .then(function(numRows, totalNumerOfRows){
-      this.#renderColumns(Math.min(numRows, this.#tuples.columns.pageSize));
-      this.#updateHorizontalSizer(numRows, this.#tuples.columns.pageSize);
-    }.bind(this));
+    var renderAxisPromises = [
+      this.#executeAxisQuery(QueryModel.AXIS_COLUMNS, this.#tuples.columns.pageSize, 0),
+      this.#executeAxisQuery(QueryModel.AXIS_ROWS, this.#tuples.rows.pageSize, 0)
+    ]
+    
+    var tableDom = this.#getTableDom();
+    tableDom.style.width = '';
+    Promise.all(renderAxisPromises)
+    .then(function(results){
+      var numColumns = results[0];
+      
+      this.#renderColumns(Math.min(numColumns, this.#tuples.columns.pageSize));
+      this.#updateHorizontalSizer(numColumns, this.#tuples.columns.pageSize);
 
-    this.#executeAxisQuery(QueryModel.AXIS_ROWS, this.#tuples.rows.pageSize, 0)
-    .then(function(numRows, totalNumerOfRows){
+      var numRows = results[1];
+      
       this.#renderRows(Math.min(numRows, this.#tuples.rows.pageSize));
       this.#updateVerticalSizer(numRows, this.#tuples.rows.pageSize);
-    }.bind(this));
+      
+      this.#renderCells();
+      
+    }.bind(this))
+    .finally(function(){
+      tableDom.style.width = '100%';
+    }.bind(this))
+    ;
   }
   
   clear(){
