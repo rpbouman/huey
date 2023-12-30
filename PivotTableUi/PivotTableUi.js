@@ -409,7 +409,7 @@ class PivotTableUi {
       }        
       this.#executeAxisQuery(axisId, newCount, firstIndexToFetch)
       .then(function(numRows){
-        tuples = data.slice(offset, offset + numRows);
+        tuples = data.slice(offset, offset + count);
         resolve(tuples);
       })
       .catch(reject)
