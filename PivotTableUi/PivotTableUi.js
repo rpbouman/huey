@@ -120,7 +120,7 @@ class PivotTableUi {
     var fractionalIndex = physicalIndex / factor; 
     var tupleIndex = Math.floor(fractionalIndex);
     var fraction = fractionalIndex - tupleIndex;
-    var cellAxisItemIndex = fraction * factor;
+    var cellAxisItemIndex = Math.round(fraction * factor);
     
     return {
       physicalIndex: physicalIndex,
@@ -181,7 +181,7 @@ class PivotTableUi {
         if (j < tupleValues.length) {
           tupleValue = tupleValues[j];         
 
-          if (j === 0 || cellAxisItemIndex === 0) {
+          if (cellAxisItemIndex === 0 || i === 0) {
             labelText = String(tupleValue);
           }
           else {
@@ -190,21 +190,22 @@ class PivotTableUi {
         }
         else
         if (doCellHeaders) {
-          cellsAxisItem = cellsAxisItems[cellAxisItemIndex];
+          var cellsAxisItem = cellsAxisItems[cellAxisItemIndex];
           labelText = PivotTableUi.#getCaptionForAxisItem(cellsAxisItem);
-          cellAxisItemIndex += 1;
         }
         
         label.innerText = labelText;
-        
-        if (doCellHeaders && cellAxisItemIndex === cellsAxisItems.length) {
+      }
+      
+      if (doCellHeaders) {
+        cellAxisItemIndex += 1;
+        if (cellAxisItemIndex === cellsAxisItems.length) {
           cellAxisItemIndex = 0;
           tupleIndex += 1;
         }
-        else {
-          tupleIndex += 1;
-        }
-        
+      }
+      else {
+        tupleIndex += 1;
       }
     }
   }
