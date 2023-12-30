@@ -152,7 +152,7 @@ function clearAttributeUi(showBusy){
   var attributesUi = byId('attributeUi');
   var content;
   if (showBusy) {
-    content = '<div class="loader"></div>';
+    content = '<div class="loader loader-medium"></div>';
   }
   else {
     content = '';

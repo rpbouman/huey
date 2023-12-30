@@ -24,6 +24,12 @@
   -ms-transform: translateZ(0);
   transform: translateZ(0);
 }
+
+.loader.loader-medium {
+  width: 5em;
+  height: 5em;
+}
+
 .loader:before {
   background: #c8c8c8;
   width: 50%;
