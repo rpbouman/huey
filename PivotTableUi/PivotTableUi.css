@@ -1,6 +1,5 @@
 .pivotTableUiContainer {
   overflow: hidden;
-  padding: 1px;
 }
 
 .pivotTableUiContainer > .pivotTableUiInnerContainer {
@@ -8,6 +7,7 @@
   position: relative;
   width: 100%;
   height: 100%;
+  margin: 1px;
   top: 0px;
   bottom: 0px;
   right: 0px;

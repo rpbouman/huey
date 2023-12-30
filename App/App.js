@@ -17,10 +17,10 @@ function duckDbRowToJSON(object){
 }
 
 function initDuckdbVersion(){
-  if (!window.kwikDb) {
+  if (!window.hueyDb) {
     return;
   }
-  var connection = window.kwikDb.connection;
+  var connection = window.hueyDb.connection;
   connection.query('SELECT version() as version')
   .then(function(resultset){
     var duckdbVersionLabel = byId('duckdbVersionLabel');
@@ -46,25 +46,20 @@ function initRegisteredFiles(){
   byId("registeredFiles").addEventListener("input", handleFileSelected, false);
 }
 
-function registerFile(file){
-  var kwikDb = window.kwikDb;
-  var registeredFiles = byId('registeredFiles');
-  var fileName = file.name;
-  kwikDb.instance.registerFileHandle(
-    fileName, 
-    file, 
-    kwikDb.duckdb.DuckDBDataProtocol.BROWSER_FILEREADER
-  )
-  .then(function(){
-    var option = document.createElement('option');
-    option.label = option.value = fileName;
-    registeredFiles.appendChild(option);
-    registeredFiles.selectedIndex = registeredFiles.options.length - 1;
-    handleFileSelected();
-  })
-  .catch(function(){
-    console.error(`Error registering file: ${fileName}`);
+async function registerFile(file){
+  var hueyDb = window.hueyDb;
+  var datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
+    type: DuckDbDataSource.types.FILE,
+    file: file
   });
+  await datasource.registerFile();
+  
+  var option = document.createElement('option');
+  option.label = option.value = datasource.getFileName();
+  var registeredFiles = byId('registeredFiles');
+  registeredFiles.appendChild(option);
+  registeredFiles.selectedIndex = registeredFiles.options.length - 1;
+  handleFileSelected(datasource);
 }
 
 function handleUpload(event){
@@ -75,34 +70,37 @@ function handleUpload(event){
   }
 }
 
-function handleFileSelected(event){
+async function handleFileSelected(event){
   var registeredFiles = byId('registeredFiles');
   var fileName = registeredFiles.value;
   if (fileName === ''){
     return;
   }
   
-  var datasource = {
-    type: 'file',
-    fileName: fileName
-  };
-  clearAttributeUi(true);
-  var sql = getSQLForDataProfile(datasource, 100);
-  kwikDb.connection.query(sql)
-  .then(function(resultset){
-    queryModel.clear();
-    var metadata = 
-    queryModel.setDatasource({
-      type: 'file',
-      fileName: fileName,
-      metadata: metadata
+  var datasource;
+  if (event instanceof DuckDbDataSource) {
+    datasource = event;
+  }
+  else {
+    var hueyDb = window.hueyDb;
+    datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance,  {
+      type: DuckDbDataSource.types.FILE,
+      fileName: fileName
     });
-    renderAttributeUi(resultset);
-  })
-  .catch(function(err){
+  }
+  
+  clearAttributeUi(true);
+
+  try {
+    var profileResultSet = await datasource.getProfileData(100);
+    queryModel.clear();
+    queryModel.setDatasource(datasource);
+    renderAttributeUi(profileResultSet);
+  }
+  catch (error) {
     console.error(`Error reading file ${fileName}`);
     console.error(err);
-  });
+  }
 }
 
 

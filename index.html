@@ -143,6 +143,7 @@
     <script onload="resourceLoaded(this.src)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/sql/SQLHelper.js"></script>
+    <script onload="resourceLoaded(this.src)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
     <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryModel/QueryModel.js"></script>
@@ -165,7 +166,7 @@
       const connection = await db.connect();
       URL.revokeObjectURL(worker_url);    
       
-      window.kwikDb = {
+      window.hueyDb = {
         duckdb: duckdb,
         instance: db,
         connection: connection

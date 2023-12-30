@@ -146,6 +146,7 @@ class PivotTableUi {
     var axisId = QueryModel.AXIS_ROWS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalRowsAxisTupleIndex);
     var rowsAxisSizeInfo = this.#getRowsAxisSizeInfo();
+    var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = rowsAxisSizeInfo.rows.rowCount;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     
@@ -172,7 +173,7 @@ class PivotTableUi {
       var tuple = tuples[tupleIndex];
       var tupleValues = tuple.values;
       
-      for (var j = 0; j < cells.length; j++){
+      for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
         var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
   
@@ -364,7 +365,7 @@ class PivotTableUi {
         resolve(0);
         return;
       }
-      kwikDb.connection.query(axisSql)
+      hueyDb.connection.query(axisSql)
       .then(function(resultset){
         this.#loadTuples(axisId, resultset, offset);
         resolve(resultset.numRows);
