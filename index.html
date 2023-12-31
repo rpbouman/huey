@@ -2,7 +2,8 @@
 <html
 >
   <head>
-    <title>Huey - powered by DuckDb</title>
+    <title>Huey</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLWRhdGFiYXNlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMTIgNm0tOCAwYTggMyAwIDEgMCAxNiAwYTggMyAwIDEgMCAtMTYgMCIgLz48cGF0aCBkPSJNNCA2djZhOCAzIDAgMCAwIDE2IDB2LTYiIC8+PHBhdGggZD0iTTQgMTJ2NmE4IDMgMCAwIDAgMTYgMHYtNiIgLz48L3N2Zz4="/>
     <script>
     function resourceLoaded(url){
       console.log(`Loaded ${url}`);
@@ -38,6 +39,7 @@
       <div
         class="toolbar"
       >
+        🦆      
         <label 
           for="uploader"
           class="button uploader ti ti-upload"
@@ -144,6 +146,7 @@
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/sql/SQLHelper.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
+    <script onload="resourceLoaded(this.src)" src="TupleSet/TupleSet.js"></script>
     <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryModel/QueryModel.js"></script>

@@ -193,5 +193,3 @@ function getSQLForQueryModelAxis(queryModel, axisId, includeCountAll){
   return sql;
 }
 
-function getSQLForQueryModel(){
-}

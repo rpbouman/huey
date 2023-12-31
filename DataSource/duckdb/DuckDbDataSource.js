@@ -159,7 +159,7 @@ class DuckDbDataSource {
     return sql;
   }
   
-  async #getConnection(){
+  async getConnection(){
     if (this.#connection === undefined) {
       this.#connection = await this.#duckDbInstance.connect();
     }
@@ -173,7 +173,7 @@ class DuckDbDataSource {
       sampleSize = this.#defaultSampleSize;
     }
     var sql = this.#getSQLForDataProfile(sampleSize);
-    var connection = await this.#getConnection();
+    var connection = await this.getConnection();
     var resultset = connection.query(sql);
     return resultset;
   }

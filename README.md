@@ -1,2 +1,2 @@
-# huey
+# 🦆 Huey 🦆
 A UI for DuckDB
