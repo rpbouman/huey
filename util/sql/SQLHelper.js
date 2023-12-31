@@ -182,7 +182,8 @@ function getSQLForQueryModelAxis(queryModel, axisId, includeCountAll){
   }
   
   var datasource = queryModel.getDatasource();
-  var fromClause = getSQLFromClauseForDatasource(datasource);
+  var qualifiedObjectName = datasource.getQualifiedObjectName();
+  var fromClause = `FROM ${qualifiedObjectName}`;
   var sql = `
     SELECT ${selectListExpressions.join('\n,')}
     ${fromClause} 
@@ -192,5 +193,3 @@ function getSQLForQueryModelAxis(queryModel, axisId, includeCountAll){
   return sql;
 }
 
-function getSQLForQueryModel(){
-}

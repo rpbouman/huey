@@ -117,7 +117,7 @@ class QueryModel extends EventEmitter {
   }
   
   getDatasource(){
-    return Object.assign({}, this.#datasource);
+    return this.#datasource;
   }
   
   findItem(config){
