@@ -555,7 +555,7 @@ class PivotTableUi {
       for (var j = columnOffset; j < columnCount; j++){
         
         var cell = createEl('div', {
-          "class": "pivotTableUiCell"
+          "class": "pivotTableUiCell pivotTableUiValueCell"
         });
         bodyRow.appendChild(cell);
         var label = createEl('span', {
