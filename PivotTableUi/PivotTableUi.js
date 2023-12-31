@@ -44,7 +44,7 @@ class PivotTableUi {
       .then(function(){
       }.bind(this))
       .catch(function(error){
-        debugger;
+        console.error(error);
       }.bind(this))
       .finally(function(){
         var dom = this.getDom();
@@ -130,6 +130,7 @@ class PivotTableUi {
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = columnsAxisSizeInfo.columns.columnCount;
+    var maxColumnIndex = columnsAxisSizeInfo.headers.columnCount + count;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#columnsTupleSet;
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
@@ -140,6 +141,9 @@ class PivotTableUi {
     if (doCellHeaders) {
       var cellsAxis = queryModel.getCellsAxis();
       cellsAxisItems = cellsAxis.getItems();
+      if (cellsAxisItems.length === 0){
+        doCellHeaders = false;
+      }
     }
 
     var tupleIndex = 0;
@@ -147,13 +151,57 @@ class PivotTableUi {
     
     var tableHeaderDom = this.#getTableHeaderDom();
     var rows = tableHeaderDom.childNodes;
+    var numRows = rows.length;
+    if (!doCellHeaders){
+      numRows -= 1;
+    }
     
     // for each tuple
-    for (var i = columnsAxisSizeInfo.headers.columnCount; i < columnsAxisSizeInfo.columns.columnCount; i++){
+    for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
       
       //for each header row
-      for (var j = 0; j < rows.length; j++){
+      for (var j = 0; j < numRows; j++){
+        var row = rows.item(j);
+        var cells = row.childNodes;
+        var cell = cells.item(i);
+        var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        
+        var labelText;
+        var tupleValue;
+        if (tuple && j < tuple.values.length){
+          tupleValue = tuple.values[j];
+
+          if (cellAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
+            labelText = String(tupleValue);
+          }
+          else {
+            labelText = '';
+          }
+        }
+        else 
+        if (doCellHeaders) {
+          if (cellsAxisItems.length) {
+            var cellsAxisItem = cellsAxisItems[cellAxisItemIndex];
+            labelText = PivotTableUi.#getCaptionForAxisItem(cellsAxisItem);
+          }
+          else {
+            labelText = '';
+          }
+        }
+        
+        label.innerText = labelText;
+      }
+
+      if (doCellHeaders) {
+        cellAxisItemIndex += 1;
+        if (cellAxisItemIndex === cellsAxisItems.length) {
+          cellAxisItemIndex = 0;
+          tupleIndex += 1;
+        }
+      }
+      else {
+        tupleIndex += 1;
       }
     }
   }
@@ -679,6 +727,7 @@ class PivotTableUi {
       var items = cellsAxis.getItems();
       factor = items.length;
     }
+    
     if (!factor) {
       factor = 1;
     }
@@ -695,6 +744,9 @@ class PivotTableUi {
         throw new Error(`Invalid axis id ${axisId}.`);
     }
     var tupleCount = tupleSet.getTupleCountSync();
+    if (tupleCount === undefined) {
+      return 0;
+    }
     var numberOfPhysicalRows = tupleCount * factor;
     return numberOfPhysicalRows;
   }
