@@ -3,7 +3,10 @@
 >
   <head>
     <title>Huey</title>
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLWRhdGFiYXNlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMTIgNm0tOCAwYTggMyAwIDEgMCAxNiAwYTggMyAwIDEgMCAtMTYgMCIgLz48cGF0aCBkPSJNNCA2djZhOCAzIDAgMCAwIDE2IDB2LTYiIC8+PHBhdGggZD0iTTQgMTJ2NmE4IDMgMCAwIDAgMTYgMHYtNiIgLz48L3N2Zz4="/>
+    <link 
+      rel="icon" 
+      href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLXRhYmxlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMyA1YTIgMiAwIDAgMSAyIC0yaDE0YTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxIC0yIDJoLTE0YTIgMiAwIDAgMSAtMiAtMnYtMTR6IiAvPjxwYXRoIGQ9Ik0zIDEwaDE4IiAvPjxwYXRoIGQ9Ik0xMCAzdjE4IiAvPjwvc3ZnPg=="
+    />
     <script>
     function resourceLoaded(url){
       console.log(`Loaded ${url}`);
@@ -16,30 +19,53 @@
       list.appendChild(item);
     }
     </script>
-    <link onload="resourceLoaded(this.href)" rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0" as="font" type="font/woff2" crossorigin="true"/>
+    <link onload="resourceLoaded(this.href)" 
+      rel="preload" 
+      as="font" 
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0" 
+      type="font/woff2" 
+      crossorigin="true"
+    />
     <link onload="resourceLoaded(this.href)" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/Spinner.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/app.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="QueryUi/QueryUi.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUi.css"/>
   </head>
   <body>
+
     <div id="spinner">
       <div class="loader">Loading...</div>
-      <ul id="resources">
-      </ul>
+      <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
+
+    <dialog id="aboutDialog">
+      <h3>Huey</h3>
+      <p>
+        A simple DuckDB UI - by Roland.Bouman@gmail.com
+      </p>
+      <ul>
+        <li id="duckdbVersionLabel"></li>
+        <li><a href="https://github.com/rpbouman/huey/" target="_github">Github</a></li>
+        <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License</a></li>
+      </ul>
+      <button id="aboutDialogOkButton">Ok</button>
+    </dialog>
+    
     <div
       id="layout"
       class="layout"
       style="display: none"
     >
-      <div
-        class="toolbar"
-      >
-        🦆      
+      <div class="toolbar">
+        <label for="registeredFiles">Files:</label>
+        <select id="registeredFiles">
+          <option value="" selected="true"></option>
+          <option value="new">New...</option>
+        </select>
         <label 
           for="uploader"
           class="button uploader ti ti-upload"
@@ -49,30 +75,30 @@
             type="file"
             multiple="true"
             accept=".parquet,.csv,.json"
-            style="display:none"
           />
         </label>
-        <label for="registeredFiles">Select File:</label>
-        <select
-          id="registeredFiles" 
-        ></select>
-        <label id="duckdbVersionLabel"
-          style="float: right"
-        ></label>
+        <label id="aboutButton" class="aboutButton" title="About Huey...">
+          🦆
+        </span>      
       </div>
-      <div
-        class="resizeHorizontal sidebar"
-      >
-        <div id="attributeUi" class="attributeUi">
+      <div class="resizeHorizontal sidebar">
+        <div class="search">
+          <fieldset>
+            <legend>Search</legend>
+            <input 
+              id="searchAttribute"
+              type="search"
+            />
+          </fieldset>
+        </div>
+        <div 
+          id="attributeUi" 
+          class="attributeUi"
+          style="flex-grow: 1;"
+        >
         </div>
       </div>
-      <div
-        class="workarea"
-        style="
-          display: flex;
-          flex-direction: column;
-        "
-      >
+      <div class="workarea">
         <table
           id="queryUi"
           class="queryUi"
@@ -80,9 +106,7 @@
           border="0"
           cellspacing="2"
           cellpadding="0"
-          style="
-            flex-grow: 0;
-          "
+          style="flex-grow: 0;"
         >
           <tbody
             class="queryUiAxes"
@@ -116,8 +140,8 @@
             width: 100%;
             height: 100%;
             border-width: 1px;
-            border-color: rgb(220,220,220);
-            border-style: solid none none none;
+            border-color: rgb(175,175,175);
+            border-top-style: solid;
           "
           data-updating="false"
         >

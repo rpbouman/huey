@@ -77,6 +77,11 @@ async function handleFileSelected(event){
     return;
   }
   
+  if (registeredFiles.value === 'new'){
+    byId("uploader").click();
+    return;
+  }
+    
   var datasource;
   if (event instanceof DuckDbDataSource) {
     datasource = event;
@@ -103,9 +108,22 @@ async function handleFileSelected(event){
   }
 }
 
+function initAbout(){
+  var aboutDialog = byId('aboutDialog');
+
+  byId('aboutButton').addEventListener('click', function(){
+    aboutDialog.showModal();
+  });
+
+  byId('aboutDialogOkButton').addEventListener('click', function(event){
+    event.cancelBubble = true;
+    aboutDialog.close();
+  });
+}
 
 function initApplication(){
   initDuckdbVersion();
+  initAbout();
   initUploader();
   initRegisteredFiles();
   initQueryModel();

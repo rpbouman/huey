@@ -27,6 +27,7 @@ body {
   border-style: solid;
   border-width: 1px;
   border-color: rgb(222,222,222);
+  border-bottom-color: rgb(175,175,175);
   grid-column: 1/ span 2;
   grid-row: 1/1;
   overflow: hidden;
@@ -34,14 +35,17 @@ body {
 
 .sidebar {
   width: 15vw;
-  height: calc(100vh - 46px);
+  height: calc(100vh - 40px);
   max-width: calc(100vw - 14px);
   border-style: none solid solid solid;
   border-color: rgb(222,222,222);
+  border-right-color: rgb(175,175,175);
   border-width: 1px;
   grid-column: 1/1;
   grid-row: 2/ span 2;
-  padding: 4px;
+  padding: 0px 4px 0px 4px;
+  display: flex;
+  flex-direction: column;
 }
 
 .workarea {
@@ -49,6 +53,8 @@ body {
   grid-row: 2/2;
   height: calc(100vh - 38px);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;  
 }
 
 .button {
@@ -59,8 +65,15 @@ label.uploader {
   
 }
 
+#registeredFiles {
+  min-width: 20em;
+}
+
+input[type=file]{
+  display:none;
+}
+
 input[type=file]::file-selector-button {
-  
   background-color: white;
   border-style: solid;
   border-width: 1px;
@@ -71,11 +84,39 @@ select {
   border-width: 1px;
   border-color: rgb(222,222,222);
   border-radius: 14px;
-  height: 28px;
+  height: 26px;
   padding: 0px 2px 0px 2px;
 }
 
 select:focus {
   border-color: rgb(200,200,200);
   border-width: 1px;
+}
+
+label.aboutButton {
+  float: right;
+  opacity: .5;
+}
+
+label.aboutButton:hover {
+  opacity: 1;
+}
+
+dialog {
+  border-style: solid;
+  border-width:1px;
+  border-color: rgb(175,175,175);
+  border-radius: 18px;
+}
+
+button {
+  border-style: solid;
+  border-width:1px;
+  border-color: rgb(175,175,175);
+  border-radius: 16px;
+  background-color:rgb(222,222,222);
+}
+
+dialog h3 {
+  
 }

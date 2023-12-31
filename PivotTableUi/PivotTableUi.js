@@ -133,8 +133,29 @@ class PivotTableUi {
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#columnsTupleSet;
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
+
+    var cellHeadersAxis = queryModel.getCellHeadersAxis();
+    var cellsAxisItems, numCellsAxisItems;
+    var doCellHeaders = (cellHeadersAxis === axisId);
+    if (doCellHeaders) {
+      var cellsAxis = queryModel.getCellsAxis();
+      cellsAxisItems = cellsAxis.getItems();
+    }
+
+    var tupleIndex = 0;
+    var cellAxisItemIndex = tupleIndexInfo.cellAxisItemIndex;
     
-    //debugger;
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var rows = tableHeaderDom.childNodes;
+    
+    // for each tuple
+    for (var i = columnsAxisSizeInfo.headers.columnCount; i < columnsAxisSizeInfo.columns.columnCount; i++){
+      var tuple = tuples[tupleIndex];
+      
+      //for each header row
+      for (var j = 0; j < rows.length; j++){
+      }
+    }
   }
   
   async #updateRowsAxisTupleData(physicalRowsAxisTupleIndex){

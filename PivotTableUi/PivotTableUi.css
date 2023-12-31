@@ -13,7 +13,7 @@
   right: 0px;
   left: 0px;
   border-style: none;
-  border-width: none;
+  border-width: 0px;
 }
 
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiSizer {

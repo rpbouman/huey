@@ -41,6 +41,11 @@ class DuckDbDataSource {
               this.#fileProtocol = config.protocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
               break;
             }
+          case 'undefined':
+            if (config.fileName) {
+              this.#objectName = config.fileName;
+              break;
+            }
           default:
             throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
         }
