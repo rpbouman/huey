@@ -95,7 +95,8 @@ async function handleFileSelected(event){
   }
   
   clearAttributeUi(true);
-
+  clearSearch();
+  
   try {
     var profileResultSet = await datasource.getProfileData(100);
     queryModel.clear();
@@ -128,6 +129,7 @@ function initApplication(){
   initRegisteredFiles();
   initQueryModel();
   initAttributeUi();
+  initSearch();
   initQueryUi();
   initPivotTableUi();
 }

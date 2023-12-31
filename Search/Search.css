@@ -29,3 +29,8 @@
   border-width: 1px;
   border-color: rgb(175,175,175);
 }
+
+
+.attributeUi .attributeUiNode[data-matches-searchstring=false] {
+  display: none;
+}

@@ -235,7 +235,6 @@ class PivotTableUi {
       var cells = row.childNodes;
       
       var tuple = tuples[tupleIndex];
-      var tupleValues = tuple.values;
       
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
@@ -243,8 +242,8 @@ class PivotTableUi {
   
         var labelText;
         var tupleValue;
-        if (j < tupleValues.length) {
-          tupleValue = tupleValues[j];         
+        if (tuple && j < tuple.values.length) {
+          tupleValue = tuple.values[j];         
 
           if (cellAxisItemIndex === 0 || i === 0) {
             labelText = String(tupleValue);
@@ -554,7 +553,6 @@ class PivotTableUi {
     
     for (var i = 0; i < numRows; i++){
       var tuple = tuples[i];
-      var values = tuple.values;
       
       for (var k = 0; k < numCellHeaders; k++){
         var bodyRow = createEl('div', {
@@ -570,8 +568,8 @@ class PivotTableUi {
           
           var labelText;
           if (j < rowAxisItems.length) {
-            if (k === 0) {
-              var value = String(values[j]);
+            if (k === 0 && tuple) {
+              var value = String(tuple.values[j]);
               labelText = String(value);
             }
             else {

@@ -1,6 +1,9 @@
 function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
   var defaultTimeout = 100;
 
+  if (typeof eventEmitter === 'string'){
+    eventEmitter = byId(eventEmitter);
+  }
   if (typeof eventEmitter !== 'object') {
     throw new Error(`Invalid argument 1: eventEmitter should be an object, not "${typeof eventEmitter}".`);
   }

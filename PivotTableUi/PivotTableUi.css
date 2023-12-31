@@ -79,10 +79,16 @@
   overflow: hidden;
 }
 
+/* 
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell::-moz-resizer,
+*/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell::-webkit-resizer {
   display: none;
 }
 
+/*
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell::-moz-resizer,
+*/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell::-webkit-resizer {
   border-right-style: dotted;
   border-right-width: 2px;
