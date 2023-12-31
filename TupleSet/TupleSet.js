@@ -25,6 +25,27 @@ class TupleSet {
     return items;
   }
 
+  #getSqlForAggregatedQueryAxisItem(item){
+    var columnName = item.columnName;
+    var quotedColumnName = getQuotedIdentifier(columnName);
+    var aggregator = item.aggregator;
+    var aggregatorInfo = aggregators[aggregator];
+    var expressionTemplate = aggregatorInfo.expressionTemplate;
+    var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
+    return expression;
+  }
+
+  #getSqlForDerivedQueryAxisItem(item){
+    var columnName = item.columnName;
+    var quotedColumnName = getQuotedIdentifier(columnName);
+    var derivation = item.derivation;
+    var derivationInfo;
+    derivationInfo = dateFields[derivation] || timeFields[derivation];
+    var expressionTemplate = derivationInfo.expressionTemplate;
+    var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
+    return expression;
+  }
+
   #getSqlSelectExpressions(includeCountAll){
     var items = this.#getQueryAxisItems();
     if (!items.length) {
@@ -38,11 +59,11 @@ class TupleSet {
       var quotedColumnName = getQuotedIdentifier(columnName);
       var selectListExpression;
       if (item.aggregator) {
-        selectListExpression = getSqlForAggregatedQueryAxisItem(item);
+        selectListExpression = this.#getSqlForAggregatedQueryAxisItem(item);
       }
       else
       if (item.derivation) {
-        selectListExpression = getSqlForDerivedQueryAxisItem(item);
+        selectListExpression = this.#getSqlForDerivedQueryAxisItem(item);
       }
       else {
         selectListExpression = quotedColumnName;
