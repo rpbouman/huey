@@ -6,20 +6,11 @@ class PivotTableUi {
   
   #id = undefined;
   #queryModel = undefined;
+    
+  #columnsTupleSet = undefined;
+  #rowsTupleSet = undefined;
   
-  #tuples = {
-    columns: {
-      pageSize: 50,
-      count: 0,
-      data: []
-    },
-    rows: {
-      pageSize: 50,
-      count: 0,
-      data: []
-    }
-  };
-  
+  // 
   #rowIndex = 0;
   #columnIndex = 0;
     
@@ -28,6 +19,9 @@ class PivotTableUi {
     
     var queryModel = config.queryModel;
     this.#queryModel = queryModel;
+
+    this.#columnsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_COLUMNS);
+    this.#rowsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_ROWS);
    
     queryModel.addEventListener('change', function(event){
       this.updatePivotTableUi();
@@ -137,7 +131,8 @@ class PivotTableUi {
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = columnsAxisSizeInfo.columns.columnCount;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
-    var tuples = await this.#getTuples(axisId, tupleCount, tupleIndexInfo.tupleIndex);
+    var tupleSet = this.#columnsTupleSet;
+    var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
     
     //debugger;
   }
@@ -149,8 +144,8 @@ class PivotTableUi {
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = rowsAxisSizeInfo.rows.rowCount;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
-    
-    var tuples = await this.#getTuples(axisId, tupleCount, tupleIndexInfo.tupleIndex);
+    var tupleSet = this.#rowsTupleSet;
+    var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
     var cellsAxisItems;
@@ -318,108 +313,8 @@ class PivotTableUi {
     });
     stufferRow.appendChild(stufferCell);
   } 
-
-  #loadTuples(axisId, resultSet, offset) {
-    var queryModel = this.#queryModel;
-    var queryAxis = queryModel.getQueryAxis(axisId);
-    var items = queryAxis.getItems();
-    var numRows = resultSet.numRows;
-    var fields = resultSet.schema.fields;
-    
-    var tuples = this.#tuples[axisId];
-    // if the offset is 0 we should have included an expression that computes the total count as last
-    if (offset === 0) {
-      if (numRows === 0){
-        tuples.count = 0;
-      }
-      else {
-        var firstRow = resultSet.get(0);
-        var lastField = fields[fields.length - 1];
-        var totalCount = firstRow[lastField.name];
-        tuples.count = parseInt(String(totalCount), 10);
-      }
-    }
-    tuples = tuples.data;
-    
-    for (var i = 0; i < numRows; i++){
-      var row = resultSet.get(i);
-      var values = [];
-      for (var j = 0; j < items.length; j++){
-        var field = fields[j];
-        values[j] = row[field.name];
-      }
-      var tuple = {values: values};
-      tuples[offset + i] = tuple;
-    }
-  }
-    
-  async #executeAxisQuery(axisId, limit, offset){
-    var queryModel = this.#queryModel;
-    var includeCountExpression = offset === 0;
-    var axisSql = getSQLForQueryModelAxis(queryModel, axisId, includeCountExpression);
-    if (axisSql) {
-      axisSql = `${axisSql}\nLIMIT ${limit} OFFSET ${offset}`;
-    }
-    return new Promise(function(resolve, reject){
-      if (!axisSql){
-        resolve(0);
-        return;
-      }
-      hueyDb.connection.query(axisSql)
-      .then(function(resultset){
-        this.#loadTuples(axisId, resultset, offset);
-        resolve(resultset.numRows);
-      }.bind(this))
-      .catch(function(error){
-        reject(error);
-      })
-      ;
-    }.bind(this));
-  }
   
-  async #getTuples(axisId, count, offset){
-    return new Promise(function(resolve, reject){
-      var tuplesInfo = this.#tuples[axisId];
-      var data = tuplesInfo.data;
-      var tuples = [];
-      var i = 0;
-      var firstIndexToFetch, lastIndexToFetch;
-      while(i < count){
-        var tupleIndex = offset + i;
-        var tuple = data[tupleIndex];
-        tuples[i] = tuple;
-        if (tuple === undefined) {
-          if (firstIndexToFetch === undefined) {
-            firstIndexToFetch = tupleIndex;
-            lastIndexToFetch = tupleIndex;
-          }
-          else 
-          if (tupleIndex > lastIndexToFetch) {
-            lastIndexToFetch = tupleIndex;
-          }
-        }
-        i += 1;
-      }
-      if (firstIndexToFetch === undefined) {
-        resolve(tuples);
-        return;
-      }
-      lastIndexToFetch += 1;
-      var newCount = (lastIndexToFetch - firstIndexToFetch);
-      if (newCount < tuplesInfo.pageSize && (offset + count === lastIndexToFetch)) {
-        newCount = tuplesInfo.pageSize;
-      }        
-      this.#executeAxisQuery(axisId, newCount, firstIndexToFetch)
-      .then(function(numRows){
-        tuples = data.slice(offset, offset + count);
-        resolve(tuples);
-      })
-      .catch(reject)
-      ;
-    }.bind(this));
-  }  
-  
-  #renderColumns(numTuples, limit){
+  #renderColumns(tuples){
     
     var containerDom = this.#getInnerContainerDom();
     var innerContainerWidth = containerDom.clientWidth;
@@ -430,6 +325,7 @@ class PivotTableUi {
     var queryModel = this.#queryModel;
     
     var numCellHeaders = 0;
+    var numTuples = tuples.length;
     var numColumns = numTuples;
     var cellHeadersPlacement = queryModel.getCellHeadersAxis();
     var renderCellHeaders = (cellHeadersPlacement === QueryModel.AXIS_COLUMNS);
@@ -457,16 +353,13 @@ class PivotTableUi {
     var firstHeaderRow = headerRows.item(0);
     var firstHeaderRowCells = firstHeaderRow.childNodes;
     var stufferCell = firstHeaderRowCells.item(firstHeaderRowCells.length - 1);
-    
-    var tuples = this.#tuples[QueryModel.AXIS_COLUMNS];
-    var data = tuples.data;
-    
+        
     // loop for each row from the column axis query result
     // if there aren't any, but the cells are on the column axis, and there is at least one item on the cell axis, this will still run once.
     for (var i = 0; i < numColumns; i++){
       var tuple;
       if (i < numTuples){
-        tuple = data[i];
+        tuple = tuples[i];
       }
     
       var valuesMaxWidth = 0, columnWidth;
@@ -540,7 +433,7 @@ class PivotTableUi {
     }
   }
 
-  #renderRows(numTuples, limit){
+  #renderRows(tuples){
     var containerDom = this.#getInnerContainerDom();
     var innerContainerHeight = containerDom.clientHeight;
     var tableDom = this.#getTableDom();
@@ -554,7 +447,7 @@ class PivotTableUi {
     var numColumns = rowAxisItems.length;
     
     var numCellHeaders = 1;
-    var numRows = numTuples;
+    var numRows = tuples.length;
     var cellHeadersPlacement = queryModel.getCellHeadersAxis();
     var renderCellHeaders = (cellHeadersPlacement === QueryModel.AXIS_ROWS);
     var cellAxisItems;
@@ -590,10 +483,8 @@ class PivotTableUi {
     var tableBodyDomRows = tableBodyDom.childNodes;
     var stufferRow = tableBodyDomRows.item(0);
     
-    var tuples = this.#tuples[QueryModel.AXIS_ROWS];
-    var data = tuples.data;
     for (var i = 0; i < numRows; i++){
-      var tuple = data[i];
+      var tuple = tuples[i];
       var values = tuple.values;
       
       for (var k = 0; k < numCellHeaders; k++){
@@ -677,39 +568,36 @@ class PivotTableUi {
   
   updatePivotTableUi(){
     this.clear();
-    this.#tuples = {
-      columns: {
-        pageSize: 50,
-        count: 0,
-        data: []
-      },
-      rows: {
-        pageSize: 50,
-        count: 0,
-        data: []
-      }
-    };
+
+    var columnsTupleSet = this.#columnsTupleSet;
+    var columnsPageSize = columnsTupleSet.getPageSize();
+    columnsTupleSet.clear();
+
+    var rowsTupleSet = this.#rowsTupleSet;
+    var rowsPageSize = rowsTupleSet.getPageSize();
+    rowsTupleSet.clear();
     
     this.#renderHeader();
     
     var renderAxisPromises = [
-      this.#executeAxisQuery(QueryModel.AXIS_COLUMNS, this.#tuples.columns.pageSize, 0),
-      this.#executeAxisQuery(QueryModel.AXIS_ROWS, this.#tuples.rows.pageSize, 0)
-    ]
+      columnsTupleSet.getTuples(columnsPageSize, 0),
+      rowsTupleSet.getTuples(rowsPageSize, 0)
+    ];
     
     var tableDom = this.#getTableDom();
     tableDom.style.width = '';
+    
     Promise.all(renderAxisPromises)
     .then(function(results){
-      var numColumns = results[0];
+      var columnTuples = results[0];
       
-      this.#renderColumns(Math.min(numColumns, this.#tuples.columns.pageSize));
-      this.#updateHorizontalSizer(numColumns, this.#tuples.columns.pageSize);
+      this.#renderColumns(columnTuples);
+      this.#updateHorizontalSizer();
 
-      var numRows = results[1];
+      var rowTuples = results[1];
       
-      this.#renderRows(Math.min(numRows, this.#tuples.rows.pageSize));
-      this.#updateVerticalSizer(numRows, this.#tuples.rows.pageSize);
+      this.#renderRows(rowTuples);
+      this.#updateVerticalSizer();
       
       this.#renderCells();
       
@@ -763,6 +651,7 @@ class PivotTableUi {
   #getNumberOfPhysicalTuplesForAxis(axisId){
     var queryModel = this.#queryModel;
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
+    
     var factor;
     if (cellHeadersAxis === axisId) {
       var cellsAxis = queryModel.getCellsAxis();
@@ -772,9 +661,19 @@ class PivotTableUi {
     if (!factor) {
       factor = 1;
     }
-    var columnsAxis = queryModel.getQueryAxis(axisId);
-    var tuples = this.#tuples[axisId];
-    var tupleCount = tuples.count;
+
+    var tupleSet;
+    switch (axisId){
+      case QueryModel.AXIS_COLUMNS:
+        tupleSet = this.#columnsTupleSet;
+        break;
+      case QueryModel.AXIS_ROWS:
+        tupleSet = this.#rowsTupleSet;
+        break;
+      default: 
+        throw new Error(`Invalid axis id ${axisId}.`);
+    }
+    var tupleCount = tupleSet.getTupleCountSync();
     var numberOfPhysicalRows = tupleCount * factor;
     return numberOfPhysicalRows;
   }

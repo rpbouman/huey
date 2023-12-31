@@ -12,6 +12,10 @@ class TupleSet {
     this.#axisId = axisId;  
   }
 
+  getPageSize(){
+    return this.#pageSize;
+  }
+
   #getQueryAxisItems(){
     var queryModel = this.#queryModel;
     var axisId = this.#axisId;
@@ -91,6 +95,10 @@ class TupleSet {
     this.#tupleCount = undefined;
   }
   
+  getTupleCountSync() {
+    return this.#tupleCount;
+  }
+  
   async getTupleCount(){
     if (this.#tupleCount === undefined) {
       
@@ -146,7 +154,8 @@ class TupleSet {
     axisSql = `${axisSql}\nLIMIT ${limit} OFFSET ${offset}`;
 
     var queryModel = this.#queryModel;
-    var connection = await queryModel.getConnection();    
+    var datasource = queryModel.getDatasource();
+    var connection = await datasource.getConnection();    
     var resultset = await connection.query(axisSql);
     this.#loadTuples(resultset, offset);
 
@@ -177,14 +186,13 @@ class TupleSet {
     }
     
     if (firstIndexToFetch === undefined) {
-      resolve(tuples);
-      return;
+      return tuples;
     }
     
     lastIndexToFetch += 1;
     var newCount = (lastIndexToFetch - firstIndexToFetch);
-    if (newCount < tuplesInfo.pageSize && (offset + count === lastIndexToFetch)) {
-      newCount = tuplesInfo.pageSize;
+    if (newCount < this.#pageSize && (offset + count === lastIndexToFetch)) {
+      newCount = this.#pageSize;
     }        
     var numRows = await this.#executeAxisQuery(newCount, firstIndexToFetch);
     tuples = data.slice(offset, offset + count);
