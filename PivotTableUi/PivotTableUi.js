@@ -711,7 +711,7 @@ class PivotTableUi {
       
     }.bind(this))
     .finally(function(){
-      tableDom.style.width = '100%';
+      tableDom.style.width = '99.99%';
     }.bind(this))
     ;
   }
