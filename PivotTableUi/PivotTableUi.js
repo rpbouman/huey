@@ -14,6 +14,9 @@ class PivotTableUi {
   #rowIndex = 0;
   #columnIndex = 0;
     
+  #resizeTimeoutId = undefined;
+  #resizeTimeout = 1000;
+  
   constructor(config){
     this.#id = config.id;
     
@@ -24,7 +27,16 @@ class PivotTableUi {
     this.#rowsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_ROWS);
    
     queryModel.addEventListener('change', function(event){
-      this.updatePivotTableUi();
+      
+      // TODO: examine the change before clearing the tuplesets.
+
+      var columnsTupleSet = this.#columnsTupleSet;
+      columnsTupleSet.clear();
+
+      var rowsTupleSet = this.#rowsTupleSet;
+      rowsTupleSet.clear();
+      
+      this.#updatePivotTableUi();
     }.bind(this));
     
     var container = this.#getInnerContainerDom();
@@ -35,8 +47,20 @@ class PivotTableUi {
       this,
       100
     );
-  }
 
+    var resizeObserver = new ResizeObserver(function(){
+      if (this.#resizeTimeoutId !== undefined) {
+        clearTimeout(this.#resizeTimeoutId);
+        this.#resizeTimeoutId = undefined;
+      }
+      this.#resizeTimeoutId = setTimeout(function(){
+        this.#updatePivotTableUi();
+      }.bind(this), this.#resizeTimeout);
+    }.bind(this));
+    var dom = this.getDom();
+    resizeObserver.observe(dom);
+  }
+  
   #handleInnerContainerScrolled(event, count){
     if (count === undefined){
       // this is the last scroll event, update the table contents.
@@ -387,7 +411,6 @@ class PivotTableUi {
     var containerDom = this.#getInnerContainerDom();
     var innerContainerWidth = containerDom.clientWidth;
     var tableDom = this.#getTableDom();
-    var initialTableDomWidth = tableDom.clientWidth;
     var physicalColumnsAdded = 0;
     
     var queryModel = this.#queryModel;
@@ -487,17 +510,36 @@ class PivotTableUi {
         
         physicalColumnsAdded += 1;
         //check if the table overshoots the allowable width
-        if (tableDom.clientWidth > innerContainerWidth) {
-          // table exceeds allowed width remove the last column.
-          for (var j = 0; j < headerRows.length; j++){
-            var headerRow = headerRows.item(j);
-            var cells = headerRow.childNodes;
-            var lastCell = cells.item(physicalColumnsAdded - 1);
-            //headerRow.removeChild(lastCell);
-          }
+        while (tableDom.clientWidth > innerContainerWidth) {
           return;
         }
       }        
+    }
+  }
+  
+  #removeExcessColumns(){
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var headerRows = tableHeaderDom.childNodes;
+    var firstHeaderRow = headerRows.item(0);
+    var firstHeaderRowCells = firstHeaderRow.childNodes;
+    var lastHeaderRowIndex = headerRows.length -1;
+    
+    var containerDom = this.#getInnerContainerDom();
+    var innerContainerWidth = containerDom.clientWidth;
+    var tableDom = this.#getTableDom();
+    
+    var cellIndex;
+    while (tableDom.clientWidth > innerContainerWidth) {
+      // table exceeds allowed width remove the last column.
+      for (var j = lastHeaderRowIndex; j >=0; j--){
+        var headerRow = headerRows.item(j);
+        var cells = headerRow.childNodes;
+        var lastCell = cells.item(firstHeaderRowCells.length - 2);
+        if (j === lastHeaderRowIndex && (tableDom.clientWidth - lastCell.clientWidth) < innerContainerWidth) {
+          return;
+        }
+        headerRow.removeChild(lastCell);
+      }
     }
   }
 
@@ -633,22 +675,17 @@ class PivotTableUi {
     }
   }
   
-  updatePivotTableUi(){
+  #updatePivotTableUi(){
     this.clear();
 
     var columnsTupleSet = this.#columnsTupleSet;
-    var columnsPageSize = columnsTupleSet.getPageSize();
-    columnsTupleSet.clear();
-
     var rowsTupleSet = this.#rowsTupleSet;
-    var rowsPageSize = rowsTupleSet.getPageSize();
-    rowsTupleSet.clear();
     
     this.#renderHeader();
     
     var renderAxisPromises = [
-      columnsTupleSet.getTuples(columnsPageSize, 0),
-      rowsTupleSet.getTuples(rowsPageSize, 0)
+      columnsTupleSet.getTuples(columnsTupleSet.getPageSize(), 0),
+      rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
     ];
     
     var tableDom = this.#getTableDom();
@@ -658,14 +695,18 @@ class PivotTableUi {
     .then(function(results){
       var columnTuples = results[0];
       
+      this.#setHorizontalSize(0);
       this.#renderColumns(columnTuples);
-      this.#updateHorizontalSizer();
 
       var rowTuples = results[1];
       
+      this.#setVerticalSize(0);
       this.#renderRows(rowTuples);
       this.#updateVerticalSizer();
       
+      this.#removeExcessColumns()
+      this.#updateHorizontalSizer();
+
       this.#renderCells();
       
     }.bind(this))
