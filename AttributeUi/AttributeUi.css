@@ -34,7 +34,7 @@
   font-family: tabler-icons !important;
   font-size: 18px;
   width: 24px;
-  padding: 3px;
+  padding: 6px 3px 0px 3px;
   text-align: center;
 }
 
@@ -215,7 +215,7 @@
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton {
   display: block;
   float: inline-end;
-  padding-top:2px;
+  padding-top: 9px;
   width: 20px;
   font-size: 16px;
   font-family: tabler-icons !important;
