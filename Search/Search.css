@@ -6,7 +6,7 @@
 }
 
 .search > fieldset {
-  margin: 0.5em 0.5em 1em 0.5em;
+  margin: 0.5em 0.25em .5em 0.25em;
   border-color: rgb(222,222,222);
   border-width: 1px;
 }
@@ -17,7 +17,7 @@
 
 .search > fieldset > input[type=search]{
   height: 22px;
-  margin: 0.3em 1em 1em 0.3em;
+  margin: 0em 0em .25em 0em;
   width: 100%;
   border-radius: 16px;
   border-color: rgb(222,222,222);

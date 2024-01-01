@@ -89,6 +89,21 @@ class DuckDbDataSource {
       protocol
     )
   }
+  
+  async validateAccess(){
+    var connection = await this.getConnection();
+    var qualifiedObjectName = this.getQualifiedObjectName();
+    var sql = `SELECT * FROM ${qualifiedObjectName} LIMIT 1`;
+    var result;
+    try{
+      var resultSet = await connection.query(sql);
+      result = true;
+    }
+    catch(error){
+      result = error;
+    }
+    return result;
+  }
  
   getQualifiedObjectName(){
     var qualifiedObjectName;

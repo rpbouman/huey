@@ -53,7 +53,16 @@ async function registerFile(file){
     file: file
   });
   await datasource.registerFile();
+  var result = await datasource.validateAccess();
   
+  if (result !== true){
+    showErrorDialog({
+      title: 'Error reading file',
+      description: result.message
+    });
+    return;
+  }
+
   var option = document.createElement('option');
   option.label = option.value = datasource.getFileName();
   var registeredFiles = byId('registeredFiles');
@@ -104,27 +113,22 @@ async function handleFileSelected(event){
     renderAttributeUi(profileResultSet);
   }
   catch (error) {
-    console.error(`Error reading file ${fileName}`);
-    console.error(err);
+    clearAttributeUi(false);
+    var title = `Error reading file ${fileName}`;
+    console.error(title);
+    var description = error.message;
+    console.error(error);
+    showErrorDialog({
+      title: title,
+      description: description
+    });
   }
-}
-
-function initAbout(){
-  var aboutDialog = byId('aboutDialog');
-
-  byId('aboutButton').addEventListener('click', function(){
-    aboutDialog.showModal();
-  });
-
-  byId('aboutDialogOkButton').addEventListener('click', function(event){
-    event.cancelBubble = true;
-    aboutDialog.close();
-  });
 }
 
 function initApplication(){
   initDuckdbVersion();
   initAbout();
+  initErrorDialog();
   initUploader();
   initRegisteredFiles();
   initQueryModel();

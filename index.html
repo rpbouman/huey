@@ -28,7 +28,9 @@
     />
     <link onload="resourceLoaded(this.href)" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/Spinner.css"/>
-    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/app.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -42,6 +44,12 @@
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
+    <dialog id="errorDialog">
+      <h3 id="errorDialogTitle"></h3>
+      <p id="errorDialogDescription"></p>
+      <button id="errorDialogOkButton">Ok</button>
+    </dialog>
+
     <dialog id="aboutDialog">
       <h3>Huey</h3>
       <p>
@@ -54,7 +62,7 @@
       </ul>
       <button id="aboutDialogOkButton">Ok</button>
     </dialog>
-    
+        
     <div
       id="layout"
       class="layout"
@@ -170,8 +178,11 @@
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/sql/SQLHelper.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
-    <script onload="resourceLoaded(this.src)" src="TupleSet/TupleSet.js"></script>
+    <script onload="resourceLoaded(this.src)" src="DataSet/TupleSet.js"></script>
+    <script onload="resourceLoaded(this.src)" src="DataSet/CellSet.js"></script>
     <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
+    <script onload="resourceLoaded(this.src)" src="AboutDialog/AboutDialog.js"></script>
+    <script onload="resourceLoaded(this.src)" src="ErrorDialog/ErrorDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryModel/QueryModel.js"></script>

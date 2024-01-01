@@ -93,15 +93,6 @@ select:focus {
   border-width: 1px;
 }
 
-label.aboutButton {
-  float: right;
-  opacity: .5;
-}
-
-label.aboutButton:hover {
-  opacity: 1;
-}
-
 dialog {
   border-style: solid;
   border-width:1px;
@@ -117,6 +108,13 @@ button {
   background-color:rgb(222,222,222);
 }
 
-dialog h3 {
-  
+dialog h1:first-child,
+dialog h2:first-child,
+dialog h3:first-child,
+dialog h4:first-child,
+dialog h5:first-child,
+dialog h6:first-child,
+dialog h7:first-child 
+{
+  margin-block-start: 0px;
 }
