@@ -189,7 +189,7 @@ class PivotTableUi {
         var row = rows.item(j);
         var cells = row.childNodes;
         var cell = cells.item(i);
-        var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         
         var labelText;
         var tupleValue;
@@ -262,7 +262,7 @@ class PivotTableUi {
       
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
-        var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
   
         var labelText;
         var tupleValue;
@@ -729,26 +729,12 @@ class PivotTableUi {
     return document.getElementById(this.#id);
   }
   
-  #getChildWithClassName(dom, className){
-    var childNodes = dom.childNodes;
-    for (var i = 0; i < childNodes.length; i++){
-      var childNode = childNodes.item(i);
-      if (childNode.nodeType !== 1) {
-        continue;
-      }
-      if (hasClass(childNode,className)){
-        return childNode;
-      }
-    }
-    throw new Error(`Couldn't find element with classname ${className}`);
-  }
-
   #getInnerContainerDom(){
-    return this.#getChildWithClassName(this.getDom(), 'pivotTableUiInnerContainer');
+    return getChildWithClassName(this.getDom(), 'pivotTableUiInnerContainer');
   }
       
   #getHorizontalSizer() {
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiHorizontalSizer');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiHorizontalSizer');
   }
   
   #setHorizontalSize(size){
@@ -853,7 +839,7 @@ class PivotTableUi {
   }
   
   #getVerticalSizer() {
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiVerticalSizer');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiVerticalSizer');
   }
 
   #setVerticalSize(size){
@@ -887,15 +873,15 @@ class PivotTableUi {
   }
   
   #getTableDom(){
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiTable');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiTable');
   }
   
   #getTableHeaderDom(){
-    return this.#getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableHeader');
+    return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableHeader');
   }
   
   #getTableBodyDom(){
-    return this.#getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
+    return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
   }
 }
 

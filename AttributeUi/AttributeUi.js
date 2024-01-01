@@ -433,11 +433,7 @@ function attributeUiClickHandler(event){
   var target = event.target;
   var classNames = getClassNames(target);
   
-  var node = target;
-  while (node && !hasClass(node, 'attributeUiNode')) {
-    node = node.parentNode;
-  }
-  
+  var node = getAncestorWithClassName(target, 'attributeUiNode');
   if (!node) {
     return;
   }

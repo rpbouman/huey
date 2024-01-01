@@ -8,10 +8,15 @@
 .queryUi > .queryUiAxes > .queryUiAxis > .axisIcon,
 .queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton
 {
-  width: 20px;
-  font-size: 16px;
-  font-family: tabler-icons !important;
-  color: rgb(200,200,200);
+  width: 24px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .axisIcon:hover,
+.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:hover {
+  color: var( --huey-icon-color-highlight );
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:before {
@@ -22,7 +27,6 @@
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:hover:before {
   /* table-column */
   content: "\faff";
-  color: black;
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:before {
@@ -33,7 +37,6 @@
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:hover:before{
   /* table-row */
   content: "\fb00";
-  color: black;
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:before {
@@ -41,13 +44,11 @@
 }
 
 .queryUi[data-cellheadersaxis=columns] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
-  color: black;
   /* table-column */
   content: "\faff";
 }
 
 .queryUi[data-cellheadersaxis=rows] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
-  color: black;
   /* table-row */
   content: "\fb00";
 }
@@ -61,12 +62,11 @@
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:hover {
-  color: black;
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .label {
   /* this is to ensure minimum height so we don't see displacement after adding items. */
-  height: 25px;
+  height: 26px;
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .label:before {
@@ -82,7 +82,8 @@
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items {
-  border-color: rgb(200,200,200);
+  border-color: var( --huey-light-border-color );
+  background-color: var( --huey-light-background-color );
   border-radius: 15px;
   border-style: solid;
   border-width: 1px;
@@ -95,35 +96,36 @@
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem {
   display: inline-block;
-  background-color: rgb(250,250,250);
-  border-color: rgb(200,200,200);
+  background-color: var( --huey-medium-background-color );
+  border-color: var( --huey-dark-border-color );
   border-radius: 15px;  
   border-style: solid;
   border-width: 1px;
-  margin-top: 1px 2px 1px 0px;
-  margin-left: 2px;
+  margin: 1px 2px 1px 1px;
 }
 
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiLabel {
-  padding: 2px 4px 2px 4px;
+  vertical-align: top;
+  margin-left: 1ch;
+  margin-right: 1ch;
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator] > .icon, 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation] > .icon, 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
   width: 20px;
-  font-size: 16px;
-  font-family: tabler-icons !important;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
 }
 
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
-  color: rgb(200,200,200);
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button:hover {
-  color: black;
+  color: var( --huey-icon-color-highlight );
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:first-child > .button.queryAxisItemUiMoveLeftButton {

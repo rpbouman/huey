@@ -11,9 +11,9 @@
   width: 11em;
   height: 11em;
   border-radius: 50%;
-  background: #c8c8c8;
+  background: var( --huey-medium-background-color );
   background: -moz-linear-gradient(left, #c8c8c8 10%, rgba(200,200,200, 0) 42%);
-  background: -webkit-linear-gradient(left, #c8c8c8 10%, rgba(200,200,200, 0) 42%);
+  background: -webkit-linear-gradient(left, var( --huey-medium-background-color ) 10%, var( --huey-light-background-color ) 42%);
   background: -o-linear-gradient(left, #c8c8c8 10%, rgba(200,200,200, 0) 42%);
   background: -ms-linear-gradient(left, #c8c8c8 10%, rgba(200,200,200, 0) 42%);
   background: linear-gradient(to right, #c8c8c8 10%, rgba(200,200,200, 0) 42%);
@@ -31,7 +31,7 @@
 }
 
 .loader:before {
-  background: #c8c8c8;
+  background: var( --huey-medium-background-color );
   width: 50%;
   height: 50%;
   border-radius: 100% 0 0 0;
@@ -41,7 +41,7 @@
   content: '';
 }
 .loader:after {
-  background: white;
+  background-color: var( --huey-medium-background-color );
   width: 75%;
   height: 75%;
   border-radius: 50%;
