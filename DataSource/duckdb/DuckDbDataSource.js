@@ -151,7 +151,17 @@ class DuckDbDataSource {
     return this.#schemaName;
   }
   
-  #getSQLForDataProfile(sampleSize) {
+  async getConnection(){
+    if (this.#connection === undefined) {
+      this.#connection = await this.#duckDbInstance.connect();
+    }
+    return new Promise(function(resolve, reject){
+      resolve(this.#connection);
+    }.bind(this));
+  }
+  
+  
+  #getSqlForDataProfile(sampleSize) {
     var qualifiedObjectName = this.getQualifiedObjectName();
     var fromClause = `FROM ${qualifiedObjectName}`;
     var sql = `SUMMARIZE SELECT * ${fromClause}`;
@@ -178,21 +188,26 @@ class DuckDbDataSource {
     }
     return sql;
   }
-  
-  async getConnection(){
-    if (this.#connection === undefined) {
-      this.#connection = await this.#duckDbInstance.connect();
-    }
-    return new Promise(function(resolve, reject){
-      resolve(this.#connection);
-    }.bind(this));
-  }
-  
+
   async getProfileData(sampleSize){
     if (sampleSize === undefined){
       sampleSize = this.#defaultSampleSize;
     }
-    var sql = this.#getSQLForDataProfile(sampleSize);
+    var sql = this.#getSqlForDataProfile(sampleSize);
+    var connection = await this.getConnection();
+    var resultset = connection.query(sql);
+    return resultset;
+  }
+  
+  #getSqlForTableSchema(){
+    var qualifiedObjectName = this.getQualifiedObjectName();
+    var fromClause = `FROM ${qualifiedObjectName}`;
+    var sql = `DESCRIBE SELECT * ${fromClause}`;
+    return sql;
+  }
+    
+  async getTableSchema(){
+    var sql = this.#getSqlForTableSchema();
     var connection = await this.getConnection();
     var resultset = connection.query(sql);
     return resultset;

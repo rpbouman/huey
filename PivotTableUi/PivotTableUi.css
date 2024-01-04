@@ -111,7 +111,7 @@
   color: inherit;
 }
 
-.pivotTableUiContainer[data-updating=true] > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
+.pivotTableUiContainer[data-updating=true] > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel {
   color: transparent;
   text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }

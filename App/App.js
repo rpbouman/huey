@@ -107,10 +107,10 @@ async function handleFileSelected(event){
   clearSearch();
   
   try {
-    var profileResultSet = await datasource.getProfileData(100);
+    var tableSchemaResultSet = await datasource.getTableSchema();
     queryModel.clear();
     queryModel.setDatasource(datasource);
-    renderAttributeUi(profileResultSet);
+    renderAttributeUi(tableSchemaResultSet);
   }
   catch (error) {
     clearAttributeUi(false);

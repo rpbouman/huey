@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
+}
+
 :root {
   /*
   * Huey text font
@@ -35,7 +42,7 @@
   * Huey border colors
   */
   --huey-light-border-color: rgb(222,222,222);
-  --huey-dark-border-color: rgb(175,175,175);
+  --huey-dark-border-color: rgb(200,200,200);
   
 }
 

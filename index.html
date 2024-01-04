@@ -26,7 +26,6 @@
       type="font/woff2" 
       crossorigin="true"
     />
-    <link onload="resourceLoaded(this.href)" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/General.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/Spinner.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
@@ -73,11 +72,11 @@
         <label for="registeredFiles">Files:</label>
         <select id="registeredFiles">
           <option value="" selected="true"></option>
-          <option value="new">New...</option>
+          <option value="new">Register New...</option>
         </select>
         <label 
           for="uploader"
-          class="button uploader ti ti-upload"
+          class="button uploader"
         >
           <input 
             id="uploader" 
@@ -149,7 +148,7 @@
             width: 100%;
             height: 100%;
             border-width: 1px;
-            border-color: rgb(175,175,175);
+            border-color: var( --huey-dark-border-color );
             border-top-style: solid;
           "
           data-updating="false"
@@ -211,7 +210,7 @@
         instance: db,
         connection: connection
       };
-      
+            
       initApplication();
     </script>
   </body>

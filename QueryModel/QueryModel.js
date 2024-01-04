@@ -1,3 +1,80 @@
+class QueryAxisItem {
+
+  static getCaptionForQueryAxisItem(axisItem){
+    var caption = axisItem.columnName;
+    var postfix;
+    if (axisItem.derivation) {
+      postfix = axisItem.derivation;
+    }
+    else 
+    if (axisItem.aggregator){
+      postfix = axisItem.aggregator;
+    }
+    
+    if (postfix) {
+      caption += ` ${postfix}`;
+    }
+    return caption;
+  }
+  
+  static getIdForQueryAxisItem(axisItem){
+    var id = QueryAxisItem.getSqlForQueryAxisItem(axisItem);
+    return id;
+  }
+  
+  static getSqlForAggregatedQueryAxisItem(item, alias){
+    var columnName = item.columnName;
+    if (alias){
+      columnName = getQualifiedIdentifier(alias, columnName);
+    }
+    else {
+      columnName = getQuotedIdentifier(columnName);
+    }
+    var aggregator = item.aggregator;
+    var aggregatorInfo = aggregators[aggregator];
+    var expressionTemplate = aggregatorInfo.expressionTemplate;
+    var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
+    return expression;
+  }
+
+  static getSqlForDerivedQueryAxisItem(item, alias){
+    var columnName = item.columnName;
+    if (alias){
+      columnName = getQualifiedIdentifier(alias, columnName);
+    }
+    else {
+      columnName = getQuotedIdentifier(columnName);
+    }
+    var derivation = item.derivation;
+    var derivationInfo;
+    derivationInfo = dateFields[derivation] || timeFields[derivation];
+    var expressionTemplate = derivationInfo.expressionTemplate;
+    var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
+    return expression;
+  }
+
+  static getSqlForQueryAxisItem(item, alias){
+    var sqlExpression;
+    if (item.aggregator) {
+      sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias);
+    }
+    else
+    if (item.derivation) {
+      sqlExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias);
+    }
+    else {
+      if (alias){
+        sqlExpression = getQualifiedIdentifier(alias, item.columnName);
+      }
+      else {
+        sqlExpression = getQuotedIdentifier(item.columnName);
+      }
+    }    
+    return sqlExpression;
+  }
+}
+
+
 class QueryAxis {
   
   #items = [];

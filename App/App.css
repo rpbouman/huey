@@ -49,7 +49,11 @@
 }
 
 label.uploader {
-  
+}
+
+label.button.uploader::before {
+  font-family: var( --huey-icon-font-family );
+  content: "\eb47";
 }
 
 #registeredFiles {
