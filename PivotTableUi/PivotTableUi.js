@@ -399,7 +399,6 @@ class PivotTableUi {
     var cellsAxisItemIndex;
 
     var cellsSet = this.#cellsSet;
-    //var cellIndices = cellsSet.getTupleRanges([rowsTupleRange, columnsTupleRange]);
     var cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
     
     var cellIndex;
@@ -407,11 +406,19 @@ class PivotTableUi {
     for (var i = 0; i < rowCount; i++){
       var tableRow = tableBodyRows.item(i);
       var cellElements = tableRow.childNodes;
+      
+      if (cellHeadersAxis === QueryModel.AXIS_ROWS && i === 0){
+        cellsAxisItemIndex = rowTupleIndexInfo.cellsAxisItemIndex; 
+        rowsAxisTupleIndex = rowTupleIndexInfo.tupleIndex;
+      }        
+      
       for (var j = headerColumnCount; j < headerColumnCount + columnCount; j++){
         
-        if (cellHeadersAxis === QueryModel.AXIS_COLUMNS && j === headerColumnCount) {
-          cellsAxisItemIndex = columnTupleIndexInfo.cellsAxisItemIndex; 
+        if (j === headerColumnCount) {
           columnsAxisTupleIndex = columnTupleIndexInfo.tupleIndex;
+          if (cellHeadersAxis === QueryModel.AXIS_COLUMNS) {
+            cellsAxisItemIndex = columnTupleIndexInfo.cellsAxisItemIndex; 
+          }
         }
         
         var cellElement = cellElements.item(j);
@@ -446,7 +453,7 @@ class PivotTableUi {
       
       if (cellHeadersAxis === QueryModel.AXIS_ROWS){
         cellsAxisItemIndex += 1;
-        if (cellsAxisItemIndex > cellsAxisItems.length) {
+        if (cellsAxisItemIndex >= cellsAxisItems.length) {
           cellsAxisItemIndex = 0;
           rowsAxisTupleIndex += 1;
         }
@@ -483,9 +490,10 @@ class PivotTableUi {
     
     var numRowAxisColumns = rowsAxisItems.length;
     if (cellHeadersAxis === QueryModel.AXIS_ROWS) {
+      // make room for the cell headers on the rows axis
       if (columnsAxisItems.length || cellsAxisItems.length) {
         numRowAxisColumns += 1;
-      }
+      }      
     }
     if (numRowAxisColumns === 0){
       numRowAxisColumns = 1;
@@ -547,9 +555,24 @@ class PivotTableUi {
         tableCell.appendChild(label);
       }
     }
-    
-    var stufferCell, stufferRow;
+
     firstTableHeaderRow = tableHeaderDom.childNodes.item(0);
+    
+    // if there are cell axis items appearing on the rows axis,
+    // but no items on the columns axis, then we need one extra column to make room for the cells
+    if (cellHeadersAxis === QueryModel.AXIS_ROWS && !columnsAxisItems.length && cellsAxisItems.length) {
+      tableCell = createEl('div', {
+        "class": 'pivotTableUiCell pivotTableUiHeaderCell'
+      });
+      tableRow.appendChild(tableCell);
+      tableCell.style.width = '8ch';
+      label = createEl('span', {
+        "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
+      }, '');
+      tableCell.appendChild(label);
+    }
+        
+    var stufferCell, stufferRow;
     stufferCell = createEl('div', {
       "class": "pivotTableUiCell pivotTableUiHeaderCell pivotTableUiStufferCell"
     });
@@ -625,6 +648,10 @@ class PivotTableUi {
           var cell = createEl('div', {
             "class": "pivotTableUiCell pivotTableUiHeaderCell"
           });
+          
+          if (j === headerRows.length - 1 && renderCellHeaders && cellItems.length){
+            cell.className += ' pivotTableUiCellAxisHeaderCell';
+          }
           
           var labelText;
           if (values && j < values.length) {
@@ -777,12 +804,14 @@ class PivotTableUi {
               labelText = '';
             }
           }
-          else
-          if (k < cellAxisItems.length) {
-            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
-          }
           else {
-            labelText = '';
+            cell.className += ' pivotTableUiCellAxisHeaderCell';
+            if (k < cellAxisItems.length) {
+              labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
+            }
+            else {
+              labelText = '';
+            }
           }
 
           var label = createEl('span', {

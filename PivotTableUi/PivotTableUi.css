@@ -137,6 +137,7 @@
   display: block;
 }
 
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
   font-weight: bold;
   padding: 0px 2px 0px 4px;
