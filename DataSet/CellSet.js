@@ -6,6 +6,7 @@ class CellSet {
   // Cells array elements are objects having a values property.
   // The values property is an array of values corresponding (by position) to the items of the cells axis
   #cells = [];
+  #cellValueFields = {};
   
   #tupleSets = [];
     
@@ -20,6 +21,7 @@ class CellSet {
   
   clear(){
     this.#cells = [];
+    this.#cellValueFields = {};
   }  
 
   // variable argument list,
@@ -177,7 +179,13 @@ class CellSet {
       acc = acc.concat(currValues);
       return acc;
     }, []);
+    
+    console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
+    console.log(sql);
+    console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
     var resultSet = await preparedStatement.query.apply(preparedStatement, values);
+    console.timeEnd(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
+    
     return resultSet;
   }
   
@@ -188,17 +196,21 @@ class CellSet {
       var row = resultSet.get(i);
       var cellIndex, cell;
       for (var j = 0; j < fields.length; j++){
-        var fieldName = fields[j].name;
+        var field = fields[j];
+        var fieldName = field.name;
         var value = row[fieldName];
         
         if (j === 0) {
           cellIndex = value;
           // check if we already cached the cell, 
-          // because if it already exists then we will update it with the newlye fetched metrics
+          // because if it already exists then we will update it with the newly fetched metrics
           cell = this.#cells[cellIndex];
           if (cell === undefined){
             // cell didn't exist! So lets add it.
-            this.#cells[cellIndex] = cell = {values: {} };
+            this.#cells[cellIndex] = cell = {values: {}};
+            if (this.#cellValueFields[fieldName] === undefined) {
+              this.#cellValueFields[fieldName] = field;
+            }
           }
         }
         else {
@@ -242,61 +254,70 @@ class CellSet {
       var cellIndex = this.getCellIndex.apply(this, tupleIndicesItem);
       var cell = cells[cellIndex];
       
-      if (aggregateExpressionsToFetch.length < cellsAxisItems.length){
-        for (var j = 0; j < cellsAxisItems.length; j++){
-          var cellsAxisItem = cellsAxisItems[j];
-          var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+      // make a reference to the cell which we will use to check if we need to add more aggregate sql expressions
+      var cellCopy = cell;
+      for (var j = 0; j < cellsAxisItems.length; j++){
+        var cellsAxisItem = cellsAxisItems[j];
+        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+        
+        if (!cellCopy || (cellCopy && cellCopy.values[sqlExpression] === undefined) ){
+          // we have a cell, but the cell doesn't have a value for this axis item.
+          // this means the cell is not complete so we must fetch it. 
+          cell = undefined;
           
-          if (cell && cell.values[sqlExpression] === undefined){
-            cell = undefined;
-          }
-          
-          if (!cell && aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
+          // if we aren't already querying this aggregate, then we add it too.
+          if (aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
             aggregateExpressionsToFetch.push(sqlExpression);
-          }            
-        }
+          }
+        }          
       }
       
-      if (!cell) {
-        var row = {
-          __huey_cellIndex: cellIndex
-        }
-        
-        // for each query axis...
-        for (var j = 0; j < tupleIndicesItem.length; j++){
-          
-          // ...get the tuple,...
-          var tupleIndex = tupleIndicesItem[j];
-          var tupleSet = tupleSets[j];
-          var tuple = tupleSet.getTupleSync(tupleIndex);
-          if (!tuple) {
-            continue;
-          }
-          var tupleValues = tuple.values;
-          
-          var queryAxisId = tupleSet.getQueryAxisId();
-          var queryAxis = queryModel.getQueryAxis(queryAxisId);
-          var queryAxisItems = queryAxis.getItems();
-
-          for (var k = 0; k < queryAxisItems.length; k++){
-            // ...and extract and store the values in our row.
-            var queryAxisItem = queryAxisItems[k];
-            var tupleValue = tupleValues[k];
-            var columnName = `${queryAxisId}_value${k}`;
-            row[columnName] = tupleValue;
-            
-            if (tupleValueToColumnMapping[columnName] === undefined) {
-              // store the mapping between our literal row column and the original sql expression
-              var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, '__data');
-              tupleValueToColumnMapping[columnName] = sqlExpression;
-            }
-          }
-        }
-        tuplesToQuery.push(row);
-      }
-      else {
+      if (cell) {
+        // If we arrive here, and we still have the cell, 
+        // it means the cell was not only already cached, but also contains values for all currently reqyested cells axis items.
+        // We can serve the cell from the cache and we don't need to include it in our SQL.
         availableCells[cellIndex] = cell;
+        continue;
       }
+      
+      // If we arrive here, the cell is either not cached, or incomplete,
+      // i.e. it lacks one or more values corresponding to the requested cells axis items. 
+      // If even one cells axis item value is missing, we have to include the cell in our query.
+      var row = {
+        __huey_cellIndex: cellIndex
+      }
+      
+      // for each query axis...
+      for (var j = 0; j < tupleIndicesItem.length; j++){
+        
+        // ...get the tuple,...
+        var tupleIndex = tupleIndicesItem[j];
+        var tupleSet = tupleSets[j];
+        var tuple = tupleSet.getTupleSync(tupleIndex);
+        if (!tuple) {
+          continue;
+        }
+        var tupleValues = tuple.values;
+        
+        var queryAxisId = tupleSet.getQueryAxisId();
+        var queryAxis = queryModel.getQueryAxis(queryAxisId);
+        var queryAxisItems = queryAxis.getItems();
+
+        for (var k = 0; k < queryAxisItems.length; k++){
+          // ...and extract and store the values in our row.
+          var queryAxisItem = queryAxisItems[k];
+          var tupleValue = tupleValues[k];
+          var columnName = `${queryAxisId}_value${k}`;
+          row[columnName] = tupleValue;
+          
+          if (tupleValueToColumnMapping[columnName] === undefined) {
+            // store the mapping between our literal row column and the original sql expression
+            var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, '__data');
+            tupleValueToColumnMapping[columnName] = sqlExpression;
+          }
+        }
+      }
+      tuplesToQuery.push(row);
     }
     
     if (aggregateExpressionsToFetch.length && tuplesToQuery){

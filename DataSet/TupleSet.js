@@ -159,8 +159,14 @@ class TupleSet {
 
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
-    var connection = await datasource.getConnection();    
+    var connection = await datasource.getConnection();
+
+    console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
+    console.log(axisSql);
+    
+    console.time(`Executing query`);
     var resultset = await connection.query(axisSql);
+    console.timeEnd(`Executing query`);
     this.#loadTuples(resultset, offset);
 
     return resultset.numRows;
