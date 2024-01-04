@@ -91,7 +91,11 @@
         </span>      
       </div>
       <div class="resizeHorizontal sidebar">
-        <div class="search">
+        <div 
+          id="searchAttributeUi"
+          class="search" 
+          style="display:none"
+        >
           <fieldset>
             <legend>Search</legend>
             <input 
@@ -115,7 +119,10 @@
           border="0"
           cellspacing="2"
           cellpadding="0"
-          style="flex-grow: 0;"
+          style="
+            display: none;
+            flex-grow: 0;
+          "
         >
           <tbody
             class="queryUiAxes"

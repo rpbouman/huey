@@ -111,6 +111,8 @@ async function handleFileSelected(event){
     queryModel.clear();
     queryModel.setDatasource(datasource);
     renderAttributeUi(tableSchemaResultSet);
+    byId('searchAttributeUi').style.display = '';
+    byId('queryUi').style.display = '';
   }
   catch (error) {
     clearAttributeUi(false);
