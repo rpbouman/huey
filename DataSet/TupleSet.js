@@ -172,10 +172,15 @@ class TupleSet {
 
     var i = 0;
     var firstIndexToFetch, lastIndexToFetch;
-    while (i < count) {
+    var maxIndex = offset + count;
+
+    if (this.#tupleCount !== undefined && maxIndex > this.#tupleCount) {
+      maxIndex = this.#tupleCount;
+    }
+    
+    while (i < maxIndex) {
       var tupleIndex = offset + i;
       var tuple = data[tupleIndex];
-      tuples[i] = tuple;
       if (tuple === undefined) {
         if (firstIndexToFetch === undefined) {
           firstIndexToFetch = tupleIndex;
@@ -186,13 +191,10 @@ class TupleSet {
           lastIndexToFetch = tupleIndex;
         }
       }
+      else {
+        tuples[i] = tuple;
+      }
       i += 1;
-    }
-
-    // if we know that the request exceeds the number of existing tuples, 
-    // then we don't want to requery.
-    if (this.#tupleCount !== undefined && firstIndexToFetch >= this.#tupleCount) {
-      firstIndexToFetch = undefined;
     }
     
     if (firstIndexToFetch === undefined) {
