@@ -39,16 +39,17 @@ class PivotTableUi {
       // examine the change
       var eventData = event.eventData;
       if (eventData.axesChanged) {
+        var axesChangedInfo = eventData.axesChanged;
 
-        if (eventData[QueryModel.AXIS_ROWS] !== undefined) {
+        if (axesChangedInfo[QueryModel.AXIS_ROWS] !== undefined) {
           clearCellsSet = clearRowsTupleSet = true;
         }          
 
-        if (eventData[QueryModel.AXIS_COLUMNS] !== undefined) {
+        if (axesChangedInfo[QueryModel.AXIS_COLUMNS] !== undefined) {
           clearCellsSet = clearColumnsTupleSet = true;
         }          
 
-        if (eventData[QueryModel.AXIS_CELLS] !== undefined) {
+        if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
           if (!clearCellsSet) {
             // NOOP!
             
@@ -60,7 +61,9 @@ class PivotTableUi {
       }
       else 
       if (eventData.propertiesChanged){
-        if (eventData.propertiesChanged.cellHeadersAxis){
+        var propertiesChangedInfo = eventData.propertiesChanged;
+        
+        if (propertiesChangedInfo.cellHeadersAxis){
           // TODO: flipping of the axes could in theory be done 
           // without clearing any of tupleSets and cellsSet
           // Right now won't prioritize it but it should be done at some point
