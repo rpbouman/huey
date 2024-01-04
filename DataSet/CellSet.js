@@ -158,7 +158,21 @@ class CellSet {
     var preparedStatement = await connection.prepare(sql);
     var values = tuplesToQuery.reduce(function(acc, curr){
       var currValues = Object.keys(curr).map(function(key){
-        return curr[key];
+        var value = curr[key];
+        
+        // currently duckdb WASM preparedStatement.query does not properly handle BigInt values
+        // so for now we convert to string
+        // see: https://github.com/duckdb/duckdb-wasm/issues/1563
+        if (typeof value === 'bigint'){
+          var strValue = String(value);
+          if (Number.MIN_SAFE_INTEGER <= value && value <= Number.MAX_SAFE_INTEGER){
+            value = parseInt(strValue, 10);
+          }
+          else {
+            value = strValue;
+          }
+        }
+        return value;
       })
       acc = acc.concat(currValues);
       return acc;
