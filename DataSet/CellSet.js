@@ -186,20 +186,26 @@ class CellSet {
     var fields = resultSet.schema.fields;
     for (var i = 0; i < resultSet.numRows; i++){
       var row = resultSet.get(i);
-      var cellIndex;
-      var cell = {values: {}};
+      var cellIndex, cell;
       for (var j = 0; j < fields.length; j++){
         var fieldName = fields[j].name;
         var value = row[fieldName];
         
         if (j === 0) {
           cellIndex = value;
+          // check if we already cached the cell, 
+          // because if it already exists then we will update it with the newlye fetched metrics
+          cell = this.#cells[cellIndex];
+          if (cell === undefined){
+            // cell didn't exist! So lets add it.
+            this.#cells[cellIndex] = cell = {values: {} };
+          }
         }
         else {
           cell.values[fieldName] = value;
         }
       }
-      this.#cells[cellIndex] = cells[cellIndex] = cell;
+      cells[cellIndex] = cell;
     }
     return cells;
   }
@@ -240,15 +246,12 @@ class CellSet {
         for (var j = 0; j < cellsAxisItems.length; j++){
           var cellsAxisItem = cellsAxisItems[j];
           var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+          
           if (cell && cell.values[sqlExpression] === undefined){
             cell = undefined;
-            if (aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
-              aggregateExpressionsToFetch.push(sqlExpression);
-            }
-            break;
           }
-          else
-          if (aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
+          
+          if (!cell && aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
             aggregateExpressionsToFetch.push(sqlExpression);
           }            
         }
