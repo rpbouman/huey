@@ -1,7 +1,7 @@
 class TupleSet {
     
   #queryModel = undefined;
-  #axisId = undefined;  
+  #queryAxisId = undefined;  
 
   #tuples = [];
   #tupleCount = undefined;
@@ -9,41 +9,28 @@ class TupleSet {
   
   constructor(queryModel, axisId){
     this.#queryModel = queryModel;
-    this.#axisId = axisId;  
+    this.#queryAxisId = axisId;  
   }
 
   getPageSize(){
     return this.#pageSize;
   }
 
+  setPageSize(pageSize){
+    this.#pageSize = pageSize;
+  }
+  
+  getQueryAxisId(){
+    return this.#queryAxisId;
+  }
+
   #getQueryAxisItems(){
     var queryModel = this.#queryModel;
-    var axisId = this.#axisId;
+    var axisId = this.#queryAxisId;
     
     var queryAxis = queryModel.getQueryAxis(axisId);
     var items = queryAxis.getItems();
     return items;
-  }
-
-  #getSqlForAggregatedQueryAxisItem(item){
-    var columnName = item.columnName;
-    var quotedColumnName = getQuotedIdentifier(columnName);
-    var aggregator = item.aggregator;
-    var aggregatorInfo = aggregators[aggregator];
-    var expressionTemplate = aggregatorInfo.expressionTemplate;
-    var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
-    return expression;
-  }
-
-  #getSqlForDerivedQueryAxisItem(item){
-    var columnName = item.columnName;
-    var quotedColumnName = getQuotedIdentifier(columnName);
-    var derivation = item.derivation;
-    var derivationInfo;
-    derivationInfo = dateFields[derivation] || timeFields[derivation];
-    var expressionTemplate = derivationInfo.expressionTemplate;
-    var expression = expressionTemplate.replace(/\$\{columnName\}/g, quotedColumnName);
-    return expression;
   }
 
   #getSqlSelectExpressions(includeCountAll){
@@ -55,19 +42,7 @@ class TupleSet {
     var selectListExpressions = [];
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
-      var columnName = item.columnName;
-      var quotedColumnName = getQuotedIdentifier(columnName);
-      var selectListExpression;
-      if (item.aggregator) {
-        selectListExpression = this.#getSqlForAggregatedQueryAxisItem(item);
-      }
-      else
-      if (item.derivation) {
-        selectListExpression = this.#getSqlForDerivedQueryAxisItem(item);
-      }
-      else {
-        selectListExpression = quotedColumnName;
-      }
+      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item);
       selectListExpressions.push(selectListExpression);
     }
     
@@ -120,6 +95,14 @@ class TupleSet {
     return this.#tupleCount;
   }
   
+  getTuplesSync(from, to){
+    return this.#tuples.slice(from, to);
+  }
+  
+  getTupleSync(index){
+    return this.#tuples[index];
+  }
+    
   async getTupleCount(){
     if (this.#tupleCount === undefined) {
       
@@ -204,6 +187,12 @@ class TupleSet {
         }
       }
       i += 1;
+    }
+
+    // if we know that the request exceeds the number of existing tuples, 
+    // then we don't want to requery.
+    if (this.#tupleCount !== undefined && firstIndexToFetch >= this.#tupleCount) {
+      firstIndexToFetch = undefined;
     }
     
     if (firstIndexToFetch === undefined) {

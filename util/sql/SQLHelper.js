@@ -1,9 +1,8 @@
 function getQuotedIdentifier(identifier){
-  return `"${identifier}"`;
+  return `"${identifier.replace(/"/g, '""')}"`;
 }
 
 function getQualifiedIdentifier(){
-  var identifiers = [];
   switch (arguments.length) {
     case 0:
       throw new Error(`Invalid number of arguments.`);
@@ -21,7 +20,7 @@ function getQualifiedIdentifier(){
               })
               .map(function(element){
                 if (!element.startsWith('"') && !element.endsWith('"')){
-                  return getQualifiedIdentifier(element);
+                  return getQuotedIdentifier(element);
                 }
                 return element;
               })
@@ -34,13 +33,10 @@ function getQualifiedIdentifier(){
       }
       break;
     default:
-      args = [];
+      var args = [];
       for (var i = 0; i < arguments.length; i++){
         var identifier = arguments[i];
-        if (!identifier.startsWith('"') && !identifier.endsWith('"')){
-          identifier = getQuotedIdentifier(identifier);
-        }
-        identifiers.push(identifier);
+        args.push(identifier);
       }
       return getQualifiedIdentifier(args);
   }

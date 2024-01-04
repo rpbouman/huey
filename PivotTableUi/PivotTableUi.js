@@ -1,14 +1,11 @@
 class PivotTableUi {
-  
-  static #getCaptionForAxisItem(axisItem){
-    return axisItem.columnName;
-  }
-  
+    
   #id = undefined;
   #queryModel = undefined;
     
   #columnsTupleSet = undefined;
   #rowsTupleSet = undefined;
+  #cellsSet = undefined;
   
   // 
   #rowIndex = 0;
@@ -23,8 +20,15 @@ class PivotTableUi {
     var queryModel = config.queryModel;
     this.#queryModel = queryModel;
 
-    this.#columnsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_COLUMNS);
-    this.#rowsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_ROWS);
+    var columnsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_COLUMNS);
+    this.#columnsTupleSet = columnsTupleSet;
+    var rowsTupleSet = new TupleSet(queryModel, QueryModel.AXIS_ROWS);
+    this.#rowsTupleSet = rowsTupleSet;
+    
+    this.#cellsSet = new CellSet(queryModel, [
+        rowsTupleSet,
+        columnsTupleSet
+    ]);
    
     queryModel.addEventListener('change', function(event){
       
@@ -35,6 +39,9 @@ class PivotTableUi {
 
       var rowsTupleSet = this.#rowsTupleSet;
       rowsTupleSet.clear();
+
+      var cellsSet = this.#cellsSet;
+      cellsSet.clear();
       
       this.#updatePivotTableUi();
     }.bind(this));
@@ -61,21 +68,24 @@ class PivotTableUi {
     resizeObserver.observe(dom);
   }
   
+  #setBusy(busy){
+    var dom = this.getDom();
+    dom.setAttribute('data-updating', String(Boolean(busy)));
+  }
+  
   #handleInnerContainerScrolled(event, count){
     if (count === undefined){
       // this is the last scroll event, update the table contents.
       this.#updateDataToScrollPosition()
       .then(function(){
+        // nothing to do here, yet.
       }.bind(this))
       .catch(function(error){
         console.error(error);
       }.bind(this))
       .finally(function(){
-        var dom = this.getDom();
         // for some reason, the attribute doesn't get updated unless we apply timeout.
-        setTimeout(function(){
-          dom.setAttribute('data-updating', String(false));
-        }, 1);
+        setTimeout(this.#setBusy.bind(this), 1);
       }.bind(this));
     }
     else 
@@ -83,8 +93,7 @@ class PivotTableUi {
       return;
     }
     // this is the first scroll event, set the busy indicator
-    var dom = this.getDom();
-    dom.setAttribute('data-updating', String(true));
+    this.#setBusy(true);
   }
   
   async #updateDataToScrollPosition(){
@@ -114,7 +123,9 @@ class PivotTableUi {
 
     var rowAxisPromise = this.#updateRowsAxisTupleData(physicalRowsAxisTupleIndex);
     
-    return Promise.all([columnAxisPromise, rowAxisPromise]);
+    await Promise.all([columnAxisPromise, rowAxisPromise]);
+    
+    return this.#updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex);
   }
       
   #getTupleIndexForPhysicalIndex(axisId, physicalIndex){
@@ -138,14 +149,14 @@ class PivotTableUi {
     var fractionalIndex = physicalIndex / factor; 
     var tupleIndex = Math.floor(fractionalIndex);
     var fraction = fractionalIndex - tupleIndex;
-    var cellAxisItemIndex = Math.round(fraction * factor);
+    var cellsAxisItemIndex = Math.round(fraction * factor);
     
     return {
       physicalIndex: physicalIndex,
       axisId: axisId,
       factor: factor,
       tupleIndex: tupleIndex,
-      cellAxisItemIndex: cellAxisItemIndex
+      cellsAxisItemIndex: cellsAxisItemIndex
     };
   }
   
@@ -171,7 +182,7 @@ class PivotTableUi {
     }
 
     var tupleIndex = 0;
-    var cellAxisItemIndex = tupleIndexInfo.cellAxisItemIndex;
+    var cellsAxisItemIndex = tupleIndexInfo.cellsAxisItemIndex;
     
     var tableHeaderDom = this.#getTableHeaderDom();
     var rows = tableHeaderDom.childNodes;
@@ -189,14 +200,14 @@ class PivotTableUi {
         var row = rows.item(j);
         var cells = row.childNodes;
         var cell = cells.item(i);
-        var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         
         var labelText;
         var tupleValue;
         if (tuple && j < tuple.values.length){
           tupleValue = tuple.values[j];
 
-          if (cellAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
+          if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
             labelText = String(tupleValue);
           }
           else {
@@ -206,8 +217,8 @@ class PivotTableUi {
         else 
         if (doCellHeaders) {
           if (cellsAxisItems.length) {
-            var cellsAxisItem = cellsAxisItems[cellAxisItemIndex];
-            labelText = PivotTableUi.#getCaptionForAxisItem(cellsAxisItem);
+            var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
+            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
           }
           else {
             labelText = '';
@@ -218,9 +229,9 @@ class PivotTableUi {
       }
 
       if (doCellHeaders) {
-        cellAxisItemIndex += 1;
-        if (cellAxisItemIndex === cellsAxisItems.length) {
-          cellAxisItemIndex = 0;
+        cellsAxisItemIndex += 1;
+        if (cellsAxisItemIndex === cellsAxisItems.length) {
+          cellsAxisItemIndex = 0;
           tupleIndex += 1;
         }
       }
@@ -249,7 +260,7 @@ class PivotTableUi {
     }
 
     var tupleIndex = 0;
-    var cellAxisItemIndex = tupleIndexInfo.cellAxisItemIndex;
+    var cellsAxisItemIndex = tupleIndexInfo.cellsAxisItemIndex;
     
     var tableBodyDom = this.#getTableBodyDom();
     var rows = tableBodyDom.childNodes;
@@ -262,14 +273,14 @@ class PivotTableUi {
       
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
-        var label = this.#getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
   
         var labelText;
         var tupleValue;
         if (tuple && j < tuple.values.length) {
           tupleValue = tuple.values[j];         
 
-          if (cellAxisItemIndex === 0 || i === 0) {
+          if (cellsAxisItemIndex === 0 || i === 0) {
             labelText = String(tupleValue);
           }
           else {
@@ -278,22 +289,126 @@ class PivotTableUi {
         }
         else
         if (doCellHeaders) {
-          var cellsAxisItem = cellsAxisItems[cellAxisItemIndex];
-          labelText = PivotTableUi.#getCaptionForAxisItem(cellsAxisItem);
+          var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
+          labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
         }
         
         label.innerText = labelText;
       }
       
       if (doCellHeaders) {
-        cellAxisItemIndex += 1;
-        if (cellAxisItemIndex === cellsAxisItems.length) {
-          cellAxisItemIndex = 0;
+        cellsAxisItemIndex += 1;
+        if (cellsAxisItemIndex === cellsAxisItems.length) {
+          cellsAxisItemIndex = 0;
           tupleIndex += 1;
         }
       }
       else {
         tupleIndex += 1;
+      }
+    }
+  }
+  
+  async #updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex){
+    var tableBodyDom = this.#getTableBodyDom();
+    var tableBodyRows = tableBodyDom.childNodes;
+
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var tableHeaderRows = tableHeaderDom.childNodes;
+    var firstTableHeaderRow = tableHeaderRows.item(0);
+    var firstTableHeaderRowCells = firstTableHeaderRow.childNodes;
+    
+    var queryModel = this.#queryModel;
+    var cellHeadersAxis = queryModel.getCellHeadersAxis();
+    
+    var cellsAxis = queryModel.getCellsAxis();
+    var cellsAxisItems = cellsAxis.getItems();
+    
+    var columnTupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
+    var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    var headerColumnCount = columnsAxisSizeInfo.headers.columnCount;
+
+    var rowTupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_ROWS, physicalRowsAxisTupleIndex);
+    var rowsAxisSizeInfo = this.#getRowsAxisSizeInfo();
+
+    var rowCount = tableBodyRows.length - 1;
+    var columnCount = firstTableHeaderRowCells.length - headerColumnCount - 1;
+
+    var columnsAxisTupleIndex = columnTupleIndexInfo.tupleIndex;
+    var rowsAxisTupleIndex = rowTupleIndexInfo.tupleIndex;
+    var numRowsAxisTuples, numColumnsAxisTuples;
+    var columnsTupleRange = [];
+    var rowsTupleRange = [];
+    switch (cellHeadersAxis){
+      case QueryModel.AXIS_COLUMNS:
+        numColumnsAxisTuples = Math.ceil(columnCount / columnTupleIndexInfo.factor);
+        numRowsAxisTuples = rowCount;
+        break;
+      case QueryModel.AXIS_ROWS:
+        numColumnsAxisTuples = columnCount;
+        numRowsAxisTuples = Math.ceil(rowCount / rowTupleIndexInfo.factor);
+        break;
+    }
+    columnsTupleRange = [columnsAxisTupleIndex, columnsAxisTupleIndex + numColumnsAxisTuples];
+    rowsTupleRange = [rowsAxisTupleIndex, rowsAxisTupleIndex + numRowsAxisTuples];
+
+    var cellsAxisItemIndex;
+
+    var cellsSet = this.#cellsSet;
+    //var cellIndices = cellsSet.getTupleRanges([rowsTupleRange, columnsTupleRange]);
+    var cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
+    
+    var cellIndex;
+    
+    for (var i = 0; i < rowCount; i++){
+      var tableRow = tableBodyRows.item(i);
+      var cellElements = tableRow.childNodes;
+      for (var j = headerColumnCount; j < headerColumnCount + columnCount; j++){
+        
+        if (cellHeadersAxis === QueryModel.AXIS_COLUMNS && j === headerColumnCount) {
+          cellsAxisItemIndex = columnTupleIndexInfo.cellsAxisItemIndex; 
+          columnsAxisTupleIndex = columnTupleIndexInfo.tupleIndex;
+        }
+        
+        var cellElement = cellElements.item(j);
+        var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
+        var labelText = '';
+            
+        if (cellsAxisItems.length){
+          var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
+          var cell = cells[cellIndex];
+          if (cell){
+            var values = cell.values;
+            var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
+            var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+            var value = values[sqlExpression];
+            labelText = value === null ? '' : String(value);
+          }
+        }          
+
+        label.innerText = labelText;
+        
+        if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
+          cellsAxisItemIndex += 1;
+          if (cellsAxisItemIndex >= cellsAxisItems.length) {
+            cellsAxisItemIndex = 0;
+            columnsAxisTupleIndex += 1;
+          }
+        }
+        else {
+          columnsAxisTupleIndex += 1;
+        }
+      }
+      
+      if (cellHeadersAxis === QueryModel.AXIS_ROWS){
+        cellsAxisItemIndex += 1;
+        if (cellsAxisItemIndex > cellsAxisItems.length) {
+          cellsAxisItemIndex = 0;
+          rowsAxisTupleIndex += 1;
+        }
+      }
+      else {
+        rowsAxisTupleIndex += 1;
       }
     }
   }
@@ -352,7 +467,7 @@ class PivotTableUi {
           if (j < rowsAxisItems.length){
             tableCell.className += ' pivotTableUiRowsAxisHeaderCell';
             var rowsAxisItem = rowsAxisItems[j];
-            labelText = PivotTableUi.#getCaptionForAxisItem(rowsAxisItem);
+            labelText = QueryAxisItem.getCaptionForQueryAxisItem(rowsAxisItem);
             columnWidth = (labelText.length + 1) + 'ch';
             label = createEl('span', {
               "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
@@ -362,7 +477,7 @@ class PivotTableUi {
           else 
           if (cellHeadersAxis === QueryModel.AXIS_ROWS) {
             columnWidth = rowsAxisItems.reduce(function(acc, curr){
-              labelText = PivotTableUi.#getCaptionForAxisItem(curr);
+              labelText = QueryAxisItem.getCaptionForQueryAxisItem(curr);
               columnWidth = labelText.length; 
               return columnWidth > acc ? columnWidth : acc;
             }, 0);
@@ -380,7 +495,7 @@ class PivotTableUi {
       if (i < columnsAxisItems.length) {
         tableCell.className += ' pivotTableUiColumnsAxisHeaderCell';
         var columnsAxisItem = columnsAxisItems[i];
-        labelText = PivotTableUi.#getCaptionForAxisItem(columnsAxisItem);
+        labelText = QueryAxisItem.getCaptionForQueryAxisItem(columnsAxisItem);
         label = createEl('span', {
           "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
         }, labelText);
@@ -484,7 +599,7 @@ class PivotTableUi {
           else
           if (k < cellItems.length) {
             var cellItem = cellItems[k];
-            labelText = PivotTableUi.#getCaptionForAxisItem(cellItem);
+            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellItem);
             columnWidth = labelText.length > valuesMaxWidth ? labelText.length : valuesMaxWidth;            
           }
           else {
@@ -620,7 +735,7 @@ class PivotTableUi {
           }
           else
           if (k < cellAxisItems.length) {
-            labelText = PivotTableUi.#getCaptionForAxisItem(cellAxisItems[k]);
+            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
           }
           else {
             labelText = '';
@@ -675,43 +790,61 @@ class PivotTableUi {
     }
   }
   
-  #updatePivotTableUi(){
+  async #estimateColumnsAxisPageSize(){
+    return 100;
+  }
+
+  async #estimateRowsAxisPageSize(){
+    return 100;
+  }
+  
+  async #updatePivotTableUi(){
+    this.#setBusy(true);
     this.clear();
 
     var columnsTupleSet = this.#columnsTupleSet;
     var rowsTupleSet = this.#rowsTupleSet;
     
     this.#renderHeader();
+
+    var tableDom = this.#getTableDom();
+    tableDom.style.width = '';
+    
+    var pageSizes = await Promise.all([
+      this.#estimateColumnsAxisPageSize(),
+      this.#estimateRowsAxisPageSize(),
+    ]);
+    
+    columnsTupleSet.setPageSize(pageSizes[0]);
+    rowsTupleSet.setPageSize(pageSizes[1]);
     
     var renderAxisPromises = [
       columnsTupleSet.getTuples(columnsTupleSet.getPageSize(), 0),
       rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
     ];
-    
-    var tableDom = this.#getTableDom();
-    tableDom.style.width = '';
-    
+        
     Promise.all(renderAxisPromises)
     .then(function(results){
       var columnTuples = results[0];
       
       this.#setHorizontalSize(0);
       this.#renderColumns(columnTuples);
-
       var rowTuples = results[1];
       
       this.#setVerticalSize(0);
       this.#renderRows(rowTuples);
-      this.#updateVerticalSizer();
-      
+
+      this.#updateVerticalSizer();      
       this.#removeExcessColumns()
       this.#updateHorizontalSizer();
 
       this.#renderCells();
+      this.#updateCellData(0, 0);
       
     }.bind(this))
     .finally(function(){
       tableDom.style.width = '99.99%';
+      this.#setBusy(false);
     }.bind(this))
     ;
   }
@@ -729,26 +862,12 @@ class PivotTableUi {
     return document.getElementById(this.#id);
   }
   
-  #getChildWithClassName(dom, className){
-    var childNodes = dom.childNodes;
-    for (var i = 0; i < childNodes.length; i++){
-      var childNode = childNodes.item(i);
-      if (childNode.nodeType !== 1) {
-        continue;
-      }
-      if (hasClass(childNode,className)){
-        return childNode;
-      }
-    }
-    throw new Error(`Couldn't find element with classname ${className}`);
-  }
-
   #getInnerContainerDom(){
-    return this.#getChildWithClassName(this.getDom(), 'pivotTableUiInnerContainer');
+    return getChildWithClassName(this.getDom(), 'pivotTableUiInnerContainer');
   }
       
   #getHorizontalSizer() {
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiHorizontalSizer');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiHorizontalSizer');
   }
   
   #setHorizontalSize(size){
@@ -853,7 +972,7 @@ class PivotTableUi {
   }
   
   #getVerticalSizer() {
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiVerticalSizer');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiVerticalSizer');
   }
 
   #setVerticalSize(size){
@@ -887,15 +1006,15 @@ class PivotTableUi {
   }
   
   #getTableDom(){
-    return this.#getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiTable');
+    return getChildWithClassName(this.#getInnerContainerDom(), 'pivotTableUiTable');
   }
   
   #getTableHeaderDom(){
-    return this.#getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableHeader');
+    return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableHeader');
   }
   
   #getTableBodyDom(){
-    return this.#getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
+    return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
   }
 }
 

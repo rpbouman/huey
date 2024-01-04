@@ -1,17 +1,3 @@
-body, html {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  margin: 0px;
-  padding: 0px;
-  overflow:hidden;
-}
-
-body {
-  font-family: verdana;
-  font-size: 10pt;
-  color: rgb(50,50,50);
-}
 
 .layout {
   height: 100%;
@@ -26,8 +12,8 @@ body {
   height: 32px;
   border-style: solid;
   border-width: 1px;
-  border-color: rgb(222,222,222);
-  border-bottom-color: rgb(175,175,175);
+  border-color: var( --huey-light-border-color );
+  border-bottom-color: var( --huey-dark-border-color );
   grid-column: 1/ span 2;
   grid-row: 1/1;
   overflow: hidden;
@@ -38,14 +24,15 @@ body {
   height: calc(100vh - 40px);
   max-width: calc(100vw - 14px);
   border-style: none solid solid solid;
-  border-color: rgb(222,222,222);
-  border-right-color: rgb(175,175,175);
+  border-color: var( --huey-light-border-color );
+  border-right-color: var( --huey-dark-border-color );
   border-width: 1px;
   grid-column: 1/1;
   grid-row: 2/ span 2;
   padding: 0px 4px 0px 4px;
   display: flex;
   flex-direction: column;
+  min-width: 138px;
 }
 
 .workarea {
@@ -62,59 +49,17 @@ body {
 }
 
 label.uploader {
-  
+}
+
+label.button.uploader::before {
+  font-family: var( --huey-icon-font-family );
+  content: "\eb47";
 }
 
 #registeredFiles {
   min-width: 20em;
 }
 
-input[type=file]{
+#uploader {
   display:none;
-}
-
-input[type=file]::file-selector-button {
-  background-color: white;
-  border-style: solid;
-  border-width: 1px;
-}
-
-select {
-  border-style: solid;
-  border-width: 1px;
-  border-color: rgb(222,222,222);
-  border-radius: 14px;
-  height: 26px;
-  padding: 0px 2px 0px 2px;
-}
-
-select:focus {
-  border-color: rgb(200,200,200);
-  border-width: 1px;
-}
-
-dialog {
-  border-style: solid;
-  border-width:1px;
-  border-color: rgb(175,175,175);
-  border-radius: 18px;
-}
-
-button {
-  border-style: solid;
-  border-width:1px;
-  border-color: rgb(175,175,175);
-  border-radius: 16px;
-  background-color:rgb(222,222,222);
-}
-
-dialog h1:first-child,
-dialog h2:first-child,
-dialog h3:first-child,
-dialog h4:first-child,
-dialog h5:first-child,
-dialog h6:first-child,
-dialog h7:first-child 
-{
-  margin-block-start: 0px;
 }

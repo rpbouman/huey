@@ -2,34 +2,12 @@
   position: sticky;
   flex-grow: 0;
   top: 0px;
-  background-color: white;
-}
-
-.search > fieldset {
-  margin: 0.5em 0.25em .5em 0.25em;
-  border-color: rgb(222,222,222);
-  border-width: 1px;
-}
-
-.search > fieldset > legend {
-  font-size: smaller;
+  background-color: var( --huey-medium-background-color )
 }
 
 .search > fieldset > input[type=search]{
-  height: 22px;
-  margin: 0em 0em .25em 0em;
   width: 100%;
-  border-radius: 16px;
-  border-color: rgb(222,222,222);
-  border-style: solid;
-  border-width: 1px;
 }
-
-.search > fieldset > input[type=search]:focus{
-  border-width: 1px;
-  border-color: rgb(175,175,175);
-}
-
 
 .attributeUi .attributeUiNode[data-matches-searchstring=false] {
   display: none;

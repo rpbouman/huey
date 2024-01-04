@@ -216,37 +216,37 @@ var aggregators = {
 
 var dateFields = {
   'year': {
-    expressionTemplate: "YEAR( ${columnName} )"
+    expressionTemplate: "CAST( YEAR( ${columnName} ) AS SMALLINT)"
   },
   'quarter': {
-    expressionTemplate: "QUARTER( ${columnName} )"
+    expressionTemplate: "'Q' || QUARTER( ${columnName} )"
   },
   'month': {
-    expressionTemplate: "MONTH( ${columnName} )"
+    expressionTemplate: "CAST( MONTH( ${columnName} ) AS TINYINT)"
   },
   'week': {
-    expressionTemplate: "WEEK( ${columnName} )"
+    expressionTemplate: "CAST( WEEK( ${columnName} ) AS TINYINT)"
   },
   'day of year': {
-    expressionTemplate: "DAYOFYEAR( ${columnName} )"
+    expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as SMALLINT)"
   },
   'day of month': {
-    expressionTemplate: "DAYOFMONTH( ${columnName} )"
+    expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS TINYINT)"
   },
   'day of week': {
-    expressionTemplate: "DAYOFWEEK( ${columnName} )"
+    expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as TINYINT)"
   }
 };
 
 var timeFields = {
   'hour': {
-    expressionTemplate: "HOUR( ${columnName} )"
+    expressionTemplate: "CAST( HOUR( ${columnName} ) as TINYINT)"
   },
   'minute': {
-    expressionTemplate: "MINUTE( ${columnName} )"
+    expressionTemplate: "CAST( MINUTE( ${columnName} ) as TINYINT)"
   },
   'second': {
-    expressionTemplate: "SECOND( ${columnName} )"
+    expressionTemplate: "CAST( SECOND( ${columnName} ) as TINYINT)"
   }
 };
 
@@ -433,11 +433,7 @@ function attributeUiClickHandler(event){
   var target = event.target;
   var classNames = getClassNames(target);
   
-  var node = target;
-  while (node && !hasClass(node, 'attributeUiNode')) {
-    node = node.parentNode;
-  }
-  
+  var node = getAncestorWithClassName(target, 'attributeUiNode');
   if (!node) {
     return;
   }

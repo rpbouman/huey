@@ -1,0 +1,131 @@
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
+}
+
+:root {
+  /*
+  * Huey text font
+  */
+  --huey-text-font-family: Verdana;
+  --huey-text-font-size: 10pt;
+  
+  /**
+  * Huey text font colors
+  */
+  --huey-foreground-color: rgb(50,50,50);
+  
+  /**
+  * Huey icon font
+  */
+  --huey-icon-font-family: tabler-icons;
+  --huey-icon-small: 14px;
+  --huey-icon-medium: 18px;
+
+  /**
+  * Huey icon font colors
+  */
+  --huey-icon-color-subtle: rgb(200,200,200);
+  --huey-icon-color: rgb(50,50,50);
+  --huey-icon-color-highlight: rgb(0,0,0);
+  
+  /**
+  * Huey background colors
+  */
+  --huey-light-background-color: rgb(255,255,255);
+  --huey-medium-background-color: rgb(250,250,250);
+  --huey-dark-background-color: rgb(222,222,222);
+
+  /**
+  * Huey border colors
+  */
+  --huey-light-border-color: rgb(222,222,222);
+  --huey-dark-border-color: rgb(200,200,200);
+  
+}
+
+/**
+*
+* Default Element Appearance
+*
+*/
+body, html {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow:hidden;
+}
+
+body {
+  font-family: var( --huey-text-font-family );
+  font-size: var( --huey-text-font-size );
+  color: var( --huey-foreground-color );
+  background-color: var( --huey-medium-background-color );
+}
+
+input, select, button {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 14px;
+  height: 26px;
+}
+
+input, select{
+  border-color: var( --huey-light-border-color );
+  background-color: var( --huey-light-background-color );
+  padding: 0px 2px 0px 2px;
+}
+
+select:focus, 
+select:focus-visible, 
+select:active, 
+input:focus, 
+input:focus-visible, 
+input:active {
+  border-color: var( --huey-dark-border-color );
+  border-width: 1px;
+  box-shadow: 0 0 3px var( --huey-dark-border-color );  
+  outline-width: 0px;
+  outline-color: var( --huey-dark-border-color );
+}
+
+input[type=file]::file-selector-button {
+}
+
+button {
+  border-color: var( --huey-dark-border-color );
+  background-color: var( --huey-dark-background-color );
+}
+
+fieldset {
+  margin: 0.5em 0.25em .5em 0.25em;
+  border-color: var( --huey-light-border-color );
+  border-width: 1px;
+}
+
+fieldset > legend {
+  font-size: x-small;
+}
+
+dialog {
+  background-color: var( --huey-medium-background-color );
+  border-style: solid;
+  border-width: 1px;
+  border-color: var( --huey-dark-border-color );
+  border-radius: 18px;
+}
+
+dialog h1:first-child,
+dialog h2:first-child,
+dialog h3:first-child,
+dialog h4:first-child,
+dialog h5:first-child,
+dialog h6:first-child,
+dialog h7:first-child 
+{
+  margin-block-start: 0px;
+}

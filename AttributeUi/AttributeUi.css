@@ -8,31 +8,30 @@
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .expander {
   padding: 2px;
-  color: rgb(200,200,200);
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-small );
+  color: var( --huey-icon-color-subtle );
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .expander:hover {
-  color: black;
+  color: var( --huey-icon-color-highlight );
 }
 
 .attributeUi .attributeUiNode[data-state=collapsed] > .attributeUiNodeHead > .expander:before {
-  font-family: tabler-icons !important;
   /* square-rounded-plus */
   content: "\f63f";
-  font-size: 14px;
 }
 
 .attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeHead > .expander:before {
-  font-family: tabler-icons !important;
   /* square-rounded-minus */
   content: "\f63e";
-  font-size: 14px;
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .icon {
   display: inline-block;
-  font-family: tabler-icons !important;
-  font-size: 18px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color );
   width: 24px;
   padding: 6px 3px 0px 3px;
   text-align: center;
@@ -202,7 +201,7 @@
   text-overflow: ellipsis;
   display: inline-block;
   overflow: hidden;
-  max-width: calc(100% - 130px);
+  max-width: calc(100% - 138px);
   vertical-align: text-bottom;
 }
 
@@ -215,20 +214,19 @@
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton {
   display: block;
   float: inline-end;
-  padding-top: 9px;
-  width: 20px;
-  font-size: 16px;
-  font-family: tabler-icons !important;
-  color: rgb(200,200,200);
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:hover {
-  color: black;
+  color: var( --huey-icon-color-highlight );
 }
 
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=rows]:before {
-  font-family: tabler-icons !important;
   /* table-column */
   /* 
     It may seem backward that we're using the table-column icon for the rows axis, 
@@ -238,7 +236,6 @@
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=columns]:before {
-  font-family: tabler-icons !important;
   /* table-row */
   /* 
     It may seem backward that we're using the table-row icon for the columns axis, 
@@ -248,7 +245,6 @@
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells]:before {
-  font-family: tabler-icons !important;
   /* layout grid */
   content: "\edba";
 }
@@ -268,7 +264,7 @@
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:has(> input[type=checkbox]:checked) {
-  color: black;
+  color: var( --huey-icon-color-highlight );
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeBody {
