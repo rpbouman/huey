@@ -30,65 +30,7 @@ class PivotTableUi {
         columnsTupleSet
     ]);
    
-    queryModel.addEventListener('change', function(event){
-      
-      var clearRowsTupleSet = false;
-      var clearColumnsTupleSet = false;
-      var clearCellsSet = false;
-      
-      // examine the change
-      var eventData = event.eventData;
-      if (eventData.axesChanged) {
-        var axesChangedInfo = eventData.axesChanged;
-
-        if (axesChangedInfo[QueryModel.AXIS_ROWS] !== undefined) {
-          clearCellsSet = clearRowsTupleSet = true;
-        }          
-
-        if (axesChangedInfo[QueryModel.AXIS_COLUMNS] !== undefined) {
-          clearCellsSet = clearColumnsTupleSet = true;
-        }          
-
-        if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
-          if (!clearCellsSet) {
-            // NOOP!
-            
-            // This case is special - it means only the cells axis changed
-            // But adding or removing items to only the cellset does not require clearing of the cells,
-            // as we store aggregate items together and separately in the cell data.
-          }
-        }          
-      }
-      else 
-      if (eventData.propertiesChanged){
-        var propertiesChangedInfo = eventData.propertiesChanged;
-        
-        if (propertiesChangedInfo.cellHeadersAxis){
-          // TODO: flipping of the axes could in theory be done 
-          // without clearing any of tupleSets and cellsSet
-          // Right now won't prioritize it but it should be done at some point
-          clearRowsTupleSet = clearColumnsTupleSet = clearCellsSet = true;
-        }
-      }
-
-      // only clear tuple sets or cellset if the change requires it.
-      if (clearColumnsTupleSet) {
-        var columnsTupleSet = this.#columnsTupleSet;
-        columnsTupleSet.clear();
-      }
-
-      if (clearRowsTupleSet === true) {
-        var rowsTupleSet = this.#rowsTupleSet;
-        rowsTupleSet.clear();
-      }
-
-      if (clearCellsSet === true) {
-        var cellsSet = this.#cellsSet;
-        cellsSet.clear();
-      }
-      
-      this.#updatePivotTableUi();
-    }.bind(this));
+    queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
     
     var container = this.#getInnerContainerDom();
     bufferEvents(
@@ -110,6 +52,66 @@ class PivotTableUi {
     }.bind(this));
     var dom = this.getDom();
     resizeObserver.observe(dom);
+  }
+  
+  #queryModelChangeHandler(event){
+        
+    var clearRowsTupleSet = false;
+    var clearColumnsTupleSet = false;
+    var clearCellsSet = false;
+    
+    // examine the change
+    var eventData = event.eventData;
+    if (eventData.axesChanged) {
+      var axesChangedInfo = eventData.axesChanged;
+
+      if (axesChangedInfo[QueryModel.AXIS_ROWS] !== undefined) {
+        clearCellsSet = clearRowsTupleSet = true;
+      }          
+
+      if (axesChangedInfo[QueryModel.AXIS_COLUMNS] !== undefined) {
+        clearCellsSet = clearColumnsTupleSet = true;
+      }          
+
+      if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
+        if (!clearCellsSet) {
+          // NOOP!
+          
+          // This case is special - it means only the cells axis changed
+          // But adding or removing items to only the cellset does not require clearing of the cells,
+          // as we store aggregate items together and separately in the cell data.
+        }
+      }          
+    }
+    else 
+    if (eventData.propertiesChanged){
+      var propertiesChangedInfo = eventData.propertiesChanged;
+      
+      if (propertiesChangedInfo.cellHeadersAxis){
+        // TODO: flipping of the axes could in theory be done 
+        // without clearing any of tupleSets and cellsSet
+        // Right now won't prioritize it but it should be done at some point
+        clearRowsTupleSet = clearColumnsTupleSet = clearCellsSet = true;
+      }
+    }
+
+    // only clear tuple sets or cellset if the change requires it.
+    if (clearColumnsTupleSet) {
+      var columnsTupleSet = this.#columnsTupleSet;
+      columnsTupleSet.clear();
+    }
+
+    if (clearRowsTupleSet === true) {
+      var rowsTupleSet = this.#rowsTupleSet;
+      rowsTupleSet.clear();
+    }
+
+    if (clearCellsSet === true) {
+      var cellsSet = this.#cellsSet;
+      cellsSet.clear();
+    }
+    
+    this.#updatePivotTableUi();
   }
   
   #setBusy(busy){

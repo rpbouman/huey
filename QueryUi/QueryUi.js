@@ -49,10 +49,9 @@ function getQueryModelItem(queryAxisItemUi){
 function moveQueryAxisItemUi(queryAxisItemUi, direction) {
   var item = getQueryModelItem(queryAxisItemUi);
   var itemIndex = item.index;
-  var removedItem = queryModel.removeItem(item);
   itemIndex += direction;
-  removedItem.index = itemIndex;
-  queryModel.addItem(removedItem);
+  item.index = itemIndex;
+  queryModel.addItem(item);
 }
 
 function queryAxisUiItemMoveLeftClicked(queryAxisItemUi){
