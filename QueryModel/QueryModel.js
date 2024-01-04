@@ -163,9 +163,15 @@ class QueryModel extends EventEmitter {
   #datasource = undefined;
   
   setCellHeadersAxis(cellheadersaxis) {
+    var oldCellHeadersAxis = this.#cellheadersaxis;
     this.#cellheadersaxis = cellheadersaxis;
     this.fireEvent('change', {
-      
+      propertiesChanged: {
+        cellHeadersAxis: {
+          previousValue: oldCellHeadersAxis,
+          newValue: cellheadersaxis
+        }
+      }
     });
   }
   
@@ -236,6 +242,7 @@ class QueryModel extends EventEmitter {
     var axisId = config.axis;
     var axis = this.getQueryAxis(config.axis);
     var addedItem = axis.addItem(config);
+    addedItem.axis = axisId;
     return addedItem;
   }
 
@@ -243,6 +250,7 @@ class QueryModel extends EventEmitter {
     var axisId = config.axis;
     var axis = this.getQueryAxis(config.axis);
     var removedItem = axis.removeItem(config);
+    removedItem.axis = axisId;
     return removedItem;
   }
   
@@ -264,14 +272,25 @@ class QueryModel extends EventEmitter {
     delete copyOfConfig['axis'];
     var item = this.findItem(copyOfConfig);
     
+    var removedItem;
     if (item) {
       // if the item already exits in this model, we first remove it.
-      var removedItem = this.#removeItem(item);
+      removedItem = this.#removeItem(item);
     }
     var addedItem = this.#addItem(config);
 
+    var axesChangeInfo = {};
+    axesChangeInfo[addedItem.axis] = {
+      added: [addedItem]
+    };
+    if (removedItem){
+      axesChangeInfo[removedItem.axis] = {
+        removed: [removedItem]
+      };
+    }
+    
     this.fireEvent('change', {
-      
+      axesChanged: axesChangeInfo
     });
 
     return addedItem;
@@ -288,8 +307,14 @@ class QueryModel extends EventEmitter {
     var axis = this.getQueryAxis(axisId);
     var removedItem = axis.removeItem(item);
     removedItem.axis = axisId;
+    
+    var axesChangeInfo = {};
+    axesChangeInfo[axisId] = {
+      removed: [removedItem]
+    };
+    
     this.fireEvent('change', {
-      
+      axesChanged: axesChangeInfo
     });
 
     return removedItem;
@@ -304,30 +329,64 @@ class QueryModel extends EventEmitter {
     else {
       axisIds = Object.keys(this.#axes);
     }
-    
+
+    var axesChangeInfo = {};
     for (var i = 0; i < axisIds.length; i++) {
       var axisId = axisIds[i];
       var axis = this.getQueryAxis(axisId);
+      var items = axis.getItems();
+      
+      if (!items.length) {
+        continue;
+      }
+      
+      axesChangeInfo[axisId] = {
+        removed: items
+      };
       axis.clear();
     }
     
+    if (!Object.keys(axesChangeInfo).length){
+      // no change, don't fire event.
+      return;
+    }
+    
     this.fireEvent('change', {
-      
+      axesChanged: axesChangeInfo
     });
   }
   
   flipAxes(axisId1, axisId2) {
+    var axesChangeInfo = {};
+
     var axis1 = this.getQueryAxis(axisId1);
     var axis1Items = axis1.getItems();
-    
+        
     var axis2 = this.getQueryAxis(axisId2);
     var axis2Items = axis2.getItems();
 
     axis1.setItems(axis2Items);
     axis2.setItems(axis1Items);
+
+    if (axis1Items.length) {
+      axesChangeInfo[axis1] = {
+        removed: axis1Items
+      }
+      axesChangeInfo[axis2] = {
+        added: axis1Items
+      };
+    }
+    if (axis2Items.length) {
+      axesChangeInfo[axis2] = {
+        removed: axis2Items
+      };
+      axesChangeInfo[axis1] = {
+        added: axis2Items
+      };
+    }
     
     this.fireEvent('change', {
-      
+      axesChanged: axesChangeInfo
     });
   }
   
