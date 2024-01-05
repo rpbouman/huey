@@ -99,49 +99,118 @@ class CellSet {
     return allRanges;
   }
   
-  #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch){
+  #getValuesClauseForCellsQuery(
+    dataRelationName, cellIndexColumnName, 
+    tupleValueToColumnMapping, tuplesToQuery, 
+    values
+  ){
+    var allDataPaceHoldersSql = tuplesToQuery.map(function(tuple){
+      var valuesClauseRow = Object.keys(tuple).map(function(columnName){
+        var value = tuple[columnName];
+        if (columnName === cellIndexColumnName) {
+          // we serialize the cellindex explicitly as a matter of principle: it is a value we assign,
+          // whereas the tuple values are truly input values.
+          // and it helps to clearly mark each tuple 
+          return String(value);
+        }
+
+        if (typeof value === 'bigint'){
+          // bigint values are not properly serialized by duckdb wasm 
+          // see: https://github.com/duckdb/duckdb-wasm/issues/1563
+          return `String(value)::BIGINT`;
+        }
+
+        var mappingInfo = tupleValueToColumnMapping[columnName];
+        var tupleValueField = mappingInfo.tupleValueField;
+        var typeName = String(tupleValueField.type);
+        switch (typeName){
+          case 'Timestamp<MICROSECOND>':
+            // If the native duckdb is TIMESTAMP then duckdb WASM tags the field type with a custom Timestamp<MICROSECOND> class
+            // The actual resultset values however are simply javascript Number primitives.
+            // If we simply plug those numbers back as values to our preparedStmt.query call, it fails with the error:
+            //
+            // Error: Conversion Error: Unimplemented type for cast (TIMESTAMP -> DOUBLE)
+            // (see: https://github.com/duckdb/duckdb-wasm/issues/1563#issuecomment-1878745744)
+            //
+            // now, it turns out that the number returned is the number of milliseconds since epoch, 
+            // which is probably meant to make it easy to instantiate a javascript Date object with it like so:
+            //
+            // new Date(timestampColumnValue);
+            //
+            // TIMESTAMP columns have microseconds resolution and JavaScript Date's only milliseconds, 
+            // but duckdb WASM deals with that by letting the number have fractional digits.
+            // For example, this SQL:
+            //  
+            // SELECT TIMESTAMP'2024-01-05 01:02:03.456789' as ts
+            //
+            // results in return of this Number value: 1704416523456.7888
+            // and new Date(1704416523456.7888) is 'Fri Jan 05 2024 02:02:03 GMT+0100 (Central European Standard Time)'
+            //
+            // However for our purpose we need to be able to use the returned JavaScript Number value to create the exact original TIMESTAMP value.
+            //
+            // There are two duckdb functions (see: https://duckdb.org/docs/archive/0.9.2/sql/functions/timestamp) that can help:
+            //            
+            // - make_timestamp(microseconds) - the microseconds is some integer value in microseconds
+            // - to_timestamp(double)         - the double value is the number of *seconds* (so not microseconds or milliseconds).
+            //
+            // so we got milliseconds and can either multiple by 1000 to get microseconds: 
+            // - make_timestamp(CAST(1704416523456.7888::DOUBLE * 1000 AS BIGINT)))
+            // - to_timestamp(1704416523456.7888::DOUBLE / 1000)
+            return `to_timestamp(${value}::DOUBLE / 1000)`;
+          default:
+        }
+        values.push(value);
+        return '?';
+      });
+      return `(${valuesClauseRow})`
+    }).join('\n,');
+
+    var columns = [cellIndexColumnName].concat(Object.keys(tupleValueToColumnMapping));
+    var relationDefinition = `${dataRelationName}(${columns.map(getQuotedIdentifier).join(', ')})`;
+
+    var valuesClause = `(VALUES ${allDataPaceHoldersSql}) AS ${relationDefinition}`;
+    return valuesClause;
+  }
+  
+  #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values){
         
     var dataRelationName = '__huey_tuples';
     var cellIndexColumnName = '__huey_cellIndex';
-    var quotedCellIndexColumnName = getQuotedIdentifier(cellIndexColumnName);
-    
+
+    // build the SELECT list
+    var quotedCellIndexColumnName = getQuotedIdentifier(cellIndexColumnName);    
     var qualifiedCellIndexColumnName = getQualifiedIdentifier(dataRelationName, cellIndexColumnName);
     var tupleIndexSelectExpression = `CAST(${qualifiedCellIndexColumnName} AS INTEGER) AS ${quotedCellIndexColumnName}`;
-    
     aggregateExpressionsToFetch = aggregateExpressionsToFetch.map(function(expression){
       return `${expression} AS ${getQuotedIdentifier(expression)}`;
-    })
+    });
     var selectListExpressions = [tupleIndexSelectExpression].concat(aggregateExpressionsToFetch);
     var selectClauseSql = `SELECT ${selectListExpressions.join('\n, ')}`;
-
-    var columns = [cellIndexColumnName].concat(Object.keys(tupleValueToColumnMapping));
-
-    var dataPlaceholders = new Array(columns.length).fill('?');
-    var dataPlaceholdersSql = `( ${dataPlaceholders.join(', ')} )`;
-    
-    var allDataPaceHolders = new Array(tuplesToQuery.length).fill(dataPlaceholdersSql);
-    var allDataPaceHoldersSql = allDataPaceHolders.join('\n,');
-    
-    var quotedColumns = columns.map(getQuotedIdentifier);
-    var relationDefinition = `${dataRelationName}(${quotedColumns.join(', ')})`;
-
-    var valuesClause = `(VALUES ${allDataPaceHoldersSql}) AS ${relationDefinition}`;
-    
+  
+    // build the FROM clause
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
     var qualifiedObjectName = datasource.getQualifiedObjectName();
-    
+    var valuesClause = this.#getValuesClauseForCellsQuery(
+      dataRelationName, cellIndexColumnName, 
+      tupleValueToColumnMapping, tuplesToQuery, 
+      values
+    );
     var fromClause = `FROM ${valuesClause}`;
+    
+    // build the JOIN clause
     var joinClause = `LEFT JOIN ${qualifiedObjectName} AS ${getQuotedIdentifier('__data')}`;
     var joinConditionsSql = Object.keys(tupleValueToColumnMapping).map(function(columnName){
-      var mappedExpression = tupleValueToColumnMapping[columnName];
+      var mappingInfo = tupleValueToColumnMapping[columnName];
+      var sqlExpression = mappingInfo.sqlExpression;
       var dataColumnName = getQualifiedIdentifier(dataRelationName, columnName);
-      return `${dataColumnName} = ${mappedExpression}`
+      return `${dataColumnName} = ${sqlExpression}`;
     });
     var joinConditionSql = joinConditionsSql.join('\nAND ');
     var onClause = `ON ${joinConditionSql}`;
     var groupByClause = `GROUP BY ${qualifiedCellIndexColumnName}`;
     
+    // build the statement
     var sql = `
       ${selectClauseSql} 
       ${fromClause}
@@ -155,30 +224,10 @@ class CellSet {
   async #executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch) {
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
-    var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch);
+    var values = [];
+    var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values);
     var connection = await datasource.getConnection();
     var preparedStatement = await connection.prepare(sql);
-    var values = tuplesToQuery.reduce(function(acc, curr){
-      var currValues = Object.keys(curr).map(function(key){
-        var value = curr[key];
-        
-        // currently duckdb WASM preparedStatement.query does not properly handle BigInt values
-        // so for now we convert to string
-        // see: https://github.com/duckdb/duckdb-wasm/issues/1563
-        if (typeof value === 'bigint'){
-          var strValue = String(value);
-          if (Number.MIN_SAFE_INTEGER <= value && value <= Number.MAX_SAFE_INTEGER){
-            value = parseInt(strValue, 10);
-          }
-          else {
-            value = strValue;
-          }
-        }
-        return value;
-      })
-      acc = acc.concat(currValues);
-      return acc;
-    }, []);
     
     console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
     console.log(sql);
@@ -289,12 +338,14 @@ class CellSet {
       
       // for each query axis...
       for (var j = 0; j < tupleIndicesItem.length; j++){
-        
+                
         // ...get the tuple,...
         var tupleIndex = tupleIndicesItem[j];
         var tupleSet = tupleSets[j];
+                
         var tuple = tupleSet.getTupleSync(tupleIndex);
         if (!tuple) {
+          console.error(`Couldn't find tuple ${tupleIndex} in tupleset for query axis ${tupleSet.getQueryAxisId()}`);
           continue;
         }
         var tupleValues = tuple.values;
@@ -310,13 +361,18 @@ class CellSet {
           var columnName = `${queryAxisId}_value${k}`;
           row[columnName] = tupleValue;
           
-          if (tupleValueToColumnMapping[columnName] === undefined) {
+          if (tuplesToQuery.length === 0){
+            var tupleSetValueFields = tupleSet.getTupleValueFields();
             // store the mapping between our literal row column and the original sql expression
             var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, '__data');
-            tupleValueToColumnMapping[columnName] = sqlExpression;
-          }
+            tupleValueToColumnMapping[columnName] = {
+              sqlExpression: sqlExpression,
+              tupleValueField: tupleSetValueFields[k]
+            };
+          }        
         }
       }
+      
       tuplesToQuery.push(row);
     }
     

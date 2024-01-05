@@ -4,6 +4,8 @@ class TupleSet {
   #queryAxisId = undefined;  
 
   #tuples = [];
+  #tupleValueFields = [];
+  
   #tupleCount = undefined;
   #pageSize = 50;
   
@@ -12,6 +14,10 @@ class TupleSet {
     this.#queryAxisId = axisId;  
   }
 
+  getTupleValueFields(){
+    return this.#tupleValueFields;
+  }
+  
   getPageSize(){
     return this.#pageSize;
   }
@@ -116,6 +122,8 @@ class TupleSet {
     var numRows = resultSet.numRows;
     var fields = resultSet.schema.fields;
     
+    this.#tupleValueFields = fields;
+    
     var items = this.#getQueryAxisItems();    
     var tuples = this.#tuples;
 
@@ -131,7 +139,7 @@ class TupleSet {
         this.#tupleCount = parseInt(String(totalCount), 10);
       }
     }
-    
+        
     for (var i = 0; i < numRows; i++){
 
       var row = resultSet.get(i);
@@ -139,7 +147,9 @@ class TupleSet {
 
       for (var j = 0; j < items.length; j++){
         var field = fields[j];
-        values[j] = row[field.name];
+        var fieldName = field.name;
+                
+        values[j] = row[fieldName];
       }
 
       var tuple = {values: values};
