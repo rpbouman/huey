@@ -88,10 +88,8 @@ class PivotTableUi {
       var propertiesChangedInfo = eventData.propertiesChanged;
       
       if (propertiesChangedInfo.cellHeadersAxis){
-        // TODO: flipping of the axes could in theory be done 
-        // without clearing any of tupleSets and cellsSet
-        // Right now won't prioritize it but it should be done at some point
-        clearRowsTupleSet = clearColumnsTupleSet = clearCellsSet = true;
+        // moving cells to another axis does not change the tuples or the cached cells, 
+        // it only requires rerendering the table.
       }
     }
 
