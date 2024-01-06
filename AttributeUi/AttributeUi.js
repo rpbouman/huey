@@ -163,9 +163,21 @@ function clearAttributeUi(showBusy){
 function renderAttributeUi(columnSummary){
   clearAttributeUi();
   var attributesUi = byId('attributeUi');
+  
+  var node = renderAttributeUiNode({
+    type: 'aggregate',
+    aggregator: 'count',
+    profile: {
+      column_name: '*',
+      column_type: 'INTEGER'
+    }
+  });
+  attributesUi.appendChild(node);
+  
+  
   for (var i = 0; i < columnSummary.numRows; i++){
     var row = columnSummary.get(i);
-    var node = renderAttributeUiNode({
+    node = renderAttributeUiNode({
       type: 'column',
       profile: row.toJSON()
     });

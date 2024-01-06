@@ -24,12 +24,17 @@ class QueryAxisItem {
   
   static getSqlForAggregatedQueryAxisItem(item, alias){
     var columnName = item.columnName;
+    
+    if (columnName === '*') {
+    }
+    else 
     if (alias){
       columnName = getQualifiedIdentifier(alias, columnName);
     }
     else {
       columnName = getQuotedIdentifier(columnName);
     }
+    
     var aggregator = item.aggregator;
     var aggregatorInfo = aggregators[aggregator];
     var expressionTemplate = aggregatorInfo.expressionTemplate;

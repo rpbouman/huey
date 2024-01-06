@@ -504,6 +504,10 @@ class PivotTableUi {
       }      
     }
     
+    if (numRowAxisColumns === 0) {
+      numRowAxisColumns = 1;
+    }
+    
     var firstTableHeaderRow, firstTableHeaderRowCells;
     for (var i = 0; i < numColumnAxisRows; i++){ 
       var tableRow = createEl('div', {
@@ -743,6 +747,9 @@ class PivotTableUi {
     var physicalRowsAdded = 0;
     
     var queryModel = this.#queryModel;
+
+    var columnsAxis = queryModel.getColumnsAxis();
+    var columnAxisItems = columnsAxis.getItems();
     
     var rowsAxis = queryModel.getRowsAxis();
     var rowAxisItems = rowsAxis.getItems();
@@ -770,7 +777,10 @@ class PivotTableUi {
       else {
         numColumns += 1;
       }
-      
+    }
+    else 
+    if (numColumns === 0 && columnAxisItems.length){
+      numColumns = 1;
     }
 
     // if there are no tuples on the rows axis, but there are items in the cells axis, 
@@ -809,16 +819,16 @@ class PivotTableUi {
               labelText = String(value);
             }
             else {
-              labelText = '';
+              labelText = String.fromCharCode(160);
             }
           }
           else {
             cell.className += ' pivotTableUiCellAxisHeaderCell';
-            if (k < cellAxisItems.length) {
+            if (k < cellAxisItems.length && renderCellHeaders) {
               labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
             }
             else {
-              labelText = '';
+              labelText = String.fromCharCode(160);
             }
           }
 
