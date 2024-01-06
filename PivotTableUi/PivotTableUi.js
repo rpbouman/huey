@@ -365,6 +365,10 @@ class PivotTableUi {
     var queryModel = this.#queryModel;
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
     
+    var rowsAxis = queryModel.getRowsAxis();
+    var rowsAxisItems = rowsAxis.getItems();
+    var columnsAxis = queryModel.getColumnsAxis();
+    var columnsAxisItems = columnsAxis.getItems();
     var cellsAxis = queryModel.getCellsAxis();
     var cellsAxisItems = cellsAxis.getItems();
     
@@ -385,12 +389,12 @@ class PivotTableUi {
     var rowsTupleRange = [];
     switch (cellHeadersAxis){
       case QueryModel.AXIS_COLUMNS:
-        numColumnsAxisTuples = Math.ceil(columnCount / columnTupleIndexInfo.factor);
-        numRowsAxisTuples = rowCount;
+        numColumnsAxisTuples = columnsAxisItems.length ? Math.ceil(columnCount / columnTupleIndexInfo.factor) : 0;
+        numRowsAxisTuples = rowsAxisItems.length ? rowCount : 0;
         break;
       case QueryModel.AXIS_ROWS:
-        numColumnsAxisTuples = columnCount;
-        numRowsAxisTuples = Math.ceil(rowCount / rowTupleIndexInfo.factor);
+        numColumnsAxisTuples = columnsAxisItems.length ? columnCount : 0;
+        numRowsAxisTuples = rowsAxisItems.length ? Math.ceil(rowCount / rowTupleIndexInfo.factor) : 0;
         break;
     }
     columnsTupleRange = [columnsAxisTupleIndex, columnsAxisTupleIndex + numColumnsAxisTuples];
@@ -494,9 +498,6 @@ class PivotTableUi {
       if (columnsAxisItems.length || cellsAxisItems.length) {
         numRowAxisColumns += 1;
       }      
-    }
-    if (numRowAxisColumns === 0){
-      numRowAxisColumns = 1;
     }
     
     var firstTableHeaderRow, firstTableHeaderRowCells;
@@ -602,23 +603,24 @@ class PivotTableUi {
     var numColumns = numTuples;
     var cellHeadersPlacement = queryModel.getCellHeadersAxis();
     var renderCellHeaders = (cellHeadersPlacement === QueryModel.AXIS_COLUMNS);
-    var cellItems;
+    
+    var cellsAxis = queryModel.getCellsAxis();
+    var cellItems = cellsAxis.getItems();
     if (renderCellHeaders) {
-      var cellsAxis = queryModel.getCellsAxis();
-      cellItems = cellsAxis.getItems();
       numCellHeaders = cellItems.length;
       if (numCellHeaders === 0) {
         numCellHeaders = 1;
       }
       
-      // if there are no tuples on the column axis, but there are items in the cells axis, 
-      // then we still need 1 column
-      if (numColumns === 0 && cellItems.length) {
-        numColumns = 1;
-      }
     }
     else {
       numCellHeaders = 1;
+    }
+
+    // if there are no tuples on the column axis, but there are items in the cells axis, 
+    // then we still need 1 column
+    if (numColumns === 0 && cellItems.length) {
+      numColumns = 1;
     }
     
     var tableHeaderDom = this.#getTableHeaderDom();
@@ -664,17 +666,17 @@ class PivotTableUi {
               labelText = stringValue;
             }
             else {
-              labelText = '';
+              labelText = String.fromCharCode(160);
             }
           }
           else
-          if (k < cellItems.length) {
+          if (renderCellHeaders && k < cellItems.length) {
             var cellItem = cellItems[k];
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellItem);
             columnWidth = labelText.length > valuesMaxWidth ? labelText.length : valuesMaxWidth;            
           }
           else {
-            labelText = '';
+            labelText = String.fromCharCode(160);
           }
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel"
@@ -746,10 +748,11 @@ class PivotTableUi {
     var numRows = tuples.length;
     var cellHeadersPlacement = queryModel.getCellHeadersAxis();
     var renderCellHeaders = (cellHeadersPlacement === QueryModel.AXIS_ROWS);
-    var cellAxisItems;
+
+    var cellsAxis = queryModel.getCellsAxis();
+    var cellAxisItems = cellsAxis.getItems();
+
     if (renderCellHeaders) {
-      var cellsAxis = queryModel.getCellsAxis();
-      cellAxisItems = cellsAxis.getItems();
       numCellHeaders = cellAxisItems.length;
       if (numCellHeaders === 0) {
         numCellHeaders = 1;
@@ -764,11 +767,12 @@ class PivotTableUi {
         numColumns += 1;
       }
       
-      // if there are no tuples on the rows axis, but there are items in the cells axis, 
-      // then we still need 1 row
-      if (numRows === 0 && cellAxisItems.length) {
-        numRows = 1;
-      }
+    }
+
+    // if there are no tuples on the rows axis, but there are items in the cells axis, 
+    // then we still need 1 row
+    if (numRows === 0 && cellAxisItems.length) {
+      numRows = 1;
     }
     
     var tableHeaderDom = this.#getTableHeaderDom();
