@@ -233,7 +233,10 @@ var dateFields = {
   'quarter': {
     expressionTemplate: "'Q' || QUARTER( ${columnName} )"
   },
-  'month': {
+  'monthnum': {
+    expressionTemplate: "CAST( MONTH( ${columnName} ) AS TINYINT)"
+  },
+  'mmm': {
     expressionTemplate: "CAST( MONTH( ${columnName} ) AS TINYINT)"
   },
   'week': {

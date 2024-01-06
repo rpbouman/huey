@@ -11,6 +11,8 @@
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-small );
   color: var( --huey-icon-color-subtle );
+  display: inline-block;
+  width: 18px;
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeHead > .expander:hover {
@@ -201,7 +203,7 @@
   text-overflow: ellipsis;
   display: inline-block;
   overflow: hidden;
-  max-width: calc(100% - 138px);
+  max-width: calc(100% - 156px);
   vertical-align: text-bottom;
 }
 
@@ -268,7 +270,7 @@
 }
 
 .attributeUi .attributeUiNode > .attributeUiNodeBody {
-  padding-left: 32px;
+  padding-left: 24px;
 }
 
 .attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeBody {
