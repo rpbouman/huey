@@ -24,6 +24,10 @@ class CellSet {
     this.#cellValueFields = {};
   }  
 
+  getCellValueFields(){
+    return this.#cellValueFields;
+  }
+
   // variable argument list,
   // each argument should be a tuple index
   // tuple indexes should by in order of tupleSets
@@ -264,6 +268,9 @@ class CellSet {
       for (var j = 0; j < fields.length; j++){
         var field = fields[j];
         var fieldName = field.name;
+        if (this.#cellValueFields[fieldName] === undefined) {
+          this.#cellValueFields[fieldName] = field;
+        }
         var value = row[fieldName];
         
         if (j === 0) {
@@ -274,9 +281,6 @@ class CellSet {
           if (cell === undefined){
             // cell didn't exist! So lets add it.
             this.#cells[cellIndex] = cell = {values: {}};
-            if (this.#cellValueFields[fieldName] === undefined) {
-              this.#cellValueFields[fieldName] = field;
-            }
           }
         }
         else {

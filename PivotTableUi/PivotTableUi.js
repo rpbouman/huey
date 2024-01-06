@@ -403,6 +403,7 @@ class PivotTableUi {
     var cellsAxisItemIndex;
 
     var cellsSet = this.#cellsSet;
+    var cellValueFields = cellsSet.getCellValueFields();
     var cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
     
     var cellIndex;
@@ -436,6 +437,9 @@ class PivotTableUi {
             var values = cell.values;
             var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
             var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+            var cellValueField = cellValueFields[sqlExpression];
+            var cellValueType = String(cellValueField.type);
+            cellElement.setAttribute('data-value-type', cellValueType);
             var value = values[sqlExpression];
             labelText = value === null ? '' : String(value);
           }

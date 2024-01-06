@@ -150,3 +150,20 @@
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow > .pivotTableUiCell:has(+ .pivotTableUiColumnsAxisHeaderCell) {
   border-right-color: var( --huey-dark-border-color );
 }
+
+
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=List<Decimal] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=List<Float] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=List<Int] > .pivotTableUiCellLabel  {
+  font-family: var( --huey-mono-font-family );  
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel {
+  text-align: right;
+}
