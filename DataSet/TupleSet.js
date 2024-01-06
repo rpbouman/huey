@@ -188,13 +188,12 @@ class TupleSet {
 
     var i = 0;
     var firstIndexToFetch, lastIndexToFetch;
-    var maxIndex = offset + count;
 
-    if (this.#tupleCount !== undefined && maxIndex > this.#tupleCount) {
-      maxIndex = this.#tupleCount;
+    if (this.#tupleCount !== undefined && offset + count > this.#tupleCount) {
+      count = this.#tupleCount - offset;
     }
     
-    while (i < maxIndex) {
+    while (i < count) {
       var tupleIndex = offset + i;
       var tuple = data[tupleIndex];
       if (tuple === undefined) {
@@ -219,9 +218,10 @@ class TupleSet {
     
     lastIndexToFetch += 1;
     var newCount = (lastIndexToFetch - firstIndexToFetch);
-    if (newCount < this.#pageSize && (offset + count === lastIndexToFetch)) {
+    if (newCount < this.#pageSize && (offset + count === lastIndexToFetch) && lastIndexToFetch < this.#tupleCount) {
       newCount = this.#pageSize;
-    }        
+    }
+    
     var numRows = await this.#executeAxisQuery(newCount, firstIndexToFetch);
     tuples = data.slice(offset, offset + count);
     return tuples;
