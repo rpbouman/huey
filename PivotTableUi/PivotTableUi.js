@@ -779,7 +779,7 @@ class PivotTableUi {
       }
     }
     else 
-    if (numColumns === 0 && columnAxisItems.length){
+    if (numColumns === 0){
       numColumns = 1;
     }
 
@@ -1024,8 +1024,9 @@ class PivotTableUi {
         numHeaderItems += 1;
       }
     }
-    if (numHeaderItems === 0 && columnsAxisItems.length) {
-      numHeaderItems += 1;
+    
+    if (numHeaderItems === 0) {
+      numHeaderItems = 1;
     }
     
      var sizeInfo = {
