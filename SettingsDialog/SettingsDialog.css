@@ -1,0 +1,22 @@
+#settingsDialog {
+  width: 400px;
+  height: 300px;
+}
+
+label.settings {
+  float: right;
+}
+
+label.settings:before {
+  font-family: var( --huey-icon-font-family );
+  content: '\eb20';
+}
+
+label.settings > button {
+  display: none;
+}
+
+
+#settingsDialog > .tabs > .tabPage > .tabPageContents {
+  padding: 8px 4px 4px 4px;
+}

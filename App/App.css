@@ -46,13 +46,27 @@
 
 .button {
   display: inline-block;
+  
 }
 
 label.uploader {
 }
 
-label.button.uploader::before {
+.toolbar > label:has( > button)::before,
+.toolbar > label:has( > input[type=file])::before 
+{  
   font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-normal );
+  vertical-align:middle;
+  color: var( --huey-icon-color-subtle );
+}
+
+.toolbar > label:hover:has( > button)::before,
+.toolbar > label:hover:has( > input[type=file])::before {
+  color: var( --huey-icon-color-highlight );
+}
+
+.toolbar > label[for=uploader]::before {
   content: "\eb47";
 }
 

@@ -17,6 +17,7 @@
   * Huey text font colors
   */
   --huey-foreground-color: rgb(50,50,50);
+  --huey-placeholder-color: rgb(180,180,180);
   
   /**
   * Huey icon font
@@ -24,6 +25,7 @@
   --huey-icon-font-family: tabler-icons;
   --huey-icon-small: 14px;
   --huey-icon-medium: 18px;
+  --huey-icon-normal: 20px;
 
   /**
   * Huey icon font colors
@@ -78,7 +80,11 @@ input, select, button {
 input, select{
   border-color: var( --huey-light-border-color );
   background-color: var( --huey-light-background-color );
-  padding: 0px 2px 0px 2px;
+  padding: 0px 2px 0px 8px;
+}
+
+input::placeholder {
+  color: var( --huey-placeholder-color );
 }
 
 select:focus, 
@@ -120,6 +126,28 @@ dialog {
   border-radius: 18px;
 }
 
+dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* this is used as dialog title section */
+dialog > header {
+  flex-grow: 0;
+}
+
+/* this is used as dialog contents section */
+dialog > section {
+  flex-grow: 1;
+}
+
+/* this is used as dialog buttons section */
+dialog > footer {
+  margin-top: 6px;
+  margin-bottom: -6px;
+  flex-grow: 0;
+}
+
 dialog h1:first-child,
 dialog h2:first-child,
 dialog h3:first-child,
@@ -129,4 +157,23 @@ dialog h6:first-child,
 dialog h7:first-child 
 {
   margin-block-start: 0px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: [labels] auto [controls] 1fr;
+  grid-auto-flow: row;
+  grid-gap: 0.5em;
+}
+
+form > label {
+  grid-column: labels;
+  grid-row: auto;
+  margin-top: 4px;
+}
+
+form > input,
+form > select {
+  grid-column: controls;
+  grid-row: auto;
 }

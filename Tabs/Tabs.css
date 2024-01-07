@@ -1,0 +1,66 @@
+.tabs {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+
+.tabs > .tabPage {
+  flex-grow: 0;
+}
+
+.tabs > .tabPage > label.tab {
+  border-style: solid;
+  border-color: var( --huey-light-border-color );
+  border-width: 2px;
+  border-radius: 18px 8px 0px 0px;
+  padding: 2px 4px 2px 4px;
+  background-color: var( --huey-dark-background-color );
+}
+
+.tabs > .tabPage:last-child {
+  flex-grow: 1;
+}
+
+/*
+  first and last are filler elements.
+*/
+.tabs > .tabPage:first-child > label.tab,
+.tabs > .tabPage:last-child > label.tab {
+  background-color: var( --huey-medium-background-color );
+  border-color: var( --huey-light-border-color );
+  border-style: none none solid none;
+  display: block;
+  margin-top: -2px;
+}
+
+.tabs > .tabPage:first-child > label.tab::before,
+.tabs > .tabPage:last-child > label.tab::before {
+  content: "\00a0";
+}
+  
+.tabs > .tabPage:has( > input[type=radio].tabState:checked ) > label.tab {
+  border-bottom-color: var( --huey-medium-background-color );
+  background-color: var( --huey-medium-background-color );
+}
+
+.tabs > .tabPage > .tabPageContents {
+  position: absolute;
+  top: 19px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  border-style: none solid solid solid;
+  border-color: var( --huey-light-border-color );
+  border-width: 2px;
+  display: none;
+}
+
+.tabs > .tabPage:has( > input[type=radio].tabState:checked ) > .tabPageContents {
+  display: block;
+}
+
+.tabs > .tabPage > input[type=radio].tabState {
+  appearance: none;
+  display: none;
+}
+
