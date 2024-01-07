@@ -1,6 +1,7 @@
 label.aboutButton {
   float: right;
   opacity: .5;
+  margin: 1px 4px 0px 6px;
 }
 
 label.aboutButton:hover {

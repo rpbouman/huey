@@ -67,7 +67,7 @@
         class="tabs"
       >
         <div class="tabPage">
-          <label 
+          <span 
             class="tab"
           >
           </label>
@@ -81,14 +81,22 @@
           </label>
           <input type="radio" name="settingsTabs" class="tabState" id="settingsTabGeneral" checked="true"/>
           <div class="tabPageContents">
-            <form>
-              <label>File types:</label>
-              <select>
+            <form id="generalSettingsForm">
+              <label for="registeredFileTypes">File types:</label>
+              <select id="registeredFileTypes">
                 <option value="new">Add New...</option>
                 <option value=".csv">Comma seperated (*.csv)</option>
                 <option value=".json">JSON (*.json)</option>
                 <option value=".parquet">Parquet (*.parquet)</option>
                 <option value=".txt">Text (*.txt)</option>
+              </select>
+              <label for="defaultActionForFileType">File type default action:</label>
+              <select id="defaultActionForFileType">
+                <option value="SelectFrom"></option>
+                <option value="SelectFrom">SELECT FROM</option>
+                <option value="csvWizard">csv wizard</option>
+                <option value="jsonWizard">json wizard</option>
+                <option value="parquetWizard">parquet wizard</option>
               </select>
             </form>
           </div>
@@ -126,13 +134,13 @@
           </label>
           <input type="radio" name="settingsTabs" class="tabState" id="settingsTabPivotTable"/>
           <div class="tabPageContents">
-            <form>
-              <label>Default number format:</label><input type="text"/>
+            <form id="pivotTableSettingsForm">
+              <label for="defaultNumberFormat">Default number format:</label><input id="defaultNumberFormat" type="text"/>
             </form>
           </div>
         </div>
         <div class="tabPage">
-          <label 
+          <span 
             class="tab"
           ></label>
         </div>
@@ -168,12 +176,13 @@
     >
       <div class="toolbar">
         <label for="registeredFiles">Files:</label>
-        <select id="registeredFiles">
+        <select id="registeredFiles" title="Choose a registered file, or register a new one.">
           <option value="" selected="true"></option>
           <option value="new">Register New...</option>
         </select>
         <label 
           for="uploader"
+          title="Open a file browser to register a file."
         >
           <input 
             id="uploader" 
@@ -188,6 +197,7 @@
         <label
           for="settingsButton"
           class="button settings"
+          title="Open the Huey Settings dialog."
         >
           <button
             id="settingsButton"

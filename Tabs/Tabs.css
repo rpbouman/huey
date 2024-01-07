@@ -24,17 +24,19 @@
 /*
   first and last are filler elements.
 */
-.tabs > .tabPage:first-child > label.tab,
-.tabs > .tabPage:last-child > label.tab {
-  background-color: var( --huey-medium-background-color );
-  border-color: var( --huey-light-border-color );
+.tabs > .tabPage:first-child > span.tab,
+.tabs > .tabPage:last-child > span.tab {
   border-style: none none solid none;
+  border-color: var( --huey-light-border-color );
+  border-width: 2px;
+  background-color: var( --huey-medium-background-color );
+  margin-top: 2px;
   display: block;
-  margin-top: -2px;
 }
 
-.tabs > .tabPage:first-child > label.tab::before,
-.tabs > .tabPage:last-child > label.tab::before {
+.tabs > .tabPage:first-child > span.tab::before,
+.tabs > .tabPage:last-child > span.tab::before {
+  content: "\00a0";
   content: "\00a0";
 }
   
