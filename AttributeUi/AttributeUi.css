@@ -91,12 +91,12 @@
   content: "\ec60";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=month] > .attributeUiNodeHead > .icon:before {
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="month num"] > .attributeUiNodeHead > .icon:before {
   /* letter m */
   content: "\ec5c";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=week] > .attributeUiNodeHead > .icon:before {
+.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="week num"] > .attributeUiNodeHead > .icon:before {
   /* letter w */
   content: "\ec66";
 }

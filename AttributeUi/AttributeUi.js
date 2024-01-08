@@ -241,17 +241,31 @@ var aggregators = {
 var dateFields = {
   'year': {
     expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
-    columnType: 'INT'
+    columnType: 'INT', 
+    formats: {
+      'yyyy': {
+      },
+      'yy': {
+      }
+    }
   },
   'quarter': {
     expressionTemplate: "'Q' || QUARTER( ${columnName} )",
-    columnType: 'VARCHAR'
+    columnType: 'VARCHAR'    
   },
-  'month': {
+  'month num': {
     expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
-    columnType: 'UTINYINT'
+    columnType: 'UTINYINT',
+    formats: {
+      'long': {
+      },
+      'short': {
+      },
+      'narrow': {
+      }
+    }
   },
-  'week': {
+  'week num': {
     expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
     columnType: 'UTINYINT'
   },
@@ -265,14 +279,28 @@ var dateFields = {
   },
   'day of week': {
     expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
-    columnType: 'UTINYINT'
+    columnType: 'UTINYINT',
+    formats: {
+      'long': {
+      },
+      'short': {
+      },
+      'narrow': {
+      }
+    }
   }
 };
 
 var timeFields = {
   'hour': {
     expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
-    columnType: 'UTINYINT'
+    columnType: 'UTINYINT',
+    formats: {
+      'short': {
+      },
+      'long': {
+      }
+    }
   },
   'minute': {
     expressionTemplate: "CAST( MINUTE( ${columnName} ) as UTINYINT)",

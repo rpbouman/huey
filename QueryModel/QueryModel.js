@@ -24,6 +24,7 @@ class QueryAxisItem {
     
     var derivation = axisItem.derivation;
     if (derivation){
+      var derivations = Object.assign({}, dateFields, timeFields);
       var derivationInfo = derivations[derivation];
       var dataType = derivationInfo.dataType;
       var typeInfo = dataTypes[dataType];
