@@ -27,9 +27,13 @@ class QueryAxisItem {
       var derivations = Object.assign({}, dateFields, timeFields);
       var derivationInfo = derivations[derivation];
       var dataType = derivationInfo.dataType;
-      var typeInfo = dataTypes[dataType];
-      isNumeric = typeInfo.isNumeric;
-      isInteger = typeInfo.isInteger;
+      if (dataType) {
+        var typeInfo = dataTypes[dataType];
+        isNumeric = typeInfo.isNumeric;
+        isInteger = typeInfo.isInteger;
+      }
+      isNumeric = derivation.isNumeric || isNumeric;
+      isInteger = derivation.isInteger || isInteger;
     }
     
     var localeSettings = settings.getSettings('localeSettings');
