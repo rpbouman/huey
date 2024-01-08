@@ -332,7 +332,7 @@ class CellSet {
       var cellCopy = cell;
       for (var j = 0; j < cellsAxisItems.length; j++){
         var cellsAxisItem = cellsAxisItems[j];
-        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, '__data');
         
         if (!cellCopy || (cellCopy && cellCopy.values[sqlExpression] === undefined) ){
           // we have a cell, but the cell doesn't have a value for this axis item.
