@@ -110,7 +110,7 @@ class Settings extends EventEmitter {
         if (!control){
           continue;
         }
-        if (typeof control.checkValidity === 'function' && !control.checkValidity()){
+        if (settingsOrDialog === 'settings' && typeof control.checkValidity === 'function' && !control.checkValidity()){
           console.error(`Settings persistence issue: ${control.nodeName} for property ${property} in section ${sectionName} has invalid value.`);
           continue;
         }
@@ -140,21 +140,19 @@ class Settings extends EventEmitter {
   }
   
   #synchronizeInput(settingsOrDialog, settings, property, control){
-    var valueProperty;
+    var valueProperty = 'value';
     var defaultValueGetter, defaultValueSetter;
     switch (control.type) {
       case 'checkbox':
         valueProperty = 'checked';
         break;
       case 'text':
-        valueProperty = 'value';
         break;
       case 'number':
         defaultValueGetter = function(control){var num = parseFloat(control.value, 10); return isNaN(num) ? undefined : num;}
         break;
       default:
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
-        valueProperty = 'value';
         break;
     }
     
