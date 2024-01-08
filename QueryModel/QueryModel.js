@@ -83,9 +83,6 @@ class QueryAxisItem {
   static getSqlForAggregatedQueryAxisItem(item, alias){
     var columnName = item.columnName;
     
-    if (columnName === '*') {
-    }
-    else 
     if (alias){
       columnName = getQualifiedIdentifier(alias, columnName);
     }
