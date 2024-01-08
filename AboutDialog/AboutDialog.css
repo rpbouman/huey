@@ -1,9 +1,13 @@
 label.aboutButton {
   float: right;
-  opacity: .5;
-  margin: 1px 4px 0px 6px;
 }
 
-label.aboutButton:hover {
-  opacity: 1;
+label.aboutButton:before {
+  font-family: var( --huey-icon-font-family );
+  font-size: var(--huey-icon-normal);  
+  content: '\eac5';
+}
+
+label.aboutButton > button {
+  display: none;
 }
