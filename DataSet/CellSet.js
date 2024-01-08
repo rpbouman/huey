@@ -9,7 +9,11 @@ class CellSet {
   #cellValueFields = {};
   
   #tupleSets = [];
-    
+   
+  static #datasetRelationName = '__data';   
+  static #tupleDataRelationName = '__huey_tuples';
+  static #cellIndexColumnName = '__huey_cellIndex';
+   
   constructor(queryModel, tupleSets){
     this.#queryModel = queryModel;
     this.#tupleSets = tupleSets;
@@ -17,7 +21,7 @@ class CellSet {
 
   #getSqlSelectStatement(){
     return '';
-  }
+  }  
   
   clear(){
     this.#cells = [];
@@ -103,15 +107,11 @@ class CellSet {
     return allRanges;
   }
   
-  #getValuesClauseForCellsQuery(
-    dataRelationName, cellIndexColumnName, 
-    tupleValueToColumnMapping, tuplesToQuery, 
-    values
-  ){
+  #getValuesClauseForCellsQuery(tupleValueToColumnMapping, tuplesToQuery, values){
     var allDataPaceHoldersSql = tuplesToQuery.map(function(tuple){
       var valuesClauseRow = Object.keys(tuple).map(function(columnName){
         var value = tuple[columnName];
-        if (columnName === cellIndexColumnName) {
+        if (columnName === CellSet.#cellIndexColumnName) {
           // we serialize the cellindex explicitly as a matter of principle: it is a value we assign,
           // whereas the tuple values are truly input values.
           // and it helps to clearly mark each tuple 
@@ -169,8 +169,8 @@ class CellSet {
       return `(${valuesClauseRow})`
     }).join('\n,');
 
-    var columns = [cellIndexColumnName].concat(Object.keys(tupleValueToColumnMapping));
-    var relationDefinition = `${dataRelationName}(${columns.map(getQuotedIdentifier).join(', ')})`;
+    var columns = [CellSet.#cellIndexColumnName].concat(Object.keys(tupleValueToColumnMapping));
+    var relationDefinition = `${CellSet.#tupleDataRelationName}(${columns.map(getQuotedIdentifier).join(', ')})`;
 
     var valuesClause = `(VALUES ${allDataPaceHoldersSql}) AS ${relationDefinition}`;
     return valuesClause;
@@ -180,17 +180,16 @@ class CellSet {
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
     var qualifiedObjectName = datasource.getQualifiedObjectName();
-        
-    var dataRelationName = '__huey_tuples';
-    var cellIndexColumnName = '__huey_cellIndex';
+    
+    var aliasedDatasetName = `${qualifiedObjectName} AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`; 
 
-    aggregateExpressionsToFetch = aggregateExpressionsToFetch.map(function(expression){
-      return `${expression} AS ${getQuotedIdentifier(expression)}`;
+    aggregateExpressionsToFetch = Object.keys(aggregateExpressionsToFetch).map(function(expression){
+      return `${aggregateExpressionsToFetch[expression]} AS ${getQuotedIdentifier(expression)}`;
     });
 
     // build the SELECT list
-    var quotedCellIndexColumnName = getQuotedIdentifier(cellIndexColumnName);
-    var qualifiedCellIndexColumnName = getQualifiedIdentifier(dataRelationName, cellIndexColumnName);
+    var quotedCellIndexColumnName = getQuotedIdentifier(CellSet.#cellIndexColumnName);
+    var qualifiedCellIndexColumnName = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
     
     if (tuplesToQuery.length === 0){
       qualifiedCellIndexColumnName = '0';
@@ -204,25 +203,21 @@ class CellSet {
     if (tuplesToQuery.length === 0) {
       sql = `
         ${selectClauseSql}
-        FROM ${qualifiedObjectName}
+        FROM ${aliasedDatasetName}
       `;
       return sql;
     }
 
     // build the FROM clause
-    var valuesClause = this.#getValuesClauseForCellsQuery(
-      dataRelationName, cellIndexColumnName, 
-      tupleValueToColumnMapping, tuplesToQuery, 
-      values
-    );
+    var valuesClause = this.#getValuesClauseForCellsQuery(tupleValueToColumnMapping, tuplesToQuery, values);
     var fromClause = `FROM ${valuesClause}`;
     
     // build the JOIN clause
-    var joinClause = `LEFT JOIN ${qualifiedObjectName} AS ${getQuotedIdentifier('__data')}`;
+    var joinClause = `LEFT JOIN ${aliasedDatasetName}`;
     var joinConditionsSql = Object.keys(tupleValueToColumnMapping).map(function(columnName){
       var mappingInfo = tupleValueToColumnMapping[columnName];
       var sqlExpression = mappingInfo.sqlExpression;
-      var dataColumnName = getQualifiedIdentifier(dataRelationName, columnName);
+      var dataColumnName = getQualifiedIdentifier(CellSet.#tupleDataRelationName, columnName);
       return `${dataColumnName} = ${sqlExpression}`;
     });
     var joinConditionSql = joinConditionsSql.join('\nAND ');
@@ -321,31 +316,27 @@ class CellSet {
     // this is where we store the sql expressions that calculate the cell values.
     // If there are cells missing, this will contain expressions for each cells axis items
     // but if all cells were already present and just missed a particular metric, only those metric need to be calculated.
-    var aggregateExpressionsToFetch = [];
-            
+    var aggregateExpressionsToFetch = {};
+    
+    // if we have a count(*) aggregate, and we also have tuples, then we do a LEFT JOIN of our tuple data against the dataset,
+    // where we join the actual tuple values against the corresponding expressions of the dataset.
+    // in that case, COUNT(*) is not an accurate count because it will simply count all rows resulting from the left join, 
+    // whereas we intended to count only the matching rows in the dataset.
+    // (remember that the tuple data represent combinations from both query axes, and such a combination might not exist in the dataset )
+    // To obtain an accurate count, we have to apply the count to an actual column. 
+    // For this we take any arbitrary column corresponding to the tuple values.
+    // interstingly it doesn't really matter if the column itself is nullable, because if it would be null, 
+    // it would alraedy be filtered out by the ON condition.
+    var indexOfCountStarAggregate = undefined;
+    var countStarCellsAxisItem = undefined;
+    var tupleColumnNames = [];
+       
+    // combine values from tuples of different axes into one 'supertuple'       
     _combinedTuples: for (var i = 0; i < tupleIndices.length; i++){
       var tupleIndicesItem = tupleIndices[i];
       var cellIndex = this.getCellIndex.apply(this, tupleIndicesItem);
       var cell = cells[cellIndex];
-      
-      // make a reference to the cell which we will use to check if we need to add more aggregate sql expressions
-      var cellCopy = cell;
-      for (var j = 0; j < cellsAxisItems.length; j++){
-        var cellsAxisItem = cellsAxisItems[j];
-        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, '__data');
-        
-        if (!cellCopy || (cellCopy && cellCopy.values[sqlExpression] === undefined) ){
-          // we have a cell, but the cell doesn't have a value for this axis item.
-          // this means the cell is not complete so we must fetch it. 
-          cell = undefined;
-          
-          // if we aren't already querying this aggregate, then we add it too.
-          if (aggregateExpressionsToFetch.indexOf(sqlExpression) === -1) {
-            aggregateExpressionsToFetch.push(sqlExpression);
-          }
-        }          
-      }
-      
+            
       if (cell) {
         // If we arrive here, and we still have the cell, 
         // it means the cell was not only already cached, but also contains values for all currently reqyested cells axis items.
@@ -354,12 +345,33 @@ class CellSet {
         continue;
       }
       
+      // make a reference to the cell which we will use to check if we need to add more aggregate sql expressions
+      var cellCopy = cell;
+      for (var j = 0; j < cellsAxisItems.length; j++){
+        var cellsAxisItem = cellsAxisItems[j];
+        if (indexOfCountStarAggregate === undefined && cellsAxisItem.aggregator === 'count' && cellsAxisItem.columnName === '*'){
+          countStarCellsAxisItem = cellsAxisItem;
+        }
+        
+        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, CellSet.#datasetRelationName);
+        
+        if (!cellCopy || (cellCopy && cellCopy.values[sqlExpression] === undefined) ){
+          // we have a cell, but the cell doesn't have a value for this axis item.
+          // this means the cell is not complete so we must fetch it. 
+          cell = undefined;
+          
+          // if we aren't already querying this aggregate, then we add it too.
+          if (aggregateExpressionsToFetch[sqlExpression] === undefined) {
+            aggregateExpressionsToFetch[sqlExpression] = sqlExpression;
+          }
+        }          
+      }
+      
       // If we arrive here, the cell is either not cached, or incomplete,
       // i.e. it lacks one or more values corresponding to the requested cells axis items. 
       // If even one cells axis item value is missing, we have to include the cell in our query.
-      var row = {
-        __huey_cellIndex: cellIndex
-      }
+      var row = {};
+      row[CellSet.#cellIndexColumnName] = cellIndex;
       
       // for each query axis...
       _tuplesetIndices: for (var j = 0; j < tupleIndicesItem.length; j++){
@@ -382,6 +394,12 @@ class CellSet {
         for (var k = 0; k < queryAxisItems.length; k++){
           // ...and extract and store the values in our row.
           var queryAxisItem = queryAxisItems[k];
+          
+          // maintain the list of columns in case we need a count(*) aggregate
+          if (tupleColumnNames.indexOf(queryAxisItem.columnName === -1)){
+            tupleColumnNames.push( queryAxisItem.columnName );
+          }
+          
           var tupleValue = tupleValues[k];
           var columnName = `${queryAxisId}_value${k}`;
           row[columnName] = tupleValue;
@@ -394,7 +412,7 @@ class CellSet {
           // collect metadata, only once for the entire set (done along with the first tuple)
           var tupleSetValueFields = tupleSet.getTupleValueFields();
           // store the mapping between our literal row column and the original sql expression
-          var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, '__data');
+          var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, CellSet.#datasetRelationName);
           tupleValueToColumnMapping[columnName] = {
             sqlExpression: sqlExpression,
             tupleValueField: tupleSetValueFields[k]
@@ -407,9 +425,19 @@ class CellSet {
         // it's possible to have no tuples in case there are only cells axis items and now items on rows/columns.
         tuplesToQuery.push(row);
       }
+            
     }
     
-    if (aggregateExpressionsToFetch.length && tuplesToQuery){
+    if (Object.keys(aggregateExpressionsToFetch).length){
+      if (countStarCellsAxisItem !== undefined && tupleColumnNames.length) {
+        var countStarExpressionAlias = QueryAxisItem.getSqlForQueryAxisItem(countStarCellsAxisItem, CellSet.#datasetRelationName);
+        
+        var countStarCellsAxisItemCopy = Object.assign({}, countStarCellsAxisItem);
+        countStarCellsAxisItemCopy.columnName = tupleColumnNames[0];
+        var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(countStarCellsAxisItemCopy, CellSet.#datasetRelationName);
+        
+        aggregateExpressionsToFetch[countStarExpressionAlias] = sqlExpression;
+      }
       var resultset = await this.#executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch);
       var newCells = this.#extractCellsFromResultset(resultset);
       Object.assign(availableCells, newCells);
