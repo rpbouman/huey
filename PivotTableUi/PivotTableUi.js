@@ -457,7 +457,10 @@ class PivotTableUi {
         
         var cellElement = cellElements.item(j);
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
-        var cell = cells[cellIndex];
+        var cell;
+        if (cells) {
+          cell = cells[cellIndex];
+        }
         var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];                   
         this.#renderCellValue(cell, cellsAxisItem, cellElement);
         
@@ -928,29 +931,25 @@ class PivotTableUi {
       rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
     ];
         
-    Promise.all(renderAxisPromises)
-    .then(function(results){
-      var columnTuples = results[0];
-      
-      this.#setHorizontalSize(0);
-      this.#renderColumns(columnTuples);
-      var rowTuples = results[1];
-      
-      this.#setVerticalSize(0);
-      this.#renderRows(rowTuples);
+    var renderAxisPromisesResults = await Promise.all(renderAxisPromises)
+    
+    var columnTuples = renderAxisPromisesResults[0];
+    this.#setHorizontalSize(0);
+    this.#renderColumns(columnTuples);
 
-      this.#updateVerticalSizer();      
-      this.#removeExcessColumns()
-      this.#updateHorizontalSizer();
+    var rowTuples = renderAxisPromisesResults[1];    
+    this.#setVerticalSize(0);
+    this.#renderRows(rowTuples);
 
-      this.#renderCells();
-      this.#updateCellData(0, 0);
-      
-    }.bind(this))
-    .finally(function(){
-      tableDom.style.width = '99.99%';
-      this.#setBusy(false);
-    }.bind(this))
+    this.#updateVerticalSizer();
+    this.#removeExcessColumns();
+    this.#updateHorizontalSizer();
+
+    this.#renderCells();
+    await this.#updateCellData(0, 0);  
+
+    tableDom.style.width = '99.99%';
+    this.#setBusy(false);
     ;
   }
   

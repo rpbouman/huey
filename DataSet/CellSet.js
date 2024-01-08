@@ -337,14 +337,6 @@ class CellSet {
       var cellIndex = this.getCellIndex.apply(this, tupleIndicesItem);
       var cell = cells[cellIndex];
             
-      if (cell) {
-        // If we arrive here, and we still have the cell, 
-        // it means the cell was not only already cached, but also contains values for all currently reqyested cells axis items.
-        // We can serve the cell from the cache and we don't need to include it in our SQL.
-        availableCells[cellIndex] = cell;
-        continue;
-      }
-      
       // make a reference to the cell which we will use to check if we need to add more aggregate sql expressions
       var cellCopy = cell;
       for (var j = 0; j < cellsAxisItems.length; j++){
@@ -366,7 +358,15 @@ class CellSet {
           }
         }          
       }
-      
+
+      if (cell) {
+        // If we arrive here, and we still have the cell, 
+        // it means the cell was not only already cached, but also contains values for all currently reqyested cells axis items.
+        // We can serve the cell from the cache and we don't need to include it in our SQL.
+        availableCells[cellIndex] = cell;
+        continue;
+      }
+            
       // If we arrive here, the cell is either not cached, or incomplete,
       // i.e. it lacks one or more values corresponding to the requested cells axis items. 
       // If even one cells axis item value is missing, we have to include the cell in our query.
