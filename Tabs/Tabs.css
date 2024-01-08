@@ -43,6 +43,8 @@
 .tabs > .tabPage:has( > input[type=radio].tabState:checked ) > label.tab {
   border-bottom-color: var( --huey-medium-background-color );
   background-color: var( --huey-medium-background-color );
+  /* make the tab 'pop' */
+  vertical-align: middle;
 }
 
 .tabs > .tabPage > .tabPageContents {

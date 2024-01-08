@@ -103,6 +103,11 @@ input:active {
 input[type=file]::file-selector-button {
 }
 
+input:invalid {
+  color: red;
+  border-color: red;
+}
+
 button {
   border-color: var( --huey-dark-border-color );
   background-color: var( --huey-dark-background-color );
@@ -124,6 +129,7 @@ dialog {
   border-width: 1px;
   border-color: var( --huey-dark-border-color );
   border-radius: 18px;
+  padding-top: 10px;
 }
 
 dialog[open] {
@@ -148,6 +154,10 @@ dialog > footer {
   flex-grow: 0;
 }
 
+dialog > footer > button {
+  width: 5em;
+}
+
 dialog h1:first-child,
 dialog h2:first-child,
 dialog h3:first-child,
@@ -170,10 +180,16 @@ form > label {
   grid-column: labels;
   grid-row: auto;
   margin-top: 4px;
+  justify-self: end;
+}
+
+form > label::after {
+  content: ":"
 }
 
 form > input,
 form > select {
   grid-column: controls;
   grid-row: auto;
+  justify-self:start;
 }

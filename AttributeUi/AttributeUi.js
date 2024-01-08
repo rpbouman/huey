@@ -41,6 +41,8 @@ function renderAttributeUiNodeAxisButton(config, head, axis){
   }
   
   if (createInput){
+    axisButton.setAttribute('title', `Toggle place this item on the ${axis} axis .`);
+    
     axisButton.setAttribute('for', id);
     var axisButtonInput = createEl('input', {
       type: 'checkbox',
@@ -187,15 +189,21 @@ function renderAttributeUi(columnSummary){
 
 var aggregators = {
   'count': {
+    isNumeric: true,
+    isInteger: true,
     expressionTemplate: 'COUNT( ${columnName} )'
   },
   'distinct count': {
+    isNumeric: true,
+    isInteger: true,
     expressionTemplate: 'COUNT( DISTINCT ${columnName} )'
   },
   'min': {
+    preservesColumnType: true,
     expressionTemplate: 'MIN( ${columnName} )'
   },
   'max': {
+    preservesColumnType: true,
     expressionTemplate: 'MAX( ${columnName} )'
   },
   'list': {
@@ -205,63 +213,74 @@ var aggregators = {
     expressionTemplate: 'LIST( DISTINCT ${columnName} )'
   },
   'sum': {
-    numeric: true,
+    isNumeric: true,
     expressionTemplate: 'SUM( ${columnName} )'
   },
   'avg': {
-    numeric: true,
+    isNumeric: true,
+    isInteger: false,
     expressionTemplate: 'AVG( ${columnName} )'
   },
   'median': {
-    numeric: true,
+    isNumeric: true,
+    isInteger: false,
     expressionTemplate: 'MEDIAN( ${columnName} )'
   },
   'mode': {
-    numeric: true,
+    isNumeric: true,
+    preservesColumnType: true,
     expressionTemplate: 'MODE( ${columnName} )'
   },
   'stdev': {
-    numeric: true,
+    isNumeric: true,
+    isInteger: false,
     expressionTemplate: 'STDDEV_SAMP( ${columnName} )'
   }
 }
 
 var dateFields = {
   'year': {
-    expressionTemplate: "CAST( YEAR( ${columnName} ) AS SMALLINT)"
+    expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
+    columnType: 'INT'
   },
   'quarter': {
-    expressionTemplate: "'Q' || QUARTER( ${columnName} )"
+    expressionTemplate: "'Q' || QUARTER( ${columnName} )",
+    columnType: 'VARCHAR'
   },
-  'monthnum': {
-    expressionTemplate: "CAST( MONTH( ${columnName} ) AS TINYINT)"
-  },
-  'mmm': {
-    expressionTemplate: "CAST( MONTH( ${columnName} ) AS TINYINT)"
+  'month': {
+    expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+    columnType: 'UTINYINT'
   },
   'week': {
-    expressionTemplate: "CAST( WEEK( ${columnName} ) AS TINYINT)"
+    expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
+    columnType: 'UTINYINT'
   },
   'day of year': {
-    expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as SMALLINT)"
+    expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as USMALLINT)",
+    columnType: 'USMALLINT'
   },
   'day of month': {
-    expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS TINYINT)"
+    expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
+    columnType: 'UTINYINT'
   },
   'day of week': {
-    expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as TINYINT)"
+    expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+    columnType: 'UTINYINT'
   }
 };
 
 var timeFields = {
   'hour': {
-    expressionTemplate: "CAST( HOUR( ${columnName} ) as TINYINT)"
+    expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
+    columnType: 'UTINYINT'
   },
   'minute': {
-    expressionTemplate: "CAST( MINUTE( ${columnName} ) as TINYINT)"
+    expressionTemplate: "CAST( MINUTE( ${columnName} ) as UTINYINT)",
+    columnType: 'UTINYINT'
   },
   'second': {
-    expressionTemplate: "CAST( SECOND( ${columnName} ) as TINYINT)"
+    expressionTemplate: "CAST( SECOND( ${columnName} ) as UTINYINT)",
+    columnType: 'UTINYINT'
   }
 };
 
@@ -280,61 +299,13 @@ function loadChildNodesForColumnNode(node){
   var derived = [];
   var aggregates = [];
 
-  var isNumeric = false;
-  var hasTimeFields = false;
-  var hasDateFields = false;
+  var typeInfo = dataTypes[columnType];
   
-  switch (columnType) {
-    case 'BIGINT':
-    case 'DECIMAL':
-    case 'DOUBLE':
-    case 'HUGEINT':
-    case 'INTEGER':
-    case 'REAL':
-    case 'SMALLINT':
-    case 'TINYINT':
-    case 'UBIGINT':
-    case 'UINTEGER':
-    case 'USMALLINT':
-    case 'UTINYINT':
-      isNumeric = true;
-      break;
-    case 'BIT':
-      break;
-    case 'BOOLEAN':
-      break;
-    case 'BLOB':
-      break;
-    case 'DATE':
-      hasDateFields = true;
-      break;
-    case 'TIME':
-      hasTimeFields = true;
-      break;
-    case 'TIMESTAMP':
-    case 'TIMESTAMP WITH TIME ZONE':
-      hasDateFields = true;
-      hasTimeFields = true;
-      break;
-    case 'INTERVAL':
-      break;
-    case 'UUID':
-      break;
-    case 'ENUM':
-      break;
-    case 'VARCHAR':
-      break;
-    case 'ARRAY':
-      break;
-    case 'LIST':
-      break;
-    case 'MAP':
-      break;
-    case 'STRUCT':
-      break;
-    case 'UNION':
-      break;
-  }
+  var isisNumeric = Boolean(typeInfo.isisNumeric);
+  var isInteger = Boolean(typeInfo.isInteger);
+  var hasTimeFields = Boolean(typeInfo.hasTimeFields);
+  var hasDateFields = Boolean(typeInfo.hasDateFields);
+  
   var applicableDerivations = Object.assign({}, 
     hasDateFields ? dateFields : undefined, 
     hasTimeFields ? timeFields : undefined
@@ -355,7 +326,7 @@ function loadChildNodesForColumnNode(node){
   
   for (var aggregationName in aggregators) {
     var aggregator = aggregators[aggregationName];
-    if (aggregator.numeric && !isNumeric) {
+    if (aggregator.isisNumeric && !isisNumeric) {
       continue;
     }
     config = {
@@ -426,15 +397,23 @@ function axisButtonClicked(node, axis, checked){
       break;
   }
   var columnName = node.getAttribute('data-column_name');
+  var columnType = node.getAttribute('data-column_type');
   var derivation = node.getAttribute('data-derivation');
   var aggregator = node.getAttribute('data-aggregator');
 
+  
   var itemConfig = {
     axis: axis,
     columnName: columnName,
+    columnType: columnType,
     derivation: derivation,
-    aggregator: aggregator
+    aggregator: aggregator,
   };
+  
+  var formatter = QueryAxisItem.createFormatter(itemConfig);
+  if (formatter){
+    itemConfig.formatter = formatter;
+  }
   
   if (checked) {
     queryModel.addItem(itemConfig);

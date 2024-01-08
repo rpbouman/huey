@@ -13,7 +13,7 @@ class PivotTableUi {
     
   #resizeTimeoutId = undefined;
   #resizeTimeout = 1000;
-  
+    
   constructor(config){
     this.#id = config.id;
     
@@ -52,8 +52,9 @@ class PivotTableUi {
     }.bind(this));
     var dom = this.getDom();
     resizeObserver.observe(dom);
+    
   }
-  
+    
   #queryModelChangeHandler(event){
         
     var clearRowsTupleSet = false;
@@ -353,6 +354,35 @@ class PivotTableUi {
     }
   }
   
+  #renderCellValue(cell, cellsAxisItem, cellElement){
+    var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
+    if (!cell || !cellsAxisItem){
+      label.innerText = '';
+      return;
+    }
+    
+    var values = cell.values;
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+    var value = values[sqlExpression];
+
+    var cellValueFields = this.#cellsSet.getCellValueFields();    
+    var cellValueField = cellValueFields[sqlExpression];
+    var cellValueType = String(cellValueField.type);
+    
+    cellElement.setAttribute('data-value-type', cellValueType);
+    
+    var labelText;
+    var formatter = cellsAxisItem.formatter;
+    
+    if (formatter) {
+      labelText = formatter.format(value);
+    }
+    else {
+      labelText = String(value);
+    }
+    label.innerText = labelText;    
+  }
+  
   async #updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex){
     var tableBodyDom = this.#getTableBodyDom();
     var tableBodyRows = tableBodyDom.childNodes;
@@ -403,7 +433,6 @@ class PivotTableUi {
     var cellsAxisItemIndex;
 
     var cellsSet = this.#cellsSet;
-    var cellValueFields = cellsSet.getCellValueFields();
     var cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
     
     var cellIndex;
@@ -427,25 +456,10 @@ class PivotTableUi {
         }
         
         var cellElement = cellElements.item(j);
-        var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
-        var labelText = '';
-            
-        if (cellsAxisItems.length){
-          var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
-          var cell = cells[cellIndex];
-          if (cell){
-            var values = cell.values;
-            var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
-            var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
-            var cellValueField = cellValueFields[sqlExpression];
-            var cellValueType = String(cellValueField.type);
-            cellElement.setAttribute('data-value-type', cellValueType);
-            var value = values[sqlExpression];
-            labelText = value === null ? '' : String(value);
-          }
-        }          
-
-        label.innerText = labelText;
+        var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
+        var cell = cells[cellIndex];
+        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];                   
+        this.#renderCellValue(cell, cellsAxisItem, cellElement);
         
         if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
           cellsAxisItemIndex += 1;
@@ -1114,6 +1128,7 @@ var pivotTableUi;
 function initPivotTableUi(){
   pivotTableUi = new PivotTableUi({
     id: 'pivotTableUi',
-    queryModel: queryModel
+    queryModel: queryModel,
+    settings: settings
   });  
 }

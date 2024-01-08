@@ -34,6 +34,7 @@
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -72,70 +73,120 @@
           >
           </label>
         </div>
+        
+        <!--
+          File settings
+        -->
         <div class="tabPage">
           <label 
             class="tab"
-            for="settingsTabGeneral"
+            for="fileSettingTab"
           >
-            General
+            Files
           </label>
-          <input type="radio" name="settingsTabs" class="tabState" id="settingsTabGeneral" checked="true"/>
+          <input id="fileSettingTab" type="radio" name="settingsTabs" class="tabState" checked="true"/>
           <div class="tabPageContents">
-            <form id="generalSettingsForm">
-              <label for="registeredFileTypes">File types:</label>
+            <form id="fileSettings">
+              <label for="registeredFileTypes">File types</label>
               <select id="registeredFileTypes">
-                <option value="new">Add New...</option>
-                <option value=".csv">Comma seperated (*.csv)</option>
+                <!--
+                <option value=".csv" selected="true">Comma seperated (*.csv)</option>
                 <option value=".json">JSON (*.json)</option>
                 <option value=".parquet">Parquet (*.parquet)</option>
                 <option value=".txt">Text (*.txt)</option>
+                -->
               </select>
-              <label for="defaultActionForFileType">File type default action:</label>
+              <label for="defaultActionForFileType">File type default action</label>
               <select id="defaultActionForFileType">
-                <option value="SelectFrom"></option>
-                <option value="SelectFrom">SELECT FROM</option>
+                <!--
+                <option value="SelectFrom" selected="true">SELECT FROM</option>
                 <option value="csvWizard">csv wizard</option>
                 <option value="jsonWizard">json wizard</option>
                 <option value="parquetWizard">parquet wizard</option>
+                -->
               </select>
             </form>
           </div>
         </div>
+        
+        <!--
+          Locale Settings
+        -->
         <div class="tabPage">
           <label 
             class="tab"
-            for="settingsTabAttributes"
+            for="localeSettingsTab"
           >
-            Attributes
+            Locale
           </label>
-          <input type="radio" name="settingsTabs" class="tabState" id="settingsTabAttributes"/>
+          <input id="localeSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
           <div class="tabPageContents">
-            Attribute Settings
+            <form id="localeSettings">
+              <label for="useDefaultLocale">Use default</label>
+              <input id="useDefaultLocale" type="checkbox"/>
+              <!--
+                see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
+                A locale identifier is a string that consists of:
+
+                A language subtag with 2–3 or 5–8 letters
+                A script subtag with 4 letters Optional
+                A region subtag with either 2 letters or 3 digits Optional
+                One or more variant subtags (all of which must be unique), each with either 5–8 alphanumerals or a digit followed by 3 alphanumerals Optional
+                One or more BCP 47 extension sequences Optional
+                A private-use extension sequence Optional              
+              -->
+              <label for="locale">Locale</label>
+              <!-- 
+                on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
+                and if that is empty it probably means the entered locale is either not valid or not supported.
+              -->
+              <input id="locale"  
+                pattern="^(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?)(\s*,\s*(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?))*$"
+                data-value-getter="new Function('control','settings','return control.value.split(String.fromCharCode(44));')"
+                data-value-setter="new Function('control','value','settings','control.value = value.join();')"
+              />
+              <!-- minimum integer digits -->
+              <label for="minimumIntegerDigits">Min. integer digits</label>
+              <input id="minimumIntegerDigits" type="number" min="1" max="21" value="1"/>
+              <!-- minimum fraction digits -->
+              <label for="minimumFractionDigits">Min. fraction digits</label>
+              <input id="minimumFractionDigits" type="number" min="0" max="20" value="2"/>
+              <!-- maximum fraction digits -->
+              <label for="maximumFractionDigits">Max. fraction digits</label>
+              <input id="maximumFractionDigits" type="number" min="0" max="20" value="2"/>
+            </form>
           </div>
         </div>
+        
+        <!--
+          Query settings
+        -->        
         <div class="tabPage">        
           <label 
             class="tab"
-            for="settingsTabQuery"
+            for="querySettingsTab"
           >
             Query
           </label>
-          <input type="radio" name="settingsTabs" class="tabState" id="settingsTabQuery"/>
+          <input id="querySettingsTab" type="radio" name="settingsTabs" class="tabState"/>
           <div class="tabPageContents">
             Query Settings
           </div>
         </div>
+        
+        <!--
+          Pivot Table Settings
+        -->
         <div class="tabPage">
           <label 
             class="tab"
-            for="settingsTabPivotTable"
+            for="pivotTableSettingsTab"
           >
             Pivot Table
           </label>
-          <input type="radio" name="settingsTabs" class="tabState" id="settingsTabPivotTable"/>
+          <input id="pivotTableSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
           <div class="tabPageContents">
-            <form id="pivotTableSettingsForm">
-              <label for="defaultNumberFormat">Default number format:</label><input id="defaultNumberFormat" type="text"/>
+            <form id="pivotTableSettings">
             </form>
           </div>
         </div>
@@ -147,6 +198,7 @@
       </section>
       <footer>
         <button id="settingsDialogOkButton">Ok</button>
+        <button id="settingsDialogCancelButton">Cancel</button>
       </footer>
     </dialog>
 

@@ -1,3 +1,94 @@
+var dataTypes = {
+  'DECIMAL': {
+    isNumeric: true
+  },
+  'DOUBLE': {
+    isNumeric: true
+  },
+  'REAL': {
+    isNumeric: true
+  },
+  'BIGINT': {
+    isNumeric: true,
+    isInteger: true
+  },
+  'HUGEINT': {
+    isNumeric: true,
+    isInteger: true
+  },
+  'INTEGER': {
+    isNumeric: true,
+    isInteger: true
+  },
+  'SMALLINT': {
+    isNumeric: true,
+    isInteger: true
+  },
+  'TINYINT': {
+    isNumeric: true,
+    isInteger: true
+  },
+  'UBIGINT': {
+    isNumeric: true,
+    isInteger: true,
+    isUnsigned: true
+  },
+  'UINTEGER': {
+    isNumeric: true,
+    isInteger: true,
+    isUnsigned: true
+  },
+  'USMALLINT': {
+    isNumeric: true,
+    isInteger: true,
+    isUnsigned: true
+  },
+  'UTINYINT': {
+    isNumeric: true,
+    isInteger: true,
+    isUnsigned: true
+  },
+  'BIT': {
+  },
+  'BOOLEAN': {
+  },
+  'BLOB': {
+  },
+  'DATE': {
+    hasDateFields: true
+  },
+  'TIME': {
+    hasTimeFields: true
+  },
+  'TIMESTAMP': {
+    hasDateFields: true,
+    hasTimeFields: true
+  },
+  'TIMESTAMP WITH TIME ZONE': {
+    hasDateFields: true,
+    hasTimeFields: true,
+    hasTimezone: true
+  },
+  'INTERVAL': {
+  },
+  'UUID': {
+  },
+  'ENUM': {
+  },
+  'VARCHAR': {
+  },
+  'ARRAY': {
+  },
+  'LIST': {
+  },
+  'MAP': {
+  },
+  'STRUCT': {
+  },
+  'UNION': {
+  }
+};
+
 function getQuotedIdentifier(identifier){
   return `"${identifier.replace(/"/g, '""')}"`;
 }

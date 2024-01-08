@@ -1,5 +1,58 @@
 class QueryAxisItem {
 
+  static createFormatter(axisItem){
+    var isNumeric, isInteger;
+
+    var columnType = axisItem.columnType;
+    var columnTypeInfo = dataTypes[columnType];
+    
+    var aggregator = axisItem.aggregator;
+    if (aggregator) {
+      var aggregatorInfo = aggregators[aggregator];
+      
+      var preservesColumnType = aggregatorInfo.preservesColumnType
+      
+      if (preservesColumnType) {
+        isNumeric = columnTypeInfo.isNumeric;
+        isInteger = columnTypeInfo.isInteger;
+      }
+      else {
+        isNumeric = aggregatorInfo.isNumeric;
+        isInteger = aggregatorInfo.isInteger;
+      } 
+    }
+    
+    var derivation = axisItem.derivation;
+    if (derivation){
+      var derivationInfo = derivations[derivation];
+      var dataType = derivationInfo.dataType;
+      var typeInfo = dataTypes[dataType];
+      isNumeric = typeInfo.isNumeric;
+      isInteger = typeInfo.isInteger;
+    }
+    
+    var localeSettings = settings.getSettings('localeSettings');
+    var locales = localeSettings.locale;
+    
+    var formatter;
+    if (isNumeric){
+      var options = {
+        minimumIntegerDigits: localeSettings.minimumIntegerDigits
+      };
+      if (isInteger){
+        options.minFractionalDigits = 0;
+      }
+      else {
+        options.minimumFractionDigits = localeSettings.minimumFractionDigits,
+        options.maximumFractionDigits = localeSettings.maximumFractionDigits        
+      }
+      
+      formatter = new Intl.NumberFormat(locales, options);
+    }
+    
+    return formatter;
+  }
+
   static getCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
     var postfix;
