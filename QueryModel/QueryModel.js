@@ -155,12 +155,22 @@ class QueryAxis {
       if (item.columnName !== columnName){
         return false;
       }
+      
       if (derivation) {
         return item.derivation === derivation;
       }
       else
+      if (item.derivation){
+        return false;
+      }
+      
+      else
       if (aggregator) {
         return item.aggregator === aggregator;
+      }
+      else 
+      if (item.aggregator){
+        return false;
       }
       return true;
     });
