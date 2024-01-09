@@ -149,12 +149,12 @@ class AttributeUi {
     
   }
   
-  #renderAttributeUiNodeAxisButton(config, head, axis){
+  #renderAttributeUiNodeAxisButton(config, head, axisId){
     var name = `${config.type}_${config.profile.column_name}`;
     var id = `${name}`;
     
     var axisButton = createEl('label', {
-      'data-axis': axis,
+      'data-axis': axisId,
       "class": ['attributeUiAxisButton']
     });
 
@@ -162,54 +162,53 @@ class AttributeUi {
     switch (config.type) {
       case 'column':
       case 'derived':
-        switch (axis){
-          case 'columns':
-          case 'rows':
+        switch (axisId){
+          case QueryModel.AXIS_COLUMNS:
+          case QueryModel.AXIS_ROWS:
             if (config.type === 'derived') {
               var derivation = config.derivation;
               id += `_${derivation}`;
             }
-            id += `_${axis}`;
-            createInput = true;
+            id += `_${axisId}`;
+            createInput = 'radio';
             break;
           default:
-            createInput = false;
         }
         break;
       case 'aggregate':
-        switch (axis){
-          case 'cells':
+        switch (axisId){
+          case QueryModel.AXIS_CELLS:
             id += `_${config.aggregator}`;
-            createInput = true;
+            createInput = 'checkbox';
             break;
           default:
-            createInput = false;
         }
         break;
       default:
-        createInput = false;
     }
     
-    if (createInput){
-      axisButton.setAttribute('title', `Toggle place this item on the ${axis} axis .`);
-      
-      axisButton.setAttribute('for', id);
-      var axisButtonInput = createEl('input', {
-        type: 'checkbox',
-        id: id,
-        'data-nodetype': config.type,
-        'data-column_name': config.profile.column_name,
-        'data-axis': axis
-      });
-      if (config.aggregator) {
-        axisButtonInput.setAttribute('data-aggregator', config.aggregator);
-      }
-      if (config.derivation){      
-        axisButtonInput.setAttribute('data-derivation', config.derivation);
-      }
-      
-      axisButton.appendChild(axisButtonInput);
+    if (!createInput){
+      return axisButton;
     }
+
+    axisButton.setAttribute('title', `Toggle place this item on the ${axisId} axis .`);
+    
+    axisButton.setAttribute('for', id);
+    var axisButtonInput = createEl('input', {
+      type: 'checkbox',
+      id: id,
+      'data-nodetype': config.type,
+      'data-column_name': config.profile.column_name,
+      'data-axis': axisId
+    });
+    if (config.aggregator) {
+      axisButtonInput.setAttribute('data-aggregator', config.aggregator);
+    }
+    if (config.derivation){      
+      axisButtonInput.setAttribute('data-derivation', config.derivation);
+    }
+    
+    axisButton.appendChild(axisButtonInput);
     
     return axisButton;
   }
@@ -223,10 +222,6 @@ class AttributeUi {
 
     var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
     head.appendChild(rowButton);
-  }
-
-  #toggleAttributeNode(event) {
-    
   }
 
   #renderAttributeUiNodeHead(config) {
@@ -445,16 +440,13 @@ class AttributeUi {
   #clickHandler(event) {
     var target = event.target;
     var classNames = getClassNames(target);
+    event.stopPropagation();
     
     var node = getAncestorWithClassName(target, 'attributeUiNode');
     if (!node) {
       return;
     }
     
-    if (classNames.indexOf('expander') !== -1) {
-      this.#toggleNodeState(node);
-    }
-    else 
     if (classNames.indexOf('attributeUiAxisButton') !== -1){
       var input = target.getElementsByTagName('input').item(0);
       var axisId = target.getAttribute('data-axis');
@@ -489,8 +481,6 @@ class AttributeUi {
   }
   
 }
-
-
 
 var attributeUi;
 function initAttributeUi(){
