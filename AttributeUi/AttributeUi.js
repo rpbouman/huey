@@ -82,6 +82,10 @@ class AttributeUi {
   };
 
   static dateFields = {
+    'date': {
+      expressionTemplate: "strftime( ${columnName}, '%Y-%m-%d' )",
+      columnType: 'VARCHAR'
+    },
     'year': {
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
       columnType: 'INT', 
@@ -135,6 +139,10 @@ class AttributeUi {
   };
 
   static timeFields = {
+    'time': {
+      expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
+      columnType: 'VARCHAR'
+    },
     'hour': {
       expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT',
