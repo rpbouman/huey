@@ -103,19 +103,19 @@ async function handleFileSelected(event){
     });
   }
   
-  clearAttributeUi(true);
+  attributeUi.clear(true);
   clearSearch();
   
   try {
     var tableSchemaResultSet = await datasource.getTableSchema();
     queryModel.clear();
     queryModel.setDatasource(datasource);
-    renderAttributeUi(tableSchemaResultSet);
+    attributeUi.render(tableSchemaResultSet);
     byId('searchAttributeUi').style.display = '';
     byId('queryUi').style.display = '';
   }
   catch (error) {
-    clearAttributeUi(false);
+    attributeUi.clear(false);
     var title = `Error reading file ${fileName}`;
     console.error(title);
     var description = error.message;
