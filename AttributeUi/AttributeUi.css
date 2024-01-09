@@ -161,6 +161,11 @@
   content: "\ef40";
 }
 
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon:before {
+  /* list numbers */
+  content: "\ef11";
+}
+
 .attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon:before {
   /* sum */
   content: "\eb73";
@@ -182,6 +187,26 @@
 }
 
 .attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon:before {
   /* calculator */
   content: "\eb80";
 }

@@ -28,29 +28,56 @@ class AttributeUi {
     'distinct list': {
       expressionTemplate: 'LIST( DISTINCT ${columnName} )'
     },
+    'histogram': {
+      expressionTemplate: 'HISTOGRAM( ${columnName} )'
+    },
     'sum': {
       isNumeric: true,
-      expressionTemplate: 'SUM( ${columnName} )'
+      forNumeric: true,
+      expressionTemplate: 'SUM( ${columnName} )',
+      forNumeric: true
     },
     'avg': {
       isNumeric: true,
       isInteger: false,
+      forNumeric: true,
       expressionTemplate: 'AVG( ${columnName} )'
     },
     'median': {
-      isNumeric: true,
-      isInteger: false,
       expressionTemplate: 'MEDIAN( ${columnName} )'
     },
     'mode': {
-      isNumeric: true,
       preservesColumnType: true,
       expressionTemplate: 'MODE( ${columnName} )'
     },
     'stdev': {
       isNumeric: true,
       isInteger: false,
+      forNumeric: true,
       expressionTemplate: 'STDDEV_SAMP( ${columnName} )'
+    },
+    'variance': {
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'VARIANCE_SAMP( ${columnName} )'
+    },
+    'entropy': {
+      isNumeric: true,
+      isInteger: false,
+      expressionTemplate: 'ENTROPY( ${columnName} )'
+    },
+    'kurtosis': {
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'KURTOSIS( ${columnName} )'
+    },
+    'skewness': {
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'SKEWNESS( ${columnName} )'
     }
   };
 
@@ -254,13 +281,9 @@ class AttributeUi {
       'data-nodetype': config.type
     });
     node.setAttribute('data-column_name', config.profile.column_name);
-    
+    node.setAttribute('data-column_type', config.profile.column_type);   
     switch (config.type){
       case 'column':
-        var profile = config.profile;
-        for (var property in profile){
-          node.setAttribute(`data-${property}`, String(profile[property]));
-        }
         node.setAttribute('data-state', 'collapsed');
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
@@ -358,7 +381,7 @@ class AttributeUi {
     
     for (var aggregationName in AttributeUi.aggregators) {
       var aggregator = AttributeUi.aggregators[aggregationName];
-      if (aggregator.isNumeric && !isNumeric) {
+      if (aggregator.forNumeric && !isNumeric) {
         continue;
       }
       config = {
