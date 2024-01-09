@@ -8,7 +8,7 @@ class QueryAxisItem {
     
     var aggregator = axisItem.aggregator;
     if (aggregator) {
-      var aggregatorInfo = aggregators[aggregator];
+      var aggregatorInfo = AttributeUi.aggregators[aggregator];
       
       var preservesColumnType = aggregatorInfo.preservesColumnType
       
@@ -24,7 +24,7 @@ class QueryAxisItem {
     
     var derivation = axisItem.derivation;
     if (derivation){
-      var derivations = Object.assign({}, dateFields, timeFields);
+      var derivations = Object.assign({}, AttributeUi.dateFields, AttributeUi.timeFields);
       var derivationInfo = derivations[derivation];
       var dataType = derivationInfo.dataType;
       if (dataType) {
@@ -97,7 +97,7 @@ class QueryAxisItem {
     }
     
     var aggregator = item.aggregator;
-    var aggregatorInfo = aggregators[aggregator];
+    var aggregatorInfo = AttributeUi.aggregators[aggregator];
     var expressionTemplate = aggregatorInfo.expressionTemplate;
     var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
     return expression;
@@ -113,7 +113,7 @@ class QueryAxisItem {
     }
     var derivation = item.derivation;
     var derivationInfo;
-    derivationInfo = dateFields[derivation] || timeFields[derivation];
+    derivationInfo = AttributeUi.dateFields[derivation] || AttributeUi.timeFields[derivation];
     var expressionTemplate = derivationInfo.expressionTemplate;
     var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
     return expression;
