@@ -268,7 +268,11 @@ class AttributeUi {
     });
     switch (config.type) {
       case 'column':
-        icon.setAttribute('title', config.profile.column_type);
+        icon.setAttribute('title', config.title || config.profile.column_type);
+        break;
+      case 'aggregate':
+      case 'derived':
+        icon.setAttribute('title', config.title || config.expressionTemplate);
         break;
     }
     head.appendChild(icon);
@@ -381,6 +385,8 @@ class AttributeUi {
       config = {
         type: 'derived',
         derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
         profile: profile
       };
       childNode = this.#renderAttributeUiNode(config);
@@ -395,6 +401,8 @@ class AttributeUi {
       config = {
         type: 'aggregate',
         aggregator: aggregationName,
+        title: aggregator.title,
+        expressionTemplate: aggregator.expressionTemplate,
         profile: profile
       };
       childNode = this.#renderAttributeUiNode(config);
