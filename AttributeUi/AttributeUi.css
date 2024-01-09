@@ -1,35 +1,29 @@
-.attributeUi .attributeUiNode {
-}
-
-.attributeUi .attributeUiNode > .attributeUiNodeHead {
-  white-space: nowrap;
-  vertical-align: top;
-}
-
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .expander {
-  padding: 2px;
+.attributeUi details.attributeUiNode > summary::marker {
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-small );
   color: var( --huey-icon-color-subtle );
-  display: inline-block;
-  width: 18px;
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .expander:hover {
+.attributeUi details.attributeUiNode > summary:hover::marker {
   color: var( --huey-icon-color-highlight );
 }
 
-.attributeUi .attributeUiNode[data-state=collapsed] > .attributeUiNodeHead > .expander:before {
-  /* square-rounded-plus */
-  content: "\f63f";
+.attributeUi details.attributeUiNode > summary {
+  white-space: nowrap;
+  vertical-align: top;
+  list-style-type: "\f63f"; 
 }
 
-.attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeHead > .expander:before {
-  /* square-rounded-minus */
-  content: "\f63e";
+.attributeUi details[open].attributeUiNode > summary {
+  list-style-type: "\f63e";
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .icon {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate] > summary {
+  list-style: none;
+  margin-left: 16px;
+}
+
+.attributeUi .attributeUiNode > summary > .icon {
   display: inline-block;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
@@ -44,34 +38,34 @@
 * Data type icons
 *
 */
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=VARCHAR] > .attributeUiNodeHead > .icon:before {
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon:before {
   /* letter T */
   content: "\ec63";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type*=INT] > .attributeUiNodeHead > .icon:before {
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type*=INT] > summary > .icon:before {
   /* 123 */
   content: "\f554";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type^=DECIMAL] > .attributeUiNodeHead > .icon:before,
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=DOUBLE] > .attributeUiNodeHead > .icon:before,
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=REAL] > .attributeUiNodeHead > .icon:before {
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon:before,
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon:before,
+.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=REAL] > summary > .icon:before {
   /* decimal */
   content: "\fa26";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type*=TIMESTAMP] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=column][data-column_type*=TIMESTAMP] > summary > .icon:before {
   /* calendar-clock */
   content: "\fd2e";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=DATE] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=column][data-column_type=DATE] > summary > .icon:before {
   /* calendar */
   content: "\ea53";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column][data-column_type=TIME] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=column][data-column_type=TIME] > summary > .icon:before {
   /* clock */
   content: "\ea70";
 }
@@ -81,52 +75,52 @@
 * Derivation icons
 *
 */
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=year] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation=year] > summary > .icon:before {
   /* letter-y */
   content: "\ec68";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=quarter] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation=quarter] > summary > .icon:before {
   /* letter q */
   content: "\ec60";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="month num"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation="month num"] > summary > .icon:before {
   /* letter m */
   content: "\ec5c";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="week num"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation="week num"] > summary > .icon:before {
   /* letter w */
   content: "\ec66";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of year"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation="day of year"] > summary > .icon:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of month"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation="day of month"] > summary > .icon:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation="day of week"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation="day of week"] > summary > .icon:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=hour] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation=hour] > summary > .icon:before {
   /* letter-h */
   content: "\ec57";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=minute] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation=minute] > summary > .icon:before {
   /* letter-m-small */
   content: "\fcd3";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=derived][data-derivation=second] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=derived][data-derivation=second] > summary > .icon:before {
   /* letter-s */
   content: "\ec62";
 }
@@ -137,57 +131,57 @@
 *
 */
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=count] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=count] > summary > .icon:before {
   /* tallymarks */
   content: "\ec4a";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct count"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon:before {
   /* tallymark-4 */
   content: "\ec49";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=max] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=max] > summary > .icon:before {
   /* math-max */
   content: "\f0f5";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=min] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=min] > summary > .icon:before {
   /* math-min */
   content: "\f0f6";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=list] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=list] > summary > .icon:before {
   /* list */
   content: "\eb6b";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct list"] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon:before {
   /* list details */
   content: "\ef40";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=sum] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon:before {
   /* sum */
   content: "\eb73";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=avg] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon:before {
   /* math-avg */
   content: "\f0f4";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=median] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=median] > summary > .icon:before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=mode] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon:before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate][data-aggregator=stdev] > .attributeUiNodeHead > .icon:before {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon:before {
   /* calculator */
   content: "\eb80";
 }
@@ -198,7 +192,7 @@
 *
 */
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .label {
+.attributeUi details.attributeUiNode > summary > .label {
   white-space: nowrap;
   text-overflow: ellipsis;
   display: inline-block;
@@ -213,7 +207,7 @@
 *
 */
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton {
   display: block;
   float: inline-end;
   width: 24px;
@@ -223,12 +217,12 @@
   color: var( --huey-icon-color-subtle );
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:hover {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton:hover {
   color: var( --huey-icon-color-highlight );
 }
 
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=rows]:before {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton[data-axis=rows]:before {
   /* table-column */
   /* 
     It may seem backward that we're using the table-column icon for the rows axis, 
@@ -237,7 +231,7 @@
   content: "\faff";
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=columns]:before {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton[data-axis=columns]:before {
   /* table-row */
   /* 
     It may seem backward that we're using the table-row icon for the columns axis, 
@@ -246,37 +240,30 @@
   content: "\fb00";
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells]:before {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton[data-axis=cells]:before {
   /* layout grid */
   content: "\edba";
 }
 
-.attributeUi .attributeUiNode[data-nodetype=column] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells],
-.attributeUi .attributeUiNode[data-nodetype=derived] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=cells] {
+.attributeUi details.attributeUiNode[data-nodetype=column] > summary > .attributeUiAxisButton[data-axis=cells],
+.attributeUi details.attributeUiNode[data-nodetype=derived] > summary > .attributeUiAxisButton[data-axis=cells] {
   visibility:hidden;
 }
 
-.attributeUi .attributeUiNode[data-nodetype=aggregate] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=columns],
-.attributeUi .attributeUiNode[data-nodetype=aggregate] > .attributeUiNodeHead > .attributeUiAxisButton[data-axis=rows] {
+.attributeUi details.attributeUiNode[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=columns],
+.attributeUi details.attributeUiNode[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=rows] {
   visibility:hidden;
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton > input[type=checkbox] {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton > input[type=checkbox] {
   display: none;
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeHead > .attributeUiAxisButton:has(> input[type=checkbox]:checked) {
+.attributeUi details.attributeUiNode > summary > .attributeUiAxisButton:has(> input[type=checkbox]:checked) {
   color: var( --huey-icon-color-highlight );
 }
 
-.attributeUi .attributeUiNode > .attributeUiNodeBody {
-  padding-left: 24px;
+.attributeUi details.attributeUiNode > details.attributeUiNode {
+  margin-left: 24px;
 }
 
-.attributeUi .attributeUiNode[data-state=expanded] > .attributeUiNodeBody {
-  display: block;
-}
-
-.attributeUi .attributeUiNode[data-state=collapsed] > .attributeUiNodeBody {
-  display: none;
-}

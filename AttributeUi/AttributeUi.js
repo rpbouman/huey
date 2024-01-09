@@ -225,15 +225,14 @@ class AttributeUi {
     head.appendChild(rowButton);
   }
 
-  #renderAttributeUiNodeHead(config) {
-    var head = createEl('div', {
-      "class": 'attributeUiNodeHead'
-    });
-    var expander = createEl('span', {
-      'class': 'expander'
-    });
-    head.appendChild(expander);
+  #toggleAttributeNode(event) {
+    
+  }
 
+  #renderAttributeUiNodeHead(config) {
+    var head = createEl('summary', {
+    });
+    
     var icon = createEl('span', {
       "class": 'icon'
     });
@@ -255,7 +254,7 @@ class AttributeUi {
   }
 
   #renderAttributeUiNode(config){
-    var node = createEl('div', {
+    var node = createEl('details', {
       "class": ['attributeUiNode', config.type],
       'data-nodetype': config.type
     });
@@ -268,24 +267,23 @@ class AttributeUi {
           node.setAttribute(`data-${property}`, String(profile[property]));
         }
         node.setAttribute('data-state', 'collapsed');
+        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
         break;
       case 'derived':
+        var derivation = config.derivation;
         node.setAttribute('data-derivation', config.derivation);
+        if (derivation.formats) {
+          node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+        }
         break;
     }
     
     var head = this.#renderAttributeUiNodeHead(config);
     node.appendChild(head);
 
-    if (config.type !== 'aggregate') {
-      var body = createEl('div', {
-        "class": 'attributeUiNodeBody'
-      });
-      node.appendChild(body);
-    }
     return node;
   }
     
@@ -326,10 +324,7 @@ class AttributeUi {
     }
   }
   
-  #loadChildNodesForColumnNode(node){
-    
-    var nodeBody = node.childNodes.item(1);
-    
+  #loadChildNodesForColumnNode(node){    
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
     var profile = {
@@ -363,7 +358,7 @@ class AttributeUi {
         profile: profile
       };
       childNode = this.#renderAttributeUiNode(config);
-      nodeBody.appendChild(childNode);
+      node.appendChild(childNode);
     }
     
     for (var aggregationName in AttributeUi.aggregators) {
@@ -377,7 +372,7 @@ class AttributeUi {
         profile: profile
       };
       childNode = this.#renderAttributeUiNode(config);
-      nodeBody.appendChild(childNode);    
+      node.appendChild(childNode);    
     }    
   }
   
@@ -395,28 +390,13 @@ class AttributeUi {
     }
   }  
   
-  #toggleNodeState(node){
-    var stateAttributeName = 'data-state';
-    var state = node.getAttribute(stateAttributeName);
-    var newState;
-    switch (state) {
-      case 'expanded':
-        newState = 'collapsed';
-        break;
-      case 'collapsed':
-        var loaded = node.getAttribute('data-loaded');
-        if (!loaded){
-          this.#loadChildNodes(node);
-          node.setAttribute('data-loaded', String(true));
-        }
-        newState = 'expanded';
-        break;
-      default:
+  #toggleNodeState(event){
+    var node = event.target;
+    if (event.newState === 'open'){ 
+      if (node.childNodes.length === 1){
+        this.#loadChildNodes(node);
+      }
     }
-    if (!newState) {
-      return;
-    }
-    node.setAttribute(stateAttributeName, newState);
   }
   
   #axisButtonClicked(node, axis, checked){
