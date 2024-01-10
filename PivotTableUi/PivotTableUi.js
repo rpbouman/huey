@@ -381,6 +381,10 @@ class PivotTableUi {
     if (formatter) {
       labelText = formatter.format(value);
     }
+    else
+    if (value === null){
+      labelText = '';
+    }
     else {
       labelText = String(value);
     }

@@ -57,6 +57,7 @@
   border-color: var( --huey-light-border-color );
   border-width: 2px;
   display: none;
+  overflow: auto;  
 }
 
 .tabs > .tabPage:has( > input[type=radio].tabState:checked ) > .tabPageContents {

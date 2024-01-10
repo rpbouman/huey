@@ -1,6 +1,7 @@
 #settingsDialog {
   width: 400px;
   height: 300px;
+  resize: both;
 }
 
 label.settings {

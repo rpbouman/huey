@@ -150,7 +150,8 @@ function createQueryAxisItemUi(item){
   }
 
   var moveLeftButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiMoveLeftButton'] 
+    "class": ['button', 'queryAxisItemUiMoveLeftButton'],
+    "title": "Move this item to the left"
   });
   queryAxisItemUi.appendChild(moveLeftButton);
   
@@ -177,12 +178,14 @@ function createQueryAxisItemUi(item){
   }
 
   var removeButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiRemoveButton'] 
+    "class": ['button', 'queryAxisItemUiRemoveButton'],
+    "title": "Remove this item from the query"
   });
   queryAxisItemUi.appendChild(removeButton);
 
   var moveRightButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiMoveRightButton'] 
+    "class": ['button', 'queryAxisItemUiMoveRightButton'],
+    "title": "Move this item to the right"
   });
   queryAxisItemUi.appendChild(moveRightButton);
   

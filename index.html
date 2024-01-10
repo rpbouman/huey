@@ -190,6 +190,63 @@
             </form>
           </div>
         </div>
+
+        <!--
+          Theme
+        -->
+        <div class="tabPage">
+          <label 
+            class="tab"
+            for="themeSettingsTab"
+          >
+            Theme
+          </label>
+          <input id="themeSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
+          <div class="tabPageContents">
+            <form id="themeSettings">
+              <label for="themes">Themes</label>
+              <select id="themes">
+                <optgroup label="Built-in">
+                  <option>Whio</option>
+                  <option>Mandarin</option>
+                </optgroup>
+                <optgroup label="Custom">
+                </optgroup>
+              </select>
+
+              <!-- getComputedStyle(document.body).getPropertyValue('--huey-medium-background-color') -->
+              <label for="textFont" >Text Font</label>
+              <input type="text" id="textFont" value="Verdana" data-css-var="--huey-text-font-family"/>
+              <label for="monospaceFont">Monospace Font</label>
+              <input type="text" id="monospaceFont" value="Monospace" data-css-var="--huey-text-font-family"/>
+
+              <label for="foreGroundColor">Foreground Color</label>
+              <input type="color" id="foreGroundColor" data-css-var="--huey-text-font-family"/>
+              <label for="placeholderColor">Placeholder Color</label>
+              <input type="color" id="placeholderColor" data-css-var="--huey-text-font-family"/>
+              
+              <label for="lightBackgroundColor">Light Background Color</label>
+              <input type="color" id="lightBackgroundColor"/>
+              <label for="mediumBackgroundColor">Medium Background Color</label>
+              <input type="color" id="mediumBackgroundColor"/>
+              <label for="darkBackgroundColor">Dark Background Color</label>
+              <input type="color" id="darkBackgroundColor"/>
+
+              <label for="lightBorderColor">Light Border Color</label>
+              <input type="color" id="lightBorderColor"/>
+              <label for="darkBorderColor">Dark Border Color</label>
+              <input type="color" id="darkBorderColor"/>
+
+              <label for="iconColor">Icon Color</label>
+              <input type="color" id="iconColor"/>
+              <label for="iconColorSubtle">Icon Color Subtle</label>
+              <input type="color" id="iconColorSubtle"/>
+              <label for="iconColorHighlight">Icon Color Highlight</label>
+              <input type="color" id="iconColorHighlight"/>
+            </form>
+          </div>
+        </div>
+        
         <div class="tabPage">
           <span 
             class="tab"
@@ -226,11 +283,11 @@
       class="layout"
       style="display: none"
     >
-      <div class="toolbar">
+      <div class="toolbar" role="toolbar">
         <label for="registeredFiles">Files:</label>
         <select id="registeredFiles" title="Choose a registered file, or register a new one.">
           <option value="" selected="true"></option>
-          <optgroup label="Actions">
+          <optgroup id="actions" label="Actions">
             <option id="registerNew" title="Add one or more file so you can browse and analyze their contents.">Register New...</option>
             <option id="registerPattern" title="Enter a file name pattern to browse data from matching files.">Register Pattern...</option>
             <option id="multiSelect" title="Select multiple files so you can broswe their data (union)">Select Multiple...</option>

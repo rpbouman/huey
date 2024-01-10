@@ -75,3 +75,10 @@
 #uploader {
   display:none;
 }
+
+#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #registerPattern,
+#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #multiSelect,
+#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #unregister {
+  pointer-events: none;
+  color: var( --huey-placeholder-color );  
+}  

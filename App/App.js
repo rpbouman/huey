@@ -142,6 +142,7 @@ async function handleFileSelected(event){
       return;
     case 'registerPattern':
       registerFileNamePattern();
+      registeredFiles.value = '';
       return;
     case 'multiSelect':
       return;
