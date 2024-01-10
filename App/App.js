@@ -55,28 +55,76 @@ async function registerFile(file){
   await datasource.registerFile();
   var result = await datasource.validateAccess();
   
-  if (result !== true){
-    showErrorDialog({
-      title: 'Error reading file',
-      description: result.message
-    });
-    return;
+  if (result === true){
+    return datasource;
   }
-
-  var option = document.createElement('option');
-  option.label = option.value = datasource.getFileName();
-  var registeredFiles = byId('registeredFiles');
-  registeredFiles.appendChild(option);
-  registeredFiles.selectedIndex = registeredFiles.options.length - 1;
-  handleFileSelected(datasource);
+  else {
+    return result;
+  }
 }
 
-function handleUpload(event){
-  var files = event.target.files;
+async function registerFiles(files){
+  var registerFilePromises = [];
   for (var i = 0; i < files.length; i++){ 
     var file = files[i];
-    registerFile(file);
+    var registerFilePromise = registerFile(file);
+    registerFilePromises.push(registerFilePromise);
   }
+  return Promise.all(registerFilePromises);
+}
+
+function getFileOptionsGroup(){
+  var fileOptionsGroupId = 'fileOptionsGroup'; 
+  var fileOptionsGroup = byId(fileOptionsGroupId);
+  if (!fileOptionsGroup){
+    fileOptionsGroup = createEl('optgroup', {
+      id: fileOptionsGroupId,
+      label: 'Files:'
+    });
+    registeredFiles.appendChild(fileOptionsGroup);
+  }
+  return fileOptionsGroup;
+}
+
+function addItemToFileOptionsGroup(item){
+  var fileOptionsGroup = getFileOptionsGroup();
+  var option = createEl('option', {
+    label: item,
+    value: item
+  });
+  fileOptionsGroup.appendChild(option);
+  return option;
+}
+
+async function handleUpload(event){
+  var files = event.target.files;
+  var registerFilePromiseResults = await registerFiles(files);
+  var errors = [];
+  var registeredFiles = byId('registeredFiles');
+  var fileOptionsGroup;
+  for (var i = 0; i < registerFilePromiseResults.length; i++){
+    var registerFilePromiseResult = registerFilePromiseResults[i];
+    var file = files[i];
+    if (registerFilePromiseResult instanceof Error) {
+      errors.push(`${file.name}: ${registerFilePromiseResult.message}`);
+    }
+    else {
+      addItemToFileOptionsGroup(file.name);
+    }
+  }
+  
+  if (errors.length) {
+    showErrorDialog({
+      title: 'Error registering files:',
+      description: errors.join('<br/>')
+    });
+  }
+}
+
+
+function registerFileNamePattern(){
+  var pattern = prompt('Enter a file pattern:');
+  addItemToFileOptionsGroup(pattern);
 }
 
 async function handleFileSelected(event){
@@ -86,9 +134,20 @@ async function handleFileSelected(event){
     return;
   }
   
-  if (registeredFiles.value === 'new'){
-    byId("uploader").click();
-    return;
+  var selectedOption = registeredFiles.options[registeredFiles.selectedIndex];
+  switch (selectedOption.id) {
+    case 'registerNew':
+      byId("uploader").click();
+      registeredFiles.value = '';
+      return;
+    case 'registerPattern':
+      registerFileNamePattern();
+      return;
+    case 'multiSelect':
+      return;
+    case 'unregister':
+      return;
+    default:
   }
     
   var datasource;
