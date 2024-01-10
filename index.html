@@ -283,14 +283,14 @@
       class="layout"
       style="display: none"
     >
-      <div class="toolbar" role="toolbar">
+      <menu class="toolbar" role="toolbar">
         <label for="registeredFiles">Files:</label>
         <select id="registeredFiles" title="Choose a registered file, or register a new one.">
           <option value="" selected="true"></option>
           <optgroup id="actions" label="Actions">
             <option id="registerNew" title="Add one or more file so you can browse and analyze their contents.">Register New...</option>
-            <option id="registerPattern" title="Enter a file name pattern to browse data from matching files.">Register Pattern...</option>
-            <option id="multiSelect" title="Select multiple files so you can broswe their data (union)">Select Multiple...</option>
+            <option id="registerPattern" title="Enter a file name pattern to browse data from matching files.">Register Filename Pattern...</option>
+            <option id="multiSelect" title="Select multiple files so you can broswe their data (union)">Create Union...</option>
             <option id="unregister" title="Unregister previously registered files and clear them from this list.">Unregister...</option>
           </optgroup>
         </select>
@@ -319,7 +319,7 @@
             id="settingsButton"
           >Settings</button>
         </label>
-      </div>
+      </menu>
       <div class="resizeHorizontal sidebar">
         <search 
           id="searchAttributeUi"
