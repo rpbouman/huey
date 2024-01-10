@@ -272,7 +272,22 @@ class QueryModel extends EventEmitter {
   }
   
   setDatasource(datasource){
+    if (datasource === this.#datasource) {
+      return;
+    }
+    
+    this.#clear(true);
+    var oldDatasource = this.#datasource;
     this.#datasource = datasource;
+
+    this.fireEvent('change', {
+      propertiesChanged: {
+        datasource: {
+          previousValue: oldDatasource,
+          newValue: datasource
+        }
+      }
+    });
   }
   
   getDatasource(){
@@ -396,8 +411,7 @@ class QueryModel extends EventEmitter {
     return removedItem;
   }
   
-  clear(axisId) {
-    
+  #clear(suppressFireEvent, axisId){
     var axisIds;
     if (axisId) {
       axisIds = [axisId];
@@ -427,9 +441,18 @@ class QueryModel extends EventEmitter {
       return;
     }
     
+    if (suppressFireEvent) {
+      return;
+    }
+    
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
+  }
+  
+  clear(axisId) {
+    // clear and send event;
+    this.#clear(false, axisId);
   }
   
   flipAxes(axisId1, axisId2) {

@@ -88,6 +88,10 @@ class PivotTableUi {
     if (eventData.propertiesChanged){
       var propertiesChangedInfo = eventData.propertiesChanged;
       
+      if (propertiesChangedInfo.datasource) {
+        clearCellsSet = clearRowsTupleSet = clearColumnsTupleSet  = true;        
+      }
+      
       if (propertiesChangedInfo.cellHeadersAxis){
         // moving cells to another axis does not change the tuples or the cached cells, 
         // it only requires rerendering the table.
