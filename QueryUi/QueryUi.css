@@ -171,6 +171,11 @@
 * Derivation icons
 *
 */
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=date] > .queryAxisItemUiIcon:before {
+  /* calendar */
+  content: "\ea53";
+}
+
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=year] > .queryAxisItemUiIcon:before {
   /* letter-y */
   content: "\ec68";
@@ -181,12 +186,12 @@
   content: "\ec60";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=month] > .queryAxisItemUiIcon:before {
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="month num"] > .queryAxisItemUiIcon:before {
   /* letter m */
   content: "\ec5c";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=week] > .queryAxisItemUiIcon:before {
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="week num"] > .queryAxisItemUiIcon:before {
   /* letter w */
   content: "\ec66";
 }
@@ -204,6 +209,11 @@
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of week"] > .queryAxisItemUiIcon:before {
   /* letter-d */
   content: "\ec53";
+}
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=time] > .queryAxisItemUiIcon:before {
+  /* clock */
+  content: "\ea70";
 }
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=hour] > .queryAxisItemUiIcon:before {
