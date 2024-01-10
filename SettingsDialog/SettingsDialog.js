@@ -28,9 +28,66 @@ class Settings extends EventEmitter {
     localeSettings: {
       useDefaultLocale: true,
       locale: navigator.languages,
-      minimumIntegerDigits: 2,
+      minimumIntegerDigits: 1.,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
+    },
+    themeSettings: {
+      themes: {
+        options: [
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "rgb(50,50,50)",
+              "--huey-placeholder-color": "rgb(180,180,180)",
+              "--huey-light-background-color": "rgb(255,255,255)",
+              "--huey-medium-background-color": "rgb(250,250,250)",
+              "--huey-dark-background-color": "rgb(222,222,222)",
+              "--huey-light-border-color": "rgb(222,222,222)",
+              "--huey-dark-border-color": "rgb(200,200,200)",
+              "--huey-icon-color-subtle": "rgb(200,200,200)",
+              "--huey-icon-color": "rgb(50,50,50)",
+              "--huey-icon-color-highlight": "rgb(0,0,0)"
+            },
+            label: "Whio"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "rgb(50,50,50)",
+              "--huey-placeholder-color": "rgb(180,180,180)",
+              "--huey-light-background-color": "rgb(222,227,233)",
+              "--huey-medium-background-color": "rgb(182,139,70)",
+              "--huey-dark-background-color": "rgb(182,139,70)",
+              "--huey-light-border-color": "rgb(203,140,96)",
+              "--huey-dark-border-color": "rgb(95,37,13)",
+              "--huey-icon-color-subtle": "rgb(200,200,200)",
+              "--huey-icon-color": "rgb(79,107,172)",
+              "--huey-icon-color-highlight": "rgb(188,101,120)"
+            },
+            label: "Mandarin"
+          },
+        ],
+        value: {
+          "--huey-text-font-family": "Verdana",
+          "--huey-text-font-size": "10pt",
+          "--huey-mono-font-family": "Monospace",
+          "--huey-foreground-color": "rgb(50,50,50)",
+          "--huey-placeholder-color": "rgb(180,180,180)",
+          "--huey-light-background-color": "rgb(255,255,255)",
+          "--huey-medium-background-color": "rgb(250,250,250)",
+          "--huey-dark-background-color": "rgb(222,222,222)",
+          "--huey-light-border-color": "rgb(222,222,222)",
+          "--huey-dark-border-color": "rgb(200,200,200)",
+          "--huey-icon-color-subtle": "rgb(200,200,200)",
+          "--huey-icon-color": "rgb(50,50,50)",
+          "--huey-icon-color-highlight": "rgb(0,0,0)"
+        }
+      }
     }
   };
   
@@ -51,10 +108,10 @@ class Settings extends EventEmitter {
     if (!(path instanceof Array)) {
       throw new Error('Invalid path');
     }
-    var value;
+    var value = settings;
     for (var i = 0; i < path.length; i++) {
       var pathElement = path[i];
-      value = settings[pathElement];
+      value = value[pathElement];
       if (value === undefined){
         return undefined;
       }
@@ -199,30 +256,63 @@ class Settings extends EventEmitter {
       case 'settings':
         var optionsFromSettings = [];
         var optionsFromControl = control.options;
+        
+        var valueGetter = control.getAttribute('data-value-getter');
+        if (valueGetter){
+          valueGetter = eval(valueGetter);
+        }
+        
         for (var i = 0; i < optionsFromControl.length; i++){
           var optionFromControl = optionsFromControl[i];
           var value = optionFromControl.value;
           var label = optionFromControl.label || value;
+          if (valueGetter){
+            value = valueGetter.call(null, optionFromControl, this);
+          }
           optionsFromSettings.push({value: value, label: label}); 
         }
         settings[property].options = optionsFromSettings;
-        settings[property].value = control.value;
+        if (valueGetter) {
+          settings[property].value = valueGetter.call(null, control, this);
+        }
+        else {
+          settings[property].value = control.value;
+        }
         break;
       case 'dialog':
         var optionsFromSettings = settings[property].options;
         var valueFromSettings = settings[property].value;
+
+        var valueSetter = control.getAttribute('data-value-setter');
+        if (valueSetter){
+          valueSetter = eval(valueSetter);          
+        }
+        
         control.options.length = 0;
         for (var i = 0; i < optionsFromSettings.length; i++){
           var optionFromSettings = optionsFromSettings[i];
           var value = optionFromSettings.value;
           var label = optionFromSettings.label || value;
           var option = createEl('option', {
-            value: value,
             label: label
           }, label);
-          option.selected = (value === valueFromSettings);
+          
+          if (valueSetter) {
+            valueSetter.call(null, option, value, this);
+          }
+          else {
+            option.value = value;
+          }
           control.appendChild(option);
         }
+        
+        if (valueSetter) {
+          valueSetter.call(null, control, valueFromSettings, this);
+        }
+        else {
+          control.value = valueFromSettings;
+        }
+        
         break;
     }
   }
@@ -309,7 +399,4 @@ class Settings extends EventEmitter {
   }
 }
 
-var settings;
-function initSettingsDialog(){
-  settings = new Settings('settingsDialog');
-}
+var settings = new Settings('settingsDialog');

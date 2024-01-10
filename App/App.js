@@ -191,7 +191,6 @@ function initApplication(){
   initDuckdbVersion();
   initAbout();
   initErrorDialog();
-  initSettingsDialog();
   initUploader();
   initRegisteredFiles();
   initQueryModel();

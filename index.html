@@ -27,7 +27,7 @@
       type="font/woff2" 
       crossorigin="true"
     />
-    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/General.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Theme/General.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/Spinner.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
@@ -205,44 +205,13 @@
           <div class="tabPageContents">
             <form id="themeSettings">
               <label for="themes">Themes</label>
-              <select id="themes">
-                <optgroup label="Built-in">
-                  <option>Whio</option>
-                  <option>Mandarin</option>
-                </optgroup>
-                <optgroup label="Custom">
-                </optgroup>
+              <select 
+                id="themes" 
+                onchange="Theme.applyTheme(this.selectedIndex)"
+                data-value-getter="new Function('control', 'settings', 'return JSON.parse(control.value);')"
+                data-value-setter="new Function('control', 'value', 'settings', 'control.value = JSON.stringify(value);')"
+              >
               </select>
-
-              <!-- getComputedStyle(document.body).getPropertyValue('--huey-medium-background-color') -->
-              <label for="textFont" >Text Font</label>
-              <input type="text" id="textFont" value="Verdana" data-css-var="--huey-text-font-family"/>
-              <label for="monospaceFont">Monospace Font</label>
-              <input type="text" id="monospaceFont" value="Monospace" data-css-var="--huey-text-font-family"/>
-
-              <label for="foreGroundColor">Foreground Color</label>
-              <input type="color" id="foreGroundColor" data-css-var="--huey-text-font-family"/>
-              <label for="placeholderColor">Placeholder Color</label>
-              <input type="color" id="placeholderColor" data-css-var="--huey-text-font-family"/>
-              
-              <label for="lightBackgroundColor">Light Background Color</label>
-              <input type="color" id="lightBackgroundColor"/>
-              <label for="mediumBackgroundColor">Medium Background Color</label>
-              <input type="color" id="mediumBackgroundColor"/>
-              <label for="darkBackgroundColor">Dark Background Color</label>
-              <input type="color" id="darkBackgroundColor"/>
-
-              <label for="lightBorderColor">Light Border Color</label>
-              <input type="color" id="lightBorderColor"/>
-              <label for="darkBorderColor">Dark Border Color</label>
-              <input type="color" id="darkBorderColor"/>
-
-              <label for="iconColor">Icon Color</label>
-              <input type="color" id="iconColor"/>
-              <label for="iconColorSubtle">Icon Color Subtle</label>
-              <input type="color" id="iconColorSubtle"/>
-              <label for="iconColorHighlight">Icon Color Highlight</label>
-              <input type="color" id="iconColorHighlight"/>
             </form>
           </div>
         </div>
@@ -413,6 +382,10 @@
     <script onload="resourceLoaded(this.src)" src="util/dom/dom.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
+
+    <script onload="resourceLoaded(this.src)" src="SettingsDialog/SettingsDialog.js"></script>
+    <script onload="resourceLoaded(this.src)" src="Theme/Theme.js"></script>
+
     <script onload="resourceLoaded(this.src)" src="util/sql/SQLHelper.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSet/TupleSet.js"></script>
@@ -420,7 +393,6 @@
     <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script onload="resourceLoaded(this.src)" src="AboutDialog/AboutDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="ErrorDialog/ErrorDialog.js"></script>
-    <script onload="resourceLoaded(this.src)" src="SettingsDialog/SettingsDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryModel/QueryModel.js"></script>
