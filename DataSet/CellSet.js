@@ -240,17 +240,16 @@ class CellSet {
     var datasource = queryModel.getDatasource();
     var values = [];
     var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values);
-    var connection = await datasource.getConnection();
 
     console.log(`About to create preparedStatement to fetch cell data for ${tuplesToQuery.length} tuples, SQL:`);
     console.log(sql);
-    var preparedStatement = await connection.prepare(sql);
+    var preparedStatement = await datasource.prepareStatement(sql);
     
     console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
     console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
     var resultSet = await preparedStatement.query.apply(preparedStatement, values);
     console.timeEnd(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
-    
+    preparedStatement.close();
     return resultSet;
   }
   

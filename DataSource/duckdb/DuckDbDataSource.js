@@ -160,6 +160,11 @@ class DuckDbDataSource {
     }.bind(this));
   }
   
+  async prepareStatement(sql){
+    var connection = await this.getConnection();
+    var preparedStatement = await connection.prepare(sql);
+    return preparedStatement;
+  }
   
   #getSqlForDataProfile(sampleSize) {
     var qualifiedObjectName = this.getQualifiedObjectName();
