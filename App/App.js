@@ -52,13 +52,14 @@ async function registerFile(file){
     type: DuckDbDataSource.types.FILE,
     file: file
   });
-  await datasource.registerFile();
+  var registerFileResult = await datasource.registerFile();
   var result = await datasource.validateAccess();
   
   if (result === true){
     return datasource;
   }
   else {
+    var dropResult = await hueyDb.instance.dropFile(file.name);
     return result;
   }
 }
@@ -105,11 +106,16 @@ async function handleUpload(event){
   for (var i = 0; i < registerFilePromiseResults.length; i++){
     var registerFilePromiseResult = registerFilePromiseResults[i];
     var file = files[i];
+    if (registerFilePromiseResult instanceof DuckDbDataSource) {
+      addItemToFileOptionsGroup(file.name);
+    }
+    else
     if (registerFilePromiseResult instanceof Error) {
       errors.push(`${file.name}: ${registerFilePromiseResult.message}`);
     }
     else {
-      addItemToFileOptionsGroup(file.name);
+      //
+      debugger;
     }
   }
   
@@ -147,6 +153,7 @@ async function handleFileSelected(event){
     case 'multiSelect':
       return;
     case 'unregister':
+      
       return;
     default:
   }
