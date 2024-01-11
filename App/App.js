@@ -174,10 +174,10 @@ async function handleFileSelected(event){
   clearSearch();
   
   try {
-    var tableSchemaResultSet = await datasource.getTableSchema();
+    var columnMetadata = await datasource.getColumnMetadata();
     queryModel.clear();
     queryModel.setDatasource(datasource);
-    attributeUi.render(tableSchemaResultSet);
+    attributeUi.render(columnMetadata);
     byId('searchAttributeUi').style.display = '';
     byId('queryUi').style.display = '';
   }

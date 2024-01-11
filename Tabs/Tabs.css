@@ -53,9 +53,6 @@
   left: 0px;
   right: 0px;
   bottom: 0px;
-  border-style: none solid solid solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
   display: none;
   overflow: auto;  
 }

@@ -289,26 +289,53 @@
           >Settings</button>
         </label>
       </menu>
-      <div class="resizeHorizontal sidebar">
-        <search 
-          id="searchAttributeUi"
-          class="search" 
-          style="display:none"
-        >
-          <fieldset>
-            <legend>Search</legend>
-            <input 
-              id="searchAttribute"
-              type="search"
-              placeholder="Search by Attribute name"
-            />
-          </fieldset>
-        </search>
-        <div 
-          id="attributeUi" 
-          class="attributeUi"
-          style="flex-grow: 1;"
-        >
+      <div class="resizeHorizontal sidebar tabs">
+        <div class="tabPage">
+          <span 
+            class="tab"
+          ></label>
+        </div>
+        
+        <!-- Datasources tab --> 
+        <div class="tabPage">
+          <label for="datasourcesTab" class="tab">Datasources</label>
+          <input id="datasourcesTab" type="radio" name="sidebarTabs" class="tabState" checked="true"/>
+          <div class="tabPageContents">
+          </div>
+        </div>
+        
+        <!-- Attributes tab -->
+        <div class="tabPage">
+          <label for="attributesTab" class="tab">Attributes</label>
+          <input id="attributesTab" type="radio" name="sidebarTabs" class="tabState"/>
+          <div class="tabPageContents">
+            <search 
+              id="searchAttributeUi"
+              class="search" 
+              style="display:none"
+            >
+              <fieldset>
+                <legend>Search</legend>
+                <input 
+                  id="searchAttribute"
+                  type="search"
+                  placeholder="Search by Attribute name"
+                />
+              </fieldset>
+            </search>
+            <div 
+              id="attributeUi" 
+              class="attributeUi"
+              style="flex-grow: 1;"
+            >
+            </div>
+          </div>          
+        </div>
+        
+        <div class="tabPage">
+          <span 
+            class="tab"
+          ></label>
         </div>
       </div>
       <div class="workarea">

@@ -18,6 +18,7 @@ class DuckDbDataSource {
   #file = undefined;
   #fileProtocol = undefined;
   #type = undefined;
+  #columnMetadata = undefined;
   
   constructor(duckDb, duckDbInstance, config){
     this.#duckDb = duckDb;
@@ -211,10 +212,15 @@ class DuckDbDataSource {
     return sql;
   }
     
-  async getTableSchema(){
+  async getColumnMetadata(){
+    if (this.#columnMetadata) {
+      return this.#columnMetadata;
+    }
+    
     var sql = this.#getSqlForTableSchema();
     var connection = await this.getConnection();
-    var resultset = connection.query(sql);
-    return resultset;
+    var columnMetadata = connection.query(sql);
+    this.#columnMetadata = columnMetadata;
+    return columnMetadata;
   }
 }

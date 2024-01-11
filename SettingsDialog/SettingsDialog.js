@@ -51,25 +51,117 @@ class Settings extends EventEmitter {
               "--huey-icon-color": "rgb(50,50,50)",
               "--huey-icon-color-highlight": "rgb(0,0,0)"
             },
-            label: "Whio"
+            label: "Default"
           },
           {
             value: {
               "--huey-text-font-family": "Verdana",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "Monospace",
-              "--huey-foreground-color": "rgb(50,50,50)",
-              "--huey-placeholder-color": "rgb(180,180,180)",
-              "--huey-light-background-color": "rgb(222,227,233)",
-              "--huey-medium-background-color": "rgb(182,139,70)",
-              "--huey-dark-background-color": "rgb(182,139,70)",
-              "--huey-light-border-color": "rgb(203,140,96)",
-              "--huey-dark-border-color": "rgb(95,37,13)",
-              "--huey-icon-color-subtle": "rgb(200,200,200)",
-              "--huey-icon-color": "rgb(79,107,172)",
-              "--huey-icon-color-highlight": "rgb(188,101,120)"
+              "--huey-foreground-color": "#FFFFFF",
+              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
+              "--huey-light-background-color": "#1C2E36", /* Deep Blue-Green */
+              "--huey-medium-background-color": "#5B8266", /* Sage Green */
+              "--huey-dark-background-color": "#F0E68C", /* Khaki */
+              "--huey-light-border-color": "#334D56", /* Dark Teal */
+              "--huey-dark-border-color": "#A7D3A4", /* Soft Green */
+              "--huey-icon-color-subtle": "#FFA07A", /* Light Salmon */
+              "--huey-icon-color": "#000000", /* Black */
+              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+            },
+            label: "Mallard"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
+              "--huey-light-background-color": "#2F3C4B", /* Deep Blue */
+              "--huey-medium-background-color": "#FFD700", /* Gold */
+              "--huey-dark-background-color": "#4B5320", /* Dark Olive Green */
+              "--huey-light-border-color": "#4B5968", /* Steel Blue */
+              "--huey-dark-border-color": "#FFA500", /* Orange */
+              "--huey-icon-color-subtle": "#556B2F", /* Dark Olive Green */
+              "--huey-icon-color": "#FFFFFF", /* White */
+              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
             },
             label: "Mandarin"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
+              "--huey-light-background-color": "#3A3831", /* Dark Olive Green */
+              "--huey-medium-background-color": "#8B4513", /* Saddle Brown */
+              "--huey-dark-background-color": "#E6E6FA", /* Lavender */
+              "--huey-light-border-color": "#524739", /* Dark Taupe */
+              "--huey-dark-border-color": "#CD853F", /* Peru */
+              "--huey-icon-color-subtle": "#9370DB", /* Medium Purple */
+              "--huey-icon-color": "#FFFFFF", /* White */
+              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+            },
+            label: "Wood Duck"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
+              "--huey-light-background-color": "#1F2224", /* Charcoal */
+              "--huey-medium-background-color": "#87CEEB", /* Sky Blue */
+              "--huey-dark-background-color": "#FFE4C4", /* Bisque */
+              "--huey-light-border-color": "#333B3F", /* Dark Slate Gray */
+              "--huey-dark-border-color": "#4682B4", /* Steel Blue */
+              "--huey-icon-color-subtle": "#FFD700", /* Gold */
+              "--huey-icon-color": "#FFFFFF", /* White */
+              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+            },
+            label: "Northern Pintail"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-icon-color-highlight": "#8B4513", /* Saddle Brown */
+              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
+              "--huey-light-background-color": "#008080", /* Teal */
+              "--huey-medium-background-color": "#D2B48C", /* Tan */
+              "--huey-dark-background-color": "#F5F5F5", /* White Smoke */
+              "--huey-light-border-color": "#2F4F4F", /* Dark Slate Gray */
+              "--huey-dark-border-color": "#8B4513", /* Saddle Brown */
+              "--huey-icon-color-subtle": "#87CEFA", /* Light Sky Blue */
+              "--huey-icon-color": "#FFFFFF", /* White */
+              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+            },
+            label: "Teal"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "rgb(36,36,74)",
+              "--huey-placeholder-color": "rgb(180,180,180)",
+              "--huey-light-background-color": "rgb(182,187,229)",
+              "--huey-medium-background-color": "rgb(108,115,183)",
+              "--huey-dark-background-color": "rgb(67,71,119)",
+              "--huey-light-border-color": "rgb(99,46,64)",
+              "--huey-dark-border-color": "rgb(42,34,55)",
+              "--huey-icon-color-subtle": "rgb(67,21,21)",
+              "--huey-icon-color": "rgb(36,36,74)",
+              "--huey-icon-color-highlight": "rgb(255,243,255)"
+            },
+            label: "Whio"
           },
         ],
         value: {
