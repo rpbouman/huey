@@ -331,20 +331,26 @@ class DataSourcesUi {
   #removeDatasourceClicked(event){
     var node = this.#getTreeNodeFromClickEvent(event);
     var nodeType = node.getAttribute('data-nodetype');
-    
+    var datasourceIdsList;
     switch (nodeType) {
       case 'datasource':
-        var dataSourceId = datasourceNode.id;
-        var datasource = this.getDatasource(dataSourceId);
+        var dataSourceId = node.id;
+        this.destroyDatasources([dataSourceId]);
+        datasourceIdsList = [dataSourceId];
         break;
       case 'datasourcegroup':
+        var groupType = node.getAttribute('data-grouptype');
+        switch (groupType){
+          case DuckDbDataSource.types.FILE:
+            var datasourceIdsListJSON = node.getAttribute('data-datasourceids');
+            datasourceIdsList = JSON.parse(datasourceIdsListJSON);
+            break;
+          default:
+            throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
+        }
         break;
     }    
-    var datasource = this.#getDatasourceFromClickEvent(event);
-    var id = datasource.getId();
-    delete this.#datasources[id];
-    datasource.destroy();
-    this.#renderDatasources();
+    this.destroyDatasources(datasourceIdsList);
   }
   
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
@@ -434,6 +440,19 @@ class DataSourcesUi {
       var id = datasource.getId();
       this.#datasources[id] = datasource;
     }.bind(this));
+    this.#renderDatasources();
+  }
+  
+  destroyDatasources(datasourceIds) {
+    for (var i = 0; i < datasourceIds.length; i++){
+      var datasourceId = datasourceIds[i];
+      var datasource = this.getDatasource(datasourceId);
+      if (!datasource) {
+        continue;
+      }
+      datasource.destroy();
+      delete this.#datasources[datasourceId];
+    }
     this.#renderDatasources();
   }
   
