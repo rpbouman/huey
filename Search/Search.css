@@ -1,7 +1,7 @@
 .search {
   position: sticky;
   flex-grow: 0;
-  top: 0px;
+  top: 7px;
   background-color: var( --huey-medium-background-color )
 }
 

@@ -8,6 +8,11 @@
   flex-grow: 0;
 }
 
+.tabs > .tabPage > .tab {
+  z-index: 1;
+  position: relative;
+}
+
 .tabs > .tabPage > label.tab {
   border-style: solid;
   border-color: var( --huey-light-border-color );
@@ -49,13 +54,10 @@
 
 .tabs > .tabPage > .tabPageContents {
   position: absolute;
-  top: 19px;
+  top: 17px;
   left: 0px;
   right: 0px;
-  bottom: 0px;
-  border-style: none solid solid solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
+  height: calc( 100% - 24px );
   display: none;
   overflow: auto;  
 }

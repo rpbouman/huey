@@ -1,0 +1,36 @@
+dialog#uploadUi {
+  resize: both;
+  width: 600px;
+  height: 400px;
+}
+
+dialog#uploadUi > section > details > summary > label {
+}
+
+
+
+dialog#uploadUi > section > details > summary > progress {
+  display: block;
+  width: 100%;
+}
+
+dialog#uploadUi > section > details[aria-invalid=true] > summary > progress {
+  accent-color: red;
+}
+
+dialog#uploadUi > section > details[aria-invalid=false] > summary > progress {
+  accent-color: green;
+}
+
+dialog#uploadUi > section > details > summary {
+  width: 100%;
+}
+
+dialog#uploadUi > section > details > summary::marker {
+}
+
+dialog#uploadUi > section > details > p {
+  overflow: auto;
+  max-height: 6em;
+}
+

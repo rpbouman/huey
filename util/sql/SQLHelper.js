@@ -1,3 +1,10 @@
+var duckdbExtensionForFileExtension = {
+  'json': 'json',
+  'parquet': 'parquet',
+  'sqlite': 'sqlite_scanner',
+  'xlsx': 'spatial'
+};
+
 var dataTypes = {
   'DECIMAL': {
     isNumeric: true
@@ -134,3 +141,27 @@ function getQualifiedIdentifier(){
   throw new Error(`Invalid arguments`);
 }
 
+async function ensureDuckDbExtensionLoadedAndInstalled(extensionName){
+  var connection = hueyDb.connection;
+  var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
+  var statement = await connection.prepare(sql);
+  var result = await statement.query(extensionName);
+  statement.close();
+  var loaded, installed;
+  if (result.numRows !== 0) {
+    loaded = result.loaded;
+    installed = result.installed;
+    return;
+  }
+  
+  if (!installed) {
+    sql = `INSTALL ${extensionName}`;
+    result = await connection.query(sql);
+  }
+  
+  if (!loaded){
+    sql = `LOAD ${extensionName}`;
+    result = await connection.query(sql);
+  }
+  return true;
+}
