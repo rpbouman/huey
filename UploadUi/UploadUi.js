@@ -38,75 +38,43 @@ class UploadUi {
   async #uploadFile(file, uploadItem){
     
     var progressBar = uploadItem.getElementsByTagName('progress').item(0);
-    
-    var fileName = file.name;
-    var parts = fileName.split('.');
-    if (parts.length > 1 ){
-      
-      var hueyDb = window.hueyDb;
-      var duckdb = hueyDb.duckdb;
-      var instance = hueyDb.instance;
-      
-      var datasource, canAccess;
-      var extension = parts.pop().toLowerCase();
-      switch (extension) {
-        case 'csv':
-          datasource = new DuckDbDataSource(duckdb, instance,  {
-            type: DuckDbDataSource.types.FILE,
-            file: file
-          });
-          break;
-        case 'duckdb':
-          datasource = new DuckDbDataSource(duckdb, instance,  {
-            type: DuckDbDataSource.types.DUCKDB,
-            file: file
-          });
-          break;
-        case 'json':
-          datasource = new DuckDbDataSource(duckdb, instance,  {
-            type: DuckDbDataSource.types.FILE,
-            file: file
-          });
-          break;
-        case 'parquet':
-          datasource = new DuckDbDataSource(duckdb, instance,  {
-            type: DuckDbDataSource.types.FILE,
-            file: file
-          });
-          break;
-        case 'sql':
-          throw new Error(`Error uploading file ${fileName}: file type ${extension} currently not implemented.`);
-          break;
-        case 'xlsx':
-          datasource = new DuckDbDataSource(duckdb, instance,  {
-            type: DuckDbDataSource.types.FILE,
-            file: file
-          });
-          break;
-        default:
-          throw new Error(`Error uploading file ${fileName}: Unrecognized file type ${extension}`);
-      }
 
-      await datasource.registerFile();
+    var hueyDb = window.hueyDb;
+    var duckdb = hueyDb.duckdb;
+    var instance = hueyDb.instance;
+
+    var duckDbDataSource;
+    var fileRegistered = false;
+    try {
+      duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
       progressBar.value = parseInt(progressBar.value, 10) + 10;
-      canAccess = await datasource.validateAccess();
+      
+      await duckDbDataSource.registerFile();
+      fileRegistered = true;
+      progressBar.value = parseInt(progressBar.value, 10) + 10;
+        
+      var canAccess = await duckDbDataSource.validateAccess();
       progressBar.value = parseInt(progressBar.value, 10) + 10;
 
       if (canAccess === true) {
-        if (datasource.getType() === DuckDbDataSource.types.FILE) {
-          var columnMetadata = await datasource.getColumnMetadata();
+        if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
+          var columnMetadata = await duckDbDataSource.getColumnMetadata();
         }
         progressBar.value = 100;
       }
       else {
-        await instance.dropFile(fileName);
-        return new Error(`Error uploading file ${fileName}: ${canAccess.message}.`);
+        return new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
+      }
+      return duckDbDataSource;
+    }
+    catch (error){
+      return error;
+    }
+    finally {
+      if (fileRegistered && !(duckDbDataSource instanceof DuckDbDataSource)){
+        await instance.dropFile(file.name);
       }
     }
-    else {
-      return new Error(`Error uploading file ${fileName}: File misses extension.`);
-    }
-    return datasource;
   }
   
   #createUploadItem(file){
@@ -114,6 +82,7 @@ class UploadUi {
     var uploadItem = createEl('details', {
       id: fileName
     });
+    
     var summary = createEl('summary', {
     });
     uploadItem.appendChild(summary);
@@ -132,23 +101,28 @@ class UploadUi {
   }
   
  getRequiredDuckDbExtensions(files){
-    var array = []
+    var requiredExtensions = []
     for (var i = 0; i < files.length; i++){
       var file = files[i];
       var fileName = file.name;
-
-      var fileNameParts = fileName.split('.');
-      if (fileNameParts.length < 2) {
+      var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+      var fileExtension = fileNameParts.lowerCaseExtension;
+      
+      var fileType = DuckDbDataSource.fileTypes[fileExtension];
+      if (!fileType){
         continue;
       }
-      var fileExtension = fileNameParts.pop().toLowerCase();
-      var duckdbExtension = duckdbExtensionForFileExtension[fileExtension];
       
-      if (array.indexOf(duckdbExtension) === -1) {
-        array.push(duckdbExtension);
+      var requiredDuckDbExtension = fileType.duckdb_extension;
+      if (!requiredDuckDbExtension){
+        continue;
+      }
+      
+      if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
+        requiredExtensions.push(requiredDuckDbExtension);
       }
     }
-    return array;
+    return requiredExtensions;
   }
   
   async loadRequiredDuckDbExtensions(files){
@@ -194,7 +168,7 @@ class UploadUi {
 
       var message = createEl('p', {
         id: uploadItem.id + '_message'
-      }, messageText);
+      });
 
       var uploadItem = body.childNodes.item(i);
       uploadItem.appendChild(message);
@@ -211,7 +185,8 @@ class UploadUi {
         uploadItem.setAttribute('aria-invalid', String(true));
         uploadItem.setAttribute('aria-errormessage', message.id);
       }
-            
+      message.innerText = messageText;
+      
       uploadItem
       .getElementsByTagName('summary').item(0)
       .getElementsByTagName('label').item(0)

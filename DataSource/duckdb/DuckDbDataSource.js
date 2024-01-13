@@ -67,6 +67,48 @@ class DuckDbDataSource {
     this.#init(config);
   }
   
+  static getFileNameParts(fileName){
+    if (fileName instanceof File) {
+      fileName = fileName.name;
+    }
+    
+    var separator = '.';
+    var fileNameParts = fileName.split( separator );
+    if (fileNameParts.length < 2){
+      return undefined;
+    }
+    var extension = fileNameParts.pop();
+    var lowerCaseExtension = extension.toLowerCase();
+    var fileNameWithoutExtension = fileNameParts.join( separator );
+    return {
+      extension: extension,
+      lowerCaseExtension: lowerCaseExtension,
+      fileNameWithoutExtension: fileNameWithoutExtension
+    };
+  }
+  
+  static createFromFile(duckdb, instance, file) {
+    if (!(file instanceof File)){
+      throw new Error(`The file argument must be an instance of File`);
+    }
+    
+    var fileName = file.name;
+    var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+    var fileExtension = fileNameParts.lowerCaseExtension;
+    var fileType = DuckDbDataSource.fileTypes[fileExtension];
+    
+    if (!fileType){
+      throw new Error(`Could not determine filetype of file "${fileName}".`);
+    }
+    
+    var config = {
+      type: fileType.datasourceType,
+      file: file 
+    };
+    var instance = new DuckDbDataSource(duckdb, instance, config);
+    return instance;
+  }
+  
   #init(config){
     var type = config.type;
     switch (type) {
@@ -214,21 +256,16 @@ class DuckDbDataSource {
       case DuckDbDataSource.types.FILE:
         var fileName = this.getFileName();
         var quotedFileName = getQuotedIdentifier(fileName);
-        switch (this.getFileExtension()) {
+        var fileExtension = this.getFileExtension();
+        switch (fileExtension) {
           case 'csv':
           case 'tsv':
           case 'txt':
-            sql = `read_csv_auto( ${quotedFileName} )`;
-            break;
           case 'json':
-            sql = `read_json_auto( ${quotedFileName} )`;
-            break;
           case 'parquet':
-            sql = `read_parquet( ${quotedFileName} )`;
-            break;
           case 'xlsx':
-            sql = `st_read( ${quotedFileName} )`;
-            break;
+            var fileType = DuckDbDataSource.fileTypes[fileExtension];
+            sql = `${fileType.duckdb_reader}( ${quotedFileName} )`;
         }
         break;
       case DuckDbDataSource.types.SQLQUERY:
@@ -267,28 +304,7 @@ class DuckDbDataSource {
     }
     return this.#objectName;
   }
-  
-  static getFileNameParts(fileName){
-    if (fileName instanceof File) {
-      fileName = fileName.name;
-    }
     
-    var separator = '.';
-    var fileName = file.name;
-    var fileNameParts = fileName.split( separator );
-    if (fileNameParts.length < 2){
-      return undefined;
-    }
-    var extension = fileNameParts.pop();
-    var lowerCaseExtension = extension.toLowerCase();
-    var fileNameWithoutExtension = fileNameParts.join( separator );
-    return {
-      extension: extension,
-      lowerCaseExtension: lowerCaseExtension,
-      fileNameWithoutExtension: fileNameWithoutExtension
-    };
-  }
-  
   #getFileNameParts(){
     var fileName = this.getFileName();
     return DuckDbDataSource.getFileNameParts(fileName);

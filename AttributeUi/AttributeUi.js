@@ -187,11 +187,6 @@ class AttributeUi {
     var name = `${config.type}_${config.profile.column_name}`;
     var id = `${name}`;
     
-    var axisButton = createEl('label', {
-      'data-axis': axisId,
-      "class": ['button', 'attributeUiAxisButton']
-    });
-
     var createInput;
     switch (config.type) {
       case 'column':
@@ -220,6 +215,11 @@ class AttributeUi {
         break;
       default:
     }
+
+    var axisButton = createEl(createInput ? 'label' : 'span', {
+      'data-axis': axisId,
+      "class": ['button', 'attributeUiAxisButton']
+    });
     
     if (!createInput){
       return axisButton;
