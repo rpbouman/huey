@@ -55,6 +55,8 @@ class DuckDbDataSource {
   #schemaName = undefined;
   #objectName = undefined;
   #file = undefined;
+  #fileNames = undefined;
+  #fileType = undefined;
   #fileProtocol = undefined;
   #type = undefined;
   #columnMetadata = undefined;
@@ -136,6 +138,27 @@ class DuckDbDataSource {
             throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
         }
         break;
+      case DuckDbDataSource.types.FILES:
+        var fileNames = config.fileNames;
+        if (!fileNames) {
+          throw new Error(`Invalid config: fileNames Array is mandatory`);
+        }
+        if (fileNames instanceof Array) {
+          this.#fileNames = fileNames; 
+        }
+        else {
+          throw new Error(`Invalid config: fileNames must be an array`);
+        }
+        if (config.fileType){
+          if (DuckDbDataSource.fileTypes[config.fileType] === undefined) {
+            throw new Error(`Invalid config: fileType ${config.fileType} is not recognized.`);
+          }
+          this.#fileType = config.fileType;
+        }
+        else {
+          throw new Error(`Invalid config: fileType is mandatory`);
+        }
+        break;
       case DuckDbDataSource.types.TABLE:
         this.#schemaName = config.schemaName;
         this.#objectName = config.tableName || config.objectName;
@@ -161,8 +184,15 @@ class DuckDbDataSource {
   
   getId(){
     var type = this.getType();
-    var objectName = this.getQualifiedObjectName();
-    return `${type}:${objectName}`;
+    var postFix;
+    switch (type) {
+      case DuckDbDataSource.types.FILES:
+        postFix = JSON.stringify(this.#fileNames);
+        break;
+      default:
+        postFix = this.getQualifiedObjectName();
+    }
+    return `${type}:${postFix}`;
   }
  
   async registerFile(){
@@ -276,9 +306,19 @@ class DuckDbDataSource {
     return qualifiedObjectName;
   }
   
-  getFromClauseSql(){
+  getRelationExpression(alias){
     var sql = '';
     switch (this.getType()) {
+      case DuckDbDataSource.types.FILES:
+        var fileNames = this.#fileNames.map(function(fileName){
+          return getQuotedIdentifier(fileName);
+        }.bind(this));
+        
+        var fileExtension = this.#fileType;
+        var fileType = DuckDbDataSource.fileTypes[fileExtension];
+        sql = `${fileType.duckdb_reader}( [${fileNames.join(',')}], filename = TRUE )`;
+        
+        break;
       case DuckDbDataSource.types.FILE:
         var fileName = this.getFileName();
         var quotedFileName = getQuotedIdentifier(fileName);
@@ -310,11 +350,19 @@ class DuckDbDataSource {
         break;
     }
     
-    if (this.#alias) {
-      sql = `${sql} AS ${getQuotedIdentifier(this.#alias)}`;      
+    if (!alias) {
+      alias = this.#alias;
     }
-    sql = `FROM ${sql}`;
     
+    if (alias) {
+      sql = `${sql} AS ${getQuotedIdentifier(alias)}`;      
+    }
+    return sql;
+  }
+  
+  getFromClauseSql(alias){
+    var sql = this.getRelationExpression(alias);
+    sql = `FROM ${sql}`;
     return sql;
   }
   
@@ -371,7 +419,7 @@ class DuckDbDataSource {
   
   #getSqlForDataProfile(sampleSize) {
     var qualifiedObjectName = this.getQualifiedObjectName();
-    var fromClause = `FROM ${qualifiedObjectName}`;
+    var fromClause = this.getFromClauseSql();
     var sql = `SUMMARIZE SELECT * ${fromClause}`;
     if (sampleSize) {
       var sampleSpecification;
@@ -408,8 +456,7 @@ class DuckDbDataSource {
   }
   
   #getSqlForTableSchema(){
-    var qualifiedObjectName = this.getQualifiedObjectName();
-    var fromClause = `FROM ${qualifiedObjectName}`;
+    var fromClause = this.getFromClauseSql();
     var sql = `DESCRIBE SELECT * ${fromClause}`;
     return sql;
   }

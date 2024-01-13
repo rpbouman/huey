@@ -267,11 +267,58 @@ class DataSourcesUi {
     return datasourceNode;
   }
   
-  #getDatasourceFromClickEvent(event){
-    var target = event.target;
-    var datasourceNode = getAncestorWithAttributeValue(target, 'data-nodetype', 'datasource', true);
-    var dataSourceId = datasourceNode.id;
+  #getTreeNodeFromClickEvent(event){
+    var button = event.target;
+    var label = button.parentNode;
+    var summary = label.parentNode;
+    var node = summary.parentNode;
+    return node;
+  }
+
+  #getDatasourceForTreeNode(datasourceTreeNode) {
+    var dataSourceId = datasourceTreeNode.id;
     var datasource = this.getDatasource(dataSourceId);
+    return datasource;
+  }
+  
+  #getDatasourceFromClickEvent(event){
+    var node = this.#getTreeNodeFromClickEvent(event);
+    var nodeType = node.getAttribute('data-nodetype');
+    
+    var datasource;
+    switch (nodeType) {
+      case 'datasource':
+        var datasource = this.#getDatasourceForTreeNode(node);
+        break;
+      case 'datasourcegroup':
+        var groupType = node.getAttribute('data-grouptype');
+        switch (groupType){
+          case DuckDbDataSource.types.FILE:
+            var datasourceIdsListJSON = node.getAttribute('data-datasourceids');
+            var datasourceIdsList = JSON.parse(datasourceIdsListJSON);
+            var fileNames = datasourceIdsList.map(function(datasourceId){
+              var datasource = this.#datasources[datasourceId];
+              var fileName = datasource.getFileName();
+              return fileName;
+            }.bind(this));
+            var fileType = node.getAttribute('data-filetype');
+
+            var hueyDb = window.hueyDb;
+            var duckdb = hueyDb.duckdb;
+            var instance = hueyDb.instance;            
+            datasource = new DuckDbDataSource(duckdb, instance, {
+              type: DuckDbDataSource.types.FILES,
+              fileNames,
+              fileType: fileType
+            });
+            break;
+          default:
+            throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
+        }
+        break;
+      default:
+        throw new Error(`Don't know how to get a datasource for node of type ${nodeType}.`);
+    }    
     return datasource;
   }
 
@@ -282,9 +329,17 @@ class DataSourcesUi {
   }
   
   #removeDatasourceClicked(event){
-    // todo: if the current datasource is currently used by the attribute, query or pivot ui, those should be cleared
-    // we should solve this by firing an event.
+    var node = this.#getTreeNodeFromClickEvent(event);
+    var nodeType = node.getAttribute('data-nodetype');
     
+    switch (nodeType) {
+      case 'datasource':
+        var dataSourceId = datasourceNode.id;
+        var datasource = this.getDatasource(dataSourceId);
+        break;
+      case 'datasourcegroup':
+        break;
+    }    
     var datasource = this.#getDatasourceFromClickEvent(event);
     var id = datasource.getId();
     delete this.#datasources[id];
@@ -361,7 +416,9 @@ class DataSourcesUi {
     }
     
     var datasources = datasourceGroup.datasources;
-    Object.keys(datasources).map(function(datasourceId){
+    var datasourceKeys = Object.keys(datasources);
+    groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
+    datasourceKeys.map(function(datasourceId){
       var datasource = datasources[datasourceId];
       var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);

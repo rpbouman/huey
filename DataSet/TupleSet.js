@@ -82,10 +82,10 @@ class TupleSet {
     
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
-    var qualifiedObjectName = datasource.getQualifiedObjectName();
+    var fromClause = datasource.getFromClauseSql();
     var sql = `
       SELECT ${selectListExpressions.join('\n,')}
-      FROM ${qualifiedObjectName} 
+      ${fromClause} 
       GROUP BY ${groupByExpressions.join('\n,')}
       ORDER BY ${orderByExpressions.join('\n,')}
     `;

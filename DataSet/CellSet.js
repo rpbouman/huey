@@ -179,9 +179,7 @@ class CellSet {
   #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values){
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
-    var qualifiedObjectName = datasource.getQualifiedObjectName();
-    
-    var aliasedDatasetName = `${qualifiedObjectName} AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`; 
+    var aliasedDatasetName = datasource.getRelationExpression(CellSet.#datasetRelationName); 
 
     aggregateExpressionsToFetch = Object.keys(aggregateExpressionsToFetch).map(function(expression){
       return `${aggregateExpressionsToFetch[expression]} AS ${getQuotedIdentifier(expression)}`;
