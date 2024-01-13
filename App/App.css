@@ -1,5 +1,5 @@
 
-.layout {
+main.layout {
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 99fr;
@@ -19,18 +19,18 @@ menu[role=toolbar] {
   overflow: hidden;
 }
 
-.sidebar {
+h1.currentDatasource {
+  
+}
+
+nav.sidebar {
   width: 15vw;
   height: calc(100vh - 40px);
   max-width: calc(100vw - 14px);
-  border-color: var( --huey-light-border-color );
-  border-width: 1px;
-  border-right-style:solid;
   grid-column: 1/1;
   grid-row: 2/ span 2;
   padding: 4px 4px 0px 4px;
   display: flex;
-  flex-direction: column;
   min-width: 138px;
 }
 
@@ -41,6 +41,15 @@ menu[role=toolbar] {
   overflow: hidden;
   display: flex;
   flex-direction: column;  
+  border-top-style:solid;
+  border-top-color: var( --huey-dark-border-color );
+  border-top-width: 1px;
+
+  border-left-color: var( --huey-dark-border-color );
+  border-left-width: 1px;
+  border-left-style: solid;
+
+  border-top-left-radius: 12px;
 }
 
 .button {
@@ -63,21 +72,21 @@ menu[role=toolbar] > label:hover:has( > input[type=file])::before {
   color: var( --huey-icon-color-highlight );
 }
 
+menu[role=toolbar] > label[for=uploader] {
+  vertical-align: top;
+}
+
 menu[role=toolbar] > label[for=uploader]::before {
   content: "\eb47";
 }
 
-#registeredFiles {
-  min-width: 20em;
-}
-
 #uploader {
-  display:none;
+  display: none;
 }
 
-#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #registerPattern,
-#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #multiSelect,
-#registeredFiles:not(:has( > optgroup#fileOptionsGroup )) > optgroup#actions > #unregister {
-  pointer-events: none;
-  color: var( --huey-placeholder-color );  
-}  
+menu[role=toolbar] > #currentDatasource {
+  display: inline-block;
+  margin-block-start: 0em;
+  margin-block-end: 0em;
+  font-size: 1.5em;
+}

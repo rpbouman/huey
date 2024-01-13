@@ -190,7 +190,7 @@ class AttributeUi {
     
     var axisButton = createEl('label', {
       'data-axis': axisId,
-      "class": ['attributeUiAxisButton']
+      "class": ['button', 'attributeUiAxisButton']
     });
 
     var createInput;

@@ -58,16 +58,15 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "Verdana",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "Monospace",
-              "--huey-foreground-color": "#FFFFFF",
-              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-foreground-color": "#000000", /* Black */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#1C2E36", /* Deep Blue-Green */
+              "--huey-light-background-color": "#F0E68C", /* Khaki */
               "--huey-medium-background-color": "#5B8266", /* Sage Green */
-              "--huey-dark-background-color": "#F0E68C", /* Khaki */
-              "--huey-light-border-color": "#334D56", /* Dark Teal */
-              "--huey-dark-border-color": "#A7D3A4", /* Soft Green */
+              "--huey-dark-background-color": "#1C2E36", /* Deep Blue-Green */
+              "--huey-light-border-color": "#A7D3A4", /* Soft Green */
+              "--huey-dark-border-color": "#334D56", /* Dark Teal */
               "--huey-icon-color-subtle": "#FFA07A", /* Light Salmon */
-              "--huey-icon-color": "#000000", /* Black */
+              "--huey-icon-color": "#FFFFFF", /* White */
               "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
             },
             label: "Mallard"
@@ -79,11 +78,11 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#2F3C4B", /* Deep Blue */
-              "--huey-medium-background-color": "#FFD700", /* Gold */
+              "--huey-light-background-color": "#FFD700", /* Gold */
+              "--huey-medium-background-color": "#2F3C4B", /* Deep Blue */
               "--huey-dark-background-color": "#4B5320", /* Dark Olive Green */
-              "--huey-light-border-color": "#4B5968", /* Steel Blue */
-              "--huey-dark-border-color": "#FFA500", /* Orange */
+              "--huey-light-border-color": "#FFA500", /* Orange */
+              "--huey-dark-border-color": "#4B5968", /* Steel Blue */
               "--huey-icon-color-subtle": "#556B2F", /* Dark Olive Green */
               "--huey-icon-color": "#FFFFFF", /* White */
               "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
@@ -97,11 +96,11 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#3A3831", /* Dark Olive Green */
+              "--huey-light-background-color": "#E6E6FA", /* Lavender */
               "--huey-medium-background-color": "#8B4513", /* Saddle Brown */
-              "--huey-dark-background-color": "#E6E6FA", /* Lavender */
-              "--huey-light-border-color": "#524739", /* Dark Taupe */
-              "--huey-dark-border-color": "#CD853F", /* Peru */
+              "--huey-dark-background-color": "#3A3831", /* Dark Olive Green */
+              "--huey-light-border-color": "#CD853F", /* Peru */
+              "--huey-dark-border-color": "#524739", /* Dark Taupe */
               "--huey-icon-color-subtle": "#9370DB", /* Medium Purple */
               "--huey-icon-color": "#FFFFFF", /* White */
               "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
@@ -115,11 +114,11 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#1F2224", /* Charcoal */
+              "--huey-light-background-color": "#FFE4C4", /* Bisque */
               "--huey-medium-background-color": "#87CEEB", /* Sky Blue */
-              "--huey-dark-background-color": "#FFE4C4", /* Bisque */
-              "--huey-light-border-color": "#333B3F", /* Dark Slate Gray */
-              "--huey-dark-border-color": "#4682B4", /* Steel Blue */
+              "--huey-dark-background-color": "#1F2224", /* Charcoal */
+              "--huey-light-border-color": "#4682B4", /* Steel Blue */
+              "--huey-dark-border-color": "#333B3F", /* Dark Slate Gray */
               "--huey-icon-color-subtle": "#FFD700", /* Gold */
               "--huey-icon-color": "#FFFFFF", /* White */
               "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
@@ -131,14 +130,13 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "Verdana",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "Monospace",
-              "--huey-icon-color-highlight": "#8B4513", /* Saddle Brown */
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#008080", /* Teal */
+              "--huey-light-background-color": "#F5F5F5", /* White Smoke */
               "--huey-medium-background-color": "#D2B48C", /* Tan */
-              "--huey-dark-background-color": "#F5F5F5", /* White Smoke */
-              "--huey-light-border-color": "#2F4F4F", /* Dark Slate Gray */
-              "--huey-dark-border-color": "#8B4513", /* Saddle Brown */
+              "--huey-dark-background-color": "#008080", /* Teal */
+              "--huey-light-border-color": "#8B4513", /* Saddle Brown */
+              "--huey-dark-border-color": "#2F4F4F", /* Dark Slate Gray */
               "--huey-icon-color-subtle": "#87CEFA", /* Light Sky Blue */
               "--huey-icon-color": "#FFFFFF", /* White */
               "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */

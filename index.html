@@ -35,6 +35,9 @@
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -47,6 +50,19 @@
       <div class="loader">Loading...</div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
+
+    <dialog id="uploadUi">
+      <header>
+        <h3></h3>
+      </header>
+      <section id="uploadProgressList">
+        
+      </section>
+      <footer>
+        <button id="uploadDialogOkButton">Ok</button>
+        <button id="uploadDialogCancelButton">Cancel</button>
+      </footer>
+    </dialog>
 
     <dialog id="errorDialog">
       <header>
@@ -247,22 +263,12 @@
       </footer>
     </dialog>
         
-    <div
-      id="layout"
+    <main
+      id="layout" 
       class="layout"
       style="display: none"
     >
       <menu class="toolbar" role="toolbar">
-        <label for="registeredFiles">Files:</label>
-        <select id="registeredFiles" title="Choose a registered file, or register a new one.">
-          <option value="" selected="true"></option>
-          <optgroup id="actions" label="Actions">
-            <option id="registerNew" title="Add one or more file so you can browse and analyze their contents.">Register New...</option>
-            <option id="registerPattern" title="Enter a file name pattern to browse data from matching files.">Register Filename Pattern...</option>
-            <option id="multiSelect" title="Select multiple files so you can broswe their data (union)">Create Union...</option>
-            <option id="unregister" title="Unregister previously registered files and clear them from this list.">Unregister...</option>
-          </optgroup>
-        </select>
         <label 
           for="uploader"
           title="Open a file browser to register a file."
@@ -271,9 +277,11 @@
             id="uploader" 
             type="file"
             multiple="true"
-            accept=".parquet,.csv,.json"
+            accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
         </label>
+        <h1 id="currentDatasource">
+        </h1>
         <label id="aboutButton" class="aboutButton" title="About Huey...">
           <button
             id="aboutButton"
@@ -289,7 +297,7 @@
           >Settings</button>
         </label>
       </menu>
-      <div class="resizeHorizontal sidebar tabs">
+      <nav class="resizeHorizontal sidebar tabs">
         <div class="tabPage">
           <span 
             class="tab"
@@ -298,15 +306,23 @@
         
         <!-- Datasources tab --> 
         <div class="tabPage">
-          <label for="datasourcesTab" class="tab">Datasources</label>
+          <label 
+            for="datasourcesTab" 
+            class="tab"
+            title="Files, database tables and so on that provide data you'd like to analyze."
+          >Datasources</label>
           <input id="datasourcesTab" type="radio" name="sidebarTabs" class="tabState" checked="true"/>
-          <div class="tabPageContents">
+          <div id="datasourcesUi" class="tree tabPageContents">
           </div>
         </div>
         
         <!-- Attributes tab -->
         <div class="tabPage">
-          <label for="attributesTab" class="tab">Attributes</label>
+          <label 
+            for="attributesTab" 
+            class="tab"
+            title="Columns, formulas and aggregates to query and pivot"
+          >Attributes</label>
           <input id="attributesTab" type="radio" name="sidebarTabs" class="tabState"/>
           <div class="tabPageContents">
             <search 
@@ -325,7 +341,7 @@
             </search>
             <div 
               id="attributeUi" 
-              class="attributeUi"
+              class="tree attributeUi"
               style="flex-grow: 1;"
             >
             </div>
@@ -337,7 +353,7 @@
             class="tab"
           ></label>
         </div>
-      </div>
+      </nav>
       <div class="workarea">
         <table
           id="queryUi"
@@ -404,7 +420,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
     
     <script onload="resourceLoaded(this.src)" src="util/dom/dom.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventEmitter.js"></script>
@@ -417,14 +433,17 @@
     <script onload="resourceLoaded(this.src)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSet/TupleSet.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSet/CellSet.js"></script>
-    <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script onload="resourceLoaded(this.src)" src="AboutDialog/AboutDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="ErrorDialog/ErrorDialog.js"></script>
+    <script onload="resourceLoaded(this.src)" src="UploadUi/UploadUi.js"></script>
+    <script onload="resourceLoaded(this.src)" src="DataSource/DataSourcesUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryModel/QueryModel.js"></script>
     <script onload="resourceLoaded(this.src)" src="QueryUi/QueryUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="PivotTableUi/PivotTableUi.js"></script>   
+
+    <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script type="module">
       import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/+esm';
 

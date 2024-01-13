@@ -1,0 +1,68 @@
+.tree details > summary::marker {
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-small );
+  color: var( --huey-icon-color-subtle );
+}
+
+.tree details > summary:hover::marker {
+  color: var( --huey-icon-color-highlight );
+}
+
+.tree details > summary {
+  white-space: nowrap;
+  vertical-align: top;
+  list-style-type: "\f63f"; 
+}
+
+.tree details[open] > summary {
+  list-style-type: "\f63e";
+}
+
+.tree details > summary > .icon {
+  display: inline-block;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color );
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  text-align: center;
+}
+
+/**
+*
+* Label
+*
+*/
+
+.tree details > summary > .label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+
+.tree details > details {
+  margin-left: 24px;
+}
+
+.tree details > summary > label.button 
+{
+  display: block;
+  float: inline-end;
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+
+.tree details > summary > label.button:hover {
+  color: var( --huey-icon-color-highlight );
+}
+
+
+.tree details > summary > label.button > button {
+  display: none;
+  appearance: none;
+}

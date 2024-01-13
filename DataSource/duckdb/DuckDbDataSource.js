@@ -1,11 +1,14 @@
 class DuckDbDataSource {
   
   static types = {
+    'DUCKDB': 'duckdb',
     'FILE': 'file',
+    'FILES': 'files',
+    'SQLITE': 'sqlite',
+    'SQLQUERY': 'sql',
     'TABLE': 'table',
-    'VIEW': 'view',
     'TABLEFUNCTION': 'table function',
-    'SQLQUERY': 'sql'
+    'VIEW': 'view'
   };
   
   #defaultSampleSize = 100;
@@ -19,6 +22,8 @@ class DuckDbDataSource {
   #fileProtocol = undefined;
   #type = undefined;
   #columnMetadata = undefined;
+  #alias = undefined;
+  #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
     this.#duckDb = duckDb;
@@ -29,6 +34,8 @@ class DuckDbDataSource {
   #init(config){
     var type = config.type;
     switch (type) {
+      case DuckDbDataSource.types.DUCKDB:
+      case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
         var file = config.file;
         switch (typeof file) {
@@ -63,6 +70,7 @@ class DuckDbDataSource {
         this.#schemaName = config.schemaName;
         this.#objectName = config.functionName || config.objectName;
         break;
+      case DuckDbDataSource.types.TABLEFUNCTION:
       default:
         throw new Error(`Could not initialize the datasource: unrecognized type ${type}`);
     }
@@ -72,16 +80,26 @@ class DuckDbDataSource {
   getType(){
     return this.#type;
   }
+  
+  getId(){
+    var type = this.getType();
+    var objectName = this.getQualifiedObjectName();
+    return `${type}:${objectName}`;
+  }
  
   async registerFile(){
-    var type = this.getType();
-    var requiredType = DuckDbDataSource.types.FILE;
-    if (type !== requiredType) {
-      throw new Error(`Registerfile is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);
-    }
     var file = this.#file;
     if (! (file instanceof File)){
       throw new Error(`Configuration error: datasource of type ${requiredType} needs to have a FILE instance set in order to register it.`);
+    }
+    var type = this.getType();
+    switch (type){
+      case DuckDbDataSource.types.DUCKDB:
+      case DuckDbDataSource.types.FILE:
+      case DuckDbDataSource.types.SQLITE:
+        break;
+      default:
+        throw new Error(`Registerfile is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);      
     }
     var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
     return this.#duckDbInstance.registerFileHandle(
@@ -92,11 +110,28 @@ class DuckDbDataSource {
   }
   
   async validateAccess(){
-    var connection = await this.getConnection();
-    var qualifiedObjectName = this.getQualifiedObjectName();
-    var sql = `SELECT * FROM ${qualifiedObjectName} LIMIT 1`;
     var result;
     try{
+      var connection = await this.getConnection();
+      var type = this.getType();
+      switch (type){
+        case DuckDbDataSource.types.FILE:
+        case DuckDbDataSource.types.TABLE:
+        case DuckDbDataSource.types.VIEW:
+        case DuckDbDataSource.types.TABLEFUNCTION:
+          var fromClause = this.getFromClauseSql();
+          var sql = `SELECT * ${fromClause} LIMIT 1`;
+          break;
+        case DuckDbDataSource.types.DUCKDB:
+        case DuckDbDataSource.types.SQLITE:
+          var fileName = this.getFileName();
+          var alias = this.#alias || this.getFileNameWithoutExtension();
+          var quotedAlias = getQuotedIdentifier(alias);
+          var sql = `ATTACH '${fileName}' AS ${quotedAlias}`;
+          if (type === DuckDbDataSource.types.SQLITE){
+            sql += ` (TYPE SQLITE)`;
+          }
+      }
       var resultSet = await connection.query(sql);
       result = true;
     }
@@ -110,7 +145,9 @@ class DuckDbDataSource {
     var qualifiedObjectName;
     var type = this.getType();
     switch (type) {
+      case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.FILE:
+      case DuckDbDataSource.types.SQLITE:
         var fileName = this.#objectName;
         qualifiedObjectName = getQuotedIdentifier(fileName);
         break;
@@ -135,13 +172,89 @@ class DuckDbDataSource {
     return qualifiedObjectName;
   }
   
+  getFromClauseSql(){
+    var sql = '';
+    switch (this.getType()) {
+      case DuckDbDataSource.types.FILE:
+        var fileName = this.getFileName();
+        var quotedFileName = getQuotedIdentifier(fileName);
+        switch (this.getFileExtension()) {
+          case 'csv':
+            sql = `read_csv_auto( ${quotedFileName} )`;
+            break;
+          case 'json':
+            sql = `read_json_auto( ${quotedFileName} )`;
+            break;
+          case 'parquet':
+            sql = `read_parquet( ${quotedFileName} )`;
+            break;
+          case 'xlsx':
+            sql = `st_read( ${quotedFileName} )`;
+            break;
+        }
+        break;
+      case DuckDbDataSource.types.SQLQUERY:
+        sql = `( ${this.#sqlQuery} )`;
+        break;
+      case DuckDbDataSource.types.TABLE:
+      case DuckDbDataSource.types.VIEW:
+        var qualifiedObjectName = this.getQualifiedObjectName();
+        sql = qualifiedObjectName;
+        break;
+      case DuckDbDataSource.types.TABLEFUNCTION:
+        var qualifiedObjectName = this.getQualifiedObjectName();
+        sql = qualifiedObjectName;
+        // TODO: add parameters
+        sql += '()';
+        break;
+    }
+    
+    if (this.#alias) {
+      sql = `${sql} AS ${getQuotedIdentifier(this.#alias)}`;      
+    }
+    sql = `FROM ${sql}`;
+    
+    return sql;
+  }
+  
   getFileName(){
     var type = this.getType();
-    var requiredType = DuckDbDataSource.types.FILE;
-    if (type !== requiredType) {
-      throw new Error(`getFileName() is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);
+    switch (type){
+      case DuckDbDataSource.types.DUCKDB:
+      case DuckDbDataSource.types.FILE:
+      case DuckDbDataSource.types.SQLITE:
+        break;
+      default:
+        throw new Error(`getFileName() is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);
     }
     return this.#objectName;
+  }
+  
+  getFileNameParts(){
+    var separator = '.';
+    var fileName = this.getFileName();
+    var fileNameParts = fileName.split( separator );
+    if (fileNameParts.length < 2){
+      return undefined;
+    }
+    var extension = fileNameParts.pop();
+    var lowerCaseExtension = extension.toLowerCase();
+    var fileNameWithoutExtension = fileNameParts.join( separator );
+    return {
+      extension: extension,
+      lowerCaseExtension: lowerCaseExtension,
+      fileNameWithoutExtension: fileNameWithoutExtension
+    };
+  }
+  
+  getFileExtension(){
+    var parts = this.getFileNameParts();
+    return parts.lowerCaseExtension;
+  }
+
+  getFileNameWithoutExtension(){
+    var parts = this.getFileNameParts();
+    return parts.fileNameWithoutExtension;
   }
 
   getObjectName(){

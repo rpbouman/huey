@@ -152,6 +152,26 @@ function getAncestorWithClassName(dom, classNames, allOrSome, includeSelf){
   return undefined;
 }
 
+function getAncestorWithAttributeValue(dom, attributeName, attributeValue, includeSelf){
+  if (!dom) {
+    return undefined;
+  }
+  
+  if (includeSelf === undefined) {
+    includeSelf = true;
+  }
+  
+  var node = includeSelf ? dom : dom.parentNode;
+  while(isEl(node)) {
+    var value = node.getAttribute(attributeName);
+    if (value === attributeValue) {
+      return node;
+    }
+    node = node.parentNode;
+  }    
+  return undefined;
+}
+
 function isEl(node){
   return node && node.nodeType === 1;
 }
