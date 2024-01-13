@@ -11,6 +11,42 @@ class DuckDbDataSource {
     'VIEW': 'view'
   };
   
+  static fileTypes = {
+    'csv': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_csv_auto',
+    },
+    'tsv': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_csv_auto'
+    },
+    'txt': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_csv_auto'
+    },
+    'json': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_json_auto',
+      duckdb_extension: 'json'
+    },
+    'parquet': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_parquet'
+    },
+    'xlsx': {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'st_read',
+      extension: 'spatial'
+    },
+    'duckdb': {
+      datasourceType: DuckDbDataSource.types.DUCKDB
+    },
+    'sqlite': {
+      datasourceType: DuckDbDataSource.types.SQLITE,
+      extension: 'sqlite'
+    }
+  };
+  
   #defaultSampleSize = 100;
   
   #duckDb = undefined;
@@ -180,6 +216,8 @@ class DuckDbDataSource {
         var quotedFileName = getQuotedIdentifier(fileName);
         switch (this.getFileExtension()) {
           case 'csv':
+          case 'tsv':
+          case 'txt':
             sql = `read_csv_auto( ${quotedFileName} )`;
             break;
           case 'json':
@@ -230,9 +268,13 @@ class DuckDbDataSource {
     return this.#objectName;
   }
   
-  getFileNameParts(){
+  static getFileNameParts(fileName){
+    if (fileName instanceof File) {
+      fileName = fileName.name;
+    }
+    
     var separator = '.';
-    var fileName = this.getFileName();
+    var fileName = file.name;
     var fileNameParts = fileName.split( separator );
     if (fileNameParts.length < 2){
       return undefined;
@@ -247,13 +289,18 @@ class DuckDbDataSource {
     };
   }
   
+  #getFileNameParts(){
+    var fileName = this.getFileName();
+    return DuckDbDataSource.getFileNameParts(fileName);
+  }
+  
   getFileExtension(){
-    var parts = this.getFileNameParts();
+    var parts = this.#getFileNameParts();
     return parts.lowerCaseExtension;
   }
 
   getFileNameWithoutExtension(){
-    var parts = this.getFileNameParts();
+    var parts = this.#getFileNameParts();
     return parts.fileNameWithoutExtension;
   }
 

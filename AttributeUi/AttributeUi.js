@@ -177,13 +177,12 @@ class AttributeUi {
   constructor(id, queryModel){
     this.#id = id;
     this.#queryModel = queryModel;
-    
-    this.getDom().addEventListener('click', this.#clickHandler.bind(this));
 
+    var dom = this.getDom();
+    dom.addEventListener('click', this.#clickHandler.bind(this));
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
-    
   }
-  
+    
   #renderAttributeUiNodeAxisButton(config, head, axisId){
     var name = `${config.type}_${config.profile.column_name}`;
     var id = `${name}`;

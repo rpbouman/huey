@@ -28,9 +28,8 @@ class UploadUi {
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
       this.getDom().close();
-    }.bind(this));
-    
-  }
+    }.bind(this));    
+  }  
   
   #cancelUploads(){
     this.#cancelPendingUploads = true;

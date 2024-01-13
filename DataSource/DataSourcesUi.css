@@ -2,6 +2,13 @@
   padding-top: 16px;
 }
 
+#datasourcesUi[data-drop-allowed=true] {
+  cursor: 'copy';
+}
+
+#datasourcesUi[data-drop-allowed=false] {
+  cursor: 'not-allowed';
+}
 
 #datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > .icon::before,
 #datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > summary > .icon::before,

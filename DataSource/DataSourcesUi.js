@@ -5,8 +5,65 @@ class DataSourcesUi {
   
   constructor(id){
     this.#id = id;
+
+    var dom = this.getDom();
+    
+    dom.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
+    dom.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
+    dom.addEventListener('dragover', this.#dragOverHandler.bind(this));
+    dom.addEventListener('drop', this.#dropHandler.bind(this));
   }
-  
+
+  #dragEnterHandler(event) {
+    var valid = true;
+    
+    var dataTransfer = event.dataTransfer;
+    dataTransfer.dropEffect = 'copy';
+    return;
+    var files = dataTransfer.files;
+    valid = Boolean(files.length);
+    var fileTypes = DuckDbDataSource.fileTypes;
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var fileName = file.name;
+      var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+      var fileExtension = fileNameParts.lowerCaseExtension;
+      var fileType = fileTypes[fileExtension];
+      valid = Boolean(fileType);
+      if (!valid){
+        break;
+      }
+    }
+    this.getDom().setAttribute('data-drop-allowed', valid);
+    event.stopPropagation(); 
+    event.preventDefault();
+  }
+
+  #dragLeaveHandler(event) {
+    event.stopPropagation(); 
+    event.preventDefault();
+    this.getDom().setAttribute('data-drop-allowed', '');
+  }
+
+  #dragOverHandler(event) {
+    event.stopPropagation(); 
+    event.preventDefault();
+    
+    var dataTransfer = event.dataTransfer;
+    console.log('dragover');
+  }
+
+  #dropHandler(event) {
+    event.preventDefault();
+    event.stopPropagation(); 
+    var dataTransfer = event.dataTransfer;
+    var files = dataTransfer.files;
+    if (files.length) {
+      uploadUi.uploadFiles(files);
+    }
+    console.log('drop');
+  }
+    
   getDom(){
     return byId(this.#id);
   }
