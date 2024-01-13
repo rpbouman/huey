@@ -1,5 +1,4 @@
 #datasourcesUi {
-  padding-top: 16px;
 }
 
 #datasourcesUi[data-drop-allowed=true] {
@@ -25,8 +24,18 @@
   content: '\faf7';
 }
 
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
+  /* bucket */
+  content: '\ea47';
+}
+
+#datasourcesUi details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
+  /* bucket droplet */
+  content: '\f56a';
+}
+
 #datasourcesUi details > summary > .label  {
-  max-width: calc(100% - 100px);
+  max-width: calc(100% - 104px);
 }
 
 #datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-sourcetype=file] > summary {

@@ -187,6 +187,32 @@ class DuckDbDataSource {
     )
   }
   
+  async destroy(){
+    var id = this.getId();
+    try {
+      if (this.#file) {
+        return this.#duckDbInstance.dropFile(this.#file.name);
+      }
+    }
+    catch (error){
+      console.error(`Error destroying datasource ${id}: ${error.message}`);
+      console.error(error.stack);
+    }
+    finally {
+      this.#duckDb = undefined;
+      this.#duckDbInstance = undefined;
+      this.#connection = undefined;
+      this.#schemaName = undefined;
+      this.#objectName = undefined;
+      this.#file = undefined;
+      this.#fileProtocol = undefined;
+      this.#type = undefined;
+      this.#columnMetadata = undefined;
+      this.#alias = undefined;
+      this.#sqlQuery = undefined;
+    }
+  }
+  
   async validateAccess(){
     var result;
     try{

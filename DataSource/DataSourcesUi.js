@@ -95,21 +95,40 @@ class DataSourcesUi {
   }
   
   async #getTabularDatasourceTypeSignature(datasource){
-    var signature;
+    var typeSignature;
     var type  = datasource.getType();
     var fileType = datasource.getFileExtension();
     var columnMetadata = await datasource.getColumnMetadata();
     var columnMetadataSerialized = {};
+    var datasourceSettings = settings.getSettings('datasourceSettings');
+    var useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
+    var looseColumnTypes = datasourceSettings.looseColumnTypes;
     for (var i = 0; i < columnMetadata.numRows; i++){
       var row = columnMetadata.get(i);
-      columnMetadataSerialized[row.column_name] = row.column_type;
+      
+      var columnType = row.column_type;
+      var comparisonColumnType = undefined;
+      if (useLooseColumnComparisonType) {
+        for (var looseType in looseColumnTypes){
+          var columnTypes = looseColumnTypes[looseType];
+          if (columnTypes.indexOf(columnType) === -1) {
+            continue;
+          }
+          comparisonColumnType = looseType;
+        }
+      }
+      if (comparisonColumnType === undefined) {
+        comparisonColumnType = columnType;
+      }
+      columnMetadataSerialized[row.column_name] = comparisonColumnType;
     }
     var columnMetadataSerializedJSON = JSON.stringify(columnMetadataSerialized);
-    signature = `${type}:${fileType}:${columnMetadataSerializedJSON}`; 
-    return signature;
+    typeSignature = `${type}:${fileType}:${columnMetadataSerializedJSON}`; 
+    return typeSignature;
   }
   
-  async renderDatasources(){
+  async #renderDatasources(){
+    this.clear();    
     var node, group, potentialGroups = {};
     var datasources = this.#datasources;
 
@@ -120,12 +139,13 @@ class DataSourcesUi {
       var group = undefined;
       switch (type){
         case DuckDbDataSource.types.FILE:
-          var signature = await this.#getTabularDatasourceTypeSignature(datasource);
-          group = potentialGroups[signature];
+          var typeSignature = await this.#getTabularDatasourceTypeSignature(datasource);
+          group = potentialGroups[typeSignature];
           if (!group) {
-            potentialGroups[signature] = group = {
+            potentialGroups[typeSignature] = group = {
               type: DuckDbDataSource.types.FILE,
-              filetype: datasource.getFileExtension(),
+              fileType: datasource.getFileExtension(),
+              typeSignature: typeSignature,
               datasources: {}
             };
           }
@@ -146,10 +166,10 @@ class DataSourcesUi {
     }.bind(this));
     await Promise.all(groupingPromises);
     
-    this.createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
+    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
     delete potentialGroups[DuckDbDataSource.types.DUCKDB];
     
-    this.createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
+    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
     delete potentialGroups[DuckDbDataSource.types.SQLITE];
     
     for (var groupId in potentialGroups){
@@ -170,14 +190,13 @@ class DataSourcesUi {
         miscGroup.datasources[datasource.getId()] = datasource;
       }
       else {
-        this.createDataSourceGroupNode(group);
+        this.#createDataSourceGroupNode(group);
       }
       delete potentialGroups[groupId];
     }
 
-    this.createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
+    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
-
   }
   
   static getCaptionForDatasource(datasource){
@@ -192,11 +211,31 @@ class DataSourcesUi {
     }
   }
   
-  createDatasourceNode(datasource){
+  #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
+    var analyzeActionButton = this.#renderDatasourceActionButton({
+      id: datasourceId + '_analyze',
+      "className": "analyzeActionButton",
+      events: {
+        click: this.#analyzeDatasourceClicked.bind(this)
+      }
+    });
+    summaryElement.appendChild(analyzeActionButton);
+
+    var removeActionButton = this.#renderDatasourceActionButton({
+      id: datasourceId + '_remove',
+      "className": "removeActionButton",
+      events: {
+        click: this.#removeDatasourceClicked.bind(this)
+      }
+    });
+    summaryElement.appendChild(removeActionButton);
+  }
+  
+  #createDatasourceNode(datasource){
     var type = datasource.getType();
-    var datasourceId = datasource.getId();
+    var dataSourceId = datasource.getId();
     var datasourceNode = createEl('details', {
-      id: datasourceId,
+      id: dataSourceId,
       "data-nodetype": 'datasource',
       "data-sourcetype": type,
       open: true
@@ -223,39 +262,37 @@ class DataSourcesUi {
     }, caption);
     summary.appendChild(label);
     
-    var analyzeActionButton = this.#renderDatasourceActionButton({
-      id: datasourceId + '_analyze',
-      "className": "analyzeActionButton",
-      events: {
-        click: this.#analyzeDatasourceClicked.bind(this)
-      }
-    });
-    summary.appendChild(analyzeActionButton);
-
-    var removeActionButton = this.#renderDatasourceActionButton({
-      id: datasourceId + '_remove',
-      "className": "removeActionButton",
-      events: {
-        click: this.#removeDatasourceClicked.bind(this)
-      }
-    });
-    summary.appendChild(removeActionButton);
+    this.#createDatasourceNodeActionButtons(dataSourceId, summary);
 
     return datasourceNode;
   }
   
-  #analyzeDatasourceClicked(event){    
+  #getDatasourceFromClickEvent(event){
     var target = event.target;
     var datasourceNode = getAncestorWithAttributeValue(target, 'data-nodetype', 'datasource', true);
     var dataSourceId = datasourceNode.id;
     var datasource = this.getDatasource(dataSourceId);
+    return datasource;
+  }
+
+  #analyzeDatasourceClicked(event){    
+    var datasource = this.#getDatasourceFromClickEvent(event);
+    // todo: replace direct call to global analyze with fireEvent
     analyzeDatasource(datasource);
   }
   
   #removeDatasourceClicked(event){
+    // todo: if the current datasource is currently used by the attribute, query or pivot ui, those should be cleared
+    // we should solve this by firing an event.
+    
+    var datasource = this.#getDatasourceFromClickEvent(event);
+    var id = datasource.getId();
+    delete this.#datasources[id];
+    datasource.destroy();
+    this.#renderDatasources();
   }
   
-  getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
+  #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
     switch (datasourceGroup.type) {
       case DuckDbDataSource.types.DUCKDB:
         return 'DuckDB';
@@ -273,19 +310,37 @@ class DataSourcesUi {
     }
   }
   
-  createDataSourceGroupNode(datasourceGroup, miscGroup){
+  #createDataSourceGroupNode(datasourceGroup, miscGroup){
     if (datasourceGroup === undefined){ 
       return;
     }
-    
+
+    var groupType = datasourceGroup.type;
     var groupNode = createEl('details', {
       "data-nodetype": 'datasourcegroup',
-      "data-grouptype": datasourceGroup.type,
+      "data-grouptype": groupType,
       open: true
     });
-    if (datasourceGroup.type === DuckDbDataSource.types.FILE) {
-      groupNode.setAttribute('data-filetype', datasourceGroup.fileType);
+
+    var groupTitle;
+    switch (groupType) {
+      case DuckDbDataSource.types.FILE:
+        if (miscGroup === true) {
+          groupTitle = 'Miscellanous files';
+        }
+        else {
+          groupNode.setAttribute('data-filetype', datasourceGroup.fileType);
+        }
+        
+        if (datasourceGroup.typeSignature) {
+          groupTitle = 'Bucked of similarly typed files.';
+        }
+        break;
+      default:
+        groupTitle = `${groupType}`;
     }
+    groupNode.setAttribute('title', groupTitle);
+    
     var summary = createEl('summary', {
     });
     groupNode.appendChild(summary);
@@ -295,16 +350,20 @@ class DataSourcesUi {
     });
     summary.appendChild(icon);
     
-    var caption = this.getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
+    var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
     var label = createEl('span', {
       class: 'label'
     }, caption);
     summary.appendChild(label);
     
+    if (datasourceGroup.typeSignature) {
+      this.#createDatasourceNodeActionButtons(datasourceGroup.typeSignature, summary);
+    }
+    
     var datasources = datasourceGroup.datasources;
     Object.keys(datasources).map(function(datasourceId){
       var datasource = datasources[datasourceId];
-      var datasourceNode = this.createDatasourceNode(datasource);
+      var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
     }.bind(this));
     
@@ -314,12 +373,11 @@ class DataSourcesUi {
   }
   
   addDatasources(datasources){
-    this.clear();
     datasources.forEach(function(datasource){
       var id = datasource.getId();
       this.#datasources[id] = datasource;
     }.bind(this));
-    this.renderDatasources();
+    this.#renderDatasources();
   }
   
   getDatasource(id) {

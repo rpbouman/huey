@@ -44,13 +44,12 @@ class UploadUi {
     var instance = hueyDb.instance;
 
     var duckDbDataSource;
-    var fileRegistered = false;
+    var destroyDatasource = false;
     try {
       duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
       progressBar.value = parseInt(progressBar.value, 10) + 10;
       
       await duckDbDataSource.registerFile();
-      fileRegistered = true;
       progressBar.value = parseInt(progressBar.value, 10) + 10;
         
       var canAccess = await duckDbDataSource.validateAccess();
@@ -63,16 +62,18 @@ class UploadUi {
         progressBar.value = 100;
       }
       else {
+        destroyDatasource = true;
         return new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
       }
       return duckDbDataSource;
     }
     catch (error){
+      destroyDatasource = true;
       return error;
     }
     finally {
-      if (fileRegistered && !(duckDbDataSource instanceof DuckDbDataSource)){
-        await instance.dropFile(file.name);
+      if (destroyDatasource && (duckDbDataSource instanceof DuckDbDataSource)){
+        duckDbDataSource.destroy();
       }
     }
   }

@@ -83,13 +83,26 @@
         id="settingsTabs"
         class="tabs"
       >
-        <div class="tabPage">
-          <span 
-            class="tab"
-          >
-          </label>
-        </div>
+        <div class="tabPage"><span class="tab"></span></div>
         
+        <!--
+          Datasources settings
+        -->
+        <div class="tabPage">
+          <label 
+            class="tab"
+            for="datasourcesSettingTab"
+          >
+            Datasources
+          </label>
+          <input id="datasourcesSettingTab" type="radio" name="settingsTabs" class="tabState" checked="true"/>
+          <div class="tabPageContents">
+            <form id="datasourceSettings">
+              <label for="registeredFileTypes">UNION loose typing</label>
+              <input id="useLooseColumnTypeComparison" type="checkbox"/>
+            </form>
+          </div>
+        </div>
         <!--
           File settings
         -->
@@ -100,7 +113,7 @@
           >
             Files
           </label>
-          <input id="fileSettingTab" type="radio" name="settingsTabs" class="tabState" checked="true"/>
+          <input id="fileSettingTab" type="radio" name="settingsTabs" class="tabState"/>
           <div class="tabPageContents">
             <form id="fileSettings">
               <label for="registeredFileTypes">File types</label>
@@ -232,11 +245,7 @@
           </div>
         </div>
         
-        <div class="tabPage">
-          <span 
-            class="tab"
-          ></label>
-        </div>
+        <div class="tabPage"><span class="tab"></span></div>
       </section>
       <footer>
         <button id="settingsDialogOkButton">Ok</button>

@@ -5,6 +5,31 @@ class Settings extends EventEmitter {
   #id = undefined;
   
   #settingsTemplate = {
+    datasourceSettings: {
+      useLooseColumnTypeComparison: false,
+      looseColumnTypes: {
+        // loosest numeric class.
+        number: [],
+        // loosest integer class.
+        integer: [],
+        // loosest signed integer class
+        signed: ['BIGINT', 'INTEGER', 'HUGEINT', 'SMALLINT', 'TINYINT'],
+        // loosest unsigned integer class
+        unsigned: ['UBIGINT', 'UINTEGER', 'USMALLINT', 'UTINYINT'],
+        // loosest fractional number
+        fractional: [],
+        // loosest approximat (fractional) number
+        approximate: ['DOUBLE', 'REAL'],
+        // loosest fixed fractional number. 
+        fixed: [],
+        // loosest date time temporal
+        dateTime: [],
+        // loosest character string class
+        string: [],
+        // loosest binary class
+        binary: []
+      }
+    },
     fileSettings: {
       registeredFileTypes: {
         options: [
