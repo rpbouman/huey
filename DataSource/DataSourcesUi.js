@@ -335,7 +335,6 @@ class DataSourcesUi {
     switch (nodeType) {
       case 'datasource':
         var dataSourceId = node.id;
-        this.destroyDatasources([dataSourceId]);
         datasourceIdsList = [dataSourceId];
         break;
       case 'datasourcegroup':
