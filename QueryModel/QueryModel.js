@@ -1,6 +1,13 @@
-class QueryAxisItem {
+class QueryAxisItemValueFormatter {
+  
+  #logicalType = undefined;
+  #axisItem = undefined;
+  #formatter = undefined;
+  #decimalSeparator = undefined;
+  
+  constructor(axisItem) {
+    this.#axisItem = axisItem;
 
-  static createFormatter(axisItem){
     var isNumeric, isInteger;
 
     var columnType = axisItem.columnType;
@@ -13,6 +20,7 @@ class QueryAxisItem {
       var preservesColumnType = aggregatorInfo.preservesColumnType
       
       if (preservesColumnType) {
+        this.#logicalType = columnType;
         isNumeric = columnTypeInfo.isNumeric;
         isInteger = columnTypeInfo.isInteger;
       }
@@ -24,6 +32,7 @@ class QueryAxisItem {
       if (aggregator === 'sum' && columnTypeInfo.isInteger) {
         isInteger = true;
       }
+      
     }
     
     var derivation = axisItem.derivation;
@@ -32,6 +41,7 @@ class QueryAxisItem {
       var derivationInfo = derivations[derivation];
       var dataType = derivationInfo.dataType;
       if (dataType) {
+        this.#logicalType = dataType;
         var typeInfo = dataTypes[dataType];
         isNumeric = typeInfo.isNumeric;
         isInteger = typeInfo.isInteger;
@@ -56,9 +66,174 @@ class QueryAxisItem {
         options.maximumFractionDigits = localeSettings.maximumFractionDigits        
       }
       
-      formatter = new Intl.NumberFormat(locales, options);
+      this.#formatter = new Intl.NumberFormat(locales, options);
+      this.#decimalSeparator = this.#formatter.formatToParts(123.456)['decimal'];
+    }
+  }
+  
+  // this has the job of converting the resultset value to a value that our formatter can format
+  // value as it is extracted from the resultset
+  // field as it is extracted from the resultset.
+  convertValue(value, field){
+    if (value === null || value === undefined) {
+      return value;
     }
     
+    var valueType = typeof value;
+    var fieldTypeId = field.typeId;
+    var fieldTypeName = field.type.toString();
+    
+    var convertedValue = value;
+    var stringValue;
+    // see all type Ids: https://github.com/apache/arrow/blob/740889f413af9b1ae1d81eb1e5a4a9fb4ce9cf97/js/src/enum.ts#L158
+    switch (fieldTypeId){
+      /** NONE - The default placeholder type */
+      case 0: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** A NULL type having no physical storage */
+      case 1:  
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Int - Signed or unsigned 8, 16, 32, or 64-bit little-endian integer */
+      case 2:
+        switch (valueType){
+          case 'number':
+          case 'bigint':
+            break;
+          default:
+            console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId} and value type ${valueType}. Don't know how to convert`);
+        }
+        break;
+      /** Float 2, 4, or 8-byte floating point value */
+      case 3: 
+        switch (valueType){
+          case 'number':
+            break;
+          default:
+            console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId} and value type ${valueType}. Don't know how to convert`);
+        }
+        break;
+      /** Binary Variable-length bytes (no guarantee of UTF8-ness) */
+      case 4:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** UTF8 variable-length string as List<Char> */
+      case 5:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Boolean as 1 bit, LSB bit-packed ordering */
+      case 6: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Precision-and-scale-based decimal type. Storage type depends on the parameters. */
+      case 7:
+        switch (valueType) {
+          case 'number':
+          case 'bigint':
+            break;
+          default:
+            stringValue = String(value);
+            if (field.type.scale === 0) {
+              convertedValue = BigInt(stringValue);
+            }
+            else
+            if (this.#formatter) {
+              var parts = stringValue.split('.');
+              var integerPart = this.#formatter.formatToParts(BigInt(parts[0]))['integer'];
+              var fractionPart = part[1];
+              convertedValue = `${integerPart}${this.#decimalSeparator}${fractionPart}`;
+            }
+            else {
+              convertedValue = stringValue;
+            }
+        }
+        break;
+      /** Date int32_t days or int64_t milliseconds since the UNIX epoch */
+      case 8: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Time as signed 32 or 64-bit integer, representing either seconds, milliseconds, microseconds, or nanoseconds since midnight since midnight */
+      case 9:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Timestamp =  Exact timestamp encoded with int64 since UNIX epoch (Default unit millisecond) */
+      case 10: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Interval YEAR_MONTH or DAY_TIME interval in SQL style */
+      case 11: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** List A list of some logical data type */
+      case 12: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Struct of logical types */
+      case 13:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Union of logical types */      
+      case 14:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Fixed-size binary. Each value occupies the same number of bytes */
+      case 15: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Fixed-size list. Each value occupies the same number of bytes */      
+      case 16: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Map of named logical types */
+      case 17: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      /** Measure of elapsed time in either seconds, miliseconds, microseconds or nanoseconds. */ 
+      case 18: 
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        break;
+      default:
+        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+    }
+    
+    return convertedValue;
+  }
+  
+  // value as it is extracted from the resultset
+  // field as it is extracted from the resultset.
+  // we need the field because the data type in the resultset may not always be simply aligned with the logical data type
+  // for example, 
+  // - Timestamp values may be returned as JavaScript Number values representing the milliseconds since epoch
+  // - HugeInt values may be return as Uint32 arrays
+  format(value, field) {
+    if (value === null || value === undefined) {
+      // TODO: there might be a requirement to display NULL values explicitly
+      return '';
+    }
+    var convertedValue = this.convertValue(value, field);
+    var formattedValue;
+    if (typeof convertedValue === 'string'){
+      // in this case, the converter already decided it was going to be impossible for the formatter to do it correctly
+      // this happens for example for Decimal type
+      formattedValue = convertedValue;
+    }
+    else {
+      if (this.#formatter) {
+        formattedValue = this.#formatter.format(convertedValue);
+      }
+      else {
+        formattedValue = String(convertedValue);
+      }
+    }
+    return formattedValue;
+  }
+}
+
+class QueryAxisItem {
+
+  static createFormatter(axisItem){
+    var formatter = new QueryAxisItemValueFormatter(axisItem);
     return formatter;
   }
 

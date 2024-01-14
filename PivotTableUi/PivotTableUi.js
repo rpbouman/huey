@@ -379,7 +379,7 @@ class PivotTableUi {
     var formatter = cellsAxisItem.formatter;
     
     if (formatter) {
-      labelText = formatter.format(value);
+      labelText = formatter.format(value, cellValueField);
     }
     else
     if (value === null){
