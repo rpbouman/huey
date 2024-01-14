@@ -20,19 +20,25 @@ Huey is a web application that lets you inspect and analyze tabular datasets sto
 
 ### Registering Files
 Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to access and analyze files. 
-Due to general security policy, the web browser can not simply read arbitrary files from your local computer: you need to explicitly browse for a file so it can be registered in DuckDB WASM's virtual file system. 
+Due to general security policy, the web browser can not simply read arbitrary files from your local computer: you need to explicitly select files and register them in DuckDB WASM's virtual file system. 
 
-To register a file, either select the 'Register New...' option in the 'Files' dropdown list. (This dropdown is located left in the toolbar in the top of the page).
-Alternatively, you can click the 'Upload...' button, which is immediately to the right of the Files dropdown list.
-Either of these actions will pop up a dialog that lets you browse and choose files on your local computer.
+To register one or more files, you can either 
+1) Click the 'Upload...' button, which is the leftmost button on the toolbar at the top of the page.
+2) Drag 'n Drop one or more files unto the "Datasources" tab in the sidebar. (The sidebar is on the left of the screen)
+
+Either of these actions will pop up a dialog that lets you browse and choose one or more files from your local filesystem.
 In the file browser dialog, navigate to the file or files that you want to analyze, select them and then confirm the dialog by clicking the 'Ok' button.
+
 After confirming the dialog, Huey will attempt to register the files in DuckDb. 
+The successfully registered files are added to the "Datasources" tab in the sidebar.
 
-The successfully registered files are added to the 'Files' dropdown list so you can analyze them.
+When registering new files, Huey will attempt to group files having similar column signature. The group appears as a separate node in the Datasources tab, and the individual files appear indented below it.
 
-### Analyzing files
-After selecting a registered file from the 'Files' dropdown list, the sidebar at the left side of the page is populated with a list of its Attributes.
-You can think of Attributes as a list of values (a column) that can be extracted from the file and presented along the axes of the pivot table.
+Files that cannot be grouped appear in a separate Miscellanous Files group.
+
+### Analyzing Datasources
+The Datasources have an analyze button. After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
+You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
 
 The pivot table has two axes for placing attribute values:
 1) Attributes appearing on the horizontal axis are used to generate column headers. For this reason the horizontal axis is also known as the 'columns'-axis.
