@@ -76,6 +76,7 @@ class DataSourcesUi {
     var actionButton = createEl('label', {
       "class": 'button' + (config.className ? ' ' + (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
       "for": config.id,
+      title: config.title
     });
 
     var button = createEl('button',{
@@ -215,6 +216,7 @@ class DataSourcesUi {
     var analyzeActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
+      title: 'Open the this datasource in the Query editor',
       events: {
         click: this.#analyzeDatasourceClicked.bind(this)
       }
@@ -224,6 +226,7 @@ class DataSourcesUi {
     var removeActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_remove',
       "className": "removeActionButton",
+      title: 'Remove this datasource',
       events: {
         click: this.#removeDatasourceClicked.bind(this)
       }
@@ -232,13 +235,16 @@ class DataSourcesUi {
   }
   
   #createDatasourceNode(datasource){
+    var caption = DataSourcesUi.getCaptionForDatasource(datasource);
+
     var type = datasource.getType();
     var dataSourceId = datasource.getId();
     var datasourceNode = createEl('details', {
       id: dataSourceId,
       "data-nodetype": 'datasource',
       "data-sourcetype": type,
-      open: true
+      "title": caption,
+      "open": true
     });
 
     var extension;
@@ -256,7 +262,6 @@ class DataSourcesUi {
     
     datasourceNode.appendChild(summary);
     
-    var caption = DataSourcesUi.getCaptionForDatasource(datasource);
     var label = createEl('span', {
       class: 'label'
     }, caption);
