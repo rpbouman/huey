@@ -35,7 +35,6 @@ class AttributeUi {
       isNumeric: true,
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnName} )',
-      forNumeric: true
     },
     'avg': {
       isNumeric: true,
