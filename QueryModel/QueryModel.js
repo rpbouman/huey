@@ -20,6 +20,10 @@ class QueryAxisItem {
         isNumeric = aggregatorInfo.isNumeric;
         isInteger = aggregatorInfo.isInteger;
       } 
+      
+      if (aggregator === 'sum' && columnTypeInfo.isInteger) {
+        isInteger = true;
+      }
     }
     
     var derivation = axisItem.derivation;
