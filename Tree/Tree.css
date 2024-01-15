@@ -4,6 +4,11 @@
   color: var( --huey-icon-color-subtle );
 }
 
+*[role=tree] details[role=treeitem] > summary:hover {
+  background-color: var( --huey-dark-background-color );
+  color: var( --huey-icon-color-highlight );
+}
+
 *[role=tree] details[role=treeitem] > summary:hover::marker {
   color: var( --huey-icon-color-highlight );
 }
@@ -11,6 +16,7 @@
 *[role=tree] details[role=treeitem] > summary {
   white-space: nowrap;
   vertical-align: top;
+  line-height: 20px;
   list-style-type: "\f63f"; 
 }
 
