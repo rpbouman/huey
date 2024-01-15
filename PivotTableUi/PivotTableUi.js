@@ -119,7 +119,7 @@ class PivotTableUi {
   
   #setBusy(busy){
     var dom = this.getDom();
-    dom.setAttribute('data-updating', String(Boolean(busy)));
+    dom.setAttribute('aria-busy', String(Boolean(busy)));
   }
   
   #handleInnerContainerScrolled(event, count){
@@ -217,6 +217,7 @@ class PivotTableUi {
     var maxColumnIndex = columnsAxisSizeInfo.headers.columnCount + count;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#columnsTupleSet;
+    
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
@@ -298,6 +299,7 @@ class PivotTableUi {
     var count = rowsAxisSizeInfo.rows.rowCount;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#rowsTupleSet;
+    
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();

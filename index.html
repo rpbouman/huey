@@ -28,7 +28,8 @@
       crossorigin="true"
     />
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Theme/General.css"/>
-    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/Spinner.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
@@ -74,7 +75,7 @@
         <button id="errorDialogOkButton">Ok</button>
       </footer>
     </dialog>
-
+    
     <dialog id="settingsDialog">
       <header>
         <h3>Settings</h3>
@@ -118,21 +119,9 @@
             <form id="fileSettings">
               <label for="registeredFileTypes">File types</label>
               <select id="registeredFileTypes">
-                <!--
-                <option value=".csv" selected="true">Comma seperated (*.csv)</option>
-                <option value=".json">JSON (*.json)</option>
-                <option value=".parquet">Parquet (*.parquet)</option>
-                <option value=".txt">Text (*.txt)</option>
-                -->
               </select>
               <label for="defaultActionForFileType">File type default action</label>
               <select id="defaultActionForFileType">
-                <!--
-                <option value="SelectFrom" selected="true">SELECT FROM</option>
-                <option value="csvWizard">csv wizard</option>
-                <option value="jsonWizard">json wizard</option>
-                <option value="parquetWizard">parquet wizard</option>
-                -->
               </select>
             </form>
           </div>
@@ -278,10 +267,7 @@
       style="display: none"
     >
       <menu class="toolbar" role="toolbar">
-        <label 
-          for="uploader"
-          title="Open a file browser to register a file."
-        >
+        <label for="uploader" title="Register local data files to analyze them with Huey">
           <input 
             id="uploader" 
             type="file"
@@ -289,21 +275,26 @@
             accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
         </label>
-        <h1 id="currentDatasource">
-        </h1>
-        <label id="aboutButton" class="aboutButton" title="About Huey...">
+        
+        <h1 id="currentDatasource"></h1>
+        
+        <label for="aboutButton" class="aboutButton" title="About Huey...">
           <button
             id="aboutButton"
           >About</button>
-        </label>      
+        </label>
+        
         <label
           for="settingsButton"
           class="button settings"
           title="Open the Huey Settings dialog."
         >
-          <button
-            id="settingsButton"
-          >Settings</button>
+          <button id="settingsButton">Settings</button>
+        </label>
+        
+        <!-- https://shell.duckdb.org/docs/classes/index.AsyncDuckDB.html#copyFileToBuffer -->
+        <label for="downloadButton" class="button" title="Download...">
+          <button id="downloadButton" onclick="testDownload(this)">Download</button>
         </label>
       </menu>
       <nav class="resizeHorizontal sidebar tabs">
@@ -323,7 +314,11 @@
             title="Files, database tables and so on that provide data you'd like to analyze."
           >Datasources</label>
           <input id="datasourcesTab" type="radio" name="sidebarTabs" class="tabState" checked="true"/>
-          <div id="datasourcesUi" class="tree tabPageContents">
+          <div 
+            id="datasourcesUi" 
+            class="tabPageContents"
+            role="tree"
+          >
           </div>
         </div>
         
@@ -352,8 +347,9 @@
             </search>
             <div 
               id="attributeUi" 
-              class="tree attributeUi"
+              class="attributeUi"
               style="flex-grow: 1;"
+              role="tree"
             >
             </div>
           </div>          
@@ -411,8 +407,27 @@
             border-color: var( --huey-dark-border-color );
             border-top-style: solid;
           "
-          data-updating="false"
+          aria-busy="false"
         >
+          <div role="progressbar">
+            <header>
+              <div class="loader loader-medium">Loading...</div>
+              <div class="timer">
+                <span class="digit"></span>
+                <span class="digit"></span>
+                <span class="digit"></span>
+                <span class="digit"></span>
+              </div>
+            </header>
+            <section>
+              <!-- TODO: actual progress information -->
+            </section>
+            <footer>
+              <center>
+                <button id="queryProgressCancelDialog">Cancel</button>
+              </center`>
+            </footer>
+          </div>
           <div 
             class="pivotTableUiInnerContainer"
           >

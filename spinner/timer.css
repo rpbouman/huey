@@ -1,0 +1,165 @@
+div.timer {
+  font-family: var( --huey-monospace-font-family );
+  text-align: center;
+}
+
+div.timer > span.digit {
+  position: relative;
+  display: inline-block;
+  margin: 0px;
+  margin-block:0px;
+  padding-inline: 0px;
+  counter-reset: digit 0;
+}
+
+div.timer > span.digit {
+  margin: -2px;
+}
+
+div.timer > span.digit::after {
+  content: counter(digit); 
+}
+
+@keyframes single-digit {
+  0% {
+    counter-set: digit 0;
+  }
+  9.99% {
+    counter-set: digit 0;
+  }
+
+  10% {
+    counter-set: digit 1;
+  }
+  19.99% {
+    counter-set: digit 1;
+  }
+  
+  20% {
+    counter-set: digit 2;
+  }
+  29.99% {
+    counter-set: digit 2;
+  }
+
+  30% {
+    counter-set: digit 3;
+  }
+  39.99% {
+    counter-set: digit 3;
+  }
+  
+  40% {
+    counter-set: digit 4;
+  }
+  49.99% {
+    counter-set: digit 4;
+  }
+
+  50% {
+    counter-set: digit 5;
+  }
+  59.99% {
+    counter-set: digit 5;
+  }
+
+  60% {
+    counter-set: digit 6;
+  }
+  69.99% {
+    counter-set: digit 6;
+  }
+  
+  70% {
+    counter-set: digit 7;
+  }
+  79.99% {
+    counter-set: digit 7;
+  }
+
+  80% {
+    counter-set: digit 8;
+  }
+  89.99% {
+    counter-set: digit 8;
+  }
+
+  90% {
+    counter-set: digit 9;
+  }
+  99.99% {
+    counter-set: digit 9;
+  }
+}
+
+@keyframes double-digit {
+  0% {
+    counter-set: digit 0;
+  }
+  16.66% {
+    counter-set: digit 0;
+  }
+
+  16.67% {
+    counter-set: digit 1;
+  }
+  33.33% {
+    counter-set: digit 1;
+  }
+  
+  33.34% {
+    counter-set: digit 2;
+  }
+  50.00% {
+    counter-set: digit 2;
+  }
+
+  50.01% {
+    counter-set: digit 3;
+  }
+  66.66% {
+    counter-set: digit 3;
+  }
+  
+  66.67% {
+    counter-set: digit 4;
+  }
+  83.33% {
+    counter-set: digit 4;
+  }
+
+  83.34% {
+    counter-set: digit 5;
+  }
+  100% {
+    counter-set: digit 5;
+  }
+}
+
+div.timer > span.digit:nth-of-type(1) {
+  animation-name: double-digit;
+  animation-duration: 3600s;
+  animation-iteration-count: infinite;
+}
+
+div.timer > span.digit:nth-of-type(2) {
+  animation-name: single-digit;
+  animation-duration: 600s;
+  animation-iteration-count: infinite;
+}
+
+div.timer > span.digit:nth-of-type(3)::before {
+  content: ':'
+}  
+
+div.timer > span.digit:nth-of-type(3) {
+  animation-name: double-digit;
+  animation-duration: 60s;
+  animation-iteration-count: infinite;
+}
+
+div.timer > span.digit:nth-of-type(4) {
+  animation-name: single-digit;
+  animation-duration: 10s;
+  animation-iteration-count: infinite;
+}
