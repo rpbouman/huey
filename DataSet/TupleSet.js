@@ -39,16 +39,17 @@ class TupleSet {
     return items;
   }
 
-  #getSqlSelectExpressions(includeCountAll){
-    var items = this.#getQueryAxisItems();
-    if (!items.length) {
+  static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    if (!queryAxisItems.length) {
       return undefined;
     }
     
     var selectListExpressions = [];
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item);
+    for (var i = 0; i < queryAxisItems.length; i++) {
+      var queryAxisItem = queryAxisItems[i];
+      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
       selectListExpressions.push(selectListExpression);
     }
     
@@ -57,38 +58,52 @@ class TupleSet {
     }
     return selectListExpressions;
   }
-
-  getSqlSelectStatement(includeCountAll){
-    var items = this.#getQueryAxisItems();
-    if (!items.length) {
+  
+  static getSqlSelectStatement(queryModel, axisId, includeCountAll) {
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    if (!queryAxisItems.length) {
       return undefined;
     }
     
-    var selectListExpressions = this.#getSqlSelectExpressions(includeCountAll);
+    var columnExpressions = TupleSet.getSqlSelectExpressions(queryModel, axisId, includeCountAll);
     var groupByExpressions = [];
     var orderByExpressions = [];
     
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var selectListExpression = selectListExpressions[i];
-      groupByExpressions.push(selectListExpression);
+    for (var i = 0; i < queryAxisItems.length; i++) {
+      var item = queryAxisItems[i];
+      var columnExpression = columnExpressions[i];
+      groupByExpressions.push(columnExpression);
       var sortDirection = item.sortDirection;
       if (!sortDirection) {
         sortDirection = 'ASC';
       }
-      var orderByExpression = `${selectListExpression} ${sortDirection}` ;
+      var orderByExpression = `${columnExpression} ${sortDirection}` ;
       orderByExpressions.push(orderByExpression);
     }
+
+    var selectListExpressions = columnExpressions.map(function(columnExpression, index){
+      if (includeCountAll === true && index === columnExpressions.length - 1) {
+        return columnExpression;
+      }
+      var queryAxisItem = queryAxisItems[index];
+      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+      return `${columnExpression} AS ${getQuotedIdentifier(caption)}`;
+    });
     
-    var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
     var fromClause = datasource.getFromClauseSql();
-    var sql = `
-      SELECT ${selectListExpressions.join('\n,')}
-      ${fromClause} 
-      GROUP BY ${groupByExpressions.join('\n,')}
-      ORDER BY ${orderByExpressions.join('\n,')}
-    `;
+    var sql = [
+      `SELECT ${selectListExpressions.join('\n,')}`,
+      `${fromClause}`,
+      `GROUP BY ${groupByExpressions.join('\n,')}`,
+      `ORDER BY ${orderByExpressions.join('\n,')}`
+    ].join('\n');
+    return sql;
+  }
+
+  #getSqlSelectStatement(includeCountAll){
+    var sql = TupleSet.getSqlSelectStatement(this.#queryModel, this.#queryAxisId, includeCountAll);
     return sql;
   }
   
@@ -161,7 +176,7 @@ class TupleSet {
   async #executeAxisQuery(limit, offset){
     var includeCountExpression = offset === 0;
 
-    var axisSql = this.getSqlSelectStatement(includeCountExpression);
+    var axisSql = this.#getSqlSelectStatement(includeCountExpression);
     if (!axisSql){
       return 0;
     }

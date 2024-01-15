@@ -165,3 +165,149 @@ async function ensureDuckDbExtensionLoadedAndInstalled(extensionName){
   }
   return true;
 }
+
+
+/**
+
+This is what we'd like to return here:
+
+with 
+datasource as (
+  select *
+  from read_parquet('C:\roland\projects\QuaQuery\files\poplegales2017-2021.parquet')
+)
+,columns_axis as (
+  SELECT    DISTINCT "ANNEE_RP"
+  FROM      data
+  ORDER BY  "ANNEE_RP" ASC
+)
+,rows_axis as (
+  SELECT    DISTINCT "CODDEP"
+  ,         "CODGEO"
+  FROM      data
+  ORDER BY  "CODDEP" ASC
+  ,         "CODGEO" ASC
+)
+,cells as (
+  select     {"ANNEE_RP": columns_axis."ANNEE_RP"} as column_tuple
+  ,          {"CODDEP": rows_axis."CODDEP", "CODGEO": rows_axis."CODGEO"} as row_tuple
+  ,          PMUN 
+  from       columns_axis
+  cross join rows_axis
+  left join  data
+  on         columns_axis."ANNEE_RP" = data."ANNEE_RP"
+  and        rows_axis."CODDEP"      = data."CODDEP"
+)
+pivot cells 
+on column_tuple
+using 
+  sum(PMUN)         as "PMUN sum"
+, count(PMUN)       as "PMIN count"
+group by row_tuple
+
+
+*/
+
+function getSqlFragmentsForTupleAxis(queryModel, axisId, aliasForMapping){
+  var queryAxis = queryModel.getQueryAxis(axisId);
+  var queryAxisItems = queryAxis.getItems();
+  if (queryAxisItems.length === 0) {
+    return undefined;
+  }
+  var selectStatement = TupleSet.getSqlSelectStatement(queryModel, axisId);
+  var cteName = axisId;
+  var cte = `${getQuotedIdentifier(cteName)} AS (\n${selectStatement}\n)`;
+  var joinConditions = {};
+  var tupleMembers = queryAxisItems.map(function(queryAxisItem){
+    var queryAxisItemCaption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+    joinConditions[getQualifiedIdentifier(cteName, queryAxisItemCaption)] = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, aliasForMapping);
+    return `${getQuotedIdentifier(queryAxisItemCaption)}: ${getQualifiedIdentifier(axisId, queryAxisItemCaption)}`;
+  });
+  var tupleName = `${axisId}_tuple`;
+  var tupleDefinition = `{${tupleMembers.join('\n,')}} AS ${getQuotedIdentifier(tupleName)}`;
+  return {
+    cte: cte, 
+    cteName: cteName,
+    tupleName: tupleName,
+    tupleDefinition: tupleDefinition,
+    joinConditions: joinConditions
+  }
+}
+
+function getDuckDbPivotSqlStatementForQueryModel(queryModel){
+  var aliasForCells = 'datasource';
+  var datasource = queryModel.getDatasource();
+  
+  var columnsAxisFragments = getSqlFragmentsForTupleAxis(queryModel, QueryModel.AXIS_COLUMNS, aliasForCells);
+
+  var rowsAxisFragments = getSqlFragmentsForTupleAxis(queryModel, QueryModel.AXIS_ROWS, aliasForCells);
+
+  var cellsAxis = queryModel.getCellsAxis();
+  var cellsAxisItems = cellsAxis.getItems();
+  var cellsAxisColumnNames = [];
+  var cellsAxisAggregateExpressions = [];
+  cellsAxisItems.forEach(function(cellsAxisItem){
+    var cellsAxisItemCaption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
+    var cellsAxisExpression;
+
+    var cellsAxisItemExpression;
+    var cellsAxisItemColumnName = cellsAxisItem.columnName;
+    if (cellsAxisItemColumnName === '*' && cellsAxisItem.aggregator === 'count') {
+      // count(*) is special, we need to count an actual column, not *
+      for (var joinCol in columnsAxisFragments.joinConditions){
+        cellsAxisItemExpression = columnsAxisFragments.joinConditions[joinCol];
+        break;
+      }
+      var aliasForStar = getQuotedIdentifier('*');
+      cellsAxisItemExpression = `${cellsAxisItemExpression} AS ${aliasForStar}`;
+      cellsAxisExpression = `COUNT( ${aliasForStar} )`;
+    }
+    else{
+      cellsAxisExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+      cellsAxisItemExpression = getQualifiedIdentifier(aliasForCells, cellsAxisItemColumnName);
+    }
+    cellsAxisColumnNames.push(cellsAxisItemExpression);
+    cellsAxisAggregateExpressions.push(`${cellsAxisExpression} AS ${getQuotedIdentifier(cellsAxisItemCaption)}`);
+  });
+  
+  var cellsSelectList = [].concat([
+    columnsAxisFragments.tupleDefinition,
+    rowsAxisFragments.tupleDefinition,
+  ], cellsAxisColumnNames);
+  
+  var columnsJoinConditions = Object.keys(columnsAxisFragments.joinConditions).map(function(tupleExpression){
+    var mappedExpression = columnsAxisFragments.joinConditions[tupleExpression];
+    return `${tupleExpression} = ${mappedExpression}`;
+  });
+  var rowsJoinConditions = Object.keys(rowsAxisFragments.joinConditions).map(function(tupleExpression){
+    var mappedExpression = rowsAxisFragments.joinConditions[tupleExpression];
+    return `${tupleExpression} = ${mappedExpression}`;
+  });
+  var joinConditions = [].concat(columnsJoinConditions, rowsJoinConditions);
+  
+  var cellsCteName = 'cells';
+  var cellsCte = [
+    `SELECT ${cellsSelectList.join('\n,')}`,
+    `FROM ${getQuotedIdentifier(columnsAxisFragments.cteName)}`,
+    `CROSS JOIN ${getQuotedIdentifier(rowsAxisFragments.cteName)}`,
+    `LEFT JOIN ${datasource.getRelationExpression(aliasForCells)}`,
+    `ON ${joinConditions.join('\nAND ')}`
+  ].join('\n');
+  cellsCte = `${getQuotedIdentifier(cellsCteName)} AS (\n${cellsCte}\n)`
+  
+  var pivotStatement = [
+    `PIVOT ${getQuotedIdentifier(cellsCteName)}`,
+    `ON ${getQuotedIdentifier(columnsAxisFragments.tupleName)}`,
+    `USING ${cellsAxisAggregateExpressions.join('\n')}`,
+    `GROUP BY ${getQuotedIdentifier(rowsAxisFragments.tupleName)}`,
+    `ORDER BY ${getQuotedIdentifier(rowsAxisFragments.tupleName)}`
+  ].join('\n');
+  
+  var sql = [
+    `WITH ${columnsAxisFragments.cte}`,
+    `,${rowsAxisFragments.cte}`,
+    `,${cellsCte}`,
+    pivotStatement
+  ].join('\n');
+  return sql;
+}

@@ -319,7 +319,6 @@ class QueryAxisItem {
   }
 }
 
-
 class QueryAxis {
   
   #items = [];
