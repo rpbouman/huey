@@ -36,6 +36,7 @@
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
@@ -62,6 +63,47 @@
       <footer>
         <button id="uploadDialogOkButton">Ok</button>
         <button id="uploadDialogCancelButton">Cancel</button>
+      </footer>
+    </dialog>
+
+    <dialog id="exportDialog">
+      <header>
+        <h3>Export...</h3>
+      </header>
+      <section >
+        <fieldset>
+          <legend>DuckDB PIVOT statement</legend>
+          <menu role="menu">
+            <li role="menuitem">
+              <label for="copyPivotStatementToClipboard">Copy to clipboard...
+                <button id="copyPivotStatementToClipboard">Copy to clipboard...</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label for="downloadPivotStatementToSqlFile">Download as SQL file...
+                <button id="downloadPivotStatementToSqlFile">Download as SQL file...</button>
+              </label>
+            </li>
+          </menu>
+        </fieldset>
+        <fieldset>
+          <legend>Query Results</legend>
+          <menu role="menu">
+            <li role="menuitem">
+              <label for="downloadQueryResultsAsCsvFile">Download as .csv file...
+                <button id="downloadQueryResultsAsCsvFile">Download as .csv file...</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label for="downloadQueryResultsAsParquetFile">Download as .parquet file...
+                <button id="downloadQueryResultsAsParquetFile">Download as .parquet file...</button>
+              </label>
+            </li>
+          </menu>
+        </fieldset>
+      </section>
+      <footer>
+        <button id="exportDialogCloseButton">Close</button>
       </footer>
     </dialog>
 
@@ -276,6 +318,7 @@
           />
         </label>
         
+        <!-- title in the toolbar identifies the currently selected datasource -->
         <h1 id="currentDatasource"></h1>
         
         <label for="aboutButton" class="aboutButton" title="About Huey...">
@@ -292,9 +335,8 @@
           <button id="settingsButton">Settings</button>
         </label>
         
-        <!-- https://shell.duckdb.org/docs/classes/index.AsyncDuckDB.html#copyFileToBuffer -->
-        <label for="downloadButton" class="button" title="Download...">
-          <button id="downloadButton" onclick="testDownload(this)">Download</button>
+        <label for="downloadButton" class="button" title="Export &amp; Download queries and/or result data...">
+          <button id="downloadButton">Download</button>
         </label>
       </menu>
       <nav class="resizeHorizontal sidebar tabs">
@@ -449,6 +491,7 @@
     </main>
     
     <script onload="resourceLoaded(this.src)" src="util/dom/dom.js"></script>
+    <script onload="resourceLoaded(this.src)" src="util/clipboard/clipboard.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
 
@@ -462,6 +505,7 @@
     <script onload="resourceLoaded(this.src)" src="AboutDialog/AboutDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="ErrorDialog/ErrorDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="UploadUi/UploadUi.js"></script>
+    <script onload="resourceLoaded(this.src)" src="ExportUi/ExportUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSource/DataSourcesUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="Search/Search.js"></script>

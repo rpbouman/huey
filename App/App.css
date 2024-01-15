@@ -7,18 +7,6 @@ main.layout {
   gap: 0px;
 }
 
-menu[role=toolbar] {
-  list-style-type: none;
-  margin-block: 0px;
-  margin-inline: 0px;
-  padding-inline-start: 0px;
-  padding: 6px 0px 0px 4px;
-  height: 32px;
-  grid-column: 1/ span 2;
-  grid-row: 1/1;
-  overflow: hidden;
-}
-
 nav.sidebar {
   width: 15vw;
   height: calc(100vh - 40px);
@@ -53,21 +41,6 @@ nav.sidebar {
   
 }
 
-menu[role=toolbar] > label:has( > button)::before,
-menu[role=toolbar] > label:has( > input[type=file])::before 
-{  
-  font-family: var( --huey-icon-font-family );
-  font-size: var( --huey-icon-normal );
-  vertical-align:middle;
-  color: var( --huey-icon-color-subtle );
-  margin: 4px 4px 0px 4px;
-}
-
-menu[role=toolbar] > label:hover:has( > button)::before,
-menu[role=toolbar] > label:hover:has( > input[type=file])::before {
-  color: var( --huey-icon-color-highlight );
-}
-
 menu[role=toolbar] > label[for=uploader] {
   vertical-align: top;
 }
@@ -80,6 +53,16 @@ menu[role=toolbar] > label[for=uploader]::before {
   display: none;
 }
 
+menu[role=toolbar] > label[for=downloadButton] {
+  font-family: var( --huey-icon-font-family );
+  vertical-align: top;
+  float: right;
+}
+
+menu[role=toolbar] > label[for=downloadButton]::before {
+  content: "\ea96";
+}
+
 menu[role=toolbar] > #currentDatasource {
   display: inline-block;
   margin-block-start: 0em;
@@ -88,5 +71,6 @@ menu[role=toolbar] > #currentDatasource {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc( 100% - 100px);
+  max-width: calc( 100% - 130px);
 }
+

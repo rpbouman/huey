@@ -193,3 +193,63 @@ form > select {
   grid-row: auto;
   justify-self:start;
 }
+
+menu[role=toolbar] {
+  list-style-type: none;
+  margin-block: 0px;
+  margin-inline: 0px;
+  padding-inline-start: 0px;
+  padding: 6px 0px 0px 4px;
+  height: 32px;
+  grid-column: 1/ span 2;
+  grid-row: 1/1;
+  overflow: hidden;
+}
+
+menu[role=toolbar] > label > button {
+  display: none;
+}
+
+menu[role=toolbar] > label:has( > button)::before,
+menu[role=toolbar] > label:has( > input[type=file])::before 
+{  
+  font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-normal );
+  vertical-align:middle;
+  color: var( --huey-icon-color-subtle );
+  margin: 4px 4px 0px 4px;
+}
+
+menu[role=toolbar] > label:hover:has( > button)::before,
+menu[role=toolbar] > label:hover:has( > input[type=file])::before {
+  color: var( --huey-icon-color-highlight );
+}
+
+
+menu[role=menu] {
+  list-style-type: none;
+  margin-block: 0px;
+  margin-inline: 0px;
+  padding-inline-start: 0px;
+  border-collapse: collapse;
+}
+
+menu[role=menu] > li[role=menuitem] {
+  line-height: 24px;
+  background-color: var( --huey-dark-background-color );
+  border-color: var( --huey-dark-border-color );
+  border-width: 1px;
+  border-style: solid;
+  padding: 2px 4px 2px 10px;
+  border-radius: 14px;
+}
+
+menu[role=menu] > li[role=menuitem]:hover {
+  background-color: var( --huey-light-background-color );
+  border-color: var( --huey-light-border-color );
+}
+
+menu[role=menu] > li[role=menuitem] > label > button {
+  display: none;
+}
+

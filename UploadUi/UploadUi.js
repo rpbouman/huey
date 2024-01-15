@@ -243,5 +243,13 @@ class UploadUi {
 
 var uploadUi;
 function initUploadUi(){
-  uploadUi = new UploadUi('uploadUi');
+  uploadUi = new UploadUi('uploadUi');  
+  
+  byId("uploader")
+  .addEventListener("change", async function(event){
+    var files = event.target.files;
+    uploadUi.uploadFiles(files);
+    return;  
+  }, false);
 }
+

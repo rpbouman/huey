@@ -311,3 +311,81 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   ].join('\n');
   return sql;
 }
+
+
+
+function getDuckDbPivotSqlStatementForQueryModel(queryModel){
+  var columnsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_COLUMNS);
+  if (columnsExpressions === undefined) {
+    columnsExpressions = {"columns":  `''`};
+  }
+
+  var rowsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_ROWS);
+  if (rowsExpressions === undefined) {
+    rowsExpressions = {"rows":  `''`};
+  }
+
+  var cellsAxis = queryModel.getCellsAxis();
+  var cellsAxisItems = cellsAxis.getItems();
+
+  var cellColumnExpressions = {};
+  var aggregateExpressions = {};
+  
+  if (cellsAxisItems.length === 0){
+    aggregateExpressions[' '] = 'ANY_VALUE( NULL )';
+  }
+  else {
+    cellsAxisItems.forEach(function(cellsAxisItem){
+      if (cellsAxisItem.columnName === '*') {
+        // the COUNT(*) expression is special, we don't need to have a column for it
+      }
+      else {
+        cellColumnExpressions[cellsAxisItem.columnName] = getQuotedIdentifier(cellsAxisItem.columnName);
+      }
+      
+      var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
+      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
+      aggregateExpressions[caption] = selectListExpression;
+    });
+  }
+  
+  var columns = [].concat(
+    Object.keys(columnsExpressions).map(function(expressionId){
+      var expression = columnsExpressions[expressionId];
+      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+    }),
+    Object.keys(rowsExpressions).map(function(expressionId){
+      var expression = rowsExpressions[expressionId];
+      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+    }),
+    Object.keys(cellColumnExpressions).map(function(expressionId){
+      var expression = cellColumnExpressions[expressionId];
+      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+    })
+  );
+  
+  var aggregates = Object.keys(aggregateExpressions).map(function(expressionId){
+    var aggregateExpression = aggregateExpressions[expressionId];
+    return `${aggregateExpression} AS ${getQuotedIdentifier(expressionId)}`;
+  });
+
+  var datasource = queryModel.getDatasource();
+  
+  var cteName = 'data';
+  var sql = [
+    `/*********************************`,
+    `* DuckDB query generated ${new Date(Date.now)} by Huey`,
+    `* https://github.com/rpbouman/huey`,
+    `**********************************/`,
+    `WITH ${cteName} AS (`,
+    `SELECT ${columns.join('\n,')}`,
+    `${datasource.getFromClauseSql()}`,
+    `)`,
+    `PIVOT ${cteName}`,
+    `ON ${Object.keys(columnsExpressions).map(getQuotedIdentifier)}`,
+    `USING ${aggregates.join('\n,')}`,
+    `GROUP BY ${Object.keys(rowsExpressions).map(getQuotedIdentifier)}`,
+    `ORDER BY ${Object.keys(rowsExpressions).map(getQuotedIdentifier)}`
+  ].join('\n');
+  return sql;
+}

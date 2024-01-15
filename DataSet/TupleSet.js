@@ -46,15 +46,17 @@ class TupleSet {
       return undefined;
     }
     
-    var selectListExpressions = [];
+    var selectListExpressions = {};
     for (var i = 0; i < queryAxisItems.length; i++) {
       var queryAxisItem = queryAxisItems[i];
+      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
       var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-      selectListExpressions.push(selectListExpression);
+      selectListExpressions[caption] = selectListExpression;
     }
     
     if (includeCountAll) {
-      selectListExpressions.push('COUNT(*) OVER ()');
+      var countExpression = 'COUNT(*) OVER ()';
+      selectListExpressions[countExpression] = countExpression;
     }
     return selectListExpressions;
   }
@@ -67,30 +69,32 @@ class TupleSet {
     }
     
     var columnExpressions = TupleSet.getSqlSelectExpressions(queryModel, axisId, includeCountAll);
+
+    var selectListExpressions = [];
     var groupByExpressions = [];
     var orderByExpressions = [];
     
-    for (var i = 0; i < queryAxisItems.length; i++) {
-      var item = queryAxisItems[i];
-      var columnExpression = columnExpressions[i];
+    var columnIds = Object.keys(columnExpressions);
+    for (var i = 0; i < columnIds.length; i++) {
+      var columnId = columnIds[i];
+      var columnExpression = columnExpressions[columnId];
+      
+      if (i >= queryAxisItems.length) {
+        selectListExpressions.push(columnExpression);
+        break;
+      }
+      selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
       groupByExpressions.push(columnExpression);
+      
+      var item = queryAxisItems[i];
       var sortDirection = item.sortDirection;
       if (!sortDirection) {
         sortDirection = 'ASC';
       }
       var orderByExpression = `${columnExpression} ${sortDirection}` ;
-      orderByExpressions.push(orderByExpression);
+      orderByExpressions.push(orderByExpression);      
     }
 
-    var selectListExpressions = columnExpressions.map(function(columnExpression, index){
-      if (includeCountAll === true && index === columnExpressions.length - 1) {
-        return columnExpression;
-      }
-      var queryAxisItem = queryAxisItems[index];
-      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
-      return `${columnExpression} AS ${getQuotedIdentifier(caption)}`;
-    });
-    
     var datasource = queryModel.getDatasource();
     var fromClause = datasource.getFromClauseSql();
     var sql = [

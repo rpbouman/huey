@@ -38,16 +38,6 @@ function initDuckdbVersion(){
   })
 }
 
-function initUploader(){
-  byId("uploader").addEventListener("change", handleUpload, false);
-}
-
-async function handleUpload(event){
-  var files = event.target.files;
-  uploadUi.uploadFiles(files);
-  return;  
-}
-
 async function analyzeDatasource(datasource){
   try {
     byId('attributesTab').checked = true;
@@ -79,9 +69,9 @@ function initApplication(){
   initDuckdbVersion();
   initAbout();
   initUploadUi();
+  initExportUi();
   initDataSourcesUi();
   initErrorDialog();
-  initUploader();
   initQueryModel();
   initAttributeUi();
   initSearch();
