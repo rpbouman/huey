@@ -46,7 +46,7 @@
   margin-left: 24px;
 }
 
-*[role=tree] details[role=treeitem] > summary > label.button 
+*[role=tree] details[role=treeitem] > summary > .button 
 {
   display: block;
   float: inline-end;
