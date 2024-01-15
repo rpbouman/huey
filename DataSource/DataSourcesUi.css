@@ -1,4 +1,6 @@
 #datasourcesUi {
+  padding-top: 12px;
+  height: calc(100% - 36px);
 }
 
 #datasourcesUi[data-drop-allowed=true] {
