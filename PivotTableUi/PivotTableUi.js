@@ -961,7 +961,7 @@ class PivotTableUi {
       await this.#updateCellData(0, 0);  
     }
     catch(e){
-      showError(e);
+      showErrorDialog(e);
     }
     finally {
       tableDom.style.width = '99.99%';
