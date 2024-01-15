@@ -335,6 +335,7 @@ class AttributeUi {
     var node = this.#renderAttributeUiNode({
       type: 'aggregate',
       aggregator: 'count',
+      title: 'Generic rowcount',
       profile: {
         column_name: '*',
         column_type: 'INTEGER'
