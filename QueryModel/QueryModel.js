@@ -646,18 +646,18 @@ class QueryModel extends EventEmitter {
     axis2.setItems(axis1Items);
 
     if (axis1Items.length) {
-      axesChangeInfo[axis1] = {
+      axesChangeInfo[axisId1] = {
         removed: axis1Items
       }
-      axesChangeInfo[axis2] = {
+      axesChangeInfo[axisId2] = {
         added: axis1Items
       };
     }
     if (axis2Items.length) {
-      axesChangeInfo[axis2] = {
+      axesChangeInfo[axisId2] = {
         removed: axis2Items
       };
-      axesChangeInfo[axis1] = {
+      axesChangeInfo[axisId1] = {
         added: axis2Items
       };
     }
