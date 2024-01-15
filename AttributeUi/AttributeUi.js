@@ -59,7 +59,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'VARIANCE_SAMP( ${columnName} )'
+      expressionTemplate: 'VAR_SAMP( ${columnName} )'
     },
     'entropy': {
       isNumeric: true,
