@@ -291,3 +291,11 @@
   /* calculator */
   content: "\eb80";
 }
+
+
+/**
+* Prevent the Query UI events when the pivot table is busy:
+*/
+main.layout .workarea:has( > .pivotTableUiContainer[aria-busy=true] ) > .queryUi {
+  pointer-events: none;
+}

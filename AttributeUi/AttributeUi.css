@@ -1,5 +1,7 @@
 .attributeUi details[data-nodetype=derived] > summary,
-.attributeUi details[data-nodetype=aggregate] > summary {
+.attributeUi details[data-nodetype=aggregate] > summary,
+.attributeUi details[data-nodetype=derived][open] > summary,
+.attributeUi details[data-nodetype=aggregate][open] > summary {
   list-style: none;
   margin-left: 16px;
 }
@@ -200,7 +202,12 @@
 *
 */
 
-
+/**
+* Prevent the Attribute UI events when the pivot table is busy:
+*/
+main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav.sidebar .attributeUi details > summary > label.attributeUiAxisButton {
+  pointer-events: none;
+}
 
 .attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]:before {
   /* table-column */
@@ -242,5 +249,4 @@
 .attributeUi details > summary > .attributeUiAxisButton:has(> input[type=checkbox]:checked) {
   color: var( --huey-icon-color-highlight );
 }
-
 
