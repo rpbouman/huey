@@ -58,7 +58,7 @@ class TupleSet {
     return selectListExpressions;
   }
 
-  #getSqlSelectStatement(includeCountAll){
+  getSqlSelectStatement(includeCountAll){
     var items = this.#getQueryAxisItems();
     if (!items.length) {
       return undefined;
@@ -161,7 +161,7 @@ class TupleSet {
   async #executeAxisQuery(limit, offset){
     var includeCountExpression = offset === 0;
 
-    var axisSql = this.#getSqlSelectStatement(includeCountExpression);    
+    var axisSql = this.getSqlSelectStatement(includeCountExpression);
     if (!axisSql){
       return 0;
     }
