@@ -241,6 +241,7 @@ class DataSourcesUi {
     var dataSourceId = datasource.getId();
     var datasourceNode = createEl('details', {
       id: dataSourceId,
+      role: 'treeitem',
       "data-nodetype": 'datasource',
       "data-sourcetype": type,
       "title": caption,
@@ -382,6 +383,7 @@ class DataSourcesUi {
 
     var groupType = datasourceGroup.type;
     var groupNode = createEl('details', {
+      role: 'treeitem',
       "data-nodetype": 'datasourcegroup',
       "data-grouptype": groupType,
       open: true

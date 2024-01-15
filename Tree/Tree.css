@@ -1,24 +1,24 @@
-.tree details > summary::marker {
+*[role=tree] details[role=treeitem] > summary::marker {
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-small );
   color: var( --huey-icon-color-subtle );
 }
 
-.tree details > summary:hover::marker {
+*[role=tree] details[role=treeitem] > summary:hover::marker {
   color: var( --huey-icon-color-highlight );
 }
 
-.tree details > summary {
+*[role=tree] details[role=treeitem] > summary {
   white-space: nowrap;
   vertical-align: top;
   list-style-type: "\f63f"; 
 }
 
-.tree details[open] > summary {
+*[role=tree] details[role=treeitem][open] > summary {
   list-style-type: "\f63e";
 }
 
-.tree details > summary > .icon {
+*[role=tree] details[role=treeitem] > summary > .icon {
   display: inline-block;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
@@ -34,7 +34,7 @@
 *
 */
 
-.tree details > summary > .label {
+*[role=tree] details[role=treeitem] > summary > .label {
   white-space: nowrap;
   text-overflow: ellipsis;
   display: inline-block;
@@ -42,11 +42,11 @@
   vertical-align: text-bottom;
 }
 
-.tree details > details {
+*[role=tree] details[role=treeitem] > details[role=treeitem] {
   margin-left: 24px;
 }
 
-.tree details > summary > label.button 
+*[role=tree] details[role=treeitem] > summary > label.button 
 {
   display: block;
   float: inline-end;
@@ -57,12 +57,12 @@
   color: var( --huey-icon-color-subtle );
 }
 
-.tree details > summary > label.button:hover {
+*[role=tree] details[role=treeitem] > summary > label.button:hover {
   color: var( --huey-icon-color-highlight );
 }
 
 
-.tree details > summary > label.button > button {
+*[role=tree] details[role=treeitem] > summary > label.button > button {
   display: none;
   appearance: none;
 }

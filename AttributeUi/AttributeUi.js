@@ -287,6 +287,7 @@ class AttributeUi {
 
   #renderAttributeUiNode(config){
     var node = createEl('details', {
+      role: 'treeitem',      
       "class": ['attributeUiNode', config.type],
       'data-nodetype': config.type
     });
