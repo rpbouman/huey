@@ -1,4 +1,11 @@
 function showErrorDialog(config){
+  if (config instanceof Error){
+    config = {
+      title: config.message,
+      description: config.stack
+    };
+  }
+  
   var title = config.title;
   if (!title) {
     title = 'Unexpected Error';

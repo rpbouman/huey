@@ -917,50 +917,56 @@ class PivotTableUi {
   }
   
   async #updatePivotTableUi(){
-    this.#setBusy(true);
-    this.clear();
-
-    var columnsTupleSet = this.#columnsTupleSet;
-    var rowsTupleSet = this.#rowsTupleSet;
-    
-    this.#renderHeader();
-
     var tableDom = this.#getTableDom();
-    tableDom.style.width = '';
-    
-    var pageSizes = await Promise.all([
-      this.#estimateColumnsAxisPageSize(),
-      this.#estimateRowsAxisPageSize(),
-    ]);
-    
-    columnsTupleSet.setPageSize(pageSizes[0]);
-    rowsTupleSet.setPageSize(pageSizes[1]);
-    
-    var renderAxisPromises = [
-      columnsTupleSet.getTuples(columnsTupleSet.getPageSize(), 0),
-      rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
-    ];
-        
-    var renderAxisPromisesResults = await Promise.all(renderAxisPromises)
-    
-    var columnTuples = renderAxisPromisesResults[0];
-    this.#setHorizontalSize(0);
-    this.#renderColumns(columnTuples);
+    try {
+      
+      this.#setBusy(true);
+      this.clear();
 
-    var rowTuples = renderAxisPromisesResults[1];    
-    this.#setVerticalSize(0);
-    this.#renderRows(rowTuples);
+      var columnsTupleSet = this.#columnsTupleSet;
+      var rowsTupleSet = this.#rowsTupleSet;
+      
+      this.#renderHeader();
 
-    this.#updateVerticalSizer();
-    this.#removeExcessColumns();
-    this.#updateHorizontalSizer();
+      tableDom.style.width = '';
+      
+      var pageSizes = await Promise.all([
+        this.#estimateColumnsAxisPageSize(),
+        this.#estimateRowsAxisPageSize(),
+      ]);
+      
+      columnsTupleSet.setPageSize(pageSizes[0]);
+      rowsTupleSet.setPageSize(pageSizes[1]);
+      
+      var renderAxisPromises = [
+        columnsTupleSet.getTuples(columnsTupleSet.getPageSize(), 0),
+        rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
+      ];
+          
+      var renderAxisPromisesResults = await Promise.all(renderAxisPromises)
+      
+      var columnTuples = renderAxisPromisesResults[0];
+      this.#setHorizontalSize(0);
+      this.#renderColumns(columnTuples);
 
-    this.#renderCells();
-    await this.#updateCellData(0, 0);  
+      var rowTuples = renderAxisPromisesResults[1];    
+      this.#setVerticalSize(0);
+      this.#renderRows(rowTuples);
 
-    tableDom.style.width = '99.99%';
-    this.#setBusy(false);
-    ;
+      this.#updateVerticalSizer();
+      this.#removeExcessColumns();
+      this.#updateHorizontalSizer();
+
+      this.#renderCells();
+      await this.#updateCellData(0, 0);  
+    }
+    catch(e){
+      showError(e);
+    }
+    finally {
+      tableDom.style.width = '99.99%';
+      this.#setBusy(false);
+    }
   }
   
   clear(){
