@@ -86,13 +86,13 @@ class Settings extends EventEmitter {
               "--huey-foreground-color": "#000000", /* Black */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
               "--huey-light-background-color": "#F0E68C", /* Khaki */
-              "--huey-medium-background-color": "#5B8266", /* Sage Green */
-              "--huey-dark-background-color": "#1C2E36", /* Deep Blue-Green */
-              "--huey-light-border-color": "#A7D3A4", /* Soft Green */
-              "--huey-dark-border-color": "#334D56", /* Dark Teal */
-              "--huey-icon-color-subtle": "#FFA07A", /* Light Salmon */
-              "--huey-icon-color": "#FFFFFF", /* White */
-              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+              "--huey-medium-background-color": "#A7D3A4", 
+              "--huey-dark-background-color": "#5B8266", 
+              "--huey-light-border-color": "#A5B479", 
+              "--huey-dark-border-color": "#334D56", 
+              "--huey-icon-color-subtle": "#B4AA50", 
+              "--huey-icon-color": "#8B4513", 
+              "--huey-icon-color-highlight": "#FFFFFF"
             },
             label: "Mallard"
           },
