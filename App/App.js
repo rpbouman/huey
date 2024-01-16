@@ -66,14 +66,23 @@ async function analyzeDatasource(datasource){
 }
 
 function initExecuteQuery(){
+  
   byId('runQueryButton').addEventListener('click', function(event){
     pivotTableUi.updatePivotTableUi();
   });
-  byId('autoRunQuery').addEventListener('change', function(event){
+  
+  var autoRunQuery = byId('autoRunQuery');
+  var settingsPath = ['querySettings', 'autoRunQuery'];
+  autoRunQuery.checked = Boolean( settings.getSettings(settingsPath) );
+  autoRunQuery.addEventListener('change', function(event){
     var target = event.target;
-    if (target.checked) {
+    var checked = target.checked;
+    if (checked) {
       pivotTableUi.setAutoUpdate(true);
     }
+    settings.assignSettings('querySettings', {
+      'autoRunQuery': checked
+    })
   });
 }
 

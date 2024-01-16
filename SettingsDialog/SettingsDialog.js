@@ -53,9 +53,12 @@ class Settings extends EventEmitter {
     localeSettings: {
       useDefaultLocale: true,
       locale: navigator.languages,
-      minimumIntegerDigits: 1.,
+      minimumIntegerDigits: 1,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
+    },
+    querySettings: {
+      autoRunQuery: false
     },
     themeSettings: {
       themes: {
@@ -186,6 +189,24 @@ class Settings extends EventEmitter {
             },
             label: "Whio"
           },
+          {
+            value: {
+              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "Monospace",
+              "--huey-foreground-color": "rgb(220, 220, 220)",
+              "--huey-placeholder-color": "rgb(100, 100, 100)",
+              "--huey-light-background-color": "rgb(40, 40, 40)",
+              "--huey-medium-background-color": "rgb(30, 30, 30)",
+              "--huey-dark-background-color": "rgb(20, 20, 20)",
+              "--huey-light-border-color": "rgb(20, 20, 20)",
+              "--huey-dark-border-color": "rgb(40, 40, 40)",
+              "--huey-icon-color-subtle": "rgb(60, 60, 60)",
+              "--huey-icon-color": "rgb(220, 220, 220)",
+              "--huey-icon-color-highlight": "rgb(255, 255, 255)"
+            },
+            label: "Dark Mode"
+          }
         ],
         value: {
           "--huey-text-font-family": "Verdana",
@@ -215,7 +236,7 @@ class Settings extends EventEmitter {
     this.#initDialog();
   }
   
-  getSettings(path){
+  #getSettings(path){
     var settings = this.#settings;
     if (typeof path === 'string'){
       path = [path];
@@ -231,10 +252,35 @@ class Settings extends EventEmitter {
         return undefined;
       }
     }
+    return value;
+  }
+  
+  // return a safe copy of a setting (one that can be abused by the receiver without messing up the actual settings)
+  getSettings(path){
+    var value = this.#getSettings(path);
     if (typeof value === 'object'){
       value = Object.assign({}, value);
     }
     return value;
+  }
+  
+  assignSettings(path, value){ 
+    function deepAssign(target, source){
+      for (var property in source){
+        var sourceValue = source[property];
+        if (typeof sourceValue === 'object') {
+          deepAssign(target[property], sourceValue);
+        }
+        else {
+          target[property] = sourceValue;
+        }
+      }
+    }
+    
+    var settings = this.#getSettings(path);
+    deepAssign(settings, value);
+
+    this.#storeToLocalStorage();    
   }
   
   #getDialog(){
