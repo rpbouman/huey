@@ -77,7 +77,7 @@ input, select, button {
   height: 26px;
 }
 
-input, select{
+input[type=text], input[type=input], input[type=checkbox], select{
   border-color: var( --huey-light-border-color );
   background-color: var( --huey-light-background-color );
   padding: 0px 2px 0px 8px;
@@ -149,7 +149,7 @@ dialog > section {
 
 /* this is used as dialog buttons section */
 dialog > footer {
-  margin-top: 6px;
+  margin-top: 12px;
   margin-bottom: -6px;
   flex-grow: 0;
 }
