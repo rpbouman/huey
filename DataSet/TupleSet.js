@@ -193,9 +193,9 @@ class TupleSet {
     console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
     console.log(axisSql);
     
-    console.time(`Executing query`);
+    console.time(`Executing query for ${this.#queryAxisId} tupleset`);
     var resultset = await connection.query(axisSql);
-    console.timeEnd(`Executing query`);
+    console.timeEnd(`Executing query for ${this.#queryAxisId} tupleset`);
     this.#loadTuples(resultset, offset);
 
     return resultset.numRows;

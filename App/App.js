@@ -65,6 +65,18 @@ async function analyzeDatasource(datasource){
   }
 }
 
+function initExecuteQuery(){
+  byId('runQueryButton').addEventListener('click', function(event){
+    pivotTableUi.updatePivotTableUi();
+  });
+  byId('autoRunQuery').addEventListener('change', function(event){
+    var target = event.target;
+    if (target.checked) {
+      pivotTableUi.setAutoUpdate(true);
+    }
+  });
+}
+
 function initApplication(){
   initDuckdbVersion();
   initAbout();
@@ -77,4 +89,5 @@ function initApplication(){
   initSearch();
   initQueryUi();
   initPivotTableUi();
+  initExecuteQuery();
 }

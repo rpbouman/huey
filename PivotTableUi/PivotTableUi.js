@@ -2,11 +2,13 @@ class PivotTableUi {
     
   #id = undefined;
   #queryModel = undefined;
+  #autoUpdate = false;
+  #needsUpdate = false;
     
   #columnsTupleSet = undefined;
   #rowsTupleSet = undefined;
   #cellsSet = undefined;
-  
+
   // 
   #rowIndex = 0;
   #columnIndex = 0;
@@ -47,7 +49,7 @@ class PivotTableUi {
         this.#resizeTimeoutId = undefined;
       }
       this.#resizeTimeoutId = setTimeout(function(){
-        this.#updatePivotTableUi();
+        this.updatePivotTableUi();
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
     var dom = this.getDom();
@@ -55,6 +57,20 @@ class PivotTableUi {
     
   }
     
+  setAutoUpdate(autoUpdate){
+    this.#autoUpdate = Boolean(autoUpdate);
+    if (this.#needsUpdate) {
+      this.updatePivotTableUi();
+    }
+  }
+
+  #setNeedsUpdate(needsUpdate){
+    this.#needsUpdate = needsUpdate;
+
+    var dom = this.getDom();
+    dom.setAttribute('data-needs-update', String(Boolean(needsUpdate)));
+  }
+  
   #queryModelChangeHandler(event){
         
     var clearRowsTupleSet = false;
@@ -75,6 +91,7 @@ class PivotTableUi {
       }          
 
       if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
+        this.#setNeedsUpdate(true);
         if (!clearCellsSet) {
           // NOOP!
           
@@ -95,6 +112,7 @@ class PivotTableUi {
       if (propertiesChangedInfo.cellHeadersAxis){
         // moving cells to another axis does not change the tuples or the cached cells, 
         // it only requires rerendering the table.
+        this.#setNeedsUpdate(true);
       }
     }
 
@@ -102,19 +120,26 @@ class PivotTableUi {
     if (clearColumnsTupleSet) {
       var columnsTupleSet = this.#columnsTupleSet;
       columnsTupleSet.clear();
+      this.#setNeedsUpdate(true);
     }
 
     if (clearRowsTupleSet === true) {
       var rowsTupleSet = this.#rowsTupleSet;
       rowsTupleSet.clear();
+      this.#setNeedsUpdate(true);
     }
 
     if (clearCellsSet === true) {
       var cellsSet = this.#cellsSet;
       cellsSet.clear();
+      this.#setNeedsUpdate(true);
     }
     
-    this.#updatePivotTableUi();
+    if (!this.#autoUpdate){
+      return;
+    }
+    
+    this.updatePivotTableUi();
   }
   
   #setBusy(busy){
@@ -916,7 +941,7 @@ class PivotTableUi {
     return 100;
   }
   
-  async #updatePivotTableUi(){
+  async updatePivotTableUi(){
     var tableDom = this.#getTableDom();
     try {
       
@@ -959,6 +984,7 @@ class PivotTableUi {
 
       this.#renderCells();
       await this.#updateCellData(0, 0);  
+      this.#setNeedsUpdate(false);
     }
     catch(e){
       showErrorDialog(e);

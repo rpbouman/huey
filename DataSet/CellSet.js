@@ -244,9 +244,9 @@ class CellSet {
     var preparedStatement = await datasource.prepareStatement(sql);
     
     console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
-    console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
+    console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId} for cellset`);
     var resultSet = await preparedStatement.query.apply(preparedStatement, values);
-    console.timeEnd(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
+    console.timeEnd(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId} for cellset`);
     preparedStatement.close();
     return resultSet;
   }

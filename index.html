@@ -323,7 +323,17 @@
             accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
         </label>
-        
+
+        <label for="runQueryButton" title="Execute Query">
+          <button
+            id="runQueryButton"
+          >Execute Query</button>
+        </label>
+
+        <label for="autoRunQuery" title="Check this if you want to execute the query automatically">Autorun Query:
+          <input id="autoRunQuery" type="checkbox"/>
+        </label>        
+
         <!-- title in the toolbar identifies the currently selected datasource -->
         <h1 id="currentDatasource"></h1>
         
@@ -456,6 +466,7 @@
             border-top-style: solid;
           "
           aria-busy="false"
+          data-needs-update="false"
         >
           <div role="progressbar">
             <header>

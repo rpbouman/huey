@@ -53,6 +53,49 @@ menu[role=toolbar] > label[for=uploader]::before {
   display: none;
 }
 
+menu[role=toolbar] > label[for=autoRunQuery]{
+  position: relative;
+  vertical-align: top;
+}
+
+menu[role=toolbar] > label[for=autoRunQuery] > input#autoRunQuery {
+  position: relative;
+  height: 12px;
+  top: 2px;
+}
+
+menu[role=toolbar] > label[for=runQueryButton]{
+  position: relative;
+  vertical-align: top;
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton] {
+  pointer-events: none;
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play */
+  content: "\ed46";
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play */
+  content: "\ed46";
+  color: var( --huey-icon-highlight );
+}
+
+main:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play-filled */
+  content: "\f691";
+  color: var( --huey-icon-highlight );
+  pointer-events: none;
+}
+
+menu[role=toolbar]:has( > label[for=autoRunQuery] > input[type=checkbox]:checked ) > label[for=runQueryButton] {
+  background-color: red;
+  visibility: hidden;
+}
+
 menu[role=toolbar] > label[for=downloadButton] {
   font-family: var( --huey-icon-font-family );
   vertical-align: top;
@@ -65,12 +108,13 @@ menu[role=toolbar] > label[for=downloadButton]::before {
 
 menu[role=toolbar] > #currentDatasource {
   display: inline-block;
+  padding: 4px;
   margin-block-start: 0em;
   margin-block-end: 0em;
   font-size: 1em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc( 100% - 130px);
+  max-width: calc( 100% - 300px);
 }
 
