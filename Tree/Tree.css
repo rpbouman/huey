@@ -1,3 +1,7 @@
+*[role=tree] {
+  padding-left: 6px;
+}
+
 *[role=tree] details[role=treeitem] > summary::marker {
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-small );

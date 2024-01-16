@@ -49,7 +49,11 @@ class PivotTableUi {
         this.#resizeTimeoutId = undefined;
       }
       this.#resizeTimeoutId = setTimeout(function(){
-        this.updatePivotTableUi();
+        // TODO: we should probably always automatically update some visuals, 
+        // just don't run a query unless there is an explicit query.
+        if (this.#autoUpdate) {
+          this.updatePivotTableUi();
+        }
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
     var dom = this.getDom();
