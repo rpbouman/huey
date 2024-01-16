@@ -54,6 +54,9 @@ class PivotTableUi {
         if (this.#autoUpdate) {
           this.updatePivotTableUi();
         }
+        else {
+          this.#setNeedsUpdate(true);
+        }
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
     var dom = this.getDom();
