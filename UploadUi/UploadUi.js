@@ -47,13 +47,13 @@ class UploadUi {
     var destroyDatasource = false;
     try {
       duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
-      progressBar.value = parseInt(progressBar.value, 10) + 10;
+      progressBar.value = parseInt(progressBar.value, 10) + 20;
       
       await duckDbDataSource.registerFile();
-      progressBar.value = parseInt(progressBar.value, 10) + 10;
+      progressBar.value = parseInt(progressBar.value, 10) + 40;
         
       var canAccess = await duckDbDataSource.validateAccess();
-      progressBar.value = parseInt(progressBar.value, 10) + 10;
+      progressBar.value = parseInt(progressBar.value, 10) + 30;
 
       if (canAccess === true) {
         if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
