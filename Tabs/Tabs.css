@@ -1,60 +1,34 @@
-.tabs {
+*[role=tablist]{
   display: flex;
   flex-direction: row;
   position: relative;
 }
 
-.tabs > .tabPage {
+*[role=tablist]> * {
   flex-grow: 0;
 }
 
-.tabs > .tabPage > .tab {
-  z-index: 1;
-  position: relative;
-}
-
-.tabs > .tabPage > label.tab {
+*[role=tablist]> * > label[role=tab] {
   border-style: solid;
   border-color: var( --huey-light-border-color );
   border-width: 2px;
   border-radius: 18px 8px 0px 0px;
   padding: 2px 4px 2px 4px;
   background-color: var( --huey-dark-background-color );
-}
-
-.tabs > .tabPage:last-child {
-  flex-grow: 1;
-}
-
-/*
-  first and last are filler elements.
-*/
-.tabs > .tabPage:first-child > span.tab,
-.tabs > .tabPage:last-child > span.tab {
-  border-style: none none solid none;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
-  background-color: var( --huey-medium-background-color );
-  margin-top: 2px;
-  display: block;
-}
-
-.tabs > .tabPage:first-child > span.tab::before,
-.tabs > .tabPage:last-child > span.tab::before {
-  content: "\00a0";
-  content: "\00a0";
+  white-space: nowrap;
+  text-overflow: 'ellipsis';
 }
   
-.tabs > .tabPage:has( > input[type=radio].tabState:checked ) > label.tab {
+*[role=tablist]> *:has( > input[type=radio].tabState:checked ) > label[role=tab] {
   border-bottom-color: var( --huey-medium-background-color );
   background-color: var( --huey-medium-background-color );
   /* make the tab 'pop' */
   vertical-align: middle;
 }
 
-.tabs > .tabPage > .tabPageContents {
+*[role=tablist]> * > *[role=tabpanel] {
   position: absolute;
-  top: 17px;
+  top: 24px;
   left: 0px;
   right: 0px;
   height: calc( 100% - 24px );
@@ -62,12 +36,46 @@
   overflow: auto;  
 }
 
-.tabs > .tabPage:has( > input[type=radio].tabState:checked ) > .tabPageContents {
+*[role=tablist]> *:has( > input[type=radio].tabState:checked ) > *[role=tabpanel] {
   display: block;
 }
 
-.tabs > .tabPage > input[type=radio].tabState {
+*[role=tablist]> * > input[type=radio].tabState {
   appearance: none;
   display: none;
 }
+
+
+/*
+  first and last are filler elements.
+*/
+
+*[role=tablist]> *:last-child {
+  flex-grow: 1;
+}
+*[role=tablist] > *:first-child::before {
+  content: ' ';
+  width: 10px;
+  border-bottom-style: solid;
+  border-color: var( --huey-light-border-color );
+  border-width: 2px;
+  display: block;
+  position: absolute;
+  margin-left: -10px;
+  margin-top: 18px;
+}
+*[role=tablist] > *:last-child::after {
+  content: ' ';
+  width: 100%;
+  border-bottom-style: solid;
+  border-color: var( --huey-light-border-color );
+  border-width: 2px;
+  display: block;
+  margin-top: 2px;
+}
+
+*[role=tablist] > *:has( > input[type=radio].tabState:checked ):last-child::after {
+  margin-top: 1px;
+}
+
 
