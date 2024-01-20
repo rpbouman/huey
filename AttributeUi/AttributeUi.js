@@ -23,13 +23,16 @@ class AttributeUi {
       expressionTemplate: 'MAX( ${columnName} )'
     },
     'list': {
-      expressionTemplate: 'LIST( ${columnName} )'
+      expressionTemplate: 'LIST( ${columnName} )',
+      isArray: true
     },
     'distinct list': {
-      expressionTemplate: 'LIST( DISTINCT ${columnName} )'
+      expressionTemplate: 'LIST( DISTINCT ${columnName} )',
+      isArray: true      
     },
     'histogram': {
-      expressionTemplate: 'HISTOGRAM( ${columnName} )'
+      expressionTemplate: 'HISTOGRAM( ${columnName} )',
+      isStruct: true,
     },
     'sum': {
       isNumeric: true,
@@ -53,30 +56,35 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'STDDEV_SAMP( ${columnName} )'
+      expressionTemplate: 'STDDEV_SAMP( ${columnName} )',
+      columnType: 'DOUBLE'
     },
     'variance': {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'VAR_SAMP( ${columnName} )'
+      expressionTemplate: 'VAR_SAMP( ${columnName} )',
+      columnType: 'DOUBLE'
     },
     'entropy': {
       isNumeric: true,
       isInteger: false,
-      expressionTemplate: 'ENTROPY( ${columnName} )'
+      expressionTemplate: 'ENTROPY( ${columnName} )',
+      columnType: 'DOUBLE'
     },
     'kurtosis': {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'KURTOSIS( ${columnName} )'
+      expressionTemplate: 'KURTOSIS( ${columnName} )',
+      columnType: 'DOUBLE'
     },
     'skewness': {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'SKEWNESS( ${columnName} )'
+      expressionTemplate: 'SKEWNESS( ${columnName} )',
+      columnType: 'DOUBLE'
     }
   };
 
@@ -161,6 +169,25 @@ class AttributeUi {
       columnType: 'UTINYINT'
     }
   };
+  
+  static getApplicableDerivations(typeName){
+    var typeInfo = dataTypes[typeName];
+    
+    var hasTimeFields = Boolean(typeInfo.hasTimeFields);
+    var hasDateFields = Boolean(typeInfo.hasDateFields);
+    
+    var applicableDerivations = Object.assign({}, 
+      hasDateFields ? AttributeUi.dateFields : undefined, 
+      hasTimeFields ? AttributeUi.timeFields : undefined
+    );
+    return applicableDerivations;
+  }
+
+  static getDerivationInfo(typeName, derivationName){
+    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
+    var derivationInfo = applicableDerivations[derivationName];
+    return derivationInfo;
+  }
   
   static #getUiNodeCaption(config){
     switch (config.type){
@@ -373,10 +400,7 @@ class AttributeUi {
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
     
-    var applicableDerivations = Object.assign({}, 
-      hasDateFields ? AttributeUi.dateFields : undefined, 
-      hasTimeFields ? AttributeUi.timeFields : undefined
-    );
+    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
     
     var childNode, config;
     
