@@ -479,39 +479,39 @@
         
       </nav>
       <div class="workarea">
-        <table
+        <div 
           id="queryUi"
-          class="queryUi"
+          class="queryUi" 
           data-cellheadersaxis="columns"
-          border="0"
-          cellspacing="2"
-          cellpadding="0"
-          style="
-            display: none;
-            flex-grow: 0;
-          "
+          style="display: none"
         >
-          <tbody class="queryUiAxes">
-            <tr class="queryUiAxis" data-axis="columns">
-              <td class="axisIcon" title="Flip rows and columns axes"></td>
-              <td class="label"></td>
-              <td class="items"></td>
-              <td class="clearAxisButton" title="Clear columns axis"></td>
-            </tr>
-            <tr class="queryUiAxis" data-axis="rows">
-              <td class="axisIcon" title="Flip rows and columns axes"></td>
-              <td class="label"></td>
-              <td class="items"></td>
-              <td class="clearAxisButton" title="Clear rows axis"></td>
-            </tr>
-            <tr class="queryUiAxis" data-axis="cells">
-              <td class="axisIcon"></td>
-              <td class="label"></td>
-              <td class="items"></td>
-              <td class="clearAxisButton" title="Clear cells axis"></td>
-            </tr>
-          </tbody>
-        </table>
+          <template id="queryUiAxis">
+            <section>
+              <header>
+                <label><button id="-axis-primary-action"></button></label>
+                <h1>Axis Caption</h1>
+              </header>
+              <ol>
+              </ol>
+              <footer>
+                <label title="Clear all items from this axis"><button id="-clear-axis">Clear axis</button></label>
+              </footer>
+            </section>
+          </template>
+          
+          <template id="queryUiAxisItem">
+            <li>
+              <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
+              <span>caption</span>
+              <menu>
+                <label title="Move this item to the other axis"><button id="-move-to-other-axis">Move item to other axis</button></label>
+                <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
+              </menu>
+              <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
+            </li>          
+          </template>
+          
+        </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
         <div
           id="pivotTableUi"

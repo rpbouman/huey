@@ -1,181 +1,138 @@
 .queryUi {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 4px;
+  padding-right: 2px;
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis {
+.queryUi section,
+.queryUi menu,
+.queryUi ol,
+.queryUi li {
+  margin-block: 0px;
+  margin-inline: 0px;
+  padding-inline: 0px;
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .axisIcon,
-.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton
-{
+/* query ui axis */
+.queryUi > section {
+  display: flex;
+  flex-direction: row;
+  margin-top: 1px;
+  height: 26px;
+}
+
+.queryUi > section:last-child {
+  margin-bottom: 1px;  
+}
+
+/* query ui axis label */
+.queryUi > section > header > h1 {
+  font-size: 1em;
+  font-weight: normal;
+  display: inline-block;
+  width: 64px;
+  margin-block: 0px;
+}
+
+.queryUi > section > header > h1:after {
+  content: ':';
+}
+
+.queryUi label > button {
+  display: none;
+}
+
+.queryUi label:has( > button )::after {
   width: 24px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color-subtle );
 }
-
-.queryUi > .queryUiAxes > .queryUiAxis > .axisIcon:hover,
-.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:hover {
+.queryUi label:has( > button ):hover::after {
   color: var( --huey-icon-color-highlight );
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:before {
+/* Columns axis header icon */
+.queryUi > section[data-axis=columns] > header > label:has( > button )::after {
   /* table-row */
   content: "\fb00";
 }
 /* axis icon is a button to flip the non-cells axes */
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .axisIcon:hover:before {
+.queryUi > section[data-axis=columns] > header > label:has( > button ):hover::after {
   /* table-column */
   content: "\faff";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:before {
+/* Rows axis header icon */
+.queryUi > section[data-axis=rows] > header > label:has( > button )::after {
   /* table-column */
   content: "\faff";
 }
 /* axis icon is a button to flip the non-cells axes */
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .axisIcon:hover:before{
+.queryUi > section[data-axis=rows] > header > label:has( > button ):hover::after {
   /* table-row */
   content: "\fb00";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:before {
+/* Cells axis header icon */
+.queryUi > section[data-axis=cells] > header > label:has( > button )::after {
   content: "\edba";
 }
 
-.queryUi[data-cellheadersaxis=columns] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+.queryUi[data-cellheadersaxis=columns] > section[data-axis=cells] > header > label:has( > button ):hover::after {
   /* table-column */
   content: "\faff";
 }
-
-.queryUi[data-cellheadersaxis=rows] > .queryUiAxes > .queryUiAxis[data-axis=cells] > .axisIcon:hover:before {
+.queryUi[data-cellheadersaxis=rows] > section[data-axis=cells] > header > label:has( > button ):hover::after {
   /* table-row */
   content: "\fb00";
 }
 
-/*
-*/
-
-.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:before {
+.queryUi > section > footer > label:has( > button )::after {
   /* trash */
   content: "\eb41";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .clearAxisButton:hover {
-}
+/* query ui axis items */
+.queryUi > section > ol {
+  flex-grow: 1;
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+  display: inline-block;
 
-.queryUi > .queryUiAxes > .queryUiAxis > .label {
-  /* this is to ensure minimum height so we don't see displacement after adding items. */
-  height: 26px;
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .label:before {
-  content: 'Columns:'
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .label:before {
-  content: 'Rows:'
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=cells] > .label:before {
-  content: 'Cells:'
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items {
   border-color: var( --huey-light-border-color );
   background-color: var( --huey-light-background-color );
+  border-style: solid;
+  border-width: 1px;
   border-radius: 15px;
-  border-style: solid;
-  border-width: 1px;
-  width: 100%;
 }
 
-/**
-* axis item
-*/
+/* query ui axis item */
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem {
-  display: inline-block;
+.queryUi > section > ol > li {
+  border-color: var( --huey-light-border-color );
   background-color: var( --huey-medium-background-color );
-  border-color: var( --huey-dark-border-color );
-  border-radius: 15px;  
+  white-space: nowrap;
+  display: inline-block;
   border-style: solid;
   border-width: 1px;
-  margin: 1px 2px 1px 1px;
+  border-radius: 15px;
+  margin: 1px 0px 1px 1px;
 }
 
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiLabel {
-  vertical-align: top;
-  margin-left: 1ch;
-  margin-right: 1ch;
+/* label holding the item caption */
+.queryUi > section > ol > li > span {
+  vertical-align: 16%;
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator] > .icon, 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation] > .icon, 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
-  width: 20px;
+.queryUi > section > ol > li[data-derivation] > span:before,
+.queryUi > section > ol > li[data-aggregator] > span:before {
+  width: 24px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .icon {
   color: var( --huey-icon-color );
-}  
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
-  color: var( --huey-icon-color-subtle );
-}  
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button:hover {
-  color: var( --huey-icon-color-highlight );
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:first-child > .button.queryAxisItemUiMoveLeftButton {
-  width: 2px;
-  font-size: 0px;
-}
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:not(:first-child) > .queryAxisItemUiMoveLeftButton:before {
-  /* chevron left */
-  content: "\ea60";
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:last-child > .button.queryAxisItemUiMoveRightButton {
-  width: 2px;
-  font-size: 0px;
-}
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem:not(:last-child) > .queryAxisItemUiMoveRightButton:before {
-  /* chevron right */
-  content: "\ea61";
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiFilterButton:before {
-  /* filter */
-  content: "\eaa5";
-}
-
-
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiRemoveButton:before {
-  /* trash */
-  content: "\eb41";
-}
-
-/**
-*
-* Move axis button
-*
-*/
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=columns] > .items > .queryUiAxisItem > .queryAxisItemUiMoveToAxisButton:before {
-  /* table-column */
-  content: "\faff";
-}
-
-.queryUi > .queryUiAxes > .queryUiAxis[data-axis=rows] > .items > .queryUiAxisItem > .queryAxisItemUiMoveToAxisButton:before {
-  /* table-row */
-  content: "\fb00";
 }
 
 /**
@@ -183,131 +140,183 @@
 * Derivation icons
 *
 */
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=date] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=date] > span:before {
   /* calendar */
   content: "\ea53";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=year] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=year] > span:before {
   /* letter-y */
   content: "\ec68";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=quarter] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=quarter] > span:before {
   /* letter q */
   content: "\ec60";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="month num"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation="month num"] > span:before {
   /* letter m */
   content: "\ec5c";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="week num"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation="week num"] > span:before {
   /* letter w */
   content: "\ec66";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of year"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation="day of year"] > span:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of month"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation="day of month"] > span:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation="day of week"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation="day of week"] > span:before {
   /* letter-d */
   content: "\ec53";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=time] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=time] > span:before {
   /* clock */
   content: "\ea70";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=hour] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=hour] > span:before {
   /* letter-h */
   content: "\ec57";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=minute] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=minute] > span:before {
   /* letter-m-small */
   content: "\fcd3";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-derivation=second] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-derivation=second] > span:before {
   /* letter-s */
   content: "\ec62";
 }
-
 
 /**
 *
 * Aggregator icons
 *
 */
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=count] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=count] > span:before {
   /* tallymarks */
   content: "\ec4a";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator="distinct count"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator="distinct count"] > span:before {
   /* tallymark-4 */
   content: "\ec49";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=max] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=max] > span:before {
   /* math-max */
   content: "\f0f5";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=min] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=min] > span:before {
   /* math-min */
   content: "\f0f6";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=list] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=list] > span:before {
   /* list */
   content: "\eb6b";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator="distinct list"] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator="distinct list"] > span:before {
   /* list details */
   content: "\ef40";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=sum] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=sum] > span:before {
   /* sum */
   content: "\eb73";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=avg] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=avg] > span:before {
   /* math-avg */
   content: "\f0f4";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=median] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=median] > span:before {
   /* calculator */
   content: "\eb80";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=mode] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=mode] > span:before {
   /* calculator */
   content: "\eb80";
 }
 
-.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem[data-aggregator=stdev] > .queryAxisItemUiIcon:before {
+.queryUi > section > ol > li[data-aggregator=stdev] > span:before {
   /* calculator */
   content: "\eb80";
 }
 
 
-/**
-* Prevent the Query UI events when the pivot table is busy:
-*/
-main.layout .workarea:has( > .pivotTableUiContainer[aria-busy=true] ) > .queryUi {
-  pointer-events: none;
+
+/* buttons to move the item */
+.queryUi > section > ol > li > label:first-child:has( > button )::after {
+  /* chevron left */
+  content: "\ea60";  
+}
+
+.queryUi > section > ol > li > label:last-child:has( > button )::after {
+  /* chevron right */
+  content: "\ea61";
+}
+
+.queryUi > section > ol > li:first-child > label:first-child:has( > button )::after {
+  visibility: hidden;  
+  display: none;
+}
+
+/* label holding the item caption */
+.queryUi > section > ol > li:first-child > span {
+  margin-left: 8px;
+}
+
+
+.queryUi > section > ol > li:last-child > label:last-child:has( > button )::after {
+  visibility: hidden;  
+  display: none;
+}
+
+/* label holding the item caption */
+.queryUi > section > ol > li:last-child > menu {
+  margin-right: 6px;
+}
+
+/* axis item actions */
+.queryUi > section > ol > li > menu {
+  display: inline-block;
+  margin: 0px;
+}
+
+/* axis item action to move item to other axis */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* table-row */
+  content: "\fb00";
+}
+
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* table-column */
+  content: "\faff";
+}
+
+/* axis item action to remove item from axis */
+.queryUi > section > ol > li > menu > label:nth-child(2):has( > button )::after {
+  /* trash */
+  content: "\eb41";
+}
+
+
+
 }
