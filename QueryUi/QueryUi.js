@@ -1,237 +1,308 @@
-
-function flipQueryUiAxisButtonClicked(queryAxisUi){
-  var axisId = queryAxisUi.getAttribute('data-axis');
-  var withAxisId;
-  switch(axisId) {
-    case QueryModel.AXIS_COLUMNS:
-      queryModel.flipAxes(QueryModel.AXIS_COLUMNS, QueryModel.AXIS_ROWS);
-      break;
-    case QueryModel.AXIS_ROWS:
-      queryModel.flipAxes(QueryModel.AXIS_ROWS, QueryModel.AXIS_COLUMNS);
-      break;
-    case QueryModel.AXIS_CELLS:
-      var queryUi = queryAxisUi.parentNode.parentNode;
-      var cellheadersaxis = queryUi.getAttribute('data-cellheadersaxis');
-      switch (cellheadersaxis) {
-        case QueryModel.AXIS_COLUMNS:
-          cellheadersaxis = QueryModel.AXIS_ROWS;
-          break;
-        case QueryModel.AXIS_ROWS:
-          cellheadersaxis = QueryModel.AXIS_COLUMNS;
-          break;
-        default:
-          throw new Error(`Unrecognized cellaxisplacement ${cellheadersaxis}`);
-      }
-      queryUi.setAttribute('data-cellheadersaxis', cellheadersaxis);
-      queryModel.setCellHeadersAxis(cellheadersaxis);
-      break;
-  }
-}
-
-function clearQueryUiAxisButtonClicked(queryAxisUi){
-  var axisId = queryAxisUi.getAttribute('data-axis');
-  queryModel.clear(axisId);
-}
-
-function getQueryModelItem(queryAxisItemUi){
-  var searchItem = {
-    columnName: queryAxisItemUi.getAttribute('data-column_name'),
-    derivation: queryAxisItemUi.getAttribute('data-derivation'),
-    aggregator: queryAxisItemUi.getAttribute('data-aggregator')
-  };
-  var item = queryModel.findItem(searchItem);
-  if (!item) {
-    throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
-  }
-  return item;
-}
-
-function moveQueryAxisItemUi(queryAxisItemUi, direction) {
-  var item = getQueryModelItem(queryAxisItemUi);
-  var itemIndex = item.index;
-  itemIndex += direction;
-  item.index = itemIndex;
-  queryModel.addItem(item);
-}
-
-function queryAxisUiItemMoveLeftClicked(queryAxisItemUi){
-  moveQueryAxisItemUi(queryAxisItemUi, -1);
-}
-
-function queryAxisUiItemMoveRightClicked(queryAxisItemUi){
-  moveQueryAxisItemUi(queryAxisItemUi, 1);
-}
-
-function queryAxisUiItemRemoveClicked(queryAxisItemUi){
-  var item = getQueryModelItem(queryAxisItemUi);
-  queryModel.removeItem(item);
-}
-
-function queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
-  var item = getQueryModelItem(queryAxisItemUi);
-  delete item.index;
-  switch (item.axis) {
-    case QueryModel.AXIS_COLUMNS:
-      item.axis = QueryModel.AXIS_ROWS;
-      break;
-    case QueryModel.AXIS_ROWS:
-      item.axis = QueryModel.AXIS_COLUMNS;
-      break;
-  }
-  queryModel.addItem(item);
-}
-
-function queryUiClickHandler(event){
-  // setup the event context (element that was clicked and top element of this component)
-  var queryUi = event.currentTarget;
-  var target = event.target;
+class QueryUi {
   
-  // establish the element hierarchy
-  var queryAxisItemUi, queryAxisUi;
-  var classNames, node = target;
-  while (node && node !== queryUi){
+  #id = undefined;
+  #queryModel = undefined;
+  #queryAxisTemplateId = undefined;
+  #queryAxisItemTemplateId = undefined;
+  
+  
+  constructor(config){
+    this.#id = config.id || 'queryUi';
+    this.#queryModel = config.queryModel; 
+    this.#queryAxisTemplateId = config.queryAxisTemplateId || 'queryUiAxis';
+    this.#queryAxisItemTemplateId = config.queryAxisItemTemplateId || 'queryUiAxisItem';
+    this.#renderAxes();
+    this.#initEvents();
+  }
+  
+  #queryUiClickHandler(event){
+    var target = event.target;
+    if (target.tagName !== 'BUTTON'){
+      return;
+    }
+    var node = target;
+    var axis, axisItem;
+    var isClearAxisAction, isPrimaryAxisAction, isAxisItemAction;
+    var dom = this.getDom();
+    while (node && node !== dom){
+      switch (node.tagName){
+        case 'SECTION':
+          axis = node;
+          break;
+        case 'LI':
+          axisItem = node;
+          break;
+      }
+      node = node.parentNode;
+    }
     
-    classNames = getClassNames(node);
-    if (!queryAxisItemUi && classNames.indexOf('queryUiAxisItem') !== -1) {
-      queryAxisItemUi = node;
+    if (!axis){
+      return;
+    }
+    
+    var targetId = target.getAttribute('id');
+    if (targetId.endsWith('-axis-primary-action')) {
+      this.#axisPrimaryActionButtonClicked(axis);
     }
     else
-    if (!queryAxisUi && classNames.indexOf('queryUiAxis') !== -1) {
-      queryAxisUi = node;
+    if (targetId.endsWith('-clear-axis')){
+      this.#axisClearButtonClicked(axis);
     }
-    node = node.parentNode;
-  }
-  
-  // determine the appropriate action and call the corresponding handler.
-  classNames = getClassNames(target);
-  if (classNames.indexOf('axisIcon') !== -1){
-    flipQueryUiAxisButtonClicked(queryAxisUi);
-  }
-  else
-  if (classNames.indexOf('clearAxisButton') !== -1) {
-    clearQueryUiAxisButtonClicked(queryAxisUi);
-  }
-  else
-  if (classNames.indexOf('queryAxisItemUiMoveLeftButton') !== -1){
-    queryAxisUiItemMoveLeftClicked(queryAxisItemUi);
-  }
-  else
-  if (classNames.indexOf('queryAxisItemUiMoveRightButton') !== -1){
-    queryAxisUiItemMoveRightClicked(queryAxisItemUi);
-  }
-  else
-  if (classNames.indexOf('queryAxisItemUiRemoveButton') !== -1){
-    queryAxisUiItemRemoveClicked(queryAxisItemUi);
-  }
-  else 
-  if (classNames.indexOf('queryAxisItemUiMoveToAxisButton') !== -1) {
-    queryAxisUiItemMoveToAxisClicked(queryAxisItemUi);
-  }
-  else 
-  if (classNames.indexOf('queryAxisItemUiFilterButton') !== -1){
-    var queryModelItem = getQueryModelItem(queryAxisItemUi);
-    filterDialog.openFilterDialog(queryModel, queryModelItem, queryAxisItemUi);
-  }
-}
-
-function getQueryAxisItemUiCaption(item){
-  return item.columnName;
-}
-
-function createQueryAxisItemUi(item){
-  var queryAxisItemUi = createEl('div', {
-    'class': 'queryUiAxisItem',
-    'data-column_name': item.columnName
-  });
-  
-  var derivation = item.derivation;
-  if (derivation) {
-    queryAxisItemUi.setAttribute('data-derivation', derivation);
-  }
-  
-  var aggregator = item.aggregator;
-  if (aggregator) {
-    queryAxisItemUi.setAttribute('data-aggregator', aggregator);
+    
+    if (!axisItem){
+      return;
+    }
+    
+    if (targetId.endsWith('-move-left')) {
+      this.#queryAxisUiItemMoveLeftClicked(axisItem);
+    }
+    else
+    if (targetId.endsWith('-move-right')) {
+      this.#queryAxisUiItemMoveRightClicked(axisItem);
+    }
+    else
+    if (targetId.endsWith('-remove-from-axis')){
+      this.#queryAxisUiItemRemoveClicked(axisItem);
+    }
+    else
+    if (targetId.endsWith('-move-to-other-axis')){
+      this.#queryAxisUiItemMoveToAxisClicked(axisItem);      
+    }
   }
 
-  var moveLeftButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiMoveLeftButton'],
-    "title": "Move this item to the left"
-  });
-  queryAxisItemUi.appendChild(moveLeftButton);
+  #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
+    var item = this.#getQueryModelItem(queryAxisItemUi);
+    delete item.index;
+    switch (item.axis) {
+      case QueryModel.AXIS_COLUMNS:
+        item.axis = QueryModel.AXIS_ROWS;
+        break;
+      case QueryModel.AXIS_ROWS:
+        item.axis = QueryModel.AXIS_COLUMNS;
+        break;
+    }
+    this.#queryModel.addItem(item);
+  }
+
+  #moveQueryAxisItemUi(queryAxisItemUi, direction) {
+    var item = this.#getQueryModelItem(queryAxisItemUi);
+    var itemIndex = item.index;
+    itemIndex += direction;
+    item.index = itemIndex;
+    this.#queryModel.addItem(item);
+  }
+
+  #queryAxisUiItemMoveLeftClicked(queryAxisItemUi){
+    this.#moveQueryAxisItemUi(queryAxisItemUi, -1);
+  }
+
+  #queryAxisUiItemMoveRightClicked(queryAxisItemUi){
+    this.#moveQueryAxisItemUi(queryAxisItemUi, 1);
+  }
+
+  #queryAxisUiItemRemoveClicked(queryAxisItemUi){
+    var item = this.#getQueryModelItem(queryAxisItemUi);
+    queryModel.removeItem(item);
+  }
+
+  #updateQueryUi(){
+    var dom = this.getDom();
+    dom.setAttribute('data-cellheadersaxis', this.#queryModel.getCellHeadersAxis());
+    var axes = dom.childNodes;
+    for (var i = 0; i < axes.length; i++){
+      var axis = axes.item(i);
+      if (axis.nodeType !== 1 || axis.tagName !== 'SECTION') {
+        continue;
+      }
+      var axisId = axis.getAttribute('data-axis');
+      var queryModelAxis = queryModel.getQueryAxis(axisId);
+      this.#updateQueryAxisUi(axis, queryModelAxis);
+    }
+  }
   
-  if (aggregator || derivation) {
-    var icon = createEl('span', {
-      "class": ['icon', 'queryAxisItemUiIcon'],
-      "title": aggregator || derivation
+  #getQueryAxisItemUiCaption(axisItem){
+    return axisItem.columnName;
+  }
+  
+  #getQueryModelItem(queryAxisItemUi){
+    var searchItem = {
+      columnName: queryAxisItemUi.getAttribute('data-column_name'),
+      derivation: queryAxisItemUi.getAttribute('data-derivation'),
+      aggregator: queryAxisItemUi.getAttribute('data-aggregator')
+    };
+    var item = this.#queryModel.findItem(searchItem);
+    if (!item) {
+      throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+    }
+    return item;
+  }
+  
+  #createQueryAxisItemUi(axisItem){
+    
+    var id = this.#id + '-' + QueryAxisItem.getIdForQueryAxisItem(axisItem);
+    
+    var itemUi = this.#instantiateTemplate('queryUiAxisItem', id);
+    itemUi.setAttribute('id', id);
+    itemUi.setAttribute('data-column_name',  axisItem.columnName);
+
+    var derivation = axisItem.derivation;
+    if (derivation) {
+      itemUi.setAttribute('data-derivation', derivation);
+    }
+    
+    var aggregator = axisItem.aggregator;
+    if (aggregator) {
+      itemUi.setAttribute('data-aggregator', aggregator);
+    }
+    
+    var captionText = this.#getQueryAxisItemUiCaption(axisItem);
+    var captionUi = itemUi.getElementsByTagName('span').item(0);
+    captionUi.innerText = captionText;
+
+    return itemUi;
+  }
+  
+  #updateQueryAxisUi(axisUi, queryModelAxis) {
+    var axisItemsUi = axisUi.getElementsByTagName('ol').item(0);
+    axisItemsUi.innerHTML = '';
+    var items = queryModelAxis.getItems();
+    for (var i = 0; i < items.length; i++){
+      var item = items[i];
+      var queryAxisItemUi = this.#createQueryAxisItemUi(item);
+      axisItemsUi.appendChild(queryAxisItemUi);
+    }
+  }
+  
+  #queryModelChangeHandler(event) {
+    // TODO: examine the event Data and figure out if we have to update the entire ui or just bits of it.
+    this.#updateQueryUi();
+  }
+  
+  #initEvents(){
+    var dom = this.getDom();
+    dom.addEventListener('click', this.#queryUiClickHandler.bind(this));
+
+    this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
+  }
+  
+  #axisClearButtonClicked(axis){
+    var axisId = axis.getAttribute('data-axis');
+    this.#queryModel.clear(axisId);
+  }
+
+  #axisPrimaryActionButtonClicked(axis){
+    var axisId = axis.getAttribute('data-axis');
+    switch (axisId){
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        this.#queryModel.flipAxes(QueryModel.AXIS_COLUMNS, QueryModel.AXIS_ROWS);
+        break;
+      case QueryModel.AXIS_CELLS:
+        var cellheadersaxis = this.#queryModel.getCellHeadersAxis();
+        switch (cellheadersaxis) {
+          case QueryModel.AXIS_COLUMNS:
+            cellheadersaxis = QueryModel.AXIS_ROWS;
+            break;
+          case QueryModel.AXIS_ROWS:
+            cellheadersaxis = QueryModel.AXIS_COLUMNS;
+            break;
+          default:
+            throw new Error(`Unrecognized cellaxisplacement ${cellheadersaxis}`);
+        }
+        this.#queryModel.setCellHeadersAxis(cellheadersaxis);
+        break;
+    }
+  }
+    
+  #instantiateTemplate(templateId, instanceId) {
+    var template = byId(templateId);
+    var clone = template.content.cloneNode(true);
+    var index = 0;
+    var node;
+    do {
+      var node = clone.childNodes.item(index++);
+    } while (node && node.nodeType !== node.ELEMENT_NODE);
+    node.setAttribute('id', instanceId);
+    var buttons = node.getElementsByTagName('button');
+    for (var i = 0; i < buttons.length; i++){
+      var button = buttons.item(i);
+      var buttonId = instanceId + '-' + button.getAttribute('id');
+      button.setAttribute('id', buttonId);
+      button.parentNode.setAttribute('for', buttonId);
+    }
+    return node;
+  }
+  
+  #getCellsAxisPrimaryActionTitle(){
+    var cellsAxisPrimaryActionTitle;
+    var targetAxis;
+    var cellHeadersAxis = this.#queryModel.getCellHeadersAxis();
+    switch (cellHeadersAxis){
+      case QueryModel.AXIS_COLUMNS:
+        targetAxis = QueryModel.AXIS_ROWS;
+        break;
+      case QueryModel.AXIS_ROWS:
+        targetAxis = QueryModel.AXIS_COLUMNS;
+        break;
+    }
+    var cellsAxisPrimaryActionTitle = `Move the cell headers to the ${targetAxis} axis`;
+    return cellsAxisPrimaryActionTitle;
+  }
+  
+  #renderAxis(config){
+    var axisId = config.axisId;
+    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
+    var axis = this.#instantiateTemplate(this.#queryAxisTemplateId, this.#id + '-' + axisId);
+
+    var primaryAxisActionLabelTitle;
+    if (config.primaryAxisActionLabelTitle){
+      primaryAxisActionLabelTitle = config.primaryAxisActionLabelTitle;
+    }
+    else {
+      switch (axisId) {
+        case QueryModel.AXIS_COLUMNS:
+        case QueryModel.AXIS_ROWS:
+          primaryAxisActionLabelTitle = 'Flip the rows and columns axes';
+          break;
+        case QueryModel.AXIS_CELLS:
+          primaryAxisActionLabelTitle = this.#getCellsAxisPrimaryActionTitle();
+          break;
+      }
+    }
+    var labels = axis.getElementsByTagName('label');
+    
+    var primaryAxisActionLabel = labels.item(0);
+    primaryAxisActionLabel.setAttribute('title', primaryAxisActionLabelTitle);
+    
+    labels.item(1).setAttribute('title', `Clear all items from the ${axisId} axis.`);
+    
+    axis.setAttribute('data-axis', axisId);
+    var heading = axis.getElementsByTagName('h1').item(0);
+    heading.innerText = caption;
+    this.getDom().appendChild(axis);
+  }
+  
+  #renderAxes(){
+    this.#renderAxis({
+      axisId: QueryModel.AXIS_COLUMNS
     });
-    queryAxisItemUi.appendChild(icon);
+    this.#renderAxis({
+      axisId: QueryModel.AXIS_ROWS
+    });
+    this.#renderAxis({
+      axisId: QueryModel.AXIS_CELLS
+    });    
   }
   
-  var caption = getQueryAxisItemUiCaption(item);
-  var label = createEl('span', {
-    "class": 'queryAxisItemUiLabel' 
-  }, caption);
-  queryAxisItemUi.appendChild(label);
-
-  if (!aggregator){
-    var moveToAxisButton = createEl('span', {
-      "class": ['button', 'queryAxisItemUiMoveToAxisButton'],
-      title: "Move this item to the other axis"
-    });
-    queryAxisItemUi.appendChild(moveToAxisButton);
-  }
-
-  if (item.axis !== QueryModel.AXIS_CELLS) {
-    var filterButton = createEl('span', {
-      "class": ['button', 'queryAxisItemUiFilterButton'],
-      "title": "Open the filter dialog for this item"
-    });
-    queryAxisItemUi.appendChild(filterButton);
-  }
-
-  var removeButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiRemoveButton'],
-    "title": "Remove this item from the query"
-  });
-  queryAxisItemUi.appendChild(removeButton);
-
-  var moveRightButton = createEl('span', {
-    "class": ['button', 'queryAxisItemUiMoveRightButton'],
-    "title": "Move this item to the right"
-  });
-  queryAxisItemUi.appendChild(moveRightButton);
-  
-  return queryAxisItemUi;
-}
-
-function updateQueryAxisUi(queryUiAxis, queryModelAxis){
-  var itemsCell = queryUiAxis.cells.item(2);
-  itemsCell.innerHTML = '';
-  var items = queryModelAxis.getItems();
-  for (var i = 0; i < items.length; i++){
-    var item = items[i];
-    var queryAxisItemUi = createQueryAxisItemUi(item);
-    itemsCell.appendChild(queryAxisItemUi);
+  getDom(){
+    return byId(this.#id);
   }
 }
 
-function updateQueryUi(queryModel){
-  var queryUi = byId('queryUi');
-  var queryUiAxes = queryUi.rows;
-  for (var i = 0; i < queryUiAxes.length; i++){
-    var queryUiAxis = queryUiAxes.item(i);
-    var axisId = queryUiAxis.getAttribute('data-axis');
-    var queryModelAxis = queryModel.getQueryAxis(axisId);
-    updateQueryAxisUi(queryUiAxis, queryModelAxis);
-  }
-}
-
+var queryUi;
 function initQueryUi(){
-  var queryUi = byId('queryUi');
-  queryUi.addEventListener('click', queryUiClickHandler);
-  
-  queryModel.addEventListener('change', function(event){
-    updateQueryUi(queryModel);
+  queryUi = new QueryUi({
+    id: 'queryUi',
+    queryModel: queryModel
   });
 }
