@@ -317,6 +317,43 @@ class QueryAxisItem {
     }    
     return sqlExpression;
   }
+  
+  static getQueryAxisItemDataType(queryAxisItem){
+    var columnType = queryAxisItem.columnType;
+    var dataType = columnType;
+
+    var derivationInfo, derivation = queryAxisItem.derivation;
+    if (derivation) {
+      derivationInfo = AttributeUi.getDerivationInfo(derivation);
+      if (derivationInfo.columnType) {
+        dataType = derivationInfo.columnType;
+      }
+      else 
+      if (derivationInfo.preservesColumnType){
+        dataType = columnType;
+      }
+      else {
+        dataType = undefined;
+      }
+    }
+
+    var aggregatorInfo, aggregator = queryAxisItem.aggregator;
+    if (aggregator) {
+      aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+      if (aggregatorInfo.columnType) {
+        dataType = aggregatorInfo.columnType;
+      }
+      else 
+      if (aggregatorInfo.preservesColumnType){
+        dataType = columnType;
+      }
+      else {
+        dataType = undefined;
+      }
+    }
+    
+    return dataType;
+  }
 }
 
 class QueryAxis {
@@ -666,7 +703,29 @@ class QueryModel extends EventEmitter {
       axesChanged: axesChangeInfo
     });
   }
-  
+ 
+  setQueryAxisItemFilter(queryAxisItem, filter){
+    var queryModelItem = this.findItem(queryAxisItem);
+    if (!queryModelItem) {
+      throw new Error(`Item is not part of the model!`);
+    }
+    var oldFilter = queryAxisItem.filter;
+
+    // update the real item stored in the axis
+    // (note that the normal getters return copies)
+    var axis = this.getQueryAxis(queryModelItem.axis);
+    var items = axis.getItems();
+    items[queryModelItem.index].filter = filter;
+    
+    var axesChangeInfo = {};
+    axesChangeInfo[queryAxisItem.axis] = {
+      changed: [queryAxisItem]
+    };
+    
+    this.fireEvent('change', {
+      axesChanged: axesChangeInfo
+    });
+  }
 }
 
 var queryModel;

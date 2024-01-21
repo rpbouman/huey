@@ -90,7 +90,9 @@ class AttributeUi {
 
   static dateFields = {
     'date': {
-      expressionTemplate: "strftime( ${columnName}, '%Y-%m-%d' )",
+      // %x is isodate,
+      // see: https://duckdb.org/docs/sql/functions/dateformat.html
+      expressionTemplate: "strftime( ${columnName}, '%x' )",
       columnType: 'VARCHAR'
     },
     'year': {
@@ -106,7 +108,7 @@ class AttributeUi {
     'quarter': {
       expressionTemplate: "'Q' || QUARTER( ${columnName} )",
       columnType: 'VARCHAR'    
-    },
+    },    
     'month num': {
       expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT',
@@ -183,10 +185,37 @@ class AttributeUi {
     return applicableDerivations;
   }
 
-  static getDerivationInfo(typeName, derivationName){
-    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
-    var derivationInfo = applicableDerivations[derivationName];
+  static getDerivationInfo(derivationName){
+    var derivations = Object.assign({}, 
+      hasDateFields ? AttributeUi.dateFields : undefined, 
+      hasTimeFields ? AttributeUi.timeFields : undefined
+    );
+    var derivationInfo = derivations[derivationName];
     return derivationInfo;
+  }
+
+  static getAggregatorInfo(aggregatorName){
+    var aggregatorInfo = AttributeUi.aggregators[aggregatorName];
+    return aggregatorInfo;
+  }
+  
+  static getApplicableAggregators(typeName) {
+    var typeInfo = dataTypes[typeName];
+    
+    var isNumeric = Boolean(typeInfo.isNumeric);
+    var isInteger = Boolean(typeInfo.isInteger);
+    var hasTimeFields = Boolean(typeInfo.hasTimeFields);
+    var hasDateFields = Boolean(typeInfo.hasDateFields);
+            
+    var applicableAggregators = {};
+    for (var aggregationName in AttributeUi.aggregators) {
+      var aggregator = AttributeUi.aggregators[aggregationName];
+      if (aggregator.forNumeric && !isNumeric) {
+        continue;
+      }
+      applicableAggregators[aggregationName] = aggregator;
+    }
+    return applicableAggregators;
   }
   
   static #getUiNodeCaption(config){
@@ -399,11 +428,10 @@ class AttributeUi {
     var isInteger = Boolean(typeInfo.isInteger);
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
-    
-    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
-    
+        
     var childNode, config;
     
+    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
     for (var derivationName in applicableDerivations) {
       var derivation = applicableDerivations[derivationName];
       config = {
@@ -417,11 +445,9 @@ class AttributeUi {
       node.appendChild(childNode);
     }
     
-    for (var aggregationName in AttributeUi.aggregators) {
-      var aggregator = AttributeUi.aggregators[aggregationName];
-      if (aggregator.forNumeric && !isNumeric) {
-        continue;
-      }
+    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    for (var aggregationName in applicableAggregators) {
+      var aggregator = applicableAggregators[aggregationName];
       config = {
         type: 'aggregate',
         aggregator: aggregationName,

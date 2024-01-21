@@ -117,9 +117,15 @@
   width: 20px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
-  color: var( --huey-icon-color-subtle );
 }
 
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .icon {
+  color: var( --huey-icon-color );
+}  
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
+  color: var( --huey-icon-color-subtle );
+}  
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .button {
 }
@@ -145,6 +151,12 @@
   /* chevron right */
   content: "\ea61";
 }
+
+.queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiFilterButton:before {
+  /* filter */
+  content: "\eaa5";
+}
+
 
 .queryUi > .queryUiAxes > .queryUiAxis > .items > .queryUiAxisItem > .queryAxisItemUiRemoveButton:before {
   /* trash */

@@ -127,6 +127,11 @@ function queryUiClickHandler(event){
   if (classNames.indexOf('queryAxisItemUiMoveToAxisButton') !== -1) {
     queryAxisUiItemMoveToAxisClicked(queryAxisItemUi);
   }
+  else 
+  if (classNames.indexOf('queryAxisItemUiFilterButton') !== -1){
+    var queryModelItem = getQueryModelItem(queryAxisItemUi);
+    filterDialog.openFilterDialog(queryModel, queryModelItem, queryAxisItemUi);
+  }
 }
 
 function getQueryAxisItemUiCaption(item){
@@ -175,6 +180,14 @@ function createQueryAxisItemUi(item){
       title: "Move this item to the other axis"
     });
     queryAxisItemUi.appendChild(moveToAxisButton);
+  }
+
+  if (item.axis !== QueryModel.AXIS_CELLS) {
+    var filterButton = createEl('span', {
+      "class": ['button', 'queryAxisItemUiFilterButton'],
+      "title": "Open the filter dialog for this item"
+    });
+    queryAxisItemUi.appendChild(filterButton);
   }
 
   var removeButton = createEl('span', {

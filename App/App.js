@@ -77,12 +77,12 @@ function initExecuteQuery(){
   autoRunQuery.addEventListener('change', function(event){
     var target = event.target;
     var checked = target.checked;
-    if (checked) {
-      pivotTableUi.setAutoUpdate(true);
-    }
     settings.assignSettings('querySettings', {
       'autoRunQuery': checked
-    })
+    });
+    if (checked) {
+      pivotTableUi.updatePivotTableUi();
+    }
   });
 }
 
@@ -97,6 +97,7 @@ function initApplication(){
   initAttributeUi();
   initSearch();
   initQueryUi();
+  initFilterUi();
   initPivotTableUi();
   initExecuteQuery();
 }

@@ -2,7 +2,7 @@ class PivotTableUi {
     
   #id = undefined;
   #queryModel = undefined;
-  #autoUpdate = false;
+  #settings = undefined;
   #needsUpdate = false;
     
   #columnsTupleSet = undefined;
@@ -19,6 +19,10 @@ class PivotTableUi {
   constructor(config){
     this.#id = config.id;
     
+    if (config.settings){
+      this.#initSettings(config.settings);
+    }
+    
     var queryModel = config.queryModel;
     this.#queryModel = queryModel;
 
@@ -34,6 +38,11 @@ class PivotTableUi {
    
     queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
     
+    this.#initScrollHandler();
+    this.#initResizeObserver();
+  }
+  
+  #initScrollHandler(){
     var container = this.#getInnerContainerDom();
     bufferEvents(
       container,
@@ -42,6 +51,10 @@ class PivotTableUi {
       this,
       100
     );
+  }
+  
+  #initResizeObserver(){
+    var dom = this.getDom();
 
     var resizeObserver = new ResizeObserver(function(){
       if (this.#resizeTimeoutId !== undefined) {
@@ -51,26 +64,35 @@ class PivotTableUi {
       this.#resizeTimeoutId = setTimeout(function(){
         // TODO: we should probably always automatically update some visuals, 
         // just don't run a query unless there is an explicit query.
-        if (this.#autoUpdate) {
-          this.updatePivotTableUi();
-        }
-        else {
-          this.#setNeedsUpdate(true);
-        }
+        this.updatePivotTableUi();
+        
+        //if (this.#autoUpdate) {
+        //  this.updatePivotTableUi();
+        //}
+        //else {
+        //  this.#setNeedsUpdate(true);
+        //}
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
-    var dom = this.getDom();
     resizeObserver.observe(dom);
-    
   }
     
-  setAutoUpdate(autoUpdate){
-    this.#autoUpdate = Boolean(autoUpdate);
-    if (this.#needsUpdate) {
-      this.updatePivotTableUi();
+  #initSettings(settings){
+    this.#settings = settings;
+  }
+  
+  get #autoUpdate(){
+    var autoUpdate;
+    var querySettings = settings.getSettings('querySettings');
+    if (querySettings.autoRunQuery === undefined) {
+      autoUpdate = false;
     }
+    else {
+      autoUpdate = querySettings.autoRunQuery;
+    }
+    return autoUpdate;
   }
-
+  
   #setNeedsUpdate(needsUpdate){
     this.#needsUpdate = needsUpdate;
 
