@@ -318,7 +318,8 @@ class AttributeUi {
     });
     
     var icon = createEl('span', {
-      "class": 'icon'
+      'class': 'icon',
+      'role': 'img'
     });
     switch (config.type) {
       case 'column':

@@ -257,7 +257,8 @@ class DataSourcesUi {
     var summary = createEl('summary', {
     });
     var icon = createEl('span', {
-      "class": 'icon'
+      'class': 'icon',
+      'role': 'img'
     });
     summary.appendChild(icon);
     
