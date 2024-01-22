@@ -354,6 +354,92 @@ class QueryAxisItem {
     
     return dataType;
   }
+
+  static #getValueLiteralWriter(dataType){
+    var dataTypeInfo = dataTypes[dataType];
+    var valueLiteralWriter;
+    if (dataTypeInfo.isNumeric) {
+      valueLiteralWriter = function(value){
+        return value;
+      };
+      return valueLiteralWriter;
+    }
+    
+    switch (dataType) {
+      case 'VARCHAR':
+        valueLiteralWriter = function(value){
+          return `'${value.replace(/'/g, "''")}'`;
+        };
+        break;      
+      default:
+        valueLiteralWriter = function(value){
+          return `'${value.replace(/'/g, "''")}'::${dataType}`;
+        };
+    }
+    return valueLiteralWriter;
+  }
+
+  static #getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem){
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryAxisItem);    
+    var valueLiteralWriter = QueryAxisItem.#getValueLiteralWriter(dataType);
+
+    var sql;
+    var filter = queryAxisItem.filter;
+
+
+    var values = filter.values;
+    var toValues = filter.toValues;    
+    var keys = Object.keys(values);
+    
+    var valueLiterals = keys.map(function(key){
+      var entry = values[key];
+      return valueLiteralWriter(entry.value);
+    });
+    var toValueLiterals;
+    if (filter.filterType === FilterDialog.filterTypes.BETWEEN) {
+      keys = Object.keys(toValues);
+      toValueLiterals = keys.map(function(key){
+        var entry = toValues[key];
+        return valueLiteralWriter(entry.value);
+      });
+    }
+    return {
+      valueLiterals: valueLiterals,
+      toValueLiterals: toValueLiterals
+    };
+  }
+  
+  static getFilterConditionSql(queryAxisItem){
+    var filter = queryAxisItem.filter;
+    if (!filter) {
+      return undefined;
+    }
+    var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
+    
+    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+    var sql = '';
+    switch (filter.filterType) {
+      case FilterDialog.filterTypes.EXCLUDE:
+        sql += ' NOT ';
+      case FilterDialog.filterTypes.INCLUDE:
+        sql += 'IN' 
+        sql = `${columnExpression} ${sql} ( ${literalLists.valueLiterals.join('\n,')} )`;
+        break;
+      case FilterDialog.filterTypes.BETWEEN:
+        sql = '(' + literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
+          acc += '\n';
+          if (currIndex) {
+            acc += 'OR '
+          }
+          var fromValue = literalLists.valueLiterals[currIndex];
+          var toValue = literalLists.toValueLiterals[currIndex];
+          
+          acc += `${columnExpression} BETWEEN ${fromValue} AND ${toValue}`;
+          return acc;
+        }, '') + ')';
+    }
+    return sql;
+  }
 }
 
 class QueryAxis {
@@ -439,11 +525,13 @@ class QueryAxis {
 
 class QueryModel extends EventEmitter {
   
+  static AXIS_FILTERS = 'filters';
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
   
   #axes = {
+    filters: new QueryAxis(),
     columns: new QueryAxis(),
     rows: new QueryAxis(),
     cells: new QueryAxis()
@@ -474,6 +562,10 @@ class QueryModel extends EventEmitter {
     return this.#axes[axisId];
   }
   
+  getFiltersAxis(){
+    return this.getQueryAxis(QueryModel.AXIS_FILTERS);
+  }
+
   getColumnsAxis(){
     return this.getQueryAxis(QueryModel.AXIS_COLUMNS);
   }
@@ -523,7 +615,9 @@ class QueryModel extends EventEmitter {
       axisIds = ['cells'];
     }
     else {
-      axisIds = Object.keys(this.#axes);
+      axisIds = Object.keys(this.#axes).filter(function(axisId){
+        return axisId !== QueryModel.AXIS_FILTERS;
+      });
     }
 
     var findConfig = {
@@ -575,7 +669,10 @@ class QueryModel extends EventEmitter {
     
     // make an axis-less version of the item so we can locate it in case it's already added to the model. 
     var copyOfConfig = Object.assign({}, config);
-    delete copyOfConfig['axis'];
+    
+    if (axis !== QueryModel.AXIS_FILTERS){
+      delete copyOfConfig['axis'];
+    }
     var item = this.findItem(copyOfConfig);
     
     var removedItem;
@@ -604,7 +701,12 @@ class QueryModel extends EventEmitter {
   
   removeItem(config){
     var copyOfConfig = Object.assign({}, config);
-    delete copyOfConfig['axis'];
+    
+    var axisId = copyOfConfig['axis']; 
+    if (axisId && axisId !== QueryModel.AXIS_FILTERS) {
+      delete copyOfConfig[axisId];
+    }
+    
     var item = this.findItem(copyOfConfig);
     if (!item){
       return undefined;
@@ -726,6 +828,41 @@ class QueryModel extends EventEmitter {
       axesChanged: axesChangeInfo
     });
   }
+  
+  // axisId should be columns or row axis, and then get the items from filter axis matching the items from the specified axis.
+  getFilterAxisItems(axisId) {
+    switch(axisId) {
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        break;
+      default:
+        throw new Error(`Invalid axis! Must not be ${axisId}.`);
+    }
+    var queryAxis = this.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    
+    var filterAxisItems = [];
+    var filtersAxis = this.getFiltersAxis();
+    for (var i = 0; i < queryAxisItems.length; i++){
+      var queryAxisItem = queryAxisItems[i];
+      var filterAxisItem = filterAxis.findItem(queryAxisItem);
+      filterAxisItems.push(filterAxisItem);
+    }    
+  }
+  
+  getFilterConditionSql(){
+    var queryAxis = this.getFiltersAxis();
+    var items = queryAxis.getItems();
+    if (items.length === 0){
+      return undefined;
+    }
+    var conditions = items.map(function(item){
+      return QueryAxisItem.getFilterConditionSql(item);
+    });
+    var condition = conditions.join('\nAND ');
+    return condition;
+  }
+  
 }
 
 var queryModel;

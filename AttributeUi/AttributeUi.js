@@ -187,8 +187,8 @@ class AttributeUi {
 
   static getDerivationInfo(derivationName){
     var derivations = Object.assign({}, 
-      hasDateFields ? AttributeUi.dateFields : undefined, 
-      hasTimeFields ? AttributeUi.timeFields : undefined
+      AttributeUi.dateFields, 
+      AttributeUi.timeFields
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -247,6 +247,7 @@ class AttributeUi {
       case 'column':
       case 'derived':
         switch (axisId){
+          case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
             if (config.type === 'derived') {
@@ -280,7 +281,7 @@ class AttributeUi {
       return axisButton;
     }
 
-    axisButton.setAttribute('title', `Toggle place this item on the ${axisId} axis .`);
+    axisButton.setAttribute('title', `Toggle place this item on the ${axisId} axis.`);
     
     axisButton.setAttribute('for', id);
     var axisButtonInput = createEl('input', {
@@ -303,6 +304,9 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeAxisButtons(config, head){
+    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
+    head.appendChild(filterButton);
+
     var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
     head.appendChild(cellsButton);
 
@@ -311,6 +315,7 @@ class AttributeUi {
 
     var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
     head.appendChild(rowButton);
+        
   }
 
   #renderAttributeUiNodeHead(config) {
@@ -488,8 +493,8 @@ class AttributeUi {
     var head = node.childNodes.item(0);
     var inputs = head.getElementsByTagName('input');
     switch (axis){
-      case 'columns':
-      case 'rows':
+      case QueryModel.AXIS_ROWS:
+      case QueryModel.AXIS_COLUMNS:
         // implement mutual exclusive axes (either rows or columns, not both)
         for (var i = 0; i < inputs.length; i++){
           var input = inputs.item(i);

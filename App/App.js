@@ -96,8 +96,8 @@ function initApplication(){
   initQueryModel();
   initAttributeUi();
   initSearch();
-  initQueryUi();
   initFilterUi();
+  initQueryUi();
   initPivotTableUi();
   initExecuteQuery();
 }

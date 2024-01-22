@@ -54,6 +54,12 @@
 }
 
 /* Columns axis header icon */
+.queryUi > section[data-axis=filters] > header > label:has( > button )::after {
+  /* filter */
+  content: "\eaa5";
+}
+
+/* Columns axis header icon */
 .queryUi > section[data-axis=columns] > header > label:has( > button )::after {
   /* table-row */
   content: "\fb00";
@@ -133,6 +139,7 @@
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color );
+  vertical-align: -15%;
 }
 
 /**
@@ -309,6 +316,11 @@
 .queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > button )::after {
   /* table-column */
   content: "\faff";
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* filter-edit */
+  content: "\fa00";
 }
 
 /* axis item action to remove item from axis */

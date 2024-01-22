@@ -2,6 +2,7 @@ class QueryUi {
   
   #id = undefined;
   #queryModel = undefined;
+  #filterDialog = filterDialog;
   #queryAxisTemplateId = undefined;
   #queryAxisItemTemplateId = undefined;
   
@@ -9,6 +10,7 @@ class QueryUi {
   constructor(config){
     this.#id = config.id || 'queryUi';
     this.#queryModel = config.queryModel; 
+    this.#filterDialog = config.filterDialog;
     this.#queryAxisTemplateId = config.queryAxisTemplateId || 'queryUiAxis';
     this.#queryAxisItemTemplateId = config.queryAxisItemTemplateId || 'queryUiAxisItem';
     this.#renderAxes();
@@ -68,6 +70,15 @@ class QueryUi {
     if (targetId.endsWith('-move-to-other-axis')){
       this.#queryAxisUiItemMoveToAxisClicked(axisItem);      
     }
+    else 
+    if (targetId.endsWith('-edit-filter-condition')){
+      this.#queryAxisUiItemEditFilterClicked(axisItem)
+    }
+  }
+    
+  #queryAxisUiItemEditFilterClicked(queryAxisItemUi){
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
   }
 
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
@@ -130,6 +141,13 @@ class QueryUi {
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
       aggregator: queryAxisItemUi.getAttribute('data-aggregator')
     };
+    
+    var axisUi = queryAxisItemUi.parentNode.parentNode;
+    var axisId = axisUi.getAttribute('data-axis');
+    if (axisId === QueryModel.AXIS_FILTERS){
+      searchItem.axis = axisId; 
+    }
+
     var item = this.#queryModel.findItem(searchItem);
     if (!item) {
       throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
@@ -137,12 +155,41 @@ class QueryUi {
     return item;
   }
   
+  #getQueryAxisItemUi(queryModelAxisItem){
+    var axisId = queryModelAxisItem.axis;
+    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName}"]`;
+    if (queryModelAxisItem.derivation){
+      cssSelector += `[data-derivation="${queryModelAxisItem.derivation}"]`;
+    }
+    if (queryModelAxisItem.aggregator){
+      cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
+    }
+    return document.querySelector(cssSelector);
+  }
+  
   #createQueryAxisItemUi(axisItem){
     
-    var id = this.#id + '-' + QueryAxisItem.getIdForQueryAxisItem(axisItem);
+    var axisId = axisItem.axis;
+    
+    var id = this.#id 
+    if (axisId === QueryModel.AXIS_FILTERS) {
+      id += '-' + axisId;
+    }
+    id += '-' + QueryAxisItem.getIdForQueryAxisItem(axisItem);
     
     var itemUi = this.#instantiateTemplate('queryUiAxisItem', id);
-    itemUi.setAttribute('id', id);
+    
+    if (axisId === QueryModel.AXIS_FILTERS) {
+      var text = 'Click to open the filter dialog to edit the filter.';
+      var actionButton = itemUi.getElementsByTagName('BUTTON').item(1);
+      actionButton.innerHTML = text;
+      var updatedId = id + '--edit-filter-condition';
+      actionButton.setAttribute('id', updatedId);
+      var label = actionButton.parentNode;
+      label.setAttribute('for', updatedId);
+      label.setAttribute('title', text);
+    }
+    
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
 
     var derivation = axisItem.derivation;
@@ -174,8 +221,21 @@ class QueryUi {
   }
   
   #queryModelChangeHandler(event) {
+    var eventData = event.eventData;
     // TODO: examine the event Data and figure out if we have to update the entire ui or just bits of it.
     this.#updateQueryUi();
+
+    if (
+      eventData.axesChanged && 
+      eventData.axesChanged.filters && 
+      eventData.axesChanged.filters && 
+      eventData.axesChanged.filters.added && 
+      eventData.axesChanged.filters.added.length
+    ){
+      var queryModelItem = eventData.axesChanged.filters.added[0];
+      var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
+      this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+    }
   }
   
   #initEvents(){
@@ -223,6 +283,8 @@ class QueryUi {
       var node = clone.childNodes.item(index++);
     } while (node && node.nodeType !== node.ELEMENT_NODE);
     node.setAttribute('id', instanceId);
+    
+    //
     var buttons = node.getElementsByTagName('button');
     for (var i = 0; i < buttons.length; i++){
       var button = buttons.item(i);
@@ -260,6 +322,9 @@ class QueryUi {
     }
     else {
       switch (axisId) {
+        case QueryModel.AXIS_FILTERS:
+          primaryAxisActionLabelTitle = '...';
+          break;
         case QueryModel.AXIS_COLUMNS:
         case QueryModel.AXIS_ROWS:
           primaryAxisActionLabelTitle = 'Flip the rows and columns axes';
@@ -284,6 +349,9 @@ class QueryUi {
   
   #renderAxes(){
     this.#renderAxis({
+      axisId: QueryModel.AXIS_FILTERS
+    });
+    this.#renderAxis({
       axisId: QueryModel.AXIS_COLUMNS
     });
     this.#renderAxis({
@@ -303,6 +371,7 @@ var queryUi;
 function initQueryUi(){
   queryUi = new QueryUi({
     id: 'queryUi',
-    queryModel: queryModel
+    queryModel: queryModel,
+    filterDialog: filterDialog
   });
 }

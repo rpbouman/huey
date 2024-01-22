@@ -61,6 +61,19 @@ class TupleSet {
     return selectListExpressions;
   }
   
+  static #getFilterCondition(queryModel, values){
+    var filterConditions = [];
+    var filtersAxis = this.#queryModel.getFiltersAxis();
+    var filtersAxisItems = filtersAxis.getItems();
+    for (var i = 0; i < filtersAxisItems.length; i++){
+      var filtersAxisItem = filtersAxisItems[i];
+      var filterCondition = QueryAxisItem.getFilterConditionSql(filtersAxisItem);
+      conditions.push(conditions);
+    }
+    var filterCondition = filterConditions.join('\nAND ');
+    return filterCondition;
+  }
+  
   static getSqlSelectStatement(queryModel, axisId, includeCountAll) {
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
@@ -97,17 +110,20 @@ class TupleSet {
 
     var datasource = queryModel.getDatasource();
     var fromClause = datasource.getFromClauseSql();
+    var filterCondition = queryModel.getFilterConditionSql();
+    var whereClause = filterCondition ? `WHERE ${filterCondition}` : '';
     var sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
-      `${fromClause}`,
+      fromClause,
+      whereClause,
       `GROUP BY ${groupByExpressions.join('\n,')}`,
       `ORDER BY ${orderByExpressions.join('\n,')}`
     ].join('\n');
     return sql;
   }
 
-  #getSqlSelectStatement(includeCountAll){
-    var sql = TupleSet.getSqlSelectStatement(this.#queryModel, this.#queryAxisId, includeCountAll);
+  #getSqlSelectStatement(includeCountAll, values){
+    var sql = TupleSet.getSqlSelectStatement(this.#queryModel, this.#queryAxisId, includeCountAll, values);
     return sql;
   }
   

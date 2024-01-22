@@ -47,6 +47,7 @@ class FilterDialog {
       var width, element;
       var filterValuesList = this.#getFilterValuesList();
       if (filterType.value === FilterDialog.filterTypes.BETWEEN) {
+        this.clearFilterValueLists();
         width = '50%';
         element = filterValuesList.parentNode;
       }
@@ -54,7 +55,10 @@ class FilterDialog {
         element = filterValuesList;
         width = '';
       } 
-      element.style.width = width;      
+      element.style.width = width;
+      
+      // reset the width again so the resizer can manage the width.
+      element.style.width = '';
     }.bind(this));
     
     bufferEvents(this.#getSearch(), 'input', function(event, count){
@@ -141,28 +145,102 @@ class FilterDialog {
     var toFilterValuesListOptions = toFilterValuesList.options;
     var currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
     
+    var valueForSelectingToListOption = undefined;
     // get the current selection and create new options out of it.
     var selectedOption, newOptions = [];
     if (isBetweenFilterType) {
+
       var rangeStart, rangeEnd;
-      for (var i = 0; i < options.length; i++){
-        var option = options[i];
-        if (rangeStart === undefined) {
+      
+      if (filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && selectedOptions.length === 1) {
+        // one value is selected in the picklist, and the start of an existing range is selected: 
+        // we will attempt to update the start of the existing range
+        var newSelectedValueOption = selectedOptions[0];
+        var newSelectedValue = newSelectedValueOption.value;
+
+        var selectedValueOption = filterValuesList.selectedOptions[0]
+        var selectedValue = selectedValueOption.value;
+        var correspondingToValue = currentToValues[selectedValue];
+
+        if (currentValues[newSelectedValue] !== undefined) {
+          // invalid choice: a range already exists for the newly selected value
+        }
+        else
+        if (newSelectedValue > correspondingToValue.value) {
+          // invalid choice: newly selected value exceeds to end of the existing range
+        }
+        else {
+          delete currentValues[selectedValue];
+          delete currentToValues[selectedValue];
+          
+          currentValues[newSelectedValue] = {
+            value: newSelectedValueOption.value,
+            label: newSelectedValueOption.label
+          };
+          currentToValues[newSelectedValue] = correspondingToValue;
+        }
+      }
+      else
+      if (filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && selectedOptions.length === 1) {
+        // one value is selected in the picklist, and the end of an existing range is selected: 
+        // we will attempt to update the end of the existing range
+        var newSelectedValueOption = selectedOptions[0];
+        var newSelectedValue = newSelectedValueOption.value;
+
+        var selectedValueIndex = toFilterValuesList.selectedIndex;
+        var selectedValueOption = toFilterValuesList.options[selectedValueIndex];        
+        var correspondingOption = filterValuesList.options[selectedValueIndex];
+        var selectedValue = correspondingOption.value;
+        
+        if (newSelectedValue < selectedValue) {
+          // invalid choice: newly selected value exceeds to end of the existing range
+        }
+        else {
+          currentToValues[selectedValue] = {
+            value: newSelectedValueOption.value,
+            label: newSelectedValueOption.label
+          };
+        }        
+      }
+      else {
+        // go through the options, and add one pair of from/to values for a set of adjacent selected options
+        for (var i = 0; i < options.length; i++){
+          var option = options[i];
+          if (rangeStart === undefined) {
+            if (option.selected) {
+              rangeStart = rangeEnd = {
+                value: option.value,
+                label: option.label
+              };
+            }
+          }
+          else
           if (option.selected) {
-            rangeStart = rangeEnd = {
+            rangeEnd = {
               value: option.value,
               label: option.label
             };
           }
+          else {
+            // check if we should add the new range
+            if (
+              currentValues[rangeStart.value] === undefined || 
+              JSON.stringify(currentValues[rangeStart.value]) === JSON.stringify(currentToValues[rangeStart.value])
+            ){
+              currentValues[rangeStart.value] = rangeStart;
+              currentToValues[rangeStart.value] = rangeEnd;
+            }
+
+            // save the value so we can select it in the toValues list.
+            if (selectedOptions.length === 1 && rangeStart.value === rangeEnd.value) {
+              valueForSelectingToListOption = rangeStart.value;
+            }
+
+            rangeStart = rangeEnd = undefined;
+          }
         }
-        else
-        if (option.selected) {
-          rangeEnd = {
-            value: option.value,
-            label: option.label
-          };
-        }
-        else {
+        
+        if (rangeStart !== undefined && rangeEnd !== undefined) {
           // check if we should add the new range
           if (
             currentValues[rangeStart.value] === undefined || 
@@ -170,22 +248,15 @@ class FilterDialog {
           ){
             currentValues[rangeStart.value] = rangeStart;
             currentToValues[rangeStart.value] = rangeEnd;
+            
+            // save the value so we can select it in the toValues list.
+            if (selectedOptions.length === 1 && rangeStart.value === rangeEnd.value) {
+              valueForSelectingToListOption = rangeStart.value;
+            }
           }
-          rangeStart = rangeEnd = undefined;
         }
+        
       }
-      
-      if (rangeStart !== undefined && rangeEnd !== undefined) {
-        // check if we should add the new range
-        if (
-          currentValues[rangeStart.value] === undefined || 
-          JSOIN.stringify(currentValues[rangeStart.value]) === JSON.stringify(currentToValues[rangeStart.value])
-        ){
-          currentValues[rangeStart.value] = rangeStart;
-          currentToValues[rangeStart.value] = rangeEnd;
-        }
-      }
-      
     }
     else {
       // go through the new options, and add them if they aren't already in the list.
@@ -205,6 +276,17 @@ class FilterDialog {
     
     this.#renderOptionsToSelectList(currentValues, filterValuesList);
     this.#renderOptionsToSelectList(currentToValues, toFilterValuesList);
+    
+    if (valueForSelectingToListOption !== undefined) {
+      filterValuesListOptions = filterValuesList.options;
+      for (var i = 0; i < filterValuesListOptions.length; i++){
+        if (filterValuesListOptions[i].value !== valueForSelectingToListOption) {
+          continue;
+        }
+        toFilterValuesList.selectedIndex = i;
+        break;
+      }
+    }
   }
   
   #handleFilterValuesListChange(event){
@@ -218,7 +300,9 @@ class FilterDialog {
       var option = options[i];
       if (option.selected) {
         valueOptionsToRemove.push(option);
-        toValueOptionsToRemove.push(toValuesOptions[i]);
+        if (i < toValuesOptions.length){
+          toValueOptionsToRemove.push(toValuesOptions[i]);
+        }
       }
     }
     valueOptionsToRemove.forEach(function(option){
@@ -306,6 +390,7 @@ class FilterDialog {
   }
   
   #clearDialog(){
+    this.#getValuePicklist().innerHTML = '';
     this.clearFilterValueLists();
     this.#getSearch().value = '';
   }

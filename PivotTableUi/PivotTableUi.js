@@ -62,16 +62,12 @@ class PivotTableUi {
         this.#resizeTimeoutId = undefined;
       }
       this.#resizeTimeoutId = setTimeout(function(){
-        // TODO: we should probably always automatically update some visuals, 
-        // just don't run a query unless there is an explicit query.
-        this.updatePivotTableUi();
-        
-        //if (this.#autoUpdate) {
-        //  this.updatePivotTableUi();
-        //}
-        //else {
-        //  this.#setNeedsUpdate(true);
-        //}
+        if (this.#autoUpdate) {
+          this.updatePivotTableUi();
+        }
+        else {
+          this.#setNeedsUpdate(true);
+        }
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
     resizeObserver.observe(dom);
