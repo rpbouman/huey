@@ -316,7 +316,7 @@ class DuckDbDataSource {
         
         var fileExtension = this.#fileType;
         var fileType = DuckDbDataSource.fileTypes[fileExtension];
-        sql = `${fileType.duckdb_reader}( [${fileNames.join(',')}], filename = TRUE )`;
+        sql = `${fileType.duckdb_reader}( [\n ${fileNames.join('\n,')}\n], filename = TRUE )`;
         
         break;
       case DuckDbDataSource.types.FILE:
