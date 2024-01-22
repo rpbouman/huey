@@ -118,9 +118,10 @@
       <header>
         <label for="filterType">Filter type:</label>
         <select id="filterType">
-          <option value="in">Include</option>
-          <option value="notin">Exclude</option>
-          <option value="between">Between</option>
+          <option value="in" title="Include data that matches any of the selected values">Include</option>
+          <option value="notin" title="Exclude data that matches any of the selected values">Exclude</option>
+          <option value="between" title="Include data within any of the specified value ranges">Between</option>
+          <option value="notbetween" title="Exclude data within any of the specified value ranges">Not Between</option>
         </select>
       </header>
       <section>
@@ -140,7 +141,7 @@
                 id="filterPicklist"
                 multiple="true" 
                 size="5"
-                title="Choose values from the picklist to add them to the Filter values list"
+                title="Choose values from the picklist to add them to the Filter values list. Hold SHIFT-key to select multiple items."
               >
               </select>
             </section>
@@ -171,9 +172,10 @@
         </section>
       </section>
       <footer>
-        <button id="filterDialogOkButton">Ok</button>
-        <button id="filterDialogClearButton">Clear</button>
-        <button id="filterDialogCancelButton">Cancel</button>
+        <button id="filterDialogOkButton" title="Confirm the filter setting changes">Ok</button>
+        <button id="filterDialogClearSelectedButton" title="Clear selected values from the list">Clear Selected</button>
+        <button id="filterDialogClearButton" title="Clear the values list">Clear All</button>
+        <button id="filterDialogCancelButton" title="Cancel filter setting changes">Cancel</button>
       </footer>
     </dialog>
     

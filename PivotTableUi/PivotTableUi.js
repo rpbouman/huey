@@ -66,7 +66,7 @@ class PivotTableUi {
           this.updatePivotTableUi();
         }
         else {
-          this.#setNeedsUpdate(true);
+          //this.#setNeedsUpdate(true);
         }
       }.bind(this), this.#resizeTimeout);
     }.bind(this));
@@ -97,7 +97,9 @@ class PivotTableUi {
   }
   
   #queryModelChangeHandler(event){
-        
+    var needsClearing = false;
+    var needsUpdate = false;
+    
     var clearRowsTupleSet = false;
     var clearColumnsTupleSet = false;
     var clearCellsSet = false;
@@ -116,7 +118,7 @@ class PivotTableUi {
       }          
 
       if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
-        this.#setNeedsUpdate(true);
+        needsUpdate = true;
         if (!clearCellsSet) {
           // NOOP!
           
@@ -131,13 +133,14 @@ class PivotTableUi {
       var propertiesChangedInfo = eventData.propertiesChanged;
       
       if (propertiesChangedInfo.datasource) {
-        clearCellsSet = clearRowsTupleSet = clearColumnsTupleSet  = true;        
+        clearCellsSet = clearRowsTupleSet = clearColumnsTupleSet = true;
+        needsClearing = true;
       }
       
       if (propertiesChangedInfo.cellHeadersAxis){
         // moving cells to another axis does not change the tuples or the cached cells, 
         // it only requires rerendering the table.
-        this.#setNeedsUpdate(true);
+        needsUpdate = true;
       }
     }
 
@@ -145,20 +148,39 @@ class PivotTableUi {
     if (clearColumnsTupleSet) {
       var columnsTupleSet = this.#columnsTupleSet;
       columnsTupleSet.clear();
-      this.#setNeedsUpdate(true);
+      needsUpdate = true;
     }
 
     if (clearRowsTupleSet === true) {
       var rowsTupleSet = this.#rowsTupleSet;
       rowsTupleSet.clear();
-      this.#setNeedsUpdate(true);
+      needsUpdate = true;
     }
 
     if (clearCellsSet === true) {
       var cellsSet = this.#cellsSet;
       cellsSet.clear();
-      this.#setNeedsUpdate(true);
+      needsUpdate = true;
     }
+    
+    var countQueryAxisItems = [
+      QueryModel.AXIS_ROWS,
+      QueryModel.AXIS_COLUMNS,
+      QueryModel.AXIS_CELLS
+    ].reduce(function(acc, curr){
+      return acc + this.#queryModel.getQueryAxis(curr).getItems().length;
+    }.bind(this), 0);
+
+    if (countQueryAxisItems === 0) {
+      needsClearing = true;
+    }
+
+    if (needsClearing) {
+      this.clear();
+      needsUpdate = false;
+    }
+    
+    this.#setNeedsUpdate(needsUpdate);
     
     if (!this.#autoUpdate){
       return;

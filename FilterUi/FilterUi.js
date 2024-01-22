@@ -4,7 +4,8 @@ class FilterDialog {
   static filterTypes = {
     INCLUDE: 'in',
     EXCLUDE: 'notin',
-    BETWEEN: 'between'
+    BETWEEN: 'between',
+    NOTBETWEEN: 'notbetween'
   };
   
   #id = undefined;
@@ -23,20 +24,35 @@ class FilterDialog {
   #initEvents(){
     var filterDialog = this.getDom();
     
+    // Ok button confirms the filter settings and stores them in the model
     this.#getOkButton().addEventListener('click', function(event){
       var dialogState = this.#getDialogState();
       this.#queryModel.setQueryAxisItemFilter(this.#queryAxisItem, dialogState);
       filterDialog.close();
     }.bind(this));
+    
+    // Cancel button closes the dialog without storing the changes to the filter
     this.#getCancelButton().addEventListener('click', function(event){
       filterDialog.close();
     });
+    
+    // Clear button clears the values lists
     this.#getClearButton().addEventListener('click', function(event){
       this.clearFilterValueLists();
     }.bind(this));
+
+    // clear selected button clears the selected values from the value lists
+    this.#getClearSelectedButton().addEventListener('click', function(event){
+      this.#removeSelectedValues();
+    }.bind(this));
     
+    // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
     this.#getValuePicklist().addEventListener('change', this.#handleValuePicklistChange.bind(this));
-    this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
+    
+    //this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
+    
+    // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
+    // this handler ensures the scrolbar moves both lists.
     this.#getToFilterValuesList().addEventListener('scroll', function(event){
       var target = event.target;
       this.#getFilterValuesList().scrollTop = target.scrollTop;
@@ -46,19 +62,22 @@ class FilterDialog {
       var filterType = event.target;
       var width, element;
       var filterValuesList = this.#getFilterValuesList();
-      if (filterType.value === FilterDialog.filterTypes.BETWEEN) {
-        this.clearFilterValueLists();
-        width = '50%';
-        element = filterValuesList.parentNode;
+      switch (filterType.value){
+        case FilterDialog.filterTypes.BETWEEN:
+        case FilterDialog.filterTypes.NOTBETWEEN:
+          this.clearFilterValueLists();
+          width = '50%';
+          element = filterValuesList.parentNode;
+          break;
+        default:
+          element = filterValuesList;
+          width = '';
       }
-      else {
-        element = filterValuesList;
-        width = '';
-      } 
       element.style.width = width;
       
       // reset the width again so the resizer can manage the width.
       element.style.width = '';
+      this.#getValuePicklist().selectedIndex = -1;
     }.bind(this));
     
     bufferEvents(this.#getSearch(), 'input', function(event, count){
@@ -135,7 +154,15 @@ class FilterDialog {
     }
     
     var filterType = this.#getFilterType().value;
-    var isBetweenFilterType = filterType === FilterDialog.filterTypes.BETWEEN;
+    var isRangeFilterType;
+    switch (filterType){
+      case FilterDialog.filterTypes.BETWEEN:
+      case FilterDialog.filterTypes.NOTBETWEEN:
+        isRangeFilterType = true;
+        break;
+      default:
+        isRangeFilterType = false;
+    }
     
     var filterValuesList = this.#getFilterValuesList();
     var filterValuesListOptions = filterValuesList.options;
@@ -148,7 +175,7 @@ class FilterDialog {
     var valueForSelectingToListOption = undefined;
     // get the current selection and create new options out of it.
     var selectedOption, newOptions = [];
-    if (isBetweenFilterType) {
+    if (isRangeFilterType) {
 
       var rangeStart, rangeEnd;
       
@@ -289,8 +316,8 @@ class FilterDialog {
     }
   }
   
-  #handleFilterValuesListChange(event){
-    var selectControl = event.target;
+  #removeSelectedValues(){
+    var selectControl = this.#getFilterValuesList();
     var options = selectControl.options;
     var toValuesList = this.#getToFilterValuesList();
     var toValuesOptions = toValuesList.options;
@@ -311,6 +338,7 @@ class FilterDialog {
     toValueOptionsToRemove.forEach(function(option){
       toValuesList.removeChild(option);
     });
+    this.#getValuePicklist().selectedIndex = -1;
   }
 
   #getDialogButtons(){
@@ -330,6 +358,10 @@ class FilterDialog {
 
   #getClearButton(){
     return byId('filterDialogClearButton');
+  }
+
+  #getClearSelectedButton(){
+    return byId('filterDialogClearSelectedButton');
   }
 
   #getSpinner(){
@@ -475,6 +507,8 @@ class FilterDialog {
       var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
       switch (dataType) {
         case 'VARCHAR':
+        // TODO: think of a more clever way to deal with non-VARCHAR values.
+        default:
           condition = `${sqlExpression} like ?`;
           bindValue = `${searchString}`;
           break;

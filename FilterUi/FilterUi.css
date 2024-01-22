@@ -29,6 +29,18 @@ dialog#filterDialog[aria-busy=true] > section > header > section > header > sear
 dialog#filterDialog[aria-busy=true] > section > header > section > section > select#filterPicklist {
   color: transparent;
   text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  overflow: auto;
+}
+
+dialog#filterDialog > footer > button {
+  width: 4.5em;
+}
+
+dialog#filterDialog > footer > button#filterDialogClearSelectedButton {
+  width: 8.5em;
+}
+dialog#filterDialog > footer > button#filterDialogClearButton{
+  width: 5.5em;
 }
 
 dialog#filterDialog > section > header > section > section > select#filterPicklist > optgroup > option[data-next-page-loader=true] {
@@ -89,6 +101,8 @@ dialog#filterDialog > section > header > section > footer[role=status] {
   font-size: smaller;
 }
 
+dialog#filterDialog select[multiple=true] > option {
+}
 
 dialog#filterDialog > section > section > label > select {
   width: 100%;
@@ -119,21 +133,24 @@ dialog#filterDialog > section > section > div:has( > label[for=toFilterValueList
   display: none;
 }
 
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ) {
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ), 
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) {
   display: flex;
   flex-grow: 1;
 }
 
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ){
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ),
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ){
   flex-grow: 0;
 }
 
 dialog#filterDialog #filterValueList,
 dialog#filterDialog #toFilterValueList {
-  overflow: scroll;
+  overflow: auto;
 }
 
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) #filterValueList {
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) #filterValueList,
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) #filterValueList {
   resize: horizontal;
   overflow-y: hidden;
 }

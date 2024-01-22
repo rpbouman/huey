@@ -167,6 +167,9 @@ dialog > footer {
 
 dialog > footer > button {
   width: 5em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 dialog h1:first-child,

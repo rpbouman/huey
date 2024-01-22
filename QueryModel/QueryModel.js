@@ -396,7 +396,16 @@ class QueryAxisItem {
       return valueLiteralWriter(entry.value);
     });
     var toValueLiterals;
-    if (filter.filterType === FilterDialog.filterTypes.BETWEEN) {
+    var isRangeFilterType;
+    switch (filter.filterType) {
+      case FilterDialog.filterTypes.BETWEEN:
+      case FilterDialog.filterTypes.NOTBETWEEN:
+        isRangeFilterType = true;
+        break;
+      default:
+        isRangeFilterType = false;
+    }
+    if (isRangeFilterType) {
       keys = Object.keys(toValues);
       toValueLiterals = keys.map(function(key){
         var entry = toValues[key];
@@ -417,7 +426,7 @@ class QueryAxisItem {
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     
     var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-    var sql = '';
+    var sql = '', operator = '';
     switch (filter.filterType) {
       case FilterDialog.filterTypes.EXCLUDE:
         sql += ' NOT ';
@@ -425,7 +434,10 @@ class QueryAxisItem {
         sql += 'IN' 
         sql = `${columnExpression} ${sql} ( ${literalLists.valueLiterals.join('\n,')} )`;
         break;
+      case FilterDialog.filterTypes.NOTBETWEEN:
+        operator = 'NOT ';
       case FilterDialog.filterTypes.BETWEEN:
+        operator += 'BETWEEN';
         sql = '(' + literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
           acc += '\n';
           if (currIndex) {
@@ -434,7 +446,7 @@ class QueryAxisItem {
           var fromValue = literalLists.valueLiterals[currIndex];
           var toValue = literalLists.toValueLiterals[currIndex];
           
-          acc += `${columnExpression} BETWEEN ${fromValue} AND ${toValue}`;
+          acc += `${columnExpression} ${operator} ${fromValue} AND ${toValue}`;
           return acc;
         }, '') + ')';
     }
