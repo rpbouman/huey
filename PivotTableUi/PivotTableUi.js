@@ -45,14 +45,20 @@ class PivotTableUi {
 
   #initCancelQueryButtonClickHandler(){
     byId('cancelQueryButton')
-    .addEventHandler(
+    .addEventListener(
       'click', 
       this.#cancelQueryButtonClicked.bind(this)
     );
   }
 
-  #cancelQueryButtonClicked(event){
-    
+  async #cancelQueryButtonClicked(event){
+    var cancelResults = await Promise.all([
+      this.#columnsTupleSet.cancelPendingQuery(),
+      this.#rowsTupleSet.cancelPendingQuery(),
+      this.#cellsSet.cancelPendingQuery()
+    ]);
+    console.log(`Results: `, cancelResults);
+    this.#setNeedsUpdate(true);
   }
 
   #initQueryModelChangeHandler(){
