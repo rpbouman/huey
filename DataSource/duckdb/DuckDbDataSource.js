@@ -405,13 +405,25 @@ class DuckDbDataSource extends EventEmitter {
     return this.#schemaName;
   }
   
+  // this gets the datasource's own connection
   async getConnection(){
     if (this.#connection === undefined) {
-      this.#connection = await this.#duckDbInstance.connect();
+      this.#connection = await this.createNewConnection();
     }
     return new Promise(function(resolve, reject){
       resolve(this.#connection);
     }.bind(this));
+  }
+  
+  // this creates a new connection.
+  // the difference with getConnection is that createNewConnection is not cached and meant to be managed by the caller
+  async createNewConnection(){
+    return this.#duckDbInstance.connect();
+  }
+
+  createManagedConnection(){
+    var managedConnection = new DuckDbConnection(this.#duckDbInstance);
+    return managedConnection;
   }
   
   async prepareStatement(sql){
