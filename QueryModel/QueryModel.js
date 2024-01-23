@@ -518,6 +518,9 @@ class QueryAxis {
   
   removeItem(config){
     var item = this.findItem(config);
+    if (!item){
+      return undefined;
+    }
     this.#items.splice(item.index, 1);
     return item;
   }

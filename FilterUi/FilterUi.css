@@ -33,14 +33,30 @@ dialog#filterDialog[aria-busy=true] > section > header > section > section > sel
 }
 
 dialog#filterDialog > footer > button {
-  width: 4.5em;
+  width: 5.5em;
 }
 
-dialog#filterDialog > footer > button#filterDialogClearSelectedButton {
+dialog#filterDialog > section > footer > button#filterDialogClearSelectedButton {
   width: 8.5em;
 }
-dialog#filterDialog > footer > button#filterDialogClearButton{
-  width: 5.5em;
+dialog#filterDialog > section > footer > button#filterDialogClearButton{
+  width: 8.5em;
+}
+
+dialog#filterDialog section > header {
+  flex-grow: 0;
+}
+
+dialog#filterDialog > section > header {
+  flex-grow: .75
+}
+
+dialog#filterDialog section > section {
+  flex-grow: 1;
+}
+
+dialog#filterDialog > section > section {
+  flex-grow: 1.25
 }
 
 dialog#filterDialog > section > header > section > section > select#filterPicklist > optgroup > option[data-next-page-loader=true] {
@@ -68,16 +84,9 @@ dialog#filterDialog section {
   flex-direction: column;
 }
 
-dialog#filterDialog section > header {
-  flex-grow: 0;
-}
-
-dialog#filterDialog section > section {
-  flex-grow: 1;
-}
-
 dialog#filterDialog section > footer {
   flex-grow: 0;
+  padding-top: 4px;
 }
 
 dialog#filterDialog > section > header > section > header > input[type=search]#filterSearch {
@@ -127,6 +136,7 @@ dialog#filterDialog > section > section > div > label{
 dialog#filterDialog > section > section > div > select{
   flex-grow: 1;
   width: 100%;
+  height: 100%;
 }
 
 dialog#filterDialog > section > section > div:has( > label[for=toFilterValueList] ) {
