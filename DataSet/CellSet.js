@@ -1,7 +1,5 @@
-class CellSet {
+class CellSet extends DataSetComponent {
     
-  #queryModel = undefined;
-  
   // Cells is an array indexed by columntupleIndex * rowTupleIndex
   // Cells array elements are objects having a values property.
   // The values property is an array of values corresponding (by position) to the items of the cells axis
@@ -9,13 +7,13 @@ class CellSet {
   #cellValueFields = {};
   
   #tupleSets = [];
-   
+  
   static #datasetRelationName = '__data';   
   static #tupleDataRelationName = '__huey_tuples';
   static #cellIndexColumnName = '__huey_cellIndex';
    
   constructor(queryModel, tupleSets){
-    this.#queryModel = queryModel;
+    super(queryModel);
     this.#tupleSets = tupleSets;
   }
   
@@ -173,7 +171,7 @@ class CellSet {
   }
   
   #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values){
-    var queryModel = this.#queryModel;
+    var queryModel = this.getQueryModel();
     var datasource = queryModel.getDatasource();
     var aliasedDatasetName = datasource.getRelationExpression(CellSet.#datasetRelationName); 
 
@@ -245,14 +243,13 @@ class CellSet {
   }
   
   async #executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch) {
-    var queryModel = this.#queryModel;
-    var datasource = queryModel.getDatasource();
     var values = [];
     var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values);
 
+    var connection = this.getManagedConnection();
     console.log(`About to create preparedStatement to fetch cell data for ${tuplesToQuery.length} tuples, SQL:`);
     console.log(sql);
-    var preparedStatement = await datasource.prepareStatement(sql);
+    var preparedStatement = await connection.prepareStatement(sql);
     
     console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
     console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId} for cellset`);
@@ -297,7 +294,7 @@ class CellSet {
 
   // ranges is aa list of tuple index pairs
   async getCells(ranges){
-    var queryModel = this.#queryModel;
+    var queryModel = this.getQueryModel();
     var cellsAxis = queryModel.getCellsAxis();
     var cellsAxisItems = cellsAxis.getItems();
     
