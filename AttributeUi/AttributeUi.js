@@ -281,7 +281,7 @@ class AttributeUi {
       return axisButton;
     }
 
-    axisButton.setAttribute('title', `Toggle place this item on the ${axisId} axis.`);
+    axisButton.setAttribute('title', `Toggle to add or remove this attribute on the ${axisId} axis.`);
     
     axisButton.setAttribute('for', id);
     var axisButtonInput = createEl('input', {

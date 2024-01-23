@@ -126,7 +126,30 @@ class PivotTableUi {
           // But adding or removing items to only the cellset does not require clearing of the cells,
           // as we store aggregate items together and separately in the cell data.
         }
-      }          
+      }
+
+      if (axesChangedInfo[QueryModel.AXIS_FILTERS] !== undefined) {
+        if (axesChangedInfo[QueryModel.AXIS_FILTERS].added) {
+          needsUpdate = axesChangedInfo[QueryModel.AXIS_FILTERS].added.some(function(item){
+            var changed = item.filter && Object.keys(item.filter.values).length > 0;
+            if (changed) {
+              clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+            }
+            return changed;
+          });
+        }
+        
+        if (axesChangedInfo[QueryModel.AXIS_FILTERS].removed) {
+          needsUpdate = true;
+          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+        }
+
+        if (axesChangedInfo[QueryModel.AXIS_FILTERS].changed){
+          needsUpdate = true;
+          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+        }
+      }
+      
     }
     else 
     if (eventData.propertiesChanged){

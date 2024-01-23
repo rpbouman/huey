@@ -418,14 +418,14 @@ class QueryAxisItem {
     };
   }
   
-  static getFilterConditionSql(queryAxisItem){
+  static getFilterConditionSql(queryAxisItem, alias){
     var filter = queryAxisItem.filter;
     if (!filter) {
       return undefined;
     }
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     
-    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
     var sql = '', operator = '';
     switch (filter.filterType) {
       case FilterDialog.filterTypes.EXCLUDE:
@@ -833,43 +833,46 @@ class QueryModel extends EventEmitter {
     
     var axesChangeInfo = {};
     axesChangeInfo[queryAxisItem.axis] = {
-      changed: [queryAxisItem]
+      changed: {
+        changed: [queryAxisItem]
+      }
     };
     
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
   }
-  
-  // axisId should be columns or row axis, and then get the items from filter axis matching the items from the specified axis.
-  getFilterAxisItems(axisId) {
-    switch(axisId) {
-      case QueryModel.AXIS_COLUMNS:
-      case QueryModel.AXIS_ROWS:
-        break;
-      default:
-        throw new Error(`Invalid axis! Must not be ${axisId}.`);
-    }
-    var queryAxis = this.getQueryAxis(axisId);
-    var queryAxisItems = queryAxis.getItems();
     
-    var filterAxisItems = [];
-    var filtersAxis = this.getFiltersAxis();
-    for (var i = 0; i < queryAxisItems.length; i++){
-      var queryAxisItem = queryAxisItems[i];
-      var filterAxisItem = filterAxis.findItem(queryAxisItem);
-      filterAxisItems.push(filterAxisItem);
-    }    
-  }
-  
-  getFilterConditionSql(){
+  /**
+  * Gets the sql condition for all filters.
+  * If excludeTupleItems is true, then all filter items that appear on the rows and columns axes will be skipped.
+  * That option is intended to be used to run the cellset query, because the cellset is already restricted by vales from the tuples
+  * So if the tuples are already calculated with the filters in effect, then the tuple values must already be a subset of the values that satisfy the filter
+  * and hence we shouldn't need to filter again on those items.  
+  */
+  getFilterConditionSql(excludeTupleItems, alias){
     var queryAxis = this.getFiltersAxis();
     var items = queryAxis.getItems();
     if (items.length === 0){
       return undefined;
     }
+    
+    if (excludeTupleItems === true){
+      var rowsAxis = this.getRowsAxis();
+      var columnsAxis = this.getColumnsAxis();
+      items = items.filter(function(item){
+        if (rowsAxis.findItem(item)) {
+          return false;
+        }
+        if (columnsAxis.findItem(item)) {
+          return false;
+        }
+        return true;
+      });
+    }
+    
     var conditions = items.map(function(item){
-      return QueryAxisItem.getFilterConditionSql(item);
+      return QueryAxisItem.getFilterConditionSql(item, alias);
     });
     var condition = conditions.join('\nAND ');
     return condition;

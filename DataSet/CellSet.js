@@ -18,10 +18,6 @@ class CellSet {
     this.#queryModel = queryModel;
     this.#tupleSets = tupleSets;
   }
-
-  #getSqlSelectStatement(){
-    return '';
-  }  
   
   clear(){
     this.#cells = [];
@@ -197,12 +193,19 @@ class CellSet {
     var selectListExpressions = [tupleIndexSelectExpression].concat(aggregateExpressionsToFetch);
     var selectClauseSql = `SELECT ${selectListExpressions.join('\n, ')}`;
   
+    var filterCondition = queryModel.getFilterConditionSql(true, CellSet.#datasetRelationName);
+  
     var sql;
     if (tuplesToQuery.length === 0) {
-      sql = `
-        ${selectClauseSql}
-        FROM ${aliasedDatasetName}
-      `;
+      sql = [
+        selectClauseSql,
+        `FROM ${aliasedDatasetName}`
+      ];
+      
+      if (filterCondition) {
+        sql.push(`WHERE ${filterCondition}`);
+      }
+      sql = sql.join('\n');
       return sql;
     }
 
@@ -220,6 +223,14 @@ class CellSet {
     });
     var joinConditionSql = joinConditionsSql.join('\nAND ');
     var onClause = `ON ${joinConditionSql}`;
+
+    if (filterCondition) {
+      onClause = [
+        onClause,
+        `AND ${filterCondition}`
+      ].join('\n');
+    }
+        
     var groupByClause = `GROUP BY ${qualifiedCellIndexColumnName}`;
     
     // build the statement

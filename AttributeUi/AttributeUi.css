@@ -209,11 +209,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav.side
   pointer-events: none;
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:before {
-  /* filter-plus */
-  content: "\fa02";
-}
-
 .attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]:before {
   /* table-column */
   /* 
@@ -256,8 +251,17 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav.side
   color: var( --huey-icon-color-highlight );
 }
 
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:before {
+  /* filter-plus */
+  /* content: "\fa02"; */
+  /* filter */
+  content: "\eaa5";
+}
+
 .attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked ):before {
   /* filter-x */
-  content: "\fa04";
+  /* content: "\fa04"; */
+  /* filter-off */
+  content: "\ed2c";
 }
 
