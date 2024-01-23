@@ -598,6 +598,12 @@ class QueryModel extends EventEmitter {
     this.#clear(true);
     var oldDatasource = this.#datasource;
     this.#datasource = datasource;
+    
+    if (datasource){
+      datasource.addEventListener('destroy', function(event){
+        this.setDatasource(undefined);
+      }.bind(this));
+    }
 
     this.fireEvent('change', {
       propertiesChanged: {

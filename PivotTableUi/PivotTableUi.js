@@ -36,10 +36,17 @@ class PivotTableUi {
         columnsTupleSet
     ]);
    
-    queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
-    
+    this.#initQueryModelChangeHandler()
     this.#initScrollHandler();
     this.#initResizeObserver();
+  }
+
+  #initQueryModelChangeHandler(){
+    this.#queryModel
+    .addEventListener(
+      'change', 
+      this.#queryModelChangeHandler.bind(this)
+    );
   }
   
   #initScrollHandler(){

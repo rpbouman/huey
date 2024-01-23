@@ -43,10 +43,8 @@ async function analyzeDatasource(datasource){
     byId('attributesTab').checked = true;
     attributeUi.clear(true);
     clearSearch();
-    var columnMetadata = await datasource.getColumnMetadata();
     queryModel.clear();
     queryModel.setDatasource(datasource);
-    attributeUi.render(columnMetadata);
     byId('searchAttributeUi').style.display = '';
     byId('queryUi').style.display = '';
 

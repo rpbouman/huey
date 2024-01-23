@@ -315,7 +315,6 @@ class AttributeUi {
 
     var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
     head.appendChild(rowButton);
-        
   }
 
   #renderAttributeUiNodeHead(config) {
@@ -551,23 +550,38 @@ class AttributeUi {
     }    
   }
   
-  #queryModelChangeHandler(event){
-    var inputs = this.getDom().getElementsByTagName('input');
-    for (var i = 0; i < inputs.length; i++){
-      var input = inputs.item(i);
-      var columnName = input.getAttribute('data-column_name');
-      var axis = input.getAttribute('data-axis');
-      var aggregator = input.getAttribute('data-aggregator');
-      var derivation = input.getAttribute('data-derivation');
-      
-      var item = queryModel.findItem({
-        columnName: columnName,
-        axis: axis,
-        aggregator: aggregator,
-        derivation: derivation
-      });
-      
-      input.checked = Boolean(item);
+  async #queryModelChangeHandler(event){
+    var eventData = event.eventData;
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        if (eventData.propertiesChanged.datasource.newValue) {
+          var datasource = eventData.propertiesChanged.datasource.newValue;
+          var columnMetadata = await datasource.getColumnMetadata();
+          this.render(columnMetadata);
+        }
+        else {
+          this.clear(false  );
+        }
+      }
+    }
+    else {
+      var inputs = this.getDom().getElementsByTagName('input');
+      for (var i = 0; i < inputs.length; i++){
+        var input = inputs.item(i);
+        var columnName = input.getAttribute('data-column_name');
+        var axis = input.getAttribute('data-axis');
+        var aggregator = input.getAttribute('data-aggregator');
+        var derivation = input.getAttribute('data-derivation');
+        
+        var item = queryModel.findItem({
+          columnName: columnName,
+          axis: axis,
+          aggregator: aggregator,
+          derivation: derivation
+        });
+        
+        input.checked = Boolean(item);
+      }
     }
   }
   

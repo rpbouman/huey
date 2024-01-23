@@ -5,12 +5,17 @@ class EventEmitter {
   constructor(){
   }
   
+  destroy(){
+    this.#eventListeners = null;
+  }
+  
   checkEventType(eventType){
     switch(eventType) {
       case 'change':
+      case 'destroy':
         break;
       default:
-        throw new Error(`Unrecognized event type ${type}`);
+        throw new Error(`Unrecognized event type ${eventType}`);
     }
   }
   

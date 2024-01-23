@@ -1,4 +1,4 @@
-class DuckDbDataSource {
+class DuckDbDataSource extends EventEmitter {
   
   static types = {
     'DUCKDB': 'duckdb',
@@ -64,6 +64,7 @@ class DuckDbDataSource {
   #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
+    super();
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
@@ -220,6 +221,7 @@ class DuckDbDataSource {
   async destroy(){
     var id = this.getId();
     try {
+      this.fireEvent('destroy', {});
       if (this.#file) {
         return this.#duckDbInstance.dropFile(this.#file.name);
       }
@@ -229,6 +231,7 @@ class DuckDbDataSource {
       console.error(error.stack);
     }
     finally {
+      super.destroy();
       this.#duckDb = undefined;
       this.#duckDbInstance = undefined;
       this.#connection = undefined;
