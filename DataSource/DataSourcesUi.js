@@ -68,8 +68,11 @@ class DataSourcesUi {
     return byId(this.#id);
   }
   
-  clear(){
-    this.getDom().innerHTML = '';
+  clear(content){
+    if (!content){
+      content = '';
+    }
+    this.getDom().innerHTML = content;
   }
   
   #renderDatasourceActionButton(config){

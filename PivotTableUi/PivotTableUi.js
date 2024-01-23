@@ -39,6 +39,20 @@ class PivotTableUi {
     this.#initQueryModelChangeHandler()
     this.#initScrollHandler();
     this.#initResizeObserver();
+    this.#initCancelQueryButtonClickHandler();
+    
+  }
+
+  #initCancelQueryButtonClickHandler(){
+    byId('cancelQueryButton')
+    .addEventHandler(
+      'click', 
+      this.#cancelQueryButtonClicked.bind(this)
+    );
+  }
+
+  #cancelQueryButtonClicked(event){
+    
   }
 
   #initQueryModelChangeHandler(){
