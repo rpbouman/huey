@@ -89,7 +89,7 @@ class PivotTableUi {
         this.#resizeTimeoutId = undefined;
       }
       this.#resizeTimeoutId = setTimeout(function(){
-        if (this.#autoUpdate) {
+        if (this.#autoUpdate && !this.#getBusy()) {
           this.updatePivotTableUi();
         }
         else {
@@ -242,6 +242,11 @@ class PivotTableUi {
   #setBusy(busy){
     var dom = this.getDom();
     dom.setAttribute('aria-busy', String(Boolean(busy)));
+  }
+  
+  #getBusy(){
+    var dom = this.getDom();
+    return dom.getAttribute('aria-busy') === 'true'; 
   }
   
   #handleInnerContainerScrolled(event, count){
@@ -1039,6 +1044,9 @@ class PivotTableUi {
   }
   
   async updatePivotTableUi(){
+    if (this.#getBusy()) {
+      return;
+    }
     var tableDom = this.#getTableDom();
     try {
       

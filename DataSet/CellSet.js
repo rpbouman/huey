@@ -11,6 +11,7 @@ class CellSet extends DataSetComponent {
   static #datasetRelationName = '__data';   
   static #tupleDataRelationName = '__huey_tuples';
   static #cellIndexColumnName = '__huey_cellIndex';
+  static #countStarExpressionAlias = '__huey_count_star';
    
   constructor(queryModel, tupleSets){
     super(queryModel);
@@ -170,7 +171,7 @@ class CellSet extends DataSetComponent {
     return valuesClause;
   }
   
-  #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values){
+  #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values, subQueryColumnNames){
     var queryModel = this.getQueryModel();
     var datasource = queryModel.getDatasource();
     var aliasedDatasetName = datasource.getRelationExpression(CellSet.#datasetRelationName); 
@@ -212,12 +213,29 @@ class CellSet extends DataSetComponent {
     var fromClause = `FROM ${valuesClause}`;
     
     // build the JOIN clause
-    var joinClause = `LEFT JOIN ${aliasedDatasetName}`;
+    var joinClause = 'LEFT JOIN ';
+    if (subQueryColumnNames) {
+      var subQueryColumnExpressions = Object.keys(subQueryColumnNames).map(getQuotedIdentifier);
+      subQueryColumnExpressions.push(`1 AS ${getQuotedIdentifier(CellSet.#countStarExpressionAlias)}`);
+      var subquery = [
+        `SELECT ${subQueryColumnExpressions.join('\n,')}`,
+        `FROM ${aliasedDatasetName}`
+      ];
+      joinClause += `( ${subquery.join('\n')} ) AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`;
+    }
+    else {
+      joinClause += aliasedDatasetName;
+    }
     var joinConditionsSql = Object.keys(tupleValueToColumnMapping).map(function(columnName){
       var mappingInfo = tupleValueToColumnMapping[columnName];
       var sqlExpression = mappingInfo.sqlExpression;
       var dataColumnName = getQualifiedIdentifier(CellSet.#tupleDataRelationName, columnName);
-      return `${dataColumnName} = ${sqlExpression}`;
+      var comparisonExpression = `${dataColumnName} = ${sqlExpression}`;
+      if (mappingInfo.nullValueCount > 0) {
+        var nullComparisonExpression = `${dataColumnName} IS NULL AND ${sqlExpression} IS NULL`;
+        comparisonExpression = `( ${comparisonExpression} OR ${nullComparisonExpression} )`
+      }
+      return comparisonExpression;
     });
     var joinConditionSql = joinConditionsSql.join('\nAND ');
     var onClause = `ON ${joinConditionSql}`;
@@ -242,9 +260,9 @@ class CellSet extends DataSetComponent {
     return sql;
   }
   
-  async #executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch) {
+  async #executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames) {
     var values = [];
-    var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values);
+    var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values, subQueryColumnNames);
 
     var connection = this.getManagedConnection();
     console.log(`About to create preparedStatement to fetch cell data for ${tuplesToQuery.length} tuples, SQL:`);
@@ -409,19 +427,24 @@ class CellSet extends DataSetComponent {
           var columnName = `${queryAxisId}_value${k}`;
           row[columnName] = tupleValue;
           
-          if (tuplesToQuery.length !== 0){
-            // metadata gathered for the first tuple, not needed after that.
-            continue;
+          if (tuplesToQuery.length === 0){
+            // collect metadata, only once for the entire set (done along with the first tuple)
+            var tupleSetValueFields = tupleSet.getTupleValueFields();
+            // store the mapping between our literal row column and the original sql expression
+            var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, CellSet.#datasetRelationName);
+            tupleValueToColumnMapping[columnName] = {
+              sqlExpression: sqlExpression,
+              tupleValueField: tupleSetValueFields[k],
+              nullValueCount: 0
+            };
           }        
 
-          // collect metadata, only once for the entire set (done along with the first tuple)
-          var tupleSetValueFields = tupleSet.getTupleValueFields();
-          // store the mapping between our literal row column and the original sql expression
-          var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, CellSet.#datasetRelationName);
-          tupleValueToColumnMapping[columnName] = {
-            sqlExpression: sqlExpression,
-            tupleValueField: tupleSetValueFields[k]
-          };
+          // keep track of the  null values - 
+          // if there are null values in the tuples, 
+          // we need to take that into account in the join clause when fetching the cell values
+          if (tupleValue === null) {
+            tupleValueToColumnMapping[columnName].nullValueCount += 1;
+          }
         }
       }
 
@@ -430,20 +453,44 @@ class CellSet extends DataSetComponent {
         // it's possible to have no tuples in case there are only cells axis items and now items on rows/columns.
         tuplesToQuery.push(row);
       }
-            
     }
     
     if (Object.keys(aggregateExpressionsToFetch).length){
+      var subqueryColumnNames;
+      // if we have a count star expression, we need to apply it to a column that does not have NULLs.
+      // we do not have proper nullability metadata (duckdb will report nulllable columns in csv files even though there are 0 NULL occurrences in the column)
+      // But we do know if the columns from our tuple values happen to have nulls or not because we stored that in nullValueCount in the mapping info
+      // So we can use that to select a column that is not-nullable at least in the scope of this query.
       if (countStarCellsAxisItem !== undefined && tupleColumnNames.length) {
         var countStarExpressionAlias = QueryAxisItem.getSqlForQueryAxisItem(countStarCellsAxisItem, CellSet.#datasetRelationName);
         
         var countStarCellsAxisItemCopy = Object.assign({}, countStarCellsAxisItem);
-        countStarCellsAxisItemCopy.columnName = tupleColumnNames[0];
+
+        // we cannot find a non-nullable 'natural' column, we can create one by adding a constant value and wrapping it in a subquery.
+        subqueryColumnNames = {};
+        for (var i = 0; i < tupleColumnNames.length; i++) {
+          var tupleColumnName = tupleColumnNames[i];
+          if (subqueryColumnNames[tupleColumnName] === undefined) {
+            subqueryColumnNames[tupleColumnName] = tupleColumnName;
+          }
+        }
+        for (var i = 0; i < cellsAxisItems.length; i++){
+          var cellsAxisItem = cellsAxisItems[i];
+          var cellsAxisItemColumnName = cellsAxisItem.columnName;
+          if (cellsAxisItemColumnName === '*' && cellsAxisItem.aggregator === 'count') {
+            continue;
+          }
+          if (subqueryColumnNames[cellsAxisItemColumnName] === undefined) {
+            cellsAxisItemColumnName[cellsAxisItemColumnName] = cellsAxisItemColumnName;
+          }
+        }
+        countStarCellsAxisItemCopy.columnName = CellSet.#countStarExpressionAlias;
+
         var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(countStarCellsAxisItemCopy, CellSet.#datasetRelationName);
         
         aggregateExpressionsToFetch[countStarExpressionAlias] = sqlExpression;
       }
-      var resultset = await this.#executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch);
+      var resultset = await this.#executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subqueryColumnNames);
       var newCells = this.#extractCellsFromResultset(resultset);
       Object.assign(availableCells, newCells);
     }

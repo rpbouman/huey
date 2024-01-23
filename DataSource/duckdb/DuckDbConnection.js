@@ -35,9 +35,10 @@ class DuckDbConnection {
   async query(sql){
     var connection = await this.#getPhysicalConnection();
     this.#state = 'querying';
-    console.time(`Executing ${sql} on connection ${this.getConnectionId()}`);
+    var msg = `Executing ${sql} on connection ${this.getConnectionId()}`;
+    console.time(msg);
     var result = await connection.query(sql);
-    console.timeEnd(`Executing ${sql} on connection ${this.getConnectionId()}`);
+    console.timeEnd(msg);
     this.#state = 'queried';
     return result;
   }
