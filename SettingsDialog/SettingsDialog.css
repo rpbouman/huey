@@ -1,5 +1,6 @@
 #settingsDialog {
   width: 400px;
+  min-width: 400px;
   height: 300px;
   resize: both;
 }

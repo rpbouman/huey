@@ -54,7 +54,10 @@
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
-    <dialog id="uploadUi">
+    <dialog 
+      id="uploadUi" 
+      popover="manual"
+    >
       <header>
         <h3></h3>
         <div class="timer">
@@ -68,12 +71,23 @@
         
       </section>
       <footer>
-        <button id="uploadDialogOkButton">Ok</button>
-        <button id="uploadDialogCancelButton">Cancel</button>
+        <button 
+          id="uploadDialogOkButton" 
+          popovertarget="uploadUi" 
+          popovertargetaction="hide"
+        >Ok</button>
+        <button 
+          id="uploadDialogCancelButton" 
+          popovertarget="uploadUi"  
+          popovertargetaction="hide"
+        >Cancel</button>
       </footer>
     </dialog>
 
-    <dialog id="exportDialog">
+    <dialog 
+      id="exportDialog" 
+      popover="manual"
+    >
       <header>
         <h3>Export...</h3>
       </header>
@@ -110,7 +124,11 @@
         </fieldset>
       </section>
       <footer>
-        <button id="exportDialogCloseButton">Close</button>
+        <button 
+          id="exportDialogCloseButton" 
+          popovertarget="exportDialog"
+          popovertargetaction="hide"
+        >Close</button>
       </footer>
     </dialog>
     
@@ -182,18 +200,25 @@
       </footer>
     </dialog>
     
-    <dialog id="errorDialog">
+    <dialog id="errorDialog" popover="manual">
       <header>
         <h3 id="errorDialogTitle"></h3>
       </header>
       <section id="errorDialogDescription">
       </section>
       <footer>
-        <button id="errorDialogOkButton">Ok</button>
+        <button 
+          id="errorDialogOkButton"
+          popovertarget="errorDialog"
+          popovertargetaction="hide"
+        >Ok</button>
       </footer>
     </dialog>
     
-    <dialog id="settingsDialog">
+    <dialog 
+      id="settingsDialog"
+      popover="manual"
+    >
       <header>
         <h3>Settings</h3>
       </header>
@@ -356,12 +381,23 @@
         
       </section>
       <footer>
-        <button id="settingsDialogOkButton">Ok</button>
-        <button id="settingsDialogCancelButton">Cancel</button>
+        <button 
+          id="settingsDialogOkButton"
+          popovertarget="settingsDialog"
+          popovertargetaction="hide"
+        >Ok</button>
+        <button 
+          id="settingsDialogCancelButton"
+          popovertarget="settingsDialog"
+          popovertargetaction="hide"
+        >Cancel</button>
       </footer>
     </dialog>
 
-    <dialog id="aboutDialog">
+    <dialog 
+      id="aboutDialog"
+      popover="auto"
+    >
       <header>
         <h3>Huey</h3>
       </header>
@@ -376,7 +412,11 @@
         </ul>
       </section>
       <footer>
-        <button id="aboutDialogOkButton">Ok</button>
+        <button 
+          id="aboutDialogOkButton"
+          popovertarget="aboutDialog"
+          popovertargetaction="hide"
+        >Ok</button>
       </footer>
     </dialog>
         
@@ -406,9 +446,15 @@
         <!-- title in the toolbar identifies the currently selected datasource -->
         <h1 id="currentDatasource"></h1>
         
-        <label for="aboutButton" class="aboutButton" title="About Huey...">
+        <label 
+          for="aboutButton" 
+          class="aboutButton" 
+          title="About Huey..."
+        >
           <button
             id="aboutButton"
+            popovertarget="aboutDialog"
+            popovertargetaction="show"
           >About</button>
         </label>
         
@@ -417,11 +463,23 @@
           class="button settings"
           title="Open the Huey Settings dialog."
         >
-          <button id="settingsButton">Settings</button>
+          <button 
+            id="settingsButton"
+            popovertarget="settingsDialog"
+            popovertargetaction="show"
+          >Settings</button>
         </label>
         
-        <label for="downloadButton" class="button" title="Export &amp; Download queries and/or result data...">
-          <button id="downloadButton">Download</button>
+        <label 
+          for="downloadButton" 
+          class="button" 
+          title="Export &amp; Download queries and/or result data..."
+        >
+          <button 
+            id="downloadButton"
+            popovertarget="exportDialog"
+            popovertargetaction="show"
+          >Download</button>
         </label>
       </menu>
       <nav 
@@ -584,7 +642,6 @@
     <script onload="resourceLoaded(this.src)" src="DataSet/DataSetComponent.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSet/TupleSet.js"></script>
     <script onload="resourceLoaded(this.src)" src="DataSet/CellSet.js"></script>
-    <script onload="resourceLoaded(this.src)" src="AboutDialog/AboutDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="ErrorDialog/ErrorDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="UploadUi/UploadUi.js"></script>
     <script onload="resourceLoaded(this.src)" src="ExportUi/ExportUi.js"></script>

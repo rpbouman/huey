@@ -70,19 +70,6 @@ async function downloadQueryResultToParquetFile(){
 }
 
 function initExportUi(){
-  // open the export ui dialog
-  byId('downloadButton')
-  .addEventListener('click', function(){
-    byId('exportDialog').showModal();
-  });
-
-  // close the export ui dialog
-  byId('exportDialogCloseButton')
-  .addEventListener('click', function(){
-    byId('exportDialog').close();
-  });
-  
-  // export dialog actions:
   
   // copy sql to clipboard
   byId('copyPivotStatementToClipboard')

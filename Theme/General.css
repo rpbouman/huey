@@ -140,9 +140,10 @@ dialog {
   border-width: 1px;
   border-color: var( --huey-dark-border-color );
   border-radius: 18px;
-  padding-top: 10px;
+  padding: 15px;
 }
 
+dialog:popover-open,
 dialog[open] {
   display: flex;
   flex-direction: column;

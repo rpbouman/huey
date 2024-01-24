@@ -2,12 +2,11 @@ dialog#uploadUi {
   resize: both;
   width: 600px;
   height: 400px;
+  padding: 15px;
 }
 
 dialog#uploadUi > section > details > summary > label {
 }
-
-
 
 dialog#uploadUi > section > details > summary > progress {
   display: block;

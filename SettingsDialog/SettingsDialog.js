@@ -295,17 +295,14 @@ class Settings extends EventEmitter {
       event.cancelBubble = true;
       this.#updateSettingsFromDialog();
       this.#storeToLocalStorage();
-      settingsDialog.close();
     }.bind(this));
 
     byId('settingsDialogCancelButton').addEventListener('click', function(event){
       event.cancelBubble = true;
-      settingsDialog.close();
     }.bind(this));
 
     byId('settingsButton').addEventListener('click', function(){
       this.#updateDialogFromSettings();
-      settingsDialog.showModal();
     }.bind(this));
   }
   

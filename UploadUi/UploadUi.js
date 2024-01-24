@@ -20,14 +20,9 @@ class UploadUi {
   
   init(){
     var dom = this.getDom();
-    
-    this.#getOkButton().addEventListener('click', async function(){
-      this.getDom().close();
-    }.bind(this));
-    
+        
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
-      this.getDom().close();
     }.bind(this));    
   }  
   

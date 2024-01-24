@@ -86,11 +86,9 @@ function initExecuteQuery(){
 
 function initApplication(){
   initDuckdbVersion();
-  initAbout();
   initUploadUi();
   initExportUi();
   initDataSourcesUi();
-  initErrorDialog();
   initQueryModel();
   initAttributeUi();
   initSearch();
