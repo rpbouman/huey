@@ -259,10 +259,12 @@ menu[role=menu] > li[role=menuitem] {
   border-radius: 14px;
 }
 
+footer[role=toolbar] > button:hover ,
 menu[role=menu] > li[role=menuitem]:hover {
   background-color: var( --huey-light-background-color );
   border-color: var( --huey-light-border-color );
 }
+
 
 menu[role=menu] > li[role=menuitem] > label > button {
   display: none;

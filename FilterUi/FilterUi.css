@@ -67,8 +67,11 @@ dialog#filterDialog > section > header > section > section > select#filterPickli
 dialog#filterDialog > footer {
   margin-top: 0px;
   margin-bottom: 0px;
-  padding: 0px 4px 0px 4px;
+  padding: 4px 4px 0px 4px;
   height: 30px;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var( --huey-light-border-color );
 }
 
 dialog#filterDialog > section {
@@ -87,6 +90,7 @@ dialog#filterDialog section {
 dialog#filterDialog section > footer {
   flex-grow: 0;
   padding-top: 4px;
+  padding-bottom: 2px;
 }
 
 dialog#filterDialog > section > header > section > header > input[type=search]#filterSearch {

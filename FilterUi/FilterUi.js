@@ -33,14 +33,13 @@ class FilterDialog {
     
     this.#getRemoveFilterButton().addEventListener('click', function(event){
       this.#queryModel.removeItem(this.#queryAxisItem);
-      this.getDom().close();
+      filterDialog.close();
     }.bind(this));
-    
-    // Cancel button closes the dialog without storing the changes to the filter
+
     this.#getCancelButton().addEventListener('click', function(event){
       filterDialog.close();
-    });
-    
+    }.bind(this));
+        
     // Clear button clears the values lists
     this.#getClearButton().addEventListener('click', function(event){
       this.clearFilterValueLists();

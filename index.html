@@ -57,9 +57,10 @@
     <dialog 
       id="uploadUi" 
       popover="manual"
+      aria-labelledby="uploadUiTitle"
     >
       <header>
-        <h3></h3>
+        <h3 id="uploadUiTitle"></h3>
         <div class="timer">
           <span class="digit"></span>
           <span class="digit"></span>
@@ -70,7 +71,7 @@
       <section id="uploadProgressList">
         
       </section>
-      <footer>
+      <footer role="toolbar">
         <button 
           id="uploadDialogOkButton" 
           popovertarget="uploadUi" 
@@ -87,9 +88,10 @@
     <dialog 
       id="exportDialog" 
       popover="manual"
+      aria-labelledby="uploadUiTitle"
     >
       <header>
-        <h3>Export...</h3>
+        <h3 id="exportDialogTitle">Export...</h3>
       </header>
       <section >
         <fieldset>
@@ -123,7 +125,7 @@
           </menu>
         </fieldset>
       </section>
-      <footer>
+      <footer role="toolbar">
         <button 
           id="exportDialogCloseButton" 
           popovertarget="exportDialog"
@@ -132,7 +134,11 @@
       </footer>
     </dialog>
     
-    <dialog id="filterDialog" aria-busy="false">
+    <dialog 
+      id="filterDialog" 
+      aria-busy="false"
+      popover="auto"
+    >
       <header>
         <label for="filterType">Filter type:</label>
         <select id="filterType">
@@ -188,28 +194,45 @@
             </select>
           </div>
         </section>
-        <footer>
+        <footer role="toolbar">
           <button id="filterDialogClearSelectedButton" title="Clear selected values from the list">Clear Selected</button>
           <button id="filterDialogClearButton" title="Clear the values list">Clear All</button>
         </footer>
       </section>
-      <footer>
-        <button id="filterDialogOkButton" title="Confirm the filter setting changes">Ok</button>
-        <button id="filterDialogRemoveButton" title="Remove the filter from the axis">Remove</button>
-        <button id="filterDialogCancelButton" title="Cancel filter setting changes">Cancel</button>
+      <footer role="toolbar">
+        <button 
+          id="filterDialogOkButton" 
+          title="Confirm the filter setting changes"
+          popovertarget="filterDialog"
+          popovertargetaction="hide"
+        >Apply</button>
+        <button 
+          id="filterDialogRemoveButton" 
+          title="Remove the filter from the axis"
+          popovertarget="filterDialog"
+          popovertargetaction="hide"
+        >Remove</button>
+        <button 
+          id="filterDialogCancelButton" 
+          title="Cancel filter setting changes"
+          popovertarget="filterDialog"
+          popovertargetaction="hide"
+        >Cancel</button>
       </footer>
     </dialog>
     
     <dialog 
       id="errorDialog" 
       popover="auto"
+      aria-labelledby="errorDialogTitle"
+      aria-describedby="errorDialogDescription"
     >
       <header>
         <h3 id="errorDialogTitle"></h3>
       </header>
       <section id="errorDialogDescription">
       </section>
-      <footer>
+      <footer role="toolbar">
         <button 
           id="errorDialogOkButton"
           popovertarget="errorDialog"
@@ -220,10 +243,11 @@
     
     <dialog 
       id="settingsDialog"
+      aria-labelledby="settingsDialogTitle"
       popover="manual"
     >
       <header>
-        <h3>Settings</h3>
+        <h3 id="settingsDialogTitle">Settings</h3>
       </header>
       <section 
         id="settingsTabs"
@@ -383,7 +407,7 @@
         </div>
         
       </section>
-      <footer>
+      <footer role="toolbar">
         <button 
           id="settingsDialogOkButton"
           popovertarget="settingsDialog"
@@ -414,7 +438,7 @@
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License</a></li>
         </ul>
       </section>
-      <footer>
+      <footer role="toolbar">
         <button 
           id="aboutDialogOkButton"
           popovertarget="aboutDialog"
