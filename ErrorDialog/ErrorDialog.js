@@ -24,3 +24,10 @@ function showErrorDialog(config){
   errorDialog.showModal();
 }
 
+function initErrorDialog(){
+  var errorDialog = byId('errorDialog');
+  byId('errorDialogOkButton').addEventListener('click', function(event){
+    event.cancelBubble = true;
+    errorDialog.close();
+  });
+}

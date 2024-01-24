@@ -89,6 +89,7 @@ function initApplication(){
   initUploadUi();
   initExportUi();
   initDataSourcesUi();
+  initErrorDialog();
   initQueryModel();
   initAttributeUi();
   initSearch();

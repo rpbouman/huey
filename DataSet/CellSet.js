@@ -221,6 +221,10 @@ class CellSet extends DataSetComponent {
         `SELECT ${subQueryColumnExpressions.join('\n,')}`,
         `FROM ${aliasedDatasetName}`
       ];
+      
+      if (filterCondition) {
+        subquery.push(`WHERE ${filterCondition}`);
+      }
       joinClause += `( ${subquery.join('\n')} ) AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`;
     }
     else {
@@ -240,7 +244,7 @@ class CellSet extends DataSetComponent {
     var joinConditionSql = joinConditionsSql.join('\nAND ');
     var onClause = `ON ${joinConditionSql}`;
 
-    if (filterCondition) {
+    if (filterCondition && !subQueryColumnNames) {
       onClause = [
         onClause,
         `AND ${filterCondition}`
