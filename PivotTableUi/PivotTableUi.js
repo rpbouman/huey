@@ -714,7 +714,7 @@ class PivotTableUi {
         label = createEl('span', {
           "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
         }, labelText);
-        tableCell.style.width = (labelText.length + 2) + 'ch';
+        tableCell.style.width = (labelText.length + 1) + 'ch';
         tableCell.appendChild(label);
       }
     }
@@ -804,7 +804,7 @@ class PivotTableUi {
         tuple = tuples[i];
       }
     
-      var valuesMaxWidth = 0, columnWidth;
+      var valuesMaxWidth = 0, columnWidth = 0;
       var values, stringValue;
       if (tuple){
         values = tuple.values;
@@ -845,6 +845,7 @@ class PivotTableUi {
           else {
             labelText = String.fromCharCode(160);
           }
+          
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel"
           }, labelText);
@@ -876,6 +877,9 @@ class PivotTableUi {
     var tableHeaderDom = this.#getTableHeaderDom();
     var headerRows = tableHeaderDom.childNodes;
     var firstHeaderRow = headerRows.item(0);
+    if (!firstHeaderRow) {
+      return;
+    }
     var firstHeaderRowCells = firstHeaderRow.childNodes;
     var lastHeaderRowIndex = headerRows.length -1;
     
@@ -952,6 +956,11 @@ class PivotTableUi {
     var tableHeaderRows = tableHeaderDom.childNodes;
     var firstTableHeaderRow = tableHeaderRows.item(0);
     
+    if (!firstTableHeaderRow){
+      return;
+    }
+    var firstTableHeaderRowCells = firstTableHeaderRow.childNodes;
+    
     var tableBodyDom = this.#getTableBodyDom();
     var tableBodyDomRows = tableBodyDom.childNodes;
     var stufferRow = tableBodyDomRows.item(0);
@@ -969,6 +978,10 @@ class PivotTableUi {
           var cell = createEl('div', {
             "class": "pivotTableUiCell pivotTableUiHeaderCell"
           });
+          
+          var headerCell = firstTableHeaderRowCells[bodyRow.childNodes.length];
+          var headerCellWidth = parseInt(headerCell.style.width);
+
           bodyRow.appendChild(cell);
           
           var labelText;
@@ -995,6 +1008,11 @@ class PivotTableUi {
             "class": "pivotTableUiCellLabel"
           }, labelText);
           cell.appendChild(label);
+          
+          if (headerCellWidth < labelText.length){
+            headerCellWidth = labelText.length;
+            headerCell.style.width = headerCellWidth + 'ch';
+          }
         }
         
         physicalRowsAdded += 1;
@@ -1168,6 +1186,11 @@ class PivotTableUi {
   #getColumnsAxisSizeInfo(){
     var tableHeaderDom = this.#getTableHeaderDom();
     var firstHeaderRow = tableHeaderDom.childNodes.item(0);
+    
+    if (!firstHeaderRow ){
+      return undefined;
+    }
+    
     var cells = firstHeaderRow.childNodes;
 
     var queryModel = this.#queryModel;
