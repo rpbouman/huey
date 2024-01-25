@@ -30,8 +30,8 @@
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Theme/General.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
-    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this.href)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
@@ -92,38 +92,189 @@
     >
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
+        <form>
+          <label 
+            for="exportTitleTemplate"
+            label="The title template is used to generate a file name for downloads"
+          >Title template</label>
+          <input 
+            id="exportTitleTemplate"
+            label="The title template is used to generate a file name for downloads"
+            value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
+          />
+          <label 
+            for="exportTitle"
+            label="The title generated from the template"
+          >Title</label>
+          <output 
+            id="exportTitle"
+            for="exportTitleTemplate"
+            label="The title generated from the template"
+          ></output>
+          <fieldset>
+            <legend title="Control the shape of the exported dataset">Data Structure</legend>
+            <label 
+              for="exportResultShapePivot" 
+              title="Export results as a pivot table"
+            >Pivot</label>
+            <input 
+              id="exportResultShapePivot" 
+              type="radio" 
+              name="exportResultShape" 
+              checked="true"
+              title="Check this to export results as a pivot table"
+            />
+            <label 
+              for="exportResultShapeTable" 
+              title="Export results as a plain table. In this format, all items from the query are used to produce a list of rows "
+            >Table</label>
+            <input 
+              id="exportResultShapeTable" 
+              type="radio" 
+              name="exportResultShape"
+            />
+          </fieldset>
+          <fieldset>
+            <legend title="Control where the results are exported to">Destination</legend>
+            <label 
+              for="exportDestinationFile" 
+              title="Download the export data as a file so you can store it on your system."
+            >File</label>
+            <input 
+              id="exportDestinationFile" 
+              type="radio" 
+              name="exportDestination" 
+              checked="true"
+            />
+            <label 
+              for="exportDestinationClipboard" 
+              title="Copy the export data to the clipboard"
+            >Clipboard</label>
+            <input 
+              id="exportDestinationClipboard" 
+              type="radio" 
+              name="exportDestination"
+              title="Check this to copy the export data to the clipboard so you can paste it in other applications"
+            />
+          </fieldset>
+        </form>
       </header>
-      <section >
-        <fieldset>
-          <legend>DuckDB Pivot statement (SQL)</legend>
-          <menu role="menu">
-            <li role="menuitem">
-              <label for="copyPivotStatementToClipboard">Copy to clipboard...
-                <button id="copyPivotStatementToClipboard">Copy to clipboard...</button>
-              </label>
-            </li>
-            <li role="menuitem">
-              <label for="downloadPivotStatementToSqlFile">Download as SQL file...
-                <button id="downloadPivotStatementToSqlFile">Download as SQL file...</button>
-              </label>
-            </li>
-          </menu>
-        </fieldset>
-        <fieldset>
-          <legend>Pivot Statement Results</legend>
-          <menu role="menu">
-            <li role="menuitem">
-              <label for="downloadQueryResultsAsCsvFile">Download as .csv file...
-                <button id="downloadQueryResultsAsCsvFile">Download as .csv file...</button>
-              </label>
-            </li>
-            <li role="menuitem">
-              <label for="downloadQueryResultsAsParquetFile">Download as .parquet file...
-                <button id="downloadQueryResultsAsParquetFile">Download as .parquet file...</button>
-              </label>
-            </li>
-          </menu>
-        </fieldset>
+      <section role="tablist">
+        <!--
+          See: https://duckdb.org/docs/sql/statements/copy.html#csv-options
+        -->
+        <div>
+          <label 
+            role="tab" 
+            for="exportDelimited" 
+            title="Use this tab to export data as delimited text, like .CSV, TSV, etc."
+          >Delimited text</label>
+          <input id="exportDelimited" name="exportFormat" type="radio" checked="true"/>
+          <div role="tabpanel">
+            <form>
+              <label 
+                for="exportDelimitedCompression"
+              >Compression</label>
+              <select id="exportDelimitedCompression">
+                <option selected="true">none</option>
+                <option>gzip</option>
+                <option>ztsd</option>
+              </select>
+              <label for="exportDelimitedIncludeHeaders">Include Headers</label>
+              <input id="exportDelimitedIncludeHeaders" type="checkbox" checked="true"/>
+              <fieldset>
+                <legend>Formatting</legend>
+                <label for="exportDelimitedDateFormat">Date Format</label>
+                <input id="exportDelimitedDateFormat" type="text" value="%x"/>
+                <label for="exportDelimitedTimestampFormat">Timestamp Format</label>
+                <input id="exportDelimitedTimestampFormat" type="text" value="%c"/>
+                <label for="exportDelimitedNullString">NULL-value string</label>
+                <input id="exportDelimitedNullString" type="text" value=""/>
+              </fieldset>
+              <fieldset>
+                <legend>Delimiters</legend>
+                <label for="exportDelimitedColumnDelimiter">Column delimiter</label>
+                <input id="exportDelimitedColumnDelimiter" type="text" value=","/>
+                <label for="exportDelimitedQuote">Quote Character</label>
+                <input id="exportDelimitedQuote" type="text" value="&quot;"/>
+                <label for="exportDelimitedEscape">Escape Character</label>
+                <input id="exportDelimitedEscape" type="text" value="&quot;"/>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+        <!--
+          See: https://duckdb.org/docs/sql/statements/copy.html#json-options
+        -->
+        <div>
+          <label 
+            role="tab" 
+            for="exportJson" 
+            title="Use this tab to export data in the JSON format"
+          >JSON</label>
+          <input id="exportJson" name="exportFormat" type="radio"/>
+          <div role="tabpanel">
+            <form>
+              <label 
+                for="exportJsonCompression"
+              >Compression</label>
+              <select id="exportJsonCompression">
+                <option selected="true">none</option>
+                <option>gzip</option>
+                <option>ztsd</option>
+              </select>
+              <fieldset>
+                <legend>Formatting</legend>
+                <label for="exportJsonDateFormat">Date Format</label>
+                <input id="exportJsonDateFormat" value="%x"/>
+                <label for="exportJsonTimestampFormat">Timestamp Format</label>
+                <input id="exportJsonTimestampFormat" value="%c"/>
+              </fieldset>
+              <fieldset>
+                <legend>Delimiters</legend>
+                <label for="exportJsonRowDelimiter">Column delimiter</label>
+                <select id="exportJsonRowDelimiter">
+                  <option value="true">JSON Array</option>
+                  <option value="false">newline delimited</option>
+                </select>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+        <!--
+          See: https://duckdb.org/docs/sql/statements/copy.html#parquet-options
+        -->
+        <div>
+          <label 
+            role="tab" 
+            for="exportParquet" 
+            title="Use this tab to export data in Parquet format"
+          >Parquet</label>
+          <input id="exportParquet" name="exportFormat" type="radio"/>
+          <div role="tabpanel">
+            <form>
+              <label 
+                for="exportParquetCompression"
+              >Compression</label>
+              <select id="exportParquetCompression">
+                <option>none</option>
+                <option>gzip</option>
+                <option selected="true">snappy</option>
+                <option>ztsd</option>
+              </select>
+            </form>
+          </div>
+        </div>
+        <div>
+          <label 
+            role="tab" 
+            for="exportSql"
+            title="Use this tab to export a SQL statement that would produce the result data."
+          >SQL</label>
+          <input id="exportSql" name="exportFormat" type="radio"/>
+          <div role="tabpanel">
+          </div>
+        </div>
       </section>
       <footer role="toolbar">
         <button 
@@ -131,6 +282,9 @@
           popovertarget="exportDialog"
           popovertargetaction="hide"
         >Close</button>
+        <button 
+          id="exportDialogExecuteButton" 
+        >Go!</button>
       </footer>
     </dialog>
     
@@ -263,10 +417,8 @@
           >
             Datasources
           </label>
-          <input id="datasourcesSettingTab" type="radio" name="settingsTabs" class="tabState" checked="true"/>
-          <div 
-            role="tabpanel"
-          >
+          <input id="datasourcesSettingTab" type="radio" name="settingsTabs" checked="true"/>
+          <div role="tabpanel">
             <form id="datasourceSettings">
               <label for="registeredFileTypes">UNION loose typing</label>
               <input id="useLooseColumnTypeComparison" type="checkbox"/>
@@ -283,7 +435,7 @@
           >
             Files
           </label>
-          <input id="fileSettingTab" type="radio" name="settingsTabs" class="tabState"/>
+          <input id="fileSettingTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="fileSettings">
               <label for="registeredFileTypes">File types</label>
@@ -306,7 +458,7 @@
           >
             Locale
           </label>
-          <input id="localeSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
+          <input id="localeSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="localeSettings">
               <label for="useDefaultLocale">Use default</label>
@@ -355,7 +507,7 @@
           >
             Query
           </label>
-          <input id="querySettingsTab" type="radio" name="settingsTabs" class="tabState"/>
+          <input id="querySettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="querySettings">
               <label for="autoRunQuery">Autorun Query</label>
@@ -374,7 +526,7 @@
           >
             Pivot Table
           </label>
-          <input id="pivotTableSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
+          <input id="pivotTableSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="pivotTableSettings">
             </form>
@@ -391,7 +543,7 @@
           >
             Theme
           </label>
-          <input id="themeSettingsTab" type="radio" name="settingsTabs" class="tabState"/>
+          <input id="themeSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="themeSettings">
               <label for="themes">Themes</label>
@@ -498,12 +650,12 @@
         </label>
         
         <label 
-          for="downloadButton" 
+          for="exportButton" 
           class="button" 
           title="Export &amp; Download queries and/or result data..."
         >
           <button 
-            id="downloadButton"
+            id="exportButton"
             popovertarget="exportDialog"
             popovertargetaction="show"
           >Download</button>
@@ -522,7 +674,7 @@
             role="tab"
             title="Files, database tables and so on that provide data you'd like to analyze."
           >Datasources</label>
-          <input id="datasourcesTab" type="radio" name="sidebarTabs" class="tabState" checked="true"/>
+          <input id="datasourcesTab" type="radio" name="sidebarTabs" checked="true"/>
           <div 
             role="tabpanel"
           >
@@ -540,7 +692,7 @@
             role="tab"
             title="Columns, formulas and aggregates to query and pivot"
           >Attributes</label>
-          <input id="attributesTab" type="radio" name="sidebarTabs" class="tabState"/>
+          <input id="attributesTab" type="radio" name="sidebarTabs"/>
           <div role="tabpanel">
             <search 
               id="searchAttributeUi"
@@ -659,6 +811,7 @@
     <script onload="resourceLoaded(this.src)" src="util/clipboard/clipboard.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this.src)" src="util/event/EventBuffer.js"></script>
+    <script onload="resourceLoaded(this.src)" src="Tabs/Tabs.js"></script>
 
     <script onload="resourceLoaded(this.src)" src="SettingsDialog/SettingsDialog.js"></script>
     <script onload="resourceLoaded(this.src)" src="Theme/Theme.js"></script>
@@ -727,8 +880,6 @@
       };
       
       initApplication();
-      
-      
       
     </script>
   </body>

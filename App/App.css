@@ -108,16 +108,6 @@ body:has( #autoRunQuery:checked ) > main > menu[role=toolbar] > label[for=runQue
   visibility: hidden;
 }
 
-menu[role=toolbar] > label[for=downloadButton] {
-  font-family: var( --huey-icon-font-family );
-  vertical-align: top;
-  float: right;
-}
-
-menu[role=toolbar] > label[for=downloadButton]::before {
-  content: "\ea96";
-}
-
 menu[role=toolbar] > #currentDatasource {
   display: inline-block;
   padding: 8px;

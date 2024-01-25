@@ -1,0 +1,28 @@
+dialog#exportDialog {
+  width: 700px;
+  height: 430px;
+  resize: both;
+}
+
+dialog#exportDialog > header > form > input#exportTitleTemplate {
+  width: 100%;
+}
+
+form > fieldset {
+  grid-column: span 1;
+}
+
+
+menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
+  float: right;
+}
+
+menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::before {
+  content: "\ea96";
+}
+
+form > output {
+  grid-column: controls;
+  grid-row: auto;
+  justify-self:start;
+}

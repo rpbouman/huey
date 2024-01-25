@@ -1,13 +1,7 @@
-label.aboutButton {
+menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton ) {
   float: right;
 }
 
-label.aboutButton:before {
-  font-family: var( --huey-icon-font-family );
-  font-size: var(--huey-icon-normal);  
+menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton )::before {
   content: '\eac5';
-}
-
-label.aboutButton > button {
-  display: none;
 }

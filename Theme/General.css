@@ -78,14 +78,18 @@ input, select, button {
   border-style: solid;
   border-width: 1px;
   border-radius: 14px;
-  height: 26px;
+  height: 22px;
+}
+
+input[type=radio] {
+  height: 13px;
+  width: 13px;
 }
 
 select[multiple] {
   border-style: solid;
   border-width: 1px;
   border-radius: 14px 0px 0px 14px;
-  height: 26px;
 }
 
 input[type=text], input[type=input], input[type=checkbox], select{
@@ -155,8 +159,14 @@ dialog > header {
 }
 
 /* this is used as dialog contents section */
-dialog > section {
+dialog > section,
+dialog > form {
   flex-grow: 1;
+}
+
+dialog > section[role=tablist],
+dialog > form[role=tablist] {
+  margin-top: 12px;
 }
 
 /* this is used as dialog buttons section */
@@ -182,23 +192,28 @@ dialog h6:first-child,
 dialog h7:first-child 
 {
   margin-block-start: 0px;
+  margin-block-end: 0px;
 }
 
-form {
+form, form > fieldset {
   display: grid;
   grid-template-columns: [labels] auto [controls] 1fr;
   grid-auto-flow: row;
   grid-gap: 0.5em;
 }
 
+form > fieldset {
+  grid-column: span 2;  
+}
+
 form > label {
   grid-column: labels;
   grid-row: auto;
-  margin-top: 4px;
+  margin-top: 2px;
   justify-self: end;
 }
 
-form > label::after {
+form > label::after, form > fieldset > label::after {
   content: ":"
 }
 
@@ -208,6 +223,7 @@ form > select {
   grid-row: auto;
   justify-self:start;
 }
+
 
 menu[role=toolbar] {
   list-style-type: none;

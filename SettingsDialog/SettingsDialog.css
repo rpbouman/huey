@@ -5,25 +5,10 @@
   resize: both;
 }
 
-label.settings {
+menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {
   float: right;
 }
 
-label.settings:before {
-  font-family: var( --huey-icon-font-family );
+menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton )::before {
   content: '\eb20';
 }
-
-label.settings > button {
-  display: none;
-}
-
-
-#settingsDialog > .tabs > .tabPage > .tabPageContents {
-  padding: 8px 4px 4px 4px;
-  border-style: none solid solid solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
-}
-
-

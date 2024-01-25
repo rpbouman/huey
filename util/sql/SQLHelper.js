@@ -312,7 +312,75 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   return sql;
 }
 
+function getCopyToStatement(selectStatement, fileName, options){
+  var optionsString = Object
+  .keys(options)
+  .map(function(option){
+    return `${option} ${options[option]}`
+  }).join('\n, ');
+  
+  var copyStatement = [
+    'COPY (',
+    selectStatement,
+    `) TO '${fileName}' WITH (`,
+    optionsString,
+    ')'
+  ];
+  return copyStatement.join('\n');
+}
 
+function getSqlHeader(){
+  return [
+    `/*********************************`,
+    `* DuckDB query generated ${new Date(Date.now())} by Huey`,
+    `* https://github.com/rpbouman/huey`,
+    `**********************************/`
+  ].join('\n');
+}
+
+function getDuckDbTableSqlStatementForQueryModel(queryModel){
+  var datasource = queryModel.getDatasource();
+
+  var rowsAxisItems = queryModel.getRowsAxis().getItems();
+  var columnsAxisItems = queryModel.getColumnsAxis().getItems();
+  var cellsAxisItems = queryModel.getCellsAxis().getItems();
+  var queryAxisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
+  
+  var selectList = {}, groupBy = [], orderBy = [];
+  for (var i = 0; i < queryAxisItems.length; i++){
+    var queryAxisItem = queryAxisItems[i];
+    var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+    selectList[caption] = sqlExpression;
+    
+    if (i < rowsAxisItems.length + columnsAxisItems.length) {
+      groupBy.push(sqlExpression);
+      orderBy.push(sqlExpression);
+    }
+  }
+  var selectList = Object.keys(selectList).map(function(caption){
+    var sqlExpression = selectList[caption];
+    return `${sqlExpression} AS ${getQuotedIdentifier(caption)}`;
+  })
+    
+  var sql =  [
+    getSqlHeader(),
+    `SELECT ${selectList.join('\n, ')}`,
+    datasource.getFromClauseSql(),
+  ];
+  var filterSql = queryModel.getFilterConditionSql();
+  if (filterSql) {
+    sql.push('WHERE ${filterSql}');
+  }
+  if (groupBy.length) {
+    sql.push(`GROUP BY ${groupBy.join('\n, ')}`);
+  }
+  if (orderBy.length) {
+    sql.push(`ORDER BY ${orderBy.join('\n, ')}`);
+  }
+  sql = sql.join('\n');
+  return sql;
+}
 
 function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   var columnsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_COLUMNS);
@@ -373,10 +441,7 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   
   var cteName = 'data';
   var sql = [
-    `/*********************************`,
-    `* DuckDB query generated ${new Date(Date.now)} by Huey`,
-    `* https://github.com/rpbouman/huey`,
-    `**********************************/`,
+    getSqlHeader(),
     `WITH ${cteName} AS (`,
     `SELECT ${columns.join('\n,')}`,
     `${datasource.getFromClauseSql()}`,

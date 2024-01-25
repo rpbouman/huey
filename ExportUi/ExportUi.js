@@ -69,29 +69,189 @@ async function downloadQueryResultToParquetFile(){
   downloadBlob(buffer, fileName, 'application/vnd.apache.parquet');
 }
 
-function initExportUi(){
-  
-  // copy sql to clipboard
-  byId('copyPivotStatementToClipboard')
-  .addEventListener('click', function(){
-    copyPivotStatementToClipboard();
+function getCaptionForQueryAxis(axisId){
+  var queryAxis = queryModel.getQueryAxis(axisId);
+  var items = queryAxis.getItems();
+  if (items.length === 0){
+    return '<empty>';
+  }
+  var itemKeys = Object.keys(items);
+  var captions = itemKeys.map(function(itemKey){
+    var item = items[itemKey];
+    var caption = QueryAxisItem.getCaptionForQueryAxisItem(item);
+    return `"${caption}"`;
   });
+  return captions.join(', ');
+}
 
-  // download sql file
-  byId('downloadPivotStatementToSqlFile')
-  .addEventListener('click', function(){
-    downloadPivotStatementToSqlFile();
+var exportTitleFields = {
+  'datasource': function(){
+    var datasource = queryModel.getDatasource();
+    if (!datasource) {
+      return '<no datasource>';
+    }
+    var caption = DataSourcesUi.getCaptionForDatasource(datasource);
+    return caption;
+  },
+  'columns-items': function(){
+    return getCaptionForQueryAxis(QueryModel.AXIS_COLUMNS);
+  },
+  'rows-items': function(){
+    return getCaptionForQueryAxis(QueryModel.AXIS_ROWS);
+  },
+  'cells-items': function(){
+    return getCaptionForQueryAxis(QueryModel.AXIS_CELLS);
+  },
+  'filters-items': function(){
+    return getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
+  },
+};
+
+function generateExportDialogTitle(){
+  var exportTemplate = byId('exportTitleTemplate')
+  var exportTemplateValue = exportTemplate.value;
+  var replacedTemplate = exportTemplateValue.replace(/\$\{[^\}]+\}/g, function(fieldRef){
+    var fieldName = fieldRef.slice(2, -1);
+    var func = exportTitleFields[fieldName];
+    if (typeof func === 'function'){
+      return func(); 
+    }
+    else {
+      return fieldRef;
+    }
   });
- 
-  // download results as CSV file
-  byId('downloadQueryResultsAsCsvFile')
-  .addEventListener('click', function(){
-    downloadQueryResultToCsvFile();
-  });
+  return replacedTemplate;
+}
+
+function updateExportDialog(){
+  var title = generateExportDialogTitle();
+  byId('exportTitle').innerText = title;
+}
+
+async function executeExport(){
+  var title = byId('exportTitle').innerText;
   
-  // download results as parquet file
-  byId('downloadQueryResultsAsParquetFile')
-  .addEventListener('click', function(){
-    downloadQueryResultToParquetFile();
-  });
+  var sql, structure;
+  if (byId('exportResultShapePivot').checked){
+    structure = 'pivot';
+    sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
+  }
+  else
+  if (byId('exportResultShapeTable').checked){
+    structure = 'table';
+    sql = getDuckDbTableSqlStatementForQueryModel(queryModel);
+  }
+    
+  var selectedTab = TabUi.getSelectedTab('#exportDialog');
+  var tabName = selectedTab.getAttribute('for');
+  
+  var mimeType, compression, includeHeaders,
+      dateFormat, timestampFormat, nullValueString,
+      columnDelimiter, quote, escape, rowDelimiter
+  ;
+  var fileExtension, data, copyStatementOptions;
+  switch (tabName) {
+    case 'exportDelimited':
+      columnDelimiter = byId(tabName + 'ColumnDelimiter').value;
+      nullValueString = byId(tabName + 'NullString').value;
+      includeHeaders = byId(tabName + 'IncludeHeaders').checked;
+      quote = byId(tabName + 'Quote').value;
+      escape = byId(tabName + 'Escape').value;
+      dateFormat = byId(tabName + 'DateFormat').value;
+      timestampFormat = byId(tabName + 'TimestampFormat').value;
+      compression = byId(tabName + 'Compression').value;
+      copyStatementOptions = {
+        "FORMAT": 'csv',
+        "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
+        "NULL": `'${nullValueString.replace('\'', "''")}'`,
+        "HEADER": includeHeaders ? 'TRUE' : 'FALSE',
+        "QUOTE": `'${quote.replace('\'', "''")}'`,
+        "ESCAPE": `'${escape.replace('\'', "''")}'`,
+        "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
+        "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+        "COMPRESSION": `'${compression.replace('\'', "''")}'`,
+        "ESCAPE": `'${escape.replace('\'', "''")}'`,
+      };
+      mimeType = 'text/csv';
+      fileExtension = 'csv';
+      break;
+    case 'exportJson':
+      compression = byId('exportJsonCompression').value;
+      dateFormat = byId(tabName + 'DateFormat').value;
+      timestampFormat = byId(tabName + 'TimestampFormat').value;
+      rowDelimiter = byId(tabName + 'RowDelimiter').value;
+      copyStatementOptions = {
+        "FORMAT": 'json',
+        "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
+        "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+        "COMPRESSION": `'${compression.replace('\'', "''")}'`,
+        "ARRAY": rowDelimiter.toUpperCase()
+      };
+      mimeType = 'application/json';
+      fileExtension = 'json';
+      break;
+    case 'exportParquet':
+      compression = byId('exportParquetCompression').value;
+      copyStatementOptions = {
+        "COMPRESSION": `'${compression.replace('\'', "''")}'`
+      };
+      mimeType = 'application/vnd.apache.parquet';
+      fileExtension = 'parquet';
+      break;
+    case 'exportSql':
+      mimeType = 'text/plain';
+      data = sql;
+      fileExtension = 'sql';
+      break;
+  }
+  var fileName = [title, fileExtension].join('.');
+
+  if (copyStatementOptions){
+    var tmpFile = [crypto.randomUUID(), fileExtension].join('.');
+    var copyStatement = getCopyToStatement(sql, tmpFile, copyStatementOptions);
+    var datasource = queryModel.getDatasource();
+    var connection = datasource.createManagedConnection();
+    await connection.query(copyStatement);
+    data = await connection.copyFileToBuffer(tmpFile);
+    await connection.dropFile(fileName);
+  }
+  
+  var destination;
+  if (byId('exportDestinationFile').checked){
+    destination = 'file';
+  }
+  else
+  if (byId('exportDestinationClipboard').checked){
+    destination = 'clipboard';
+  }
+  switch (destination){
+    case 'file':
+      downloadBlob(data, fileName, mimeType)
+      break;
+    case 'clipboard':
+      var text;
+      if (typeof data === 'string'){
+        text = data;
+      }
+      else {
+        text = new TextDecoder('utf-8').decode(data);
+      }
+      copyToClipboard(text, 'text/plain')
+      .then(function(){
+        debugger;
+      })
+      .catch(function(e){
+        showErrorDialog(e);
+      });
+      break;
+  }
+  
+}
+
+function initExportUi(){
+  byId('exportButton')
+  .addEventListener('click', updateExportDialog);
+
+  byId('exportDialogExecuteButton')
+  .addEventListener('click', executeExport);
 }

@@ -68,6 +68,61 @@ class DuckDbConnection {
     return this.#state;
   }
   
+  registerFile(file, protocol){
+    if (! (file instanceof File)){
+      throw new Error(`Invalid argument! Need instance of File.`);
+    }
+    var protocol = protocol || window.hueyDb.duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
+    return this.#duckDbInstance.registerFileHandle(
+      file.name, 
+      file, 
+      protocol
+    );
+  }
+ 
+  copyFileToBuffer(fileName){
+    return this.#duckDbInstance.copyFileToBuffer(fileName);
+  }
+  
+  dropFile(fileName){
+    return this.#duckDbInstance.dropFile(fileName);
+  }
+  
+  async close(){
+    if (this.#physicalConnection){
+      try {
+        this.#state = 'closing';        
+        var result = await this.#physicalConnection.close();
+        this.#state = 'closed';
+        return result;
+      }
+      catch(e){
+        console.error(e);
+      }
+      finally {
+        this.#state = 'destroyed';
+        this.#physicalConnection = null;
+        this.#duckDbInstance = null;
+      }
+    }
+    else {
+      return null;
+    }
+  }
+  
+  async destroy(){
+    if (this.#physicalConnection){
+      try {
+        await this.close();
+      }
+      catch(e){
+        console.error(e);
+      }
+    }
+    this.#state = 'destroyed';
+    this.#physicalConnection = null
+  }
+ 
   getState(){
     return this.#state;
   }
