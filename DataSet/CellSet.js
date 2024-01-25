@@ -485,7 +485,7 @@ class CellSet extends DataSetComponent {
             continue;
           }
           if (subqueryColumnNames[cellsAxisItemColumnName] === undefined) {
-            cellsAxisItemColumnName[cellsAxisItemColumnName] = cellsAxisItemColumnName;
+            subqueryColumnNames[cellsAxisItemColumnName] = cellsAxisItemColumnName;
           }
         }
         countStarCellsAxisItemCopy.columnName = CellSet.#countStarExpressionAlias;

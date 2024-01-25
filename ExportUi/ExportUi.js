@@ -210,10 +210,28 @@ async function executeExport(){
     var tmpFile = [crypto.randomUUID(), fileExtension].join('.');
     var copyStatement = getCopyToStatement(sql, tmpFile, copyStatementOptions);
     var datasource = queryModel.getDatasource();
-    var connection = datasource.createManagedConnection();
-    await connection.query(copyStatement);
-    data = await connection.copyFileToBuffer(tmpFile);
-    await connection.dropFile(fileName);
+    var connection, result;
+    try {
+      connection = datasource.createManagedConnection();
+      result = await connection.query(copyStatement);
+      data = await connection.copyFileToBuffer(tmpFile);
+    }
+    catch (e){
+      showErrorDialog(e);
+      return;
+    }
+    finally {
+      if (result){
+        await result.close();
+      }
+      if (data) {
+        await connection.dropFile(fileName);
+      }
+      if (connection){
+        connection.destroy()
+      }
+    }
+    
   }
   
   var destination;

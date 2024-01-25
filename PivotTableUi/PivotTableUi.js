@@ -788,6 +788,11 @@ class PivotTableUi {
     var tableHeaderDom = this.#getTableHeaderDom();
     var headerRows = tableHeaderDom.childNodes;
     var firstHeaderRow = headerRows.item(0);
+    
+    if (!firstHeaderRow) {
+      return;
+    }
+    
     var firstHeaderRowCells = firstHeaderRow.childNodes;
     var stufferCell = firstHeaderRowCells.item(firstHeaderRowCells.length - 1);
         

@@ -132,6 +132,7 @@
               id="exportResultShapeTable" 
               type="radio" 
               name="exportResultShape"
+              title="Check this to export results as a plain table"
             />
           </fieldset>
           <fieldset>
@@ -145,6 +146,7 @@
               type="radio" 
               name="exportDestination" 
               checked="true"
+              title="Check this to download the result as a file"
             />
             <label 
               for="exportDestinationClipboard" 
@@ -174,31 +176,101 @@
             <form>
               <label 
                 for="exportDelimitedCompression"
+                title="The algorithm used for compressing the query result. Compression typically results in smaller result files."
               >Compression</label>
-              <select id="exportDelimitedCompression">
-                <option selected="true">none</option>
-                <option>gzip</option>
-                <option>ztsd</option>
+              <select 
+                id="exportDelimitedCompression"
+                title="Use this to choose the algorithm used for compressing the query result."
+              >
+                <option 
+                  selected="true"
+                  title="Uncompressed - no compression will be applied"
+                  value="UNCOMPRESSED"
+                >uncompressed</option>
+                <option
+                  title="GZIP - applies gzip compression"
+                  value="GZIP"
+                >gzip</option>
+                <option
+                  title="ZTSD - applies ztsd compression"
+                  value="ZTSD"
+                >ztsd</option>
               </select>
-              <label for="exportDelimitedIncludeHeaders">Include Headers</label>
-              <input id="exportDelimitedIncludeHeaders" type="checkbox" checked="true"/>
+              <label 
+                title="Whether to include a line of column headers." 
+                for="exportDelimitedIncludeHeaders"
+              >Include Headers</label>
+              <input 
+                id="exportDelimitedIncludeHeaders" 
+                title="Check this to include a header line of column names." 
+                type="checkbox" 
+                checked="true"
+              />
               <fieldset>
                 <legend>Formatting</legend>
-                <label for="exportDelimitedDateFormat">Date Format</label>
-                <input id="exportDelimitedDateFormat" type="text" value="%x"/>
-                <label for="exportDelimitedTimestampFormat">Timestamp Format</label>
-                <input id="exportDelimitedTimestampFormat" type="text" value="%c"/>
-                <label for="exportDelimitedNullString">NULL-value string</label>
-                <input id="exportDelimitedNullString" type="text" value=""/>
+                <label 
+                  for="exportDelimitedDateFormat"
+                  title="The date format controls how date values are represented in the result."
+                >Date Format</label>
+                <input 
+                  id="exportDelimitedDateFormat" 
+                  title="Enter a valid DuckDB date format string."
+                  type="text" 
+                  value="%x"
+                />
+                <label 
+                  for="exportDelimitedTimestampFormat"
+                  title="The timestamp format controls how timestamp values are represented in the result."
+                >Timestamp Format</label>
+                <input 
+                  id="exportDelimitedTimestampFormat" 
+                  title="Enter a valid DuckDB timestamp format string."
+                  type="text" 
+                  value="%c"
+                />
+                <label 
+                  for="exportDelimitedNullString"
+                  title="The NULL-string controls how SQL NULL-values are rendered to the result"
+                >NULL-value string</label>
+                <input 
+                  id="exportDelimitedNullString" 
+                  title="Enter the string that should be written to the result to represent SQL NULL-values"
+                  type="text" 
+                  value=""
+                />
               </fieldset>
               <fieldset>
                 <legend>Delimiters</legend>
-                <label for="exportDelimitedColumnDelimiter">Column delimiter</label>
-                <input id="exportDelimitedColumnDelimiter" type="text" value=","/>
-                <label for="exportDelimitedQuote">Quote Character</label>
-                <input id="exportDelimitedQuote" type="text" value="&quot;"/>
-                <label for="exportDelimitedEscape">Escape Character</label>
-                <input id="exportDelimitedEscape" type="text" value="&quot;"/>
+                <label 
+                  for="exportDelimitedColumnDelimiter"
+                  title="The column delimiter is the character used to separate the values within a row in the result."
+                >Column delimiter</label>
+                <input 
+                  id="exportDelimitedColumnDelimiter" 
+                  type="text" 
+                  value=","
+                  title="Enter the character that is to be used as column delimiter."
+                />
+                <label 
+                  for="exportDelimitedQuote"
+                  title="The quote character is used to enclose column values in case the column value contains a delimiter character"
+                >Quote Character</label>
+                <input 
+                  id="exportDelimitedQuote" 
+                  type="text" 
+                  value="&quot;"
+                  title="Enter the character that is to be used as quote character."
+                />
+                <label 
+                  for="exportDelimitedEscape"
+                  title="The escape character is used to signal a literal occurrence of the quote character within a column value"
+                >Escape Character</label>
+                <input 
+                  id="exportDelimitedEscape" 
+                  type="text" 
+                  value="&quot;"
+                  title="Enter the character used to escape the quote character."
+                />
               </fieldset>
             </form>
           </div>
@@ -217,25 +289,65 @@
             <form>
               <label 
                 for="exportJsonCompression"
+                title="Use this to choose the algorithm used for compressing the query result."
               >Compression</label>
-              <select id="exportJsonCompression">
-                <option selected="true">none</option>
-                <option>gzip</option>
-                <option>ztsd</option>
+              <select 
+                id="exportJsonCompression"
+                title="Use this to choose the algorithm used for compressing the query result."
+              >
+                <option 
+                  selected="true"
+                  title="Uncompressed - no compression will be applied"
+                  value="UNCOMPRESSED"
+                >uncompressed</option>
+                <option
+                  title="GZIP - applies gzip compression"
+                  value="GZIP"
+                >gzip</option>
+                <option
+                  title="ZTSD - applies ztsd compression"
+                  value="ZTSD"
+                >ztsd</option>
               </select>
               <fieldset>
                 <legend>Formatting</legend>
-                <label for="exportJsonDateFormat">Date Format</label>
-                <input id="exportJsonDateFormat" value="%x"/>
-                <label for="exportJsonTimestampFormat">Timestamp Format</label>
-                <input id="exportJsonTimestampFormat" value="%c"/>
+                <label 
+                  for="exportJsonDateFormat"
+                  title="The date format controls how date values are represented in the result."
+                >Date Format</label>
+                <input 
+                  id="exportJsonDateFormat" 
+                  value="%x"
+                  title="Enter a valid DuckDB date format string."
+                />
+                <label 
+                  for="exportJsonTimestampFormat"
+                  title="The timestamp format controls how timestamp values are represented in the result."
+                >Timestamp Format</label>
+                <input 
+                  id="exportJsonTimestampFormat" 
+                  title="Enter a valid DuckDB timestamp format string."
+                  value="%c"
+                />
               </fieldset>
               <fieldset>
                 <legend>Delimiters</legend>
-                <label for="exportJsonRowDelimiter">Column delimiter</label>
-                <select id="exportJsonRowDelimiter">
-                  <option value="true">JSON Array</option>
-                  <option value="false">newline delimited</option>
+                <label 
+                  for="exportJsonRowDelimiter"
+                  title="This controls how rows are delimited in the JSON output"
+                >Row delimiter</label>
+                <select 
+                  id="exportJsonRowDelimiter"
+                  title="This controls how rows are delimited in the JSON output"
+                >
+                  <option 
+                    value="true"
+                    title="Write the rows as a JSON array"
+                  >JSON Array</option>
+                  <option 
+                    value="false"
+                    title="Separate individual rows with a newline character."
+                  >newline delimited</option>
                 </select>
               </fieldset>
             </form>
@@ -255,12 +367,29 @@
             <form>
               <label 
                 for="exportParquetCompression"
+                title="Use this to choose the algorithm used for compressing the query result."
               >Compression</label>
-              <select id="exportParquetCompression">
-                <option>none</option>
-                <option>gzip</option>
-                <option selected="true">snappy</option>
-                <option>ztsd</option>
+              <select 
+                id="exportParquetCompression"
+                title="Use this to choose the algorithm used for compressing the query result."
+              >
+                <option 
+                  selected="true"
+                  title="Uncompressed - no compression will be applied"
+                  value="UNCOMPRESSED"
+                >uncompressed</option>
+                <option
+                  title="GZIP - applies gzip compression"
+                  value="GZIP"
+                >gzip</option>
+                <option 
+                  selected="true"
+                  title="SNAPPY - applies snappy compression"
+                >snappy</option>
+                <option
+                  title="ZTSD - applies ztsd compression"
+                  value="ZTSD"
+                >ztsd</option>
               </select>
             </form>
           </div>
@@ -273,6 +402,16 @@
           >SQL</label>
           <input id="exportSql" name="exportFormat" type="radio"/>
           <div role="tabpanel">
+            <form>
+              <label>Keywords Case</label>
+              <select>
+                <option>Camelcase</option>
+                <option>Lowercase</option>
+                <option selected="true">Uppercase</option>
+              </select>
+              <label>Always Quote identifiers</label>
+              <input type="checkbox"/>
+            </form>
           </div>
         </div>
       </section>
@@ -284,7 +423,7 @@
         >Close</button>
         <button 
           id="exportDialogExecuteButton" 
-        >Go!</button>
+        >Export</button>
       </footer>
     </dialog>
     
