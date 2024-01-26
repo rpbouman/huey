@@ -89,7 +89,27 @@
       id="exportDialog" 
       popover="manual"
       aria-labelledby="uploadUiTitle"
+      aria-busy="false"
     >
+      <dialog role="progressbar">
+        <header>
+          <h3 role="status"></h3>
+        </header>
+        <section>
+          <div class="loader loader-medium">Exporting...</div>
+          <div class="timer">
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+          </div>
+        </section>
+        <footer>
+          <center>
+            <button id="cancelQueryButton">Cancel</button>
+          </center`>
+        </footer>
+      </dialog>      
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
         <form>

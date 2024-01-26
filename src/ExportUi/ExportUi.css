@@ -31,3 +31,21 @@ form > output {
   grid-row: auto;
   justify-self:start;
 }
+
+dialog#exportDialog > dialog[role=progressbar] {
+  z-index: 1;
+  width: 200px;
+}
+
+dialog#exportDialog > dialog[role=progressbar] > header > h3[role=status] {
+  font-size: smaller;
+}
+
+dialog#exportDialog[aria-busy=true] > dialog[role=progressbar] {
+  display: flex;
+  flex-direction: column;
+}
+
+dialog#exportDialog[aria-busy=false] > dialog[role=progressbar] {
+  display: none;
+}
