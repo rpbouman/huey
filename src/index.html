@@ -75,12 +75,12 @@
         <button 
           id="uploadDialogOkButton" 
           popovertarget="uploadUi" 
-          popovertargetaction="hide"
+          popovertargetaction="close"
         >Ok</button>
         <button 
           id="uploadDialogCancelButton" 
           popovertarget="uploadUi"  
-          popovertargetaction="hide"
+          popovertargetaction="close"
         >Cancel</button>
       </footer>
     </dialog>
@@ -695,10 +695,11 @@
 
     <dialog 
       id="aboutDialog"
+      aria-labelledby="aboutDialogTitle"      
       popover="auto"
     >
       <header>
-        <h3>Huey</h3>
+        <h3 id="aboutDialogTitle">About Huey...</h3>
       </header>
       <section>
         <p>
@@ -972,6 +973,7 @@
       
       await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
       const connection = await db.connect();
+            
       /*
       console.log(`connection: ${connection._conn}`);
       connection.query('with t as (select * from generate_series(1,10) ) select count(*) from t as t1, t as t2, t as t3, t as t4, t as t5, t as t6, t as t7, t as t8, t as t9, t as t10;')

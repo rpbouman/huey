@@ -18,15 +18,18 @@ class UploadUi {
     this.init();
   }
   
-  init(){
-    var dom = this.getDom();
-        
+  init(){        
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
-    }.bind(this));    
+      this.getDom().close();
+    }.bind(this));
+    
+    this.#getOkButton().addEventListener('click', function(){
+      this.getDom().close();
+    }.bind(this));
   }  
   
-  #cancelUploads(){
+  async #cancelUploads(){
     this.#cancelPendingUploads = true;
   }
     
@@ -96,7 +99,32 @@ class UploadUi {
     return uploadItem;
   }
   
- getRequiredDuckDbExtensions(files){
+  #createInstallExtensionItem(extensionName){
+    var extensionItemId = `duckdb_extension:${extensionName}`;
+    var uploadItem = createEl('details', {
+      id: extensionItemId
+    });
+    
+    var summary = createEl('summary', {
+    });
+    uploadItem.appendChild(summary);
+
+    var label = createEl('label', {
+      for: extensionItemId
+    }, `Extension: ${extensionName}`);
+    summary.appendChild(label);
+    var progressBar = createEl('progress', {
+      id: extensionItemId,
+      max: 100,
+      value: 10
+    })
+    summary.appendChild(progressBar);
+    var message = createEl('p');
+    uploadItem.appendChild(message);
+    return uploadItem;
+  }  
+  
+  getRequiredDuckDbExtensions(files){
     var requiredExtensions = []
     for (var i = 0; i < files.length; i++){
       var file = files[i];
@@ -121,15 +149,63 @@ class UploadUi {
     return requiredExtensions;
   }
   
-  async loadRequiredDuckDbExtensions(files){
-    var requiredDuckDbExtensions = this.getRequiredDuckDbExtensions(files);
-    var loadExtensionPromises = requiredDuckDbExtensions.map(ensureDuckDbExtensionLoadedAndInstalled);
-    var loadExtensionPromiseResults = await Promise.all(loadExtensionPromises);
-    var result = loadExtensionPromiseResults.reduce(function(acc, curr, index){
-      var extension = requiredDuckDbExtensions[index];
-      acc[extension] = curr;
-      return acc;
-    }, {});
+  loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
+    var extensionInstallationItems = requiredDuckDbExtensions.map(async function(extensionName){
+      var body = this.#getBody();
+      var installExtensionItem = this.#createInstallExtensionItem(extensionName);
+      body.appendChild(installExtensionItem);
+      
+      var progressbar = installExtensionItem.getElementsByTagName('progress').item(0);
+      var message = installExtensionItem.getElementsByTagName('p').item(0);
+      
+      var connection = hueyDb.connection;      
+      
+      message.innerHTML += 'Preparing extension check<br/>';
+      var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
+      var statement = await connection.prepare(sql);
+      progressbar.value = parseInt(progressbar.value, 10) + 20;
+      
+      message.innerHTML += `Checking extension ${extensionName}<br/>`;
+      var result = await statement.query(extensionName);
+      statement.close();
+      progressbar.value = parseInt(progressbar.value, 10) + 20;
+
+      if (result.numRows === 0) {
+        message.innerHTML += `Extension ${extensionName} not found<br/>`;
+        throw new Error(`Extension not found`);
+      }
+      else {
+        message.innerHTML += `Extension ${extensionName} exists<br/>`;
+      }
+      
+      var row = result.get(0);
+      if (row['installed']){
+        message.innerHTML += `Extension ${extensionName} already installed<br/>`;
+      }
+      else {
+        message.innerHTML += `Extension ${extensionName} not installed<br/>`;
+        
+        message.innerHTML += `Installing extension ${extensionName}<br/>`;
+        await connection.query(`INSTALL ${extensionName}`);
+        message.innerHTML += `Extension ${extensionName} installed<br/>`;
+        progressbar.value = parseInt(progressbar.value, 10) + 20;
+      }
+
+      if (row['loaded']){
+        message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
+      }
+      else {
+        message.innerHTML += `Extension ${extensionName} not loaded<br/>`;
+        
+        message.innerHTML += `Loading extension ${extensionName}<br/>`;
+        await connection.query(`LOAD ${extensionName}`);
+        message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
+        progressbar.value = parseInt(progressbar.value, 10) + 20;
+      }
+      progressbar.value = 100;
+      return true;
+    }.bind(this));
+    return extensionInstallationItems;
   }
   
   async uploadFiles(files){
@@ -141,18 +217,22 @@ class UploadUi {
     var header = this.#getHeader();
     header.innerHTML = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
 
+    dom.showModal();
+
     var body = this.#getBody();
     body.innerHTML = '';
     
-    //var loadExtensionsResult = await this.loadRequiredDuckDbExtensions(files);    
+    var requiredDuckDbExtensions = this.getRequiredDuckDbExtensions(files);
+    var loadExtensionsPromises = this.loadRequiredDuckDbExtensions(requiredDuckDbExtensions);
+    var loadExtensionsPromiseResults = await Promise.all(loadExtensionsPromises);
             
-    dom.showModal();
     this.#pendingUploads = [];
     for (var i = 0; i < numFiles; i++){
       var file = files[i];
       var uploadItem = this.#createUploadItem(file);
       body.appendChild(uploadItem);
-      this.#pendingUploads.push( this.#uploadFile(file, uploadItem) );
+      var uploadPromise = this.#uploadFile(file, uploadItem);
+      this.#pendingUploads.push( uploadPromise );
     }
     var uploadResults = await Promise.all(this.#pendingUploads);
     
@@ -166,7 +246,7 @@ class UploadUi {
         id: uploadItem.id + '_message'
       });
 
-      var uploadItem = body.childNodes.item(i);
+      var uploadItem = body.childNodes.item(i + requiredDuckDbExtensions.length);
       uploadItem.appendChild(message);
 
       if (uploadResult instanceof DuckDbDataSource) {
@@ -242,8 +322,10 @@ function initUploadUi(){
   
   byId("uploader")
   .addEventListener("change", async function(event){
-    var files = event.target.files;
-    uploadUi.uploadFiles(files);
+    var fileControl = event.target;
+    var files = fileControl.files;
+    await uploadUi.uploadFiles(files);
+    fileControl.value = '';
     return;  
   }, false);
 }

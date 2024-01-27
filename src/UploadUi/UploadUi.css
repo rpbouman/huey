@@ -33,3 +33,7 @@ dialog#uploadUi > section > details > p {
   max-height: 6em;
 }
 
+dialog#uploadUi[aria-busy=true] #uploadDialogOkButton {
+  pointer-events: none;
+  color: var( --huey-placeholder-color );
+}

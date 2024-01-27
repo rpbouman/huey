@@ -36,14 +36,14 @@ class DuckDbDataSource extends EventEmitter {
     'xlsx': {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'st_read',
-      extension: 'spatial'
+      duckdb_extension: 'spatial'
     },
     'duckdb': {
       datasourceType: DuckDbDataSource.types.DUCKDB
     },
     'sqlite': {
       datasourceType: DuckDbDataSource.types.SQLITE,
-      extension: 'sqlite'
+      duckdb_extension: 'sqlite'
     }
   };
   
