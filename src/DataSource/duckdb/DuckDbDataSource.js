@@ -309,17 +309,24 @@ class DuckDbDataSource extends EventEmitter {
     return qualifiedObjectName;
   }
   
-  getRelationExpression(alias){
+  getRelationExpression(alias, sqlOptions){    
+    sqlOptions = normalizeSqlOptions(sqlOptions);
+    var comma = getComma(sqlOptions.commaStyle);
+    
+    var identifierQuoter = function(identifier){
+      return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
+    }  
+    
     var sql = '';
     switch (this.getType()) {
       case DuckDbDataSource.types.FILES:
         var fileNames = this.#fileNames.map(function(fileName){
-          return getQuotedIdentifier(fileName);
+          return identifierQuoter(fileName);
         }.bind(this));
         
         var fileExtension = this.#fileType;
         var fileType = DuckDbDataSource.fileTypes[fileExtension];
-        sql = `${fileType.duckdb_reader}( [\n ${fileNames.join('\n,')}\n], filename = TRUE )`;
+        sql = `${fileType.duckdb_reader}( [\n ${fileNames.join(comma)}\n], filename = TRUE )`;
         
         break;
       case DuckDbDataSource.types.FILE:
@@ -358,14 +365,15 @@ class DuckDbDataSource extends EventEmitter {
     }
     
     if (alias) {
-      sql = `${sql} AS ${getQuotedIdentifier(alias)}`;      
+      sql = `${sql} AS ${identifierQuoter(alias)}`;      
     }
     return sql;
   }
   
-  getFromClauseSql(alias){
-    var sql = this.getRelationExpression(alias);
-    sql = `FROM ${sql}`;
+  getFromClauseSql(alias, sqlOptions){
+    sqlOptions = normalizeSqlOptions(sqlOptions);    
+    var sql = this.getRelationExpression(alias, sqlOptions);
+    sql = `${formatKeyword('from', sqlOptions.keywordLetterCase)} ${sql}`;
     return sql;
   }
   

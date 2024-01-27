@@ -112,24 +112,24 @@
       </dialog>      
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
-        <form>
+        <form id="exportGeneralSettings">
           <label 
             for="exportTitleTemplate"
-            label="The title template is used to generate a file name for downloads"
+            title="The title template is used to generate a file name for downloads"
           >Title template</label>
           <input 
             id="exportTitleTemplate"
-            label="The title template is used to generate a file name for downloads"
+            title="The title template is used to generate a file name for downloads"
             value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
           />
           <label 
             for="exportTitle"
-            label="The title generated from the template"
+            title="The title generated from the template"
           >Title</label>
           <output 
             id="exportTitle"
             for="exportTitleTemplate"
-            label="The title generated from the template"
+            title="The title generated from the template"
           ></output>
           <fieldset>
             <legend title="Control the shape of the exported dataset">Data Structure</legend>
@@ -156,7 +156,7 @@
             />
           </fieldset>
           <fieldset>
-            <legend title="Control where the results are exported to">Destination</legend>
+            <legend title="Control where the results are exported to">Export destination</legend>
             <label 
               for="exportDestinationFile" 
               title="Download the export data as a file so you can store it on your system."
@@ -193,7 +193,7 @@
           >Delimited text</label>
           <input id="exportDelimited" name="exportFormat" type="radio" checked="true"/>
           <div role="tabpanel">
-            <form>
+            <form id="exportDelimitedSettings">
               <label 
                 for="exportDelimitedCompression"
                 title="The algorithm used for compressing the query result. Compression typically results in smaller result files."
@@ -306,7 +306,7 @@
           >JSON</label>
           <input id="exportJson" name="exportFormat" type="radio"/>
           <div role="tabpanel">
-            <form>
+            <form id="exportJsonSettings">
               <label 
                 for="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
@@ -314,21 +314,7 @@
               <select 
                 id="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
-              >
-                <option 
-                  selected="true"
-                  title="Uncompressed - no compression will be applied"
-                  value="UNCOMPRESSED"
-                >uncompressed</option>
-                <option
-                  title="GZIP - applies gzip compression"
-                  value="GZIP"
-                >gzip</option>
-                <option
-                  title="ZTSD - applies ztsd compression"
-                  value="ZTSD"
-                >ztsd</option>
-              </select>
+              ></select>
               <fieldset>
                 <legend>Formatting</legend>
                 <label 
@@ -336,7 +322,8 @@
                   title="The date format controls how date values are represented in the result."
                 >Date Format</label>
                 <input 
-                  id="exportJsonDateFormat" 
+                  id="exportJsonDateFormat"
+                  type="text"
                   value="%x"
                   title="Enter a valid DuckDB date format string."
                 />
@@ -346,6 +333,7 @@
                 >Timestamp Format</label>
                 <input 
                   id="exportJsonTimestampFormat" 
+                  type="text"
                   title="Enter a valid DuckDB timestamp format string."
                   value="%c"
                 />
@@ -359,16 +347,7 @@
                 <select 
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
-                >
-                  <option 
-                    value="true"
-                    title="Write the rows as a JSON array"
-                  >JSON Array</option>
-                  <option 
-                    value="false"
-                    title="Separate individual rows with a newline character."
-                  >newline delimited</option>
-                </select>
+                ></select>
               </fieldset>
             </form>
           </div>
@@ -379,12 +358,12 @@
         <div>
           <label 
             role="tab" 
-            for="exportParquet" 
+            for="exportParquet"
             title="Use this tab to export data in Parquet format"
           >Parquet</label>
           <input id="exportParquet" name="exportFormat" type="radio"/>
           <div role="tabpanel">
-            <form>
+            <form id="exportParquetSettings">
               <label 
                 for="exportParquetCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
@@ -392,25 +371,7 @@
               <select 
                 id="exportParquetCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
-              >
-                <option 
-                  selected="true"
-                  title="Uncompressed - no compression will be applied"
-                  value="UNCOMPRESSED"
-                >uncompressed</option>
-                <option
-                  title="GZIP - applies gzip compression"
-                  value="GZIP"
-                >gzip</option>
-                <option 
-                  selected="true"
-                  title="SNAPPY - applies snappy compression"
-                >snappy</option>
-                <option
-                  title="ZTSD - applies ztsd compression"
-                  value="ZTSD"
-                >ztsd</option>
-              </select>
+              ></select>
             </form>
           </div>
         </div>
@@ -418,19 +379,56 @@
           <label 
             role="tab" 
             for="exportSql"
-            title="Use this tab to export a SQL statement that would produce the result data."
+            title="Use this tab to export a SQL query that would produce this result."
           >SQL</label>
           <input id="exportSql" name="exportFormat" type="radio"/>
           <div role="tabpanel">
-            <form>
-              <label>Keywords Case</label>
-              <select>
-                <option>Camelcase</option>
-                <option>Lowercase</option>
-                <option selected="true">Uppercase</option>
+            <form id="exportSqlSettings">
+              <label
+                for="exportSqlKeywordLettercase"
+                title="The lettercase for SQL keywords"
+              >Keywords Case</label>
+              <select 
+                title="The lettercase for SQL keywords"
+                id="exportSqlKeywordLettercase"
+              >
+                <option 
+                  title="Initial capital followed by lowercase" 
+                  value="initialCapital">Initial Capital</option>
+                <option 
+                  title="Lowercase" 
+                  value="lowerCase">Lower Case</option>
+                <option 
+                  title="Uppercase" 
+                  value="upperCase" 
+                  selected="true">Upper Case</option>
               </select>
-              <label>Always Quote identifiers</label>
-              <input type="checkbox"/>
+              <label 
+                for="exportSqlAlwaysQuoteIdentifiers"
+                title="Whether to always quote identifiers."
+              >Always Quote identifiers</label>
+              <input 
+                id="exportSqlAlwaysQuoteIdentifiers" 
+                title="Check this to force all identifiers to be quoted."
+                checked="true" 
+                type="checkbox"
+              />
+              <label
+                for="exportSqlCommaStyle"
+                title="How to render commas in the SQL output"
+              >Comma style</label>
+              <select 
+                title="Select the style for rendering commas in the SQL output"
+                id="exportSqlCommaStyle"
+              >
+                <option 
+                  value="spaceAfter">Space After</option>
+                <option 
+                  value="newlineAfter">Newline After</option>
+                <option 
+                  value="newlineBefore" 
+                  selected="true">Newline Before</option>
+              </select>
             </form>
           </div>
         </div>
@@ -583,30 +581,7 @@
               <input id="useLooseColumnTypeComparison" type="checkbox"/>
             </form>
           </div>
-        </div>
-        <!--
-          File settings
-        -->
-        <div>
-          <label 
-            role="tab"
-            for="fileSettingTab"
-          >
-            Files
-          </label>
-          <input id="fileSettingTab" type="radio" name="settingsTabs"/>
-          <div role="tabpanel">
-            <form id="fileSettings">
-              <label for="registeredFileTypes">File types</label>
-              <select id="registeredFileTypes">
-              </select>
-              <label for="defaultActionForFileType">File type default action</label>
-              <select id="defaultActionForFileType">
-              </select>
-            </form>
-          </div>
-        </div>
-        
+        </div>        
         <!--
           Locale Settings
         -->
@@ -676,23 +651,6 @@
         </div>
         
         <!--
-          Pivot Table Settings
-        -->
-        <div>
-          <label 
-            role="tab"
-            for="pivotTableSettingsTab"
-          >
-            Pivot Table
-          </label>
-          <input id="pivotTableSettingsTab" type="radio" name="settingsTabs"/>
-          <div role="tabpanel">
-            <form id="pivotTableSettings">
-            </form>
-          </div>
-        </div>
-
-        <!--
           Theme
         -->
         <div>
@@ -724,6 +682,9 @@
           popovertarget="settingsDialog"
           popovertargetaction="hide"
         >Ok</button>
+        <button 
+          id="settingsDialogResetButton"
+        >Reset All</button>
         <button 
           id="settingsDialogCancelButton"
           popovertarget="settingsDialog"
@@ -812,6 +773,7 @@
           for="exportButton" 
           class="button" 
           title="Export &amp; Download queries and/or result data..."
+          style="visibility: hidden"
         >
           <button 
             id="exportButton"
@@ -822,7 +784,8 @@
       </menu>
       <nav 
         role="tablist"
-        class="resizeHorizontal sidebar"
+        id="sidebar"
+        class="resizeHorizontal"
       >
         <!-- Datasources tab --> 
         <div 
@@ -994,8 +957,8 @@
 
     <script onload="resourceLoaded(this.src)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/+esm';
-
+      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev99.0/+esm';
+      
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 

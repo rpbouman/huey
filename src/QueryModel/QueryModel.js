@@ -298,21 +298,22 @@ class QueryAxisItem {
     return expression;
   }
 
-  static getSqlForQueryAxisItem(item, alias){
+  static getSqlForQueryAxisItem(item, alias, sqlOptions){
+    sqlOptions = normalizeSqlOptions(sqlOptions);
     var sqlExpression;
     if (item.aggregator) {
-      sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias);
+      sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
     }
     else
     if (item.derivation) {
-      sqlExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias);
+      sqlExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias, sqlOptions);
     }
     else {
       if (alias){
-        sqlExpression = getQualifiedIdentifier(alias, item.columnName);
+        sqlExpression = getQualifiedIdentifier(alias, item.columnName, sqlOptions);
       }
       else {
-        sqlExpression = getQuotedIdentifier(item.columnName);
+        sqlExpression = getIdentifier(item.columnName, sqlOptions.alwaysQuoteIdentifiers);
       }
     }    
     return sqlExpression;
@@ -892,4 +893,39 @@ class QueryModel extends EventEmitter {
 var queryModel;
 function initQueryModel(){
   queryModel = new QueryModel();
+  
+  queryModel.addEventListener('change', function(event){
+    var eventData = event.eventData;
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        var currentDatasourceCaption;
+        var datasource = eventData.propertiesChanged.datasource.newValue;
+        if (datasource) {
+          currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
+        }
+        else {
+          currentDatasourceCaption = '';
+        }
+        byId('currentDatasource').innerHTML = currentDatasourceCaption;
+      }
+    }
+    
+    var exportUiActive;
+    if (
+      queryModel.getColumnsAxis().getItems().length === 0 && 
+      queryModel.getRowsAxis().getItems().length === 0 &&
+      queryModel.getCellsAxis().getItems().length === 0 
+    ){
+      exportUiActive = false;
+    }
+    else {
+      exportUiActive = true;
+    }
+    var exportButton = byId('exportButton').parentNode;
+    exportButton.style.visibility = exportUiActive ? '' : 'hidden';
+    if (!exportUiActive){
+      byId('exportDialog').close();
+    }
+    
+  });
 }

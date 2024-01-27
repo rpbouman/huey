@@ -7,7 +7,7 @@ main.layout {
   gap: 0px;
 }
 
-nav.sidebar {
+nav#sidebar {
   width: 350px;
   height: calc(100vh - 40px);
   max-width: calc(100vw - 14px);
@@ -108,6 +108,9 @@ body:has( #autoRunQuery:checked ) > main > menu[role=toolbar] > label[for=runQue
   visibility: hidden;
 }
 
+menu[role=toolbar] > #currentDatasource:not( :empty )::before {
+  content: 'Datasource: '
+}
 menu[role=toolbar] > #currentDatasource {
   display: inline-block;
   padding: 8px;
@@ -117,6 +120,6 @@ menu[role=toolbar] > #currentDatasource {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc( 100% - 300px);
+  max-width: calc( 100% - 450px);
 }
 

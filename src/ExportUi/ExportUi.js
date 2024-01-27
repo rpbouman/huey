@@ -21,54 +21,6 @@ function downloadURL(data, fileName) {
   a.remove();
 };
 
-async function copyPivotStatementToClipboard(){
-  try {
-    var sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
-    await copyToClipboard(sql, 'text/plain');
-  }
-  catch (e){
-    showErrorDialog(e);
-  }
-}
-
-async function downloadPivotStatementToSqlFile(){
-  // todo: make the filename configurable through settings
-  // todo: generate a reasonable filename based on the query
-  var fileName = 'pivot.sql';
-  var sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
-  downloadBlob(sql, fileName, 'text/plain');
-}
-
-async function downloadQueryResultToCsvFile(){
-  // todo: generate a reasonable default filename based on the query
-  // todo: make the filename configurable through settings
-  // todo: make the default csv options configurable through settings
-  // todo: make the currenmt csv options configurable in the dialog
-  var fileName = 'huey-results.csv';
-  var sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
-  //see: https://github.com/holdenmatt/duckdb-wasm-kit/blob/main/src/files/exportFile.ts#L31-L49
-  await window.hueyDb.connection.query(`copy (${sql}) to \'${fileName}\' WITH (HEADER 1, DELIMITER \';\')`);
-  var buffer = await window.hueyDb.instance.copyFileToBuffer(fileName);
-  window.hueyDb.instance.dropFile(fileName);
-  var results = new TextDecoder('utf-8').decode(buffer);
-  downloadBlob(results, fileName, 'text/csv');
-}
-
-async function downloadQueryResultToParquetFile(){
-  // todo: generate a reasonable default filename based on the query
-  // todo: make the filename configurable through settings
-  // todo: make the default parquet options configurable through settings
-  // todo: make the currennt parquet options configurable in the dialog
-  var fileName = 'huey-results.parquet';
-  var sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
-  //see: https://github.com/holdenmatt/duckdb-wasm-kit/blob/main/src/files/exportFile.ts#L31-L49
-  await window.hueyDb.connection.query(`copy (${sql}) to \'${fileName}\' (FORMAT PARQUET, COMPRESSION GZIP)`);
-  var buffer = await window.hueyDb.instance.copyFileToBuffer(fileName);
-  window.hueyDb.instance.dropFile(fileName);
-  // see: https://github.com/holdenmatt/duckdb-wasm-kit/blob/main/src/files/parquet.ts
-  downloadBlob(buffer, fileName, 'application/vnd.apache.parquet');
-}
-
 function getCaptionForQueryAxis(axisId){
   var queryAxis = queryModel.getQueryAxis(axisId);
   var items = queryAxis.getItems();
@@ -126,6 +78,7 @@ function generateExportDialogTitle(){
 function updateExportDialog(){
   var title = generateExportDialogTitle();
   byId('exportTitle').innerText = title;
+  Settings.synchronize(byId('exportDialog'), {"_": settings.getSettings('exportUi')}, 'dialog');
 }
 
 async function executeExport(){
@@ -135,18 +88,7 @@ async function executeExport(){
   progressMessageElement.innerText = 'Preparing export...';
   try {
     var title = byId('exportTitle').innerText;
-    
-    var sql, structure;
-    if (byId('exportResultShapePivot').checked){
-      structure = 'pivot';
-      sql = getDuckDbPivotSqlStatementForQueryModel(queryModel);
-    }
-    else
-    if (byId('exportResultShapeTable').checked){
-      structure = 'table';
-      sql = getDuckDbTableSqlStatementForQueryModel(queryModel);
-    }
-      
+          
     var selectedTab = TabUi.getSelectedTab('#exportDialog');
     var tabName = selectedTab.getAttribute('for');
     
@@ -154,7 +96,7 @@ async function executeExport(){
         dateFormat, timestampFormat, nullValueString,
         columnDelimiter, quote, escape, rowDelimiter
     ;
-    var fileExtension, data, copyStatementOptions;
+    var fileExtension, data, copyStatementOptions, sqlOptions;
     switch (tabName) {
       case 'exportDelimited':
         columnDelimiter = byId(tabName + 'ColumnDelimiter').value;
@@ -166,7 +108,7 @@ async function executeExport(){
         timestampFormat = byId(tabName + 'TimestampFormat').value;
         compression = byId(tabName + 'Compression').value;
         copyStatementOptions = {
-          "FORMAT": 'csv',
+          "FORMAT": 'CSV',
           "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
           "NULL": `'${nullValueString.replace('\'', "''")}'`,
           "HEADER": includeHeaders ? 'TRUE' : 'FALSE',
@@ -174,8 +116,7 @@ async function executeExport(){
           "ESCAPE": `'${escape.replace('\'', "''")}'`,
           "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
           "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-          "COMPRESSION": `'${compression.replace('\'', "''")}'`,
-          "ESCAPE": `'${escape.replace('\'', "''")}'`,
+          "COMPRESSION": compression,
         };
         mimeType = 'text/csv';
         fileExtension = 'csv';
@@ -186,10 +127,10 @@ async function executeExport(){
         timestampFormat = byId(tabName + 'TimestampFormat').value;
         rowDelimiter = byId(tabName + 'RowDelimiter').value;
         copyStatementOptions = {
-          "FORMAT": 'json',
+          "FORMAT": 'JSON',
           "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
           "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-          "COMPRESSION": `'${compression.replace('\'', "''")}'`,
+          "COMPRESSION": compression,
           "ARRAY": rowDelimiter.toUpperCase()
         };
         mimeType = 'application/json';
@@ -198,19 +139,53 @@ async function executeExport(){
       case 'exportParquet':
         compression = byId(tabName + 'Compression').value;
         copyStatementOptions = {
-          "COMPRESSION": `'${compression.replace('\'', "''")}'`
+          "FORMAT": 'PARQUET',
+          "COMPRESSION": compression,
         };
         mimeType = 'application/vnd.apache.parquet';
         fileExtension = 'parquet';
         break;
       case 'exportSql':
+        sqlOptions = {};
         mimeType = 'text/plain';
-        data = sql;
-        fileExtension = 'sql';
+        var keywordLetterCase = byId(tabName + 'KeywordLettercase').value;
+        sqlOptions.keywordLetterCase = keywordLetterCase;
+        var alwaysQuoteIdentifiers = byId(tabName + 'AlwaysQuoteIdentifiers').checked;
+        sqlOptions.alwaysQuoteIdentifiers = alwaysQuoteIdentifiers;
+        var commaStyle = byId(tabName + 'CommaStyle').value;
+        sqlOptions.commaStyle = commaStyle;
+        fileExtension = 'sql';        
         break;
     }
 
-    if (compression !== 'UNCOMPRESSED'){
+    var sql, structure;
+    if (byId('exportResultShapePivot').checked){
+      structure = 'pivot';
+      sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
+    }
+    else
+    if (byId('exportResultShapeTable').checked){
+      structure = 'table';
+      sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
+    }
+    
+    if (sqlOptions) {
+      data = sql;
+    }
+
+    if (compression && compression !== 'UNCOMPRESSED'){
+      if (tabName !== 'exportParquet'){
+        switch (compression){
+          case 'GZIP':  
+            mimeType = 'application/gzip';
+            break;
+          case 'ZTSD':  
+            mimeType = 'application/ztsd';
+            break;
+          default:
+            mimeType = 'application/octet-stream';
+        }
+      }
       fileExtension += '.' + compression.toLowerCase();
     }
     
@@ -265,6 +240,9 @@ async function executeExport(){
         break;
     }
     progressMessageElement.innerText = `Success!`;
+    var exportSettings = settings.getSettings('exportUi');
+    Settings.synchronize(byId('exportDialog'), {"_": exportSettings}, 'settings');
+    settings.assignSettings('exportUi', exportSettings);
   }
   catch (e){
     progressMessageElement.innerText = `Error!`;

@@ -113,6 +113,7 @@ input:active {
   box-shadow: 0 0 3px var( --huey-dark-border-color );  
   outline-width: 0px;
   outline-color: var( --huey-dark-border-color );
+  color: var( --huey-foreground-color );
 }
 
 input[type=file]::file-selector-button {
@@ -145,6 +146,7 @@ dialog {
   border-color: var( --huey-dark-border-color );
   border-radius: 18px;
   padding: 15px;
+  color: var( --huey-foreground-color );
 }
 
 dialog:popover-open,
@@ -156,6 +158,7 @@ dialog[open] {
 /* this is used as dialog title section */
 dialog > header {
   flex-grow: 0;
+  color: var( --huey-foreground-color );
 }
 
 /* this is used as dialog contents section */
@@ -181,6 +184,7 @@ dialog > footer > button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var( --huey-foreground-color );
 }
 
 dialog h1:first-child,
@@ -214,6 +218,10 @@ form > label {
   justify-self: end;
 }
 
+label {
+  color: var( --huey-foreground-color );
+}
+
 form > label::after, form > fieldset > label::after {
   content: ":"
 }
@@ -242,8 +250,8 @@ menu[role=toolbar] > label > button {
   display: none;
 }
 
-menu[role=toolbar] > label:has( > button)::before,
-menu[role=toolbar] > label:has( > input[type=file])::before 
+menu[role=toolbar] > label:has( > button )::before,
+menu[role=toolbar] > label:has( > input[type=file] )::before 
 {  
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
@@ -252,8 +260,8 @@ menu[role=toolbar] > label:has( > input[type=file])::before
   margin: 4px 4px 0px 4px;
 }
 
-menu[role=toolbar] > label:hover:has( > button)::before,
-menu[role=toolbar] > label:hover:has( > input[type=file])::before {
+menu[role=toolbar] > label:hover:has( > button )::before,
+menu[role=toolbar] > label:hover:has( > input[type=file] )::before {
   color: var( --huey-icon-color-highlight );
 }
 

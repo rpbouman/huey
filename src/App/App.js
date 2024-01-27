@@ -40,15 +40,12 @@ function initDuckdbVersion(){
 
 async function analyzeDatasource(datasource){
   try {
-    byId('attributesTab').checked = true;
-    attributeUi.clear(true);
+    TabUi.setSelectedTab('#sidebar', '#attributesTab');
     clearSearch();
-    queryModel.clear();
     queryModel.setDatasource(datasource);
     byId('searchAttributeUi').style.display = '';
     byId('queryUi').style.display = '';
 
-    byId('currentDatasource').innerHTML = DataSourcesUi.getCaptionForDatasource(datasource);
   }
   catch (error) {
     attributeUi.clear(false);
@@ -85,12 +82,12 @@ function initExecuteQuery(){
 }
 
 function initApplication(){
+  initErrorDialog();
   initDuckdbVersion();
   initUploadUi();
-  initExportUi();
   initDataSourcesUi();
-  initErrorDialog();
   initQueryModel();
+  initExportUi();
   initAttributeUi();
   initSearch();
   initFilterUi();

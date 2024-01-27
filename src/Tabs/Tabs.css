@@ -17,6 +17,7 @@
   background-color: var( --huey-dark-background-color );
   white-space: nowrap;
   text-overflow: 'ellipsis';
+  color: var( --huey-foreground-color );
 }
   
 *[role=tablist]> *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > label[role=tab] {

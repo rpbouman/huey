@@ -4,7 +4,7 @@ class Settings extends EventEmitter {
   
   #id = undefined;
   
-  #settingsTemplate = {
+  static #settingsTemplate = {
     datasourceSettings: {
       useLooseColumnTypeComparison: false,
       looseColumnTypes: {
@@ -57,8 +57,88 @@ class Settings extends EventEmitter {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     },
+    sqlSettings: {
+      keywordLetterCase: 'upperCase',
+      alwaysQuoteIdentifiers: true,
+      commaStyle: 'newlineBefore'
+    },
     querySettings: {
       autoRunQuery: false
+    },
+    exportUi: {
+      exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',
+      // radio
+      exportResultShapePivot: true,
+      exportResultShapeTable: false,
+      // radio
+      exportDestinationFile: false,
+      exportDestinationClipboard: true,
+      // radio
+      exportDelimited: true,
+      exportJson: false,
+      exportParquet: false,
+      exportSql: false,
+      // options for delimited
+      exportDelimitedCompression: {
+        value: 'UNCOMPRESSED',
+        options: [
+          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
+          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
+          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
+        ]
+      },
+      exportDelimitedIncludeHeaders: true,
+      exportDelimitedDateFormat: '%x',
+      exportDelimitedTimestampFormat: '%c',
+      exportDelimitedNullString: '',
+      exportDelimitedColumnDelimiter: ',',
+      exportDelimitedQuote: '"',
+      exportDelimitedEscape: '"',
+      // options for json
+      exportJsonCompression: {
+        value: 'UNCOMPRESSED',
+        options: [
+          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
+          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
+          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
+        ]
+      },
+      exportJsonDateFormat: '%x',
+      exportJsonTimestampFormat: '%c',
+      // true for array, false for newline
+      exportJsonRowDelimiter: {
+        value: "true",
+        options: [
+          { "value": "false", label: "newline" },
+          { "value": "true", label: "array" }
+        ]
+      },
+      exportParquetCompression: {
+        value: 'SNAPPY',
+        options: [
+          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
+          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
+          { value: 'SNAPPY', label: 'snappy' , title: 'SNAPPY - applies snappy compression'},
+          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
+        ]
+      },
+      exportSqlKeywordLettercase: {
+        value: 'upperCase',
+        options: [
+          { value: 'initialCapital', label: 'Initial Capital', title: 'Initial capital followed by lowercase'},
+          { value: 'lowerCase', label: 'Lower Case', title: 'All lower case'},
+          { value: 'upperCase', label: 'Upper Capital', title: 'All upper case'}
+        ]
+      },
+      exportSqlAlwaysQuoteIdentifiers: true,
+      exportSqlCommaStyle: {
+        value: 'newlineBefore',
+        options: [
+          { value: 'spaceAfter', label: 'Space After' },
+          { value: 'newlineAfter', label: 'Newline After' },
+          { value: 'newlineBefore', label: 'Newline Before' }
+        ]
+      }
     },
     themeSettings: {
       themes: {
@@ -106,60 +186,6 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#FFD700", /* Gold */
-              "--huey-medium-background-color": "#2F3C4B", /* Deep Blue */
-              "--huey-dark-background-color": "#4B5320", /* Dark Olive Green */
-              "--huey-light-border-color": "#FFA500", /* Orange */
-              "--huey-dark-border-color": "#4B5968", /* Steel Blue */
-              "--huey-icon-color-subtle": "#556B2F", /* Dark Olive Green */
-              "--huey-icon-color": "#FFFFFF", /* White */
-              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
-            },
-            label: "Mandarin"
-          },
-          {
-            value: {
-              "--huey-text-font-family": "Verdana",
-              "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
-              "--huey-foreground-color": "#FFFFFF", /* White */
-              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#E6E6FA", /* Lavender */
-              "--huey-medium-background-color": "#8B4513", /* Saddle Brown */
-              "--huey-dark-background-color": "#3A3831", /* Dark Olive Green */
-              "--huey-light-border-color": "#CD853F", /* Peru */
-              "--huey-dark-border-color": "#524739", /* Dark Taupe */
-              "--huey-icon-color-subtle": "#9370DB", /* Medium Purple */
-              "--huey-icon-color": "#FFFFFF", /* White */
-              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
-            },
-            label: "Wood Duck"
-          },
-          {
-            value: {
-              "--huey-text-font-family": "Verdana",
-              "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
-              "--huey-foreground-color": "#FFFFFF", /* White */
-              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#FFE4C4", /* Bisque */
-              "--huey-medium-background-color": "#87CEEB", /* Sky Blue */
-              "--huey-dark-background-color": "#1F2224", /* Charcoal */
-              "--huey-light-border-color": "#4682B4", /* Steel Blue */
-              "--huey-dark-border-color": "#333B3F", /* Dark Slate Gray */
-              "--huey-icon-color-subtle": "#FFD700", /* Gold */
-              "--huey-icon-color": "#FFFFFF", /* White */
-              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
-            },
-            label: "Northern Pintail"
-          },
-          {
-            value: {
-              "--huey-text-font-family": "Verdana",
-              "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
-              "--huey-foreground-color": "#FFFFFF", /* White */
-              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
               "--huey-light-background-color": "#F5F5F5", /* White Smoke */
               "--huey-medium-background-color": "#D2B48C", /* Tan */
               "--huey-dark-background-color": "#008080", /* Teal */
@@ -196,12 +222,12 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "rgb(220, 220, 220)",
               "--huey-placeholder-color": "rgb(100, 100, 100)",
-              "--huey-light-background-color": "rgb(40, 40, 40)",
-              "--huey-medium-background-color": "rgb(30, 30, 30)",
-              "--huey-dark-background-color": "rgb(20, 20, 20)",
-              "--huey-light-border-color": "rgb(20, 20, 20)",
-              "--huey-dark-border-color": "rgb(40, 40, 40)",
-              "--huey-icon-color-subtle": "rgb(60, 60, 60)",
+              "--huey-light-background-color": "rgb(20, 20, 20)",
+              "--huey-medium-background-color": "rgb(70, 70, 70)",
+              "--huey-dark-background-color": "rgb(110 110, 110)",
+              "--huey-light-border-color": "rgb(50, 50, 50)",
+              "--huey-dark-border-color": "rgb(110, 110, 110)",
+              "--huey-icon-color-subtle": "rgb(150, 150, 150)",
               "--huey-icon-color": "rgb(220, 220, 220)",
               "--huey-icon-color-highlight": "rgb(255, 255, 255)"
             },
@@ -234,6 +260,10 @@ class Settings extends EventEmitter {
     this.#id = id;
     this.#loadFromLocalStorage();
     this.#initDialog();
+    
+    window.addEventListener('beforeunload', function(){
+      this.#storeToLocalStorage();
+    }.bind(this));
   }
   
   #getSettings(path){
@@ -301,9 +331,19 @@ class Settings extends EventEmitter {
       event.cancelBubble = true;
     }.bind(this));
 
+    byId('settingsDialogResetButton').addEventListener('click', function(event){
+      this.#resetSettings();
+    }.bind(this));
+
     byId('settingsButton').addEventListener('click', function(){
       this.#updateDialogFromSettings();
-    }.bind(this));
+    }.bind(this));    
+  }
+  
+  #resetSettings(){
+    this.#settings = Settings.#settingsTemplate;
+    this.#storeToLocalStorage();
+    this.#updateDialogFromSettings();
   }
   
   #updateSettingsFromDialog(){
@@ -317,6 +357,14 @@ class Settings extends EventEmitter {
   #synchronize(settingsOrDialog){
     var dialog = this.#getDialog();
     var settings = this.#settings;
+    Settings.synchronize(dialog, settings, settingsOrDialog);
+    if (settingsOrDialog === 'settings') {
+      var settingsCopy = Object.assign({}, settings);
+      this.#examineChangesAndSendEvent(settingsCopy);
+    }
+  }
+  
+  static synchronize(dialog, settings, settingsOrDialog){
     var settingsCopy = Object.assign({}, settings);
     for (var sectionName in settings) {
       var section = settings[sectionName];
@@ -331,18 +379,15 @@ class Settings extends EventEmitter {
         }
         switch (control.nodeName){
           case 'INPUT':
-            this.#synchronizeInput(settingsOrDialog, section, property, control);
+            Settings.#synchronizeInput(settingsOrDialog, section, property, control);
             break;
           case 'SELECT':
-            this.#synchronizeSelect(settingsOrDialog, section, property, control);
+            Settings.#synchronizeSelect(settingsOrDialog, section, property, control);
             break;
           default:
             break;
         }
       }
-    }
-    if (settingsOrDialog === 'settings') {
-      this.#examineChangesAndSendEvent(settingsCopy);
     }
   }
   
@@ -354,10 +399,11 @@ class Settings extends EventEmitter {
     this.fireEvent('change', this);
   }
   
-  #synchronizeInput(settingsOrDialog, settings, property, control){
+  static #synchronizeInput(settingsOrDialog, settings, property, control){
     var valueProperty = 'value';
     var defaultValueGetter, defaultValueSetter;
     switch (control.type) {
+      case 'radio':
       case 'checkbox':
         valueProperty = 'checked';
         break;
@@ -409,7 +455,7 @@ class Settings extends EventEmitter {
     }
   }
 
-  #synchronizeSelect(settingsOrDialog, settings, property, control){
+  static #synchronizeSelect(settingsOrDialog, settings, property, control){
     switch (settingsOrDialog) {
       case 'settings':
         var optionsFromSettings = [];
@@ -451,8 +497,10 @@ class Settings extends EventEmitter {
           var optionFromSettings = optionsFromSettings[i];
           var value = optionFromSettings.value;
           var label = optionFromSettings.label || value;
+          var title = optionFromSettings.title || label;
           var option = createEl('option', {
-            label: label
+            label: label,
+            title: title
           }, label);
           
           if (valueSetter) {
@@ -543,7 +591,7 @@ class Settings extends EventEmitter {
   }
   
   #loadFromLocalStorage(){
-    var settingsTemplate = this.#settingsTemplate;
+    var settingsTemplate = Settings.#settingsTemplate;
     var storedSettingsJSON = localStorage.getItem(Settings.localStorageKey);
     var storedSettings = JSON.parse(storedSettingsJSON);
     var settings = this.#updateDataFromTemplate(storedSettings, settingsTemplate);

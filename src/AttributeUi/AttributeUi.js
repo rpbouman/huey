@@ -555,12 +555,13 @@ class AttributeUi {
     if (eventData.propertiesChanged) {
       if (eventData.propertiesChanged.datasource) {
         if (eventData.propertiesChanged.datasource.newValue) {
+          this.clear(true);
           var datasource = eventData.propertiesChanged.datasource.newValue;
           var columnMetadata = await datasource.getColumnMetadata();
           this.render(columnMetadata);
         }
         else {
-          this.clear(false  );
+          this.clear(false);
         }
       }
     }

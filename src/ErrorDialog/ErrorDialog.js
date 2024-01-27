@@ -1,8 +1,9 @@
 function showErrorDialog(config){
   if (config instanceof Error){
+    console.error(config);
     config = {
       title: config.message,
-      description: config.stack
+      description: `<pre>${config.stack}</pre>`
     };
   }
   

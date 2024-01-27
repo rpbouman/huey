@@ -96,47 +96,99 @@ var dataTypes = {
   }
 };
 
+function identifierRequiresQuoting(identifier){
+  return /[\s"]/.test(identifier);
+}
+
+function quoteIdentifierWhenRequired(identifier){
+  if (identifier.startsWith('"') && identifier.endsWith('"')) {
+    return identifier;
+  }
+  else 
+  if (identifierRequiresQuoting(identifier)) {
+    return getQuotedIdentifier(identifier);
+  }
+  return identifier;
+}
+
 function getQuotedIdentifier(identifier){
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
+function getIdentifier(identifier, quoteAlways){
+  if (quoteAlways || identifierRequiresQuoting(identifier)){
+    return getQuotedIdentifier(identifier);
+  } 
+  return identifier;
+}
+
+function formatKeyword(keyword, letterCase){
+  switch(letterCase){
+    case 'initialCapital':
+      return keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
+    case 'lowerCase':
+      return keyword.toLowerCase();
+    case 'upperCase':
+      return keyword.toUpperCase();
+  }
+}
+
 function getQualifiedIdentifier(){
+  var sqlOptions;
   switch (arguments.length) {
     case 0:
       throw new Error(`Invalid number of arguments.`);
     case 1:
+      sqlOptions = normalizeSqlOptions(sqlOptions);
       var arg = arguments[0];
-      switch (typeof arg) {
-        case 'string':
-          return getQualifiedIdentifier([arg]);
-        case 'object':
-          if (arg instanceof Array) {
-            if (arg.length) {
-              return arg
-              .filter(function(element){
-                return String(element) === element;
-              })
-              .map(function(element){
-                if (!element.startsWith('"') && !element.endsWith('"')){
-                  return getQuotedIdentifier(element);
-                }
-                return element;
-              })
-              .join('.');
-            }
-            else {
-              return undefined;
-            }
+      return getQualifiedIdentifier(arg, sqlOptions);
+      break;
+    case 2:
+      switch (typeof arguments[1]) {
+        case 'object':  //2nd argument is sqlOptions
+          sqlOptions = normalizeSqlOptions(sqlOptions);
+          switch (typeof arguments[0]) {
+            case 'string':
+              return getQualifiedIdentifier([arguments[0]], sqlOptions);
+              break;
+            case 'object':
+              if (arguments[0] instanceof Array ) {
+                function identifierQuoter (identifier){
+                  return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
+                };
+                
+                return arguments[0]
+                .map(identifierQuoter)
+                .join('.')
+                ;
+              }
+            default:
+              throw new Error(`Invalid argument`);
           }
+          break;
+        case 'string':
+          return getQualifiedIdentifier([arguments[0], arguments[1]]);
+          break;
+        default:
+          throw new Error(`Invalid argument type ${typeof arguments[1]}`);
       }
       break;
     default:
+      var n = arguments.length;
+      var lastArgument = arguments[n - 1];
+      var sqlOptions;
+      if (typeof lastArgument === 'object') {
+        sqlOptions = lastArgument;
+        n -= 1;
+      }
+      sqlOptions = normalizeSqlOptions(sqlOptions);
+      
       var args = [];
-      for (var i = 0; i < arguments.length; i++){
+      for (var i = 0; i < n; i++){
         var identifier = arguments[i];
         args.push(identifier);
       }
-      return getQualifiedIdentifier(args);
+      return getQualifiedIdentifier(args, sqlOptions);
   }
   throw new Error(`Invalid arguments`);
 }
@@ -166,152 +218,6 @@ async function ensureDuckDbExtensionLoadedAndInstalled(extensionName){
   return true;
 }
 
-
-/**
-
-This is what we'd like to return here:
-
-with 
-datasource as (
-  select *
-  from read_parquet('C:\roland\projects\QuaQuery\files\poplegales2017-2021.parquet')
-)
-,columns_axis as (
-  SELECT    DISTINCT "ANNEE_RP"
-  FROM      data
-  ORDER BY  "ANNEE_RP" ASC
-)
-,rows_axis as (
-  SELECT    DISTINCT "CODDEP"
-  ,         "CODGEO"
-  FROM      data
-  ORDER BY  "CODDEP" ASC
-  ,         "CODGEO" ASC
-)
-,cells as (
-  select     {"ANNEE_RP": columns_axis."ANNEE_RP"} as column_tuple
-  ,          {"CODDEP": rows_axis."CODDEP", "CODGEO": rows_axis."CODGEO"} as row_tuple
-  ,          PMUN 
-  from       columns_axis
-  cross join rows_axis
-  left join  data
-  on         columns_axis."ANNEE_RP" = data."ANNEE_RP"
-  and        rows_axis."CODDEP"      = data."CODDEP"
-)
-pivot cells 
-on column_tuple
-using 
-  sum(PMUN)         as "PMUN sum"
-, count(PMUN)       as "PMIN count"
-group by row_tuple
-
-
-*/
-
-function getSqlFragmentsForTupleAxis(queryModel, axisId, aliasForMapping){
-  var queryAxis = queryModel.getQueryAxis(axisId);
-  var queryAxisItems = queryAxis.getItems();
-  if (queryAxisItems.length === 0) {
-    return undefined;
-  }
-  var selectStatement = TupleSet.getSqlSelectStatement(queryModel, axisId);
-  var cteName = axisId;
-  var cte = `${getQuotedIdentifier(cteName)} AS (\n${selectStatement}\n)`;
-  var joinConditions = {};
-  var tupleMembers = queryAxisItems.map(function(queryAxisItem){
-    var queryAxisItemCaption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
-    joinConditions[getQualifiedIdentifier(cteName, queryAxisItemCaption)] = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, aliasForMapping);
-    return `${getQuotedIdentifier(queryAxisItemCaption)}: ${getQualifiedIdentifier(axisId, queryAxisItemCaption)}`;
-  });
-  var tupleName = `${axisId}_tuple`;
-  var tupleDefinition = `{${tupleMembers.join('\n,')}} AS ${getQuotedIdentifier(tupleName)}`;
-  return {
-    cte: cte, 
-    cteName: cteName,
-    tupleName: tupleName,
-    tupleDefinition: tupleDefinition,
-    joinConditions: joinConditions
-  }
-}
-
-function getDuckDbPivotSqlStatementForQueryModel(queryModel){
-  var aliasForCells = 'datasource';
-  var datasource = queryModel.getDatasource();
-  
-  var columnsAxisFragments = getSqlFragmentsForTupleAxis(queryModel, QueryModel.AXIS_COLUMNS, aliasForCells);
-
-  var rowsAxisFragments = getSqlFragmentsForTupleAxis(queryModel, QueryModel.AXIS_ROWS, aliasForCells);
-
-  var cellsAxis = queryModel.getCellsAxis();
-  var cellsAxisItems = cellsAxis.getItems();
-  var cellsAxisColumnNames = [];
-  var cellsAxisAggregateExpressions = [];
-  cellsAxisItems.forEach(function(cellsAxisItem){
-    var cellsAxisItemCaption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
-    var cellsAxisExpression;
-
-    var cellsAxisItemExpression;
-    var cellsAxisItemColumnName = cellsAxisItem.columnName;
-    if (cellsAxisItemColumnName === '*' && cellsAxisItem.aggregator === 'count') {
-      // count(*) is special, we need to count an actual column, not *
-      for (var joinCol in columnsAxisFragments.joinConditions){
-        cellsAxisItemExpression = columnsAxisFragments.joinConditions[joinCol];
-        break;
-      }
-      var aliasForStar = getQuotedIdentifier('*');
-      cellsAxisItemExpression = `${cellsAxisItemExpression} AS ${aliasForStar}`;
-      cellsAxisExpression = `COUNT( ${aliasForStar} )`;
-    }
-    else{
-      cellsAxisExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
-      cellsAxisItemExpression = getQualifiedIdentifier(aliasForCells, cellsAxisItemColumnName);
-    }
-    cellsAxisColumnNames.push(cellsAxisItemExpression);
-    cellsAxisAggregateExpressions.push(`${cellsAxisExpression} AS ${getQuotedIdentifier(cellsAxisItemCaption)}`);
-  });
-  
-  var cellsSelectList = [].concat([
-    columnsAxisFragments.tupleDefinition,
-    rowsAxisFragments.tupleDefinition,
-  ], cellsAxisColumnNames);
-  
-  var columnsJoinConditions = Object.keys(columnsAxisFragments.joinConditions).map(function(tupleExpression){
-    var mappedExpression = columnsAxisFragments.joinConditions[tupleExpression];
-    return `${tupleExpression} = ${mappedExpression}`;
-  });
-  var rowsJoinConditions = Object.keys(rowsAxisFragments.joinConditions).map(function(tupleExpression){
-    var mappedExpression = rowsAxisFragments.joinConditions[tupleExpression];
-    return `${tupleExpression} = ${mappedExpression}`;
-  });
-  var joinConditions = [].concat(columnsJoinConditions, rowsJoinConditions);
-  
-  var cellsCteName = 'cells';
-  var cellsCte = [
-    `SELECT ${cellsSelectList.join('\n,')}`,
-    `FROM ${getQuotedIdentifier(columnsAxisFragments.cteName)}`,
-    `CROSS JOIN ${getQuotedIdentifier(rowsAxisFragments.cteName)}`,
-    `LEFT JOIN ${datasource.getRelationExpression(aliasForCells)}`,
-    `ON ${joinConditions.join('\nAND ')}`
-  ].join('\n');
-  cellsCte = `${getQuotedIdentifier(cellsCteName)} AS (\n${cellsCte}\n)`
-  
-  var pivotStatement = [
-    `PIVOT ${getQuotedIdentifier(cellsCteName)}`,
-    `ON ${getQuotedIdentifier(columnsAxisFragments.tupleName)}`,
-    `USING ${cellsAxisAggregateExpressions.join('\n')}`,
-    `GROUP BY ${getQuotedIdentifier(rowsAxisFragments.tupleName)}`,
-    `ORDER BY ${getQuotedIdentifier(rowsAxisFragments.tupleName)}`
-  ].join('\n');
-  
-  var sql = [
-    `WITH ${columnsAxisFragments.cte}`,
-    `,${rowsAxisFragments.cte}`,
-    `,${cellsCte}`,
-    pivotStatement
-  ].join('\n');
-  return sql;
-}
-
 function getCopyToStatement(selectStatement, fileName, options){
   var optionsString = Object
   .keys(options)
@@ -332,13 +238,41 @@ function getCopyToStatement(selectStatement, fileName, options){
 function getSqlHeader(){
   return [
     `/*********************************`,
-    `* DuckDB query generated ${new Date(Date.now())} by Huey`,
+    `* DuckDB query generated by Huey`,
+    `* ${new Date(Date.now())}`,
     `* https://github.com/rpbouman/huey`,
     `**********************************/`
   ].join('\n');
 }
 
-function getDuckDbTableSqlStatementForQueryModel(queryModel){
+function getComma(commaStyle) {
+  var prefix = '', postfix = ''
+  switch(commaStyle){
+    case 'spaceAfter':
+      postfix = ' ';
+      break;
+    case 'newlineAfter':
+      postfix = '\n';
+      break;
+    case 'newlineBefore':
+      prefix = '\n';
+    default:
+  }
+  return `${prefix},${postfix}`;
+}
+
+function normalizeSqlOptions(sqlOptions){
+  var defaultSqlSettings = settings.getSettings('sqlSettings');
+  return Object.assign({}, defaultSqlSettings, sqlOptions);
+}
+
+function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
+  sqlOptions = normalizeSqlOptions(sqlOptions);
+  var comma = getComma(sqlOptions.commaStyle);
+  function keywordFormatter(keyword){
+    return formatKeyword(keyword, sqlOptions.keywordLetterCase);
+  }
+
   var datasource = queryModel.getDatasource();
 
   var rowsAxisItems = queryModel.getRowsAxis().getItems();
@@ -350,7 +284,7 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel){
   for (var i = 0; i < queryAxisItems.length; i++){
     var queryAxisItem = queryAxisItems[i];
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, undefined, sqlOptions);
     selectList[caption] = sqlExpression;
     
     if (i < rowsAxisItems.length + columnsAxisItems.length) {
@@ -358,31 +292,46 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel){
       orderBy.push(sqlExpression);
     }
   }
+    
   var selectList = Object.keys(selectList).map(function(caption){
     var sqlExpression = selectList[caption];
-    return `${sqlExpression} AS ${getQuotedIdentifier(caption)}`;
-  })
+    var asKeyword = keywordFormatter('as');
+    var columnAlias = getIdentifier(caption, sqlOptions.alwaysQuoteIdentifiers);
+    return `${sqlExpression} ${asKeyword} ${columnAlias}`;
+  });
     
   var sql =  [
     getSqlHeader(),
-    `SELECT ${selectList.join('\n, ')}`,
-    datasource.getFromClauseSql(),
+    `${keywordFormatter('select')} ${selectList.join(comma)}`,
+    datasource.getFromClauseSql(undefined, sqlOptions),
   ];
   var filterSql = queryModel.getFilterConditionSql();
   if (filterSql) {
-    sql.push('WHERE ${filterSql}');
+    sql.push(`${keywordFormatter('where')} ${filterSql}`);
   }
+  var byKeyword = keywordFormatter('by');
   if (groupBy.length) {
-    sql.push(`GROUP BY ${groupBy.join('\n, ')}`);
+    sql.push(`${keywordFormatter('group')} ${byKeyword} ${groupBy.join(comma)}`);
   }
   if (orderBy.length) {
-    sql.push(`ORDER BY ${orderBy.join('\n, ')}`);
+    sql.push(`${keywordFormatter('order')} ${byKeyword} ${orderBy.join(comma)}`);
   }
   sql = sql.join('\n');
   return sql;
 }
 
-function getDuckDbPivotSqlStatementForQueryModel(queryModel){
+function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
+  sqlOptions = normalizeSqlOptions(sqlOptions);  
+  var comma = getComma(sqlOptions.commaStyle);
+  var identifierQuoter = function(identifier){
+    return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
+  }  
+  function keywordFormatter(keyword){
+    return formatKeyword(keyword, sqlOptions.keywordLetterCase);
+  }
+  
+  var asKeyword = keywordFormatter('as');
+  
   var columnsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_COLUMNS);
   if (columnsExpressions === undefined) {
     columnsExpressions = {"columns":  `''`};
@@ -400,7 +349,7 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   var aggregateExpressions = {};
   
   if (cellsAxisItems.length === 0){
-    aggregateExpressions[' '] = 'ANY_VALUE( NULL )';
+    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( keywordFormatter('null') )`;
   }
   else {
     cellsAxisItems.forEach(function(cellsAxisItem){
@@ -420,37 +369,45 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel){
   var columns = [].concat(
     Object.keys(columnsExpressions).map(function(expressionId){
       var expression = columnsExpressions[expressionId];
-      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
     }),
     Object.keys(rowsExpressions).map(function(expressionId){
       var expression = rowsExpressions[expressionId];
-      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
     }),
     Object.keys(cellColumnExpressions).map(function(expressionId){
       var expression = cellColumnExpressions[expressionId];
-      return `${expression} AS ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
     })
   );
   
   var aggregates = Object.keys(aggregateExpressions).map(function(expressionId){
     var aggregateExpression = aggregateExpressions[expressionId];
-    return `${aggregateExpression} AS ${getQuotedIdentifier(expressionId)}`;
+    return `${aggregateExpression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
   });
 
   var datasource = queryModel.getDatasource();
-  
-  var cteName = 'data';
+    
+  var cteName = identifierQuoter('data');
   var sql = [
     getSqlHeader(),
-    `WITH ${cteName} AS (`,
-    `SELECT ${columns.join('\n,')}`,
-    `${datasource.getFromClauseSql()}`,
+    `${keywordFormatter('with')} ${cteName} ${asKeyword} (`,
+    `${keywordFormatter('select')} ${columns.join(comma)}`,
+    `${datasource.getFromClauseSql(undefined, sqlOptions)}`
+  ];
+
+  var filterSql = queryModel.getFilterConditionSql();
+  if (filterSql) {
+    sql.push(`${formatKeyword('where', sqlOptions.keywordLetterCase)} ${filterSql}`);
+  }
+  
+  sql = [].concat(sql, [
     `)`,
-    `PIVOT ${cteName}`,
-    `ON ${Object.keys(columnsExpressions).map(getQuotedIdentifier)}`,
-    `USING ${aggregates.join('\n,')}`,
-    `GROUP BY ${Object.keys(rowsExpressions).map(getQuotedIdentifier)}`,
-    `ORDER BY ${Object.keys(rowsExpressions).map(getQuotedIdentifier)}`
-  ].join('\n');
+    `${keywordFormatter('pivot')} ${cteName}`,
+    `${keywordFormatter('on')} ${Object.keys(columnsExpressions).map(identifierQuoter).join(comma)}`,
+    `${keywordFormatter('using')} ${aggregates.join(comma)}`,
+    `${keywordFormatter('group')} ${keywordFormatter('by')} ${Object.keys(rowsExpressions).map(identifierQuoter).join(comma)}`,
+    `${keywordFormatter('order')} ${keywordFormatter('by')} ${Object.keys(rowsExpressions).map(identifierQuoter).join(comma)}`
+  ]).join('\n');
   return sql;
 }

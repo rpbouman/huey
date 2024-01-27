@@ -17,15 +17,6 @@ form > fieldset {
   grid-column: span 1;
 }
 
-
-menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
-  float: right;
-}
-
-menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::before {
-  content: "\ea96";
-}
-
 form > output {
   grid-column: controls;
   grid-row: auto;
@@ -49,3 +40,23 @@ dialog#exportDialog[aria-busy=true] > dialog[role=progressbar] {
 dialog#exportDialog[aria-busy=false] > dialog[role=progressbar] {
   display: none;
 }
+
+menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
+  float: right;
+}
+
+menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::before {
+  content: "\ea96";
+}
+
+dialog#exportDialog #exportDelimitedDateFormat,
+dialog#exportDialog #exportDelimitedTimestampFormat,
+dialog#exportDialog #exportDelimitedNullString,
+dialog#exportDialog #exportDelimitedColumnDelimiter,
+dialog#exportDialog #exportDelimitedQuote,
+dialog#exportDialog #exportDelimitedEscape,
+dialog#exportDialog #exportJsonDateFormat,
+dialog#exportDialog #exportJsonTimestampFormat {
+  font-family: var( --huey-mono-font-family );
+}
+
