@@ -274,7 +274,7 @@ class AttributeUi {
 
     var axisButton = createEl(createInput ? 'label' : 'span', {
       'data-axis': axisId,
-      "class": ['button', 'attributeUiAxisButton']
+      "class": 'attributeUiAxisButton'
     });
     
     if (!createInput){

@@ -87,7 +87,6 @@ class UploadUi {
     uploadItem.appendChild(summary);
 
     var label = createEl('label', {
-      for: fileName
     }, fileName);
     summary.appendChild(label);
     var progressBar = createEl('progress', {

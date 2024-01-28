@@ -77,7 +77,7 @@ class DataSourcesUi {
   
   #renderDatasourceActionButton(config){
     var actionButton = createEl('label', {
-      "class": 'button' + (config.className ? ' ' + (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
+      "class": (config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
       "for": config.id,
       title: config.title
     });

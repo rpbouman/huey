@@ -92,12 +92,33 @@
   content: '\fb1b';
 }
 
-#datasourcesUi details > summary > label.button.analyzeActionButton::before {
+#datasourcesUi details > summary > label.analyzeActionButton::before {
   /* table */
   content: '\eba1';
 }
 
-#datasourcesUi details > summary > label.button.removeActionButton::before {
+#datasourcesUi details > summary > label.removeActionButton::before {
   /* trash */
   content: '\eb41';
+}
+
+#datasourcesUi details > summary > label:has( > button ) 
+{
+  display: block;
+  float: inline-end;
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+
+#datasourcesUi details > summary > label:has( > button):hover {
+  color: var( --huey-icon-color-highlight );
+}
+
+
+#datasourcesUi details > summary > label > button {
+  display: none;
+  appearance: none;
 }

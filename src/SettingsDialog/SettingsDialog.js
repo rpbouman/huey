@@ -225,7 +225,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(80, 80, 80)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
               "--huey-dark-background-color": "rgb(110 110, 110)",
-              "--huey-light-border-color": "rgb(50, 50, 50)",
+              "--huey-light-border-color": "rgb(80, 80, 80)",
               "--huey-dark-border-color": "rgb(110, 110, 110)",
               "--huey-icon-color-subtle": "rgb(150, 150, 150)",
               "--huey-icon-color": "rgb(220, 220, 220)",
