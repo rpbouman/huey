@@ -53,7 +53,8 @@ class FilterDialog {
     // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
     this.#getValuePicklist().addEventListener('change', this.#handleValuePicklistChange.bind(this));
     
-    //this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
+    this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
+    this.#getToFilterValuesList().addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
     
     // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
     // this handler ensures the scrolbar moves both lists.
@@ -91,6 +92,19 @@ class FilterDialog {
     }, this, this.#searchAutoQueryTimeout);
   }
   
+  #handleFilterValuesListChange(event){
+    if (event.target.selectedOptions.length){
+      this.#getValuePicklist().selectedIndex = -1;
+      this.#getToFilterValuesList().selectedIndex = -1;
+    }
+  }
+  #handleToFilterValuesListChange(){
+    if (event.target.selectedOptions.length){
+      this.#getValuePicklist().selectedIndex = -1;
+      this.#getFilterValuesList().selectedIndex = -1;
+    }
+  }
+  
   #sortValues(values){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
@@ -112,6 +126,29 @@ class FilterDialog {
     return values.sort();
   }
   
+  #sortValueLists(valuesList, toValuesList){
+    var sortedValuesList = {}, sortedToValuesList, toKeys;
+    var keys = Object.keys(valuesList);
+    var sortedKeys = this.#sortValues([].concat(keys));
+    if (toValuesList) {
+      sortedToValuesList = {};
+      toKeys = Object.keys(toValuesList);
+    }
+    
+    sortedKeys.forEach(function(key){
+      sortedValuesList[key] = valuesList[key];
+      if (toValuesList) {
+        var toKey = toKeys[keys.indexOf(key)];
+        sortedToValuesList[toKey] = toValuesList[toKey];
+      }
+    });
+    
+    return {
+      valuesList: sortedValuesList, 
+      toValuesList: sortedToValuesList
+    };
+  }
+  
   #extractOptionsFromSelectList(selectList){
     var optionObjects = {};
     var options = selectList.options;
@@ -126,8 +163,10 @@ class FilterDialog {
   }
   
   #renderOptionsToSelectList(options, selectList){
+    if (options === undefined) {
+      return;
+    }
     var values = Object.keys(options);
-    values = this.#sortValues(values);
    
     for (var i = 0; i < values.length; i++){
       var value = values[i];
@@ -172,18 +211,23 @@ class FilterDialog {
     var filterValuesList = this.#getFilterValuesList();
     var filterValuesListOptions = filterValuesList.options;
     var currentValues = this.#extractOptionsFromSelectList(filterValuesList);
+        
+    var toFilterValuesList, currentToValues; 
 
-    var toFilterValuesList = this.#getToFilterValuesList();
-    var toFilterValuesListOptions = toFilterValuesList.options;
-    var currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
+    // these are used to set a selection in either the values list or the values to list.
+    var restoreSelectionInValueList, restoreSelectionValue;
     
-    var valueIndex;
-    
-    var valueForSelectingToListOption = undefined;
     // get the current selection and create new options out of it.
     if (isRangeFilterType) {
+      toFilterValuesList = this.#getToFilterValuesList();
+      var toFilterValuesListOptions = toFilterValuesList.options;
+      currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
+
       var rangeStart, rangeEnd;
       
+      // The following condition captures the case where the user selected 1 option in the picklist, 
+      // and either the values list or the to values list also has 1 option selected. 
+      // In action is then to use the picklist value to update that end of a range.
       if (selectedOptions.length === 1 && (
           filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 ||
           filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1
@@ -225,27 +269,40 @@ class FilterDialog {
           };
           correspondingValues[correspondingValue] = correspondingOptionValueObject;
         }
+        
+        if (filterValuesList.selectedOptions.length === 1) {
+          // if the values list had a selected item, we will restore that selection.
+          // (if the to values list had a selected item, it could be the result of adding a new range, 
+          // and in that case we don't want to restore the selection because the likely new action is adding a new range, not editing the existing range.)
+          restoreSelectionInValueList = filterValuesList;
+          restoreSelectionValue = optionValue;
+        }
       }
       else {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
         for (var i = 0; i < options.length; i++){
           var option = options[i];
+          
           if (option.selected) {
+            // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
-              rangeStart = rangeEnd = {
+              rangeStart = {
                 value: option.value,
                 label: option.label
               };
             }
-            else {
+            
+            // update the end of the current range (we keep updating it as long as the options are selected)
+            if (rangeStart !== undefined) {
               rangeEnd = {
                 value: option.value,
                 label: option.label
               };
             }
-          }          
-          else 
-          if(rangeStart){
+          }
+          
+          // if the option is not selected, or if we are the last option, then add the current range.
+          if((option.selected !== true || i === options.length -1) && rangeStart){
             // check if we should add the new range
             if (
               currentValues[rangeStart.value] === undefined || 
@@ -257,29 +314,13 @@ class FilterDialog {
 
             // save the value so we can select it in the toValues list.
             if (selectedOptions.length === 1 && rangeStart.value === rangeEnd.value) {
-              valueForSelectingToListOption = rangeStart.value;
+              restoreSelectionInValueList = toFilterValuesList;
+              restoreSelectionValue = rangeEnd.value;
             }
 
             rangeStart = rangeEnd = undefined;
           }
-        }
-        
-        if (rangeStart !== undefined && rangeEnd !== undefined) {
-          // check if we should add the new range
-          if (
-            currentValues[rangeStart.value] === undefined || 
-            JSON.stringify(currentValues[rangeStart.value]) === JSON.stringify(currentToValues[rangeStart.value])
-          ){
-            currentValues[rangeStart.value] = rangeStart;
-            currentToValues[rangeStart.value] = rangeEnd;
-            
-            // save the value so we can select it in the toValues list.
-            if (selectedOptions.length === 1 && rangeStart.value === rangeEnd.value) {
-              valueForSelectingToListOption = rangeStart.value;
-            }
-          }
-        }
-        
+        }        
       }
     }
     else {
@@ -296,21 +337,28 @@ class FilterDialog {
       }
     }
     
+    // clear the value lists and then update them with the changed set of values
     this.clearFilterValueLists();
+    var sortedValueLists = this.#sortValueLists(currentValues, currentToValues)
+    this.#renderOptionsToSelectList(sortedValueLists.valuesList, filterValuesList);
+    this.#renderOptionsToSelectList(sortedValueLists.toValuesList, toFilterValuesList);
     
-    this.#renderOptionsToSelectList(currentValues, filterValuesList);
-    this.#renderOptionsToSelectList(currentToValues, toFilterValuesList);
-    
-    if (valueForSelectingToListOption !== undefined) {
-      filterValuesListOptions = filterValuesList.options;
-      for (var i = 0; i < filterValuesListOptions.length; i++){
-        if (filterValuesListOptions[i].value !== valueForSelectingToListOption) {
-          continue;
-        }
-        toFilterValuesList.selectedIndex = i;
-        break;
-      }
+    //no need to restore a selection
+    if (restoreSelectionInValueList === undefined) {
+      return ;
     }
+    
+    // finally, restore the selection in the value lists.
+    filterValuesListOptions = restoreSelectionInValueList.options;
+    for (var i = 0; i < filterValuesListOptions.length; i++){
+      if (filterValuesListOptions[i].value !== restoreSelectionValue) {
+        continue;
+      }
+      filterValuesListOptions.selectedIndex = i;
+      break;
+    }
+    
+    // the end.
   }
   
   #removeSelectedValues(){
@@ -344,9 +392,8 @@ class FilterDialog {
       }
     }
 
-    selectControl.innerHTML = '';
+    this.clearFilterValueLists();
     this.#renderOptionsToSelectList(currentValues, selectControl);
-    toValuesList.innerHTML = '';
     this.#renderOptionsToSelectList(currentToValues, toValuesList);
     
     this.#getValuePicklist().selectedIndex = -1;
@@ -461,8 +508,16 @@ class FilterDialog {
     var filter = queryAxisItem.filter;
     if (filter){
       this.#getFilterType().value = filter.filterType;
-      this.#renderOptionsToSelectList(filter.values, this.#getFilterValuesList());
-      this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());      
+      
+      var sortedValues, sortedValueArgs = [filter.values];
+      switch (filter.filterType) {
+        case FilterDialog.filterTypes.BETWEEN:
+        case FilterDialog.filterTypes.NOTBETWEEN:
+          sortedValueArgs.push(filter.toValues);
+      }
+      sortedValues = this.#sortValueLists.apply(this, sortedValueArgs);
+      this.#renderOptionsToSelectList(sortedValues.valuesList, this.#getFilterValuesList());
+      this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());      
     }
     else {
     }
