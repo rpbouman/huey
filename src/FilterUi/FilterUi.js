@@ -146,6 +146,7 @@ class FilterDialog {
     var selectedOptions = selectControl.selectedOptions;
 
     // first, check if this is a special "loader" option
+    var selectedOption;
     if (selectedOptions.length === 1) {
       var selectedOption = selectedOptions[0];
       // it is a loader option, so load more values and exit.
@@ -176,83 +177,75 @@ class FilterDialog {
     var toFilterValuesListOptions = toFilterValuesList.options;
     var currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
     
+    var valueIndex;
+    
     var valueForSelectingToListOption = undefined;
     // get the current selection and create new options out of it.
-    var selectedOption, newOptions = [];
     if (isRangeFilterType) {
-
       var rangeStart, rangeEnd;
       
-      if (filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && selectedOptions.length === 1) {
-        // one value is selected in the picklist, and the start of an existing range is selected: 
-        // we will attempt to update the start of the existing range
-        var newSelectedValueOption = selectedOptions[0];
-        var newSelectedValue = newSelectedValueOption.value;
+      if (selectedOptions.length === 1 && (
+          filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 ||
+          filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1
+        )
+      ) {
+        var selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
+        var values = filterValuesList.selectedOptions.length ? currentValues : currentToValues;
 
-        var selectedValueOption = filterValuesList.selectedOptions[0]
-        var selectedValue = selectedValueOption.value;
-        var correspondingToValue = currentToValues[selectedValue];
+        var correspondingList = filterValuesList.selectedOptions.length ? toFilterValuesList : filterValuesList;
+        var correspondingValues = filterValuesList.selectedOptions.length ? currentToValues : currentValues;
 
-        if (currentValues[newSelectedValue] !== undefined) {
-          // invalid choice: a range already exists for the newly selected value
+        var selectedIndex = selectedList.selectedIndex;
+
+        var option = selectedList.options[selectedIndex];
+        var optionValue = option.value;        
+
+        var correspondingOption = correspondingList.options[selectedIndex];
+        var correspondingValue = correspondingOption.value;        
+        
+        if (values[selectedOption.value]) {
+          // invalid choice, range already exists
         }
         else
-        if (newSelectedValue > correspondingToValue.value) {
-          // invalid choice: newly selected value exceeds to end of the existing range
+        if ( values === currentValues &&  selectedOption.value > correspondingValue) {
+          // noop, fromValue can't be bigger than toValue
+        }
+        else
+        if ( values === currentToValues && selectedOption.value < correspondingValue) {
+          // noop, toValue can't be smaller than fromValue
         }
         else {
-          delete currentValues[selectedValue];
-          delete currentToValues[selectedValue];
-          
-          currentValues[newSelectedValue] = {
-            value: newSelectedValueOption.value,
-            label: newSelectedValueOption.label
-          };
-          currentToValues[newSelectedValue] = correspondingToValue;
-        }
-      }
-      else
-      if (filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && selectedOptions.length === 1) {
-        // one value is selected in the picklist, and the end of an existing range is selected: 
-        // we will attempt to update the end of the existing range
-        var newSelectedValueOption = selectedOptions[0];
-        var newSelectedValue = newSelectedValueOption.value;
+          delete values[option.value];
+          var correspondingOptionValueObject = correspondingValues[correspondingValue];
+          delete correspondingValues[correspondingValue];
 
-        var selectedValueIndex = toFilterValuesList.selectedIndex;
-        var selectedValueOption = toFilterValuesList.options[selectedValueIndex];        
-        var correspondingOption = filterValuesList.options[selectedValueIndex];
-        var selectedValue = correspondingOption.value;
-        
-        if (newSelectedValue < selectedValue) {
-          // invalid choice: newly selected value exceeds to end of the existing range
-        }
-        else {
-          currentToValues[selectedValue] = {
-            value: newSelectedValueOption.value,
-            label: newSelectedValueOption.label
+          values[selectedOption.value] = {
+            value: selectedOption.value,
+            label: selectedOption.label
           };
-        }        
+          correspondingValues[correspondingValue] = correspondingOptionValueObject;
+        }
       }
       else {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
         for (var i = 0; i < options.length; i++){
           var option = options[i];
-          if (rangeStart === undefined) {
-            if (option.selected) {
+          if (option.selected) {
+            if (rangeStart === undefined) {
               rangeStart = rangeEnd = {
                 value: option.value,
                 label: option.label
               };
             }
-          }
-          else
-          if (option.selected) {
-            rangeEnd = {
-              value: option.value,
-              label: option.label
-            };
-          }
-          else {
+            else {
+              rangeEnd = {
+                value: option.value,
+                label: option.label
+              };
+            }
+          }          
+          else 
+          if(rangeStart){
             // check if we should add the new range
             if (
               currentValues[rangeStart.value] === undefined || 
@@ -325,23 +318,37 @@ class FilterDialog {
     var options = selectControl.options;
     var toValuesList = this.#getToFilterValuesList();
     var toValuesOptions = toValuesList.options;
-    var valueOptionsToRemove = [];
-    var toValueOptionsToRemove = [];
+    var currentValues = {}, currentToValues = {};
     for (var i = 0 ; i < options.length; i++){
       var option = options[i];
-      if (option.selected) {
-        valueOptionsToRemove.push(option);
-        if (i < toValuesOptions.length){
-          toValueOptionsToRemove.push(toValuesOptions[i]);
+      var toOption;
+      if (i < toValuesOptions.length){
+        toOption = toValuesOptions[i];
+      }
+      
+      if (option.selected || toOption && toOption.selected) {
+        // either side has a selected option, which should be removed.
+      }
+      else {
+        // neither side has a selected option, so we add it to preserve
+        currentValues[option.value] = {
+          value: option.value,
+          label: option.label,
+        };
+        if (toOption){
+          currentToValues[toOption.value] = {
+            value: toOption.value,
+            label: toOption.label,
+          };
         }
       }
     }
-    valueOptionsToRemove.forEach(function(option){
-      selectControl.removeChild(option);
-    });
-    toValueOptionsToRemove.forEach(function(option){
-      toValuesList.removeChild(option);
-    });
+
+    selectControl.innerHTML = '';
+    this.#renderOptionsToSelectList(currentValues, selectControl);
+    toValuesList.innerHTML = '';
+    this.#renderOptionsToSelectList(currentToValues, toValuesList);
+    
     this.#getValuePicklist().selectedIndex = -1;
   }
 
