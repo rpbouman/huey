@@ -43,11 +43,14 @@ class FilterDialog {
     // Clear button clears the values lists
     this.#getClearButton().addEventListener('click', function(event){
       this.clearFilterValueLists();
+      
+      this.#updateValueSelectionStatusText();
     }.bind(this));
 
     // clear selected button clears the selected values from the value lists
     this.#getClearSelectedButton().addEventListener('click', function(event){
       this.#removeSelectedValues();
+      this.#updateValueSelectionStatusText();
     }.bind(this));
     
     // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
@@ -83,6 +86,7 @@ class FilterDialog {
       // reset the width again so the resizer can manage the width.
       element.style.width = '';
       this.#getValuePicklist().selectedIndex = -1;
+      this.#updateValueSelectionStatusText();
     }.bind(this));
     
     bufferEvents(this.#getSearch(), 'input', function(event, count){
@@ -170,16 +174,17 @@ class FilterDialog {
    
     for (var i = 0; i < values.length; i++){
       var value = values[i];
-      var option = options[value];
-      var option = createEl('option', {
-        value: option.value,
-        label: option.label
+      var optionObject = options[value];
+      var optionElement = createEl('option', {
+        value: optionObject.value,
+        label: optionObject.label
       });
-      selectList.appendChild(option);
+      selectList.appendChild(optionElement);
     }   
   }
     
   #handleValuePicklistChange(event){
+    var valueSelectionStatusText = undefined;
     var selectControl = event.target;
     var options = selectControl.options;
     var selectedOptions = selectControl.selectedOptions;
@@ -249,14 +254,17 @@ class FilterDialog {
         
         if (values[selectedOption.value]) {
           // invalid choice, range already exists
+          valueSelectionStatusText = `Choice conflicts with existing range.`;
         }
         else
         if ( values === currentValues &&  selectedOption.value > correspondingValue) {
           // noop, fromValue can't be bigger than toValue
+          valueSelectionStatusText = `From Value can't be bigger than to Value.`;
         }
         else
         if ( values === currentToValues && selectedOption.value < correspondingValue) {
           // noop, toValue can't be smaller than fromValue
+          valueSelectionStatusText = `To Value can't be smaller than from Value.`;
         }
         else {
           delete values[option.value];
@@ -277,6 +285,7 @@ class FilterDialog {
           restoreSelectionInValueList = filterValuesList;
           restoreSelectionValue = optionValue;
         }
+        valueSelectionStatusText = `Range modified.`;
       }
       else {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
@@ -320,7 +329,8 @@ class FilterDialog {
 
             rangeStart = rangeEnd = undefined;
           }
-        }        
+        }
+        valueSelectionStatusText = `Range created.`;        
       }
     }
     else {
@@ -343,6 +353,13 @@ class FilterDialog {
     this.#renderOptionsToSelectList(sortedValueLists.valuesList, filterValuesList);
     this.#renderOptionsToSelectList(sortedValueLists.toValuesList, toFilterValuesList);
     
+    if (valueSelectionStatusText){
+      this.#setValueSelectionStatusText(valueSelectionStatusText);
+    }
+    else {
+      this.#updateValueSelectionStatusText();
+    }
+
     //no need to restore a selection
     if (restoreSelectionInValueList === undefined) {
       return ;
@@ -440,7 +457,36 @@ class FilterDialog {
   }
   
   #getSearchStatus(){
-    return byId('searchStatus');
+    return byId('filterSearchStatus');
+  }
+
+  #getValueSelectionStatus(){
+    return byId('filterValueSelectionStatus');
+  }
+    
+  #setValueSelectionStatusText(text){
+    this.#getValueSelectionStatus().innerText = text;
+  }
+  
+  #updateValueSelectionStatusText(){
+    var text;
+    var count = this.#getFilterValuesList().options.length;
+    if (count === 0) {
+      text = 'Select values from the picklist';
+    }
+    else {
+      switch (this.#getFilterType().value) {
+        case FilterDialog.filterTypes.INCLUDE:
+        case FilterDialog.filterTypes.EXCLIDE:
+          text = `${count} values selected.`;
+          break;
+        case FilterDialog.filterTypes.BETWEEN:
+        case FilterDialog.filterTypes.NOTBETWEEN:
+          text = `${count} value ranges selected.`;
+          break;
+      }
+    }
+    this.#setValueSelectionStatusText(text);
   }
 
   #getFilterType(){
@@ -520,7 +566,9 @@ class FilterDialog {
       this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());      
     }
     else {
+      
     }
+    this.#updateValueSelectionStatusText();
   }
   
   #getDialogState(){
