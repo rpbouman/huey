@@ -73,7 +73,9 @@ class FilterDialog {
       switch (filterType.value){
         case FilterDialog.filterTypes.BETWEEN:
         case FilterDialog.filterTypes.NOTBETWEEN:
-          this.clearFilterValueLists();
+          if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
+            this.clearFilterValueLists();
+          }
           width = '50%';
           element = filterValuesList.parentNode;
           break;
@@ -158,10 +160,14 @@ class FilterDialog {
     var options = selectList.options;
     for (var i = 0; i < options.length; i++){
       var option = options[i];
-      optionObjects[option.value] = {
+      var valueObject = {
         value: option.value,
         label: option.label
       };
+      if (option.getAttribute('data-sql-null') === String(true)) {
+        valueObject.isSqlNull = true;
+      }
+      optionObjects[option.value] = valueObject;
     }
     return optionObjects;
   }
@@ -179,11 +185,15 @@ class FilterDialog {
         value: optionObject.value,
         label: optionObject.label
       });
+      if (optionObject.isSqlNull){
+        optionElement.setAttribute('data-sql-null', true);
+      }
       selectList.appendChild(optionElement);
     }   
   }
     
   #handleValuePicklistChange(event){
+    var isSqlNull;
     var valueSelectionStatusText = undefined;
     var selectControl = event.target;
     var options = selectControl.options;
@@ -233,11 +243,13 @@ class FilterDialog {
       // The following condition captures the case where the user selected 1 option in the picklist, 
       // and either the values list or the to values list also has 1 option selected. 
       // In action is then to use the picklist value to update that end of a range.
-      if (selectedOptions.length === 1 && (
-          filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 ||
-          filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1
-        )
+      if (
+        selectedOptions.length === 1 && selectedOption.getAttribute('data-sql-null') !== String(true) && (
+          filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && filterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true) ||
+          filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true)
+        ) 
       ) {
+
         var selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
         var values = filterValuesList.selectedOptions.length ? currentValues : currentToValues;
 
@@ -254,28 +266,29 @@ class FilterDialog {
         
         if (values[selectedOption.value]) {
           // invalid choice, range already exists
-          valueSelectionStatusText = `Choice conflicts with existing range.`;
+          valueSelectionStatusText = `Existing range collision.`;
         }
         else
         if ( values === currentValues &&  selectedOption.value > correspondingValue) {
           // noop, fromValue can't be bigger than toValue
-          valueSelectionStatusText = `From Value can't be bigger than to Value.`;
+          valueSelectionStatusText = `From Value exceeds to Value.`;
         }
         else
         if ( values === currentToValues && selectedOption.value < correspondingValue) {
           // noop, toValue can't be smaller than fromValue
-          valueSelectionStatusText = `To Value can't be smaller than from Value.`;
+          valueSelectionStatusText = `To Value smaller than from Value.`;
         }
         else {
           delete values[option.value];
           var correspondingOptionValueObject = correspondingValues[correspondingValue];
           delete correspondingValues[correspondingValue];
-
+          
           values[selectedOption.value] = {
             value: selectedOption.value,
-            label: selectedOption.label
+            label: selectedOption.label,
           };
           correspondingValues[correspondingValue] = correspondingOptionValueObject;
+          valueSelectionStatusText = `Range modified.`;
         }
         
         if (filterValuesList.selectedOptions.length === 1) {
@@ -285,7 +298,6 @@ class FilterDialog {
           restoreSelectionInValueList = filterValuesList;
           restoreSelectionValue = optionValue;
         }
-        valueSelectionStatusText = `Range modified.`;
       }
       else {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
@@ -293,11 +305,14 @@ class FilterDialog {
           var option = options[i];
           
           if (option.selected) {
+            isSqlNull = selectedOption.getAttribute('data-sql-null') === String(true);
+
             // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
               rangeStart = {
                 value: option.value,
-                label: option.label
+                label: option.label,
+                isSqlNull: isSqlNull
               };
             }
             
@@ -305,7 +320,8 @@ class FilterDialog {
             if (rangeStart !== undefined) {
               rangeEnd = {
                 value: option.value,
-                label: option.label
+                label: option.label,
+                isSqlNull: isSqlNull
               };
             }
           }
@@ -337,12 +353,14 @@ class FilterDialog {
       // go through the new options, and add them if they aren't already in the list.
       for (var i = 0; i < selectedOptions.length; i++) {
         selectedOption = selectedOptions[i];
+        isSqlNull = selectedOption.getAttribute('data-sql-null') === String(true);
         if (currentValues[selectedOption.value] !== undefined) {
           continue;
         }
         currentValues[selectedOption.value] = {
           value: selectedOption.value,
-          label: selectedOption.label
+          label: selectedOption.label,
+          isSqlNull: isSqlNull
         }
       }
     }
@@ -477,7 +495,7 @@ class FilterDialog {
     else {
       switch (this.#getFilterType().value) {
         case FilterDialog.filterTypes.INCLUDE:
-        case FilterDialog.filterTypes.EXCLIDE:
+        case FilterDialog.filterTypes.EXCLUDE:
           text = `${count} values selected.`;
           break;
         case FilterDialog.filterTypes.BETWEEN:
@@ -715,10 +733,15 @@ class FilterDialog {
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
+      var value = row.value;
+      var label = row.label;
       option = createEl('option', {
-        value: row.value,
-        label: row.label
+        value: value,
+        label: label
       });
+      if (value === null){
+        option.setAttribute('data-sql-null', true);
+      }
       optionsContainer.appendChild(option);
     }
 

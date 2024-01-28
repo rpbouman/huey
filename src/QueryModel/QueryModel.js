@@ -387,13 +387,14 @@ class QueryAxisItem {
     var sql;
     var filter = queryAxisItem.filter;
 
-
     var values = filter.values;
     var toValues = filter.toValues;    
-    var keys = Object.keys(values);
-    
-    var valueLiterals = keys.map(function(key){
+
+    var valueLiterals = Object.keys(values).map(function(key){
       var entry = values[key];
+      if (entry.isSqlNull) {
+        return null;
+      }
       return valueLiteralWriter(entry.value);
     });
     var toValueLiterals;
@@ -407,9 +408,11 @@ class QueryAxisItem {
         isRangeFilterType = false;
     }
     if (isRangeFilterType) {
-      keys = Object.keys(toValues);
-      toValueLiterals = keys.map(function(key){
+      toValueLiterals = Object.keys(toValues).map(function(key){
         var entry = toValues[key];
+        if (entry.isSqlNull) {
+          return null;
+        }
         return valueLiteralWriter(entry.value);
       });
     }
@@ -426,30 +429,78 @@ class QueryAxisItem {
     }
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     
-    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
-    var sql = '', operator = '';
-    switch (filter.filterType) {
-      case FilterDialog.filterTypes.EXCLUDE:
-        sql += ' NOT ';
-      case FilterDialog.filterTypes.INCLUDE:
-        sql += 'IN' 
-        sql = `${columnExpression} ${sql} ( ${literalLists.valueLiterals.join('\n,')} )`;
-        break;
-      case FilterDialog.filterTypes.NOTBETWEEN:
-        operator = 'NOT ';
-      case FilterDialog.filterTypes.BETWEEN:
-        operator += 'BETWEEN';
-        sql = '(' + literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
-          acc += '\n';
-          if (currIndex) {
-            acc += 'OR '
-          }
-          var fromValue = literalLists.valueLiterals[currIndex];
-          var toValue = literalLists.toValueLiterals[currIndex];
+    if (literalLists.valueLiterals.length === 0){
+      return undefined;
+    }
+    
+    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);    
+    var operator = '';
+    
+    var nullCondition;
+    var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
+      return value === null;
+    });
+    if (indexOfNull !== -1) {
+      operator = 'IS';
+      switch (filter.filterType) {
+        case FilterDialog.filterTypes.EXCLUDE:
+        case FilterDialog.filterTypes.NOTBETWEEN:
+          operator += ' NOT';
+      }
+      literalLists.valueLiterals.splice(indexOfNull, 1);
+      switch (filter.filterType) {
+        case FilterDialog.filterTypes.NOTBETWEEN:
+        case FilterDialog.filterTypes.BETWEEN:
+          literalLists.toValueLiterals.splice(indexOfNull, 1);
+      }
+      nullCondition = `${columnExpression} ${operator} NULL`;
+      operator = '';
+    }
+    
+    var sql = '', logicalOperator;
+    if (literalLists.valueLiterals.length > 0) {
+      switch (filter.filterType) {
+        case FilterDialog.filterTypes.EXCLUDE:
+          operator += literalLists.valueLiterals.length === 1 ? ' !' : ' NOT';
+          logicalOperator = 'AND';
+        case FilterDialog.filterTypes.INCLUDE:
+          operator += literalLists.valueLiterals.length === 1 ? '=' : ' IN';
+          var values = literalLists.valueLiterals.length === 1 ? literalLists.valueLiterals[0] : `( ${literalLists.valueLiterals.join('\n,')} )`;
+          sql = `${columnExpression} ${operator} ${values}`;
           
-          acc += `${columnExpression} ${operator} ${fromValue} AND ${toValue}`;
-          return acc;
-        }, '') + ')';
+          if (nullCondition) {
+            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+            if (!logicalOperator) {
+              sql = `( ${sql} )`;
+            }
+          }          
+          break;
+        case FilterDialog.filterTypes.NOTBETWEEN:
+          operator = 'NOT ';
+          logicalOperator = 'AND';
+        case FilterDialog.filterTypes.BETWEEN:
+          operator += 'BETWEEN';
+          sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
+            acc += '\n';
+            if (currIndex) {
+              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+            }
+            var fromValue = literalLists.valueLiterals[currIndex];
+            var toValue = literalLists.toValueLiterals[currIndex];
+            acc += `${columnExpression} ${operator} ${fromValue} AND ${toValue}`;
+            return acc;
+          }, '');
+          
+          if (nullCondition) {
+            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR '} ${sql}`
+          }
+          if (!logicalOperator && nullCondition || literalLists.valueLiterals.length > 1) {
+            sql = `( ${sql} )`;
+          }
+      }
+    }
+    else {
+      sql = nullCondition;
     }
     return sql;
   }
