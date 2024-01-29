@@ -384,7 +384,6 @@ class DataSourcesUi {
       default:
         // noop.
     }
-    
 
     var extension;
     if (type === DuckDbDataSource.types.FILE) {
@@ -418,6 +417,18 @@ class DataSourcesUi {
           }
         });      
         summary.appendChild(removeButton);
+        break;
+      case DuckDbDataSource.types.TABLE:
+      case DuckDbDataSource.types.VIEW:
+        var analyzeActionButton = this.#renderDatasourceActionButton({
+          id: datasourceId + '_analyze',
+          "className": "analyzeActionButton",
+          title: 'Open the this datasource in the Query editor',
+          events: {
+            click: this.#analyzeDatasourceClicked.bind(this)
+          }
+        });
+        summary.appendChild(analyzeActionButton);
         break;
       default:
         this.#createDatasourceNodeActionButtons(datasourceId, summary);
