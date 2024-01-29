@@ -3,6 +3,19 @@
   height: calc(100% - 36px);
 }
 
+#datasourcesUi label[for=uploader]::after {
+  display:inline-block;
+  font-size: 140px;
+  width: 100%;
+  font-family: var( --huey-icon-font-family );
+  content: "\eb47";
+  text-align: center;
+  color: var( --huey-icon-color-subtle );
+}
+#datasourcesUi label[for=uploader]:hover::after {
+  color: var( --huey-icon-color-highlight );
+}
+
 #datasourcesUi[data-drop-allowed=true] {
   cursor: 'copy';
 }
@@ -56,7 +69,7 @@
   content: '\ea88';
 }
 
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=duckdb_table] summary > .icon::before 
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=table] summary > .icon::before 
 {
   /* table */
   content: '\eba1';
@@ -120,7 +133,7 @@
   content: '\eb41';
 }
 
-#datasourcesUi details > summary > label:has( > button ) 
+#datasourcesUi details > summary > label:has( > button )::before 
 {
   display: block;
   float: inline-end;
@@ -131,7 +144,7 @@
   color: var( --huey-icon-color-subtle );
 }
 
-#datasourcesUi details > summary > label:has( > button):hover {
+#datasourcesUi details > summary > label:has( > button ):hover::before {
   color: var( --huey-icon-color-highlight );
 }
 

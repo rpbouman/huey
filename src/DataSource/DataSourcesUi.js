@@ -200,6 +200,14 @@ class DataSourcesUi {
 
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
+    
+    this.showLoadDatasourcesHint();
+  }
+
+  showLoadDatasourcesHint(){
+    if (!Object.keys(this.#datasources).length){
+      this.getDom().innerHTML = `<label for="uploader">Drop some files here, or use the Upload button</label>`;
+    }
   }
   
   static getCaptionForDatasource(datasource){
@@ -209,6 +217,10 @@ class DataSourcesUi {
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
         return datasource.getFileNameWithoutExtension();
+      case DuckDbDataSource.types.TABLE:
+      case DuckDbDataSource.types.TABLEFUNCTION:
+      case DuckDbDataSource.types.VIEW:      
+        return datasource.getObjectName();
       default:
         return datasource.getId();
     }
@@ -296,45 +308,30 @@ class DataSourcesUi {
           break;
       }
       
-      var tableNode = createEl('details', {
-        id: datasourceId + ':' + schemaName + ':' + tableName,
-        role: 'treeitem',
-        "data-nodetype": 'duckdb_' + datasourcetype,
-        "data-datasourcetype": datasourcetype,
-        title: tableName,        
-        "data-catalog-name": catalogName,
-        "data-schema-name": schemaName,
-        "data-relation-name": tableName
-      });
-      summary = createEl('summary', {
-      });
-      icon = createEl('span', {
-        class: 'icon',
-        role: 'img'
-      });
-      summary.appendChild(icon);
-      label = createEl('span', {
-        class: 'label'
-      }, tableName);
-      summary.appendChild(label);
-      
-      var analyzeActionButton = this.#renderDatasourceActionButton({
-        id: datasourceId + '_analyze',
-        "className": "analyzeActionButton",
-        title: 'Open the this datasource in the Query editor',
-        events: {
-          click: this.#analyzeDatasourceClicked.bind(this)
-        }
-      });
-      summary.appendChild(analyzeActionButton);
-      
-      tableNode.appendChild(summary);
+      var tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
+      var datasource = this.getDatasource(tableDatasourceId);
+      if (!datasource) {
+        var hueyDb = window.hueyDb;
+        datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
+          type: datasourcetype,
+          catalogName: catalogName,
+          schemaName: schemaName,
+          objectName: tableName
+        });
+        
+        this.addDatasource(datasource);
+      }
+
+      var tableNode = this.#createDatasourceNode(datasource);
       schemaNode.appendChild(tableNode);
     }
   }
   
   async #loadDatasource(datasource) {
     switch (datasource.getType()){
+      case DuckDbDataSource.types.FILE:
+        // noop, files can't be expanded.
+        break;
       case DuckDbDataSource.types.DUCKDB:
         this.#loadDuckDbDatasource(datasource);
         break;
@@ -357,7 +354,7 @@ class DataSourcesUi {
     this.#loadDatasource(datasource);
   }
   
-  #createDatasourceNode(datasource){
+  #createDatasourceNode(datasource, attributes){
     var caption = DataSourcesUi.getCaptionForDatasource(datasource);
 
     var type = datasource.getType();
@@ -370,8 +367,20 @@ class DataSourcesUi {
       "title": caption,
       "open": true
     });
+    if (attributes){
+      for (var attributeName in attributes){ 
+      datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
+      }
+    }
     
-    datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this))
+    switch (type) {
+      case DuckDbDataSource.types.DUCKDB:
+        datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this));
+        break;
+      default:
+        // noop.
+    }
+    
 
     var extension;
     if (type === DuckDbDataSource.types.FILE) {
@@ -462,19 +471,6 @@ class DataSourcesUi {
           default:
             throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
         }
-        break;
-      case 'duckdb_table':
-      case 'duckdb_view':
-        var catalogName = node.getAttribute('data-catalog-name');
-        var schemaName = node.getAttribute('data-schema-name');
-        var objectName = node.getAttribute('data-relation-name');
-        var type = node.getAttribute('data-datasourcetype');
-        var datasource = new DuckDbDataSource(duckdb, instance, {
-          type: type,
-          catalogName: catalogName,
-          schemaName: schemaName,
-          objectName: objectName
-        });
         break;
       default:
         throw new Error(`Don't know how to get a datasource for node of type ${nodeType}.`);
@@ -595,10 +591,14 @@ class DataSourcesUi {
     return groupNode;
   }
   
+  addDatasource(datasource) {
+    var id = datasource.getId();
+    this.#datasources[id] = datasource;
+  }
+  
   addDatasources(datasources){
     datasources.forEach(function(datasource){
-      var id = datasource.getId();
-      this.#datasources[id] = datasource;
+      this.addDatasource(datasource);
     }.bind(this));
     this.#renderDatasources();
   }
@@ -624,4 +624,5 @@ class DataSourcesUi {
 var datasourcesUi;
 function initDataSourcesUi(){
   datasourcesUi = new DataSourcesUi('datasourcesUi');
+  datasourcesUi.showLoadDatasourcesHint();
 }
