@@ -1,5 +1,6 @@
 # 🦆 Huey
-Huey is a browser-based application that lets you inspect and analyze tabular datasets stored as .csv or .parquet files.
+Huey is a browser-based application that lets you inspect and analyze tabular datasets.
+Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 ## Key features
 - Zero install. Download or checkout the source tree, and open index.html in your browser! No server required.
@@ -62,6 +63,10 @@ The values that are thus derived from the original attribute values can be thoug
 
 Aggregates are special expressions that calculate a result on a group of attribute values. 
 Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
+
+#### Filtering
+The query editor supports a special Filters axis. Items placed on the filters access support the Filters dialog which lets you choose values and operators to filter the query results.
+Items on the filter axis themselves are not visible in the query result, unless those items are also placed on the the columns or rows axis.
 
 ### Export
 Huey provides export capabilities so you can use the results of your analysis outside huey.
