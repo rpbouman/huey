@@ -52,6 +52,7 @@ class DuckDbDataSource extends EventEmitter {
   #duckDb = undefined;
   #duckDbInstance = undefined;
   #connection = undefined;
+  #catalogName = undefined;
   #schemaName = undefined;
   #objectName = undefined;
   #file = undefined;
@@ -161,18 +162,20 @@ class DuckDbDataSource extends EventEmitter {
         }
         break;
       case DuckDbDataSource.types.TABLE:
+        this.#catalogName = config.catalogName;
         this.#schemaName = config.schemaName;
         this.#objectName = config.tableName || config.objectName;
         break;
       case DuckDbDataSource.types.VIEW:
+        this.#catalogName = config.catalogName;
         this.#schemaName = config.schemaName;
         this.#objectName = config.viewName || config.objectName;
         break;
       case DuckDbDataSource.types.TABLEFUNCTION:
+        this.#catalogName = config.catalogName;
         this.#schemaName = config.schemaName;
         this.#objectName = config.functionName || config.objectName;
         break;
-      case DuckDbDataSource.types.TABLEFUNCTION:
       default:
         throw new Error(`Could not initialize the datasource: unrecognized type ${type}`);
     }
@@ -235,6 +238,7 @@ class DuckDbDataSource extends EventEmitter {
       this.#duckDb = undefined;
       this.#duckDbInstance = undefined;
       this.#connection = undefined;
+      this.#catalogName = undefined;
       this.#schemaName = undefined;
       this.#objectName = undefined;
       this.#file = undefined;
@@ -289,19 +293,22 @@ class DuckDbDataSource extends EventEmitter {
         qualifiedObjectName = getQuotedIdentifier(fileName);
         break;
       case DuckDbDataSource.types.TABLE:
+        var catalogName = this.#catalogName;
         var schemaName = this.#schemaName;
         var tableName = this.#objectName;
-        qualifiedObjectName = getQualifiedIdentifier(schemaName, tableName);
+        qualifiedObjectName = getQualifiedIdentifier(catalogName, schemaName, tableName);
         break;
       case DuckDbDataSource.types.VIEW:
+        var catalogName = this.#catalogName;
         var schemaName = this.#schemaName;
         var viewName = this.#objectName;
-        qualifiedObjectName = getQualifiedIdentifier(schemaName, viewName);
+        qualifiedObjectName = getQualifiedIdentifier(catalogName, schemaName, viewName);
         break;
       case DuckDbDataSource.types.TABLEFUNCTION:
+        var catalogName = this.#catalogName;
         var schemaName = this.#schemaName;
         var functionName = this.#objectName;
-        qualifiedObjectName = getQualifiedIdentifier(schemaName, functionName);
+        qualifiedObjectName = getQualifiedIdentifier(catalogName, schemaName, functionName);
         break;
       default:
         throw new Error(`Invalid datasource type ${type} for getting a qualified object name.`);
