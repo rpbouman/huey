@@ -4,7 +4,7 @@ Huey supports reading from multiple file formats, like .csv, .parquet, .json dat
 
 ## Key features
 - Zero install. Download or checkout the source tree, and open index.html in your browser! No server required.
-- Support for parquet and csv files. (Support for json and duckdb database files is planned).
+- Supports reading .parquet, .csv, .json and duckdb database files. (Support for reading MS Excel files is planned)
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
 - An intuitive and responsive pivot table, supporting many types of metrics
 
