@@ -153,6 +153,10 @@ class DataSourcesUi {
             };
           }
           break;
+        case DuckDbDataSource.types.TABLE:
+        case DuckDbDataSource.types.VIEW:
+          // noop. these are rendered by the respective database datasource node.
+          return;
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.SQLITE:
         default:

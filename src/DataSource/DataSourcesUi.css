@@ -75,7 +75,7 @@
   content: '\eba1';
 }
 
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=duckdb_view] summary > .icon::before 
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=view] summary > .icon::before 
 {
   /* table-options */
   content: '\f25c';
