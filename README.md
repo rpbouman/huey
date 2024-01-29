@@ -1,11 +1,13 @@
 # 🦆 Huey
-Huey is a web application that lets you inspect and analyze tabular datasets stored as .csv or .parquet files. 
+Huey is a browser-based application that lets you inspect and analyze tabular datasets stored as .csv or .parquet files.
 
 ## Key features
 - Zero install. Download or checkout the source tree, and open index.html in your browser! No server required.
 - Support for parquet and csv files. (Support for json and duckdb database files is planned).
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
 - An intuitive and responsive pivot table, supporting many types of metrics
+
+Note that although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
 
 ## Limitations
 - Developed on latest/recent versions of Google Chrome. Although most features should work on other major browsers as well, browser compatibility is currently not the highest priority
@@ -36,6 +38,14 @@ When registering new files, Huey will attempt to group files having similar colu
 
 Files that cannot be grouped appear in a separate Miscellanous Files group.
 
+#### Opening DuckDb files
+Apart from reading data files directly, Huey can also utilize existing duckdb files and access its tables and views. 
+The process for accessing duckdb files is exactly the same as for accessing data files. Just make sure you give your duckdb file a '.duckdb' extension - that's how Huey knows it's a duckdb file 
+(DuckDB data files are not required to have any particular name or extension, but Huey currently cannot detect that, so it relies on a file extension convention instead.)
+
+Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
+But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
+
 ### Analyzing Datasources
 The Datasources have an analyze button. After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
@@ -53,4 +63,8 @@ The values that are thus derived from the original attribute values can be thoug
 Aggregates are special expressions that calculate a result on a group of attribute values. 
 Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
 
+### Export
+Huey provides export capabilities so you can use the results of your analysis outside huey.
+The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
 
+Apart from the result data, Huey also lets you export the SQL statements that would produce the query result.
