@@ -222,7 +222,7 @@ class Settings extends EventEmitter {
               "--huey-mono-font-family": "Monospace",
               "--huey-foreground-color": "rgb(220, 220, 220)",
               "--huey-placeholder-color": "rgb(100, 100, 100)",
-              "--huey-light-background-color": "rgb(80, 80, 80)",
+              "--huey-light-background-color": "rgb(30, 30, 30)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
               "--huey-dark-background-color": "rgb(110 110, 110)",
               "--huey-light-border-color": "rgb(80, 80, 80)",
