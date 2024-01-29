@@ -94,7 +94,6 @@ class DataSourcesUi {
         button.addEventListener(eventName, handler);
       }
     }
-    
     return actionButton;
   }
   
@@ -237,19 +236,142 @@ class DataSourcesUi {
     summaryElement.appendChild(removeActionButton);
   }
   
+  async #loadDuckDbDatasource(duckdbDatasource){
+    var catalogName = duckdbDatasource.getFileNameWithoutExtension();
+    var connection = window.hueyDb.connection;
+    var sql = `
+      SELECT table_schema, table_name, table_type 
+      FROM information_schema.tables 
+      WHERE table_catalog = ? 
+      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
+      ORDER BY table_schema, table_name
+    `;
+    var statement = await connection.prepare(sql);
+    var result = await statement.query(catalogName);
+    statement.close();
+    
+    var datasourceId = duckdbDatasource.getId();
+    var datasourceTreeNode = byId(datasourceId);
+    
+    var schemaNodes = {};
+    for (var i = 0; i < result.numRows; i++){
+      var summary, icon, label;
+      
+      var row = result.get(i);
+      var schemaName = row.table_schema;
+      var schemaNode = schemaNodes[schemaName];
+      if (schemaNode === undefined) {
+        schemaNodes[schemaName] = schemaNode = createEl('details', {
+          id: datasourceId + ':' + schemaName,
+          role: 'treeitem',
+          "data-nodetype": 'duckdb_schema',
+          title: schemaName,
+          "data-catalog-name": catalogName,
+          "data-schema-name": schemaName,
+        });
+        summary = createEl('summary', {
+        });
+        icon = createEl('span', {
+          class: 'icon',
+          role: 'img'
+        });
+        summary.appendChild(icon);
+        label = createEl('span', {
+          class: 'label'
+        }, schemaName);
+        summary.appendChild(label);
+
+        schemaNode.appendChild(summary);
+        datasourceTreeNode.appendChild(schemaNode);
+      }
+      var tableName = row.table_name;
+      var tableType = row.table_type;
+      var datasourcetype;
+      switch (tableType){
+        case 'BASE TABLE':
+          datasourcetype = DuckDbDataSource.types.TABLE;
+          break;
+        case 'VIEW':
+          datasourcetype = DuckDbDataSource.types.VIEW;
+          break;
+      }
+      
+      var tableNode = createEl('details', {
+        id: datasourceId + ':' + schemaName + ':' + tableName,
+        role: 'treeitem',
+        "data-nodetype": 'duckdb_' + datasourcetype,
+        "data-datasourcetype": datasourcetype,
+        title: tableName,        
+        "data-catalog-name": catalogName,
+        "data-schema-name": schemaName,
+        "data-relation-name": tableName
+      });
+      summary = createEl('summary', {
+      });
+      icon = createEl('span', {
+        class: 'icon',
+        role: 'img'
+      });
+      summary.appendChild(icon);
+      label = createEl('span', {
+        class: 'label'
+      }, tableName);
+      summary.appendChild(label);
+      
+      var analyzeActionButton = this.#renderDatasourceActionButton({
+        id: datasourceId + '_analyze',
+        "className": "analyzeActionButton",
+        title: 'Open the this datasource in the Query editor',
+        events: {
+          click: this.#analyzeDatasourceClicked.bind(this)
+        }
+      });
+      summary.appendChild(analyzeActionButton);
+      
+      tableNode.appendChild(summary);
+      schemaNode.appendChild(tableNode);
+    }
+  }
+  
+  async #loadDatasource(datasource) {
+    switch (datasource.getType()){
+      case DuckDbDataSource.types.DUCKDB:
+        this.#loadDuckDbDatasource(datasource);
+        break;
+      default:
+        console.error(`Don't know how to load datasource ${datasource.getId()} of type ${datasource.getType()}`);
+    }
+  }
+  
+  #toggleDataSource(event){
+    var target = event.target;
+   
+    var oldState = event.oldState;
+    var newState = event.newState;
+
+    if (oldState !== 'closed' || newState !== 'open' || target.childNodes.length !== 1) {
+      return;
+    }
+    
+    var datasource = this.#getDatasourceForTreeNode(target);
+    this.#loadDatasource(datasource);
+  }
+  
   #createDatasourceNode(datasource){
     var caption = DataSourcesUi.getCaptionForDatasource(datasource);
 
     var type = datasource.getType();
-    var dataSourceId = datasource.getId();
+    var datasourceId = datasource.getId();
     var datasourceNode = createEl('details', {
-      id: dataSourceId,
+      id: datasourceId,
       role: 'treeitem',
       "data-nodetype": 'datasource',
-      "data-sourcetype": type,
+      "data-datasourcetype": type,
       "title": caption,
       "open": true
     });
+    
+    datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this))
 
     var extension;
     if (type === DuckDbDataSource.types.FILE) {
@@ -272,7 +394,21 @@ class DataSourcesUi {
     }, caption);
     summary.appendChild(label);
     
-    this.#createDatasourceNodeActionButtons(dataSourceId, summary);
+    switch (type) {
+      case DuckDbDataSource.types.DUCKDB:
+        var removeButton = this.#renderDatasourceActionButton({
+          id: datasourceId + '_remove',
+          "className": "removeActionButton",
+          title: 'Remove this datasource',
+          events: {
+            click: this.#removeDatasourceClicked.bind(this)
+          }
+        });      
+        summary.appendChild(removeButton);
+        break;
+      default:
+        this.#createDatasourceNodeActionButtons(datasourceId, summary);
+    }
 
     return datasourceNode;
   }
@@ -294,7 +430,11 @@ class DataSourcesUi {
   #getDatasourceFromClickEvent(event){
     var node = this.#getTreeNodeFromClickEvent(event);
     var nodeType = node.getAttribute('data-nodetype');
-    
+
+    var hueyDb = window.hueyDb;
+    var duckdb = hueyDb.duckdb;
+    var instance = hueyDb.instance;
+
     var datasource;
     switch (nodeType) {
       case 'datasource':
@@ -313,18 +453,28 @@ class DataSourcesUi {
             }.bind(this));
             var fileType = node.getAttribute('data-filetype');
 
-            var hueyDb = window.hueyDb;
-            var duckdb = hueyDb.duckdb;
-            var instance = hueyDb.instance;            
             datasource = new DuckDbDataSource(duckdb, instance, {
               type: DuckDbDataSource.types.FILES,
-              fileNames,
+              fileNames: fileNames,
               fileType: fileType
             });
             break;
           default:
             throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
         }
+        break;
+      case 'duckdb_table':
+      case 'duckdb_view':
+        var catalogName = node.getAttribute('data-catalog-name');
+        var schemaName = node.getAttribute('data-schema-name');
+        var objectName = node.getAttribute('data-relation-name');
+        var type = node.getAttribute('data-datasourcetype');
+        var datasource = new DuckDbDataSource(duckdb, instance, {
+          type: type,
+          catalogName: catalogName,
+          schemaName: schemaName,
+          objectName: objectName
+        });
         break;
       default:
         throw new Error(`Don't know how to get a datasource for node of type ${nodeType}.`);
