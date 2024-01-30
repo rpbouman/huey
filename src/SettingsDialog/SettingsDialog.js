@@ -306,9 +306,39 @@ class Settings extends EventEmitter {
         }
       }
     }
-    
+
+    if (typeof path === 'string'){
+      path = [path];
+    }
+    if (!(path instanceof Array)) {
+      throw new Error('Invalid path');
+    }
+  
+    var property = path.pop();
     var settings = this.#getSettings(path);
-    deepAssign(settings, value);
+    
+    if (value === null || value === undefined){
+      settings[property] = value;
+    }
+    else {
+      var currentValue = settings[property];
+      switch (typeof(currentValue)) {
+        case 'object':
+          if (currentValue === null){
+            // fallthrough
+          }
+          else {
+            deepAssign(currentValue, value);
+            break;
+          }
+        case 'undefined':
+        case 'string':
+        case 'number':
+        case 'boolean':
+        case 'bigint':
+          settings[property] = value;
+      }
+    }
 
     this.#storeToLocalStorage();    
   }

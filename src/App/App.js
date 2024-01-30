@@ -126,7 +126,12 @@ function setPageState(hash){
       settings.assignSettings(['querySettings', 'autoRunQuery'], false);
     }
     var queryModel = pivotTableUi.getQueryModel();
-    queryModel.setDatasource(datasource);
+    if (queryModel.getDatasource() === datasource) {
+      queryModel.clear();
+    }
+    else {
+      queryModel.setDatasource(datasource);
+    }
     
     for (var axisId in axes){
       var items = axes[axisId];
@@ -162,6 +167,7 @@ function setPageState(hash){
   finally{
     if (autoRunQuery) {
       settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
+      pivotTableUi.updatePivotTableUi();
     }
   }
 }
