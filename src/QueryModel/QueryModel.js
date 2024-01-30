@@ -621,6 +621,10 @@ class QueryModel extends EventEmitter {
     });
   }
   
+  getAxisIds(){
+    return Object.keys(this.#axes);
+  }
+  
   getCellHeadersAxis(){
     return this.#cellheadersaxis;
   }

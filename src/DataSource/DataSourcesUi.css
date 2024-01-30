@@ -125,7 +125,9 @@
 
 #datasourcesUi details > summary > label.analyzeActionButton::before {
   /* table */
-  content: '\eba1';
+  /* content: '\eba1';*/
+  /* analyze */
+  content: '\f3a3';
 }
 
 #datasourcesUi details > summary > label.removeActionButton::before {

@@ -43,9 +43,6 @@ async function analyzeDatasource(datasource){
     TabUi.setSelectedTab('#sidebar', '#attributesTab');
     clearSearch();
     queryModel.setDatasource(datasource);
-    byId('searchAttributeUi').style.display = '';
-    byId('queryUi').style.display = '';
-
   }
   catch (error) {
     attributeUi.clear(false);
@@ -81,6 +78,98 @@ function initExecuteQuery(){
   });
 }
 
+function popstateHandler(event){
+  var hash = event.target.document.location.hash;
+  if (hash.length === 0){
+    return;
+  }
+  
+  var currentRoute = Routing.getRouteForView(pivotTableUi);
+  if (currentRoute === hash){
+    return;
+  }
+  setPageState(hash);
+}
+
+function setPageState(hash){
+  if (!hash){
+    hash = document.location.hash;
+  }
+  if (hash.length === 0){
+    return;
+  }
+  if (hash.startsWith('#')) {
+    hash = hash.substring(1);
+  }
+
+  var autoRunQuery = settings.getSettings('querySettings').autoRunQuery;
+  try {
+    
+    var currentRoute = Routing.getRouteForView(pivotTableUi, false);
+    if (currentRoute === hash){
+      return;
+    }
+    
+    var state = Routing.getViewstateFromRoute(hash);
+    var viewClass = state.viewClass;
+    var queryModelState = state.queryModel;
+    var datasourceId = queryModelState.datasourceId;
+    
+    var datasource = datasourcesUi.getDatasource(datasourceId);
+    if (!datasource) {
+      throw new Error(`datasource ${datasourceId} not found.`);
+    }
+    var cellsHeadersAxis = queryModelState.cellsHeaders;
+    var axes = queryModelState.axes;
+    
+    if (autoRunQuery) {
+      settings.assignSettings(['querySettings', 'autoRunQuery'], false);
+    }
+    var queryModel = pivotTableUi.getQueryModel();
+    queryModel.setDatasource(datasource);
+    
+    for (var axisId in axes){
+      var items = axes[axisId];
+      for (var i = 0 ; i < items.length; i++){
+        var item = items[i];
+        var config = {
+          columnName: item.column
+        };
+        if (item.derivation) {
+          for (var derivation in item.derivation){
+          }
+          config.derivation = derivation;
+        }
+        if (item.aggregator) {
+          for (var aggregator in item.aggregator){
+          }
+          config.aggregator = aggregator;
+        }
+        var formatter = QueryAxisItem.createFormatter(config);
+        if (formatter){
+          config.formatter = formatter;
+        }
+        
+        config.axis = axisId;
+        queryModel.addItem(config);
+      }
+    }
+  }
+  catch(e){
+    showErrorDialog(e);
+    event.preventDefault = true;
+  }
+  finally{
+    if (autoRunQuery) {
+      settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
+    }
+  }
+}
+
+function initPopstateHandler(){
+  window.addEventListener('popstate', popstateHandler);
+}
+
 function initApplication(){
   initErrorDialog();
   initDuckdbVersion();
@@ -94,4 +183,7 @@ function initApplication(){
   initQueryUi();
   initPivotTableUi();
   initExecuteQuery();
+  
+  initPopstateHandler();
+  setPageState();
 }
