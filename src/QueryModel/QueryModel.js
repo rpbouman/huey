@@ -649,6 +649,10 @@ class QueryModel extends EventEmitter {
     return this.getQueryAxis(QueryModel.AXIS_CELLS);
   }
   
+  #destroyDatasourceHandler(event){
+    this.setDatasource(undefined);
+  }
+  
   setDatasource(datasource){
     if (datasource === this.#datasource) {
       return;
@@ -659,9 +663,7 @@ class QueryModel extends EventEmitter {
     this.#datasource = datasource;
     
     if (datasource){
-      datasource.addEventListener('destroy', function(event){
-        this.setDatasource(undefined);
-      }.bind(this));
+      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
     }
 
     this.fireEvent('change', {
@@ -731,7 +733,7 @@ class QueryModel extends EventEmitter {
     return removedItem;
   }
   
-  addItem(config){
+  async addItem(config){
     var axis = config.axis;
     
     if (!axis) {
@@ -746,7 +748,8 @@ class QueryModel extends EventEmitter {
     
     // make an axis-less version of the item so we can locate it in case it's already added to the model. 
     var copyOfConfig = Object.assign({}, config);
-    
+    // filter items are special because they can appear on multiple axes. 
+    // if the item is a filter axis item, we should not remove the axis.
     if (axis !== QueryModel.AXIS_FILTERS){
       delete copyOfConfig['axis'];
     }
@@ -757,6 +760,24 @@ class QueryModel extends EventEmitter {
       // if the item already exits in this model, we first remove it.
       removedItem = this.#removeItem(item);
     }
+    
+    if (!config.columnType) {
+      if (removedItem && removedItem.columnType) {
+        config.columnType = removedItem.columnType;
+      }
+    }
+    
+    if (!config.columnType) {
+      var datasource = this.#datasource;
+      var columnMetadata = await datasource.getColumnMetadata();
+      for (var i = 0; i < columnMetadata.numRows; i++){
+        var row = columnMetadata.get(i);
+        if (row.column_name === config.columnName) {
+          config.columnType = row.column_type;
+        }
+      }
+    }
+    
     var addedItem = this.#addItem(config);
 
     var axesChangeInfo = {};

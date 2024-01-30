@@ -40,6 +40,10 @@ class Routing {
           strippedItem.aggregator[aggregator] = aggregatorInfo.expressionTemplate;
         }
         
+        if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
+          strippedItem.filter = axisItem.filter;
+        }
+        
         return strippedItem;
       });
     });

@@ -91,7 +91,8 @@ function popstateHandler(event){
   setPageState(hash);
 }
 
-function setPageState(hash){
+// TODO: refactor this, but not sure where to put it yet.
+async function setPageState(hash){
   if (!hash){
     hash = document.location.hash;
   }
@@ -119,6 +120,8 @@ function setPageState(hash){
     if (!datasource) {
       throw new Error(`datasource ${datasourceId} not found.`);
     }
+    var columnMetadata = await datasource.getColumnMetadata();
+    
     var cellsHeadersAxis = queryModelState.cellsHeaders;
     var axes = queryModelState.axes;
     
@@ -137,26 +140,33 @@ function setPageState(hash){
       var items = axes[axisId];
       for (var i = 0 ; i < items.length; i++){
         var item = items[i];
-        var config = {
-          columnName: item.column
-        };
+        var config = { columnName: item.column };
+        
         if (item.derivation) {
           for (var derivation in item.derivation){
           }
           config.derivation = derivation;
         }
+        
         if (item.aggregator) {
           for (var aggregator in item.aggregator){
           }
           config.aggregator = aggregator;
         }
+        
         var formatter = QueryAxisItem.createFormatter(config);
         if (formatter){
           config.formatter = formatter;
         }
         
+        if (axisId === QueryModel.AXIS_FILTERS) {
+          var filter = item.filter;
+          if (filter) {
+            config.filter = filter;
+          }
+        }
         config.axis = axisId;
-        queryModel.addItem(config);
+        await queryModel.addItem(config);
       }
     }
   }
@@ -169,6 +179,7 @@ function setPageState(hash){
       settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       pivotTableUi.updatePivotTableUi();
     }
+    filterDialog.getDom().close();
   }
 }
 

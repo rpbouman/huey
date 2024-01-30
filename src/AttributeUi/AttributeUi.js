@@ -488,7 +488,7 @@ class AttributeUi {
     }
   }
   
-  #axisButtonClicked(node, axis, checked){
+  async #axisButtonClicked(node, axis, checked){
     var head = node.childNodes.item(0);
     var inputs = head.getElementsByTagName('input');
     switch (axis){
@@ -523,7 +523,7 @@ class AttributeUi {
     }
     
     if (checked) {
-      this.#queryModel.addItem(itemConfig);
+      await this.#queryModel.addItem(itemConfig);
     }
     else {
       this.#queryModel.removeItem(itemConfig);
