@@ -19,9 +19,17 @@
   content: "\ec63";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type*=INT] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon:before,
+.attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon:before
+{
   /* 123 */
   content: "\f554";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon:before
+{
+  /* code-dots */
+  content: "\f61a";
 }
 
 .attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon:before,

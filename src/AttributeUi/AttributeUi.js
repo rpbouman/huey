@@ -554,15 +554,19 @@ class AttributeUi {
     var eventData = event.eventData;
     if (eventData.propertiesChanged) {
       if (eventData.propertiesChanged.datasource) {
+        var searchAttributeUiDisplay;
         if (eventData.propertiesChanged.datasource.newValue) {
-          this.clear(true);
+          this.clear(true);          
           var datasource = eventData.propertiesChanged.datasource.newValue;
           var columnMetadata = await datasource.getColumnMetadata();
           this.render(columnMetadata);
+          searchAttributeUiDisplay = '';
         }
         else {
           this.clear(false);
+          searchAttributeUiDisplay = 'none';
         }
+        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
       }
     }
     else {

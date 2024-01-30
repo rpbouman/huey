@@ -236,6 +236,19 @@ class QueryUi {
       var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
       this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
     }
+    
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        var display;
+        if (eventData.propertiesChanged.datasource.newValue) {
+          display = '';
+        }
+        else {
+          display = 'none';
+        }
+        this.getDom().style.display = display;
+      }
+    }
   }
   
   #initEvents(){

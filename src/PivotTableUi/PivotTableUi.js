@@ -42,6 +42,10 @@ class PivotTableUi {
     this.#initCancelQueryButtonClickHandler();
     
   }
+  
+  getQueryModel(){
+    return this.#queryModel;
+  }
 
   #initCancelQueryButtonClickHandler(){
     byId('cancelQueryButton')
@@ -1113,6 +1117,9 @@ class PivotTableUi {
       this.#renderCells();
       await this.#updateCellData(0, 0);  
       this.#setNeedsUpdate(false);
+      
+      var currentRoute = Routing.getRouteForView(this);
+      document.location.hash = currentRoute || '';
     }
     catch(e){
       showErrorDialog(e);
@@ -1245,6 +1252,10 @@ class PivotTableUi {
   #updateHorizontalSizer(){
     var numberOfPhysicalTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_COLUMNS);
     var sizeInfo = this.#getColumnsAxisSizeInfo();
+    if (!sizeInfo) {
+      console.warn('updateHorizontalSizer: no sizeInfo');
+      return;
+    }
     var physicalColumnWidth = sizeInfo.columns.width / sizeInfo.columns.columnCount;
     var requiredWidth = physicalColumnWidth * numberOfPhysicalTuples;
     var totalWidth = sizeInfo.headers.width + requiredWidth;
@@ -1279,6 +1290,10 @@ class PivotTableUi {
   #updateVerticalSizer(){
     var numberOfPhysicalTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_ROWS);
     var sizeInfo = this.#getRowsAxisSizeInfo();
+    if (!sizeInfo) {
+      console.warn('updateVerticalSizer: no sizeInfo');
+      return;
+    }
     var physicalRowHeight = sizeInfo.rows.height / sizeInfo.rows.rowCount;
     var requiredHeight = physicalRowHeight * numberOfPhysicalTuples;
     var totalHeight = sizeInfo.headers.height + requiredHeight;
