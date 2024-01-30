@@ -72,12 +72,12 @@ class QueryUi {
     }
     else 
     if (targetId.endsWith('-edit-filter-condition')){
-      this.#queryAxisUiItemEditFilterClicked(axisItem)
+      this.openFilterDialogForQueryModelItem(axisItem);
     }
   }
     
-  #queryAxisUiItemEditFilterClicked(queryAxisItemUi){
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+  openFilterDialogForQueryModelItem(queryModelItem){
+    var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
   }
 
@@ -224,18 +224,6 @@ class QueryUi {
     var eventData = event.eventData;
     // TODO: examine the event Data and figure out if we have to update the entire ui or just bits of it.
     this.#updateQueryUi();
-
-    if (
-      eventData.axesChanged && 
-      eventData.axesChanged.filters && 
-      eventData.axesChanged.filters && 
-      eventData.axesChanged.filters.added && 
-      eventData.axesChanged.filters.added.length
-    ){
-      var queryModelItem = eventData.axesChanged.filters.added[0];
-      var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
-      this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
-    }
     
     if (eventData.propertiesChanged) {
       if (eventData.propertiesChanged.datasource) {

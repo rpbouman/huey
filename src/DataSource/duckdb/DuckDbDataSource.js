@@ -43,7 +43,7 @@ class DuckDbDataSource extends EventEmitter {
     },
     'sqlite': {
       datasourceType: DuckDbDataSource.types.SQLITE,
-      duckdb_extension: 'sqlite'
+      duckdb_extension: 'sqlite_scanner'
     }
   };
   

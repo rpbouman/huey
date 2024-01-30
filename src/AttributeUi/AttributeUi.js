@@ -524,6 +524,10 @@ class AttributeUi {
     
     if (checked) {
       await this.#queryModel.addItem(itemConfig);
+      
+      if (axis === QueryModel.AXIS_FILTERS) {
+        queryUi.openFilterDialogForQueryModelItem(itemConfig);
+      }
     }
     else {
       this.#queryModel.removeItem(itemConfig);

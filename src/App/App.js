@@ -179,7 +179,6 @@ async function setPageState(hash){
       settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       pivotTableUi.updatePivotTableUi();
     }
-    filterDialog.getDom().close();
   }
 }
 
