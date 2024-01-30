@@ -179,7 +179,7 @@ dialog > footer {
   flex-grow: 0;
 }
 
-dialog > footer > button {
+dialog > footer button {
   width: 5em;
   white-space: nowrap;
   overflow: hidden;
@@ -205,6 +205,11 @@ form, form > fieldset {
   grid-auto-flow: row;
   grid-gap: 0.25em;
   padding-top: 0.75em;
+}
+
+dialog > footer > form[role=toolbar][method=dialog] {
+  display: flex;
+  flex-direction: row;
 }
 
 form > fieldset {

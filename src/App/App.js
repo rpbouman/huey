@@ -118,7 +118,23 @@ async function setPageState(hash){
     
     var datasource = datasourcesUi.getDatasource(datasourceId);
     if (!datasource) {
-      throw new Error(`datasource ${datasourceId} not found.`);
+      var choice = await PromptUi.show({
+        title: 'Datasource not found',
+        contents: [
+          'You are trying to open a query on datasource:',
+          `<center>${datasourceId}</center>`,
+          'Would you like to open the datasource?'
+        ].join('<br/>')
+      });
+      switch (choice) {
+        case 'accept':
+          byId('uploader').click();
+          break;
+        case 'reject':
+          document.location.hash = '';
+          break;
+      }
+      return;
     }
     var columnMetadata = await datasource.getColumnMetadata();
     

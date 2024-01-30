@@ -325,6 +325,11 @@ function initUploadUi(){
     var files = fileControl.files;
     await uploadUi.uploadFiles(files);
     fileControl.value = '';
+    
+    if (document.location.hash && document.location.hash.length) {
+      setPageState(document.location.hash);
+    }
+    
     return;  
   }, false);
 }

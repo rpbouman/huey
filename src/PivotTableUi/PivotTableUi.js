@@ -1118,8 +1118,8 @@ class PivotTableUi {
       await this.#updateCellData(0, 0);  
       this.#setNeedsUpdate(false);
       
-      var currentRoute = Routing.getRouteForView(this);
-      document.location.hash = currentRoute || '';
+      //var currentRoute = Routing.getRouteForView(this);
+      //document.location.hash = currentRoute || '';
     }
     catch(e){
       showErrorDialog(e);
