@@ -3,16 +3,16 @@ Huey is a browser-based application that lets you inspect and analyze tabular da
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 ## Key features
-- Zero install. Download or checkout the source tree, and open index.html in your browser! No server required.
-- Supports reading .parquet, .csv, .json and duckdb database files. (Support for reading MS Excel files is planned)
+- Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
+- Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
-- An intuitive and responsive pivot table, supporting many types of metrics
+- An intuitive and responsive pivot table, with support for many types of metrics
 
-Note that although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
+Note: although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
 
 ## Limitations
-- Developed on latest/recent versions of Google Chrome. Although most features should work on other major browsers as well, browser compatibility is currently not the highest priority
-- When run directly from file, all typical limitations such as same domain restrictions apply. In general this means you can only access files that are already on your local machine.
+- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. 
+- Currently supports only local files. ("Local files" are files that logically exist in the local file system. This includes files from network drives and cloud drives like Google Drive and Microsoft OneDrive)
 
 ## Getting started
 1) [Checkout](https://github.com/rpbouman/huey.git) or [Download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) from github
