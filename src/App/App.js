@@ -216,6 +216,6 @@ function initApplication(){
   initPivotTableUi();
   initExecuteQuery();
   
-  initPopstateHandler();
-  setPageState();
+  //initPopstateHandler();
+  //setPageState();
 }

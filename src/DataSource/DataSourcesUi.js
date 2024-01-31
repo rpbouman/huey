@@ -252,8 +252,8 @@ class DataSourcesUi {
     summaryElement.appendChild(removeActionButton);
   }
   
-  async #loadDuckDbDatasource(duckdbDatasource){
-    var catalogName = duckdbDatasource.getFileNameWithoutExtension();
+  async #loadDatabaseDatasource(databaseDatasource){
+    var catalogName = databaseDatasource.getFileNameWithoutExtension();
     var connection = window.hueyDb.connection;
     var sql = `
       SELECT table_schema, table_name, table_type 
@@ -266,7 +266,7 @@ class DataSourcesUi {
     var result = await statement.query(catalogName);
     statement.close();
     
-    var datasourceId = duckdbDatasource.getId();
+    var datasourceId = databaseDatasource.getId();
     var datasourceTreeNode = byId(datasourceId);
     
     var schemaNodes = {};
@@ -337,7 +337,8 @@ class DataSourcesUi {
         // noop, files can't be expanded.
         break;
       case DuckDbDataSource.types.DUCKDB:
-        this.#loadDuckDbDatasource(datasource);
+      case DuckDbDataSource.types.SQLITE:
+        this.#loadDatabaseDatasource(datasource);
         break;
       default:
         console.error(`Don't know how to load datasource ${datasource.getId()} of type ${datasource.getType()}`);
@@ -379,6 +380,7 @@ class DataSourcesUi {
     
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
+      case DuckDbDataSource.types.SQLITE:
         datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this));
         break;
       default:
