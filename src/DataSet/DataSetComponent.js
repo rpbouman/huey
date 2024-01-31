@@ -28,6 +28,5 @@ class DataSetComponent {
   async cancelPendingQuery(){
     var connection = this.getManagedConnection();
     return await connection.cancelPendingQuery();
-  }
-  
+  }  
 }

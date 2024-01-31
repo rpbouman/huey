@@ -50,10 +50,10 @@
   first and last are filler elements.
 */
 
-*[role=tablist]> *:last-child {
+*[role=tablist]> *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child {
   flex-grow: 1;
 }
-*[role=tablist] > *:first-child::before {
+*[role=tablist] > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):first-child::before {
   content: ' ';
   width: 10px;
   border-bottom-style: solid;
@@ -62,9 +62,10 @@
   display: block;
   position: absolute;
   margin-left: -10px;
-  margin-top: 18px;
+  margin-top: 19px;
 }
-*[role=tablist] > *:last-child::after {
+
+*[role=tablist] > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child::after {
   content: ' ';
   width: 100%;
   border-bottom-style: solid;
@@ -74,8 +75,8 @@
   margin-top: 2px;
 }
 
-*[role=tablist] > *:has( > label[role=tab] + input[type=radio].tabState:checked + *[role=tabpanel] ):last-child::after {
-  margin-top: 1px;
+*[role=tablist] > *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ):last-child::after {
+  margin-top: 0px;
 }
 
 

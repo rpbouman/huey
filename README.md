@@ -2,6 +2,9 @@
 Huey is a browser-based application that lets you inspect and analyze tabular datasets.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
+![image](https://github.com/rpbouman/huey/assets/647315/b2e45002-409c-4a98-8d38-f5a6bfc6b7e9)
+
+
 ## Key features
 - Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
