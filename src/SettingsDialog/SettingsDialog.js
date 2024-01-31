@@ -145,9 +145,9 @@ class Settings extends EventEmitter {
         options: [
           {
             value: {
-              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(50,50,50)",
               "--huey-placeholder-color": "rgb(180,180,180)",
               "--huey-light-background-color": "rgb(255,255,255)",
@@ -163,9 +163,9 @@ class Settings extends EventEmitter {
           },
           {
             value: {
-              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "#000000", /* Black */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
               "--huey-light-background-color": "#F0E68C", /* Khaki */
@@ -181,9 +181,9 @@ class Settings extends EventEmitter {
           },
           {
             value: {
-              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "#FFFFFF", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
               "--huey-light-background-color": "#F5F5F5", /* White Smoke */
@@ -199,9 +199,9 @@ class Settings extends EventEmitter {
           },
           {
             value: {
-              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(36,36,74)",
               "--huey-placeholder-color": "rgb(180,180,180)",
               "--huey-light-background-color": "rgb(182,187,229)",
@@ -217,9 +217,9 @@ class Settings extends EventEmitter {
           },
           {
             value: {
-              "--huey-text-font-family": "Verdana",
+              "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
-              "--huey-mono-font-family": "Monospace",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(220, 220, 220)",
               "--huey-placeholder-color": "rgb(100, 100, 100)",
               "--huey-light-background-color": "rgb(30, 30, 30)",
@@ -235,9 +235,9 @@ class Settings extends EventEmitter {
           }
         ],
         value: {
-          "--huey-text-font-family": "Verdana",
+          "--huey-text-font-family": "system-ui",
           "--huey-text-font-size": "10pt",
-          "--huey-mono-font-family": "Monospace",
+          "--huey-mono-font-family": "monospace",
           "--huey-foreground-color": "rgb(50,50,50)",
           "--huey-placeholder-color": "rgb(180,180,180)",
           "--huey-light-background-color": "rgb(255,255,255)",

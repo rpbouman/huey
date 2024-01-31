@@ -2,6 +2,7 @@
   font-family: "tabler-icons";
   font-style: normal;
   font-weight: 400;
+  font-display: block;
   src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
 }
 
@@ -9,9 +10,9 @@
   /*
   * Huey text font
   */
-  --huey-text-font-family: Verdana;
+  --huey-text-font-family: system-ui;
   --huey-text-font-size: 10pt;
-  --huey-mono-font-family: Monospace;
+  --huey-mono-font-family: monospace;
   
   /**
   * Huey text font colors
