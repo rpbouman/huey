@@ -23,7 +23,7 @@ class QueryUi {
       return;
     }
     var node = target;
-    var axis, axisItem;
+    var axis, queryAxisItemUi;
     var isClearAxisAction, isPrimaryAxisAction, isAxisItemAction;
     var dom = this.getDom();
     while (node && node !== dom){
@@ -32,7 +32,7 @@ class QueryUi {
           axis = node;
           break;
         case 'LI':
-          axisItem = node;
+          queryAxisItemUi = node;
           break;
       }
       node = node.parentNode;
@@ -51,56 +51,61 @@ class QueryUi {
       this.#axisClearButtonClicked(axis);
     }
     
-    if (!axisItem){
+    if (!queryAxisItemUi){
       return;
     }
     
     if (targetId.endsWith('-move-left')) {
-      this.#queryAxisUiItemMoveLeftClicked(axisItem);
+      this.#queryAxisUiItemMoveLeftClicked(queryAxisItemUi);
     }
     else
     if (targetId.endsWith('-move-right')) {
-      this.#queryAxisUiItemMoveRightClicked(axisItem);
+      this.#queryAxisUiItemMoveRightClicked(queryAxisItemUi);
     }
     else
     if (targetId.endsWith('-remove-from-axis')){
-      this.#queryAxisUiItemRemoveClicked(axisItem);
+      this.#queryAxisUiItemRemoveClicked(queryAxisItemUi);
     }
     else
     if (targetId.endsWith('-move-to-other-axis')){
-      this.#queryAxisUiItemMoveToAxisClicked(axisItem);      
+      this.#queryAxisUiItemMoveToAxisClicked(queryAxisItemUi);      
     }
     else 
     if (targetId.endsWith('-edit-filter-condition')){
-      this.openFilterDialogForQueryModelItem(axisItem);
+      this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
     }
   }
-    
+  
+  #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+  }
+  
   openFilterDialogForQueryModelItem(queryModelItem){
     var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
   }
 
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
-    var item = this.#getQueryModelItem(queryAxisItemUi);
-    delete item.index;
-    switch (item.axis) {
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    delete queryModelItem.index;
+    switch (queryModelItem.axis) {
       case QueryModel.AXIS_COLUMNS:
-        item.axis = QueryModel.AXIS_ROWS;
+        queryModelItem.axis = QueryModel.AXIS_ROWS;
         break;
       case QueryModel.AXIS_ROWS:
-        item.axis = QueryModel.AXIS_COLUMNS;
+        queryModelItem.axis = QueryModel.AXIS_COLUMNS;
         break;
     }
-    this.#queryModel.addItem(item);
+    this.#queryModel.addItem(queryModelItem);
   }
 
   #moveQueryAxisItemUi(queryAxisItemUi, direction) {
-    var item = this.#getQueryModelItem(queryAxisItemUi);
-    var itemIndex = item.index;
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    var itemIndex = queryModelItem.index;
     itemIndex += direction;
-    item.index = itemIndex;
-    this.#queryModel.addItem(item);
+    queryModelItem.index = itemIndex;
+    this.#queryModel.addItem(queryModelItem);
   }
 
   #queryAxisUiItemMoveLeftClicked(queryAxisItemUi){
@@ -112,8 +117,8 @@ class QueryUi {
   }
 
   #queryAxisUiItemRemoveClicked(queryAxisItemUi){
-    var item = this.#getQueryModelItem(queryAxisItemUi);
-    queryModel.removeItem(item);
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    queryModel.removeItem(queryModelItem);
   }
 
   #updateQueryUi(){
