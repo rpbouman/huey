@@ -178,6 +178,7 @@ dialog > footer {
   margin-top: 12px;
   margin-bottom: -6px;
   flex-grow: 0;
+  text-align: center;
 }
 
 dialog > footer button {

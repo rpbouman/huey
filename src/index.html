@@ -135,9 +135,8 @@
           </div>
         </section>
         <footer>
-          <center>
-            <button id="cancelQueryButton">Cancel</button>
-          </center`>
+          <!-- TODO: implement cancel of pending export -->
+          <button id="cancelExportButton">Cancel</button>
         </footer>
       </dialog>      
       <header>
@@ -885,11 +884,13 @@
               style="display:none"
             >
               <fieldset>
-                <legend>Search</legend>
+                <legend id="searchAttributesLabel">Search Attributes</legend>
                 <input 
                   id="searchAttribute"
                   type="search"
                   placeholder="Search by Attribute name"
+                  title="Enter a search term to find matching attributes"
+                  aria-labelledby="searchAttributesLabel"
                 />
               </fieldset>
             </search>
@@ -967,9 +968,7 @@
               <!-- TODO: actual progress information -->
             </section>
             <footer>
-              <center>
-                <button id="cancelQueryButton">Cancel</button>
-              </center`>
+              <button id="cancelQueryButton">Cancel</button>
             </footer>
           </div>
           <div 
