@@ -1,0 +1,16 @@
+.search {
+  position: sticky;
+  flex-grow: 0;
+  top: 0px;
+  background-color: var( --huey-medium-background-color );
+  height: 62px;
+  padding-top: 1px;
+}
+
+.search > fieldset > input[type=search]{
+  width: 100%;
+}
+
+.attributeUi .attributeUiNode[data-matches-searchstring=false] {
+  display: none;
+}

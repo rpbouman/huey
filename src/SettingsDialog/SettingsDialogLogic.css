@@ -1,0 +1,10 @@
+form#localeSettings:has(> input#useDefaultLocale:checked) > input#locale {
+  pointer-events: none;
+  background-color: var( --huey-medium-background-color );
+  color: var( --huey-placeholder-color ); 
+}  
+
+form#localeSettings:has(> input#useDefaultLocale:checked) > label[for=locale] {
+  pointer-events: none;
+  color: var( --huey-placeholder-color );
+}  

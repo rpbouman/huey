@@ -1,0 +1,125 @@
+
+main.layout {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 99fr;
+  grid-template-rows: 1fr 1fr 99fr;
+  gap: 0px;
+}
+
+nav#sidebar {
+  width: 350px;
+  height: calc(100vh - 40px);
+  max-width: calc(100vw - 14px);
+  grid-column: 1/1;
+  grid-row: 2/ span 2;
+  padding: 4px 4px 0px 4px;
+  display: flex;
+  min-width: 200px;
+}
+
+.workarea {
+  grid-column: 2/2;
+  grid-row: 2/2;
+  height: calc(100vh - 38px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;  
+  border-top-style:solid;
+  border-top-color: var( --huey-dark-border-color );
+  border-top-width: 1px;
+
+  border-left-color: var( --huey-dark-border-color );
+  border-left-width: 1px;
+  border-left-style: solid;
+
+  border-top-left-radius: 12px;
+}
+
+.button {
+  display: inline-block;
+  
+}
+
+menu[role=toolbar] > label[for=uploader] {
+  vertical-align: top;
+}
+
+menu[role=toolbar] > label[for=uploader]::before {
+  content: "\eb47";
+}
+
+#uploader {
+  display: none;
+}
+
+menu[role=toolbar] > label[for=autoRunQuery]{
+  position: relative;
+  vertical-align: top;
+}
+
+menu[role=toolbar] > label[for=runQueryButton]{
+  position: relative;
+  vertical-align: top;
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton] {
+  pointer-events: none;
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play */
+  content: "\ed46";
+}
+
+main:has( > .workarea > #pivotTableUi[data-needs-update=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play */
+  content: "\ed46";
+  color: var( --huey-icon-highlight );
+}
+
+main:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+  /* player-play-filled */
+  content: "\f691";
+  color: var( --huey-icon-highlight );
+  pointer-events: none;
+}
+
+body > main > menu[role=toolbar] > label[for=autoRunQuery]::after {
+  font-family: var( --huey-icon-font-family );
+  font-size: var(--huey-icon-normal);
+  color: var(--huey-icon-color-subtle);
+  margin-left: .2em;
+  /* square */
+  content: "\eb2c";
+}
+
+body > main > menu[role=toolbar] > label[for=autoRunQuery]::after:hover {
+  color: var( --huey-icon-color-highlight );
+}
+
+body:has( #autoRunQuery:checked ) > main > menu[role=toolbar] > label[for=autoRunQuery]::after {
+  /* checkbox */
+  content: "\eba6";
+  color: var( --huey-icon-color-highlight );
+}
+
+body:has( #autoRunQuery:checked ) > main > menu[role=toolbar] > label[for=runQueryButton] {
+  visibility: hidden;
+}
+
+menu[role=toolbar] > #currentDatasource:not( :empty )::before {
+  content: 'Datasource: '
+}
+menu[role=toolbar] > #currentDatasource {
+  display: inline-block;
+  padding: 8px;
+  margin-block-start: 0em;
+  margin-block-end: 0em;
+  font-size: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc( 100% - 450px);
+}
+

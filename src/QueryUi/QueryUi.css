@@ -1,0 +1,336 @@
+.queryUi {
+  display: flex;
+  flex-direction: column;
+  padding-left: 4px;
+  padding-right: 2px;
+}
+
+.queryUi section,
+.queryUi menu,
+.queryUi ol,
+.queryUi li {
+  margin-block: 0px;
+  margin-inline: 0px;
+  padding-inline: 0px;
+}
+
+/* query ui axis */
+.queryUi > section {
+  display: flex;
+  flex-direction: row;
+  margin-top: 1px;
+  min-height: 26px;
+}
+
+.queryUi > section:last-child {
+  margin-bottom: 1px;  
+}
+
+/* query ui axis label */
+.queryUi > section > header > h1 {
+  font-size: 1em;
+  font-weight: normal;
+  display: inline-block;
+  width: 64px;
+  margin-block: 0px;
+}
+
+.queryUi > section > header > h1:after {
+  content: ':';
+}
+
+.queryUi label > button {
+  display: none;
+}
+
+.queryUi label:has( > button )::after {
+  width: 24px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+.queryUi label:has( > button ):hover::after {
+  color: var( --huey-icon-color-highlight );
+}
+
+/* Columns axis header icon */
+.queryUi > section[data-axis=filters] > header > label:has( > button )::after {
+  /* filter */
+  content: "\eaa5";
+}
+
+/* Columns axis header icon */
+.queryUi > section[data-axis=columns] > header > label:has( > button )::after {
+  /* table-row */
+  content: "\fb00";
+}
+/* axis icon is a button to flip the non-cells axes */
+.queryUi > section[data-axis=columns] > header > label:has( > button ):hover::after {
+  /* table-column */
+  content: "\faff";
+}
+
+/* Rows axis header icon */
+.queryUi > section[data-axis=rows] > header > label:has( > button )::after {
+  /* table-column */
+  content: "\faff";
+}
+/* axis icon is a button to flip the non-cells axes */
+.queryUi > section[data-axis=rows] > header > label:has( > button ):hover::after {
+  /* table-row */
+  content: "\fb00";
+}
+
+/* Cells axis header icon */
+.queryUi > section[data-axis=cells] > header > label:has( > button )::after {
+  content: "\edba";
+}
+
+.queryUi[data-cellheadersaxis=columns] > section[data-axis=cells] > header > label:has( > button ):hover::after {
+  /* table-column */
+  content: "\faff";
+}
+.queryUi[data-cellheadersaxis=rows] > section[data-axis=cells] > header > label:has( > button ):hover::after {
+  /* table-row */
+  content: "\fb00";
+}
+
+.queryUi > section > footer > label:has( > button )::after {
+  /* trash */
+  content: "\eb41";
+}
+
+/* query ui axis items */
+.queryUi > section > ol {
+  flex-grow: 1;
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+  display: inline-block;
+
+  border-color: var( --huey-light-border-color );
+  background-color: var( --huey-light-background-color );
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 15px;
+}
+
+/* query ui axis item */
+
+.queryUi > section > ol > li {
+  border-color: var( --huey-light-border-color );
+  background-color: var( --huey-medium-background-color );
+  white-space: nowrap;
+  display: inline-block;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 15px;
+  margin: 1px 0px 1px 1px;
+}
+
+/* label holding the item caption */
+.queryUi > section > ol > li > span {
+  vertical-align: 16%;
+}
+
+.queryUi > section > ol > li[data-derivation] > span:before,
+.queryUi > section > ol > li[data-aggregator] > span:before {
+  width: 24px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color );
+  vertical-align: -15%;
+}
+
+/**
+*
+* Derivation icons
+*
+*/
+.queryUi > section > ol > li[data-derivation=date] > span:before {
+  /* calendar */
+  content: "\ea53";
+}
+
+.queryUi > section > ol > li[data-derivation=year] > span:before {
+  /* letter-y */
+  content: "\ec68";
+}
+
+.queryUi > section > ol > li[data-derivation=quarter] > span:before {
+  /* letter q */
+  content: "\ec60";
+}
+
+.queryUi > section > ol > li[data-derivation="month num"] > span:before {
+  /* letter m */
+  content: "\ec5c";
+}
+
+.queryUi > section > ol > li[data-derivation="week num"] > span:before {
+  /* letter w */
+  content: "\ec66";
+}
+
+.queryUi > section > ol > li[data-derivation="day of year"] > span:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > section > ol > li[data-derivation="day of month"] > span:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > section > ol > li[data-derivation="day of week"] > span:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.queryUi > section > ol > li[data-derivation=time] > span:before {
+  /* clock */
+  content: "\ea70";
+}
+
+.queryUi > section > ol > li[data-derivation=hour] > span:before {
+  /* letter-h */
+  content: "\ec57";
+}
+
+.queryUi > section > ol > li[data-derivation=minute] > span:before {
+  /* letter-m-small */
+  content: "\fcd3";
+}
+
+.queryUi > section > ol > li[data-derivation=second] > span:before {
+  /* letter-s */
+  content: "\ec62";
+}
+
+/**
+*
+* Aggregator icons
+*
+*/
+.queryUi > section > ol > li[data-aggregator=count] > span:before {
+  /* tallymarks */
+  content: "\ec4a";
+}
+
+.queryUi > section > ol > li[data-aggregator="distinct count"] > span:before {
+  /* tallymark-4 */
+  content: "\ec49";
+}
+
+.queryUi > section > ol > li[data-aggregator=max] > span:before {
+  /* math-max */
+  content: "\f0f5";
+}
+
+.queryUi > section > ol > li[data-aggregator=min] > span:before {
+  /* math-min */
+  content: "\f0f6";
+}
+
+.queryUi > section > ol > li[data-aggregator=list] > span:before {
+  /* list */
+  content: "\eb6b";
+}
+
+.queryUi > section > ol > li[data-aggregator="distinct list"] > span:before {
+  /* list details */
+  content: "\ef40";
+}
+
+.queryUi > section > ol > li[data-aggregator=sum] > span:before {
+  /* sum */
+  content: "\eb73";
+}
+
+.queryUi > section > ol > li[data-aggregator=avg] > span:before {
+  /* math-avg */
+  content: "\f0f4";
+}
+
+.queryUi > section > ol > li[data-aggregator=median] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=mode] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=stdev] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+
+
+/* buttons to move the item */
+.queryUi > section > ol > li > label:first-child:has( > button )::after {
+  /* chevron left */
+  content: "\ea60";  
+}
+
+.queryUi > section > ol > li > label:last-child:has( > button )::after {
+  /* chevron right */
+  content: "\ea61";
+}
+
+.queryUi > section > ol > li:first-child > label:first-child:has( > button )::after {
+  visibility: hidden;  
+  display: none;
+}
+
+/* label holding the item caption */
+.queryUi > section > ol > li:first-child > span {
+  margin-left: 8px;
+}
+
+
+.queryUi > section > ol > li:last-child > label:last-child:has( > button )::after {
+  visibility: hidden;  
+  display: none;
+}
+
+/* label holding the item caption */
+.queryUi > section > ol > li:last-child > menu {
+  margin-right: 6px;
+}
+
+/* axis item actions */
+.queryUi > section > ol > li > menu {
+  display: inline-block;
+  margin: 0px;
+}
+
+/* axis item action to move item to other axis */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* table-row */
+  content: "\fb00";
+}
+
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* table-column */
+  content: "\faff";
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* filter-edit */
+  /* content: "\fa00"; */
+  /* filter cog */
+  content: "\f9fe";
+}
+
+/* axis item action to remove item from axis */
+.queryUi > section > ol > li > menu > label:nth-child(2):has( > button )::after {
+  /* trash */
+  content: "\eb41";
+}
+
+
+
+}

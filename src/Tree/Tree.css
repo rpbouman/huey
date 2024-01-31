@@ -1,0 +1,58 @@
+*[role=tree] {
+  padding-left: 6px;
+}
+
+*[role=tree] details[role=treeitem] > summary::marker {
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-small );
+  color: var( --huey-icon-color-subtle );
+}
+
+*[role=tree] details[role=treeitem] > summary:hover {
+  background-color: var( --huey-dark-background-color );
+  color: var( --huey-icon-color-highlight );
+}
+
+*[role=tree] details[role=treeitem] > summary:hover::marker {
+  color: var( --huey-icon-color-highlight );
+}
+
+*[role=tree] details[role=treeitem] > summary {
+  white-space: nowrap;
+  vertical-align: top;
+  line-height: 20px;
+  list-style-type: "\f63f"; 
+}
+
+*[role=tree] details[role=treeitem][open] > summary {
+  list-style-type: "\f63e";
+}
+
+*[role=tree] details[role=treeitem] > summary > .icon {
+  display: inline-block;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color );
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  text-align: center;
+}
+
+/**
+*
+* Label
+*
+*/
+
+*[role=tree] details[role=treeitem] > summary > .label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+
+*[role=tree] details[role=treeitem] > details[role=treeitem] {
+  margin-left: 24px;
+}
+

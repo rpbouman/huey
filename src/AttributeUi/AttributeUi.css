@@ -1,0 +1,291 @@
+.attributeUi details[data-nodetype=derived] > summary,
+.attributeUi details[data-nodetype=aggregate] > summary,
+.attributeUi details[data-nodetype=derived][open] > summary,
+.attributeUi details[data-nodetype=aggregate][open] > summary {
+  list-style: none;
+  margin-left: 16px;
+}
+
+.attributeUi details > summary > .label  {
+  max-width: calc(100% - 166px);
+}
+/**
+*
+* Data type icons
+*
+*/
+.attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon:before {
+  /* letter T */
+  content: "\ec63";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon:before,
+.attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon:before
+{
+  /* 123 */
+  content: "\f554";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon:before
+{
+  /* code-dots */
+  content: "\f61a";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon:before,
+.attributeUi details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon:before,
+.attributeUi details[data-nodetype=column][data-column_type=REAL] > summary > .icon:before {
+  /* decimal */
+  content: "\fa26";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type*=TIMESTAMP] > summary > .icon:before {
+  /* calendar-clock */
+  content: "\fd2e";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type=DATE] > summary > .icon:before {
+  /* calendar */
+  content: "\ea53";
+}
+
+.attributeUi details[data-nodetype=column][data-column_type=TIME] > summary > .icon:before {
+  /* clock */
+  content: "\ea70";
+}
+
+/**
+*
+* Derivation icons
+*
+*/
+.attributeUi details[data-nodetype=derived][data-derivation=date] > summary > .icon:before {
+  /* calendar */
+  content: "\ea53";
+}
+.attributeUi details[data-nodetype=derived][data-derivation=year] > summary > .icon:before {
+  /* letter-y */
+  content: "\ec68";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=quarter] > summary > .icon:before {
+  /* letter q */
+  content: "\ec60";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation="month num"] > summary > .icon:before {
+  /* letter m */
+  content: "\ec5c";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation="week num"] > summary > .icon:before {
+  /* letter w */
+  content: "\ec66";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon:before {
+  /* letter-d */
+  content: "\ec53";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=time] > summary > .icon:before {
+  /* clock */
+  content: "\ea70";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=hour] > summary > .icon:before {
+  /* letter-h */
+  content: "\ec57";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=minute] > summary > .icon:before {
+  /* letter-m-small */
+  content: "\fcd3";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=second] > summary > .icon:before {
+  /* letter-s */
+  content: "\ec62";
+}
+
+/**
+*
+* Aggregator icons
+*
+*/
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon:before {
+  /* tallymarks */
+  content: "\ec4a";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon:before {
+  /* tallymark-4 */
+  content: "\ec49";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon:before {
+  /* math-max */
+  content: "\f0f5";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon:before {
+  /* math-min */
+  content: "\f0f6";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon:before {
+  /* list */
+  content: "\eb6b";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon:before {
+  /* list details */
+  content: "\ef40";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon:before {
+  /* list numbers */
+  content: "\ef11";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon:before {
+  /* sum */
+  content: "\eb73";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon:before {
+  /* math-avg */
+  content: "\f0f4";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+
+/**
+* Prevent the Attribute UI events when the pivot table is busy:
+*/
+main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#sidebar .attributeUi details > summary > label.attributeUiAxisButton {
+  pointer-events: none;
+}
+
+/**
+*
+* Axis Buttons
+*
+*/
+.attributeUi details > summary > span.attributeUiAxisButton,
+.attributeUi details > summary > label.attributeUiAxisButton:has( > input[type=checkbox] ) 
+{
+  display: block;
+  float: inline-end;
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+
+.attributeUi details > summary > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
+  color: var( --huey-icon-color-highlight );
+}
+
+.attributeUi details > summary > .attributeUiAxisButton > input[type=checkbox] {
+  display: none;
+}
+
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]:before {
+  /* table-column */
+  /* 
+    It may seem backward that we're using the table-column icon for the rows axis, 
+    but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+  */
+  content: "\faff";
+}
+
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=columns]:before {
+  /* table-row */
+  /* 
+    It may seem backward that we're using the table-row icon for the columns axis, 
+    but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+  */
+  content: "\fb00";
+}
+
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=cells]:before {
+  /* layout grid */
+  content: "\edba";
+}
+
+.attributeUi details[data-nodetype=column] > summary > .attributeUiAxisButton[data-axis=cells],
+.attributeUi details[data-nodetype=derived] > summary > .attributeUiAxisButton[data-axis=cells] {
+  visibility:hidden;
+}
+
+.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=filters],
+.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=columns],
+.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=rows] {
+  visibility:hidden;
+}
+
+.attributeUi details > summary > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
+  color: var( --huey-icon-color-highlight );
+}
+
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:before {
+  /* filter-plus */
+  /* content: "\fa02"; */
+  /* filter */
+  content: "\eaa5";
+}
+
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked ):before {
+  /* filter-x */
+  /* content: "\fa04"; */
+  /* filter-off */
+  content: "\ed2c";
+}
+

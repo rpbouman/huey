@@ -1,0 +1,178 @@
+dialog#filterDialog {
+  margin: 0px;
+  position:absolute;
+  resize: both;
+  padding: 2px 0px 0px 2px;
+  min-height: 300px;
+}
+
+#filterDialogSpinner {
+  position:absolute;
+  left: 50%;
+  top: 170px;
+  zoom: 33%;
+}
+
+dialog#filterDialog[aria-busy=false] #filterDialogSpinner {
+  display: none;
+}
+
+dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
+  display: block;
+}
+
+dialog#filterDialog[aria-busy=true] > section > header > section > header > search#filterSearch  {
+  color: transparent;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+dialog#filterDialog[aria-busy=true] > section > header > section > section > select#filterPicklist {
+  color: transparent;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  overflow: auto;
+}
+
+dialog#filterDialog > footer > button {
+  width: 5.5em;
+}
+
+dialog#filterDialog > section > footer > button#filterDialogClearSelectedButton {
+  width: 8.5em;
+}
+dialog#filterDialog > section > footer > button#filterDialogClearButton{
+  width: 8.5em;
+}
+
+dialog#filterDialog section > header {
+  flex-grow: 0;
+}
+
+dialog#filterDialog > section > header {
+  flex-grow: .75
+}
+
+dialog#filterDialog section > section {
+  flex-grow: 1;
+}
+
+dialog#filterDialog > section > section {
+  flex-grow: 1.25
+}
+
+dialog#filterDialog > section > header > section > section > select#filterPicklist > optgroup > option[data-next-page-loader=true] {
+  color: var( --huey-placeholder-color );
+  font-style: italic;
+}
+
+dialog#filterDialog > footer {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding: 4px 4px 0px 4px;
+  height: 30px;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var( --huey-light-border-color );
+}
+
+dialog#filterDialog > section {
+  padding: 2px;
+}
+
+dialog#filterDialog > section > section {
+  margin-top: 4px;
+}
+
+dialog#filterDialog section {
+  display:flex;
+  flex-direction: column;
+}
+
+dialog#filterDialog section > footer {
+  flex-grow: 0;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+dialog#filterDialog > section > header > section > header > input[type=search]#filterSearch {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-style: none;
+  border-color: var( --huey-light-border-color ); 
+  width: 100%;
+}
+
+dialog#filterDialog > section > header > section > section > select#filterPicklist {
+  border-top-left-radius: 0px;
+  border-top-style: none;
+  box-shadow: 0px 0px 0px transparent;
+  width: 100%;
+  height: 100%;
+  resize: vertical;
+}
+
+dialog#filterDialog > section > header > section > footer[role=status] {
+  font-size: smaller;
+}
+
+dialog#filterDialog select[multiple=true] > option {
+}
+
+dialog#filterDialog > section > section > label > select {
+  width: 100%;
+  height: calc( 100% - 20px);
+}
+
+dialog#filterDialog > section > section {
+  display: flex;
+  flex-direction: row;
+}
+
+dialog#filterDialog > section > section > div {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+dialog#filterDialog > section > section > div > label{
+  flex-grow: 0;
+}
+
+dialog#filterDialog > section > section > div > select{
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+}
+
+dialog#filterDialog > section > section > div:has( > label[for=toFilterValueList] ) {
+  display: none;
+}
+
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ), 
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) {
+  display: flex;
+  flex-grow: 1;
+}
+
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ),
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ){
+  flex-grow: 0;
+}
+
+dialog#filterDialog #filterValueList,
+dialog#filterDialog #toFilterValueList {
+  overflow: auto;
+}
+
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) #filterValueList,
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) #filterValueList {
+  resize: horizontal;
+  overflow-y: hidden;
+}
+
+#toFilterValueList{
+  border-radius: 0px;
+}
+
+#filterValueList, #toFilterValueList {
+}
+

@@ -1,0 +1,14 @@
+#settingsDialog {
+  width: 400px;
+  min-width: 400px;
+  height: 300px;
+  resize: both;
+}
+
+menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {
+  float: right;
+}
+
+menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton )::before {
+  content: '\eb20';
+}

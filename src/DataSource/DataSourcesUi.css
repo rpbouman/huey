@@ -1,0 +1,158 @@
+#datasourcesUi {
+  padding-top: 12px;
+  height: calc(100% - 36px);
+}
+
+#datasourcesUi label[for=uploader]::after {
+  display:inline-block;
+  font-size: 140px;
+  width: 100%;
+  font-family: var( --huey-icon-font-family );
+  content: "\eb47";
+  text-align: center;
+  color: var( --huey-icon-color-subtle );
+}
+#datasourcesUi label[for=uploader]:hover::after {
+  color: var( --huey-icon-color-highlight );
+}
+
+#datasourcesUi[data-drop-allowed=true] {
+  cursor: 'copy';
+}
+
+#datasourcesUi[data-drop-allowed=false] {
+  cursor: 'not-allowed';
+}
+
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=sqlite] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > .icon::before
+{
+  /* folder */
+  content: '\eaad';
+}
+
+#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=duckdb] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=file] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=sqlite] > summary > .icon::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > .icon::before
+ {
+  /* folder open */
+  content: '\faf7';
+}
+
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
+  /* bucket */
+  content: '\ea47';
+}
+
+#datasourcesUi details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
+  /* bucket droplet */
+  content: '\f56a';
+}
+
+#datasourcesUi details > summary > .label  {
+  max-width: calc(100% - 104px);
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
+#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
+  list-style: none;
+  margin-left: 16px;
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > summary > .icon::before {
+  /* file-database */
+  /* content: '\f037';*/
+  /* database*/
+  content: '\ea88';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=table] summary > .icon::before 
+{
+  /* table */
+  content: '\eba1';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=view] summary > .icon::before 
+{
+  /* table-options */
+  content: '\f25c';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file] > summary > .icon::before {
+  /* file */
+  content: '\eaa4';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > .icon::before {
+  /* feather */
+  content: '\ee8b';
+}
+
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > .icon::before {
+  /* file-type-csv */
+  content: '\fb09';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > .icon::before {
+  /* file-type-txt */
+  content: '\fb19';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=json] > summary > .icon::before {
+  /* file-type-js */
+  content: '\fb0e';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > .icon::before {
+  /* file-type-sql */
+  content: '\fb0e';
+}
+
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > .icon::before {
+  /* file-stack */
+  content: '\f503';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > .icon::before {
+  /* file-type-xls */
+  content: '\fb1b';
+}
+
+#datasourcesUi details > summary > label.analyzeActionButton::before {
+  /* table */
+  /* content: '\eba1';*/
+  /* analyze */
+  content: '\f3a3';
+}
+
+#datasourcesUi details > summary > label.removeActionButton::before {
+  /* trash */
+  content: '\eb41';
+}
+
+#datasourcesUi details > summary > label:has( > button )::before 
+{
+  display: block;
+  float: inline-end;
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color-subtle );
+}
+
+#datasourcesUi details > summary > label:has( > button ):hover::before {
+  color: var( --huey-icon-color-highlight );
+}
+
+
+#datasourcesUi details > summary > label > button {
+  display: none;
+  appearance: none;
+}
+
