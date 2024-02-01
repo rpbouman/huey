@@ -69,6 +69,18 @@ class QueryAxisItemValueFormatter {
       this.#formatter = new Intl.NumberFormat(locales, options);
       this.#decimalSeparator = this.#formatter.formatToParts(123.456)['decimal'];
     }
+    else {
+      switch (columnType) {
+        case 'DATE':  // values will be represented as JavaScript Date objects. This is correct-ish, except that we need to strip the time
+          this.#formatter = new Intl.DateTimeFormat(locales, {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit'
+          });
+          break;
+        default:
+      }
+    }
   }
   
   // this has the job of converting the resultset value to a value that our formatter can format
@@ -151,7 +163,8 @@ class QueryAxisItemValueFormatter {
         break;
       /** Date int32_t days or int64_t milliseconds since the UNIX epoch */
       case 8: 
-        console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
+        // this should be ok to return as is, as we should have attached a formatter to the query item to convert from date to string.
+        //console.warn(`Encountered field ${field.name} with type ${fieldTypeName} and typeId ${fieldTypeId}, this is not explicitly handled.`);
         break;
       /** Time as signed 32 or 64-bit integer, representing either seconds, milliseconds, microseconds, or nanoseconds since midnight since midnight */
       case 9:

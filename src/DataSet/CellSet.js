@@ -122,8 +122,13 @@ class CellSet extends DataSetComponent {
         var mappingInfo = tupleValueToColumnMapping[columnName];
         var tupleValueField = mappingInfo.tupleValueField;
         var typeName = String(tupleValueField.type);
-        switch (typeName){
-          case 'Timestamp<MICROSECOND>':
+        var fieldTypeId = tupleValueField.typeId;
+
+        switch (fieldTypeId){
+          case 8: //Date:
+            return `date'${value.getUTCFullYear()}-${value.getUTCMonth() + 1}-${value.getUTCDate()}'`;
+            break;
+          case 10: //'Timestamp<MICROSECOND>':
             // If the native duckdb is TIMESTAMP then duckdb WASM tags the field type with a custom Timestamp<MICROSECOND> class
             // The actual resultset values however are simply javascript Number primitives.
             // If we simply plug those numbers back as values to our preparedStmt.query call, it fails with the error:
@@ -157,6 +162,7 @@ class CellSet extends DataSetComponent {
             // - to_timestamp(1704416523456.7888::DOUBLE / 1000)
             return `to_timestamp(${value}::DOUBLE / 1000)`;
           default:
+            
         }
         values.push(value);
         return '?';
