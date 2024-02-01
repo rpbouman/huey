@@ -140,6 +140,10 @@ class Settings extends EventEmitter {
         ]
       }
     },
+    filterDialogSettings: {
+      filterSearchApplyAll: false,
+      caseSensitive: true
+    },
     themeSettings: {
       themes: {
         options: [
@@ -363,6 +367,7 @@ class Settings extends EventEmitter {
 
     byId('settingsDialogResetButton').addEventListener('click', function(event){
       this.#resetSettings();
+      this.fireEvent('change', this);
     }.bind(this));
 
     byId('settingsButton').addEventListener('click', function(){

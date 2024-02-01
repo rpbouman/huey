@@ -60,6 +60,11 @@ class Theme {
   
 }
 
+settings.addEventListener('change', function(event){
+  var themes = byId('themes');
+  Theme.applyTheme( themes.selectedIndex );  
+});
+
 /*
 Theme editor - put it on ice for now.
 
