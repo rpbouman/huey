@@ -65,7 +65,7 @@ class FilterDialog {
       var target = event.target;
       this.#getFilterValuesList().scrollTop = target.scrollTop;
     }.bind(this));
-    
+
     this.#getFilterType().addEventListener('change', function(event){
       var filterType = event.target;
       var width, element;
@@ -90,7 +90,17 @@ class FilterDialog {
       this.#getValuePicklist().selectedIndex = -1;
       this.#updateValueSelectionStatusText();
     }.bind(this));
-    
+
+    this.#getIncludeAllFilters().addEventListener('change', function(event){
+      // TODO: check to see if there are any other filter items, 
+      // and also if they have any filter condition set.
+      // If we can avoid a query, then return, if not, repopulate the list.
+      var target = event.target;
+      settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
+      
+      this.#updatePicklist(0, this.#valuePicklistPageSize);
+    }.bind(this));
+        
     bufferEvents(this.#getSearch(), 'input', function(event, count){
       if (count === undefined) {
         this.#updatePicklist(0, this.#valuePicklistPageSize);
@@ -507,6 +517,10 @@ class FilterDialog {
     this.#setValueSelectionStatusText(text);
   }
 
+  #getIncludeAllFilters(){
+    return byId('filterSearchApplyAll');
+  }
+
   #getFilterType(){
     return byId('filterType');
   }
@@ -603,6 +617,31 @@ class FilterDialog {
     this.#populatePickList(result, offset, limit);
   }
   
+  #getOtherFilterAxisItems(withFilterValues){
+    var filtersAxis = this.#queryModel.getFiltersAxis();
+    var filtersAxisItems = filtersAxis.getItems();
+    var otherFilterAxisItems = filtersAxisItems.filter(function(filterAxisItem){
+      if (filterAxisItem === this.#queryAxisItem) {
+        return false;
+      }
+      if (withFilterValues){
+        if (!filterAxisItem.filter) {
+          return false;
+        }
+        
+        if (!filterAxisItem.filter.values) {
+          return false;
+        }
+        
+        if (!Object.keys(filterAxisItem.filter.values).length){
+          return false;
+        }
+      }
+      return true;
+    }.bind(this));
+    return otherFilterAxisItems;
+  }
+  
   async #getPicklistValues(offset, limit){
     this.setBusy(true);
 
@@ -634,25 +673,42 @@ class FilterDialog {
       ];
     }
     
+    var condition = '';
+    var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
+    if (filterSearchApplyAll) {
+      var otherFilterAxisItems = this.#getOtherFilterAxisItems(true);
+      if (otherFilterAxisItems.length) {
+        var conditions = otherFilterAxisItems.map(function(filterAxisItem){
+          return QueryAxisItem.getFilterConditionSql(filterAxisItem);
+        });
+        if (conditions && conditions.length){
+          condition = conditions.join('\nAND ');
+        }
+      }
+    }
+    
     var search = this.#getSearch();
     var searchString = search.value.trim();
     var parameters = [];
     var bindValue;
     if (searchString.length){
-      var condition;
       var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
       switch (dataType) {
         case 'VARCHAR':
         // TODO: think of a more clever way to deal with non-VARCHAR values.
         default:
-          condition = `${sqlExpression} like ?`;
+          if (condition && condition.length) {
+            condition += '\nAND ';
+          }
+          condition += `${sqlExpression} like ?`;
           bindValue = `${searchString}`;
           break;
       }
-      if (condition) {
-        sql.push(`WHERE ${condition}`);
-      }      
     }
+    
+    if (condition) {
+      sql.push(`WHERE ${condition}`);
+    }      
     
     if (bindValue){
       parameters.push(bindValue);

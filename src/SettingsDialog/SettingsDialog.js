@@ -140,6 +140,10 @@ class Settings extends EventEmitter {
         ]
       }
     },
+    filterDialogSettings: {
+      filterSearchApplyAll: false,
+      caseSensitive: true
+    },
     themeSettings: {
       themes: {
         options: [
