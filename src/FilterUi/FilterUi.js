@@ -91,7 +91,9 @@ class FilterDialog {
       this.#updateValueSelectionStatusText();
     }.bind(this));
 
-    this.#getIncludeAllFilters().addEventListener('change', function(event){
+    var includeAllFiltersCheckbox = this.#getIncludeAllFilters();
+    includeAllFiltersCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
+    includeAllFiltersCheckbox.addEventListener('change', function(event){
       // TODO: check to see if there are any other filter items, 
       // and also if they have any filter condition set.
       // If we can avoid a query, then return, if not, repopulate the list.
