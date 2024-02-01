@@ -763,6 +763,10 @@ class PivotTableUi {
     var physicalColumnsAdded = 0;
     
     var queryModel = this.#queryModel;
+    var columnsAxis = queryModel.getColumnsAxis();
+    var columnsAxisItems = columnsAxis.getItems();
+    
+    var tupleValueFields = this.#columnsTupleSet.getTupleValueFields();
     
     var numCellHeaders = 0;
     var numTuples = tuples.length;
@@ -777,7 +781,6 @@ class PivotTableUi {
       if (numCellHeaders === 0) {
         numCellHeaders = 1;
       }
-      
     }
     else {
       numCellHeaders = 1;
@@ -828,16 +831,24 @@ class PivotTableUi {
           
           var labelText;
           if (values && j < values.length) {
-            stringValue = String(values[j]);
-            if (stringValue.length > valuesMaxWidth){
-              valuesMaxWidth = stringValue.length;
-              columnWidth = valuesMaxWidth;
-            }
             if (k === 0) {
-              labelText = stringValue;
+              var value = values[j];
+              var columnsAxisItem = columnsAxisItems[j];
+              if (columnsAxisItem.formatter) {
+                var tupleValueField = tupleValueFields[j];
+                labelText = columnsAxisItem.formatter.format(value, tupleValueField);
+              }
+              else {
+                labelText = String(value);
+              }
             }
             else {
               labelText = String.fromCharCode(160);
+            }
+            
+            if (labelText.length > valuesMaxWidth){
+              valuesMaxWidth = labelText.length;
+              columnWidth = valuesMaxWidth;
             }
           }
           else
@@ -922,6 +933,8 @@ class PivotTableUi {
     var rowAxisItems = rowsAxis.getItems();
     var numColumns = rowAxisItems.length;
     
+    var tupleValueFields = this.#rowsTupleSet.getTupleValueFields();
+    
     var numCellHeaders = 1;
     var numRows = tuples.length;
     var cellHeadersPlacement = queryModel.getCellHeadersAxis();
@@ -991,8 +1004,16 @@ class PivotTableUi {
           var labelText;
           if (j < rowAxisItems.length) {
             if (k === 0 && tuple) {
-              var value = String(tuple.values[j]);
-              labelText = String(value);
+              var value = tuple.values[j];
+              var rowAxisItem = rowAxisItems[j];
+              if (rowAxisItem.formatter) {
+                var tupleValueField = tupleValueFields[j];
+                labelText= rowAxisItem.formatter.format(value, tupleValueField);
+              }
+              else {
+                var value = String(value);
+                labelText = String(value);
+              }
             }
             else {
               labelText = String.fromCharCode(160);
