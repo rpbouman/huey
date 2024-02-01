@@ -32,6 +32,37 @@ dialog#filterDialog[aria-busy=true] > section > header > section > section > sel
   overflow: auto;
 }
 
+dialog#filterDialog > header[role=toolbar] {
+  padding-left: .5em;
+}
+
+dialog#filterDialog > section > header > menu[role=toolbar] {
+  padding: unset;
+  height: unset;
+}
+
+dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] )::after {
+  font-family: var( --huey-icon-font-family );
+  color: var(--huey-icon-color-subtle);  
+  /* square */
+  content: "\eb2c";
+}
+
+dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] ):hover::after {
+  color: var( --huey-icon-color-highlight );
+}
+
+dialog#filterDialog > section >  header > menu[role=toolbar] > label:has( > input[type=checkbox]:checked )::after {
+  /* checkbox */
+  content: "\eba6";
+  color: var( --huey-icon-color-highlight );
+}
+
+dialog#filterDialog > section >  header > menu[role=toolbar] > label > input[type=checkbox] {
+  visibility: hidden;
+  display: none;
+}
+
 dialog#filterDialog > footer > button {
   width: 5.5em;
 }

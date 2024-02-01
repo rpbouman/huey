@@ -479,7 +479,7 @@
       aria-busy="false"
       popover="auto"
     >
-      <header>
+      <header role="toolbar">
         <label for="filterType">Filter type:</label>
         <select id="filterType">
           <option value="in" title="Include data that matches any of the selected values">Include</option>
@@ -490,6 +490,15 @@
       </header>
       <section>
         <header>
+          <menu role="toolbar">
+            <label 
+              for="filterSearchApplyAll"
+              title="Check to include the other filter items (in addition to the search string) to populate the picklist"
+            >
+              Apply all filters:
+              <input id="filterSearchApplyAll" type="checkbox"/>
+            </label>
+          </menu>
           <section>
             <div id="filterDialogSpinner" class="loader loader-medium"></div>
             <header>
