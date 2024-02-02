@@ -235,6 +235,41 @@ var dataTypes = {
   'TIMESTAMP': {
     hasDateFields: true,
     hasTimeFields: true,
+    createFormatter: function(){
+      // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
+      // allowing us to use the value directly as argumnet to the Date constructor.
+      // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
+      // and since the Duckdb TIMESTAMP is measured in microseconds, there will be 3 such decimal digits
+      var localeSettings = settings.getSettings('localeSettings');
+      var locales = localeSettings.locale;      
+      var formatter = new Intl.DateTimeFormat(locales, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3
+      });
+      return function(value, field){
+        if (value === null ){
+          return null;
+        }
+        var date = new Date(value);
+        var parts = String(value).split('.');
+        var micros;
+        if (parts.length === 2) {
+          micros = parseInt( parts[1], 10 );
+        }
+        var dateTimeString = formatter.format(date);
+        
+        if (!micros) {
+          return dateTimeString;
+        }
+        
+        return `${dateTimeString} ${micros}μs`;
+      };
+    },
     createLiteralWriter: function(){
       return function(value, field){
         return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;       
