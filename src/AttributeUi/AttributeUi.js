@@ -93,7 +93,7 @@ class AttributeUi {
   };
 
   static dateFields = {
-    'date': {
+    'iso-date': {
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
       expressionTemplate: "strftime( ${columnName}, '%x' )",
@@ -152,7 +152,7 @@ class AttributeUi {
   };
 
   static timeFields = {
-    'time': {
+    'iso-time': {
       expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
       columnType: 'VARCHAR'
     },
