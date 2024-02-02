@@ -102,8 +102,9 @@ class CellSet extends DataSetComponent {
     return allRanges;
   }
   
-  #getValuesClauseForCellsQuery(tupleValueToColumnMapping, tuplesToQuery, values){
-    var allDataPaceHoldersSql = tuplesToQuery.map(function(tuple){
+  #getValuesClauseForCellsQuery(tupleQueryAxisItems, tupleValueToColumnMapping, tuplesToQuery){
+    var allDataPaceHoldersSql = tuplesToQuery.map(function(tuple, tupleIndex){
+      var tupleQueryAxisItemIndex = 0;
       var valuesClauseRow = Object.keys(tuple).map(function(columnName){
         var value = tuple[columnName];
         if (columnName === CellSet.#cellIndexColumnName) {
@@ -113,59 +114,13 @@ class CellSet extends DataSetComponent {
           return String(value);
         }
 
-        if (typeof value === 'bigint'){
-          // bigint values are not properly serialized by duckdb wasm 
-          // see: https://github.com/duckdb/duckdb-wasm/issues/1563
-          return `${String(value)}::BIGINT`;
-        }
-
         var mappingInfo = tupleValueToColumnMapping[columnName];
         var tupleValueField = mappingInfo.tupleValueField;
-        var typeName = String(tupleValueField.type);
-        var fieldTypeId = tupleValueField.typeId;
 
-        switch (fieldTypeId){
-          case 8: //Date:
-            return `date'${value.getUTCFullYear()}-${value.getUTCMonth() + 1}-${value.getUTCDate()}'`;
-            break;
-          case 10: //'Timestamp<MICROSECOND>':
-            // If the native duckdb is TIMESTAMP then duckdb WASM tags the field type with a custom Timestamp<MICROSECOND> class
-            // The actual resultset values however are simply javascript Number primitives.
-            // If we simply plug those numbers back as values to our preparedStmt.query call, it fails with the error:
-            //
-            // Error: Conversion Error: Unimplemented type for cast (TIMESTAMP -> DOUBLE)
-            // (see: https://github.com/duckdb/duckdb-wasm/issues/1563#issuecomment-1878745744)
-            //
-            // now, it turns out that the number returned is the number of milliseconds since epoch, 
-            // which is probably meant to make it easy to instantiate a javascript Date object with it like so:
-            //
-            // new Date(timestampColumnValue);
-            //
-            // TIMESTAMP columns have microseconds resolution and JavaScript Date's only milliseconds, 
-            // but duckdb WASM deals with that by letting the number have fractional digits.
-            // For example, this SQL:
-            //  
-            // SELECT TIMESTAMP'2024-01-05 01:02:03.456789' as ts
-            //
-            // results in return of this Number value: 1704416523456.7888
-            // and new Date(1704416523456.7888) is 'Fri Jan 05 2024 02:02:03 GMT+0100 (Central European Standard Time)'
-            //
-            // However for our purpose we need to be able to use the returned JavaScript Number value to create the exact original TIMESTAMP value.
-            //
-            // There are two duckdb functions (see: https://duckdb.org/docs/archive/0.9.2/sql/functions/timestamp) that can help:
-            //            
-            // - make_timestamp(microseconds) - the microseconds is some integer value in microseconds
-            // - to_timestamp(double)         - the double value is the number of *seconds* (so not microseconds or milliseconds).
-            //
-            // so we got milliseconds and can either multiple by 1000 to get microseconds: 
-            // - make_timestamp(CAST(1704416523456.7888::DOUBLE * 1000 AS BIGINT)))
-            // - to_timestamp(1704416523456.7888::DOUBLE / 1000)
-            return `to_timestamp(${value}::DOUBLE / 1000)`;
-          default:
-            
-        }
-        values.push(value);
-        return '?';
+        var tupleQueryAxisItem = tupleQueryAxisItems[tupleQueryAxisItemIndex++];
+        var literalWriter = tupleQueryAxisItem.literalWriter;
+        var literal = literalWriter(value, tupleValueField);
+        return literal;
       });
       return `(${valuesClauseRow})`
     }).join('\n,');
@@ -177,7 +132,7 @@ class CellSet extends DataSetComponent {
     return valuesClause;
   }
   
-  #getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values, subQueryColumnNames){
+  #getSqlQueryForCells(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames){
     var queryModel = this.getQueryModel();
     var datasource = queryModel.getDatasource();
     var aliasedDatasetName = datasource.getRelationExpression(CellSet.#datasetRelationName); 
@@ -215,7 +170,7 @@ class CellSet extends DataSetComponent {
     }
 
     // build the FROM clause
-    var valuesClause = this.#getValuesClauseForCellsQuery(tupleValueToColumnMapping, tuplesToQuery, values);
+    var valuesClause = this.#getValuesClauseForCellsQuery(tupleQueryAxisItems, tupleValueToColumnMapping, tuplesToQuery);
     var fromClause = `FROM ${valuesClause}`;
     
     // build the JOIN clause
@@ -270,20 +225,10 @@ class CellSet extends DataSetComponent {
     return sql;
   }
   
-  async #executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames) {
-    var values = [];
-    var sql = this.#getSqlQueryForCells(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, values, subQueryColumnNames);
-
+  async #executeCellsQuery(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames) {
+    var sql = this.#getSqlQueryForCells(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames);
     var connection = this.getManagedConnection();
-    console.log(`About to create preparedStatement to fetch cell data for ${tuplesToQuery.length} tuples, SQL:`);
-    console.log(sql);
-    var preparedStatement = await connection.prepareStatement(sql);
-    
-    console.log(`SQL to fetch cell data for ${tuplesToQuery.length} tuples prepared: ${preparedStatement.connectionId}:${preparedStatement.statementId}`);
-    console.time(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId} for cellset`);
-    var resultSet = await preparedStatement.query.apply(preparedStatement, values);
-    console.timeEnd(`Executing prepared statement ${preparedStatement.connectionId}:${preparedStatement.statementId} for cellset`);
-    preparedStatement.close();
+    var resultSet = await connection.query(sql);
     return resultSet;
   }
   
@@ -346,6 +291,10 @@ class CellSet extends DataSetComponent {
     // and the corresponding sql expressions in the main dataset.
     // we need that to correlate the filter the dataset based on the tuple data 
     var tupleValueToColumnMapping = {};
+    // there query axis items contain most information we need to write a query,
+    // we collect them in this array.
+    // (note that this is populated with query axis items from all axes currently in the rows and columns axes of the query model
+    var tupleQueryAxisItems = [];
     // this is where we store the sql expressions that calculate the cell values.
     // If there are cells missing, this will contain expressions for each cells axis items
     // but if all cells were already present and just missed a particular metric, only those metric need to be calculated.
@@ -438,6 +387,7 @@ class CellSet extends DataSetComponent {
           row[columnName] = tupleValue;
           
           if (tuplesToQuery.length === 0){
+            tupleQueryAxisItems.push(queryAxisItem);
             // collect metadata, only once for the entire set (done along with the first tuple)
             var tupleSetValueFields = tupleSet.getTupleValueFields();
             // store the mapping between our literal row column and the original sql expression
@@ -500,7 +450,7 @@ class CellSet extends DataSetComponent {
         
         aggregateExpressionsToFetch[countStarExpressionAlias] = sqlExpression;
       }
-      var resultset = await this.#executeCellsQuery(tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subqueryColumnNames);
+      var resultset = await this.#executeCellsQuery(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subqueryColumnNames);
       var newCells = this.#extractCellsFromResultset(resultset);
       Object.assign(availableCells, newCells);
     }
