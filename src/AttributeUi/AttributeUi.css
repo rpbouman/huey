@@ -135,13 +135,13 @@
 }
 
 .attributeUi details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon:before {
-  /* math-max */
-  content: "\f0f5";
+  /* arrow-up */
+  content: "\ea25";
 }
 
 .attributeUi details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon:before {
-  /* math-min */
-  content: "\f0f6";
+  /* arrow-down */
+  content: "\ea16";
 }
 
 .attributeUi details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon:before {
