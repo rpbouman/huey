@@ -223,12 +223,12 @@
 }
 
 .queryUi > section > ol > li[data-aggregator=max] > span:before {
-  /* math-max */
+  /* arrow-up */
   content: "\ea25";
 }
 
 .queryUi > section > ol > li[data-aggregator=min] > span:before {
-  /* math-min */
+  /* arrow-down */
   content: "\ea16";
 }
 
