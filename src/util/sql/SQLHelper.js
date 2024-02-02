@@ -1,59 +1,198 @@
-var duckdbExtensionForFileExtension = {
-  'json': 'json',
-  'parquet': 'parquet',
-  'sqlite': 'sqlite_scanner',
-  'xlsx': 'spatial'
-};
+function createNumberFormatter(fractionDigits){
+  var localeSettings = settings.getSettings('localeSettings');
+  var locales = localeSettings.locale;
+  var options = {
+    minimumIntegerDigits: localeSettings.minimumIntegerDigits,
+  };
+  if (fractionDigits){
+    options.minimumFractionDigits = localeSettings.minimumFractionDigits;
+    options.maximumFractionDigits = localeSettings.maximumFractionDigits;       
+  }
+  var formatter = new Intl.NumberFormat(locales, options);
+  return formatter;
+}
+
+function createDefaultLiteralWriter(type){
+  return function(value, field){
+    return `${value === null ? 'NULL' : String(value)}::${type}`;
+  }
+}
 
 var dataTypes = {
   'DECIMAL': {
-    isNumeric: true
+    isNumeric: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      var decimalSeparator = formatter.formatToParts(123.456)['decimal'];
+      
+      return function(value, field){
+        switch (typeof value){
+          case 'bigint':
+          case 'number':
+            break;
+          default:
+            var stringValue = String(value);
+            if (field.type.scale === 0) {
+              value = BigInt(stringValue);
+            }
+            else {
+              var parts = stringValue.split('.');
+              var integerPart = formatter.formatToParts(BigInt(parts[0]))['integer'];
+              var fractionPart = part[1];
+              return `${integerPart}${decimalSeparator}${fractionPart}`;
+            }
+        }
+        return formatter.format(value)
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('DECIMAL');
+    }
   },
   'DOUBLE': {
-    isNumeric: true
+    isNumeric: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('DOUBLE');
+    }    
   },
   'REAL': {
-    isNumeric: true
+    isNumeric: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('REAL');
+    }    
   },
   'BIGINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'HUGEINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'INTEGER': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'SMALLINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'TINYINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'UBIGINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'UINTEGER': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'USMALLINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'UTINYINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'BIT': {
   },
@@ -62,19 +201,55 @@ var dataTypes = {
   'BLOB': {
   },
   'DATE': {
-    hasDateFields: true
+    hasDateFields: true,
+    createFormatter: function(){
+      var localeSettings = settings.getSettings('localeSettings');
+      var locales = localeSettings.locale;      
+      var formatter = new Intl.DateTimeFormat(locales, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(){
+      return function(value, field){
+        var monthNum = String(1 + value.getUTCMonth());
+        if (monthNum.length === 1) {
+          monthNum = '0' + monthNum;
+        }
+        var dayNum = value.getUTCDate();
+        if (dayNum.length === 1) {
+          dayNum = '0' + dayNum;
+        }
+        return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
+      };
+    }
   },
   'TIME': {
-    hasTimeFields: true
+    hasTimeFields: true,
+    
   },
   'TIMESTAMP': {
     hasDateFields: true,
-    hasTimeFields: true
+    hasTimeFields: true,
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+      };
+    }
   },
   'TIMESTAMP WITH TIME ZONE': {
     hasDateFields: true,
     hasTimeFields: true,
-    hasTimezone: true
+    hasTimezone: true,
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+      };
+    }
   },
   'INTERVAL': {
   },
@@ -83,6 +258,16 @@ var dataTypes = {
   'ENUM': {
   },
   'VARCHAR': {
+    createFormatter: function(){
+      return function(value){
+        return value;
+      }
+    },
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;       
+      };
+    }
   },
   'ARRAY': {
   },

@@ -174,7 +174,8 @@ class FilterDialog {
       var option = options[i];
       var valueObject = {
         value: option.value,
-        label: option.label
+        label: option.label,
+        literal: option.getAttribute('data-sql-literal')
       };
       if (option.getAttribute('data-sql-null') === String(true)) {
         valueObject.isSqlNull = true;
@@ -195,7 +196,8 @@ class FilterDialog {
       var optionObject = options[value];
       var optionElement = createEl('option', {
         value: optionObject.value,
-        label: optionObject.label
+        label: optionObject.label,
+        "data-sql-literal": optionObject.literal
       });
       if (optionObject.isSqlNull){
         optionElement.setAttribute('data-sql-null', true);
@@ -296,8 +298,9 @@ class FilterDialog {
           delete correspondingValues[correspondingValue];
           
           values[selectedOption.value] = {
-            value: selectedOption.value,
-            label: selectedOption.label,
+            value: selectedOption.getAttribute('value'),
+            label: selectedOption.getAttribute('label'),
+            literal: selectedOption.getAttribute('data-sql-literal')
           };
           correspondingValues[correspondingValue] = correspondingOptionValueObject;
           valueSelectionStatusText = `Range modified.`;
@@ -322,8 +325,9 @@ class FilterDialog {
             // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
               rangeStart = {
-                value: option.value,
-                label: option.label,
+                value: option.getAttribute('value'),
+                label: option.getAttribute('label'),
+                literal: option.getAttribute('data-sql-literal'),
                 isSqlNull: isSqlNull
               };
             }
@@ -331,8 +335,9 @@ class FilterDialog {
             // update the end of the current range (we keep updating it as long as the options are selected)
             if (rangeStart !== undefined) {
               rangeEnd = {
-                value: option.value,
-                label: option.label,
+                value: option.getAttribute('value'),
+                label: option.getAttribute('label'),
+                literal: option.getAttribute('data-sql-literal'),
                 isSqlNull: isSqlNull
               };
             }
@@ -370,8 +375,9 @@ class FilterDialog {
           continue;
         }
         currentValues[selectedOption.value] = {
-          value: selectedOption.value,
-          label: selectedOption.label,
+          value: selectedOption.getAttribute('value'),
+          label: selectedOption.getAttribute('label'),
+          literal: selectedOption.getAttribute('data-sql-literal'),
           isSqlNull: isSqlNull
         }
       }
@@ -626,6 +632,13 @@ class FilterDialog {
       if (filterAxisItem === this.#queryAxisItem) {
         return false;
       }
+      if (
+        filterAxisItem.columnName === this.#queryAxisItem.columnName &&
+        filterAxisItem.derivation === this.#queryAxisItem.derivation &&
+        filterAxisItem.aggregator === this.#queryAxisItem.aggregator 
+      ){
+        return false;
+      }
       if (withFilterValues){
         if (!filterAxisItem.filter) {
           return false;
@@ -788,14 +801,36 @@ class FilterDialog {
       optionsContainer = optionGroup;
     }
     
+    var formatter = this.#queryAxisItem.formatter;
+    var valueField, labelField;
+    if (formatter) {
+      var fields = resultset.schema.fields;
+      for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        switch (field.name) {
+          case 'label':
+            labelField = field;
+            break;
+          case 'value':
+            valueField = field;
+            break;
+        }
+      }
+    }
+    var literalWriter = this.#queryAxisItem.literalWriter;
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
       var value = row.value;
       var label = row.label;
+      if (formatter) {
+        value = formatter(value, valueField);
+        label = formatter(label, labelField);
+      }
       option = createEl('option', {
         value: value,
-        label: label
+        label: label,
+        "data-sql-literal": literalWriter(row.value)
       });
       if (value === null){
         option.setAttribute('data-sql-null', true);

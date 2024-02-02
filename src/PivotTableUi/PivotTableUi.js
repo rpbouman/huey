@@ -512,7 +512,7 @@ class PivotTableUi {
     var formatter = cellsAxisItem.formatter;
     
     if (formatter) {
-      labelText = formatter.format(value, cellValueField);
+      labelText = formatter(value, cellValueField);
     }
     else
     if (value === null){
@@ -836,7 +836,7 @@ class PivotTableUi {
               var columnsAxisItem = columnsAxisItems[j];
               if (columnsAxisItem.formatter) {
                 var tupleValueField = tupleValueFields[j];
-                labelText = columnsAxisItem.formatter.format(value, tupleValueField);
+                labelText = columnsAxisItem.formatter(value, tupleValueField);
               }
               else {
                 labelText = String(value);
@@ -1008,7 +1008,7 @@ class PivotTableUi {
               var rowAxisItem = rowAxisItems[j];
               if (rowAxisItem.formatter) {
                 var tupleValueField = tupleValueFields[j];
-                labelText= rowAxisItem.formatter.format(value, tupleValueField);
+                labelText= rowAxisItem.formatter(value, tupleValueField);
               }
               else {
                 var value = String(value);

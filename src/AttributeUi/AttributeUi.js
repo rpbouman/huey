@@ -8,12 +8,15 @@ class AttributeUi {
     'count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( ${columnName} )'
+      expressionTemplate: 'COUNT( ${columnName} )',
+      columnType: 'HUGEINT'
+      
     },
     'distinct count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( DISTINCT ${columnName} )'
+      expressionTemplate: 'COUNT( DISTINCT ${columnName} )',
+      columnType: 'HUGEINT'
     },
     'min': {
       preservesColumnType: true,
@@ -521,6 +524,11 @@ class AttributeUi {
     var formatter = QueryAxisItem.createFormatter(itemConfig);
     if (formatter){
       itemConfig.formatter = formatter;
+    }
+
+    var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
+    if (literalWriter){
+      itemConfig.literalWriter = literalWriter;
     }
     
     if (checked) {
