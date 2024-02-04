@@ -349,6 +349,8 @@ class PivotTableUi {
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#columnsTupleSet;
     
+    var columnsAxisItems = this.#queryModel.getColumnsAxis().getItems();
+    var tupleValueFields = tupleSet.getTupleValueFields();
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
@@ -389,7 +391,13 @@ class PivotTableUi {
           tupleValue = tuple.values[j];
 
           if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
-            labelText = String(tupleValue);
+            var columnsAxisItem = columnsAxisItems[j];
+            if (columnsAxisItem.formatter) {
+              labelText = columnsAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
           }
           else {
             labelText = '';
@@ -431,6 +439,8 @@ class PivotTableUi {
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#rowsTupleSet;
     
+    var rowsAxisItems = this.#queryModel.getRowsAxis().getItems();
+    var tupleValueFields = tupleSet.getTupleValueFields();
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
@@ -461,9 +471,14 @@ class PivotTableUi {
         var tupleValue;
         if (tuple && j < tuple.values.length) {
           tupleValue = tuple.values[j];         
-
           if (cellsAxisItemIndex === 0 || i === 0) {
-            labelText = String(tupleValue);
+            var rowsAxisItem = rowsAxisItems[j];
+            if (rowAxisItem.formatter) {
+              labelText = rowAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
           }
           else {
             labelText = '';
@@ -1028,7 +1043,7 @@ class PivotTableUi {
               labelText = String.fromCharCode(160);
             }
           }
-
+          
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel"
           }, labelText);

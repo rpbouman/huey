@@ -39,16 +39,19 @@
   content: ':';
 }
 
-.queryUi label > button {
+.queryUi label > button,
+.queryUi label > input[type=checkbox] {
   display: none;
 }
 
+.queryUi label:has( > input[type=checkbox] )::after,
 .queryUi label:has( > button )::after {
   width: 24px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color-subtle );
 }
+.queryUi label:has( > input[type=checkbox] ):hover::after,
 .queryUi label:has( > button ):hover::after {
   color: var( --huey-icon-color-highlight );
 }
@@ -147,7 +150,7 @@
 * Derivation icons
 *
 */
-.queryUi > section > ol > li[data-derivation=date] > span:before {
+.queryUi > section > ol > li[data-derivation=iso-date] > span:before {
   /* calendar */
   content: "\ea53";
 }
@@ -187,7 +190,7 @@
   content: "\ec53";
 }
 
-.queryUi > section > ol > li[data-derivation=time] > span:before {
+.queryUi > section > ol > li[data-derivation=iso-time] > span:before {
   /* clock */
   content: "\ea70";
 }
@@ -267,8 +270,6 @@
   content: "\eb80";
 }
 
-
-
 /* buttons to move the item */
 .queryUi > section > ol > li > label:first-child:has( > button )::after {
   /* chevron left */
@@ -307,18 +308,32 @@
   margin: 0px;
 }
 
+/*  */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after,
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after {
+  /* abacus */
+  content: "\f05c";
+}
+
+/*  */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after,
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after {
+  color: var( --huey-icon-highlight );
+}
+
+
 /* axis item action to move item to other axis */
-.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* table-row */
   content: "\fb00";
 }
 
-.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* table-column */
   content: "\faff";
 }
 
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* filter-edit */
   /* content: "\fa00"; */
   /* filter cog */
@@ -326,11 +341,7 @@
 }
 
 /* axis item action to remove item from axis */
-.queryUi > section > ol > li > menu > label:nth-child(2):has( > button )::after {
+.queryUi > section > ol > li > menu > label:nth-child(3):has( > button )::after {
   /* trash */
   content: "\eb41";
-}
-
-
-
 }

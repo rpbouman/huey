@@ -32,41 +32,68 @@ class TupleSet extends DataSetComponent {
     var columnExpressions = TupleSet.getSqlSelectExpressions(queryModel, axisId, includeCountAll);
 
     var selectListExpressions = [];
+    // the group by expression includes expressons for all axis items.
     var groupByExpressions = [];
+    // the groupingSets are created when we find an axis item that has 
+    var groupingSets = [];
     var orderByExpressions = [];
     
     var columnIds = Object.keys(columnExpressions);
+    var queryAxisItem;
     for (var i = 0; i < columnIds.length; i++) {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
       
-      if (i >= queryAxisItems.length) {
+      if (includeCountAll && i >= queryAxisItems.length) {
+        // when includeCountAll is true, we generate one extra count() over () expression
         selectListExpressions.push(columnExpression);
         break;
       }
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
+      var queryAxisItem = queryAxisItems[i];
+      
+      if (queryAxisItem.includeTotals){
+        groupingSets.push([].concat(groupByExpressions));
+      }
+      
       groupByExpressions.push(columnExpression);
       
-      var item = queryAxisItems[i];
-      var sortDirection = item.sortDirection;
+      var sortDirection = queryAxisItem.sortDirection;
       if (!sortDirection) {
         sortDirection = 'ASC';
       }
       var orderByExpression = `${columnExpression} ${sortDirection}` ;
       orderByExpressions.push(orderByExpression);      
     }
+    
+    if (groupingSets.length){
+      // if we have to make grouping sets, then we need to add our "normal" group by clause too
+      groupingSets.push(groupByExpressions);
+    }
 
     var datasource = queryModel.getDatasource();
     var fromClause = datasource.getFromClauseSql();
-    var filterCondition = queryModel.getFilterConditionSql();
-    var whereClause = filterCondition ? `WHERE ${filterCondition}` : '';
     var sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
-      fromClause,
-      whereClause,
-      `GROUP BY ${groupByExpressions.join('\n,')}`,
-      `ORDER BY ${orderByExpressions.join('\n,')}`
-    ].join('\n');
+      fromClause
+    ];
+    var filterCondition = queryModel.getFilterConditionSql();
+    if (filterCondition){
+      sql.push(`WHERE ${filterCondition}`);
+    }
+    
+    var groupByClause = `GROUP BY `;
+    if (groupingSets.length > 1) {
+      groupByClause += 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
+        return `  (\n${groupingSet.join('\n  , ')}\n  )` ;
+      }).join(',') + ')';
+    }
+    else {
+      groupByClause += groupByExpressions.join('\n,');
+    }
+    sql.push(groupByClause);
+    sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+    sql = sql.join('\n');
     return sql;
   }
    

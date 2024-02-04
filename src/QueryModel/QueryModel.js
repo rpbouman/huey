@@ -571,6 +571,32 @@ class QueryModel extends EventEmitter {
     return removedItem;
   }
   
+  toggleTotals(queryItemConfig, value){
+    if (Boolean(value) !== value) {
+      return;
+    }
+    var queryModelItem = this.findItem(queryItemConfig);
+    if (!queryModelItem) {
+      return;
+    }
+    
+    var axisId = queryModelItem.axis;
+    var axis = this.getQueryAxis(axisId);
+    var items = axis.getItems();
+    items[queryModelItem.index].includeTotals = value;
+    
+    var axesChangeInfo = {};
+    axesChangeInfo[axisId] = {
+      changed: [items[queryModelItem.index]]
+    };
+    
+    this.fireEvent('change', {
+      axesChanged: axesChangeInfo
+    });
+
+    return queryModelItem;
+  }
+  
   #clear(suppressFireEvent, axisId){
     var axisIds;
     if (axisId) {
