@@ -127,7 +127,7 @@ class Settings extends EventEmitter {
         options: [
           { value: 'initialCapital', label: 'Initial Capital', title: 'Initial capital followed by lowercase'},
           { value: 'lowerCase', label: 'Lower Case', title: 'All lower case'},
-          { value: 'upperCase', label: 'Upper Capital', title: 'All upper case'}
+          { value: 'upperCase', label: 'Upper Case', title: 'All upper case'}
         ]
       },
       exportSqlAlwaysQuoteIdentifiers: true,
