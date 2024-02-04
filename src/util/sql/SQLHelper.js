@@ -96,7 +96,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('HUGEINT');
     }    
   },
   'INTEGER': {
@@ -109,7 +109,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('INTEGER');
     }    
   },
   'SMALLINT': {
@@ -122,7 +122,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('SMALLINT');
     }    
   },
   'TINYINT': {
@@ -135,7 +135,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('TINYINT');
     }    
   },
   'UBIGINT': {
@@ -149,7 +149,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('UBIGINT');
     }    
   },
   'UINTEGER': {
@@ -163,7 +163,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('UINTEGER');
     }    
   },
   'USMALLINT': {
@@ -177,7 +177,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('USMALLINT');
     }    
   },
   'UTINYINT': {
@@ -191,7 +191,7 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(value, field){
-      return createDefaultLiteralWriter('BIGINT');
+      return createDefaultLiteralWriter('UTINYINT');
     }    
   },
   'BIT': {
