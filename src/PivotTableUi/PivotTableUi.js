@@ -999,10 +999,11 @@ class PivotTableUi {
     
     for (var i = 0; i < numRows; i++){
       var tuple = tuples[i];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       
       for (var k = 0; k < numCellHeaders; k++){
         var bodyRow = createEl('div', {
-          "class": "pivotTableUiRow"
+          "class": "pivotTableUiRow" + (groupingId ? ' pivotTableUiTotals' : '')
         });
         tableBodyDom.insertBefore(bodyRow, stufferRow);
 

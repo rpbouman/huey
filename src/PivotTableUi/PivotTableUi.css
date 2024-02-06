@@ -57,6 +57,21 @@
   display: table-row;
 }
 
+/**/
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow.pivotTableUiTotals > .pivotTableUiCell,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow:has( + .pivotTableUiRow.pivotTableUiTotals) > .pivotTableUiCell {
+  border-bottom-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow.pivotTableUiTotals {
+  font-weight: bold;
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow.pivotTableUiTotals > .pivotTableUiValueCell { 
+  background-color: var( --huey-medium-background-color );
+}
+
+/**/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell.pivotTableUiStufferCell {
   width: 100%;
   resize: none;

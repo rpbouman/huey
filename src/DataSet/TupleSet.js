@@ -1,4 +1,6 @@
 class TupleSet extends DataSetComponent {
+
+  static groupingIdAlias = '__huey_grouping_id';
    
   static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
     var queryAxis = queryModel.getQueryAxis(axisId);
@@ -69,6 +71,9 @@ class TupleSet extends DataSetComponent {
     if (groupingSets.length){
       // if we have to make grouping sets, then we need to add our "normal" group by clause too
       groupingSets.push(groupByExpressions);
+      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
+      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) as ${TupleSet.groupingIdAlias}`;
+      selectListExpressions.unshift(groupingIdExpression);
     }
 
     var datasource = queryModel.getDatasource();
@@ -181,7 +186,14 @@ class TupleSet extends DataSetComponent {
     
     this.#tupleValueFields = fields;
     
-    var items = this.#getQueryAxisItems();    
+    var items = this.#getQueryAxisItems();
+    var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
+    if (fields[0].name === TupleSet.groupingIdAlias) {
+      hasGroupingId = true;
+      fieldOffset += 1;
+      fieldCount += 1;
+    }
+
     var tuples = this.#tuples;
 
     // if the offset is 0 we should have included an expression that computes the total count as last
@@ -201,17 +213,23 @@ class TupleSet extends DataSetComponent {
 
       var row = resultSet.get(i);
       var values = [];
+      var tuple = {values: values};
 
-      for (var j = 0; j < items.length; j++){
+      if (hasGroupingId){
+        var groupingId = row[TupleSet.groupingIdAlias];
+        if (groupingId > 0) {
+          tuple[TupleSet.groupingIdAlias] = groupingId;
+        }
+      }
+
+      for (var j = fieldOffset; j < fieldCount; j++){
         var field = fields[j];
         var fieldName = field.name;
                 
-        values[j] = row[fieldName];
+        values[j - fieldOffset] = row[fieldName];
       }
 
-      var tuple = {values: values};
-      tuples[offset + i] = tuple;
-      
+      tuples[offset + i] = tuple;      
     }
   }
 

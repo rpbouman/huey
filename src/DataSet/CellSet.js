@@ -126,13 +126,20 @@ class CellSet extends DataSetComponent {
     }).join('\n,');
 
     var columns = [CellSet.#cellIndexColumnName].concat(Object.keys(tupleValueToColumnMapping));
-    var relationDefinition = `${CellSet.#tupleDataRelationName}(${columns.map(getQuotedIdentifier).join(', ')})`;
+    var relationDefinition = `${getQuotedIdentifier(CellSet.#tupleDataRelationName)}(${columns.map(getQuotedIdentifier).join(', ')})`;
 
-    var valuesClause = `(VALUES ${allDataPaceHoldersSql}) AS ${relationDefinition}`;
+    var valuesClause = `(VALUES\n ${allDataPaceHoldersSql}\n) AS ${relationDefinition}`;
     return valuesClause;
   }
   
-  #getSqlQueryForCells(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames){
+  #getSqlQueryForCells(
+    tupleQueryAxisItems, 
+    tuplesToQuery, 
+    tupleValueToColumnMapping, 
+    aggregateExpressionsToFetch, 
+    subQueryColumnNames,
+    superAggregateTuplesToQuery
+  ){
     var queryModel = this.getQueryModel();
     var datasource = queryModel.getDatasource();
     var aliasedDatasetName = datasource.getRelationExpression(CellSet.#datasetRelationName); 
@@ -144,15 +151,33 @@ class CellSet extends DataSetComponent {
     // build the SELECT list
     var quotedCellIndexColumnName = getQuotedIdentifier(CellSet.#cellIndexColumnName);
     var qualifiedCellIndexColumnName = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
+        
+    var tupleIndexSelectExpression = `CAST(${tuplesToQuery.length === 0 ? '0' : qualifiedCellIndexColumnName} AS INTEGER) AS ${quotedCellIndexColumnName}`;
     
-    if (tuplesToQuery.length === 0){
-      qualifiedCellIndexColumnName = '0';
+    var groupByClause;
+    var selectListExpressions = [tupleIndexSelectExpression].concat(aggregateExpressionsToFetch);
+    if (superAggregateTuplesToQuery.length) {
+      // if we have super aggregate tuples we need to add the axis columns to the select list
+      var i = 0, groupByList = [], groupingSets = [];
+      for (var columnName in tupleValueToColumnMapping){
+        var columnExpression = getQualifiedIdentifier(CellSet.#tupleDataRelationName, columnName);
+        selectListExpressions.push(columnExpression);
+        groupByList.push(columnExpression);
+        var tupleQueryAxisItem = tupleQueryAxisItems[i++];
+        if (tupleQueryAxisItem.includeTotals){
+          groupingSets.push([].concat(groupByList));
+        }
+      }
+      groupingSets.push([qualifiedCellIndexColumnName].concat(groupByList));
+      groupByClause = 'GROUP BY GROUPING SETS (\n' + groupingSets.map(function(groupingSet){
+        return `(${groupingSet.join('\n,')})`;
+      }).join('\n, ') + '\n)';
+    }
+    else {
+      groupByClause = `GROUP BY ${qualifiedCellIndexColumnName}`;      
     }
     
-    var tupleIndexSelectExpression = `CAST(${qualifiedCellIndexColumnName} AS INTEGER) AS ${quotedCellIndexColumnName}`;
-    var selectListExpressions = [tupleIndexSelectExpression].concat(aggregateExpressionsToFetch);
     var selectClauseSql = `SELECT ${selectListExpressions.join('\n, ')}`;
-  
     var filterCondition = queryModel.getFilterConditionSql(true, CellSet.#datasetRelationName);
   
     var sql;
@@ -179,14 +204,14 @@ class CellSet extends DataSetComponent {
       var subQueryColumnExpressions = Object.keys(subQueryColumnNames).map(getQuotedIdentifier);
       subQueryColumnExpressions.push(`1 AS ${getQuotedIdentifier(CellSet.#countStarExpressionAlias)}`);
       var subquery = [
-        `SELECT ${subQueryColumnExpressions.join('\n,')}`,
-        `FROM ${aliasedDatasetName}`
+        `  SELECT ${subQueryColumnExpressions.join('\n,')}`,
+        `  FROM ${aliasedDatasetName}`
       ];
       
       if (filterCondition) {
-        subquery.push(`WHERE ${filterCondition}`);
+        subquery.push(`  WHERE ${filterCondition}`);
       }
-      joinClause += `( ${subquery.join('\n')} ) AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`;
+      joinClause += `(\n${subquery.join('\n')}\n) AS ${getQuotedIdentifier(CellSet.#datasetRelationName)}`;
     }
     else {
       joinClause += aliasedDatasetName;
@@ -211,22 +236,34 @@ class CellSet extends DataSetComponent {
         `AND ${filterCondition}`
       ].join('\n');
     }
-        
-    var groupByClause = `GROUP BY ${qualifiedCellIndexColumnName}`;
-    
+            
     // build the statement
-    sql = `
-      ${selectClauseSql} 
-      ${fromClause}
-      ${joinClause}
-      ${onClause}
-      ${groupByClause}
-    `;
+    sql = [
+      selectClauseSql,
+      fromClause,
+      joinClause,
+      onClause,
+      groupByClause
+    ].join('\n');
     return sql;
   }
   
-  async #executeCellsQuery(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames) {
-    var sql = this.#getSqlQueryForCells(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subQueryColumnNames);
+  async #executeCellsQuery(
+    tupleQueryAxisItems, 
+    tuplesToQuery, 
+    tupleValueToColumnMapping, 
+    aggregateExpressionsToFetch, 
+    subQueryColumnNames,
+    superAggregateTuplesToQuery
+  ) {
+    var sql = this.#getSqlQueryForCells(
+      tupleQueryAxisItems, 
+      tuplesToQuery, 
+      tupleValueToColumnMapping, 
+      aggregateExpressionsToFetch, 
+      subQueryColumnNames,
+      superAggregateTuplesToQuery
+    );
     var connection = this.getManagedConnection();
     var resultSet = await connection.query(sql);
     return resultSet;
@@ -287,6 +324,9 @@ class CellSet extends DataSetComponent {
     // along with the tuple values, we store the cellIndex toolbar
     // we will then use this to create an arrow table 
     var tuplesToQuery = [];
+    // if there are totals, then we need to apply grouping sets so the main query produces super-aggregate rows
+    // and then we have to look up their tupleindices 
+    var superAggregateTuplesToQuery = [];
     // this is where we keep the mapping between column names of the tuple data set 
     // and the corresponding sql expressions in the main dataset.
     // we need that to correlate the filter the dataset based on the tuple data 
@@ -356,6 +396,7 @@ class CellSet extends DataSetComponent {
       row[CellSet.#cellIndexColumnName] = cellIndex;
       
       // for each query axis...
+      var isTotalsTuple = false;
       _tuplesetIndices: for (var j = 0; j < tupleIndicesItem.length; j++){
                 
         // ...get the tuple,...
@@ -367,6 +408,11 @@ class CellSet extends DataSetComponent {
           //console.error(`Couldn't find tuple ${tupleIndex} in tupleset for query axis ${tupleSet.getQueryAxisId()}`);
           continue;
         }
+        
+        if (tuple[TupleSet.groupingIdAlias]){
+          isTotalsTuple = true;
+        }
+        
         var tupleValues = tuple.values;
         
         var queryAxisId = tupleSet.getQueryAxisId();
@@ -398,20 +444,26 @@ class CellSet extends DataSetComponent {
               nullValueCount: 0
             };
           }        
-
-          // keep track of the  null values - 
-          // if there are null values in the tuples, 
-          // we need to take that into account in the join clause when fetching the cell values
-          if (tupleValue === null) {
-            tupleValueToColumnMapping[columnName].nullValueCount += 1;
-          }
         }
       }
 
-      // check if we gathered any tuple data
+      // check if we gathered any tuple data (and the tuple is not a totals tuple)
       if (Object.keys(row).length > 1) {
-        // it's possible to have no tuples in case there are only cells axis items and now items on rows/columns.
-        tuplesToQuery.push(row);
+        if (isTotalsTuple) {
+          superAggregateTuplesToQuery.push(row);
+        }
+        else {
+          for (columnName in row){
+            if (row[columnName] === null) {
+              // keep track of the  null values - 
+              // if there are null values in the tuples, 
+              // we need to take that into account in the join clause when fetching the cell values
+              tupleValueToColumnMapping[columnName].nullValueCount += 1;
+            }
+          }
+          // it's possible to have no tuples in case there are only cells axis items and no items on rows/columns.
+          tuplesToQuery.push(row);
+        }
       }
     }
     
@@ -450,7 +502,14 @@ class CellSet extends DataSetComponent {
         
         aggregateExpressionsToFetch[countStarExpressionAlias] = sqlExpression;
       }
-      var resultset = await this.#executeCellsQuery(tupleQueryAxisItems, tuplesToQuery, tupleValueToColumnMapping, aggregateExpressionsToFetch, subqueryColumnNames);
+      var resultset = await this.#executeCellsQuery(
+        tupleQueryAxisItems, 
+        tuplesToQuery, 
+        tupleValueToColumnMapping, 
+        aggregateExpressionsToFetch, 
+        subqueryColumnNames, 
+        superAggregateTuplesToQuery
+      );
       var newCells = this.#extractCellsFromResultset(resultset);
       Object.assign(availableCells, newCells);
     }
