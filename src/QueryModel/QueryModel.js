@@ -2,6 +2,23 @@ class QueryAxisItem {
 
   static createFormatter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+    if (axisItem.aggregator) {
+      var aggregatorInfo = AttributeUi.aggregators[axisItem.aggregator];
+      if (aggregatorInfo.columnType) {
+        dataType = aggregatorInfo.columnType;
+      }
+      else
+      if (aggregatorInfo.preservesColumnType) {
+        // okay, noop
+      }
+      else {
+        //todo.
+      }
+    }
+    else
+    if (axisItem.derivation){
+      
+    }
     var dataTypeInfo = dataTypes[dataType];
     if (!dataTypeInfo) {
       console.error(`No data type found for ${dataType}`);
