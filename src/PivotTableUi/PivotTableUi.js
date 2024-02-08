@@ -399,9 +399,6 @@ class PivotTableUi {
               labelText = String(tupleValue);
             }
           }
-          else {
-            labelText = '';
-          }
         }
         else 
         if (doCellHeaders) {
@@ -409,11 +406,11 @@ class PivotTableUi {
             var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
           }
-          else {
-            labelText = '';
-          }
         }
-        
+
+        if (!labelText || !labelText.length) {
+          labelText = String.fromCharCode(160);
+        }
         label.innerText = labelText;
       }
 
@@ -462,6 +459,9 @@ class PivotTableUi {
       var cells = row.childNodes;
       
       var tuple = tuples[tupleIndex];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;      
+      
+      row.setAttribute("data-totals", groupingId > 0);
       
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
@@ -473,15 +473,12 @@ class PivotTableUi {
           tupleValue = tuple.values[j];         
           if (cellsAxisItemIndex === 0 || i === 0) {
             var rowsAxisItem = rowsAxisItems[j];
-            if (rowAxisItem.formatter) {
-              labelText = rowAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            if (rowsAxisItem.formatter) {
+              labelText = rowsAxisItem.formatter(tupleValue, tupleValueFields[j]);
             }
             else {
               labelText = String(tupleValue);
             }
-          }
-          else {
-            labelText = '';
           }
         }
         else
@@ -490,6 +487,10 @@ class PivotTableUi {
           labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
         }
         
+        if (!labelText || !labelText.length) {
+          labelText = String.fromCharCode(160);
+        }
+  
         label.innerText = labelText;
       }
       
@@ -1003,8 +1004,10 @@ class PivotTableUi {
       
       for (var k = 0; k < numCellHeaders; k++){
         var bodyRow = createEl('div', {
-          "class": "pivotTableUiRow" + (groupingId ? ' pivotTableUiTotals' : '')
+          "class": "pivotTableUiRow",
+          "data-totals": groupingId > 0
         });
+        
         tableBodyDom.insertBefore(bodyRow, stufferRow);
 
         for (var j = 0; j < numColumns; j++){
@@ -1031,18 +1034,16 @@ class PivotTableUi {
                 labelText = String(value);
               }
             }
-            else {
-              labelText = String.fromCharCode(160);
-            }
           }
           else {
             cell.className += ' pivotTableUiCellAxisHeaderCell';
             if (k < cellAxisItems.length && renderCellHeaders) {
               labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
             }
-            else {
-              labelText = String.fromCharCode(160);
-            }
+          }
+
+          if (!labelText || !labelText.length) {
+            labelText = '&#160;';
           }
           
           var label = createEl('span', {
