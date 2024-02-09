@@ -1,4 +1,6 @@
 class TupleSet extends DataSetComponent {
+
+  static groupingIdAlias = '__huey_grouping_id';
    
   static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
     var queryAxis = queryModel.getQueryAxis(axisId);
@@ -32,41 +34,71 @@ class TupleSet extends DataSetComponent {
     var columnExpressions = TupleSet.getSqlSelectExpressions(queryModel, axisId, includeCountAll);
 
     var selectListExpressions = [];
+    // the group by expression includes expressons for all axis items.
     var groupByExpressions = [];
+    // the groupingSets are created when we find an axis item that has 
+    var groupingSets = [];
     var orderByExpressions = [];
     
     var columnIds = Object.keys(columnExpressions);
+    var queryAxisItem;
     for (var i = 0; i < columnIds.length; i++) {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
       
-      if (i >= queryAxisItems.length) {
+      if (includeCountAll && i >= queryAxisItems.length) {
+        // when includeCountAll is true, we generate one extra count() over () expression
         selectListExpressions.push(columnExpression);
         break;
       }
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
+      var queryAxisItem = queryAxisItems[i];
+      
+      if (queryAxisItem.includeTotals){
+        groupingSets.push([].concat(groupByExpressions));
+      }
+      
       groupByExpressions.push(columnExpression);
       
-      var item = queryAxisItems[i];
-      var sortDirection = item.sortDirection;
+      var sortDirection = queryAxisItem.sortDirection;
       if (!sortDirection) {
         sortDirection = 'ASC';
       }
       var orderByExpression = `${columnExpression} ${sortDirection}` ;
       orderByExpressions.push(orderByExpression);      
     }
+    
+    if (groupingSets.length){
+      // if we have to make grouping sets, then we need to add our "normal" group by clause too
+      groupingSets.push(groupByExpressions);
+      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
+      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) as ${TupleSet.groupingIdAlias}`;
+      selectListExpressions.unshift(groupingIdExpression);
+    }
 
     var datasource = queryModel.getDatasource();
     var fromClause = datasource.getFromClauseSql();
-    var filterCondition = queryModel.getFilterConditionSql();
-    var whereClause = filterCondition ? `WHERE ${filterCondition}` : '';
     var sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
-      fromClause,
-      whereClause,
-      `GROUP BY ${groupByExpressions.join('\n,')}`,
-      `ORDER BY ${orderByExpressions.join('\n,')}`
-    ].join('\n');
+      fromClause
+    ];
+    var filterCondition = queryModel.getFilterConditionSql();
+    if (filterCondition){
+      sql.push(`WHERE ${filterCondition}`);
+    }
+    
+    var groupByClause = `GROUP BY `;
+    if (groupingSets.length > 1) {
+      groupByClause += 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
+        return `  (\n${groupingSet.join('\n  , ')}\n  )` ;
+      }).join(',') + ')';
+    }
+    else {
+      groupByClause += groupByExpressions.join('\n,');
+    }
+    sql.push(groupByClause);
+    sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+    sql = sql.join('\n');
     return sql;
   }
    
@@ -99,7 +131,7 @@ class TupleSet extends DataSetComponent {
     return this.#queryAxisId;
   }
 
-  #getQueryAxisItems(){
+  getQueryAxisItems(){
     var queryModel = this.getQueryModel();
     var axisId = this.#queryAxisId;
     
@@ -154,7 +186,14 @@ class TupleSet extends DataSetComponent {
     
     this.#tupleValueFields = fields;
     
-    var items = this.#getQueryAxisItems();    
+    var items = this.getQueryAxisItems();
+    var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
+    if (fields[0].name === TupleSet.groupingIdAlias) {
+      hasGroupingId = true;
+      fieldOffset += 1;
+      fieldCount += 1;
+    }
+
     var tuples = this.#tuples;
 
     // if the offset is 0 we should have included an expression that computes the total count as last
@@ -174,17 +213,23 @@ class TupleSet extends DataSetComponent {
 
       var row = resultSet.get(i);
       var values = [];
+      var tuple = {values: values};
 
-      for (var j = 0; j < items.length; j++){
+      if (hasGroupingId){
+        var groupingId = row[TupleSet.groupingIdAlias];
+        if (groupingId > 0) {
+          tuple[TupleSet.groupingIdAlias] = groupingId;
+        }
+      }
+
+      for (var j = fieldOffset; j < fieldCount; j++){
         var field = fields[j];
         var fieldName = field.name;
                 
-        values[j] = row[fieldName];
+        values[j - fieldOffset] = row[fieldName];
       }
 
-      var tuple = {values: values};
-      tuples[offset + i] = tuple;
-      
+      tuples[offset + i] = tuple;      
     }
   }
 

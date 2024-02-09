@@ -2,6 +2,23 @@ class QueryAxisItem {
 
   static createFormatter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+    if (axisItem.aggregator) {
+      var aggregatorInfo = AttributeUi.aggregators[axisItem.aggregator];
+      if (aggregatorInfo.columnType) {
+        dataType = aggregatorInfo.columnType;
+      }
+      else
+      if (aggregatorInfo.preservesColumnType) {
+        // okay, noop
+      }
+      else {
+        //todo.
+      }
+    }
+    else
+    if (axisItem.derivation){
+      
+    }
     var dataTypeInfo = dataTypes[dataType];
     if (!dataTypeInfo) {
       console.error(`No data type found for ${dataType}`);
@@ -571,6 +588,32 @@ class QueryModel extends EventEmitter {
     return removedItem;
   }
   
+  toggleTotals(queryItemConfig, value){
+    if (Boolean(value) !== value) {
+      return;
+    }
+    var queryModelItem = this.findItem(queryItemConfig);
+    if (!queryModelItem) {
+      return;
+    }
+    
+    var axisId = queryModelItem.axis;
+    var axis = this.getQueryAxis(axisId);
+    var items = axis.getItems();
+    items[queryModelItem.index].includeTotals = value;
+    
+    var axesChangeInfo = {};
+    axesChangeInfo[axisId] = {
+      changed: [items[queryModelItem.index]]
+    };
+    
+    this.fireEvent('change', {
+      axesChanged: axesChangeInfo
+    });
+
+    return queryModelItem;
+  }
+  
   #clear(suppressFireEvent, axisId){
     var axisIds;
     if (axisId) {
@@ -680,6 +723,9 @@ class QueryModel extends EventEmitter {
   * That option is intended to be used to run the cellset query, because the cellset is already restricted by vales from the tuples
   * So if the tuples are already calculated with the filters in effect, then the tuple values must already be a subset of the values that satisfy the filter
   * and hence we shouldn't need to filter again on those items.  
+  *
+  * NOTE: we probabably shoudl remove the excludeTupleItems option as it can almost never be applied
+  * for example, if there are subtotals required, it will result in wrong results.
   */
   getFilterConditionSql(excludeTupleItems, alias){
     var queryAxis = this.getFiltersAxis();

@@ -946,6 +946,7 @@
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
               <span>caption</span>
               <menu>
+                <label title="Calculate totals for this level"><input id="-toggle-totals" type="checkbox"/></label>
                 <label title="Move this item to the other axis"><button id="-move-to-other-axis">Move item to other axis</button></label>
                 <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
               </menu>
@@ -953,6 +954,17 @@
             </li>          
           </template>
           
+          <template id="queryUiFilterAxisItem">
+            <li>
+              <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
+              <span>caption</span>
+              <menu>
+                <label title="Click to open the filter dialog to edit the filter."><button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button></label>
+                <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
+              </menu>
+              <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
+            </li>          
+          </template>
         </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
         <div

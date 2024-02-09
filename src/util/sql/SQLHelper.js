@@ -9,7 +9,14 @@ function createNumberFormatter(fractionDigits){
     options.maximumFractionDigits = localeSettings.maximumFractionDigits;       
   }
   var formatter = new Intl.NumberFormat(locales, options);
-  return formatter;
+  return {
+    format: function(value){
+      if (value === null) {
+        return '';
+      }
+      return formatter.format(value);
+    }
+  };
 }
 
 function createDefaultLiteralWriter(type){
@@ -26,6 +33,7 @@ var dataTypes = {
       var decimalSeparator = formatter.formatToParts(123.456)['decimal'];
       
       return function(value, field){
+        
         switch (typeof value){
           case 'bigint':
           case 'number':
@@ -295,6 +303,9 @@ var dataTypes = {
   'VARCHAR': {
     createFormatter: function(){
       return function(value){
+        if (value === null){
+          return '';
+        }
         return value;
       }
     },

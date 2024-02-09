@@ -349,6 +349,8 @@ class PivotTableUi {
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#columnsTupleSet;
     
+    var columnsAxisItems = this.#queryModel.getColumnsAxis().getItems();
+    var tupleValueFields = tupleSet.getTupleValueFields();
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
@@ -389,10 +391,13 @@ class PivotTableUi {
           tupleValue = tuple.values[j];
 
           if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
-            labelText = String(tupleValue);
-          }
-          else {
-            labelText = '';
+            var columnsAxisItem = columnsAxisItems[j];
+            if (columnsAxisItem.formatter) {
+              labelText = columnsAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
           }
         }
         else 
@@ -401,11 +406,11 @@ class PivotTableUi {
             var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
           }
-          else {
-            labelText = '';
-          }
         }
-        
+
+        if (!labelText || !labelText.length) {
+          labelText = String.fromCharCode(160);
+        }
         label.innerText = labelText;
       }
 
@@ -431,6 +436,8 @@ class PivotTableUi {
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     var tupleSet = this.#rowsTupleSet;
     
+    var rowsAxisItems = this.#queryModel.getRowsAxis().getItems();
+    var tupleValueFields = tupleSet.getTupleValueFields();
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
@@ -452,6 +459,9 @@ class PivotTableUi {
       var cells = row.childNodes;
       
       var tuple = tuples[tupleIndex];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;      
+      
+      row.setAttribute("data-totals", groupingId > 0);
       
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);        
@@ -461,12 +471,14 @@ class PivotTableUi {
         var tupleValue;
         if (tuple && j < tuple.values.length) {
           tupleValue = tuple.values[j];         
-
           if (cellsAxisItemIndex === 0 || i === 0) {
-            labelText = String(tupleValue);
-          }
-          else {
-            labelText = '';
+            var rowsAxisItem = rowsAxisItems[j];
+            if (rowsAxisItem.formatter) {
+              labelText = rowsAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
           }
         }
         else
@@ -475,6 +487,10 @@ class PivotTableUi {
           labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
         }
         
+        if (!labelText || !labelText.length) {
+          labelText = String.fromCharCode(160);
+        }
+  
         label.innerText = labelText;
       }
       
@@ -499,7 +515,7 @@ class PivotTableUi {
     }
     
     var values = cell.values;
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, '__data');
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, CellSet.datasetRelationName);
     var value = values[sqlExpression];
 
     var cellValueFields = this.#cellsSet.getCellValueFields();    
@@ -984,11 +1000,14 @@ class PivotTableUi {
     
     for (var i = 0; i < numRows; i++){
       var tuple = tuples[i];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       
       for (var k = 0; k < numCellHeaders; k++){
         var bodyRow = createEl('div', {
-          "class": "pivotTableUiRow"
+          "class": "pivotTableUiRow",
+          "data-totals": groupingId > 0
         });
+        
         tableBodyDom.insertBefore(bodyRow, stufferRow);
 
         for (var j = 0; j < numColumns; j++){
@@ -1015,20 +1034,18 @@ class PivotTableUi {
                 labelText = String(value);
               }
             }
-            else {
-              labelText = String.fromCharCode(160);
-            }
           }
           else {
             cell.className += ' pivotTableUiCellAxisHeaderCell';
             if (k < cellAxisItems.length && renderCellHeaders) {
               labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellAxisItems[k]);
             }
-            else {
-              labelText = String.fromCharCode(160);
-            }
           }
 
+          if (!labelText || !labelText.length) {
+            labelText = '&#160;';
+          }
+          
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel"
           }, labelText);
