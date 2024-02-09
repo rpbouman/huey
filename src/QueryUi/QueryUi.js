@@ -202,7 +202,8 @@ class QueryUi {
       default:
         itemUiTemplateId = 'queryUiAxisItem';
     }
-    itemUi = this.#instantiateTemplate(itemUiTemplateId, id);    
+    itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
+    itemUi.setAttribute('title',  QueryAxisItem.getCaptionForQueryAxisItem(axisItem));
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
 
     var derivation = axisItem.derivation;

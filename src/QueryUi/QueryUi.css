@@ -27,6 +27,15 @@
   margin-bottom: 1px;  
 }
 
+.queryUi > section > header {
+  display: flex;
+  flex-direction: row;
+}
+
+.queryUi > section > header > label {
+  width: 24px;
+}
+
 /* query ui axis label */
 .queryUi > section > header > h1 {
   font-size: 1em;
@@ -99,6 +108,12 @@
   content: "\fb00";
 }
 
+.queryUi > section > footer > label {
+  display: inline-block;
+  width: 20px;
+  padding-left: 4px;
+}
+
 .queryUi > section > footer > label:has( > button )::after {
   /* trash */
   content: "\eb41";
@@ -135,15 +150,17 @@
 /* label holding the item caption */
 .queryUi > section > ol > li > span {
   vertical-align: 16%;
+  margin-left: -6px;
 }
 
 .queryUi > section > ol > li[data-derivation] > span:before,
 .queryUi > section > ol > li[data-aggregator] > span:before {
-  width: 24px;
+  width: 18px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color );
   vertical-align: -15%;
+  display: inline-block;
 }
 
 /**
@@ -191,7 +208,7 @@
   content: "\ec53";
 }
 
-.queryUi > section > ol > li[data-derivation=iso-time] > span:before {
+.queryUi > section > ol > li[data-derivation="iso-time"] > span:before {
   /* clock */
   content: "\ea70";
 }
@@ -267,6 +284,26 @@
 }
 
 .queryUi > section > ol > li[data-aggregator=stdev] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=variance] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=entropy] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=kurtosis] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=skewness] > span:before {
   /* calculator */
   content: "\eb80";
 }
