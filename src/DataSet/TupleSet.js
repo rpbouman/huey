@@ -131,7 +131,7 @@ class TupleSet extends DataSetComponent {
     return this.#queryAxisId;
   }
 
-  #getQueryAxisItems(){
+  getQueryAxisItems(){
     var queryModel = this.getQueryModel();
     var axisId = this.#queryAxisId;
     
@@ -186,7 +186,7 @@ class TupleSet extends DataSetComponent {
     
     this.#tupleValueFields = fields;
     
-    var items = this.#getQueryAxisItems();
+    var items = this.getQueryAxisItems();
     var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
     if (fields[0].name === TupleSet.groupingIdAlias) {
       hasGroupingId = true;

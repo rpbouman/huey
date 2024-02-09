@@ -515,7 +515,7 @@ class PivotTableUi {
     }
     
     var values = cell.values;
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, '__data');
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem, CellSet.datasetRelationName);
     var value = values[sqlExpression];
 
     var cellValueFields = this.#cellsSet.getCellValueFields();    
