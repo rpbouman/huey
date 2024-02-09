@@ -1,3 +1,7 @@
+.attributeUi {
+  user-select: none;
+}
+
 .attributeUi details[data-nodetype=derived] > summary,
 .attributeUi details[data-nodetype=aggregate] > summary,
 .attributeUi details[data-nodetype=derived][open] > summary,
