@@ -58,20 +58,6 @@
 }
 
 /**/
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
-  border-bottom-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] {
-  font-weight: bold;
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiValueCell { 
-  background-color: var( --huey-medium-background-color );
-}
-
-/**/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell.pivotTableUiStufferCell {
   width: 100%;
   resize: none;
@@ -205,3 +191,25 @@
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel {
   text-align: right;
 }
+
+/* Totals */
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
+  border-bottom-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] {
+  font-weight: bold;
+  background-color: var( --huey-medium-background-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
+  border-right-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=true] {
+  background-color: var( --huey-medium-background-color );
+  border-left-color: var( --huey-dark-border-color );
+  font-weight: bold;
+}
+

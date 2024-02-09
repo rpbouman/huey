@@ -380,12 +380,14 @@ class PivotTableUi {
     // for each tuple
     for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       
       //for each header row
       for (var j = 0; j < numRows; j++){
         var row = rows.item(j);
         var cells = row.childNodes;
         var cell = cells.item(i);
+        cell.setAttribute('data-totals', groupingId > 0);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         
         var labelText = undefined;
@@ -462,7 +464,7 @@ class PivotTableUi {
       var cells = row.childNodes;
       
       var tuple = tuples[tupleIndex];
-      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;      
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       
       row.setAttribute("data-totals", groupingId > 0);
       
@@ -616,6 +618,8 @@ class PivotTableUi {
         }
         
         var cellElement = cellElements.item(j);
+        cellElement.setAttribute('data-totals', firstTableHeaderRowCells.item(j).getAttribute('data-totals'));
+        
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
         var cell;
         if (cells) {
@@ -831,9 +835,10 @@ class PivotTableUi {
       }
     
       var valuesMaxWidth = 0, columnWidth = 0;
-      var values, stringValue;
+      var values, groupingId;
       if (tuple){
         values = tuple.values;
+        groupingId = tuple[TupleSet.groupingIdAlias];
       }
       
       for (var k = 0; k < numCellHeaders; k++){
@@ -841,9 +846,10 @@ class PivotTableUi {
           var headerRow = headerRows.item(j);
           
           var cell = createEl('div', {
-            "class": "pivotTableUiCell pivotTableUiHeaderCell"
+            "class": "pivotTableUiCell pivotTableUiHeaderCell",
+            "data-totals": groupingId > 0
           });
-          
+                    
           if (j === headerRows.length - 1 && renderCellHeaders && cellItems.length){
             cell.className += ' pivotTableUiCellAxisHeaderCell';
           }
