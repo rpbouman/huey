@@ -4,6 +4,10 @@ class QueryAxisItem {
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
     if (axisItem.aggregator) {
       var aggregatorInfo = AttributeUi.aggregators[axisItem.aggregator];
+      if (aggregatorInfo.createFormatter){
+        return aggregatorInfo.createFormatter(axisItem);
+      }
+      else 
       if (aggregatorInfo.columnType) {
         dataType = aggregatorInfo.columnType;
       }
@@ -17,13 +21,33 @@ class QueryAxisItem {
     }
     else
     if (axisItem.derivation){
-      
+      var derivationInfo = AttributeUi.getDerivationInfo(axisItem.derivation);
+      if (derivationInfo.createFormatter) {
+        return derivationInfo.createFormatter(axisItem);
+      }
+      else
+      if (derivationInfo.columnType){
+        dataType = derivationInfo.columnType;
+      }
     }
-    var dataTypeInfo = dataTypes[dataType];
-    if (!dataTypeInfo) {
-      console.error(`No data type found for ${dataType}`);
+    
+    if (dataType) {
+      var dataTypeInfo = dataTypes[dataType];
+      if (dataTypeInfo) {
+        if (dataTypeInfo.createFormatter){
+          return dataTypeInfo.createFormatter();
+        }
+      }
+      else {
+        console.error(`No data type info found for ${dataType}`);
+      }
     }
-    return dataTypeInfo.createFormatter();
+    else{
+      console.error(`No data type for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
+    }
+    
+    console.warn(`Using fallback formatter for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
+    return fallbackFormatter;
   }
  
   static createLiteralWriter(axisItem){

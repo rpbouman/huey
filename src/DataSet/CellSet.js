@@ -118,7 +118,14 @@ class CellSet extends DataSetComponent {
       var queryAxisItems = tupleSet.getQueryAxisItems();
       queryAxisItems.forEach(function(queryAxisItem){
         var itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
-        selectListExpressions[itemSql] = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+        var alias;
+        if (queryAxisItem.derivation) {
+          alias = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+        }
+        else {
+          alias = queryAxisItem.columnName;
+        }
+        selectListExpressions[itemSql] = alias;
       });
     }
 
@@ -127,8 +134,8 @@ class CellSet extends DataSetComponent {
         selectListExpressions[1] = CellSet.#countStarExpressionAlias;
       }
       else {
-        var itemSql = getQualifiedIdentifier(cellsAxisItem.columnName, alias);
-        selectListExpressions[itemSql] = itemSql;
+        var itemSql = getQualifiedIdentifier(alias, cellsAxisItem.columnName);
+        selectListExpressions[itemSql] = cellsAxisItem.columnName;
       }
     });
 
@@ -150,7 +157,7 @@ class CellSet extends DataSetComponent {
       filterSql = filterSql.replace(/\n/g, '\n  ');
       sql.push(`  WHERE ${filterSql}`);
     }
-    sql.unshift(`${alias} AS (`);
+    sql.unshift(`${getQuotedIdentifier(alias)} AS (`);
     sql.push(')');
     return sql.join('\n');
   }
@@ -173,7 +180,13 @@ class CellSet extends DataSetComponent {
           continue;
         }
         if (i === 0) {
-          var itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          var itemSql;
+          if (queryAxisItem.derivation) {
+            itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          }
+          else {
+            itemSql = queryAxisItem.columnName;
+          }
           columns.push(itemSql);
           var leftJoinColumn = getQualifiedIdentifier(CellSet.#tupleDataRelationName, itemSql);
           var rightJoinColumn = getQualifiedIdentifier(CellSet.datasetRelationName, itemSql); 
@@ -192,7 +205,7 @@ class CellSet extends DataSetComponent {
     }).join('\n ,') + ') AS ' + relationDefinition;
 
     var groupByList = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
-    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + CellSet.datasetRelationName;
+    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + getQuotedIdentifier(CellSet.datasetRelationName);
     if (joinConditions.length){
       joinClause += `\nON ${joinConditions.join('\n  AND ')}`;
     }

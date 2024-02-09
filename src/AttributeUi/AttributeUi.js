@@ -10,7 +10,6 @@ class AttributeUi {
       isInteger: true,
       expressionTemplate: 'COUNT( ${columnName} )',
       columnType: 'HUGEINT'
-      
     },
     'distinct count': {
       isNumeric: true,
@@ -42,15 +41,45 @@ class AttributeUi {
       isNumeric: true,
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnName} )',
+      createFormatter: function(axisItem){
+        var columnType = axisItem.columnType;
+        var dataTypeInfo = dataTypes[columnType];
+        var formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        return function(value, field){
+          return formatter.format(value);
+        };
+      }
     },
     'avg': {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'AVG( ${columnName} )'
+      expressionTemplate: 'AVG( ${columnName} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value);
+        };
+      }
     },
     'median': {
-      expressionTemplate: 'MEDIAN( ${columnName} )'
+      expressionTemplate: 'MEDIAN( ${columnName} )',
+      createFormatter: function(axisItem){
+        var columnType = axisItem.columnType;
+        var dataTypeInfo = dataTypes[columnType];
+        var formatter;
+        if (dataTypeInfo.isNumeric) {
+          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+          return function(value, field){
+            return formatter.format(value);
+          };
+        }
+        else {
+          return function(value, field){
+            return fallbackFormatter(value);
+          };
+        }
+      }
     },
     'mode': {
       preservesColumnType: true,
@@ -526,9 +555,14 @@ class AttributeUi {
       itemConfig.formatter = formatter;
     }
 
-    var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
-    if (literalWriter){
-      itemConfig.literalWriter = literalWriter;
+    if (itemConfig.aggregator) {
+      //noop
+    }
+    else {
+      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
+      if (literalWriter){
+        itemConfig.literalWriter = literalWriter;
+      }
     }
     
     if (checked) {

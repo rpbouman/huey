@@ -19,6 +19,13 @@ function createNumberFormatter(fractionDigits){
   };
 }
 
+function fallbackFormatter(value){
+  if (value === null || value === undefined){
+    return '';
+  }
+  return String(value);
+}
+
 function createDefaultLiteralWriter(type){
   return function(value, field){
     return `${value === null ? 'NULL' : String(value)}::${type}`;
@@ -71,6 +78,7 @@ var dataTypes = {
   },
   'REAL': {
     isNumeric: true,
+    greaterPrecisionAlternative: "DOUBLE",
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
       return function(value, field){
@@ -84,6 +92,7 @@ var dataTypes = {
   'BIGINT': {
     isNumeric: true,
     isInteger: true,
+    greaterPrecisionAlternative: "HUGEINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -110,6 +119,7 @@ var dataTypes = {
   'INTEGER': {
     isNumeric: true,
     isInteger: true,
+    greaterPrecisionAlternative: "BIGINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -123,6 +133,7 @@ var dataTypes = {
   'SMALLINT': {
     isNumeric: true,
     isInteger: true,
+    greaterPrecisionAlternative: "INTEGER",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -136,6 +147,7 @@ var dataTypes = {
   'TINYINT': {
     isNumeric: true,
     isInteger: true,
+    greaterPrecisionAlternative: "SMALLINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -150,6 +162,7 @@ var dataTypes = {
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
+    greaterPrecisionAlternative: "UHUGEINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -160,10 +173,24 @@ var dataTypes = {
       return createDefaultLiteralWriter('UBIGINT');
     }    
   },
+  'UHUGEINT': {
+    isNumeric: true,
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('UHUGEINT');
+    }    
+  },
   'UINTEGER': {
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
+    greaterPrecisionAlternative: "UBIGINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -178,6 +205,7 @@ var dataTypes = {
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
+    greaterPrecisionAlternative: "UINTEGER",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
@@ -192,6 +220,7 @@ var dataTypes = {
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
+    greaterPrecisionAlternative: "USMALLINT",
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
