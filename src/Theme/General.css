@@ -1,11 +1,14 @@
+/*
+We keep this one around here for reference, but 
+
 @font-face {
   font-family: "tabler-icons";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
+  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/fonts/tabler-icons.woff2?v2.47.0") format("woff2");
 }
-
+*/
 :root {
   /*
   * Huey text font
