@@ -347,12 +347,15 @@ class PivotTableUi {
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = columnsAxisSizeInfo.columns.columnCount;
     var maxColumnIndex = columnsAxisSizeInfo.headers.columnCount + count;
-    var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
+    var tupleCount = Math.ceil(count / (tupleIndexInfo.factor - tupleIndexInfo.cellsAxisItemIndex));
     var tupleSet = this.#columnsTupleSet;
     
     var columnsAxisItems = this.#queryModel.getColumnsAxis().getItems();
     var tupleValueFields = tupleSet.getTupleValueFields();
+    
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
+    // local tuple index in our array of tuples
+    var tupleIndex = 0;
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
     var cellsAxisItems, numCellsAxisItems;
@@ -365,7 +368,6 @@ class PivotTableUi {
       }
     }
 
-    var tupleIndex = 0;
     var cellsAxisItemIndex = tupleIndexInfo.cellsAxisItemIndex;
     
     var tableHeaderDom = this.#getTableHeaderDom();
@@ -386,7 +388,7 @@ class PivotTableUi {
         var cell = cells.item(i);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         
-        var labelText;
+        var labelText = undefined;
         var tupleValue;
         if (tuple && j < tuple.values.length){
           tupleValue = tuple.values[j];
