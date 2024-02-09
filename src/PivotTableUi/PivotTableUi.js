@@ -15,6 +15,7 @@ class PivotTableUi {
     
   #resizeTimeoutId = undefined;
   #resizeTimeout = 1000;
+  #scrollTimeout = 500;
     
   constructor(config){
     this.#id = config.id;
@@ -80,7 +81,7 @@ class PivotTableUi {
       'scroll',
       this.#handleInnerContainerScrolled,
       this,
-      100
+      this.#scrollTimeout
     );
   }
   
