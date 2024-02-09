@@ -155,7 +155,7 @@
 
 .queryUi > section > ol > li[data-derivation] > span:before,
 .queryUi > section > ol > li[data-aggregator] > span:before {
-  width: 18px;
+  width: 20px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color );
