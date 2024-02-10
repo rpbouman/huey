@@ -541,17 +541,40 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
   var queryAxisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
   
   var selectList = {}, groupBy = [], orderBy = [];
+  var rowsGroupingSets = [[]], columnsGroupingSets = [[]];
+  
   for (var i = 0; i < queryAxisItems.length; i++){
     var queryAxisItem = queryAxisItems[i];
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
     var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, undefined, sqlOptions);
     selectList[caption] = sqlExpression;
     
-    if (i < rowsAxisItems.length + columnsAxisItems.length) {
+    if (queryAxisItem.axis !== QueryModel.AXIS_CELLS) {
+      if (i == rowsAxisItems.length) {
+        perAxisGroupBy = [];
+      }
+      var groupingSets = (i < rowsAxisItems.length) ? rowsGroupingSets : columnsGroupingSets;
+      if (queryAxisItem.includeTotals) {
+        groupingSets.push( [].concat(groupingSets[0]) );
+      }
+      groupingSets[0].push(sqlExpression);
+      
       groupBy.push(sqlExpression);
       orderBy.push(sqlExpression);
     }
   }
+  
+  var groupingSets = []
+  if (rowsGroupingSets.length > 1 || columnsGroupingSets > 1) {
+    for (var i = 0; i < rowsGroupingSets.length; i++){
+      var rowsGroupingSet = rowsGroupingSets[i];
+      for (var j = 0; j < columnsGroupingSets.length; j++){
+        var columnsGroupingSet = columnsGroupingSets[j];
+        var groupingSet = [].concat(rowsGroupingSet, columnsGroupingSet);
+        groupingSets.push(groupingSet);
+      }
+    }
+  }    
     
   var selectList = Object.keys(selectList).map(function(caption){
     var sqlExpression = selectList[caption];
@@ -570,9 +593,21 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
     sql.push(`${keywordFormatter('where')} ${filterSql}`);
   }
   var byKeyword = keywordFormatter('by');
+  
+  if (groupingSets.length) {
+    sql.push(`${keywordFormatter('group')} ${byKeyword} ${keywordFormatter('grouping')} ${keywordFormatter('sets')} (`);
+    sql.push(
+      '  ' + groupingSets.map(function(groupingSet){
+        return `( ${groupingSet.join(', ')} )`;
+      }).join('\n, ')
+    );
+    sql.push(')');
+  }
+  else
   if (groupBy.length) {
     sql.push(`${keywordFormatter('group')} ${byKeyword} ${groupBy.join(comma)}`);
   }
+  
   if (orderBy.length) {
     sql.push(`${keywordFormatter('order')} ${byKeyword} ${orderBy.join(comma)}`);
   }
