@@ -16,6 +16,9 @@ class PivotTableUi {
   #resizeTimeoutId = undefined;
   #resizeTimeout = 1000;
   #scrollTimeout = 500;
+  
+  // the maximum width in ch units
+  static #maximumCellWidth = 30;
     
   constructor(config){
     this.#id = config.id;
@@ -543,6 +546,7 @@ class PivotTableUi {
       labelText = String(value);
     }
     label.innerText = labelText;    
+    return labelText
   }
   
   async #updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex){
@@ -618,15 +622,28 @@ class PivotTableUi {
         }
         
         var cellElement = cellElements.item(j);
-        cellElement.setAttribute('data-totals', firstTableHeaderRowCells.item(j).getAttribute('data-totals'));
+        var headerCell = firstTableHeaderRowCells.item(j);
+        cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
         
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
         var cell;
         if (cells) {
           cell = cells[cellIndex];
         }
-        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];                   
-        this.#renderCellValue(cell, cellsAxisItem, cellElement);
+        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];              
+        var labelText = this.#renderCellValue(cell, cellsAxisItem, cellElement);
+        
+        // adjust the column width if necessary.
+        var width = headerCell.style.width;
+        if (width.endsWith('ch')){
+          var newWidth = labelText.length + 1;
+          if (newWidth > PivotTableUi.#maximumCellWidth) {
+            newWidth = PivotTableUi.#maximumCellWidth;
+          }
+          if (newWidth > parseInt(width, 10)) {
+            headerCell.style.width = newWidth + 'ch';
+          }
+        }
         
         if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
           cellsAxisItemIndex += 1;

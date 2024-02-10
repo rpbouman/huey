@@ -209,7 +209,7 @@
 
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=true] {
   background-color: var( --huey-medium-background-color );
-  border-left-color: var( --huey-dark-border-color );
+  border-right-color: var( --huey-dark-border-color );
   font-weight: bold;
 }
 
