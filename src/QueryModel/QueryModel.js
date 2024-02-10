@@ -43,7 +43,7 @@ class QueryAxisItem {
       }
     }
     else{
-      console.error(`No data type for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
+      console.warn(`No data type for axisItem "${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}".`);
     }
     
     console.warn(`Using fallback formatter for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
