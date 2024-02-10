@@ -8,10 +8,13 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 
 ## Key features
-- Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
+- An intuitive and responsive pivot table that supports filtering and (sub)totals
+- Supports many different aggregate functions for reporting and data exploration
+- Automatic breakdown of date/time columns into separate parts (year, month, quarter etc) for reporting
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
+- Export of results and/or SQL queries to file or clipboard
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
-- An intuitive and responsive pivot table, with support for many types of metrics
+- Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
 
 Note: although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
 
