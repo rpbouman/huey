@@ -83,8 +83,8 @@
 }
 
 .attributeUi details[data-nodetype=derived][data-derivation="week num"] > summary > .icon:before {
-  /* letter w */
-  content: "\ec66";
+  /* calendar-week */
+  content: "\fd30";
 }
 
 .attributeUi details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon:before {
@@ -93,13 +93,13 @@
 }
 
 .attributeUi details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon:before {
-  /* letter-d */
-  content: "\ec53";
+  /* calendar-month */
+  content: "\fd2f";
 }
 
 .attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon:before {
-  /* letter-d */
-  content: "\ec53";
+  /* letter-d-small */
+  content: "\fcca";
 }
 
 .attributeUi details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon:before {

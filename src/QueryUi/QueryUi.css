@@ -189,8 +189,8 @@
 }
 
 .queryUi > section > ol > li[data-derivation="week num"] > span:before {
-  /* letter w */
-  content: "\ec66";
+  /* calendar-week */
+  content: "\fd30";
 }
 
 .queryUi > section > ol > li[data-derivation="day of year"] > span:before {
@@ -199,13 +199,13 @@
 }
 
 .queryUi > section > ol > li[data-derivation="day of month"] > span:before {
-  /* letter-d */
-  content: "\ec53";
+  /* calendar-month */
+  content: "\fd2f";
 }
 
 .queryUi > section > ol > li[data-derivation="day of week"] > span:before {
-  /* letter-d */
-  content: "\ec53";
+  /* letter-d-small */
+  content: "\fcca";
 }
 
 .queryUi > section > ol > li[data-derivation="iso-time"] > span:before {
