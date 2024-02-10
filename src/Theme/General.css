@@ -1,11 +1,14 @@
+/*
+We keep this one around here for reference, but 
+
 @font-face {
   font-family: "tabler-icons";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
+  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/fonts/tabler-icons.woff2?v2.47.0") format("woff2");
 }
-
+*/
 :root {
   /*
   * Huey text font
@@ -24,14 +27,14 @@
   * Huey background colors
   */
   --huey-light-background-color: rgb(255,255,255);
-  --huey-medium-background-color: rgb(250,250,250);
-  --huey-dark-background-color: rgb(222,222,222);
+  --huey-medium-background-color: rgb(245,245,245);
+  --huey-dark-background-color: rgb(210,210,210);
   
   /**
   * Huey border colors
   */
   --huey-light-border-color: rgb(222,222,222);
-  --huey-dark-border-color: rgb(200,200,200);
+  --huey-dark-border-color: rgb(175,175,175);
   
   /**
   * Huey icon font
@@ -45,7 +48,7 @@
   /**
   * Huey icon font colors
   */
-  --huey-icon-color-subtle: rgb(200,200,200);
+  --huey-icon-color-subtle: rgb(185,185,185);
   --huey-icon-color: rgb(50,50,50);
   --huey-icon-color-highlight: rgb(0,0,0);
 }

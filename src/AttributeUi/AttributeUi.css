@@ -1,3 +1,7 @@
+.attributeUi {
+  user-select: none;
+}
+
 .attributeUi details[data-nodetype=derived] > summary,
 .attributeUi details[data-nodetype=aggregate] > summary,
 .attributeUi details[data-nodetype=derived][open] > summary,
@@ -59,7 +63,7 @@
 * Derivation icons
 *
 */
-.attributeUi details[data-nodetype=derived][data-derivation=date] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon:before {
   /* calendar */
   content: "\ea53";
 }
@@ -98,7 +102,7 @@
   content: "\ec53";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=time] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon:before {
   /* clock */
   content: "\ea70";
 }

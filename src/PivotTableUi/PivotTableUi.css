@@ -57,6 +57,7 @@
   display: table-row;
 }
 
+/**/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell.pivotTableUiStufferCell {
   width: 100%;
   resize: none;
@@ -121,10 +122,9 @@
   text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-.pivotTableUiContainer > div[role=progressbar] {
+.pivotTableUiContainer > *[role=progressbar] {
   position: absolute;
   top: 50%;
-  left: 50%;
   z-index: 100;
   width: 200px;
   height: 160px;
@@ -135,15 +135,15 @@
   border-radius: 20px;
 }
 
-.pivotTableUiContainer[aria-busy=false] > div[role=progressbar] {
+.pivotTableUiContainer[aria-busy=false] > *[role=progressbar] {
   display: none;
 }
 
-.pivotTableUiContainer[aria-busy=true] > div[role=progressbar] {
+.pivotTableUiContainer[aria-busy=true] > *[role=progressbar] {
   display: block;
 }
 
-.pivotTableUiContainer > div[role=progressbar] > section {
+.pivotTableUiContainer > *[role=progressbar] > section {
   display: flex;
   flex-direction: column;
 }
@@ -191,3 +191,25 @@
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel {
   text-align: right;
 }
+
+/* Totals */
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
+  border-bottom-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] {
+  font-weight: bold;
+  background-color: var( --huey-medium-background-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
+  border-right-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=true] {
+  background-color: var( --huey-medium-background-color );
+  border-right-color: var( --huey-dark-border-color );
+  font-weight: bold;
+}
+

@@ -127,7 +127,7 @@ class Settings extends EventEmitter {
         options: [
           { value: 'initialCapital', label: 'Initial Capital', title: 'Initial capital followed by lowercase'},
           { value: 'lowerCase', label: 'Lower Case', title: 'All lower case'},
-          { value: 'upperCase', label: 'Upper Capital', title: 'All upper case'}
+          { value: 'upperCase', label: 'Upper Case', title: 'All upper case'}
         ]
       },
       exportSqlAlwaysQuoteIdentifiers: true,
@@ -155,11 +155,11 @@ class Settings extends EventEmitter {
               "--huey-foreground-color": "rgb(50,50,50)",
               "--huey-placeholder-color": "rgb(180,180,180)",
               "--huey-light-background-color": "rgb(255,255,255)",
-              "--huey-medium-background-color": "rgb(250,250,250)",
-              "--huey-dark-background-color": "rgb(222,222,222)",
+              "--huey-medium-background-color": "rgb(245,245,245)",
+              "--huey-dark-background-color": "rgb(210,210,210)",
               "--huey-light-border-color": "rgb(222,222,222)",
-              "--huey-dark-border-color": "rgb(200,200,200)",
-              "--huey-icon-color-subtle": "rgb(200,200,200)",
+              "--huey-dark-border-color": "rgb(175,175,175)",
+              "--huey-icon-color-subtle": "rgb(185,185,185)",
               "--huey-icon-color": "rgb(50,50,50)",
               "--huey-icon-color-highlight": "rgb(0,0,0)"
             },
@@ -245,11 +245,11 @@ class Settings extends EventEmitter {
           "--huey-foreground-color": "rgb(50,50,50)",
           "--huey-placeholder-color": "rgb(180,180,180)",
           "--huey-light-background-color": "rgb(255,255,255)",
-          "--huey-medium-background-color": "rgb(250,250,250)",
-          "--huey-dark-background-color": "rgb(222,222,222)",
+          "--huey-medium-background-color": "rgb(245,245,245)",
+          "--huey-dark-background-color": "rgb(210,210,210)",
           "--huey-light-border-color": "rgb(222,222,222)",
-          "--huey-dark-border-color": "rgb(200,200,200)",
-          "--huey-icon-color-subtle": "rgb(200,200,200)",
+          "--huey-dark-border-color": "rgb(175,175,175)",
+          "--huey-icon-color-subtle": "rgb(185,185,185)",
           "--huey-icon-color": "rgb(50,50,50)",
           "--huey-icon-color-highlight": "rgb(0,0,0)"
         }

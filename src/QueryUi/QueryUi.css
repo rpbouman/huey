@@ -3,6 +3,7 @@
   flex-direction: column;
   padding-left: 4px;
   padding-right: 2px;
+  user-select: none;
 }
 
 .queryUi section,
@@ -26,6 +27,15 @@
   margin-bottom: 1px;  
 }
 
+.queryUi > section > header {
+  display: flex;
+  flex-direction: row;
+}
+
+.queryUi > section > header > label {
+  width: 24px;
+}
+
 /* query ui axis label */
 .queryUi > section > header > h1 {
   font-size: 1em;
@@ -39,16 +49,19 @@
   content: ':';
 }
 
-.queryUi label > button {
+.queryUi label > button,
+.queryUi label > input[type=checkbox] {
   display: none;
 }
 
+.queryUi label:has( > input[type=checkbox] )::after,
 .queryUi label:has( > button )::after {
   width: 24px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color-subtle );
 }
+.queryUi label:has( > input[type=checkbox] ):hover::after,
 .queryUi label:has( > button ):hover::after {
   color: var( --huey-icon-color-highlight );
 }
@@ -95,6 +108,12 @@
   content: "\fb00";
 }
 
+.queryUi > section > footer > label {
+  display: inline-block;
+  width: 20px;
+  padding-left: 4px;
+}
+
 .queryUi > section > footer > label:has( > button )::after {
   /* trash */
   content: "\eb41";
@@ -131,15 +150,17 @@
 /* label holding the item caption */
 .queryUi > section > ol > li > span {
   vertical-align: 16%;
+  margin-left: -6px;
 }
 
 .queryUi > section > ol > li[data-derivation] > span:before,
 .queryUi > section > ol > li[data-aggregator] > span:before {
-  width: 24px;
+  width: 20px;
   font-family: var( --huey-icon-font-family ) !important;
   font-size: var( --huey-icon-medium );
   color: var( --huey-icon-color );
   vertical-align: -15%;
+  display: inline-block;
 }
 
 /**
@@ -147,7 +168,7 @@
 * Derivation icons
 *
 */
-.queryUi > section > ol > li[data-derivation=date] > span:before {
+.queryUi > section > ol > li[data-derivation=iso-date] > span:before {
   /* calendar */
   content: "\ea53";
 }
@@ -187,7 +208,7 @@
   content: "\ec53";
 }
 
-.queryUi > section > ol > li[data-derivation=time] > span:before {
+.queryUi > section > ol > li[data-derivation="iso-time"] > span:before {
   /* clock */
   content: "\ea70";
 }
@@ -267,7 +288,25 @@
   content: "\eb80";
 }
 
+.queryUi > section > ol > li[data-aggregator=variance] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
 
+.queryUi > section > ol > li[data-aggregator=entropy] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=kurtosis] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=skewness] > span:before {
+  /* calculator */
+  content: "\eb80";
+}
 
 /* buttons to move the item */
 .queryUi > section > ol > li > label:first-child:has( > button )::after {
@@ -307,18 +346,32 @@
   margin: 0px;
 }
 
+/*  */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after,
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after {
+  /* abacus */
+  content: "\f05c";
+}
+
+/*  */
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after,
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after {
+  color: var( --huey-icon-highlight );
+}
+
+
 /* axis item action to move item to other axis */
-.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=rows] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* table-row */
   content: "\fb00";
 }
 
-.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=columns] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* table-column */
   content: "\faff";
 }
 
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* filter-edit */
   /* content: "\fa00"; */
   /* filter cog */
@@ -326,11 +379,7 @@
 }
 
 /* axis item action to remove item from axis */
-.queryUi > section > ol > li > menu > label:nth-child(2):has( > button )::after {
+.queryUi > section > ol > li > menu > label:nth-child(3):has( > button )::after {
   /* trash */
   content: "\eb41";
-}
-
-
-
 }

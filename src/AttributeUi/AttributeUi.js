@@ -1,3 +1,4 @@
+
 class AttributeUi {
   
   #id = undefined;
@@ -7,12 +8,14 @@ class AttributeUi {
     'count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( ${columnName} )'
+      expressionTemplate: 'COUNT( ${columnName} )',
+      columnType: 'HUGEINT'
     },
     'distinct count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( DISTINCT ${columnName} )'
+      expressionTemplate: 'COUNT( DISTINCT ${columnName} )',
+      columnType: 'HUGEINT'
     },
     'min': {
       preservesColumnType: true,
@@ -38,15 +41,45 @@ class AttributeUi {
       isNumeric: true,
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnName} )',
+      createFormatter: function(axisItem){
+        var columnType = axisItem.columnType;
+        var dataTypeInfo = dataTypes[columnType];
+        var formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        return function(value, field){
+          return formatter.format(value);
+        };
+      }
     },
     'avg': {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'AVG( ${columnName} )'
+      expressionTemplate: 'AVG( ${columnName} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value);
+        };
+      }
     },
     'median': {
-      expressionTemplate: 'MEDIAN( ${columnName} )'
+      expressionTemplate: 'MEDIAN( ${columnName} )',
+      createFormatter: function(axisItem){
+        var columnType = axisItem.columnType;
+        var dataTypeInfo = dataTypes[columnType];
+        var formatter;
+        if (dataTypeInfo.isNumeric) {
+          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+          return function(value, field){
+            return formatter.format(value);
+          };
+        }
+        else {
+          return function(value, field){
+            return fallbackFormatter(value);
+          };
+        }
+      }
     },
     'mode': {
       preservesColumnType: true,
@@ -89,7 +122,7 @@ class AttributeUi {
   };
 
   static dateFields = {
-    'date': {
+    'iso-date': {
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
       expressionTemplate: "strftime( ${columnName}, '%x' )",
@@ -148,7 +181,7 @@ class AttributeUi {
   };
 
   static timeFields = {
-    'time': {
+    'iso-time': {
       expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
       columnType: 'VARCHAR'
     },
@@ -520,6 +553,16 @@ class AttributeUi {
     var formatter = QueryAxisItem.createFormatter(itemConfig);
     if (formatter){
       itemConfig.formatter = formatter;
+    }
+
+    if (itemConfig.aggregator) {
+      //noop
+    }
+    else {
+      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
+      if (literalWriter){
+        itemConfig.literalWriter = literalWriter;
+      }
     }
     
     if (checked) {

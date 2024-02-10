@@ -1,59 +1,235 @@
-var duckdbExtensionForFileExtension = {
-  'json': 'json',
-  'parquet': 'parquet',
-  'sqlite': 'sqlite_scanner',
-  'xlsx': 'spatial'
-};
+function createNumberFormatter(fractionDigits){
+  var localeSettings = settings.getSettings('localeSettings');
+  var locales = localeSettings.locale;
+  var options = {
+    minimumIntegerDigits: localeSettings.minimumIntegerDigits,
+  };
+  if (fractionDigits){
+    options.minimumFractionDigits = localeSettings.minimumFractionDigits;
+    options.maximumFractionDigits = localeSettings.maximumFractionDigits;       
+  }
+  var formatter = new Intl.NumberFormat(locales, options);
+  return {
+    format: function(value){
+      if (value === null) {
+        return '';
+      }
+      return formatter.format(value);
+    }
+  };
+}
+
+function fallbackFormatter(value){
+  if (value === null || value === undefined){
+    return '';
+  }
+  return String(value);
+}
+
+function createDefaultLiteralWriter(type){
+  return function(value, field){
+    return `${value === null ? 'NULL' : String(value)}::${type}`;
+  }
+}
 
 var dataTypes = {
   'DECIMAL': {
-    isNumeric: true
+    isNumeric: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      var decimalSeparator = formatter.formatToParts(123.456)['decimal'];
+      
+      return function(value, field){
+        
+        switch (typeof value){
+          case 'bigint':
+          case 'number':
+            break;
+          default:
+            var stringValue = String(value);
+            if (field.type.scale === 0) {
+              value = BigInt(stringValue);
+            }
+            else {
+              var parts = stringValue.split('.');
+              var integerPart = formatter.formatToParts(BigInt(parts[0]))['integer'];
+              var fractionPart = part[1];
+              return `${integerPart}${decimalSeparator}${fractionPart}`;
+            }
+        }
+        return formatter.format(value)
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('DECIMAL');
+    }
   },
   'DOUBLE': {
-    isNumeric: true
+    isNumeric: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('DOUBLE');
+    }    
   },
   'REAL': {
-    isNumeric: true
+    isNumeric: true,
+    greaterPrecisionAlternative: "DOUBLE",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('REAL');
+    }    
   },
   'BIGINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    greaterPrecisionAlternative: "HUGEINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BIGINT');
+    }    
   },
   'HUGEINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('HUGEINT');
+    }    
   },
   'INTEGER': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    greaterPrecisionAlternative: "BIGINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('INTEGER');
+    }    
   },
   'SMALLINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    greaterPrecisionAlternative: "INTEGER",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('SMALLINT');
+    }    
   },
   'TINYINT': {
     isNumeric: true,
-    isInteger: true
+    isInteger: true,
+    greaterPrecisionAlternative: "SMALLINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('TINYINT');
+    }    
   },
   'UBIGINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    greaterPrecisionAlternative: "UHUGEINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('UBIGINT');
+    }    
+  },
+  'UHUGEINT': {
+    isNumeric: true,
+    isInteger: true,
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('UHUGEINT');
+    }    
   },
   'UINTEGER': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    greaterPrecisionAlternative: "UBIGINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('UINTEGER');
+    }    
   },
   'USMALLINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    greaterPrecisionAlternative: "UINTEGER",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('USMALLINT');
+    }    
   },
   'UTINYINT': {
     isNumeric: true,
     isInteger: true,
-    isUnsigned: true
+    isUnsigned: true,
+    greaterPrecisionAlternative: "USMALLINT",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(false);
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('UTINYINT');
+    }    
   },
   'BIT': {
   },
@@ -62,19 +238,90 @@ var dataTypes = {
   'BLOB': {
   },
   'DATE': {
-    hasDateFields: true
+    hasDateFields: true,
+    createFormatter: function(){
+      var localeSettings = settings.getSettings('localeSettings');
+      var locales = localeSettings.locale;      
+      var formatter = new Intl.DateTimeFormat(locales, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+      return function(value, field){
+        return formatter.format(value);
+      };
+    },
+    createLiteralWriter: function(){
+      return function(value, field){
+        var monthNum = String(1 + value.getUTCMonth());
+        if (monthNum.length === 1) {
+          monthNum = '0' + monthNum;
+        }
+        var dayNum = value.getUTCDate();
+        if (dayNum.length === 1) {
+          dayNum = '0' + dayNum;
+        }
+        return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
+      };
+    }
   },
   'TIME': {
-    hasTimeFields: true
+    hasTimeFields: true,
+    
   },
   'TIMESTAMP': {
     hasDateFields: true,
-    hasTimeFields: true
+    hasTimeFields: true,
+    createFormatter: function(){
+      // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
+      // allowing us to use the value directly as argumnet to the Date constructor.
+      // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
+      // and since the Duckdb TIMESTAMP is measured in microseconds, there will be 3 such decimal digits
+      var localeSettings = settings.getSettings('localeSettings');
+      var locales = localeSettings.locale;      
+      var formatter = new Intl.DateTimeFormat(locales, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3
+      });
+      return function(value, field){
+        if (value === null ){
+          return null;
+        }
+        var date = new Date(value);
+        var parts = String(value).split('.');
+        var micros;
+        if (parts.length === 2) {
+          micros = parseInt( parts[1], 10 );
+        }
+        var dateTimeString = formatter.format(date);
+        
+        if (!micros) {
+          return dateTimeString;
+        }
+        
+        return `${dateTimeString} ${micros}μs`;
+      };
+    },
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+      };
+    }
   },
   'TIMESTAMP WITH TIME ZONE': {
     hasDateFields: true,
     hasTimeFields: true,
-    hasTimezone: true
+    hasTimezone: true,
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+      };
+    }
   },
   'INTERVAL': {
   },
@@ -83,6 +330,19 @@ var dataTypes = {
   'ENUM': {
   },
   'VARCHAR': {
+    createFormatter: function(){
+      return function(value){
+        if (value === null){
+          return '';
+        }
+        return value;
+      }
+    },
+    createLiteralWriter: function(){
+      return function(value, field){
+        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;       
+      };
+    }
   },
   'ARRAY': {
   },
@@ -281,17 +541,40 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
   var queryAxisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
   
   var selectList = {}, groupBy = [], orderBy = [];
+  var rowsGroupingSets = [[]], columnsGroupingSets = [[]];
+  
   for (var i = 0; i < queryAxisItems.length; i++){
     var queryAxisItem = queryAxisItems[i];
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
     var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, undefined, sqlOptions);
     selectList[caption] = sqlExpression;
     
-    if (i < rowsAxisItems.length + columnsAxisItems.length) {
+    if (queryAxisItem.axis !== QueryModel.AXIS_CELLS) {
+      if (i == rowsAxisItems.length) {
+        perAxisGroupBy = [];
+      }
+      var groupingSets = (i < rowsAxisItems.length) ? rowsGroupingSets : columnsGroupingSets;
+      if (queryAxisItem.includeTotals) {
+        groupingSets.push( [].concat(groupingSets[0]) );
+      }
+      groupingSets[0].push(sqlExpression);
+      
       groupBy.push(sqlExpression);
       orderBy.push(sqlExpression);
     }
   }
+  
+  var groupingSets = []
+  if (rowsGroupingSets.length > 1 || columnsGroupingSets > 1) {
+    for (var i = 0; i < rowsGroupingSets.length; i++){
+      var rowsGroupingSet = rowsGroupingSets[i];
+      for (var j = 0; j < columnsGroupingSets.length; j++){
+        var columnsGroupingSet = columnsGroupingSets[j];
+        var groupingSet = [].concat(rowsGroupingSet, columnsGroupingSet);
+        groupingSets.push(groupingSet);
+      }
+    }
+  }    
     
   var selectList = Object.keys(selectList).map(function(caption){
     var sqlExpression = selectList[caption];
@@ -310,9 +593,21 @@ function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
     sql.push(`${keywordFormatter('where')} ${filterSql}`);
   }
   var byKeyword = keywordFormatter('by');
+  
+  if (groupingSets.length) {
+    sql.push(`${keywordFormatter('group')} ${byKeyword} ${keywordFormatter('grouping')} ${keywordFormatter('sets')} (`);
+    sql.push(
+      '  ' + groupingSets.map(function(groupingSet){
+        return `( ${groupingSet.join(', ')} )`;
+      }).join('\n, ')
+    );
+    sql.push(')');
+  }
+  else
   if (groupBy.length) {
     sql.push(`${keywordFormatter('group')} ${byKeyword} ${groupBy.join(comma)}`);
   }
+  
   if (orderBy.length) {
     sql.push(`${keywordFormatter('order')} ${byKeyword} ${orderBy.join(comma)}`);
   }

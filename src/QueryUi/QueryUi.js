@@ -19,7 +19,7 @@ class QueryUi {
   
   #queryUiClickHandler(event){
     var target = event.target;
-    if (target.tagName !== 'BUTTON'){
+    if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT'){
       return;
     }
     var node = target;
@@ -74,6 +74,10 @@ class QueryUi {
     if (targetId.endsWith('-edit-filter-condition')){
       this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
     }
+    else 
+    if (targetId.endsWith('-toggle-totals')){
+      this.#queryAxisUiItemToggleTotals(queryAxisItemUi);
+    }
   }
   
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
@@ -119,6 +123,14 @@ class QueryUi {
   #queryAxisUiItemRemoveClicked(queryAxisItemUi){
     var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     queryModel.removeItem(queryModelItem);
+  }
+  
+  #queryAxisUiItemToggleTotals(queryAxisItemUi){
+    var id = queryAxisItemUi.getAttribute('id');
+    var toggleTotalsCheckbox = queryAxisItemUi.querySelector(`menu > label > input[type=checkbox]`);
+    var value = toggleTotalsCheckbox.checked;
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    queryModel.toggleTotals(queryModelItem, value);
   }
 
   #updateQueryUi(){
@@ -178,23 +190,20 @@ class QueryUi {
     
     var id = this.#id 
     if (axisId === QueryModel.AXIS_FILTERS) {
-      id += '-' + axisId;
+      id += `-${axisId}`;
     }
-    id += '-' + QueryAxisItem.getIdForQueryAxisItem(axisItem);
+    id += `-${QueryAxisItem.getIdForQueryAxisItem(axisItem)}`;
     
-    var itemUi = this.#instantiateTemplate('queryUiAxisItem', id);
-    
-    if (axisId === QueryModel.AXIS_FILTERS) {
-      var text = 'Click to open the filter dialog to edit the filter.';
-      var actionButton = itemUi.getElementsByTagName('BUTTON').item(1);
-      actionButton.innerHTML = text;
-      var updatedId = id + '--edit-filter-condition';
-      actionButton.setAttribute('id', updatedId);
-      var label = actionButton.parentNode;
-      label.setAttribute('for', updatedId);
-      label.setAttribute('title', text);
+    var itemUi, itemUiTemplateId;
+    switch (axisId) {
+      case QueryModel.AXIS_FILTERS:
+        itemUiTemplateId = 'queryUiFilterAxisItem';
+        break;
+      default:
+        itemUiTemplateId = 'queryUiAxisItem';
     }
-    
+    itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
+    itemUi.setAttribute('title',  QueryAxisItem.getCaptionForQueryAxisItem(axisItem));
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
 
     var derivation = axisItem.derivation;
@@ -210,6 +219,11 @@ class QueryUi {
     var captionText = this.#getQueryAxisItemUiCaption(axisItem);
     var captionUi = itemUi.getElementsByTagName('span').item(0);
     captionUi.innerText = captionText;
+
+    var toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
+    if (toggleTotalsCheckbox) {
+      toggleTotalsCheckbox.checked = axisItem.includeTotals === true;
+    }
 
     return itemUi;
   }
@@ -291,10 +305,10 @@ class QueryUi {
     node.setAttribute('id', instanceId);
     
     //
-    var buttons = node.getElementsByTagName('button');
+    var buttons = node.querySelectorAll('menu > label > button, menu > label > input[type=checkbox]');
     for (var i = 0; i < buttons.length; i++){
       var button = buttons.item(i);
-      var buttonId = instanceId + '-' + button.getAttribute('id');
+      var buttonId = instanceId + button.getAttribute('id');
       button.setAttribute('id', buttonId);
       button.parentNode.setAttribute('for', buttonId);
     }

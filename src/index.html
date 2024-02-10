@@ -34,7 +34,7 @@
         font-style: normal;
         font-weight: 400;
         font-display: block;
-        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/fonts/tabler-icons.woff2?v2.44.0") format("woff2");
+        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/fonts/tabler-icons.woff2?v2.47.0") format("woff2");
       }
       
       ul#resources > li::marker {
@@ -772,10 +772,10 @@
           A DuckDB User Interface
         </p>
         <ul>
-          <li>Huey version 0.0.1 - first dip</li>
+          <li>Huey version 0.0.2 - second dip</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
           <li><a href="https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm?version=1.28.1-dev99.0" target="jsdelivr">DuckDB WASM 1.28.1-dev99.0</a></li>
-          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v2.46.0</a></li>
+          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v2.47.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Source on Github</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
         </ul>
@@ -946,6 +946,7 @@
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
               <span>caption</span>
               <menu>
+                <label title="Calculate totals for this level"><input id="-toggle-totals" type="checkbox"/></label>
                 <label title="Move this item to the other axis"><button id="-move-to-other-axis">Move item to other axis</button></label>
                 <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
               </menu>
@@ -953,6 +954,17 @@
             </li>          
           </template>
           
+          <template id="queryUiFilterAxisItem">
+            <li>
+              <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
+              <span>caption</span>
+              <menu>
+                <label title="Click to open the filter dialog to edit the filter."><button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button></label>
+                <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
+              </menu>
+              <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
+            </li>          
+          </template>
         </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
         <div
@@ -969,7 +981,7 @@
           aria-busy="false"
           data-needs-update="false"
         >
-          <div role="progressbar">
+          <dialog role="progressbar">
             <header>
               <div class="loader loader-medium">Loading...</div>
               <div class="timer">
@@ -985,7 +997,7 @@
             <footer>
               <button id="cancelQueryButton">Cancel</button>
             </footer>
-          </div>
+          </dialog>
           <div 
             class="pivotTableUiInnerContainer"
           >
