@@ -767,6 +767,7 @@ class PivotTableUi {
     
     // if there are cell axis items appearing on the rows axis,
     // but no items on the columns axis, then we need one extra column to make room for the cells
+    /*
     if (cellHeadersAxis === QueryModel.AXIS_ROWS && !columnsAxisItems.length && cellsAxisItems.length) {
       tableCell = createEl('div', {
         "class": 'pivotTableUiCell pivotTableUiHeaderCell'
@@ -778,7 +779,7 @@ class PivotTableUi {
       }, '');
       tableCell.appendChild(label);
     }
-        
+    */  
     var stufferCell, stufferRow;
     stufferCell = createEl('div', {
       "class": "pivotTableUiCell pivotTableUiHeaderCell pivotTableUiStufferCell"
