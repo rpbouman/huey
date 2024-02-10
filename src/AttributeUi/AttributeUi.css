@@ -13,47 +13,61 @@
 .attributeUi details > summary > .label  {
   max-width: calc(100% - 166px);
 }
+
+/**
+* folder icons
+*/
+.attributeUi details[data-nodetype=folder] > summary > .icon::before {
+  /* folder */
+  content: "\eaad";
+}
+
+.attributeUi details[data-nodetype=folder][open] > summary > .icon::before {
+  /* folder-open */
+  content: "\faf7";
+}
+
 /**
 *
 * Data type icons
 *
 */
-.attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
   /* letter T */
   content: "\ec63";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon:before,
-.attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon:before
+.attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon::before
 {
   /* 123 */
   content: "\f554";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon:before
+.attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
 {
   /* code-dots */
   content: "\f61a";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon:before,
-.attributeUi details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon:before,
-.attributeUi details[data-nodetype=column][data-column_type=REAL] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type=REAL] > summary > .icon::before {
   /* decimal */
   content: "\fa26";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type*=TIMESTAMP] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type*=TIMESTAMP] > summary > .icon::before {
   /* calendar-clock */
   content: "\fd2e";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type=DATE] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type=DATE] > summary > .icon::before {
   /* calendar */
   content: "\ea53";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type=TIME] > summary > .icon:before {
+.attributeUi details[data-nodetype=column][data-column_type=TIME] > summary > .icon::before {
   /* clock */
   content: "\ea70";
 }
@@ -63,61 +77,61 @@
 * Derivation icons
 *
 */
-.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon::before {
   /* calendar */
   content: "\ea53";
 }
-.attributeUi details[data-nodetype=derived][data-derivation=year] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=year] > summary > .icon::before {
   /* letter-y */
   content: "\ec68";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=quarter] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=quarter] > summary > .icon::before {
   /* letter q */
   content: "\ec60";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation="month num"] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation="month num"] > summary > .icon::before {
   /* letter m */
   content: "\ec5c";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation="week num"] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation="week num"] > summary > .icon::before {
   /* calendar-week */
   content: "\fd30";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon::before {
   /* letter-d */
   content: "\ec53";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon::before {
   /* calendar-month */
   content: "\fd2f";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon::before {
   /* letter-d-small */
   content: "\fcca";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon::before {
   /* clock */
   content: "\ea70";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=hour] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=hour] > summary > .icon::before {
   /* letter-h */
   content: "\ec57";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=minute] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=minute] > summary > .icon::before {
   /* letter-m-small */
   content: "\fcd3";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation=second] > summary > .icon:before {
+.attributeUi details[data-nodetype=derived][data-derivation=second] > summary > .icon::before {
   /* letter-s */
   content: "\ec62";
 }
@@ -128,82 +142,82 @@
 *
 */
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon::before {
   /* tallymarks */
   content: "\ec4a";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon::before {
   /* tallymark-4 */
   content: "\ec49";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon::before {
   /* math-max */
   content: "\f0f5";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon::before {
   /* math-min */
   content: "\f0f6";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon::before {
   /* list */
   content: "\eb6b";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon::before {
   /* list details */
   content: "\ef40";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon::before {
   /* list numbers */
   content: "\ef11";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon::before {
   /* sum */
   content: "\eb73";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon::before {
   /* math-avg */
   content: "\f0f4";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
 
-.attributeUi details[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon:before {
+.attributeUi details[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
 }
@@ -241,7 +255,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   display: none;
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]:before {
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]::before {
   /* table-column */
   /* 
     It may seem backward that we're using the table-column icon for the rows axis, 
@@ -250,7 +264,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   content: "\faff";
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=columns]:before {
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=columns]::before {
   /* table-row */
   /* 
     It may seem backward that we're using the table-row icon for the columns axis, 
@@ -259,7 +273,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   content: "\fb00";
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=cells]:before {
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=cells]::before {
   /* layout grid */
   content: "\edba";
 }
@@ -279,14 +293,14 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   color: var( --huey-icon-color-highlight );
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:before {
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]::before {
   /* filter-plus */
   /* content: "\fa02"; */
   /* filter */
   content: "\eaa5";
 }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked ):before {
+.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
   /* filter-x */
   /* content: "\fa04"; */
   /* filter-off */
