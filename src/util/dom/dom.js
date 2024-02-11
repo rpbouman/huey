@@ -133,6 +133,26 @@ function getClassNames(el){
   return classNames;
 }
 
+function getAncestorWithTagName(dom, tagName, includeSelf){
+  if (!dom) {
+    return undefined;
+  }
+  
+  if (includeSelf === undefined) {
+    includeSelf = true;
+  }
+
+  tagName = tagName.toUpperCase();
+  var node = includeSelf ? dom : dom.parentNode;
+  while(isEl(node)) {
+    if (node.tagName === tagName){
+      return node;
+    }
+    node = node.parentNode;
+  }    
+  return undefined;
+}
+
 function getAncestorWithClassName(dom, classNames, allOrSome, includeSelf){
   if (!dom) {
     return undefined;

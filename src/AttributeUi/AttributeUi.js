@@ -664,7 +664,7 @@ class AttributeUi {
     var classNames = getClassNames(target);
     event.stopPropagation();
     
-    var node = getAncestorWithClassName(target, 'attributeUiNode');
+    var node = getAncestorWithTagName(target, 'details');
     if (!node) {
       return;
     }
