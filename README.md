@@ -1,5 +1,5 @@
 # 🦆 Huey
-Huey is a browser-based application that lets you inspect and analyze tabular datasets.
+Huey is a browser-based application that lets you explore tabular datasets.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
@@ -30,15 +30,15 @@ Note: although Huey can run locally, there is nothing that keeps you from deploy
 ## Registering and Analyzing Files with Huey
 
 ### Registering Files
-Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to access and analyze files. 
-Due to general security policy, the web browser can not simply read arbitrary files from your local computer: you need to explicitly select files and register them in DuckDB WASM's virtual file system. 
+Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to read and analyze data files. 
+Due to general security policy, the web browser can not simply read files from your local computer: you need to explicitly select and register files in DuckDB WASM's virtual file system. 
 
 To register one or more files, you can either 
 1) Click the 'Upload...' button, which is the leftmost button on the toolbar at the top of the page.
 2) Drag 'n Drop one or more files unto the "Datasources" tab in the sidebar. (The sidebar is on the left of the screen)
 
 Either of these actions will pop up a dialog that lets you browse and choose one or more files from your local filesystem.
-In the file browser dialog, navigate to the file or files that you want to analyze, select them and then confirm the dialog by clicking the 'Ok' button.
+In the file browser dialog, navigate to the file or files that you want to explore, select them and then confirm the dialog by clicking the 'Ok' button.
 
 After confirming the dialog, Huey will attempt to register the files in DuckDb. 
 The successfully registered files are added to the "Datasources" tab in the sidebar.
@@ -56,7 +56,7 @@ Note: We ran into a limitation - when the duckdb file itself refers to external 
 But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
 
 ### Analyzing Datasources
-The Datasources have an analyze button. After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
+The Datasources have an explore button <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLWFuYWx5emUiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggc3Ryb2tlPSJub25lIiBkPSJNMCAwaDI0djI0SDB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTIwIDExYTguMSA4LjEgMCAwIDAgLTYuOTg2IC02LjkxOGE4LjA5NSA4LjA5NSAwIDAgMCAtOC4wMTkgMy45MTgiIC8+PHBhdGggZD0iTTQgMTNhOC4xIDguMSAwIDAgMCAxNSAzIiAvPjxwYXRoIGQ9Ik0xOSAxNm0tMSAwYTEgMSAwIDEgMCAyIDBhMSAxIDAgMSAwIC0yIDAiIC8+PHBhdGggZD0iTTUgOG0tMSAwYTEgMSAwIDEgMCAyIDBhMSAxIDAgMSAwIC0yIDAiIC8+PHBhdGggZD0iTTEyIDEybS0zIDBhMyAzIDAgMSAwIDYgMGEzIDMgMCAxIDAgLTYgMCIgLz48L3N2Zz4="/>. After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
 
 The pivot table has two axes for placing attribute values:
