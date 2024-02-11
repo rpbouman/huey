@@ -20,6 +20,11 @@ class DataSourcesUi {
     var dataTransfer = event.dataTransfer;
     dataTransfer.dropEffect = 'copy';
     return;
+    
+    // unfortunately, we see that the files list is always emtpy.
+    // instead, when dragging files, we see a list of items of type file, but for some reason we do not see the names of the files.
+    // so this is pretty much useless, we cannot figure out in advance if the dragged items could be successfully loaded.
+    
     var files = dataTransfer.files;
     valid = Boolean(files.length);
     var fileTypes = DuckDbDataSource.fileTypes;
@@ -58,8 +63,27 @@ class DataSourcesUi {
     event.stopPropagation(); 
     var dataTransfer = event.dataTransfer;
     var files = dataTransfer.files;
+    var items = dataTransfer.items;
     if (files.length) {
       uploadUi.uploadFiles(files);
+    }
+    else 
+    if (items.length){
+      for (var i = 0 ; i < items.length; i++) {
+        var item = items[i];
+        if (item.kind !== 'string') {
+          continue;
+        }
+        if (item.type !== 'text/uri-list'){
+          continue;
+        }
+        item.getAsString(function(uri){
+          uploadUi.uploadFiles([uri]);
+        });
+        
+        // support only 1 url at a time.
+        return;
+      }
     }
     console.log('drop');
   }

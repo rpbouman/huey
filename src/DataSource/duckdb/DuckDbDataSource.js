@@ -98,6 +98,19 @@ class DuckDbDataSource extends EventEmitter {
     return `${this.types.FILE}:${getQuotedIdentifier(fileName)}`;
   }
   
+  static createFromUrl(duckdb, instance, url) {
+    if (!(typeof url === 'string')){
+      throw new Error(`The url should be of type string`);
+    }
+        
+    var config = {
+      type: DuckDbDataSource.types.FILE,
+      fileName: url 
+    };
+    var instance = new DuckDbDataSource(duckdb, instance, config);
+    return instance;
+  }
+
   static createFromFile(duckdb, instance, file) {
     if (!(file instanceof File)){
       throw new Error(`The file argument must be an instance of File`);
@@ -360,6 +373,9 @@ class DuckDbDataSource extends EventEmitter {
           case 'xlsx':
             var fileType = DuckDbDataSource.fileTypes[fileExtension];
             sql = `${fileType.duckdb_reader}( ${quotedFileName} )`;
+            break;
+          default: // for urls we will be lenient for now
+            sql = quotedFileName;
         }
         break;
       case DuckDbDataSource.types.SQLQUERY:

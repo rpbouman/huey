@@ -44,11 +44,18 @@ class UploadUi {
     var duckDbDataSource;
     var destroyDatasource = false;
     try {
-      duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
-      progressBar.value = parseInt(progressBar.value, 10) + 20;
-      
-      await duckDbDataSource.registerFile();
-      progressBar.value = parseInt(progressBar.value, 10) + 40;
+      if (typeof file === 'string'){
+        duckDbDataSource = DuckDbDataSource.createFromUrl(duckdb, instance, file);
+        progressBar.value = parseInt(progressBar.value, 10) + 20;
+      }
+      else
+      if (file instanceof File){ 
+        duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
+        progressBar.value = parseInt(progressBar.value, 10) + 20;
+        
+        await duckDbDataSource.registerFile();
+        progressBar.value = parseInt(progressBar.value, 10) + 40;
+      }
         
       var canAccess = await duckDbDataSource.validateAccess();
       progressBar.value = parseInt(progressBar.value, 10) + 30;
@@ -77,7 +84,19 @@ class UploadUi {
   }
   
   #createUploadItem(file){
-    var fileName = file.name;
+    var fileName 
+    
+    if (typeof file === 'string'){
+      fileName = file;
+    }
+    else
+    if (file instanceof File) {
+      fileName = file.name;
+    }
+    else {
+      throw new Error(`Don't know how to handle item of type ${typeof file}`);
+    }
+    
     var uploadItem = createEl('details', {
       id: fileName
     });
@@ -139,7 +158,19 @@ class UploadUi {
     var requiredExtensions = []
     for (var i = 0; i < files.length; i++){
       var file = files[i];
-      var fileName = file.name;
+      
+      var fileName;
+      if (typeof file === 'string') {
+        fileName = file;
+      }
+      else
+      if (file instanceof File) {
+        fileName = file.name;
+      }
+      else {
+        throw new Error(`Don't know how to handle item of type ${typeof file}.`);
+      }
+      
       var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
       var fileExtension = fileNameParts.lowerCaseExtension;
       
