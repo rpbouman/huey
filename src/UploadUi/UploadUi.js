@@ -160,11 +160,13 @@ class UploadUi {
     return requiredExtensions;
   }
   
-  loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
-    var extensionInstallationItems = requiredDuckDbExtensions.map(async function(extensionName){
-      var body = this.#getBody();
-      var installExtensionItem = this.#createInstallExtensionItem(extensionName);
-      body.appendChild(installExtensionItem);
+  async loadDuckDbExtension(extensionName){
+    var invalid = true;
+    var body = this.#getBody();
+    var installExtensionItem = this.#createInstallExtensionItem(extensionName);
+    body.appendChild(installExtensionItem);
+    
+    try {
       
       var progressbar = installExtensionItem.getElementsByTagName('progress').item(0);
       var message = installExtensionItem.getElementsByTagName('p').item(0);
@@ -204,6 +206,7 @@ class UploadUi {
 
       if (row['loaded']){
         message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
+        invalid = false;
       }
       else {
         message.innerHTML += `Extension ${extensionName} not loaded<br/>`;
@@ -212,10 +215,23 @@ class UploadUi {
         await connection.query(`LOAD ${extensionName}`);
         message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
         progressbar.value = parseInt(progressbar.value, 10) + 20;
+        invalid = false;
       }
-      progressbar.value = 100;
-      return true;
-    }.bind(this));
+      if (invalid === false) {
+        progressbar.value = 100;
+      }
+      return !invalid;
+    }
+    catch (e){
+      return e;
+    }
+    finally{
+      installExtensionItem.setAttribute('aria-invalid', invalid);
+    }
+  }
+  
+  loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
+    var extensionInstallationItems = requiredDuckDbExtensions.map(this.loadDuckDbExtension.bind(this));
     return extensionInstallationItems;
   }
   
