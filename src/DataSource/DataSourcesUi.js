@@ -210,7 +210,7 @@ class DataSourcesUi {
 
   showLoadDatasourcesHint(){
     if (!Object.keys(this.#datasources).length){
-      this.getDom().innerHTML = `<label for="uploader">Drop some files here, or use the Upload button:</label>`;
+      this.getDom().innerHTML = `<label for="uploader">Drop some files here, or click the Upload button:</label>`;
     }
   }
   
