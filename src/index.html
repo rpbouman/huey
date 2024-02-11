@@ -86,11 +86,12 @@
 
     <dialog 
       id="uploadUi" 
-      popover="manual"
       aria-labelledby="uploadUiTitle"
+      aria-describedby="uploadUiDescription"
     >
       <header>
         <h3 id="uploadUiTitle"></h3>
+        <p id="uploadUiDescription">;</p>
         <div class="timer">
           <span class="digit"></span>
           <span class="digit"></span>
@@ -104,13 +105,9 @@
       <footer role="toolbar">
         <button 
           id="uploadDialogOkButton" 
-          popovertarget="uploadUi" 
-          popovertargetaction="close"
         >Ok</button>
         <button 
           id="uploadDialogCancelButton" 
-          popovertarget="uploadUi"  
-          popovertargetaction="close"
         >Cancel</button>
       </footer>
     </dialog>
@@ -802,7 +799,7 @@
       style="display: none"
     >
       <menu class="toolbar" role="toolbar">
-        <label for="uploader" title="Register local data files to analyze them with Huey">
+        <label for="uploader" title="Register local data files to explore their contents with Huey">
           <input 
             id="uploader" 
             type="file"
@@ -871,7 +868,7 @@
           <label 
             for="datasourcesTab" 
             role="tab"
-            title="Files, database tables and so on that provide data you'd like to analyze."
+            title="Files, database tables and so on that provide data you'd like to explore."
           >Datasources</label>
           <input id="datasourcesTab" type="radio" name="sidebarTabs" checked="true"/>
           <div 
