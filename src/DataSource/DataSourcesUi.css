@@ -124,8 +124,6 @@
 }
 
 #datasourcesUi details > summary > label.analyzeActionButton::before {
-  /* table */
-  /* content: '\eba1';*/
   /* analyze */
   content: '\f3a3';
 }

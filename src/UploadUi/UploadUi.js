@@ -89,6 +89,18 @@ class UploadUi {
     var label = createEl('label', {
     }, fileName);
     summary.appendChild(label);
+    
+    var datasourceId = DuckDbDataSource.getDatasourceIdForFileName(fileName);
+    if (datasourceId) {
+      var analyzeButton = createEl('label', {
+        "class": 'analyzeActionButton',
+        "for": `${datasourceId}_analyze`,
+        "title": `Start exploring data from ${fileName}`,
+        "onclick": `byId("${this.#id}").close()`
+      });
+      summary.appendChild(analyzeButton);
+    }
+    
     var progressBar = createEl('progress', {
       id: fileName,
       max: 100,
@@ -214,7 +226,9 @@ class UploadUi {
     
     var numFiles = files.length;
     var header = this.#getHeader();
-    header.innerHTML = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    header.innerText = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    var description = this.#getDescription();
+    description.innerText = 'Upload in progress. This will take a few moments...';
 
     dom.showModal();
 
@@ -270,12 +284,28 @@ class UploadUi {
     }
     
     dom.setAttribute('aria-busy', false);    
-    if (!countFail) {
-      dom.close();
-    }
     if (datasources.length) {
       datasourcesUi.addDatasources(datasources);
     }
+    var message, description;
+    var instruction
+    if (countFail) {
+      var countSuccess = uploadResults.length - countFail;
+      if (countSuccess){
+        message = `${countSuccess} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, ${countFail} failed.`;
+        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+      }
+      else {
+        message = `${countFail} file${countFail > 1 ? 's' : ''} failed.`;
+        description = 'All uploads failed. You can review the errors below:';
+      }
+    }
+    else {
+      message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
+      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+    }
+    this.#getHeader().innerText = message;
+    this.#getDescription().innerHTML = description;
   }
   
   getDom(){
@@ -284,9 +314,12 @@ class UploadUi {
   
   #getHeader(){
     var dom = this.getDom();
-    var header = dom.getElementsByTagName('header').item(0);
-    var h3 = header.getElementsByTagName('h3').item(0);
-    return h3;
+    return byId(dom.getAttribute('aria-labelledby'));
+  }
+
+  #getDescription(){
+    var dom = this.getDom();
+    return byId(dom.getAttribute('aria-describedby'));
   }
   
   #getBody(){
