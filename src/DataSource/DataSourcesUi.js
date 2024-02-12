@@ -55,7 +55,6 @@ class DataSourcesUi {
     event.preventDefault();
     
     var dataTransfer = event.dataTransfer;
-    console.log('dragover');
   }
 
   #dropHandler(event) {
@@ -85,7 +84,6 @@ class DataSourcesUi {
         return;
       }
     }
-    console.log('drop');
   }
     
   getDom(){

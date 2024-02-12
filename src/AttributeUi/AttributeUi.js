@@ -1,4 +1,3 @@
-
 class AttributeUi {
   
   #id = undefined;
@@ -49,9 +48,11 @@ class AttributeUi {
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
         var dataTypeInfo = dataTypes[columnType];
-        var formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        var isInteger = dataTypeInfo.isInteger;
+        var formatter = createNumberFormatter(isInteger !== true);
+        
         return function(value, field){
-          return formatter.format(value);
+          return formatter.format(value, field);
         };
       }
     },
@@ -64,7 +65,7 @@ class AttributeUi {
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
-          return formatter.format(value);
+          return formatter.format(value, field);
         };
       }
     },
@@ -78,7 +79,7 @@ class AttributeUi {
         if (dataTypeInfo.isNumeric) {
           formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
           return function(value, field){
-            return formatter.format(value);
+            return formatter.format(value, field);
           };
         }
         else {

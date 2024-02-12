@@ -4,16 +4,45 @@ function createNumberFormatter(fractionDigits){
   var options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
+  
+  var decimalSeparator;
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
-    options.maximumFractionDigits = localeSettings.maximumFractionDigits;       
+    options.maximumFractionDigits = localeSettings.maximumFractionDigits;
+    
+    decimalSeparator = formatter.formatToParts(123.456)['decimal'];
   }
   var formatter = new Intl.NumberFormat(locales, options);
   return {
-    format: function(value){
+    format: function(value, field){
       if (value === null) {
         return '';
       }
+      
+      if (field) {
+        switch (typeof value){
+          case 'bigint':
+          case 'number':
+            break;
+          default:
+            var stringValue = String(value);
+            var integerPart, fractionalPart;
+            if (field.type.scale === 0) {
+              integerPart = stringValue;
+            }
+            else {
+              var parts = stringValue.split('.');
+              integerPart = parts[0];
+              fractionalPart = part[1];
+            }
+            stringValue = formatter.format(BigInt(integerPart));
+            if (fractionalPart) {
+              stringValue += decimalSeparator + fractionalPart;
+            }
+            return stringValue;
+        }
+      }
+      
       return formatter.format(value);
     }
   };
@@ -37,27 +66,8 @@ var dataTypes = {
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
-      var decimalSeparator = formatter.formatToParts(123.456)['decimal'];
-      
       return function(value, field){
-        
-        switch (typeof value){
-          case 'bigint':
-          case 'number':
-            break;
-          default:
-            var stringValue = String(value);
-            if (field.type.scale === 0) {
-              value = BigInt(stringValue);
-            }
-            else {
-              var parts = stringValue.split('.');
-              var integerPart = formatter.formatToParts(BigInt(parts[0]))['integer'];
-              var fractionPart = part[1];
-              return `${integerPart}${decimalSeparator}${fractionPart}`;
-            }
-        }
-        return formatter.format(value)
+        return formatter.format(value, field)
       };
     },
     createLiteralWriter: function(value, field){
@@ -69,7 +79,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -82,7 +92,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -96,7 +106,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -109,7 +119,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -123,7 +133,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -137,7 +147,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -151,7 +161,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -166,7 +176,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -179,7 +189,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -194,7 +204,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -209,7 +219,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -224,7 +234,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
