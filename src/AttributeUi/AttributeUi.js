@@ -146,12 +146,12 @@ class AttributeUi {
     'year': {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
-      columnType: 'INT'
+      columnType: 'INTEGER'
     },
     'quarter': {
       folder: 'date fields',
       expressionTemplate: "'Q' || QUARTER( ${columnName} )",
-      columnType: 'VARCHAR'    
+      columnType: 'VARCHAR'
     },    
     'month num': {
       folder: 'date fields',
