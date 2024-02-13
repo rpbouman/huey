@@ -156,6 +156,19 @@
   border-bottom-color: var( --huey-dark-border-color );
 }
 
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
+  border-bottom-color: var( --huey-dark-border-color );
+}
+
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell[data-totals] ) {
+  border-right-color: var( --huey-dark-border-color );
+}
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiRowsAxisHeaderCell {
+  border-bottom-color: var( --huey-dark-border-color );
+}
+
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -177,7 +190,7 @@
   border-top-color: var( --huey-dark-border-color );
 }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow > .pivotTableUiCell:has(+ .pivotTableUiColumnsAxisHeaderCell) {
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
   border-right-color: var( --huey-dark-border-color );
 }
 
