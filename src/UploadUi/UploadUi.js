@@ -254,6 +254,11 @@ class UploadUi {
       return !invalid;
     }
     catch (e){
+      message.innerHTML += e.message + '<br/>';
+      message.innerHTML += e.stack.split('\n').map(function(stackItem){
+        return `<pre>${stackItem}</pre>`
+      }).join('\n');
+      installExtensionItem.setAttribute('open', true);
       return e;
     }
     finally{
