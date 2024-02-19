@@ -254,7 +254,21 @@ class TupleSet extends DataSetComponent {
     return resultset.numRows;
   }
 
+  getCachedTupleCount(offset){
+    var data = this.#tuples;
+    var cachedTupleCount = 0;
+    for (var i = offset; i < this.#tupleCount; i++){
+      var tuple = data[i];
+      if (!tuple){
+        break;
+      }
+      cachedTupleCount += 1;
+    }
+    return cachedTupleCount;
+  }
+
   async getTuples(count, offset){
+    
     var data = this.#tuples;
     var tuples = [];
 
