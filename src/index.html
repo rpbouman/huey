@@ -758,7 +758,7 @@
 
     <dialog 
       id="aboutDialog"
-      aria-labelledby="aboutDialogTitle"      
+      aria-labelledby="aboutDialogTitle"
       popover="auto"
     >
       <header>
@@ -769,15 +769,15 @@
           A DuckDB User Interface
         </p>
         <ul>
-          <li>Huey version 0.0.2 - second dip</li>
+          <li>Huey version 0.0.3 - tiny ripple</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a href="https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm?version=1.28.1-dev99.0" target="jsdelivr">DuckDB WASM 1.28.1-dev99.0</a></li>
+          <li><a href="https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm?version=1.28.1-dev127.0" target="jsdelivr">DuckDB WASM 1.28.1-dev127.0</a></li>
           <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v2.47.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Source on Github</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
         </ul>
         <p style="font-size: smaller">Created and maintained by Roland.Bouman@gmail.com</p>
-        <p><a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_donate">Donations help keeping Huey in good shape!</a></p>
+        <p><a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_donate">Donations help to keep Huey in good shape!</a></p>
       </section>
       <footer role="toolbar">
         <button 
@@ -1045,7 +1045,7 @@
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev99.0/+esm';
+      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev127.0/+esm';
       
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
