@@ -602,7 +602,7 @@ class PivotTableUi {
     
     var cellIndex;
     
-    for (var i = 0; i < rowCount; i++){
+    for (var i = 0; i < tableBodyRows.length - 1; i++){
       var tableRow = tableBodyRows.item(i);
       var cellElements = tableRow.childNodes;
       
@@ -611,7 +611,7 @@ class PivotTableUi {
         rowsAxisTupleIndex = rowTupleIndexInfo.tupleIndex;
       }        
       
-      for (var j = headerColumnCount; j < headerColumnCount + columnCount; j++){
+      for (var j = headerColumnCount; j < headerColumnCount + (firstTableHeaderRowCells.length - headerColumnCount - 1); j++){
         
         if (j === headerColumnCount) {
           columnsAxisTupleIndex = columnTupleIndexInfo.tupleIndex;
@@ -629,7 +629,7 @@ class PivotTableUi {
         if (cells) {
           cell = cells[cellIndex];
         }
-        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];              
+        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
         var labelText = this.#renderCellValue(cell, cellsAxisItem, cellElement);
         
         // adjust the column width if necessary.
