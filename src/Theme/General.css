@@ -198,6 +198,10 @@ dialog > footer button {
   color: var( --huey-foreground-color );
 }
 
+*[role=toolbar] > button {
+  user-select: none;
+}
+
 dialog h1:first-child,
 dialog h2:first-child,
 dialog h3:first-child,

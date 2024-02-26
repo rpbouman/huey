@@ -1,5 +1,5 @@
 class FilterDialog {
-  
+
   static #numRowsColumnName = '__huey_numrows';
   static filterTypes = {
     INCLUDE: 'in',
@@ -7,14 +7,14 @@ class FilterDialog {
     BETWEEN: 'between',
     NOTBETWEEN: 'notbetween'
   };
-  
+
   #id = undefined;
   #queryAxisItem = undefined;
   #queryModel = undefined;
-  
+
   #valuePicklistPageSize = 100;
   #searchAutoQueryTimeout = 1000;
-  
+
   constructor(config){
     this.#id = config.id;
     this.#queryModel = config.queryModel;
@@ -23,14 +23,14 @@ class FilterDialog {
 
   #initEvents(){
     var filterDialog = this.getDom();
-    
+
     // Ok button confirms the filter settings and stores them in the model
     this.#getOkButton().addEventListener('click', function(event){
       var dialogState = this.#getDialogState();
       this.#queryModel.setQueryAxisItemFilter(this.#queryAxisItem, dialogState);
       filterDialog.close();
     }.bind(this));
-    
+
     this.#getRemoveFilterButton().addEventListener('click', function(event){
       this.#queryModel.removeItem(this.#queryAxisItem);
       filterDialog.close();
@@ -39,11 +39,11 @@ class FilterDialog {
     this.#getCancelButton().addEventListener('click', function(event){
       filterDialog.close();
     }.bind(this));
-        
+
     // Clear button clears the values lists
     this.#getClearButton().addEventListener('click', function(event){
       this.clearFilterValueLists();
-      
+
       this.#updateValueSelectionStatusText();
     }.bind(this));
 
@@ -52,13 +52,13 @@ class FilterDialog {
       this.#removeSelectedValues();
       this.#updateValueSelectionStatusText();
     }.bind(this));
-    
+
     // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
     this.#getValuePicklist().addEventListener('change', this.#handleValuePicklistChange.bind(this));
-    
+
     this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
     this.#getToFilterValuesList().addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
-    
+
     // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
     // this handler ensures the scrolbar moves both lists.
     this.#getToFilterValuesList().addEventListener('scroll', function(event){
@@ -84,7 +84,7 @@ class FilterDialog {
           width = '';
       }
       element.style.width = width;
-      
+
       // reset the width again so the resizer can manage the width.
       element.style.width = '';
       this.#getValuePicklist().selectedIndex = -1;
@@ -94,22 +94,22 @@ class FilterDialog {
     var includeAllFiltersCheckbox = this.#getIncludeAllFilters();
     includeAllFiltersCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
     includeAllFiltersCheckbox.addEventListener('change', function(event){
-      // TODO: check to see if there are any other filter items, 
+      // TODO: check to see if there are any other filter items,
       // and also if they have any filter condition set.
       // If we can avoid a query, then return, if not, repopulate the list.
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
-      
+
       this.#updatePicklist(0, this.#valuePicklistPageSize);
     }.bind(this));
-        
+
     bufferEvents(this.#getSearch(), 'input', function(event, count){
       if (count === undefined) {
         this.#updatePicklist(0, this.#valuePicklistPageSize);
       }
     }, this, this.#searchAutoQueryTimeout);
   }
-  
+
   #handleFilterValuesListChange(event){
     if (event.target.selectedOptions.length){
       this.#getValuePicklist().selectedIndex = -1;
@@ -122,7 +122,7 @@ class FilterDialog {
       this.#getFilterValuesList().selectedIndex = -1;
     }
   }
-  
+
   #sortValues(values){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
@@ -143,7 +143,7 @@ class FilterDialog {
     }
     return values.sort();
   }
-  
+
   #sortValueLists(valuesList, toValuesList){
     var sortedValuesList = {}, sortedToValuesList, toKeys;
     var keys = Object.keys(valuesList);
@@ -152,7 +152,7 @@ class FilterDialog {
       sortedToValuesList = {};
       toKeys = Object.keys(toValuesList);
     }
-    
+
     sortedKeys.forEach(function(key){
       sortedValuesList[key] = valuesList[key];
       if (toValuesList) {
@@ -160,52 +160,62 @@ class FilterDialog {
         sortedToValuesList[toKey] = toValuesList[toKey];
       }
     });
-    
+
     return {
-      valuesList: sortedValuesList, 
+      valuesList: sortedValuesList,
       toValuesList: sortedToValuesList
     };
   }
-  
+
+  #extractValuesFromOption(option){
+    var valueObject = {
+      value: option.value,
+      label: option.label,
+      literal: option.getAttribute('data-sql-literal')
+    }
+    if (option.getAttribute('data-sql-null') === String(true)) {
+      valueObject.isSqlNull = true;
+    }
+    return valueObject;
+  }
+
+  #createOptionElementFromValues(valueObject){
+    var optionElement = createEl('option', {
+      value: valueObject.value,
+      label: valueObject.label,
+      "data-sql-literal": valueObject.literal
+    });
+    if (valueObject.isSqlNull){
+      optionElement.setAttribute('data-sql-null', true);
+    }
+    return optionElement;
+  }
+
   #extractOptionsFromSelectList(selectList){
     var optionObjects = {};
     var options = selectList.options;
     for (var i = 0; i < options.length; i++){
       var option = options[i];
-      var valueObject = {
-        value: option.value,
-        label: option.label,
-        literal: option.getAttribute('data-sql-literal')
-      };
-      if (option.getAttribute('data-sql-null') === String(true)) {
-        valueObject.isSqlNull = true;
-      }
+      var valueObject = this.#extractValuesFromOption(option);
       optionObjects[option.value] = valueObject;
     }
     return optionObjects;
   }
-  
+
   #renderOptionsToSelectList(options, selectList){
     if (options === undefined) {
       return;
     }
     var values = Object.keys(options);
-   
+
     for (var i = 0; i < values.length; i++){
       var value = values[i];
-      var optionObject = options[value];
-      var optionElement = createEl('option', {
-        value: optionObject.value,
-        label: optionObject.label,
-        "data-sql-literal": optionObject.literal
-      });
-      if (optionObject.isSqlNull){
-        optionElement.setAttribute('data-sql-null', true);
-      }
+      var valueObject = options[value];
+      var optionElement = this.#createOptionElementFromValues(valueObject);
       selectList.appendChild(optionElement);
-    }   
+    }
   }
-    
+
   #handleValuePicklistChange(event){
     var isSqlNull;
     var valueSelectionStatusText = undefined;
@@ -225,7 +235,7 @@ class FilterDialog {
         return;
       }
     }
-    
+
     var filterType = this.#getFilterType().value;
     var isRangeFilterType;
     switch (filterType){
@@ -236,16 +246,16 @@ class FilterDialog {
       default:
         isRangeFilterType = false;
     }
-    
+
     var filterValuesList = this.#getFilterValuesList();
     var filterValuesListOptions = filterValuesList.options;
     var currentValues = this.#extractOptionsFromSelectList(filterValuesList);
-        
-    var toFilterValuesList, currentToValues; 
+
+    var toFilterValuesList, currentToValues;
 
     // these are used to set a selection in either the values list or the values to list.
     var restoreSelectionInValueList, restoreSelectionValue;
-    
+
     // get the current selection and create new options out of it.
     if (isRangeFilterType) {
       toFilterValuesList = this.#getToFilterValuesList();
@@ -253,15 +263,15 @@ class FilterDialog {
       currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
 
       var rangeStart, rangeEnd;
-      
-      // The following condition captures the case where the user selected 1 option in the picklist, 
-      // and either the values list or the to values list also has 1 option selected. 
+
+      // The following condition captures the case where the user selected 1 option in the picklist,
+      // and either the values list or the to values list also has 1 option selected.
       // In action is then to use the picklist value to update that end of a range.
       if (
         selectedOptions.length === 1 && selectedOption.getAttribute('data-sql-null') !== String(true) && (
           filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && filterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true) ||
           filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true)
-        ) 
+        )
       ) {
 
         var selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
@@ -273,11 +283,11 @@ class FilterDialog {
         var selectedIndex = selectedList.selectedIndex;
 
         var option = selectedList.options[selectedIndex];
-        var optionValue = option.value;        
+        var optionValue = option.value;
 
         var correspondingOption = correspondingList.options[selectedIndex];
-        var correspondingValue = correspondingOption.value;        
-        
+        var correspondingValue = correspondingOption.value;
+
         if (values[selectedOption.value]) {
           // invalid choice, range already exists
           valueSelectionStatusText = `Existing range collision.`;
@@ -296,19 +306,15 @@ class FilterDialog {
           delete values[option.value];
           var correspondingOptionValueObject = correspondingValues[correspondingValue];
           delete correspondingValues[correspondingValue];
-          
-          values[selectedOption.value] = {
-            value: selectedOption.getAttribute('value'),
-            label: selectedOption.getAttribute('label'),
-            literal: selectedOption.getAttribute('data-sql-literal')
-          };
+
+          values[selectedOption.value] = this.#extractValuesFromOption(selectedOption);
           correspondingValues[correspondingValue] = correspondingOptionValueObject;
           valueSelectionStatusText = `Range modified.`;
         }
-        
+
         if (filterValuesList.selectedOptions.length === 1) {
           // if the values list had a selected item, we will restore that selection.
-          // (if the to values list had a selected item, it could be the result of adding a new range, 
+          // (if the to values list had a selected item, it could be the result of adding a new range,
           // and in that case we don't want to restore the selection because the likely new action is adding a new range, not editing the existing range.)
           restoreSelectionInValueList = filterValuesList;
           restoreSelectionValue = optionValue;
@@ -318,36 +324,24 @@ class FilterDialog {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
         for (var i = 0; i < options.length; i++){
           var option = options[i];
-          
-          if (option.selected) {
-            isSqlNull = selectedOption.getAttribute('data-sql-null') === String(true);
 
+          if (option.selected) {
             // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
-              rangeStart = {
-                value: option.getAttribute('value'),
-                label: option.getAttribute('label'),
-                literal: option.getAttribute('data-sql-literal'),
-                isSqlNull: isSqlNull
-              };
+              rangeStart = this.#extractValuesFromOption(option);
             }
-            
+
             // update the end of the current range (we keep updating it as long as the options are selected)
             if (rangeStart !== undefined) {
-              rangeEnd = {
-                value: option.getAttribute('value'),
-                label: option.getAttribute('label'),
-                literal: option.getAttribute('data-sql-literal'),
-                isSqlNull: isSqlNull
-              };
+              rangeEnd = this.#extractValuesFromOption(option);
             }
           }
-          
+
           // if the option is not selected, or if we are the last option, then add the current range.
           if((option.selected !== true || i === options.length -1) && rangeStart){
             // check if we should add the new range
             if (
-              currentValues[rangeStart.value] === undefined || 
+              currentValues[rangeStart.value] === undefined ||
               JSON.stringify(currentValues[rangeStart.value]) === JSON.stringify(currentToValues[rangeStart.value])
             ){
               currentValues[rangeStart.value] = rangeStart;
@@ -363,32 +357,26 @@ class FilterDialog {
             rangeStart = rangeEnd = undefined;
           }
         }
-        valueSelectionStatusText = `Range created.`;        
+        valueSelectionStatusText = `Range created.`;
       }
     }
     else {
       // go through the new options, and add them if they aren't already in the list.
       for (var i = 0; i < selectedOptions.length; i++) {
         selectedOption = selectedOptions[i];
-        isSqlNull = selectedOption.getAttribute('data-sql-null') === String(true);
         if (currentValues[selectedOption.value] !== undefined) {
           continue;
         }
-        currentValues[selectedOption.value] = {
-          value: selectedOption.getAttribute('value'),
-          label: selectedOption.getAttribute('label'),
-          literal: selectedOption.getAttribute('data-sql-literal'),
-          isSqlNull: isSqlNull
-        }
+        currentValues[selectedOption.value] = this.#extractValuesFromOption(selectedOption);
       }
     }
-    
+
     // clear the value lists and then update them with the changed set of values
     this.clearFilterValueLists();
     var sortedValueLists = this.#sortValueLists(currentValues, currentToValues)
     this.#renderOptionsToSelectList(sortedValueLists.valuesList, filterValuesList);
     this.#renderOptionsToSelectList(sortedValueLists.toValuesList, toFilterValuesList);
-    
+
     if (valueSelectionStatusText){
       this.#setValueSelectionStatusText(valueSelectionStatusText);
     }
@@ -400,7 +388,7 @@ class FilterDialog {
     if (restoreSelectionInValueList === undefined) {
       return ;
     }
-    
+
     // finally, restore the selection in the value lists.
     filterValuesListOptions = restoreSelectionInValueList.options;
     for (var i = 0; i < filterValuesListOptions.length; i++){
@@ -410,10 +398,10 @@ class FilterDialog {
       filterValuesListOptions.selectedIndex = i;
       break;
     }
-    
+
     // the end.
   }
-  
+
   #removeSelectedValues(){
     var selectControl = this.#getFilterValuesList();
     var options = selectControl.options;
@@ -426,21 +414,15 @@ class FilterDialog {
       if (i < toValuesOptions.length){
         toOption = toValuesOptions[i];
       }
-      
+
       if (option.selected || toOption && toOption.selected) {
         // either side has a selected option, which should be removed.
       }
       else {
         // neither side has a selected option, so we add it to preserve
-        currentValues[option.value] = {
-          value: option.value,
-          label: option.label,
-        };
+        currentValues[option.value] = this.#extractValuesFromOption(option);
         if (toOption){
-          currentToValues[toOption.value] = {
-            value: toOption.value,
-            label: toOption.label,
-          };
+          currentToValues[toOption.value] = this.#extractValuesFromOption(toOption);
         }
       }
     }
@@ -448,7 +430,7 @@ class FilterDialog {
     this.clearFilterValueLists();
     this.#renderOptionsToSelectList(currentValues, selectControl);
     this.#renderOptionsToSelectList(currentToValues, toValuesList);
-    
+
     this.#getValuePicklist().selectedIndex = -1;
   }
 
@@ -462,11 +444,11 @@ class FilterDialog {
   #getOkButton(){
     return byId('filterDialogOkButton');
   }
-  
+
   #getRemoveFilterButton(){
     return byId('filterDialogRemoveButton');
   }
-  
+
   #getCancelButton(){
     return byId('filterDialogCancelButton');
   }
@@ -480,9 +462,9 @@ class FilterDialog {
   }
 
   #getSpinner(){
-    return byId('filterDialogSpinner'); 
+    return byId('filterDialogSpinner');
   }
-  
+
   setBusy(trueOrFalse){
     var dom = this.getDom();
     dom.setAttribute('aria-busy', String(trueOrFalse));
@@ -491,7 +473,7 @@ class FilterDialog {
   #getSearch(){
     return byId('filterSearch');
   }
-  
+
   #getSearchStatus(){
     return byId('filterSearchStatus');
   }
@@ -499,11 +481,11 @@ class FilterDialog {
   #getValueSelectionStatus(){
     return byId('filterValueSelectionStatus');
   }
-    
+
   #setValueSelectionStatusText(text){
     this.#getValueSelectionStatus().innerText = text;
   }
-  
+
   #updateValueSelectionStatusText(){
     var text;
     var count = this.#getFilterValuesList().options.length;
@@ -511,16 +493,27 @@ class FilterDialog {
       text = 'Select values from the picklist';
     }
     else {
+      var object = 'value', verb;
       switch (this.#getFilterType().value) {
         case FilterDialog.filterTypes.INCLUDE:
+          verb = 'included';
+          break;
         case FilterDialog.filterTypes.EXCLUDE:
-          text = `${count} values selected.`;
+          verb = 'excluded';
           break;
         case FilterDialog.filterTypes.BETWEEN:
+          object += ' range';
+          verb = 'included';
+          break;
         case FilterDialog.filterTypes.NOTBETWEEN:
-          text = `${count} value ranges selected.`;
+          object += ' range';
+          verb = 'excluded';
           break;
       }
+      if (count > 1){
+        object += 's';
+      }
+      text = `${count} ${object} ${verb}.`;
     }
     this.#setValueSelectionStatusText(text);
   }
@@ -536,7 +529,7 @@ class FilterDialog {
   #getValuePicklist(){
     return byId('filterPicklist');
   }
-  
+
   clearValuePicklist(){
     this.#getValuePicklist().innerHTML = '';
   }
@@ -544,7 +537,7 @@ class FilterDialog {
   #getFilterValuesList(){
     return byId('filterValueList');
   }
-  
+
   #getToFilterValuesList(){
     return byId('toFilterValueList');
   }
@@ -556,45 +549,45 @@ class FilterDialog {
   clearToFilterValueList(){
     this.#getToFilterValuesList().innerHTML = '';
   }
-  
+
   clearFilterValueLists() {
     this.clearFilterValueList();
     this.clearToFilterValueList();
   }
-  
+
   #positionFilterDialog(queryAxisItemUi){
     var boundingRect = queryAxisItemUi.getBoundingClientRect();
     var filterDialog = this.getDom();
-    filterDialog.style.left = boundingRect.x + 'px' 
+    filterDialog.style.left = boundingRect.x + 'px'
     filterDialog.style.top = (boundingRect.y + boundingRect.height) + 'px';
   }
-  
+
   #clearDialog(){
     this.#getValuePicklist().innerHTML = '';
     this.clearFilterValueLists();
     this.#getSearch().value = '';
   }
-  
+
   async openFilterDialog(queryModel, queryModelItem, queryAxisItemUi){
     this.#clearDialog();
-    
+
     this.#queryAxisItem = queryModelItem;
     this.#queryModel = queryModel;
-    
+
     this.#updateDialogState();
-    
+
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
     filterDialog.showModal();
     this.#updatePicklist(0, this.#valuePicklistPageSize);
   }
-  
+
   #updateDialogState(){
     var queryAxisItem = this.#queryAxisItem;
     var filter = queryAxisItem.filter;
     if (filter){
       this.#getFilterType().value = filter.filterType;
-      
+
       var sortedValues, sortedValueArgs = [filter.values];
       switch (filter.filterType) {
         case FilterDialog.filterTypes.BETWEEN:
@@ -603,14 +596,14 @@ class FilterDialog {
       }
       sortedValues = this.#sortValueLists.apply(this, sortedValueArgs);
       this.#renderOptionsToSelectList(sortedValues.valuesList, this.#getFilterValuesList());
-      this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());      
+      this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());
     }
     else {
-      
+
     }
     this.#updateValueSelectionStatusText();
   }
-  
+
   #getDialogState(){
     var dialogState = {
       filterType: this.#getFilterType().value,
@@ -619,12 +612,12 @@ class FilterDialog {
     };
     return dialogState;
   }
-  
+
   async #updatePicklist(offset, limit){
     var result = await this.#getPicklistValues(offset, limit);
     this.#populatePickList(result, offset, limit);
   }
-  
+
   #getOtherFilterAxisItems(withFilterValues){
     var filtersAxis = this.#queryModel.getFiltersAxis();
     var filtersAxisItems = filtersAxis.getItems();
@@ -635,7 +628,7 @@ class FilterDialog {
       if (
         filterAxisItem.columnName === this.#queryAxisItem.columnName &&
         filterAxisItem.derivation === this.#queryAxisItem.derivation &&
-        filterAxisItem.aggregator === this.#queryAxisItem.aggregator 
+        filterAxisItem.aggregator === this.#queryAxisItem.aggregator
       ){
         return false;
       }
@@ -643,11 +636,11 @@ class FilterDialog {
         if (!filterAxisItem.filter) {
           return false;
         }
-        
+
         if (!filterAxisItem.filter.values) {
           return false;
         }
-        
+
         if (!Object.keys(filterAxisItem.filter.values).length){
           return false;
         }
@@ -656,7 +649,7 @@ class FilterDialog {
     }.bind(this));
     return otherFilterAxisItems;
   }
-  
+
   async #getPicklistValues(offset, limit){
     this.setBusy(true);
 
@@ -664,7 +657,7 @@ class FilterDialog {
       var searchStatus = this.#getSearchStatus();
       searchStatus.innerHTML = 'Finding values...';
     }
-    
+
     var datasource = this.#queryModel.getDatasource();
     var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(this.#queryAxisItem);
 
@@ -687,7 +680,7 @@ class FilterDialog {
         fromClause
       ];
     }
-    
+
     var condition = '';
     var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
     if (filterSearchApplyAll) {
@@ -701,7 +694,7 @@ class FilterDialog {
         }
       }
     }
-    
+
     var search = this.#getSearch();
     var searchString = search.value.trim();
     var parameters = [];
@@ -720,15 +713,15 @@ class FilterDialog {
           break;
       }
     }
-    
+
     if (condition) {
       sql.push(`WHERE ${condition}`);
-    }      
-    
+    }
+
     if (bindValue){
       parameters.push(bindValue);
     }
-    
+
     if (offset === 0){
       sql.push(`GROUP BY ${sqlExpression}`);
     }
@@ -739,13 +732,13 @@ class FilterDialog {
     }
     parameters.push(limit);
     sql.push('LIMIT ?');
-    
+
     if (offset === undefined){
       offset = 0;
     }
     parameters.push(offset);
     sql.push('OFFSET ?');
-    
+
     sql = sql.join('\n');
     console.log(`Preparing sql for filter dialog value picklist:`);
     console.log(sql);
@@ -756,9 +749,9 @@ class FilterDialog {
     console.time(timeMessage);
     var result = await preparedStatement.query.apply(preparedStatement, parameters);
     console.timeEnd(timeMessage);
-    return result;  
+    return result;
   }
-  
+
   #populatePickList(resultset, offset, limit){
     if (offset === 0) {
       var searchStatus = this.#getSearchStatus();
@@ -768,20 +761,20 @@ class FilterDialog {
       }
       searchStatus.innerHTML = `${count} values found.`;
     }
-    
+
     var listOfValues = this.#getValuePicklist();
-    
+
     var exhausted = resultset.numRows < limit;
 
     var optionGroup, optionsContainer;
     var optionGroupLabelText = `Values ${offset + 1} - ${offset + resultset.numRows}`;
-    
+
     if (offset === 0) {
       this.clearValuePicklist();
       if (exhausted) {
         optionsContainer = listOfValues;
       }
-      else { 
+      else {
         optionGroup = createEl('optgroup', {
           label: optionGroupLabelText,
           "data-offset": offset + limit,
@@ -800,7 +793,7 @@ class FilterDialog {
       optionGroup.innerHTML = '';
       optionsContainer = optionGroup;
     }
-    
+
     var formatter = this.#queryAxisItem.formatter;
     var valueField, labelField;
     if (formatter) {
@@ -858,7 +851,7 @@ class FilterDialog {
     optionGroup.appendChild(option);
     listOfValues.appendChild(optionGroup);
   }
-    
+
   getDom(){
     return byId(this.#id);
   }
