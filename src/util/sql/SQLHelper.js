@@ -351,7 +351,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;       
+        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;
       };
     }
   },
@@ -366,6 +366,28 @@ var dataTypes = {
   'UNION': {
   }
 };
+
+function getDataTypeInfo(columnType){
+  var columnTypeUpper = columnType.toUpperCase();
+  var typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
+    return columnTypeUpper.startsWith(dataTypeName.toUpperCase());
+  });
+  if (typeNames.length === 0) {
+    return undefined;
+  }
+  typeNames.sort(function(a, b){
+    if (a.length > b.length) {
+      return 1;
+    }
+    else
+    if (a.length < b.length) {
+      return -1;
+    }
+    return 0;
+  });
+  var typeName = typeNames[0];
+  return dataTypes[typeName];
+}
 
 function identifierRequiresQuoting(identifier){
   return /[\s"]/.test(identifier);

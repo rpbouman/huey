@@ -126,7 +126,7 @@ class FilterDialog {
   #sortValues(values){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
-      var dataTypeInfo = dataTypes[dataType];
+      var dataTypeInfo = getDataTypeInfo(dataType);
       if (dataTypeInfo.isNumeric){
         return values.sort(function(a, b){
           a = parseFloat(a);

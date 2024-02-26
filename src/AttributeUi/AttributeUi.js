@@ -47,7 +47,7 @@ class AttributeUi {
       expressionTemplate: 'SUM( ${columnName} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
-        var dataTypeInfo = dataTypes[columnType];
+        var dataTypeInfo = getDataTypeInfo(columnType);
         var isInteger = dataTypeInfo.isInteger;
         var formatter = createNumberFormatter(isInteger !== true);
         
@@ -74,7 +74,7 @@ class AttributeUi {
       expressionTemplate: 'MEDIAN( ${columnName} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
-        var dataTypeInfo = dataTypes[columnType];
+        var dataTypeInfo = getDataTypeInfo(columnType);
         var formatter;
         if (dataTypeInfo.isNumeric) {
           formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
@@ -224,9 +224,9 @@ class AttributeUi {
       columnType: 'UTINYINT'
     }
   };
-  
+
   static getApplicableDerivations(typeName){
-    var typeInfo = dataTypes[typeName];
+    var typeInfo = getDataTypeInfo(typeName);
     
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
@@ -253,7 +253,7 @@ class AttributeUi {
   }
   
   static getApplicableAggregators(typeName) {
-    var typeInfo = dataTypes[typeName];
+    var typeInfo = getDataTypeInfo(typeName);
     
     var isNumeric = Boolean(typeInfo.isNumeric);
     var isInteger = Boolean(typeInfo.isInteger);
