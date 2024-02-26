@@ -34,7 +34,7 @@ function createNumberFormatter(fractionDigits){
             else {
               var parts = stringValue.split('.');
               integerPart = parts[0];
-              fractionalPart = part[1];
+              fractionalPart = parts[1];
             }
             stringValue = formatter.format(BigInt(integerPart));
             if (fractionalPart) {
