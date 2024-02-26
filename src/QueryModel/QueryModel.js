@@ -727,6 +727,10 @@ class QueryModel extends EventEmitter {
     // (note that the normal getters return copies)
     var axis = this.getQueryAxis(queryModelItem.axis);
     var items = axis.getItems();
+    
+    if (!Object.keys(filter.values).length){
+      filter = undefined;
+    }
     items[queryModelItem.index].filter = filter;
     
     var axesChangeInfo = {};
