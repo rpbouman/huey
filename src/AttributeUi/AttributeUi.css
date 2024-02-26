@@ -226,7 +226,7 @@
 /**
 * Prevent the Attribute UI events when the pivot table is busy:
 */
-main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#sidebar .attributeUi details > summary > label.attributeUiAxisButton {
+main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#sidebar .attributeUi details > summary {
   pointer-events: none;
 }
 
