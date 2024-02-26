@@ -1,7 +1,7 @@
 function clearSearch(){
   byId('searchAttribute').value = '';
-  var attributeUi = byId('attributeUi');  
-  var attributeNodes = attributeUi.getElementsByClassName('attributeUiNode');
+  var attributeUi = byId('attributeUi');
+  var attributeNodes = attributeUi.getElementsByTagName('details');
   for (var i = 0; i < attributeNodes.length; i++){
     var attributeNode = attributeNodes.item(i);
     attributeNode.setAttribute('data-matches-searchstring', '');
@@ -16,7 +16,7 @@ function handleAttributeSearch(event, count){
   var searchString = searchElement.value.trim().toUpperCase();
   console.log(searchString);
   var attributeUi = byId('attributeUi');  
-  var attributeNodes = attributeUi.getElementsByClassName('attributeUiNode');
+  var attributeNodes = attributeUi.getElementsByTagName('details');
   for (var i = 0; i < attributeNodes.length; i++){
     var attributeNode = attributeNodes.item(i);
     var match;

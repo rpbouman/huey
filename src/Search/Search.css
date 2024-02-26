@@ -11,6 +11,6 @@
   width: 100%;
 }
 
-.attributeUi .attributeUiNode[data-matches-searchstring=false] {
+.attributeUi details[data-matches-searchstring=false] {
   display: none;
 }

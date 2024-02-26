@@ -4,16 +4,67 @@ function createNumberFormatter(fractionDigits){
   var options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
+  
+  var decimalSeparator;
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
-    options.maximumFractionDigits = localeSettings.maximumFractionDigits;       
+    options.maximumFractionDigits = localeSettings.maximumFractionDigits;
   }
   var formatter = new Intl.NumberFormat(locales, options);
+  if (fractionDigits){
+    decimalSeparator = formatter.formatToParts(123.456).find(function(part){
+      return part.type === 'decimal';
+    })['value'];
+  }
   return {
-    format: function(value){
+    format: function(value, field){
       if (value === null) {
         return '';
       }
+      
+      if (field) {
+        switch (typeof value){
+          case 'bigint':
+          case 'number':
+            break;
+          default:
+            var stringValue = String(value);
+            var fieldType = field.type;
+            var fieldTypeId, fieldTypeScale;
+            
+            if(fieldType) {
+              fieldTypeId = fieldType.typeId;
+              fieldTypeScale = fieldType.scale;
+            }
+            
+            var integerPart, fractionalPart;
+            // arrow decimal
+            if (fieldTypeScale === 0) {
+              integerPart = stringValue;
+            }
+            else {
+              var parts = stringValue.split('.');
+              integerPart = parts[0];
+              if (parts.length === 2){
+                fractionalPart = parts[1];
+              }
+              else {
+                var fractionalPartIndex = integerPart.length - fieldTypeScale;
+                fractionalPart = integerPart.slice(fractionalPartIndex);
+                integerPart = integerPart.slice(0, fractionalPartIndex);
+              }
+            }
+            stringValue = formatter.format(BigInt(integerPart));
+            if (fractionalPart && options.minimumFractionDigits > 0) {
+              if (decimalSeparator === undefined) {
+                decimalSeparator = '.';
+              }
+              stringValue += decimalSeparator + fractionalPart;
+            }
+            return stringValue;
+        }
+      }
+      
       return formatter.format(value);
     }
   };
@@ -37,27 +88,8 @@ var dataTypes = {
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
-      var decimalSeparator = formatter.formatToParts(123.456)['decimal'];
-      
       return function(value, field){
-        
-        switch (typeof value){
-          case 'bigint':
-          case 'number':
-            break;
-          default:
-            var stringValue = String(value);
-            if (field.type.scale === 0) {
-              value = BigInt(stringValue);
-            }
-            else {
-              var parts = stringValue.split('.');
-              var integerPart = formatter.formatToParts(BigInt(parts[0]))['integer'];
-              var fractionPart = part[1];
-              return `${integerPart}${decimalSeparator}${fractionPart}`;
-            }
-        }
-        return formatter.format(value)
+        return formatter.format(value, field)
       };
     },
     createLiteralWriter: function(value, field){
@@ -69,7 +101,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -82,7 +114,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -96,7 +128,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -109,7 +141,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -123,7 +155,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -137,7 +169,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -151,7 +183,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -166,7 +198,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -179,7 +211,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -194,7 +226,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -209,7 +241,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -224,7 +256,7 @@ var dataTypes = {
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
       return function(value, field){
-        return formatter.format(value);
+        return formatter.format(value, field);
       };
     },
     createLiteralWriter: function(value, field){
@@ -309,7 +341,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
     }
   },
@@ -319,7 +351,7 @@ var dataTypes = {
     hasTimezone: true,
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
     }
   },
@@ -340,7 +372,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;       
+        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;
       };
     }
   },
@@ -355,6 +387,37 @@ var dataTypes = {
   'UNION': {
   }
 };
+
+function getDataTypeInfo(columnType){
+  var columnTypeUpper = columnType.toUpperCase();
+  var typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
+    return columnTypeUpper.startsWith(dataTypeName.toUpperCase());
+  });
+  if (typeNames.length === 0) {
+    return undefined;
+  }
+  
+  // check if there exists a type with exactly the given name
+  var dataTypeInfo = dataTypes[columnTypeUpper];
+  if (dataTypeInfo) {
+    return dataTypeInfo;
+  }
+  
+  // no. This means the type is in some way modified/parameterized, like DECIMAL(nn, nn)
+  // try to find the "best" match.
+  typeNames.sort(function(a, b){
+    if (a.length > b.length) {
+      return 1;
+    }
+    else
+    if (a.length < b.length) {
+      return -1;
+    }
+    return 0;
+  });
+  var typeName = typeNames[0];
+  return dataTypes[typeName];
+}
 
 function identifierRequiresQuoting(identifier){
   return /[\s"]/.test(identifier);

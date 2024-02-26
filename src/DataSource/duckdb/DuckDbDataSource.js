@@ -91,6 +91,26 @@ class DuckDbDataSource extends EventEmitter {
     };
   }
   
+  // this is a light weight method that should produce the id of a datasource that would be created for the given file.
+  // this should not actually instantiate a datasource, merely its identifier. 
+  // It is a service to easily create UI elements that may refer to a datasource without having to actually create one.
+  static getDatasourceIdForFileName(fileName){
+    return `${this.types.FILE}:${getQuotedIdentifier(fileName)}`;
+  }
+  
+  static createFromUrl(duckdb, instance, url) {
+    if (!(typeof url === 'string')){
+      throw new Error(`The url should be of type string`);
+    }
+        
+    var config = {
+      type: DuckDbDataSource.types.FILE,
+      fileName: url 
+    };
+    var instance = new DuckDbDataSource(duckdb, instance, config);
+    return instance;
+  }
+
   static createFromFile(duckdb, instance, file) {
     if (!(file instanceof File)){
       throw new Error(`The file argument must be an instance of File`);
@@ -190,6 +210,10 @@ class DuckDbDataSource extends EventEmitter {
     var type = this.getType();
     var postFix;
     switch (type) {
+      case DuckDbDataSource.types.FILE:
+        var fileName = this.getFileName();
+        var id = DuckDbDataSource.getDatasourceIdForFileName(fileName);
+        return id;
       case DuckDbDataSource.types.FILES:
         postFix = JSON.stringify(this.#fileNames);
         break;
@@ -349,6 +373,9 @@ class DuckDbDataSource extends EventEmitter {
           case 'xlsx':
             var fileType = DuckDbDataSource.fileTypes[fileExtension];
             sql = `${fileType.duckdb_reader}( ${quotedFileName} )`;
+            break;
+          default: // for urls we will be lenient for now
+            sql = quotedFileName;
         }
         break;
       case DuckDbDataSource.types.SQLQUERY:

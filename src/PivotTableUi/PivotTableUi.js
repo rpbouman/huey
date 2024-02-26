@@ -518,8 +518,7 @@ class PivotTableUi {
   #renderCellValue(cell, cellsAxisItem, cellElement){
     var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
     if (!cell || !cellsAxisItem){
-      label.innerText = '';
-      return;
+      return label.innerText = '';
     }
     
     var values = cell.values;
@@ -545,7 +544,7 @@ class PivotTableUi {
     else {
       labelText = String(value);
     }
-    label.innerText = labelText;    
+    label.innerText = labelText;
     return labelText
   }
   
@@ -603,7 +602,7 @@ class PivotTableUi {
     
     var cellIndex;
     
-    for (var i = 0; i < rowCount; i++){
+    for (var i = 0; i < tableBodyRows.length - 1; i++){
       var tableRow = tableBodyRows.item(i);
       var cellElements = tableRow.childNodes;
       
@@ -612,7 +611,7 @@ class PivotTableUi {
         rowsAxisTupleIndex = rowTupleIndexInfo.tupleIndex;
       }        
       
-      for (var j = headerColumnCount; j < headerColumnCount + columnCount; j++){
+      for (var j = headerColumnCount; j < headerColumnCount + (firstTableHeaderRowCells.length - headerColumnCount - 1); j++){
         
         if (j === headerColumnCount) {
           columnsAxisTupleIndex = columnTupleIndexInfo.tupleIndex;
@@ -630,7 +629,7 @@ class PivotTableUi {
         if (cells) {
           cell = cells[cellIndex];
         }
-        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];              
+        var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
         var labelText = this.#renderCellValue(cell, cellsAxisItem, cellElement);
         
         // adjust the column width if necessary.
@@ -1047,7 +1046,7 @@ class PivotTableUi {
 
           bodyRow.appendChild(cell);
           
-          var labelText;
+          var labelText = undefined;
           if (j < rowAxisItems.length) {
             if (k === 0 && tuple) {
               var value = tuple.values[j];

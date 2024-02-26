@@ -2,7 +2,6 @@ dialog#uploadUi {
   resize: both;
   width: 600px;
   height: 400px;
-  padding: 15px;
 }
 
 dialog#uploadUi > section > details > summary > label {
@@ -21,6 +20,20 @@ dialog#uploadUi > section > details[aria-invalid=false] > summary > progress {
   accent-color: green;
 }
 
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for] {
+  float: right;
+}
+
+dialog#uploadUi > section > details > summary > label.analyzeActionButton > button {
+  display: none;
+}
+
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]::after {
+  font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-normal );
+  content: '\f3a3';  
+}
+
 dialog#uploadUi > section > details > summary {
   width: 100%;
 }
@@ -36,4 +49,21 @@ dialog#uploadUi > section > details > p {
 dialog#uploadUi[aria-busy=true] #uploadDialogOkButton {
   pointer-events: none;
   color: var( --huey-placeholder-color );
+}
+
+dialog#uploadUi[aria-busy=false] > header > .timer {
+  visibility: hidden;
+}
+
+
+dialog#uploadUi > header > p#uploadUiDescription > label[for=datasourcesTab] {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+dialog#uploadUi > header > p#uploadUiDescription > span.analyzeActionButton::after {
+  font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-normal );
+  content: '\f3a3';
 }

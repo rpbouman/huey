@@ -149,7 +149,7 @@ dialog {
   border-width: 1px;
   border-color: var( --huey-dark-border-color );
   border-radius: 18px;
-  padding: 15px;
+  padding: 0em 1em 0em 1em;
   color: var( --huey-foreground-color );
 }
 
@@ -163,6 +163,10 @@ dialog[open] {
 dialog > header {
   flex-grow: 0;
   color: var( --huey-foreground-color );
+  position: sticky;
+  top: 0px;
+  background-color: var( --huey-medium-background-color );
+  padding: .5em 0em .5em 0em;
 }
 
 /* this is used as dialog contents section */
@@ -178,10 +182,12 @@ dialog > form[role=tablist] {
 
 /* this is used as dialog buttons section */
 dialog > footer {
-  margin-top: 12px;
-  margin-bottom: -6px;
   flex-grow: 0;
   text-align: center;
+  position: sticky;
+  bottom: 0px;
+  background-color: var( --huey-medium-background-color );
+  padding: .5em 0em .5em 0em;
 }
 
 dialog > footer button {
@@ -190,6 +196,10 @@ dialog > footer button {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var( --huey-foreground-color );
+}
+
+*[role=toolbar] > button {
+  user-select: none;
 }
 
 dialog h1:first-child,

@@ -44,11 +44,18 @@ class UploadUi {
     var duckDbDataSource;
     var destroyDatasource = false;
     try {
-      duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
-      progressBar.value = parseInt(progressBar.value, 10) + 20;
-      
-      await duckDbDataSource.registerFile();
-      progressBar.value = parseInt(progressBar.value, 10) + 40;
+      if (typeof file === 'string'){
+        duckDbDataSource = DuckDbDataSource.createFromUrl(duckdb, instance, file);
+        progressBar.value = parseInt(progressBar.value, 10) + 20;
+      }
+      else
+      if (file instanceof File){ 
+        duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
+        progressBar.value = parseInt(progressBar.value, 10) + 20;
+        
+        await duckDbDataSource.registerFile();
+        progressBar.value = parseInt(progressBar.value, 10) + 40;
+      }
         
       var canAccess = await duckDbDataSource.validateAccess();
       progressBar.value = parseInt(progressBar.value, 10) + 30;
@@ -77,7 +84,19 @@ class UploadUi {
   }
   
   #createUploadItem(file){
-    var fileName = file.name;
+    var fileName 
+    
+    if (typeof file === 'string'){
+      fileName = file;
+    }
+    else
+    if (file instanceof File) {
+      fileName = file.name;
+    }
+    else {
+      throw new Error(`Don't know how to handle item of type ${typeof file}`);
+    }
+    
     var uploadItem = createEl('details', {
       id: fileName
     });
@@ -89,6 +108,18 @@ class UploadUi {
     var label = createEl('label', {
     }, fileName);
     summary.appendChild(label);
+    
+    var datasourceId = DuckDbDataSource.getDatasourceIdForFileName(fileName);
+    if (datasourceId) {
+      var analyzeButton = createEl('label', {
+        "class": 'analyzeActionButton',
+        "for": `${datasourceId}_analyze`,
+        "title": `Start exploring data from ${fileName}`,
+        "onclick": `byId("${this.#id}").close()`
+      });
+      summary.appendChild(analyzeButton);
+    }
+    
     var progressBar = createEl('progress', {
       id: fileName,
       max: 100,
@@ -127,7 +158,19 @@ class UploadUi {
     var requiredExtensions = []
     for (var i = 0; i < files.length; i++){
       var file = files[i];
-      var fileName = file.name;
+      
+      var fileName;
+      if (typeof file === 'string') {
+        fileName = file;
+      }
+      else
+      if (file instanceof File) {
+        fileName = file.name;
+      }
+      else {
+        throw new Error(`Don't know how to handle item of type ${typeof file}.`);
+      }
+      
       var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
       var fileExtension = fileNameParts.lowerCaseExtension;
       
@@ -148,11 +191,13 @@ class UploadUi {
     return requiredExtensions;
   }
   
-  loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
-    var extensionInstallationItems = requiredDuckDbExtensions.map(async function(extensionName){
-      var body = this.#getBody();
-      var installExtensionItem = this.#createInstallExtensionItem(extensionName);
-      body.appendChild(installExtensionItem);
+  async loadDuckDbExtension(extensionName){
+    var invalid = true;
+    var body = this.#getBody();
+    var installExtensionItem = this.#createInstallExtensionItem(extensionName);
+    body.appendChild(installExtensionItem);
+    
+    try {
       
       var progressbar = installExtensionItem.getElementsByTagName('progress').item(0);
       var message = installExtensionItem.getElementsByTagName('p').item(0);
@@ -192,6 +237,7 @@ class UploadUi {
 
       if (row['loaded']){
         message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
+        invalid = false;
       }
       else {
         message.innerHTML += `Extension ${extensionName} not loaded<br/>`;
@@ -200,10 +246,28 @@ class UploadUi {
         await connection.query(`LOAD ${extensionName}`);
         message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
         progressbar.value = parseInt(progressbar.value, 10) + 20;
+        invalid = false;
       }
-      progressbar.value = 100;
-      return true;
-    }.bind(this));
+      if (invalid === false) {
+        progressbar.value = 100;
+      }
+      return !invalid;
+    }
+    catch (e){
+      message.innerHTML += e.message + '<br/>';
+      message.innerHTML += e.stack.split('\n').map(function(stackItem){
+        return `<pre>${stackItem}</pre>`
+      }).join('\n');
+      installExtensionItem.setAttribute('open', true);
+      return e;
+    }
+    finally{
+      installExtensionItem.setAttribute('aria-invalid', invalid);
+    }
+  }
+  
+  loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
+    var extensionInstallationItems = requiredDuckDbExtensions.map(this.loadDuckDbExtension.bind(this));
     return extensionInstallationItems;
   }
   
@@ -214,7 +278,9 @@ class UploadUi {
     
     var numFiles = files.length;
     var header = this.#getHeader();
-    header.innerHTML = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    header.innerText = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    var description = this.#getDescription();
+    description.innerText = 'Upload in progress. This will take a few moments...';
 
     dom.showModal();
 
@@ -270,12 +336,28 @@ class UploadUi {
     }
     
     dom.setAttribute('aria-busy', false);    
-    if (!countFail) {
-      dom.close();
-    }
     if (datasources.length) {
       datasourcesUi.addDatasources(datasources);
     }
+    var message, description;
+    var instruction
+    if (countFail) {
+      var countSuccess = uploadResults.length - countFail;
+      if (countSuccess){
+        message = `${countSuccess} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, ${countFail} failed.`;
+        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+      }
+      else {
+        message = `${countFail} file${countFail > 1 ? 's' : ''} failed.`;
+        description = 'All uploads failed. You can review the errors below:';
+      }
+    }
+    else {
+      message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
+      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+    }
+    this.#getHeader().innerText = message;
+    this.#getDescription().innerHTML = description;
   }
   
   getDom(){
@@ -284,9 +366,12 @@ class UploadUi {
   
   #getHeader(){
     var dom = this.getDom();
-    var header = dom.getElementsByTagName('header').item(0);
-    var h3 = header.getElementsByTagName('h3').item(0);
-    return h3;
+    return byId(dom.getAttribute('aria-labelledby'));
+  }
+
+  #getDescription(){
+    var dom = this.getDom();
+    return byId(dom.getAttribute('aria-describedby'));
   }
   
   #getBody(){

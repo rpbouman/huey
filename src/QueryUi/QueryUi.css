@@ -189,8 +189,8 @@
 }
 
 .queryUi > section > ol > li[data-derivation="week num"] > span:before {
-  /* letter w */
-  content: "\ec66";
+  /* calendar-week */
+  content: "\fd30";
 }
 
 .queryUi > section > ol > li[data-derivation="day of year"] > span:before {
@@ -199,13 +199,13 @@
 }
 
 .queryUi > section > ol > li[data-derivation="day of month"] > span:before {
-  /* letter-d */
-  content: "\ec53";
+  /* calendar-month */
+  content: "\fd2f";
 }
 
 .queryUi > section > ol > li[data-derivation="day of week"] > span:before {
-  /* letter-d */
-  content: "\ec53";
+  /* letter-d-small */
+  content: "\fcca";
 }
 
 .queryUi > section > ol > li[data-derivation="iso-time"] > span:before {
@@ -371,11 +371,16 @@
   content: "\faff";
 }
 
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
   /* filter-edit */
   /* content: "\fa00"; */
   /* filter cog */
   content: "\f9fe";
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
+  /* trash */
+  content: "\eb41";
 }
 
 /* axis item action to remove item from axis */

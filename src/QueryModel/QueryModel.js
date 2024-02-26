@@ -32,7 +32,7 @@ class QueryAxisItem {
     }
     
     if (dataType) {
-      var dataTypeInfo = dataTypes[dataType];
+      var dataTypeInfo = getDataTypeInfo(dataType);
       if (dataTypeInfo) {
         if (dataTypeInfo.createFormatter){
           return dataTypeInfo.createFormatter();
@@ -52,7 +52,7 @@ class QueryAxisItem {
  
   static createLiteralWriter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
-    var dataTypeInfo = dataTypes[dataType];
+    var dataTypeInfo = getDataTypeInfo(dataType);
     return dataTypeInfo.createLiteralWriter();
   }  
 
@@ -727,6 +727,10 @@ class QueryModel extends EventEmitter {
     // (note that the normal getters return copies)
     var axis = this.getQueryAxis(queryModelItem.axis);
     var items = axis.getItems();
+    
+    if (!Object.keys(filter.values).length){
+      filter = undefined;
+    }
     items[queryModelItem.index].filter = filter;
     
     var axesChangeInfo = {};

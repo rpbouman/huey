@@ -1,4 +1,3 @@
-
 class AttributeUi {
   
   #id = undefined;
@@ -18,22 +17,27 @@ class AttributeUi {
       columnType: 'HUGEINT'
     },
     'min': {
+      folder: "statistics",
       preservesColumnType: true,
       expressionTemplate: 'MIN( ${columnName} )'
     },
     'max': {
+      folder: "statistics",
       preservesColumnType: true,
       expressionTemplate: 'MAX( ${columnName} )'
     },
     'list': {
+      folder: "list aggregators",
       expressionTemplate: 'LIST( ${columnName} )',
       isArray: true
     },
     'distinct list': {
+      folder: "list aggregators",
       expressionTemplate: 'LIST( DISTINCT ${columnName} )',
       isArray: true      
     },
     'histogram': {
+      folder: "list aggregators",
       expressionTemplate: 'HISTOGRAM( ${columnName} )',
       isStruct: true,
     },
@@ -43,14 +47,17 @@ class AttributeUi {
       expressionTemplate: 'SUM( ${columnName} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
-        var dataTypeInfo = dataTypes[columnType];
-        var formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        var dataTypeInfo = getDataTypeInfo(columnType);
+        var isInteger = dataTypeInfo.isInteger;
+        var formatter = createNumberFormatter(isInteger !== true);
+        
         return function(value, field){
-          return formatter.format(value);
+          return formatter.format(value, field);
         };
       }
     },
     'avg': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
@@ -58,20 +65,21 @@ class AttributeUi {
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
-          return formatter.format(value);
+          return formatter.format(value, field);
         };
       }
     },
     'median': {
+      folder: "statistics",
       expressionTemplate: 'MEDIAN( ${columnName} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
-        var dataTypeInfo = dataTypes[columnType];
+        var dataTypeInfo = getDataTypeInfo(columnType);
         var formatter;
         if (dataTypeInfo.isNumeric) {
           formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
           return function(value, field){
-            return formatter.format(value);
+            return formatter.format(value, field);
           };
         }
         else {
@@ -82,10 +90,12 @@ class AttributeUi {
       }
     },
     'mode': {
+      folder: "statistics",
       preservesColumnType: true,
       expressionTemplate: 'MODE( ${columnName} )'
     },
     'stdev': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
@@ -93,6 +103,7 @@ class AttributeUi {
       columnType: 'DOUBLE'
     },
     'variance': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
@@ -100,12 +111,14 @@ class AttributeUi {
       columnType: 'DOUBLE'
     },
     'entropy': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       expressionTemplate: 'ENTROPY( ${columnName} )',
       columnType: 'DOUBLE'
     },
     'kurtosis': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
@@ -113,6 +126,7 @@ class AttributeUi {
       columnType: 'DOUBLE'
     },
     'skewness': {
+      folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
@@ -123,26 +137,24 @@ class AttributeUi {
 
   static dateFields = {
     'iso-date': {
+      folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
       expressionTemplate: "strftime( ${columnName}, '%x' )",
       columnType: 'VARCHAR'
     },
     'year': {
+      folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
-      columnType: 'INT', 
-      formats: {
-        'yyyy': {
-        },
-        'yy': {
-        }
-      }
+      columnType: 'INTEGER'
     },
     'quarter': {
+      folder: 'date fields',
       expressionTemplate: "'Q' || QUARTER( ${columnName} )",
-      columnType: 'VARCHAR'    
+      columnType: 'VARCHAR'
     },    
     'month num': {
+      folder: 'date fields',
       expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       formats: {
@@ -155,18 +167,22 @@ class AttributeUi {
       }
     },
     'week num': {
+      folder: 'date fields',
       expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT'
     },
     'day of year': {
+      folder: 'date fields',
       expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as USMALLINT)",
       columnType: 'USMALLINT'
     },
     'day of month': {
+      folder: 'date fields',
       expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT'
     },
     'day of week': {
+      folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT',
       formats: {
@@ -182,10 +198,12 @@ class AttributeUi {
 
   static timeFields = {
     'iso-time': {
+      folder: 'time fields',
       expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
       columnType: 'VARCHAR'
     },
     'hour': {
+      folder: 'time fields',
       expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT',
       formats: {
@@ -196,17 +214,19 @@ class AttributeUi {
       }
     },
     'minute': {
+      folder: 'time fields',
       expressionTemplate: "CAST( MINUTE( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT'
     },
     'second': {
+      folder: 'time fields',
       expressionTemplate: "CAST( SECOND( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT'
     }
   };
-  
+
   static getApplicableDerivations(typeName){
-    var typeInfo = dataTypes[typeName];
+    var typeInfo = getDataTypeInfo(typeName);
     
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
@@ -233,7 +253,7 @@ class AttributeUi {
   }
   
   static getApplicableAggregators(typeName) {
-    var typeInfo = dataTypes[typeName];
+    var typeInfo = getDataTypeInfo(typeName);
     
     var isNumeric = Boolean(typeInfo.isNumeric);
     var isInteger = Boolean(typeInfo.isInteger);
@@ -382,14 +402,12 @@ class AttributeUi {
   #renderAttributeUiNode(config){
     var node = createEl('details', {
       role: 'treeitem',      
-      "class": ['attributeUiNode', config.type],
-      'data-nodetype': config.type
+      'data-nodetype': config.type,
+      'data-column_name': config.profile.column_name,
+      'data-column_type': config.profile.column_type
     });
-    node.setAttribute('data-column_name', config.profile.column_name);
-    node.setAttribute('data-column_type', config.profile.column_type);   
     switch (config.type){
       case 'column':
-        node.setAttribute('data-state', 'collapsed');
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       case 'aggregate':
@@ -447,6 +465,108 @@ class AttributeUi {
       attributesUi.appendChild(node);
     }
   }
+
+  #renderFolderNode(config){
+    var node = createEl('details', {
+      role: 'treeitem',      
+      'data-nodetype': 'folder',
+    });
+    
+    var head = createEl('summary', {
+    });
+    
+    var icon = createEl('span', {
+      'class': 'icon',
+      'role': 'img'
+    });
+    head.appendChild(icon);
+    
+    var label = createEl('span', {
+      "class": 'label'
+    }, config.caption);
+    head.appendChild(label);
+    node.appendChild(head);
+    return node;
+  }
+
+  #createFolders(itemsObject, node){
+    var folders = Object.keys(itemsObject).reduce(function(acc, curr){
+      var object = itemsObject[curr];
+      var folder = object.folder;
+      if (!folder) {
+        return acc;
+      }
+      if (acc[folder]) {
+        return acc;
+      }
+      var folderNode = this.#renderFolderNode({caption: folder});
+      acc[folder] = folderNode;
+
+      var childNodes = node.childNodes;
+      if (childNodes.length) {
+        // folders got before any other child, 
+        for (var i = 0; i < childNodes.length ; i++){
+          var childNode = childNodes.item(i);
+          if (childNode.nodeType !== 1) {
+            continue;
+          }
+          if (childNode.getAttribute('data-nodetype') === 'folder'){
+            continue;
+          }
+          node.insertBefore(folderNode, childNode);
+          return acc;
+        }
+      }
+      
+      node.appendChild(folderNode);
+      return acc;      
+    }.bind(this), {});
+    return folders;
+  }
+
+  #loadDerivationChildNodes(node, typeName, profile){
+    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
+    var folders = this.#createFolders(applicableDerivations, node);
+    for (var derivationName in applicableDerivations) {
+      var derivation = applicableDerivations[derivationName];
+      var config = {
+        type: 'derived',
+        derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
+        profile: profile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (derivation.folder) {
+        folders[derivation.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);    
+      }
+    }
+  }
+    
+  #loadAggregatorChildNodes(node, typeName, profile) {
+    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    var folders = this.#createFolders(applicableAggregators, node);
+    for (var aggregationName in applicableAggregators) {
+      var aggregator = applicableAggregators[aggregationName];
+      var config = {
+        type: 'aggregate',
+        aggregator: aggregationName,
+        title: aggregator.title,
+        expressionTemplate: aggregator.expressionTemplate,
+        profile: profile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (aggregator.folder) {
+        folders[aggregator.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);    
+      }
+    }    
+  }
   
   #loadChildNodesForColumnNode(node){    
     var columnName = node.getAttribute('data-column_name');
@@ -456,46 +576,9 @@ class AttributeUi {
       column_type: columnType 
     };
     var typeName = /^[^\(]+/.exec(columnType)[0];
-    
-    var derived = [];
-    var aggregates = [];
-
-    var typeInfo = dataTypes[columnType];
-    
-    var isNumeric = Boolean(typeInfo.isNumeric);
-    var isInteger = Boolean(typeInfo.isInteger);
-    var hasTimeFields = Boolean(typeInfo.hasTimeFields);
-    var hasDateFields = Boolean(typeInfo.hasDateFields);
-        
-    var childNode, config;
-    
-    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
-    for (var derivationName in applicableDerivations) {
-      var derivation = applicableDerivations[derivationName];
-      config = {
-        type: 'derived',
-        derivation: derivationName,
-        title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
-        profile: profile
-      };
-      childNode = this.#renderAttributeUiNode(config);
-      node.appendChild(childNode);
-    }
-    
-    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
-    for (var aggregationName in applicableAggregators) {
-      var aggregator = applicableAggregators[aggregationName];
-      config = {
-        type: 'aggregate',
-        aggregator: aggregationName,
-        title: aggregator.title,
-        expressionTemplate: aggregator.expressionTemplate,
-        profile: profile
-      };
-      childNode = this.#renderAttributeUiNode(config);
-      node.appendChild(childNode);    
-    }    
+            
+    this.#loadDerivationChildNodes(node, typeName, profile);
+    this.#loadAggregatorChildNodes(node, typeName, profile);
   }
   
   #loadChildNodes(node){
@@ -577,13 +660,12 @@ class AttributeUi {
     }
   }
   
-  
   #clickHandler(event) {
     var target = event.target;
     var classNames = getClassNames(target);
     event.stopPropagation();
     
-    var node = getAncestorWithClassName(target, 'attributeUiNode');
+    var node = getAncestorWithTagName(target, 'details');
     if (!node) {
       return;
     }
