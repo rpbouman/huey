@@ -57,7 +57,7 @@ function createNumberFormatter(fractionDigits){
             stringValue = formatter.format(BigInt(integerPart));
             if (fractionalPart && options.minimumFractionDigits > 0) {
               if (decimalSeparator === undefined) {
-                decimalSeparator = ' ';
+                decimalSeparator = '.';
               }
               stringValue += decimalSeparator + fractionalPart;
             }
@@ -341,7 +341,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+        return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
     }
   },
@@ -351,7 +351,7 @@ var dataTypes = {
     hasTimezone: true,
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;       
+        return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
     }
   },
@@ -396,6 +396,15 @@ function getDataTypeInfo(columnType){
   if (typeNames.length === 0) {
     return undefined;
   }
+  
+  // check if there exists a type with exactly the given name
+  var dataTypeInfo = dataTypes[columnTypeUpper];
+  if (dataTypeInfo) {
+    return dataTypeInfo;
+  }
+  
+  // no. This means the type is in some way modified/parameterized, like DECIMAL(nn, nn)
+  // try to find the "best" match.
   typeNames.sort(function(a, b){
     if (a.length > b.length) {
       return 1;
