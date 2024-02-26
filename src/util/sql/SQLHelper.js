@@ -12,7 +12,9 @@ function createNumberFormatter(fractionDigits){
   }
   var formatter = new Intl.NumberFormat(locales, options);
   if (fractionDigits){
-    decimalSeparator = formatter.formatToParts(123.456)['decimal'];
+    decimalSeparator = formatter.formatToParts(123.456).find(function(part){
+      return part.type === 'decimal';
+    })['value'];
   }
   return {
     format: function(value, field){
@@ -53,7 +55,10 @@ function createNumberFormatter(fractionDigits){
               }
             }
             stringValue = formatter.format(BigInt(integerPart));
-            if (fractionalPart) {
+            if (fractionalPart && options.minimumFractionDigits > 0) {
+              if (decimalSeparator === undefined) {
+                decimalSeparator = ' ';
+              }
               stringValue += decimalSeparator + fractionalPart;
             }
             return stringValue;
