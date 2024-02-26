@@ -9,10 +9,11 @@ function createNumberFormatter(fractionDigits){
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
     options.maximumFractionDigits = localeSettings.maximumFractionDigits;
-    
-    decimalSeparator = formatter.formatToParts(123.456)['decimal'];
   }
   var formatter = new Intl.NumberFormat(locales, options);
+  if (fractionDigits){
+    decimalSeparator = formatter.formatToParts(123.456)['decimal'];
+  }
   return {
     format: function(value, field){
       if (value === null) {
