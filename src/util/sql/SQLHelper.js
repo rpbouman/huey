@@ -27,14 +27,30 @@ function createNumberFormatter(fractionDigits){
             break;
           default:
             var stringValue = String(value);
+            var fieldType = field.type;
+            var fieldTypeId, fieldTypeScale;
+            
+            if(fieldType) {
+              fieldTypeId = fieldType.typeId;
+              fieldTypeScale = fieldType.scale;
+            }
+            
             var integerPart, fractionalPart;
-            if (field.type.scale === 0) {
+            // arrow decimal
+            if (fieldTypeScale === 0) {
               integerPart = stringValue;
             }
             else {
               var parts = stringValue.split('.');
               integerPart = parts[0];
-              fractionalPart = parts[1];
+              if (parts.length === 2){
+                fractionalPart = parts[1];
+              }
+              else {
+                var fractionalPartIndex = integerPart.length - fieldTypeScale;
+                fractionalPart = integerPart.slice(fractionalPartIndex);
+                integerPart = integerPart.slice(0, fractionalPartIndex);
+              }
             }
             stringValue = formatter.format(BigInt(integerPart));
             if (fractionalPart) {
