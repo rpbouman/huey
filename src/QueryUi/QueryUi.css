@@ -371,11 +371,16 @@
   content: "\faff";
 }
 
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
   /* filter-edit */
   /* content: "\fa00"; */
   /* filter cog */
   content: "\f9fe";
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
+  /* trash */
+  content: "\eb41";
 }
 
 /* axis item action to remove item from axis */
