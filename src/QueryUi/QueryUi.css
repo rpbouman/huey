@@ -24,7 +24,7 @@
 }
 
 .queryUi > section:last-child {
-  margin-bottom: 1px;  
+  margin-bottom: 1px;
 }
 
 .queryUi > section > header {
@@ -64,6 +64,10 @@
 .queryUi label:has( > input[type=checkbox] ):hover::after,
 .queryUi label:has( > button ):hover::after {
   color: var( --huey-icon-color-highlight );
+}
+
+.queryUi > section:has( > ol:empty ) > header > label {
+  pointer-events: none;
 }
 
 /* Columns axis header icon */
