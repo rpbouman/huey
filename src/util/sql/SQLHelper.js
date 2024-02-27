@@ -5,8 +5,9 @@ function createNumberFormatter(fractionDigits){
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
   
-  var decimalSeparator;
+  var intFormatter, decimalSeparator;
   if (fractionDigits){
+    intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
     options.maximumFractionDigits = localeSettings.maximumFractionDigits;
   }
@@ -54,7 +55,7 @@ function createNumberFormatter(fractionDigits){
                 integerPart = integerPart.slice(0, fractionalPartIndex);
               }
             }
-            stringValue = formatter.format(BigInt(integerPart));
+            stringValue = intFormatter.format(BigInt(integerPart));
             if (fractionalPart && options.minimumFractionDigits > 0) {
               if (decimalSeparator === undefined) {
                 decimalSeparator = '.';
