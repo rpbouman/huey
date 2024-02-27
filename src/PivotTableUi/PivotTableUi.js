@@ -732,7 +732,8 @@ class PivotTableUi {
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(rowsAxisItem);
             columnWidth = (labelText.length + 1) + 'ch';
             label = createEl('span', {
-              "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
+              "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
+              title: labelText
             }, labelText);
             tableCell.appendChild(label);
           }
@@ -759,7 +760,8 @@ class PivotTableUi {
         var columnsAxisItem = columnsAxisItems[i];
         labelText = QueryAxisItem.getCaptionForQueryAxisItem(columnsAxisItem);
         label = createEl('span', {
-          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
+          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
+          title: labelText
         }, labelText);
         tableCell.style.width = (labelText.length + 1) + 'ch';
         tableCell.appendChild(label);
@@ -768,21 +770,7 @@ class PivotTableUi {
 
     firstTableHeaderRow = tableHeaderDom.childNodes.item(0);
 
-    // if there are cell axis items appearing on the rows axis,
-    // but no items on the columns axis, then we need one extra column to make room for the cells
-    /*
-    if (cellHeadersAxis === QueryModel.AXIS_ROWS && !columnsAxisItems.length && cellsAxisItems.length) {
-      tableCell = createEl('div', {
-        "class": 'pivotTableUiCell pivotTableUiHeaderCell'
-      });
-      tableRow.appendChild(tableCell);
-      tableCell.style.width = '8ch';
-      label = createEl('span', {
-        "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
-      }, '');
-      tableCell.appendChild(label);
-    }
-    */
+
     var stufferCell, stufferRow;
     stufferCell = createEl('div', {
       "class": "pivotTableUiCell pivotTableUiHeaderCell pivotTableUiStufferCell"
