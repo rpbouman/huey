@@ -5,8 +5,8 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="description" content="Huey is an open-source browser-based application that lets you make crosstabs/pivot tables on larget datasets."/>
-    <link 
-      rel="icon" 
+    <link
+      rel="icon"
       href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLXRhYmxlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMyA1YTIgMiAwIDAgMSAyIC0yaDE0YTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxIC0yIDJoLTE0YTIgMiAwIDAgMSAtMiAtMnYtMTR6IiAvPjxwYXRoIGQ9Ik0zIDEwaDE4IiAvPjxwYXRoIGQ9Ik0xMCAzdjE4IiAvPjwvc3ZnPg=="
     />
     <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
@@ -26,7 +26,7 @@
       list.appendChild(item);
     }
     </script>
-    
+
     <!-- Inline tabler font to force early load -->
     <style type="text/css">
       @font-face {
@@ -36,13 +36,13 @@
         font-display: block;
         src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/fonts/tabler-icons.woff2?v2.47.0") format("woff2");
       }
-      
+
       ul#resources > li::marker {
         font-family: "tabler-icons";
         /* file */
         content: '\eaa4';
       }
-      
+
       ul#resources > li[data-resource-type=css]::marker {
         /* file-type-css */
         content: '\fb08';
@@ -56,7 +56,7 @@
         content: '\f041';
       }
     </style>
-    
+
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Theme/General.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
@@ -84,8 +84,8 @@
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
-    <dialog 
-      id="uploadUi" 
+    <dialog
+      id="uploadUi"
       aria-labelledby="uploadUiTitle"
       aria-describedby="uploadUiDescription"
     >
@@ -100,20 +100,20 @@
         </div>
       </header>
       <section id="uploadProgressList">
-        
+
       </section>
       <footer role="toolbar">
-        <button 
-          id="uploadDialogOkButton" 
+        <button
+          id="uploadDialogOkButton"
         >Ok</button>
-        <button 
-          id="uploadDialogCancelButton" 
+        <button
+          id="uploadDialogCancelButton"
         >Cancel</button>
       </footer>
     </dialog>
 
-    <dialog 
-      id="exportDialog" 
+    <dialog
+      id="exportDialog"
       popover="manual"
       aria-labelledby="uploadUiTitle"
       aria-busy="false"
@@ -135,72 +135,72 @@
           <!-- TODO: implement cancel of pending export -->
           <button id="cancelExportButton">Cancel</button>
         </footer>
-      </dialog>      
+      </dialog>
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
         <form id="exportGeneralSettings">
-          <label 
+          <label
             for="exportTitleTemplate"
             title="The title template is used to generate a file name for downloads"
           >Title template</label>
-          <input 
+          <input
             id="exportTitleTemplate"
             title="The title template is used to generate a file name for downloads"
             value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
           />
-          <label 
+          <label
             for="exportTitle"
             title="The title generated from the template"
           >Title</label>
-          <output 
+          <output
             id="exportTitle"
             for="exportTitleTemplate"
             title="The title generated from the template"
           ></output>
           <fieldset>
             <legend title="Control the shape of the exported dataset">Data Structure</legend>
-            <label 
-              for="exportResultShapePivot" 
+            <label
+              for="exportResultShapePivot"
               title="Export results as a pivot table"
             >Pivot</label>
-            <input 
-              id="exportResultShapePivot" 
-              type="radio" 
-              name="exportResultShape" 
+            <input
+              id="exportResultShapePivot"
+              type="radio"
+              name="exportResultShape"
               checked="true"
               title="Check this to export results as a pivot table"
             />
-            <label 
-              for="exportResultShapeTable" 
+            <label
+              for="exportResultShapeTable"
               title="Export results as a plain table. In this format, all items from the query are used to produce a list of rows "
             >Table</label>
-            <input 
-              id="exportResultShapeTable" 
-              type="radio" 
+            <input
+              id="exportResultShapeTable"
+              type="radio"
               name="exportResultShape"
               title="Check this to export results as a plain table"
             />
           </fieldset>
           <fieldset>
             <legend title="Control where the results are exported to">Export destination</legend>
-            <label 
-              for="exportDestinationFile" 
+            <label
+              for="exportDestinationFile"
               title="Download the export data as a file so you can store it on your system."
             >File</label>
-            <input 
-              id="exportDestinationFile" 
-              type="radio" 
-              name="exportDestination" 
+            <input
+              id="exportDestinationFile"
+              type="radio"
+              name="exportDestination"
               checked="true"
               title="Check this to download the result as a file"
             />
-            <label 
-              for="exportDestinationClipboard" 
+            <label
+              for="exportDestinationClipboard"
               title="Copy the export data to the clipboard"
             >Clipboard</label>
-            <input 
-              id="exportDestinationClipboard" 
-              type="radio" 
+            <input
+              id="exportDestinationClipboard"
+              type="radio"
               name="exportDestination"
               title="Check this to copy the export data to the clipboard so you can paste it in other applications"
             />
@@ -212,23 +212,23 @@
           See: https://duckdb.org/docs/sql/statements/copy.html#csv-options
         -->
         <div>
-          <label 
-            role="tab" 
-            for="exportDelimited" 
+          <label
+            role="tab"
+            for="exportDelimited"
             title="Use this tab to export data as delimited text, like .CSV, TSV, etc."
           >Delimited text</label>
           <input id="exportDelimited" name="exportFormat" type="radio" checked="true"/>
           <div role="tabpanel">
             <form id="exportDelimitedSettings">
-              <label 
+              <label
                 for="exportDelimitedCompression"
                 title="The algorithm used for compressing the query result. Compression typically results in smaller result files."
               >Compression</label>
-              <select 
+              <select
                 id="exportDelimitedCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               >
-                <option 
+                <option
                   selected="true"
                   title="Uncompressed - no compression will be applied"
                   value="UNCOMPRESSED"
@@ -242,78 +242,78 @@
                   value="ZTSD"
                 >ztsd</option>
               </select>
-              <label 
-                title="Whether to include a line of column headers." 
+              <label
+                title="Whether to include a line of column headers."
                 for="exportDelimitedIncludeHeaders"
               >Include Headers</label>
-              <input 
-                id="exportDelimitedIncludeHeaders" 
-                title="Check this to include a header line of column names." 
-                type="checkbox" 
+              <input
+                id="exportDelimitedIncludeHeaders"
+                title="Check this to include a header line of column names."
+                type="checkbox"
                 checked="true"
               />
               <fieldset>
                 <legend>Formatting</legend>
-                <label 
+                <label
                   for="exportDelimitedDateFormat"
                   title="The date format controls how date values are represented in the result."
                 >Date Format</label>
-                <input 
-                  id="exportDelimitedDateFormat" 
+                <input
+                  id="exportDelimitedDateFormat"
                   title="Enter a valid DuckDB date format string."
-                  type="text" 
+                  type="text"
                   value="%x"
                 />
-                <label 
+                <label
                   for="exportDelimitedTimestampFormat"
                   title="The timestamp format controls how timestamp values are represented in the result."
                 >Timestamp Format</label>
-                <input 
-                  id="exportDelimitedTimestampFormat" 
+                <input
+                  id="exportDelimitedTimestampFormat"
                   title="Enter a valid DuckDB timestamp format string."
-                  type="text" 
+                  type="text"
                   value="%c"
                 />
-                <label 
+                <label
                   for="exportDelimitedNullString"
                   title="The NULL-string controls how SQL NULL-values are rendered to the result"
                 >NULL-value string</label>
-                <input 
-                  id="exportDelimitedNullString" 
+                <input
+                  id="exportDelimitedNullString"
                   title="Enter the string that should be written to the result to represent SQL NULL-values"
-                  type="text" 
+                  type="text"
                   value=""
                 />
               </fieldset>
               <fieldset>
                 <legend>Delimiters</legend>
-                <label 
+                <label
                   for="exportDelimitedColumnDelimiter"
                   title="The column delimiter is the character used to separate the values within a row in the result."
                 >Column delimiter</label>
-                <input 
-                  id="exportDelimitedColumnDelimiter" 
-                  type="text" 
+                <input
+                  id="exportDelimitedColumnDelimiter"
+                  type="text"
                   value=","
                   title="Enter the character that is to be used as column delimiter."
                 />
-                <label 
+                <label
                   for="exportDelimitedQuote"
                   title="The quote character is used to enclose column values in case the column value contains a delimiter character"
                 >Quote Character</label>
-                <input 
-                  id="exportDelimitedQuote" 
-                  type="text" 
+                <input
+                  id="exportDelimitedQuote"
+                  type="text"
                   value="&quot;"
                   title="Enter the character that is to be used as quote character."
                 />
-                <label 
+                <label
                   for="exportDelimitedEscape"
                   title="The escape character is used to signal a literal occurrence of the quote character within a column value"
                 >Escape Character</label>
-                <input 
-                  id="exportDelimitedEscape" 
-                  type="text" 
+                <input
+                  id="exportDelimitedEscape"
+                  type="text"
                   value="&quot;"
                   title="Enter the character used to escape the quote character."
                 />
@@ -325,40 +325,40 @@
           See: https://duckdb.org/docs/sql/statements/copy.html#json-options
         -->
         <div>
-          <label 
-            role="tab" 
-            for="exportJson" 
+          <label
+            role="tab"
+            for="exportJson"
             title="Use this tab to export data in the JSON format"
           >JSON</label>
           <input id="exportJson" name="exportFormat" type="radio"/>
           <div role="tabpanel">
             <form id="exportJsonSettings">
-              <label 
+              <label
                 for="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               >Compression</label>
-              <select 
+              <select
                 id="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               ></select>
               <fieldset>
                 <legend>Formatting</legend>
-                <label 
+                <label
                   for="exportJsonDateFormat"
                   title="The date format controls how date values are represented in the result."
                 >Date Format</label>
-                <input 
+                <input
                   id="exportJsonDateFormat"
                   type="text"
                   value="%x"
                   title="Enter a valid DuckDB date format string."
                 />
-                <label 
+                <label
                   for="exportJsonTimestampFormat"
                   title="The timestamp format controls how timestamp values are represented in the result."
                 >Timestamp Format</label>
-                <input 
-                  id="exportJsonTimestampFormat" 
+                <input
+                  id="exportJsonTimestampFormat"
                   type="text"
                   title="Enter a valid DuckDB timestamp format string."
                   value="%c"
@@ -366,11 +366,11 @@
               </fieldset>
               <fieldset>
                 <legend>Delimiters</legend>
-                <label 
+                <label
                   for="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
                 >Row delimiter</label>
-                <select 
+                <select
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
                 ></select>
@@ -382,19 +382,19 @@
           See: https://duckdb.org/docs/sql/statements/copy.html#parquet-options
         -->
         <div>
-          <label 
-            role="tab" 
+          <label
+            role="tab"
             for="exportParquet"
             title="Use this tab to export data in Parquet format"
           >Parquet</label>
           <input id="exportParquet" name="exportFormat" type="radio"/>
           <div role="tabpanel">
             <form id="exportParquetSettings">
-              <label 
+              <label
                 for="exportParquetCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               >Compression</label>
-              <select 
+              <select
                 id="exportParquetCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               ></select>
@@ -402,8 +402,8 @@
           </div>
         </div>
         <div>
-          <label 
-            role="tab" 
+          <label
+            role="tab"
             for="exportSql"
             title="Use this tab to export a SQL query that would produce this result."
           >SQL</label>
@@ -414,45 +414,45 @@
                 for="exportSqlKeywordLettercase"
                 title="The lettercase for SQL keywords"
               >Keywords Case</label>
-              <select 
+              <select
                 title="The lettercase for SQL keywords"
                 id="exportSqlKeywordLettercase"
               >
-                <option 
-                  title="Initial capital followed by lowercase" 
+                <option
+                  title="Initial capital followed by lowercase"
                   value="initialCapital">Initial Capital</option>
-                <option 
-                  title="Lowercase" 
+                <option
+                  title="Lowercase"
                   value="lowerCase">Lower Case</option>
-                <option 
-                  title="Uppercase" 
-                  value="upperCase" 
+                <option
+                  title="Uppercase"
+                  value="upperCase"
                   selected="true">Upper Case</option>
               </select>
-              <label 
+              <label
                 for="exportSqlAlwaysQuoteIdentifiers"
                 title="Whether to always quote identifiers."
               >Always Quote identifiers</label>
-              <input 
-                id="exportSqlAlwaysQuoteIdentifiers" 
+              <input
+                id="exportSqlAlwaysQuoteIdentifiers"
                 title="Check this to force all identifiers to be quoted."
-                checked="true" 
+                checked="true"
                 type="checkbox"
               />
               <label
                 for="exportSqlCommaStyle"
                 title="How to render commas in the SQL output"
               >Comma style</label>
-              <select 
+              <select
                 title="Select the style for rendering commas in the SQL output"
                 id="exportSqlCommaStyle"
               >
-                <option 
+                <option
                   value="spaceAfter">Space After</option>
-                <option 
+                <option
                   value="newlineAfter">Newline After</option>
-                <option 
-                  value="newlineBefore" 
+                <option
+                  value="newlineBefore"
                   selected="true">Newline Before</option>
               </select>
             </form>
@@ -460,24 +460,27 @@
         </div>
       </section>
       <footer role="toolbar">
-        <button 
-          id="exportDialogCloseButton" 
+        <button
+          id="exportDialogCloseButton"
           popovertarget="exportDialog"
           popovertargetaction="hide"
         >Close</button>
-        <button 
-          id="exportDialogExecuteButton" 
+        <button
+          id="exportDialogExecuteButton"
         >Export</button>
       </footer>
     </dialog>
-    
-    <dialog 
-      id="filterDialog" 
+
+    <dialog
+      id="filterDialog"
       aria-busy="false"
       popover="auto"
     >
       <header role="toolbar">
-        <label for="filterType">Filter type:</label>
+        <label 
+          for="filterType" 
+          title="The filter type determines how the selected values will be used to filter the results."
+        >Filter type:</label>
         <select id="filterType">
           <option value="in" title="Include data that matches any of the selected values">Include</option>
           <option value="notin" title="Exclude data that matches any of the selected values">Exclude</option>
@@ -488,7 +491,7 @@
       <section>
         <header>
           <menu role="toolbar">
-            <label 
+            <label
               for="filterSearchApplyAll"
               title="Check to include the other filter items (in addition to the search string) to populate the picklist"
             >
@@ -501,15 +504,15 @@
             <header>
               <input
                 id="filterSearch"
-                placeholder="Use a LIKE pattern to find values..." 
+                placeholder="Use a LIKE pattern to find values..."
                 type="search"
                 title="Enter a search string to filter the value picklist (LIKE wildcards supported)"
               />
             </header>
             <section>
-              <select 
+              <select
                 id="filterPicklist"
-                multiple="true" 
+                multiple="true"
                 size="5"
                 title="Choose values from the picklist to add them to the Filter values list. Hold SHIFT-key to select multiple items."
               >
@@ -521,9 +524,9 @@
         <section>
           <div>
             <label for="filterValueList">Select values:</label>
-            <select 
+            <select
               id="filterValueList"
-              multiple="true" 
+              multiple="true"
               size="7"
               title="Values in this list will be used to filter the results. Add items to the list by choosing from the picklist above; click items in the list to remove them."
             >
@@ -531,9 +534,9 @@
           </div>
           <div>
             <label for="toFilterValueList">To Values:</label>
-            <select 
+            <select
               id="toFilterValueList"
-              multiple="true" 
+              multiple="true"
               size="7"
               title="Values in this list will be used to filter the results. Add items to the list by choosing from the picklist above; click items in the list to remove them."
             >
@@ -547,29 +550,29 @@
         </footer>
       </section>
       <footer role="toolbar">
-        <button 
-          id="filterDialogOkButton" 
+        <button
+          id="filterDialogOkButton"
           title="Confirm the filter setting changes"
           popovertarget="filterDialog"
           popovertargetaction="hide"
         >Apply</button>
-        <button 
-          id="filterDialogRemoveButton" 
+        <button
+          id="filterDialogRemoveButton"
           title="Remove the filter from the axis"
           popovertarget="filterDialog"
           popovertargetaction="hide"
         >Remove</button>
-        <button 
-          id="filterDialogCancelButton" 
+        <button
+          id="filterDialogCancelButton"
           title="Cancel filter setting changes"
           popovertarget="filterDialog"
           popovertargetaction="hide"
         >Cancel</button>
       </footer>
     </dialog>
-    
-    <dialog 
-      id="errorDialog" 
+
+    <dialog
+      id="errorDialog"
       popover="auto"
       aria-labelledby="errorDialogTitle"
       aria-describedby="errorDialogDescription"
@@ -580,15 +583,15 @@
       <section id="errorDialogDescription">
       </section>
       <footer role="toolbar">
-        <button 
+        <button
           id="errorDialogOkButton"
           popovertarget="errorDialog"
           popovertargetaction="hide"
         >Ok</button>
       </footer>
     </dialog>
-    
-    <dialog 
+
+    <dialog
       id="settingsDialog"
       aria-labelledby="settingsDialogTitle"
       popover="manual"
@@ -596,15 +599,15 @@
       <header>
         <h3 id="settingsDialogTitle">Settings</h3>
       </header>
-      <section 
+      <section
         id="settingsTabs"
         role="tablist"
-      >        
+      >
         <!--
           Datasources settings
         -->
         <div>
-          <label 
+          <label
             role="tab"
             for="datasourcesSettingTab"
           >
@@ -617,12 +620,12 @@
               <input id="useLooseColumnTypeComparison" type="checkbox"/>
             </form>
           </div>
-        </div>        
+        </div>
         <!--
           Locale Settings
         -->
         <div>
-          <label 
+          <label
             role="tab"
             for="localeSettingsTab"
           >
@@ -631,7 +634,7 @@
           <input id="localeSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="localeSettings">
-              <label for="useDefaultLocale">Use default</label>
+              <label for="useDefaultLocale">Use default locale7</label>
               <input id="useDefaultLocale" type="checkbox"/>
               <!--
                 see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
@@ -642,36 +645,42 @@
                 A region subtag with either 2 letters or 3 digits Optional
                 One or more variant subtags (all of which must be unique), each with either 5–8 alphanumerals or a digit followed by 3 alphanumerals Optional
                 One or more BCP 47 extension sequences Optional
-                A private-use extension sequence Optional              
+                A private-use extension sequence Optional
               -->
               <label for="locale">Locale</label>
-              <!-- 
+              <!--
                 on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
                 and if that is empty it probably means the entered locale is either not valid or not supported.
               -->
-              <input id="locale"  
+              <input id="locale"
                 pattern="^(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?)(\s*,\s*(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?))*$"
                 data-value-getter="new Function('control','settings','return control.value.split(String.fromCharCode(44));')"
                 data-value-setter="new Function('control','value','settings','control.value = value.join();')"
               />
               <!-- minimum integer digits -->
-              <label for="minimumIntegerDigits">Min. integer digits</label>
+              <label for="minimumIntegerDigits"
+                title="The minimum number of integer digits to use. A value with a smaller number of integer digits than this number will be left-padded with zeros (to the specified length) when formatted. Possible values are from 1 to 21; the default is 1."
+              >Min. integer digits</label>
               <input id="minimumIntegerDigits" type="number" min="1" max="21" value="1"/>
               <!-- minimum fraction digits -->
-              <label for="minimumFractionDigits">Min. fraction digits</label>
+              <label for="minimumFractionDigits"
+                title="The minimum number of fraction digits to use. .Possible values are from 0 to 20; the default for plain number and percent formatting is 0; the default for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information)."
+              >Min. fraction digits</label>
               <input id="minimumFractionDigits" type="number" min="0" max="20" value="2"/>
               <!-- maximum fraction digits -->
-              <label for="maximumFractionDigits">Max. fraction digits</label>
+              <label for="maximumFractionDigits"
+                title="The maximum number of fraction digits to use. Possible values are from 0 to 20; the default for plain number formatting is the larger of minimumFractionDigits and 3; the default for currency formatting is the larger of minimumFractionDigits and the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information); the default for percent formatting is the larger of minimumFractionDigits and 0."
+              >Max. fraction digits</label>
               <input id="maximumFractionDigits" type="number" min="0" max="20" value="2"/>
             </form>
           </div>
         </div>
-                
+
         <!--
           Query settings
-        -->        
-        <div>        
-          <label 
+        -->
+        <div>
+          <label
             role="tab"
             for="querySettingsTab"
           >
@@ -685,12 +694,12 @@
             </form>
           </div>
         </div>
-        
+
         <!--
           Theme
         -->
         <div>
-          <label 
+          <label
             role="tab"
             for="themeSettingsTab"
           >
@@ -700,8 +709,8 @@
           <div role="tabpanel">
             <form id="themeSettings">
               <label for="themes">Themes</label>
-              <select 
-                id="themes" 
+              <select
+                id="themes"
                 onchange="Theme.applyTheme(this.selectedIndex)"
                 data-value-getter="new Function('control', 'settings', 'return JSON.parse(control.value);')"
                 data-value-setter="new Function('control', 'value', 'settings', 'control.value = JSON.stringify(value);')"
@@ -712,15 +721,15 @@
         </div>
       </section>
       <footer role="toolbar">
-        <button 
+        <button
           id="settingsDialogOkButton"
           popovertarget="settingsDialog"
           popovertargetaction="hide"
         >Ok</button>
-        <button 
+        <button
           id="settingsDialogResetButton"
         >Reset All</button>
-        <button 
+        <button
           id="settingsDialogCancelButton"
           popovertarget="settingsDialog"
           popovertargetaction="hide"
@@ -736,18 +745,18 @@
       <header>
         <h3 id="promptDialogTitle"></h3>
       </header>
-      <section>      
+      <section>
       </section>
       <footer role="toolbar">
         <form id="promptUiForm" method="dialog">
         </form>
-        <button 
+        <button
           id="promptDialogAcceptButton"
           form="promptUiForm"
           popovertarget="promptUi"
           popovertargetaction="hide"
         >Yes</button>
-        <button 
+        <button
           id="promptDialogRejectButton"
           form="promptUiForm"
           popovertarget="promptUi"
@@ -756,7 +765,7 @@
       </footer>
     </dialog>
 
-    <dialog 
+    <dialog
       id="aboutDialog"
       aria-labelledby="aboutDialogTitle"
       popover="auto"
@@ -780,7 +789,7 @@
         <p><a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_donate">Donations help to keep Huey in good shape!</a></p>
       </section>
       <footer role="toolbar">
-        <button 
+        <button
           id="aboutDialogOkButton"
           popovertarget="aboutDialog"
           popovertargetaction="hide"
@@ -792,16 +801,16 @@
         >Donate...</button>
       </footer>
     </dialog>
-        
+
     <main
-      id="layout" 
+      id="layout"
       class="layout"
       style="display: none"
     >
       <menu class="toolbar" role="toolbar">
         <label for="uploader" title="Register local data files to explore their contents with Huey">
-          <input 
-            id="uploader" 
+          <input
+            id="uploader"
             type="file"
             multiple="true"
             accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
@@ -814,14 +823,14 @@
           >Execute Query</button>
         </label>
 
-        <label for="autoRunQuery" title="Check this if you want to execute the query automatically">Autorun Query</label>        
+        <label for="autoRunQuery" title="Check this if you want to execute the query automatically">Autorun Query</label>
 
         <!-- title in the toolbar identifies the currently selected datasource -->
         <h1 id="currentDatasource"></h1>
-        
-        <label 
-          for="aboutButton" 
-          class="aboutButton" 
+
+        <label
+          for="aboutButton"
+          class="aboutButton"
           title="About Huey..."
         >
           <button
@@ -830,74 +839,74 @@
             popovertargetaction="show"
           >About</button>
         </label>
-        
+
         <label
           for="settingsButton"
           class="button settings"
           title="Open the Huey Settings dialog."
         >
-          <button 
+          <button
             id="settingsButton"
             popovertarget="settingsDialog"
             popovertargetaction="show"
           >Settings</button>
         </label>
-        
-        <label 
-          for="exportButton" 
-          class="button" 
+
+        <label
+          for="exportButton"
+          class="button"
           title="Export &amp; Download queries and/or result data..."
           style="visibility: hidden"
         >
-          <button 
+          <button
             id="exportButton"
             popovertarget="exportDialog"
             popovertargetaction="show"
           >Download</button>
         </label>
       </menu>
-      <nav 
+      <nav
         role="tablist"
         id="sidebar"
         class="resizeHorizontal"
       >
-        <!-- Datasources tab --> 
-        <div 
-         
+        <!-- Datasources tab -->
+        <div
+
         >
-          <label 
-            for="datasourcesTab" 
+          <label
+            for="datasourcesTab"
             role="tab"
             title="Files, database tables and so on that provide data you'd like to explore."
           >Datasources</label>
           <input id="datasourcesTab" type="radio" name="sidebarTabs" checked="true"/>
-          <div 
+          <div
             role="tabpanel"
           >
             <div
-              id="datasourcesUi" 
+              id="datasourcesUi"
               role="tree"
             ></div>
           </div>
         </div>
-        
+
         <!-- Attributes tab -->
         <div>
-          <label 
-            for="attributesTab" 
+          <label
+            for="attributesTab"
             role="tab"
             title="Columns, formulas and aggregates to query and pivot"
           >Attributes</label>
           <input id="attributesTab" type="radio" name="sidebarTabs"/>
           <div role="tabpanel">
-            <search 
+            <search
               id="searchAttributeUi"
-              class="search" 
+              class="search"
               style="display:none"
             >
               <fieldset>
                 <legend id="searchAttributesLabel">Search Attributes</legend>
-                <input 
+                <input
                   id="searchAttribute"
                   type="search"
                   placeholder="Search by Attribute name"
@@ -906,21 +915,21 @@
                 />
               </fieldset>
             </search>
-            <div 
-              id="attributeUi" 
+            <div
+              id="attributeUi"
               class="attributeUi"
               style="flex-grow: 1;"
               role="tree"
             >
             </div>
-          </div>          
+          </div>
         </div>
-        
+
       </nav>
       <div class="workarea">
-        <div 
+        <div
           id="queryUi"
-          class="queryUi" 
+          class="queryUi"
           data-cellheadersaxis="columns"
           style="display: none"
         >
@@ -937,7 +946,7 @@
               </footer>
             </section>
           </template>
-          
+
           <template id="queryUiAxisItem">
             <li>
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
@@ -948,9 +957,9 @@
                 <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
               </menu>
               <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
-            </li>          
+            </li>
           </template>
-          
+
           <template id="queryUiFilterAxisItem">
             <li>
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
@@ -960,7 +969,7 @@
                 <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
               </menu>
               <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
-            </li>          
+            </li>
           </template>
         </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
@@ -995,16 +1004,16 @@
               <button id="cancelQueryButton">Cancel</button>
             </footer>
           </dialog>
-          <div 
+          <div
             class="pivotTableUiInnerContainer"
           >
             <!-- pivotTableColumnsSizer: sizer to generate the horizontal scrollbar -->
             <div class="pivotTableUiSizer pivotTableUiHorizontalSizer"></div>
             <!-- pivotTableColumnsSizer: sizer to generate the vertical scrollbar -->
             <div class="pivotTableUiSizer pivotTableUiVerticalSizer"></div>
-            
+
             <!-- the actual table structure -->
-            <div  
+            <div
               class="pivotTableUiTable"
             >
               <div class="pivotTableUiTableHeader"></div>
@@ -1014,7 +1023,7 @@
         </div>
       </div>
     </main>
-    
+
     <script onload="resourceLoaded(this)" src="util/dom/dom.js"></script>
     <script onload="resourceLoaded(this)" src="util/clipboard/clipboard.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
@@ -1039,14 +1048,14 @@
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>
     <script onload="resourceLoaded(this)" src="QueryUi/QueryUi.js"></script>
     <script onload="resourceLoaded(this)" src="FilterUi/FilterUi.js"></script>
-    <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>   
-    <script onload="resourceLoaded(this)" src="Routing/Routing.js"></script>   
-    <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>   
+    <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>
+    <script onload="resourceLoaded(this)" src="Routing/Routing.js"></script>
+    <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
       import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev127.0/+esm';
-      
+
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
@@ -1056,19 +1065,19 @@
       const worker = new Worker(worker_url);
       const logger = new duckdb.ConsoleLogger();
       const db = new duckdb.AsyncDuckDB(logger, worker);
-      URL.revokeObjectURL(worker_url);    
-      
+      URL.revokeObjectURL(worker_url);
+
       await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
       const connection = await db.connect();
-                  
+
       window.hueyDb = {
         duckdb: duckdb,
         instance: db,
         connection: connection
       };
-      
+
       initApplication();
-      
+
     </script>
   </body>
 </html>
