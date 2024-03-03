@@ -150,12 +150,29 @@
   border-width: 1px;
   border-radius: 15px;
   margin: 1px 0px 1px 1px;
+  vertical-align: top;
+}
+
+.queryUi > section > ol > li > details {
+  display: inline-block
+}
+
+.queryUi > section > ol > li > details > ol {
+}
+
+.queryUi > section > ol > li > details > ol > li {
+  list-style-type: none;
+  margin-left: .1em;
 }
 
 /* label holding the item caption */
+.queryUi > section > ol > li > details > summary > span,
 .queryUi > section > ol > li > span {
-  vertical-align: 16%;
   margin-left: -6px;
+}
+
+.queryUi > section > ol > li > details:has( > ol > li )> summary > span {
+  margin-left: 0px;
 }
 
 .queryUi > section > ol > li[data-derivation] > span:before,
@@ -316,12 +333,14 @@
 /* buttons to move the item */
 .queryUi > section > ol > li > label:first-child:has( > button )::after {
   /* chevron left */
-  content: "\ea60";  
+  content: "\ea60";
+  vertical-align: top;
 }
 
 .queryUi > section > ol > li > label:last-child:has( > button )::after {
   /* chevron right */
   content: "\ea61";
+  vertical-align: top;
 }
 
 .queryUi > section > ol > li:first-child > label:first-child:has( > button )::after {
@@ -330,6 +349,7 @@
 }
 
 /* label holding the item caption */
+.queryUi > section > ol > li:first-child > details,
 .queryUi > section > ol > li:first-child > span {
   margin-left: 8px;
 }
@@ -348,6 +368,7 @@
 /* axis item actions */
 .queryUi > section > ol > li > menu {
   display: inline-block;
+  vertical-align: top;
   margin: 0px;
 }
 
@@ -376,20 +397,38 @@
   content: "\faff";
 }
 
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
-  /* filter-edit */
-  /* content: "\fa00"; */
-  /* filter cog */
-  content: "\f9fe";
-}
-
-.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
+/* axis item action to remove item from axis */
+.queryUi > section > ol > li > menu > label:nth-child(3):has( > button )::after {
   /* trash */
   content: "\eb41";
 }
 
-/* axis item action to remove item from axis */
-.queryUi > section > ol > li > menu > label:nth-child(3):has( > button )::after {
+/* filter with no items does not have expandable element */
+.queryUi > section[data-axis=filters] > ol > li > details:has( > ol:empty ) > summary {
+  list-style: none;
+}
+
+.queryUi > section[data-axis=filters] > ol > li > details > summary::marker {
+  
+}
+
+
+/* Filter axis item filter icon */
+.queryUi > section[data-axis=filters] > ol > li:has( > details > ol > li ) > menu > label:nth-child(1):has( > button )::after {
+  color: var( --huey-icon-highlight );
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(1):has( > button )::after {
+  /* filter check */
+  content: "\fb7e";
+}
+
+.queryUi > section[data-axis=filters] > ol > li[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {
+  /* filter exclamation */
+  content: "\fb82";
+}
+
+.queryUi > section[data-axis=filters] > ol > li > menu > label:nth-child(2):has( > button )::after {
   /* trash */
   content: "\eb41";
 }
