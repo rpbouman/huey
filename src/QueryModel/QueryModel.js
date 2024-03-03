@@ -7,7 +7,7 @@ class QueryAxisItem {
       if (aggregatorInfo.createFormatter){
         return aggregatorInfo.createFormatter(axisItem);
       }
-      else 
+      else
       if (aggregatorInfo.columnType) {
         dataType = aggregatorInfo.columnType;
       }
@@ -30,7 +30,7 @@ class QueryAxisItem {
         dataType = derivationInfo.columnType;
       }
     }
-    
+
     if (dataType) {
       var dataTypeInfo = getDataTypeInfo(dataType);
       if (dataTypeInfo) {
@@ -45,16 +45,16 @@ class QueryAxisItem {
     else{
       console.warn(`No data type for axisItem "${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}".`);
     }
-    
+
     console.warn(`Using fallback formatter for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
     return fallbackFormatter;
   }
- 
+
   static createLiteralWriter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
     var dataTypeInfo = getDataTypeInfo(dataType);
     return dataTypeInfo.createLiteralWriter();
-  }  
+  }
 
   static getCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
@@ -62,38 +62,38 @@ class QueryAxisItem {
     if (axisItem.derivation) {
       postfix = axisItem.derivation;
     }
-    else 
+    else
     if (axisItem.aggregator){
       postfix = axisItem.aggregator;
     }
-    
+
     if (postfix) {
       caption += ` ${postfix}`;
     }
     return caption;
   }
-  
+
   static getIdForQueryAxisItem(axisItem){
     var id = QueryAxisItem.getSqlForQueryAxisItem(axisItem);
     return id;
   }
-  
+
   static getSqlForAggregatedQueryAxisItem(item, alias){
     var columnName = item.columnName;
-    
+
     if (columnName === '*') {
       if (alias) {
         columnName = `${getQuotedIdentifier(alias)}.*`;
       }
     }
-    else 
+    else
     if (alias){
       columnName = getQualifiedIdentifier(alias, columnName);
     }
     else {
       columnName = getQuotedIdentifier(columnName);
     }
-    
+
     var aggregator = item.aggregator;
     var aggregatorInfo = AttributeUi.aggregators[aggregator];
     var expressionTemplate = aggregatorInfo.expressionTemplate;
@@ -134,10 +134,10 @@ class QueryAxisItem {
       else {
         sqlExpression = getIdentifier(item.columnName, sqlOptions.alwaysQuoteIdentifiers);
       }
-    }    
+    }
     return sqlExpression;
   }
-  
+
   static getQueryAxisItemDataType(queryAxisItem){
     var columnType = queryAxisItem.columnType;
     var dataType = columnType;
@@ -148,7 +148,7 @@ class QueryAxisItem {
       if (derivationInfo.columnType) {
         dataType = derivationInfo.columnType;
       }
-      else 
+      else
       if (derivationInfo.preservesColumnType){
         dataType = columnType;
       }
@@ -163,7 +163,7 @@ class QueryAxisItem {
       if (aggregatorInfo.columnType) {
         dataType = aggregatorInfo.columnType;
       }
-      else 
+      else
       if (aggregatorInfo.preservesColumnType){
         dataType = columnType;
       }
@@ -171,7 +171,7 @@ class QueryAxisItem {
         dataType = undefined;
       }
     }
-    
+
     return dataType;
   }
 
@@ -180,7 +180,7 @@ class QueryAxisItem {
     var filter = queryAxisItem.filter;
 
     var values = filter.values;
-    var toValues = filter.toValues;    
+    var toValues = filter.toValues;
 
     var valueLiterals = Object.keys(values).map(function(key){
       var entry = values[key];
@@ -207,21 +207,21 @@ class QueryAxisItem {
       toValueLiterals: toValueLiterals
     };
   }
-  
+
   static getFilterConditionSql(queryAxisItem, alias){
     var filter = queryAxisItem.filter;
     if (!filter) {
       return undefined;
     }
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
-    
+
     if (literalLists.valueLiterals.length === 0){
       return undefined;
     }
-    
-    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);    
+
+    var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
     var operator = '';
-    
+
     var nullCondition;
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
       return value === null;
@@ -242,7 +242,7 @@ class QueryAxisItem {
       nullCondition = `${columnExpression} ${operator} NULL`;
       operator = '';
     }
-    
+
     var sql = '', logicalOperator;
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
@@ -253,13 +253,13 @@ class QueryAxisItem {
           operator += literalLists.valueLiterals.length === 1 ? '=' : ' IN';
           var values = literalLists.valueLiterals.length === 1 ? literalLists.valueLiterals[0] : `( ${literalLists.valueLiterals.join('\n,')} )`;
           sql = `${columnExpression} ${operator} ${values}`;
-          
+
           if (nullCondition) {
             sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
             if (!logicalOperator) {
               sql = `( ${sql} )`;
             }
-          }          
+          }
           break;
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator = 'NOT ';
@@ -276,7 +276,7 @@ class QueryAxisItem {
             acc += `${columnExpression} ${operator} ${fromValue} AND ${toValue}`;
             return acc;
           }, '');
-          
+
           if (nullCondition) {
             sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR '} ${sql}`
           }
@@ -293,20 +293,20 @@ class QueryAxisItem {
 }
 
 class QueryAxis {
-  
+
   #items = [];
 
   findItem(config){
     var columnName = config.columnName;
     var derivation = config.derivation;
     var aggregator = config.aggregator;
-    
+
     var items = this.#items;
     var itemIndex = items.findIndex(function(item){
       if (item.columnName !== columnName){
         return false;
       }
-      
+
       if (derivation) {
         return item.derivation === derivation;
       }
@@ -314,18 +314,18 @@ class QueryAxis {
       if (item.derivation){
         return false;
       }
-      
+
       else
       if (aggregator) {
         return item.aggregator === aggregator;
       }
-      else 
+      else
       if (item.aggregator){
         return false;
       }
       return true;
     });
-    
+
     if (itemIndex === -1) {
       return undefined;
     }
@@ -334,7 +334,7 @@ class QueryAxis {
     copyOfItem.index = itemIndex;
     return copyOfItem;
   }
-  
+
   addItem(config){
     var copyOfConfig = Object.assign({}, config);
     if (copyOfConfig.index === undefined) {
@@ -353,7 +353,7 @@ class QueryAxis {
     this.#items.splice(copyOfConfig.index, 0, copyOfConfig);
     return copyOfConfig;
   }
-  
+
   removeItem(config){
     var item = this.findItem(config);
     if (!item){
@@ -362,38 +362,38 @@ class QueryAxis {
     this.#items.splice(item.index, 1);
     return item;
   }
-  
+
   clear(){
     this.#items = [];
   }
-  
+
   getItems() {
     return [].concat(this.#items);
   }
-  
+
   setItems(items) {
     this.#items = items;
   }
 }
 
 class QueryModel extends EventEmitter {
-  
+
   static AXIS_FILTERS = 'filters';
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
-  
+
   #axes = {
     filters: new QueryAxis(),
     columns: new QueryAxis(),
     rows: new QueryAxis(),
     cells: new QueryAxis()
   };
-  
+
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
-  
+
   #datasource = undefined;
-  
+
   setCellHeadersAxis(cellheadersaxis) {
     var oldCellHeadersAxis = this.#cellheadersaxis;
     this.#cellheadersaxis = cellheadersaxis;
@@ -406,19 +406,19 @@ class QueryModel extends EventEmitter {
       }
     });
   }
-  
+
   getAxisIds(){
     return Object.keys(this.#axes);
   }
-  
+
   getCellHeadersAxis(){
     return this.#cellheadersaxis;
   }
-  
+
   getQueryAxis(axisId){
     return this.#axes[axisId];
   }
-  
+
   getFiltersAxis(){
     return this.getQueryAxis(QueryModel.AXIS_FILTERS);
   }
@@ -426,7 +426,7 @@ class QueryModel extends EventEmitter {
   getColumnsAxis(){
     return this.getQueryAxis(QueryModel.AXIS_COLUMNS);
   }
-  
+
   getRowsAxis(){
     return this.getQueryAxis(QueryModel.AXIS_ROWS);
   }
@@ -434,20 +434,20 @@ class QueryModel extends EventEmitter {
   getCellsAxis(){
     return this.getQueryAxis(QueryModel.AXIS_CELLS);
   }
-  
+
   #destroyDatasourceHandler(event){
     this.setDatasource(undefined);
   }
-  
+
   setDatasource(datasource){
     if (datasource === this.#datasource) {
       return;
     }
-    
+
     this.#clear(true);
     var oldDatasource = this.#datasource;
     this.#datasource = datasource;
-    
+
     if (datasource){
       datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
     }
@@ -461,21 +461,21 @@ class QueryModel extends EventEmitter {
       }
     });
   }
-  
+
   getDatasource(){
     return this.#datasource;
   }
-  
+
   findItem(config){
     var columnName = config.columnName;
     var derivation = config.derivation;
     var aggregator = config.aggregator;
-    
+
     var axisIds, axisId = config.axis;
     if (axisId) {
       axisIds = [axisId];
     }
-    else 
+    else
     if (aggregator){
       axisIds = ['cells'];
     }
@@ -502,7 +502,7 @@ class QueryModel extends EventEmitter {
     }
     return item;
   }
-  
+
   #addItem(config){
     var axisId = config.axis;
     var axis = this.getQueryAxis(config.axis);
@@ -518,10 +518,10 @@ class QueryModel extends EventEmitter {
     removedItem.axis = axisId;
     return removedItem;
   }
-  
+
   async addItem(config){
     var axis = config.axis;
-    
+
     if (!axis) {
       if (config.aggregator) {
         axis = QueryModel.AXIS_CELLS;
@@ -531,28 +531,28 @@ class QueryModel extends EventEmitter {
         throw new Error(`Can't add item: No axis specified!`);
       }
     }
-    
-    // make an axis-less version of the item so we can locate it in case it's already added to the model. 
+
+    // make an axis-less version of the item so we can locate it in case it's already added to the model.
     var copyOfConfig = Object.assign({}, config);
-    // filter items are special because they can appear on multiple axes. 
+    // filter items are special because they can appear on multiple axes.
     // if the item is a filter axis item, we should not remove the axis.
     if (axis !== QueryModel.AXIS_FILTERS){
       delete copyOfConfig['axis'];
     }
     var item = this.findItem(copyOfConfig);
-    
+
     var removedItem;
     if (item) {
       // if the item already exits in this model, we first remove it.
       removedItem = this.#removeItem(item);
     }
-    
+
     if (!config.columnType) {
       if (removedItem && removedItem.columnType) {
         config.columnType = removedItem.columnType;
       }
     }
-    
+
     if (!config.columnType) {
       var datasource = this.#datasource;
       var columnMetadata = await datasource.getColumnMetadata();
@@ -563,7 +563,7 @@ class QueryModel extends EventEmitter {
         }
       }
     }
-    
+
     var addedItem = this.#addItem(config);
 
     var axesChangeInfo = {};
@@ -575,22 +575,22 @@ class QueryModel extends EventEmitter {
         removed: [removedItem]
       };
     }
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
 
     return addedItem;
   }
-  
+
   removeItem(config){
     var copyOfConfig = Object.assign({}, config);
-    
-    var axisId = copyOfConfig['axis']; 
+
+    var axisId = copyOfConfig['axis'];
     if (axisId && axisId !== QueryModel.AXIS_FILTERS) {
       delete copyOfConfig[axisId];
     }
-    
+
     var item = this.findItem(copyOfConfig);
     if (!item){
       return undefined;
@@ -599,19 +599,19 @@ class QueryModel extends EventEmitter {
     var axis = this.getQueryAxis(axisId);
     var removedItem = axis.removeItem(item);
     removedItem.axis = axisId;
-    
+
     var axesChangeInfo = {};
     axesChangeInfo[axisId] = {
       removed: [removedItem]
     };
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
 
     return removedItem;
   }
-  
+
   toggleTotals(queryItemConfig, value){
     if (Boolean(value) !== value) {
       return;
@@ -620,24 +620,24 @@ class QueryModel extends EventEmitter {
     if (!queryModelItem) {
       return;
     }
-    
+
     var axisId = queryModelItem.axis;
     var axis = this.getQueryAxis(axisId);
     var items = axis.getItems();
     items[queryModelItem.index].includeTotals = value;
-    
+
     var axesChangeInfo = {};
     axesChangeInfo[axisId] = {
       changed: [items[queryModelItem.index]]
     };
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
 
     return queryModelItem;
   }
-  
+
   #clear(suppressFireEvent, axisId){
     var axisIds;
     if (axisId) {
@@ -652,42 +652,42 @@ class QueryModel extends EventEmitter {
       var axisId = axisIds[i];
       var axis = this.getQueryAxis(axisId);
       var items = axis.getItems();
-      
+
       if (!items.length) {
         continue;
       }
-      
+
       axesChangeInfo[axisId] = {
         removed: items
       };
       axis.clear();
     }
-    
+
     if (!Object.keys(axesChangeInfo).length){
       // no change, don't fire event.
       return;
     }
-    
+
     if (suppressFireEvent) {
       return;
     }
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
   }
-  
+
   clear(axisId) {
     // clear and send event;
     this.#clear(false, axisId);
   }
-  
+
   flipAxes(axisId1, axisId2) {
     var axesChangeInfo = {};
 
     var axis1 = this.getQueryAxis(axisId1);
     var axis1Items = axis1.getItems();
-        
+
     var axis2 = this.getQueryAxis(axisId2);
     var axis2Items = axis2.getItems();
 
@@ -710,12 +710,12 @@ class QueryModel extends EventEmitter {
         added: axis2Items
       };
     }
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
   }
- 
+
   setQueryAxisItemFilter(queryAxisItem, filter){
     var queryModelItem = this.findItem(queryAxisItem);
     if (!queryModelItem) {
@@ -727,30 +727,30 @@ class QueryModel extends EventEmitter {
     // (note that the normal getters return copies)
     var axis = this.getQueryAxis(queryModelItem.axis);
     var items = axis.getItems();
-    
+
     if (!Object.keys(filter.values).length){
       filter = undefined;
     }
     items[queryModelItem.index].filter = filter;
-    
+
     var axesChangeInfo = {};
     axesChangeInfo[queryAxisItem.axis] = {
       changed: {
         changed: [queryAxisItem]
       }
     };
-    
+
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
   }
-    
+
   /**
   * Gets the sql condition for all filters.
   * If excludeTupleItems is true, then all filter items that appear on the rows and columns axes will be skipped.
   * That option is intended to be used to run the cellset query, because the cellset is already restricted by vales from the tuples
   * So if the tuples are already calculated with the filters in effect, then the tuple values must already be a subset of the values that satisfy the filter
-  * and hence we shouldn't need to filter again on those items.  
+  * and hence we shouldn't need to filter again on those items.
   *
   * NOTE: we probabably shoudl remove the excludeTupleItems option as it can almost never be applied
   * for example, if there are subtotals required, it will result in wrong results.
@@ -761,7 +761,7 @@ class QueryModel extends EventEmitter {
     if (items.length === 0){
       return undefined;
     }
-    
+
     if (excludeTupleItems === true){
       var rowsAxis = this.getRowsAxis();
       var columnsAxis = this.getColumnsAxis();
@@ -775,7 +775,7 @@ class QueryModel extends EventEmitter {
         return true;
       });
     }
-    
+
     var conditions = items.filter(function(item){
       if (!item.filter) {
         return false;
@@ -795,7 +795,7 @@ class QueryModel extends EventEmitter {
 var queryModel;
 function initQueryModel(){
   queryModel = new QueryModel();
-  
+
   queryModel.addEventListener('change', function(event){
     var eventData = event.eventData;
     if (eventData.propertiesChanged) {
@@ -811,12 +811,12 @@ function initQueryModel(){
         byId('currentDatasource').innerHTML = currentDatasourceCaption;
       }
     }
-    
+
     var exportUiActive;
     if (
-      queryModel.getColumnsAxis().getItems().length === 0 && 
+      queryModel.getColumnsAxis().getItems().length === 0 &&
       queryModel.getRowsAxis().getItems().length === 0 &&
-      queryModel.getCellsAxis().getItems().length === 0 
+      queryModel.getCellsAxis().getItems().length === 0
     ){
       exportUiActive = false;
     }
@@ -828,6 +828,6 @@ function initQueryModel(){
     if (!exportUiActive){
       byId('exportDialog').close();
     }
-    
+
   });
 }
