@@ -728,7 +728,10 @@ class QueryModel extends EventEmitter {
     var axis = this.getQueryAxis(queryModelItem.axis);
     var items = axis.getItems();
 
-    if (!Object.keys(filter.values).length){
+    if (Object.keys(filter.values).length){
+      filter.toggleState = oldFilter ? oldFilter.toggleState : 'closed';
+    }
+    else {
       filter = undefined;
     }
     items[queryModelItem.index].filter = filter;
