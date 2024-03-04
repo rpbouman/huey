@@ -13,7 +13,7 @@ function createNumberFormatter(fractionDigits){
   }
   var formatter = new Intl.NumberFormat(locales, options);
   if (fractionDigits){
-    decimalSeparator = formatter.formatToParts(123.456).find(function(part){
+    decimalSeparator = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(123.456).find(function(part){
       return part.type === 'decimal';
     })['value'];
   }

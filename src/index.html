@@ -634,7 +634,7 @@
           <input id="localeSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="localeSettings">
-              <label for="useDefaultLocale">Use default locale7</label>
+              <label for="useDefaultLocale">Use default locale</label>
               <input id="useDefaultLocale" type="checkbox"/>
               <!--
                 see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
@@ -780,7 +780,7 @@
         <ul>
           <li>Huey version 0.0.3 - tiny ripple</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a href="https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm?version=1.28.1-dev127.0" target="jsdelivr">DuckDB WASM 1.28.1-dev127.0</a></li>
+          <li><a href="https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm?version=1.28.1-dev127.0" target="jsdelivr">DuckDB WASM 1.28.1-dev153.0</a></li>
           <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v2.47.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Source on Github</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
@@ -963,7 +963,12 @@
           <template id="queryUiFilterAxisItem">
             <li>
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
-              <span>caption</span>
+              <details>
+                <summary>
+                  <span>caption</span>
+                </summary>
+                <ol></ol>
+              </details>
               <menu>
                 <label title="Click to open the filter dialog to edit the filter."><button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button></label>
                 <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
@@ -971,6 +976,8 @@
               <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
             </li>
           </template>
+          
+          
         </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
         <div
@@ -1054,7 +1061,7 @@
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev127.0/+esm';
+      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev153.0/+esm';
 
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
