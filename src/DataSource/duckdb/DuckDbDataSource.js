@@ -242,7 +242,7 @@ class DuckDbDataSource extends EventEmitter {
       file.name, 
       file, 
       protocol
-    )
+    );
   }
   
   async destroy(){
