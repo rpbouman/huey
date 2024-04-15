@@ -10,10 +10,10 @@ function downloadBlob(data, fileName, mimeType) {
   }, 1000);
 };
 
-function downloadURL(data, fileName) {
+function downloadURL(url, fileName) {
   var a;
   a = document.createElement('a');
-  a.href = data;
+  a.href = url;
   a.download = fileName;
   document.body.appendChild(a);
   a.style = 'display: none';
