@@ -6,12 +6,28 @@ function createNumberFormatter(fractionDigits){
   };
   
   var intFormatter, decimalSeparator;
+  intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
   if (fractionDigits){
-    intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
     options.maximumFractionDigits = localeSettings.maximumFractionDigits;
   }
-  var formatter = new Intl.NumberFormat(locales, options);
+  var formatter;
+  try {
+    formatter = new Intl.NumberFormat(locales, options);
+  }
+  catch (e){
+    // if the settings from the options somehow lead to an invalid format, we log it, 
+    // but we will recover by creating a formatter that at least works.
+    console.error(`Error creating number formatter using locales ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
+    console.error(e);
+    locales = navigator.languages;
+    options = {};
+    if (!fractionDigits){
+      options.minimumFractionDigits = 0;
+    }
+    console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
+    formatter = new Intl.NumberFormat(locales, options);
+  }
   if (fractionDigits){
     decimalSeparator = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(123.456).find(function(part){
       return part.type === 'decimal';
