@@ -920,7 +920,7 @@ class PivotTableUi {
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
             title: labelText
-          }, labelText);
+          }, String.fromCharCode(160));
 
           cell.appendChild(label);
 
@@ -1090,13 +1090,13 @@ class PivotTableUi {
           }
 
           if (!labelText || !labelText.length) {
-            labelText = '&#160;';
+            labelText = String.fromCharCode(160);
           }
 
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
             title: labelText
-          }, labelText);
+          }, String.fromCharCode(160));
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){
@@ -1215,7 +1215,9 @@ class PivotTableUi {
       this.#updateHorizontalSizer();
 
       this.#renderCells();
-      await this.#updateCellData(0, 0);
+      
+      await this.#updateDataToScrollPosition();
+      //await this.#updateCellData(0, 0);
       this.#setNeedsUpdate(false);
 
       //var currentRoute = Routing.getRouteForView(this);

@@ -230,19 +230,3 @@
   font-weight: bold;
 }
 
-/* 
-  This is here for https://github.com/rpbouman/huey/issues/70
-  basically, we need to suprress display of the label text while we're still busy (rendering the table)
-  If we don't, the cells will not have yet assumed the assigned cell width 
-  and this messes up our calculation of how much columns we should render.
-*/
-.pivotTableUiContainer[aria-busy=true] > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
-  display: none;
-}
-
-/**
-  This is here to allow the vertical scrolbar height to be calculated correctly even if the cells are hidden (see above).
-*/
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell {
-  height: 18px;
-}
