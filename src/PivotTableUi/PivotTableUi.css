@@ -240,6 +240,9 @@
   display: none;
 }
 
+/**
+  This is here to allow the vertical scrolbar height to be calculated correctly even if the cells are hidden (see above).
+*/
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell {
   height: 18px;
 }
