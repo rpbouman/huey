@@ -920,7 +920,7 @@ class PivotTableUi {
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
             title: labelText
-          }, String.fromCharCode(160));
+          }, labelText);
 
           cell.appendChild(label);
 
@@ -1096,7 +1096,7 @@ class PivotTableUi {
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
             title: labelText
-          }, String.fromCharCode(160));
+          }, labelText);
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){
@@ -1215,9 +1215,9 @@ class PivotTableUi {
       this.#updateHorizontalSizer();
 
       this.#renderCells();
-      
-      await this.#updateDataToScrollPosition();
+
       //await this.#updateCellData(0, 0);
+      await this.#updateDataToScrollPosition();
       this.#setNeedsUpdate(false);
 
       //var currentRoute = Routing.getRouteForView(this);
