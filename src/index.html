@@ -689,8 +689,30 @@
           <input id="querySettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="querySettings">
-              <label for="autoRunQuery">Autorun Query</label>
+              <label 
+                for="autoRunQuery"
+                title="When enabled the pivot table is updated automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
+              >Autorun Query</label>
               <input id="autoRunQuery" type="checkbox"/>
+            </form>
+          </div>
+        </div>
+
+        <!--
+          Pivot Table
+        -->
+        <div>
+          <label
+            role="tab"
+            for="pivotSettingsTab"
+          >
+            Pivot Table
+          </label>
+          <input id="pivotSettingsTab" type="radio" name="settingsTabs"/>
+          <div role="tabpanel">
+            <form id="pivotSettings">
+              <label for="maxCellWidth">Max cellwidth (ch)</label>
+              <input id="maxCellWidth" type="number" min="1" max="256" value="30"/>
             </form>
           </div>
         </div>
