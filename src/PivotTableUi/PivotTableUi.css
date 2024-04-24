@@ -239,3 +239,7 @@
 .pivotTableUiContainer[aria-busy=true] > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
   display: none;
 }
+
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell {
+  height: 18px;
+}
