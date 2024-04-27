@@ -10,6 +10,9 @@ function createNumberFormatter(fractionDigits){
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
     options.maximumFractionDigits = localeSettings.maximumFractionDigits;
+    if (options.maximumFractionDigits < options.minimumFractionDigits) {
+      options.maximumFractionDigits = options.minimumFractionDigits;
+    }
   }
   var formatter;
   try {

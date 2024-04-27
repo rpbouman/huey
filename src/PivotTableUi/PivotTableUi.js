@@ -640,9 +640,11 @@ class PivotTableUi {
         var width = headerCell.style.width;
         if (width.endsWith('ch')){
           var newWidth = labelText.length + 1;
+          
           if (newWidth > PivotTableUi.#maximumCellWidth) {
             newWidth = PivotTableUi.#maximumCellWidth;
           }
+          
           if (newWidth > parseInt(width, 10)) {
             headerCell.style.width = newWidth + 'ch';
           }
@@ -723,14 +725,20 @@ class PivotTableUi {
         });
         tableRow.appendChild(tableCell);
 
+        var columnWidth;
         // headers for the  row axis columns
         if (i === (numColumnAxisRows - 1)) {
-          var columnWidth;
           if (j < rowsAxisItems.length){
             tableCell.className += ' pivotTableUiRowsAxisHeaderCell';
             var rowsAxisItem = rowsAxisItems[j];
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(rowsAxisItem);
-            columnWidth = (labelText.length + 1) + 'ch';
+            columnWidth = (labelText.length + 2);
+            
+            if (columnWidth > PivotTableUi.#maximumCellWidth) {
+              columnWidth = PivotTableUi.#maximumCellWidth;
+            }
+            
+            columnWidth += 'ch';
             label = createEl('span', {
               "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
               title: labelText
@@ -744,7 +752,14 @@ class PivotTableUi {
               columnWidth = labelText.length;
               return columnWidth > acc ? columnWidth : acc;
             }, 0);
-            columnWidth = (columnWidth + 2) + 'ch';
+   
+            columnWidth += 1;   
+
+            if (columnWidth > PivotTableUi.#maximumCellWidth) {
+              columnWidth = PivotTableUi.#maximumCellWidth;
+            }
+
+            columnWidth += 'ch';
           }
 
           firstTableHeaderRow = tableHeaderDom.childNodes.item(0);
@@ -763,7 +778,14 @@ class PivotTableUi {
           "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
           title: labelText
         }, labelText);
-        tableCell.style.width = (labelText.length + 1) + 'ch';
+
+        columnWidth = labelText.length + 1;
+        
+        if (columnWidth > PivotTableUi.#maximumCellWidth) {
+          columnWidth = PivotTableUi.#maximumCellWidth;
+        }
+
+        tableCell.style.width = columnWidth + 'ch';
         tableCell.appendChild(label);
       }
     }
@@ -910,13 +932,19 @@ class PivotTableUi {
           }
 
           if (j === headerRows.length - 1) {
-            stufferCell.previousSibling.style.width = (columnWidth + 1) + 'ch';
+
+            columnWidth += 1;
+            if (columnWidth > PivotTableUi.#maximumCellWidth) {
+              columnWidth = PivotTableUi.#maximumCellWidth;
+            }
+            
+            stufferCell.previousSibling.style.width = columnWidth + 'ch';
           }
         }
 
         physicalColumnsAdded += 1;
         //check if the table overshoots the allowable width
-        while (tableDom.clientWidth > innerContainerWidth) {
+        if (tableDom.clientWidth > innerContainerWidth) {
           return;
         }
       }
@@ -1035,7 +1063,7 @@ class PivotTableUi {
           });
 
           var headerCell = firstTableHeaderRowCells[bodyRow.childNodes.length];
-          var headerCellWidth = parseInt(headerCell.style.width);
+          var headerCellWidth = parseInt(headerCell.style.width, 10);
 
           bodyRow.appendChild(cell);
 
@@ -1062,7 +1090,7 @@ class PivotTableUi {
           }
 
           if (!labelText || !labelText.length) {
-            labelText = '&#160;';
+            labelText = String.fromCharCode(160);
           }
 
           var label = createEl('span', {
@@ -1072,8 +1100,14 @@ class PivotTableUi {
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){
-            headerCellWidth = labelText.length;
+            headerCellWidth = labelText.length + 1;
+
+            if (headerCellWidth > PivotTableUi.#maximumCellWidth) {
+              headerCellWidth = PivotTableUi.#maximumCellWidth;
+            }
+            
             headerCell.style.width = headerCellWidth + 'ch';
+            cell.style.width = headerCellWidth + 'ch';
           }
         }
 
@@ -1132,6 +1166,14 @@ class PivotTableUi {
     if (this.#getBusy()) {
       return;
     }
+    
+    var maxCellWidth = this.#settings.getSettings('pivotSettings').maxCellWidth;
+    maxCellWidth = parseInt(maxCellWidth, 10);
+    if ( isNaN(maxCellWidth) || maxCellWidth <= 0 ) {
+      maxCellWidth = 30;
+    }
+    PivotTableUi.#maximumCellWidth = maxCellWidth;
+     
     var tableDom = this.#getTableDom();
     try {
 
@@ -1167,13 +1209,15 @@ class PivotTableUi {
       var rowTuples = renderAxisPromisesResults[1];
       this.#setVerticalSize(0);
       this.#renderRows(rowTuples);
-
-      this.#updateVerticalSizer();
+           
+      this.#updateVerticalSizer();      
       this.#removeExcessColumns();
       this.#updateHorizontalSizer();
 
       this.#renderCells();
-      await this.#updateCellData(0, 0);
+
+      //await this.#updateCellData(0, 0);
+      await this.#updateDataToScrollPosition();
       this.#setNeedsUpdate(false);
 
       //var currentRoute = Routing.getRouteForView(this);

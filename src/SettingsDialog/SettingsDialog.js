@@ -65,6 +65,9 @@ class Settings extends EventEmitter {
     querySettings: {
       autoRunQuery: false
     },
+    pivotSettings: {
+      maxCellWidth: 30
+    },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',
       // radio
