@@ -13,9 +13,13 @@ class PivotTableUi {
   #rowIndex = 0;
   #columnIndex = 0;
 
+  #resizeObserver = undefined;
   #resizeTimeoutId = undefined;
   #resizeTimeout = 1000;
   #scrollTimeout = 500;
+
+  #columnHeaderResizeTimeout = 500;
+  #columnHeaderResizeTimeoutId = undefined;
 
   // the maximum width in ch units
   static #maximumCellWidth = 30;
@@ -91,22 +95,109 @@ class PivotTableUi {
   #initResizeObserver(){
     var dom = this.getDom();
 
-    var resizeObserver = new ResizeObserver(function(){
-      if (this.#resizeTimeoutId !== undefined) {
-        clearTimeout(this.#resizeTimeoutId);
-        this.#resizeTimeoutId = undefined;
+    this.#resizeObserver = new ResizeObserver(function(entries){
+      for (var entry of entries){
+        var target = entry.target;
+        if (target === dom) {
+          this.#handleDomResized();
+        }
+        else
+        if (hasClass(target, 'pivotTableUiHeaderCell')){
+          this.#handleColumnHeaderResized(entry);
+        }
       }
-      this.#resizeTimeoutId = setTimeout(function(){
-        if (this.#autoUpdate && !this.#getBusy()) {
-          this.updatePivotTableUi();
-        }
-        else {
-          //this.#setNeedsUpdate(true);
-        }
-      }.bind(this), this.#resizeTimeout);
     }.bind(this));
-    resizeObserver.observe(dom);
+    
+    this.#resizeObserver.observe(dom);
   }
+  
+  #toggleObserveColumnsResizing(onOff){
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var headerRows = tableHeaderDom.childNodes;
+    if (!headerRows.length){
+      return;
+    }
+    
+    var methodName = 'observe';
+    if (onOff === false) {
+      methodName = 'un' + methodName;
+    }
+    var method = this.#resizeObserver[methodName];
+    
+    var headerRow = headerRows.item(0);
+    var columns = headerRow.childNodes;
+    for (var i = 0; i < columns.length; i++){
+      var column = columns.item(i);
+      if (!hasClass(column, 'pivotTableUiHeaderCell')){
+        continue;
+      }
+      if (hasClass(column, 'pivotTableUiStufferCell')){
+        continue;
+      }
+      method.call(this.#resizeObserver, column);
+    }
+  }
+  
+  #handleDomResized(){
+    if (this.#resizeTimeoutId !== undefined) {
+      clearTimeout(this.#resizeTimeoutId);
+      this.#resizeTimeoutId = undefined;
+    }
+    this.#resizeTimeoutId = setTimeout(function(){
+      if (this.#autoUpdate && !this.#getBusy()) {
+        this.updatePivotTableUi();
+      }
+      else {
+        //this.#setNeedsUpdate(true);
+      }
+      clearTimeout(this.#resizeTimeoutId);
+      this.#resizeTimeoutId = undefined;
+    }.bind(this), this.#resizeTimeout);
+  }
+
+  // this takes a column axis header cell and calculates the corresponding tuple index and cell axis item index 
+  #getColumnHeaderTupleAndCellAxisInfo(columnHeader){
+    var physicalTupleIndices = this.#getPhysicalTupleIndices();
+
+    var physicalColumnsAxisTupleIndex = physicalTupleIndices.physicalColumnsAxisTupleIndex;
+    var axisId = QueryModel.AXIS_COLUMNS;
+    var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
+
+    var columnsAxisSizeInfo = physicalTupleIndices.columnsAxisSizeInfo;
+    var headerCount = columnsAxisSizeInfo.headers.columnCount;
+    
+    var headerRow = columnHeader.parentNode;
+    var siblings = headerRow.childNodes;
+    var physicalColumnIndex;
+    for (var i = headerCount; i < siblings.length; i++) {
+      if (siblings.item(i) === target){
+        physicalColumnIndex = i;
+        break;
+      }
+    }
+    if (physicalColumnIndex === undefined){
+      throw new Error(`Internal error: could not determine physical column index`);
+    }
+    
+  }
+
+  #handleColumnHeaderResized(resizeEntry) {
+    if (this.#columnHeaderResizeTimeoutId !== undefined) {
+      clearTimeout(this.#columnHeaderResizeTimeoutId);
+      this.#columnHeaderResizeTimeoutId = undefined;
+    }
+    this.#columnHeaderResizeTimeoutId = setTimeout(function(){
+      var target = resizeEntry.target;
+      var width = target.style.width;
+      if (width.endsWith('px')) {
+        // user changed column width - this is where we should store the width in the corresponding column tuple.
+        var info = this.#getColumnHeaderTupleAndCellAxisInfo(target);
+        debugger;
+      }      
+      clearTimeout(this.#columnHeaderResizeTimeoutId);
+      this.#columnHeaderResizeTimeoutId = undefined;
+    }.bind(this), this.#columnHeaderResizeTimeout);
+  }    
 
   #initSettings(settings){
     this.#settings = settings;
@@ -279,8 +370,8 @@ class PivotTableUi {
     // this is the first scroll event, set the busy indicator
     this.#setBusy(true);
   }
-
-  async #updateDataToScrollPosition(){
+  
+  #getPhysicalTupleIndices(){
     var innerContainer = this.#getInnerContainerDom();
 
     //
@@ -293,8 +384,6 @@ class PivotTableUi {
     var numberOfPhysicalColumnsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_COLUMNS);
     var physicalColumnsAxisTupleIndex = Math.round(numberOfPhysicalColumnsAxisTuples * horizontallyScrolledFraction);
 
-    var columnAxisPromise = this.#updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex);
-
     //
     var scrollHeight = innerContainer.scrollHeight;
     var top = innerContainer.scrollTop;
@@ -304,9 +393,24 @@ class PivotTableUi {
     var verticallyScrolledFraction = top / (scrollHeight - headersHeight);
     var numberOfPhysicalRowsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_ROWS);
     var physicalRowsAxisTupleIndex = Math.round(numberOfPhysicalRowsAxisTuples * verticallyScrolledFraction);
+    
+    return {
+      columnsAxisSizeInfo: columnsAxisSizeInfo,
+      physicalColumnsAxisTupleIndex: physicalColumnsAxisTupleIndex,
+      rowsAxisSizeInfo: rowsAxisSizeInfo,
+      physicalRowsAxisTupleIndex: physicalRowsAxisTupleIndex
+    };
+  }
 
+  async #updateDataToScrollPosition(){
+    var physicalTupleIndices = this.#getPhysicalTupleIndices();
+    
+    var physicalColumnsAxisTupleIndex = physicalTupleIndices.physicalColumnsAxisTupleIndex;
+    var physicalRowsAxisTupleIndex = physicalTupleIndices.physicalRowsAxisTupleIndex;
+    
+    var columnAxisPromise = this.#updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex);
     var rowAxisPromise = this.#updateRowsAxisTupleData(physicalRowsAxisTupleIndex);
-
+    
     await Promise.all([columnAxisPromise, rowAxisPromise]);
 
     return this.#updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex);
@@ -380,6 +484,7 @@ class PivotTableUi {
       numRows -= 1;
     }
 
+    var columnWidth;
     // for each tuple
     for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
@@ -419,8 +524,21 @@ class PivotTableUi {
         if (!labelText || !labelText.length) {
           labelText = String.fromCharCode(160);
         }
+        
         label.innerText = labelText;
         label.title = labelText;
+        
+        if (j === 0){
+          if (tuple && tuple.widths) {
+            var queryAxisItem = cellsAxisItems.length === 0 ? null : cellsAxisItems[cellsAxisItemIndex];
+            var cellsAxisItemLabel = cellsAxisItems.length === 0 ? '' : QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+            var width = tuple.widths[cellsAxisItemLabel];
+            if (width !== undefined) {
+              cell.style.width = width + 'px';              
+            }
+          }
+        }
+        
       }
 
       if (doCellHeaders) {
@@ -1166,7 +1284,7 @@ class PivotTableUi {
     if (this.#getBusy()) {
       return;
     }
-    
+        
     var maxCellWidth = this.#settings.getSettings('pivotSettings').maxCellWidth;
     maxCellWidth = parseInt(maxCellWidth, 10);
     if ( isNaN(maxCellWidth) || maxCellWidth <= 0 ) {
@@ -1212,6 +1330,7 @@ class PivotTableUi {
            
       this.#updateVerticalSizer();      
       this.#removeExcessColumns();
+      this.#toggleObserveColumnsResizing(true);
       this.#updateHorizontalSizer();
 
       this.#renderCells();
@@ -1233,6 +1352,7 @@ class PivotTableUi {
   }
 
   clear(){
+    this.#toggleObserveColumnsResizing(false);
     var tableHeaderDom = this.#getTableHeaderDom();
     tableHeaderDom.innerHTML = '';
     var tableBodyDom = this.#getTableBodyDom();
