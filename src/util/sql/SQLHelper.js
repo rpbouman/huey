@@ -72,6 +72,9 @@ function createNumberFormatter(fractionDigits){
                 var fractionalPartIndex = integerPart.length - fieldTypeScale;
                 fractionalPart = integerPart.slice(fractionalPartIndex);
                 integerPart = integerPart.slice(0, fractionalPartIndex);
+                if (integerPart === '-') {
+                  integerPart = '-0';
+                }
               }
             }
             stringValue = intFormatter.format(BigInt(integerPart));
