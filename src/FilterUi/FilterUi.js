@@ -272,7 +272,7 @@ class FilterDialog {
           filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && filterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true) ||
           filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true)
         )
-      ) {
+      ){
 
         var selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
         var values = filterValuesList.selectedOptions.length ? currentValues : currentToValues;
