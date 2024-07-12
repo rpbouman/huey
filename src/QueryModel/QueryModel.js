@@ -224,8 +224,9 @@ class QueryAxisItem {
 
     var nullCondition;
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
-      return value === null;
+      return value.startsWith('NULL::');
     });
+    
     if (indexOfNull !== -1) {
       operator = 'IS';
       switch (filter.filterType) {
