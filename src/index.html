@@ -604,6 +604,24 @@
         role="tablist"
       >
         <!--
+          General
+        -->
+        <div>
+          <label
+            role="tab"
+            for="generalSettingTab"
+          >
+            General
+          </label>
+          <input id="generalSettingTab" type="radio" name="settingsTabs" checked="true"/>
+          <div role="tabpanel">
+            <form id="generalSettings">
+              <label for="nullString">NULL-string</label>
+              <input id="nullString" type="input"/>
+            </form>
+          </div>
+        </div>
+        <!--
           Datasources settings
         -->
         <div>
