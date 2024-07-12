@@ -1,4 +1,7 @@
 function createNumberFormatter(fractionDigits){
+  var generalSettings = settings.getSettings('generalSettings');
+  var nullString = generalSettings.nullString;
+  
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
   var options = {
@@ -39,7 +42,7 @@ function createNumberFormatter(fractionDigits){
   return {
     format: function(value, field){
       if (value === null) {
-        return '';
+        return nullString;
       }
       
       if (field) {
@@ -95,7 +98,9 @@ function createNumberFormatter(fractionDigits){
 
 function fallbackFormatter(value){
   if (value === null || value === undefined){
-    return '';
+    var generalSettings = settings.getSettings('generalSettings');
+    var nullString = generalSettings.nullString;
+    return nullString;
   }
   return String(value);
 }
@@ -295,6 +300,8 @@ var dataTypes = {
   'DATE': {
     hasDateFields: true,
     createFormatter: function(){
+      var generalSettings = settings.getSettings('generalSettings');
+      var nullString = generalSettings.nullString;
       var localeSettings = settings.getSettings('localeSettings');
       var locales = localeSettings.locale;      
       var formatter = new Intl.DateTimeFormat(locales, {
@@ -303,6 +310,9 @@ var dataTypes = {
         day: '2-digit'
       });
       return function(value, field){
+        if (value === null){
+          return nullString;
+        }
         return formatter.format(value);
       };
     },
@@ -328,6 +338,8 @@ var dataTypes = {
     hasDateFields: true,
     hasTimeFields: true,
     createFormatter: function(){
+      var generalSettings = settings.getSettings('generalSettings');
+      var nullString = generalSettings.nullString;
       // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
       // allowing us to use the value directly as argumnet to the Date constructor.
       // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
@@ -345,7 +357,7 @@ var dataTypes = {
       });
       return function(value, field){
         if (value === null ){
-          return null;
+          return nullString;
         }
         var date = new Date(value);
         var parts = String(value).split('.');
@@ -386,9 +398,11 @@ var dataTypes = {
   },
   'VARCHAR': {
     createFormatter: function(){
+      var generalSettings = settings.getSettings('generalSettings');
+      var nullString = generalSettings.nullString;
       return function(value){
         if (value === null){
-          return '';
+          return nullString;
         }
         return value;
       }
