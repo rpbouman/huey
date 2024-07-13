@@ -26,19 +26,9 @@ class Routing {
       queryModelObject.axes[axisId] = items.map(function(axisItem){
         var strippedItem = {column: axisItem.columnName};
         
-        var derivation = axisItem.derivation;
-        if (derivation) {
-          var derivationInfo = AttributeUi.getDerivationInfo(derivation);
-          strippedItem.derivation = {};
-          strippedItem.derivation[derivation] = derivationInfo.expressionTemplate;
-        }
-        
-        var aggregator = axisItem.aggregator;
-        if (aggregator) {
-          var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
-          strippedItem.aggregator = {};
-          strippedItem.aggregator[aggregator] = aggregatorInfo.expressionTemplate;
-        }
+        strippedItem.columnType = axisItem.columnType;
+        strippedItem.derivation = axisItem.derivation;
+        strippedItem.aggregator = axisItem.aggregator;
         
         if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
           strippedItem.filter = axisItem.filter;
@@ -83,6 +73,7 @@ class Routing {
       var ascii = atob( base64 ); 
       var json = decodeURIComponent( ascii );
       var state = JSON.parse( json );
+            
       return state;
     }
     catch(error){

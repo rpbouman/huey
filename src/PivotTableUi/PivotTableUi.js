@@ -1339,8 +1339,8 @@ class PivotTableUi {
       await this.#updateDataToScrollPosition();
       this.#setNeedsUpdate(false);
 
-      //var currentRoute = Routing.getRouteForView(this);
-      //document.location.hash = currentRoute || '';
+      var currentRoute = Routing.getRouteForView(this);
+      document.location.hash = currentRoute || '';
     }
     catch(e){
       showErrorDialog(e);
