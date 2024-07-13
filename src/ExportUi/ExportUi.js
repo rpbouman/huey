@@ -75,9 +75,13 @@ function generateExportDialogTitle(){
   return replacedTemplate;
 }
 
-function updateExportDialog(){
+function updateExportTitle(){
   var title = generateExportDialogTitle();
   byId('exportTitle').innerText = title;
+}
+
+function updateExportDialog(){
+  updateExportTitle();
   Settings.synchronize(byId('exportDialog'), {"_": settings.getSettings('exportUi')}, 'dialog');
 }
 
@@ -259,4 +263,7 @@ function initExportUi(){
 
   byId('exportDialogExecuteButton')
   .addEventListener('click', executeExport);
+  
+  byId('exportTitleTemplate')
+  .addEventListener('change', updateExportTitle());
 }

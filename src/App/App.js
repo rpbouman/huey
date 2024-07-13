@@ -157,22 +157,19 @@ async function setPageState(hash){
       for (var i = 0 ; i < items.length; i++){
         var item = items[i];
         var config = { columnName: item.column };
-        
-        if (item.derivation) {
-          for (var derivation in item.derivation){
-          }
-          config.derivation = derivation;
-        }
-        
-        if (item.aggregator) {
-          for (var aggregator in item.aggregator){
-          }
-          config.aggregator = aggregator;
-        }
+
+        config.columnType = item.columnType;
+        config.derivation = item.derivation;
+        config.aggregator = item.aggregator;
         
         var formatter = QueryAxisItem.createFormatter(config);
         if (formatter){
           config.formatter = formatter;
+        }
+        
+        var literalWriter = QueryAxisItem.createLiteralWriter(config);
+        if (literalWriter){
+          config.literalWriter = literalWriter;
         }
         
         if (axisId === QueryModel.AXIS_FILTERS) {
@@ -216,6 +213,6 @@ function initApplication(){
   initPivotTableUi();
   initExecuteQuery();
   
-  //initPopstateHandler();
-  //setPageState();
+  initPopstateHandler();
+  setPageState();
 }

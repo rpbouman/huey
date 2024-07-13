@@ -65,7 +65,7 @@ class DuckDbDataSource extends EventEmitter {
   #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
-    super();
+    super('destroy');
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);

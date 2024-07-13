@@ -1,4 +1,4 @@
-class PivotTableUi {
+class PivotTableUi extends EventEmitter {
 
   #id = undefined;
   #queryModel = undefined;
@@ -25,6 +25,7 @@ class PivotTableUi {
   static #maximumCellWidth = 30;
 
   constructor(config){
+    super('updated');
     this.#id = config.id;
 
     if (config.settings){
@@ -1339,11 +1340,15 @@ class PivotTableUi {
       await this.#updateDataToScrollPosition();
       this.#setNeedsUpdate(false);
 
-      //var currentRoute = Routing.getRouteForView(this);
-      //document.location.hash = currentRoute || '';
+      this.fireEvent('updated', {
+        status: 'success'
+      });
     }
     catch(e){
-      showErrorDialog(e);
+      this.fireEvent('updated', {
+        status: 'error',
+        error: e
+      });
     }
     finally {
       tableDom.style.width = '99.99%';
@@ -1541,5 +1546,20 @@ function initPivotTableUi(){
     id: 'pivotTableUi',
     queryModel: queryModel,
     settings: settings
+  });
+  
+  pivotTableUi.addEventListener('updated', function(event){
+    var eventData = event.eventData;
+    switch (eventData.status) {
+      case 'success':
+        // by the time rendering the pivot is succesful, 
+        // we can safely update the page route.
+        var currentRoute = Routing.getRouteForView(pivotTableUi);
+        document.location.hash = currentRoute || '';
+        break;
+      case 'error':
+        showErrorDialog(eventData.error);
+        break;
+    }      
   });
 }

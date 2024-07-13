@@ -394,6 +394,10 @@ class QueryModel extends EventEmitter {
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
 
   #datasource = undefined;
+  
+  constructor(){
+    super('change');
+  }
 
   setCellHeadersAxis(cellheadersaxis) {
     var oldCellHeadersAxis = this.#cellheadersaxis;
@@ -833,5 +837,7 @@ function initQueryModel(){
       byId('exportDialog').close();
     }
 
+    var title = generateExportDialogTitle();
+    document.title = 'Huey - ' + title;
   });
 }
