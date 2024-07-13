@@ -146,7 +146,10 @@ class AttributeUi {
     'year': {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
-      columnType: 'INTEGER'
+      columnType: 'INTEGER',
+      createFormatter: function(){
+        return fallbackFormatter;
+      }
     },
     'quarter': {
       folder: 'date fields',
@@ -157,6 +160,9 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT',
+      createFormatter: function(){
+        return monthNumFormatter
+      },
       formats: {
         'long': {
         },
@@ -169,7 +175,10 @@ class AttributeUi {
     'week num': {
       folder: 'date fields',
       expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
-      columnType: 'UTINYINT'
+      columnType: 'UTINYINT',
+      createFormatter: function(){
+        return weekNumFormatter
+      },
     },
     'day of year': {
       folder: 'date fields',
@@ -179,7 +188,10 @@ class AttributeUi {
     'day of month': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
-      columnType: 'UTINYINT'
+      columnType: 'UTINYINT',
+      createFormatter: function(){
+        return dayNumFormatter
+      },
     },
     'day of week': {
       folder: 'date fields',

@@ -1,7 +1,10 @@
-function createNumberFormatter(fractionDigits){
+function getNullString(){
   var generalSettings = settings.getSettings('generalSettings');
   var nullString = generalSettings.nullString;
-  
+  return nullString;
+}
+
+function createNumberFormatter(fractionDigits){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
   var options = {
@@ -42,7 +45,7 @@ function createNumberFormatter(fractionDigits){
   return {
     format: function(value, field){
       if (value === null) {
-        return nullString;
+        return getNullString();
       }
       
       if (field) {
@@ -98,9 +101,7 @@ function createNumberFormatter(fractionDigits){
 
 function fallbackFormatter(value){
   if (value === null || value === undefined){
-    var generalSettings = settings.getSettings('generalSettings');
-    var nullString = generalSettings.nullString;
-    return nullString;
+    return getNullString();
   }
   return String(value);
 }
@@ -109,6 +110,39 @@ function createDefaultLiteralWriter(type){
   return function(value, field){
     return `${value === null ? 'NULL' : String(value)}::${type}`;
   }
+}
+
+function monthNumFormatter(monthNum){
+  if (monthNum === null){
+    return getNullString();
+  }
+  monthNum = String(monthNum);
+  if (monthNum.length === 1) {
+    monthNum = '0' + monthNum;
+  }
+  return monthNum;
+}
+
+function dayNumFormatter(dayNum){
+  if (dayNum === null){
+    return getNullString();
+  }
+  dayNum = String(dayNum);
+  if (dayNum.length === 1) {
+    dayNum = '0' + dayNum;
+  }
+  return dayNum;
+}
+
+function weekNumFormatter(weekNum){
+  if (weekNum === null){
+    return getNullString();
+  }
+  weekNum = String(weekNum);
+  if (weekNum.length === 1) {
+    weekNum = '0' + weekNum;
+  }
+  return weekNum;
 }
 
 var dataTypes = {
@@ -300,8 +334,6 @@ var dataTypes = {
   'DATE': {
     hasDateFields: true,
     createFormatter: function(){
-      var generalSettings = settings.getSettings('generalSettings');
-      var nullString = generalSettings.nullString;
       var localeSettings = settings.getSettings('localeSettings');
       var locales = localeSettings.locale;      
       var formatter = new Intl.DateTimeFormat(locales, {
@@ -311,21 +343,15 @@ var dataTypes = {
       });
       return function(value, field){
         if (value === null){
-          return nullString;
+          return getNullString();
         }
         return formatter.format(value);
       };
     },
     createLiteralWriter: function(){
       return function(value, field){
-        var monthNum = String(1 + value.getUTCMonth());
-        if (monthNum.length === 1) {
-          monthNum = '0' + monthNum;
-        }
-        var dayNum = value.getUTCDate();
-        if (dayNum.length === 1) {
-          dayNum = '0' + dayNum;
-        }
+        var monthNum = monthNumFormatter(1 + value.getUTCMonth())
+        var dayNum = dayNumFormatter(value.getUTCDate());
         return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
       };
     }
@@ -338,8 +364,6 @@ var dataTypes = {
     hasDateFields: true,
     hasTimeFields: true,
     createFormatter: function(){
-      var generalSettings = settings.getSettings('generalSettings');
-      var nullString = generalSettings.nullString;
       // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
       // allowing us to use the value directly as argumnet to the Date constructor.
       // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
@@ -357,7 +381,7 @@ var dataTypes = {
       });
       return function(value, field){
         if (value === null ){
-          return nullString;
+          return getNullString();
         }
         var date = new Date(value);
         var parts = String(value).split('.');
@@ -398,11 +422,9 @@ var dataTypes = {
   },
   'VARCHAR': {
     createFormatter: function(){
-      var generalSettings = settings.getSettings('generalSettings');
-      var nullString = generalSettings.nullString;
       return function(value){
         if (value === null){
-          return nullString;
+          return getNullString();
         }
         return value;
       }
