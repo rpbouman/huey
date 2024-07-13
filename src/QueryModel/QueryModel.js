@@ -837,5 +837,7 @@ function initQueryModel(){
       byId('exportDialog').close();
     }
 
+    var title = generateExportDialogTitle();
+    document.title = 'Huey - ' + title;
   });
 }
