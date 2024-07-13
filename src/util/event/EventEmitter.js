@@ -1,8 +1,22 @@
 class EventEmitter {
   
   #eventListeners = {};
+  #supportedEvents = undefined;
   
-  constructor(){
+  constructor(supportedEvents){
+    switch (typeof supportedEvents) {
+      case 'string':
+        supportedEvents = [supportedEvents];
+      case 'undefined':
+      case 'object':
+        if (supportedEvents instanceof Array){
+          this.#supportedEvents = supportedEvents;
+          break;
+        }
+      default:
+        throw new Error(`Supported events should be an array`);
+    }
+    this.#supportedEvents = supportedEvents || [];
   }
   
   destroy(){
@@ -10,12 +24,8 @@ class EventEmitter {
   }
   
   checkEventType(eventType){
-    switch(eventType) {
-      case 'change':
-      case 'destroy':
-        break;
-      default:
-        throw new Error(`Unrecognized event type ${eventType}`);
+    if (this.#supportedEvents.indexOf(eventType) === -1) {
+      throw new Error(`Unrecognized event type ${eventType}`);
     }
   }
   

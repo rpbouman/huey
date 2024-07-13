@@ -266,7 +266,7 @@ class Settings extends EventEmitter {
   #settings = undefined;
   
   constructor(id){
-    super();
+    super('change');
     this.#id = id;
     this.#loadFromLocalStorage();
     this.#initDialog();
