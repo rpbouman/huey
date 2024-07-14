@@ -4,14 +4,20 @@ function getNullString(){
   return nullString;
 }
 
-function createNumberFormatter(fractionDigits){
+function getLocales(){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
+  return locales;
+}
+
+function createNumberFormatter(fractionDigits){
+  var localeSettings = settings.getSettings('localeSettings');
   var options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
   
   var intFormatter, decimalSeparator;
+  var locales = getLocales();
   intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
@@ -109,6 +115,77 @@ function fallbackFormatter(value){
 function createDefaultLiteralWriter(type){
   return function(value, field){
     return `${value === null ? 'NULL' : String(value)}::${type}`;
+  }
+}
+
+function createDateFormatter(options){
+  var locales = getLocales();
+  var dateFormatter = new Intl.DateTimeFormat(locales, options);
+  return dateFormatter;
+}
+
+function createLocalDateFormatter(){
+  var dateFormatter = createDateFormatter({
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  });
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return dateFormatter.format(value);
+  }
+}
+
+function createMonthNameFormatter(){
+  var dateFormatter = createDateFormatter({
+    month: 'long'
+  });
+  var monthNames = [null];
+  var date;
+  for (var i = 0; i < 12; i++){
+    if (date){
+      date.setMonth(i);
+    }
+    else{
+      date = new Date(2000, i, 01);
+    }
+    var dateString = dateFormatter.format(date);
+    var monthName = dateString.replace(/[^\d\w]/g, '');
+    monthNames.push(monthName);
+  }
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return monthNames[value];
+  }
+}
+
+function createDayNameFormatter(){
+  var dateFormatter = createDateFormatter({
+    weekday: 'long'
+  });
+  var dayNames = [];
+  var date;
+  for (var i = 1; i < 8; i++){
+    if (date){
+      date.setDate(i);
+    }
+    else {
+      // 2023-01-01 started on a sunday
+      date = new Date(2023, 0, 01);
+    }
+    var dateString = dateFormatter.format(date);
+    var dayName = dateString.replace(/[^\d\w]/g, '');
+    dayNames.push(dayName);
+  }
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return dayNames[value];
   }
 }
 

@@ -77,7 +77,8 @@
 * Derivation icons
 *
 */
-.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon::before {
+.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation=local-date] > summary > .icon::before {
   /* calendar */
   content: "\ea53";
 }
@@ -91,6 +92,7 @@
   content: "\ec60";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation="month name"] > summary > .icon::before,
 .attributeUi details[data-nodetype=derived][data-derivation="month num"] > summary > .icon::before {
   /* letter m */
   content: "\ec5c";
@@ -111,6 +113,7 @@
   content: "\fd2f";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation="day of week name"] > summary > .icon::before,
 .attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon::before {
   /* letter-d-small */
   content: "\fcca";

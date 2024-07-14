@@ -143,6 +143,14 @@ class AttributeUi {
       expressionTemplate: "strftime( ${columnName}, '%x' )",
       columnType: 'VARCHAR'
     },
+    'local-date': {
+      folder: 'date fields',
+      // %x is isodate,
+      // see: https://duckdb.org/docs/sql/functions/dateformat.html
+      expressionTemplate: "${columnName}::DATE",
+      columnType: 'DATE',
+      createFormatter: createLocalDateFormatter
+    },
     'year': {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
@@ -172,6 +180,12 @@ class AttributeUi {
         }
       }
     },
+    'month name': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createMonthNameFormatter
+    },
     'week num': {
       folder: 'date fields',
       expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
@@ -197,14 +211,12 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      formats: {
-        'long': {
-        },
-        'short': {
-        },
-        'narrow': {
-        }
-      }
+    },
+    'day of week name': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createDayNameFormatter
     }
   };
 
