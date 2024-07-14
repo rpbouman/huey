@@ -5,9 +5,6 @@ class Settings extends EventEmitter {
   #id = undefined;
   
   static #settingsTemplate = {
-    generalSettings: {
-      nullString: '␀'
-    },
     datasourceSettings: {
       useLooseColumnTypeComparison: false,
       looseColumnTypes: {
@@ -54,6 +51,7 @@ class Settings extends EventEmitter {
       }
     },
     localeSettings: {
+      nullString: '␀',
       useDefaultLocale: true,
       locale: navigator.languages,
       minimumIntegerDigits: 1,
