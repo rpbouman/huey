@@ -52,6 +52,11 @@ class QueryAxisItem {
 
   static createLiteralWriter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+    if (!dataType) {
+      // this may happen in case the item has an aggregator like sum() - in these cases we don't know what the datatype of the resulting values will be.
+      // we need to find a better solution for this but for now just bail out - we currently don't need a literalwriter for aggregated values.
+      return null;
+    }
     var dataTypeInfo = getDataTypeInfo(dataType);
     return dataTypeInfo.createLiteralWriter();
   }
@@ -139,7 +144,7 @@ class QueryAxisItem {
   }
 
   static getQueryAxisItemDataType(queryAxisItem){
-    var columnType = queryAxisItem.columnType;
+    var columnType = queryAxisItem.columnType;    
     var dataType = columnType;
 
     var derivationInfo, derivation = queryAxisItem.derivation;
