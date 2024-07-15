@@ -1,5 +1,5 @@
 function getNullString(){
-  var generalSettings = settings.getSettings('generalSettings');
+  var generalSettings = settings.getSettings('localeSettings');
   var nullString = generalSettings.nullString;
   return nullString;
 }
