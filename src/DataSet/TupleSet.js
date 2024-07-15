@@ -74,6 +74,7 @@ class TupleSet extends DataSetComponent {
       // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
       var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) as ${TupleSet.groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
+      orderByExpressions.unshift(TupleSet.groupingIdAlias);
     }
 
     var datasource = queryModel.getDatasource();
