@@ -613,7 +613,7 @@ class AttributeUi {
       column_name: columnName,
       column_type: columnType 
     };
-    var typeName = /^[^\(]+/.exec(columnType)[0];
+    var typeName = getDataTypeNameFromColumnType(columnType);
             
     this.#loadDerivationChildNodes(node, typeName, profile);
     this.#loadAggregatorChildNodes(node, typeName, profile);

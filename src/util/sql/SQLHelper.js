@@ -1,3 +1,7 @@
+function getDataTypeNameFromColumnType(columnType){
+  return /^[^\(]+/.exec(columnType)[0];
+}
+
 function getNullString(){
   var generalSettings = settings.getSettings('localeSettings');
   var nullString = generalSettings.nullString;
