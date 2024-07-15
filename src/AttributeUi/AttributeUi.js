@@ -553,7 +553,7 @@ class AttributeUi {
           if (childNode.getAttribute('data-nodetype') === 'folder'){
             continue;
           }
-          node.insertBefore(folderNode, childNode);
+          node.appendChild(folderNode);
           return acc;
         }
       }
@@ -655,11 +655,12 @@ class AttributeUi {
         // implement mutual exclusive axes (either rows or columns, not both)
         for (var i = 0; i < inputs.length; i++){
           var input = inputs.item(i);
-          if (input.checked && input.parentNode.getAttribute('data-axis') !== axis) {
+          var inputAxis = input.getAttribute('data-axis');
+          if (input.checked && inputAxis !== axis) {
             input.checked = false;
           }
           
-          if (QueryModel.AXIS_CELLS) {
+          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
             aggregator = input.getAttribute('data-aggregator');
           }
         }
@@ -676,7 +677,7 @@ class AttributeUi {
       columnName: columnName,
       columnType: columnType,
       derivation: derivation,
-      aggregator: aggregator,
+      aggregator: aggregator
     };
     
     var formatter = QueryAxisItem.createFormatter(itemConfig);
