@@ -381,9 +381,11 @@ class AttributeUi {
       'data-column_name': config.profile.column_name,
       'data-axis': axisId
     });
-    if (aggregator) {
+    
+    if (aggregator && axisId === QueryModel.AXIS_CELLS) {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
+    
     if (config.derivation){      
       axisButtonInput.setAttribute('data-derivation', config.derivation);
     }
