@@ -224,6 +224,7 @@ function weekNumFormatter(weekNum){
 
 var dataTypes = {
   'DECIMAL': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
@@ -236,6 +237,7 @@ var dataTypes = {
     }
   },
   'DOUBLE': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
@@ -248,6 +250,7 @@ var dataTypes = {
     }    
   },
   'REAL': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     greaterPrecisionAlternative: "DOUBLE",
     createFormatter: function(){
@@ -261,6 +264,7 @@ var dataTypes = {
     }    
   },
   'BIGINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "HUGEINT",
@@ -275,7 +279,9 @@ var dataTypes = {
     }    
   },
   'HUGEINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
+    defaultAnalyticalRole: 'attribute',
     isInteger: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
@@ -288,6 +294,7 @@ var dataTypes = {
     }    
   },
   'INTEGER': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "BIGINT",
@@ -302,6 +309,7 @@ var dataTypes = {
     }    
   },
   'SMALLINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "INTEGER",
@@ -316,6 +324,7 @@ var dataTypes = {
     }    
   },
   'TINYINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "SMALLINT",
@@ -330,6 +339,7 @@ var dataTypes = {
     }    
   },
   'UBIGINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -345,6 +355,7 @@ var dataTypes = {
     }    
   },
   'UHUGEINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     createFormatter: function(){
@@ -358,6 +369,7 @@ var dataTypes = {
     }    
   },
   'UINTEGER': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -373,6 +385,7 @@ var dataTypes = {
     }    
   },
   'USMALLINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -388,6 +401,7 @@ var dataTypes = {
     }    
   },
   'UTINYINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -403,12 +417,16 @@ var dataTypes = {
     }    
   },
   'BIT': {
+    defaultAnalyticalRole: 'attribute',
   },
   'BOOLEAN': {
+    defaultAnalyticalRole: 'attribute',
   },
   'BLOB': {
+    defaultAnalyticalRole: 'attribute',
   },
   'DATE': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     createFormatter: function(){
       var localeSettings = settings.getSettings('localeSettings');
@@ -434,10 +452,12 @@ var dataTypes = {
     }
   },
   'TIME': {
+    defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
     
   },
   'TIMESTAMP': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     hasTimeFields: true,
     createFormatter: function(){
@@ -482,6 +502,7 @@ var dataTypes = {
     }
   },
   'TIMESTAMP WITH TIME ZONE': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     hasTimeFields: true,
     hasTimezone: true,
@@ -492,12 +513,16 @@ var dataTypes = {
     }
   },
   'INTERVAL': {
+    defaultAnalyticalRole: 'measure'
   },
   'UUID': {
+    defaultAnalyticalRole: 'attribute'
   },
   'ENUM': {
+    defaultAnalyticalRole: 'attribute'
   },
   'VARCHAR': {
+    defaultAnalyticalRole: 'attribute',
     createFormatter: function(){
       return function(value){
         if (value === null){
@@ -513,14 +538,19 @@ var dataTypes = {
     }
   },
   'ARRAY': {
+    defaultAnalyticalRole: 'attribute'
   },
   'LIST': {
+    defaultAnalyticalRole: 'attribute'
   },
   'MAP': {
+    defaultAnalyticalRole: 'attribute'
   },
   'STRUCT': {
+    defaultAnalyticalRole: 'attribute'
   },
   'UNION': {
+    defaultAnalyticalRole: 'attribute'
   }
 };
 

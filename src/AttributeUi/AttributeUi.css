@@ -281,14 +281,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   content: "\edba";
 }
 
-.attributeUi details[data-nodetype=column] > summary > .attributeUiAxisButton[data-axis=cells],
-.attributeUi details[data-nodetype=derived] > summary > .attributeUiAxisButton[data-axis=cells] {
-  visibility:hidden;
-}
-
-.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=filters],
-.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=columns],
-.attributeUi details[data-nodetype=aggregate] > summary > .attributeUiAxisButton[data-axis=rows] {
+.attributeUi details > summary > span.attributeUiAxisButton {
   visibility:hidden;
 }
 

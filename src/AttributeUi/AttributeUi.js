@@ -318,10 +318,17 @@ class AttributeUi {
   #renderAttributeUiNodeAxisButton(config, head, axisId){
     var name = `${config.type}_${config.profile.column_name}`;
     var id = `${name}`;
-    
+
+    var analyticalRole = 'attribute';
+    var aggregator = config.aggregator;
+        
     var createInput;
     switch (config.type) {
       case 'column':
+        var profile = config.profile;
+        var columnType = profile.column_type;
+        var dataTypeInfo = getDataTypeInfo(columnType);
+        analyticalRole = dataTypeInfo.defaultAnalyticalRole || analyticalRole;
       case 'derived':
         switch (axisId){
           case QueryModel.AXIS_FILTERS:
@@ -336,11 +343,17 @@ class AttributeUi {
             break;
           default:
         }
-        break;
+        if (analyticalRole === 'attribute'){
+          break;
+        }
+        else
+        if (analyticalRole === 'measure' && config.type === 'column'){
+          aggregator = aggregator || 'sum';
+        }
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            id += `_${config.aggregator}`;
+            id += `_${aggregator}`;
             createInput = 'checkbox';
             break;
           default:
@@ -368,8 +381,8 @@ class AttributeUi {
       'data-column_name': config.profile.column_name,
       'data-axis': axisId
     });
-    if (config.aggregator) {
-      axisButtonInput.setAttribute('data-aggregator', config.aggregator);
+    if (aggregator) {
+      axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
     if (config.derivation){      
       axisButtonInput.setAttribute('data-derivation', config.derivation);
@@ -468,6 +481,7 @@ class AttributeUi {
     this.clear();
     var attributesUi = this.getDom();
     
+    // generic count(*) node
     var node = this.#renderAttributeUiNode({
       type: 'aggregate',
       aggregator: 'count',
@@ -479,7 +493,7 @@ class AttributeUi {
     });
     attributesUi.appendChild(node);
     
-    
+    // nodes for each column
     for (var i = 0; i < columnSummary.numRows; i++){
       var row = columnSummary.get(i);
       node = this.#renderAttributeUiNode({
@@ -631,14 +645,20 @@ class AttributeUi {
   async #axisButtonClicked(node, axis, checked){
     var head = node.childNodes.item(0);
     var inputs = head.getElementsByTagName('input');
+    var aggregator;
     switch (axis){
       case QueryModel.AXIS_ROWS:
       case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_CELLS:
         // implement mutual exclusive axes (either rows or columns, not both)
         for (var i = 0; i < inputs.length; i++){
           var input = inputs.item(i);
           if (input.checked && input.parentNode.getAttribute('data-axis') !== axis) {
             input.checked = false;
+          }
+          
+          if (QueryModel.AXIS_CELLS) {
+            aggregator = input.getAttribute('data-aggregator');
           }
         }
         break;
@@ -646,7 +666,7 @@ class AttributeUi {
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
     var derivation = node.getAttribute('data-derivation');
-    var aggregator = node.getAttribute('data-aggregator');
+    var aggregator = aggregator || node.getAttribute('data-aggregator');
 
     
     var itemConfig = {
