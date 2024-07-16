@@ -161,6 +161,9 @@ async function setPageState(hash){
         config.columnType = item.columnType;
         config.derivation = item.derivation;
         config.aggregator = item.aggregator;
+        if (item.includeTotals === true){
+          config.includeTotals = true;
+        }
         
         var formatter = QueryAxisItem.createFormatter(config);
         if (formatter){
