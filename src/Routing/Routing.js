@@ -29,6 +29,9 @@ class Routing {
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
         strippedItem.aggregator = axisItem.aggregator;
+        if (axisItem.includeTotals === true) {
+          strippedItem.includeTotals = true;
+        }
         
         if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
           strippedItem.filter = axisItem.filter;
