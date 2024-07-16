@@ -69,6 +69,25 @@ class AttributeUi {
         };
       }
     },
+    'geomean': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'GEOMEAN( ${columnName} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
+    'mad': {
+      folder: "statistics",
+      columnType: 'INTERVAL',
+      forNumeric: true,
+      expressionTemplate: 'MAD( ${columnName} )'
+    },
     'median': {
       folder: "statistics",
       expressionTemplate: 'MEDIAN( ${columnName} )',
