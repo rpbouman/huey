@@ -185,11 +185,13 @@
   content: "\eb73";
 }
 
+.attributeUi details[data-nodetype=aggregate][data-aggregator=geomean] > summary > .icon::before,
 .attributeUi details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon::before {
   /* math-avg */
   content: "\f0f4";
 }
 
+.attributeUi details[data-nodetype=aggregate][data-aggregator=mad] > summary > .icon::before,
 .attributeUi details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon::before {
   /* calculator */
   content: "\eb80";
