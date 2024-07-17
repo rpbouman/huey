@@ -939,3 +939,14 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
   ]).join('\n');
   return sql;
 }
+
+function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
+  var valuesClause = `(VALUES (${valueLiterals.join('),(')}) )`;
+  if (tableAlias){
+    valuesClause += ` AS ${tableAlias}`;
+    if (columnAlias){
+      valuesClause += `(${columnAlias})`;
+    }
+  }
+  return valuesClause;
+}

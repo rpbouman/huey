@@ -212,7 +212,7 @@ class QueryAxisItem {
       toValueLiterals: toValueLiterals
     };
   }
-
+  
   static getFilterConditionSql(queryAxisItem, alias){
     var filter = queryAxisItem.filter;
     if (!filter) {
@@ -253,19 +253,23 @@ class QueryAxisItem {
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
         case FilterDialog.filterTypes.EXCLUDE:
+          // in case of exclude, keep NULL values unless NULL is also in the valuelist.
+          // https://github.com/rpbouman/huey/issues/90
+          // TODO: if the column happens not to contain any nulls, we can omit this condition
+          if (indexOfNull === -1) {
+            sql = `${columnExpression} IS NULL OR `;
+          }
           operator += literalLists.valueLiterals.length === 1 ? ' !' : ' NOT';
           logicalOperator = 'AND';
         case FilterDialog.filterTypes.INCLUDE:
           operator += literalLists.valueLiterals.length === 1 ? '=' : ' IN';
           var values = literalLists.valueLiterals.length === 1 ? literalLists.valueLiterals[0] : `( ${literalLists.valueLiterals.join('\n,')} )`;
-          sql = `${columnExpression} ${operator} ${values}`;
+          sql += `${columnExpression} ${operator} ${values}`;
 
-          if (nullCondition) {
+          if (indexOfNull !== -1) {
             sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
-            if (!logicalOperator) {
-              sql = `( ${sql} )`;
-            }
           }
+          sql = `( ${sql} )`;
           break;
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator = 'NOT ';
@@ -803,6 +807,7 @@ class QueryModel extends EventEmitter {
     var condition = conditions.join('\nAND ');
     return condition;
   }
+  
 }
 
 var queryModel;
