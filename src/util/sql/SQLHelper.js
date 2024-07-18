@@ -8,6 +8,12 @@ function getNullString(){
   return nullString;
 }
 
+function getTotalsString(axisItem){
+  var generalSettings = settings.getSettings('localeSettings');
+  var totalsString = generalSettings.totalsString;
+  return totalsString;
+}
+
 function getLocales(){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;

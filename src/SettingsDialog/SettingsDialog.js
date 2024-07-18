@@ -52,6 +52,7 @@ class Settings extends EventEmitter {
     },
     localeSettings: {
       nullString: '␀',
+      totalsString: 'Total',
       useDefaultLocale: true,
       locale: navigator.languages,
       minimumIntegerDigits: 1,
