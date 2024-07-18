@@ -449,6 +449,12 @@ class PivotTableUi extends EventEmitter {
     };
   }
 
+  static #isTotalsMember(groupingId, numMembers, memberIndex){
+    var totalsMemberBit = groupingId ? 1 << (numMembers - memberIndex - 1) : undefined;
+    var isTotalsMember = totalsMemberBit ? groupingId & BigInt(totalsMemberBit) : false;
+    return isTotalsMember;
+  }
+
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
     var axisId = QueryModel.AXIS_COLUMNS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
@@ -489,6 +495,7 @@ class PivotTableUi extends EventEmitter {
     // for each tuple
     for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
+      var numMembers = tuple ? tuple.length : 0;
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
 
       //for each header row
@@ -498,6 +505,7 @@ class PivotTableUi extends EventEmitter {
         var cell = cells.item(i);
         cell.setAttribute('data-totals', groupingId > 0);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, numMembers, j);
 
         var labelText = undefined;
         var tupleValue;
@@ -506,6 +514,10 @@ class PivotTableUi extends EventEmitter {
 
           if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
             var columnsAxisItem = columnsAxisItems[j];
+            if (isTotalsMember) {
+              labelText = getTotalsString();
+            }
+            else
             if (columnsAxisItem.formatter) {
               labelText = columnsAxisItem.formatter(tupleValue, tupleValueFields[j]);
             }
@@ -589,7 +601,8 @@ class PivotTableUi extends EventEmitter {
       var tuple = tuples[tupleIndex];
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
 
-      row.setAttribute("data-totals", groupingId > 0);
+      var isTotalsRow = groupingId > 0;
+      row.setAttribute("data-totals", isTotalsRow);
 
       for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
         var cell = cells.item(j);
@@ -597,10 +610,17 @@ class PivotTableUi extends EventEmitter {
 
         var labelText;
         var tupleValue;
-        if (tuple && j < tuple.values.length) {
+        var numMembers = tuple ? tuple.values.length : 0;
+        if (tuple && j < numMembers) {
+          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, numMembers, j);
           tupleValue = tuple.values[j];
+          
           if (cellsAxisItemIndex === 0 || i === 0) {
             var rowsAxisItem = rowsAxisItems[j];
+            if (isTotalsMember) {
+              labelText = getTotalsString(rowsAxisItem);
+            }
+            else
             if (rowsAxisItem.formatter) {
               labelText = rowsAxisItem.formatter(tupleValue, tupleValueFields[j]);
             }
@@ -993,6 +1013,9 @@ class PivotTableUi extends EventEmitter {
 
       for (var k = 0; k < numCellHeaders; k++){
         for (var j = 0; j < headerRows.length; j++){
+          
+          var isTotalsMember = tuple ? PivotTableUi.#isTotalsMember(groupingId, values.length, j) : false;
+
           var headerRow = headerRows.item(j);
 
           var cell = createEl('div', {
@@ -1005,6 +1028,10 @@ class PivotTableUi extends EventEmitter {
           }
 
           var labelText;
+          if (isTotalsMember){
+            labelText = getTotalsString();
+          }
+          else
           if (values && j < values.length) {
             if (k === 0) {
               var value = values[j];
