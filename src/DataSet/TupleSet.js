@@ -72,9 +72,10 @@ class TupleSet extends DataSetComponent {
       // if we have to make grouping sets, then we need to add our "normal" group by clause too
       groupingSets.push(groupByExpressions);
       // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
-      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) as ${TupleSet.groupingIdAlias}`;
+      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
+      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) AS ${groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
-      orderByExpressions.unshift(TupleSet.groupingIdAlias);
+      orderByExpressions.push(`${groupingIdAlias} ASC`);
     }
 
     var datasource = queryModel.getDatasource();
