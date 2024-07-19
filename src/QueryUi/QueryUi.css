@@ -6,6 +6,13 @@
   user-select: none;
 }
 
+/**
+* Prevent Query UI events when the pivot table is busy:
+*/
+.workarea:has( > .pivotTableUiContainer[aria-busy=true] ) > .queryUi {
+  pointer-events: none;
+}
+
 .queryUi section,
 .queryUi menu,
 .queryUi ol,
