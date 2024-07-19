@@ -87,6 +87,12 @@ Aggregates cannot be placed on the horizontal or vertical axes of the pivot tabl
 The query editor supports a special Filters axis. Items placed on the filters access support the Filters dialog which lets you choose values and operators to filter the query results.
 Items on the filter axis themselves are not visible in the query result, unless those items are also placed on the the columns or rows axis.
 
+#### (Sub)totals
+
+Items on the row or columns axis have a "totals" toggle-icon. When enabled, totals for that item will be displayed in a totals row or column.
+
+![image](https://github.com/user-attachments/assets/4b9bed21-0d42-4af0-9b1c-b921f440de48)
+
 ### Export
 Huey provides export capabilities so you can use the results of your analysis outside huey.
 The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
