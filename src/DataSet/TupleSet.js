@@ -23,7 +23,7 @@ class TupleSet extends DataSetComponent {
     }
     return selectListExpressions;
   }
-    
+      
   static getSqlSelectStatement(queryModel, axisId, includeCountAll) {
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
@@ -34,10 +34,13 @@ class TupleSet extends DataSetComponent {
     var columnExpressions = TupleSet.getSqlSelectExpressions(queryModel, axisId, includeCountAll);
 
     var selectListExpressions = [];
+
     // the group by expression includes expressons for all axis items.
     var groupByExpressions = [];
-    // the groupingSets are created when we find an axis item that has 
+
+    // the groupingSets are created when we find an axis item that has includeTotals
     var groupingSets = [];
+    
     var orderByExpressions = [];
     
     var columnIds = Object.keys(columnExpressions);
@@ -45,32 +48,54 @@ class TupleSet extends DataSetComponent {
     for (var i = 0; i < columnIds.length; i++) {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
+      var orderByExpression = columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
+        // we need that count all to figure out how many tuples there are on the axis in total
         selectListExpressions.push(columnExpression);
+        // since this does not correspond to an actual query item, we whould leave immediately after
         break;
       }
+      
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
       var queryAxisItem = queryAxisItems[i];
+      var sortDirection = queryAxisItem.sortDirection || 'ASC';
       
       if (queryAxisItem.includeTotals){
-        groupingSets.push([].concat(groupByExpressions));
+        var groupingSet = [].concat(
+          groupByExpressions, 
+          columnIds
+          .slice(i+1, includeCountAll ? -1 : undefined)
+          .filter(function(columnId, i){
+            var indexOfQueryAxisItem = columnIds.indexOf(columnId);
+            var queryAxisItem = queryAxisItems[indexOfQueryAxisItem];
+            return !queryAxisItem.includeTotals;
+          })
+          .map(function(columnId){
+            return columnExpressions[columnId];
+          })
+        );
+        groupingSets.push(groupingSet);
+        
+        // if we have an axis item with includeTotals, then we want the super-aggregate rows (the totels) 
+        // to appear directly below the group of rows with a particular column value.
+        // but because the total row has a NULL their, it will sort lower than anything else.
+        // changing the order by expresison to MAX fixes that as it will get the value of the row that sorted last.
+        // (there are still some issues when you have actual NULL values in the column but we'll get to that later).
+        var orderByAggregate = 'MAX';
+        orderByExpression = `${orderByAggregate}( ${orderByExpression} )`;
       }
       
-      groupByExpressions.push(columnExpression);
-      
-      var sortDirection = queryAxisItem.sortDirection;
-      if (!sortDirection) {
-        sortDirection = 'ASC';
-      }
-      var orderByExpression = `${columnExpression} ${sortDirection}` ;
-      orderByExpressions.push(orderByExpression);      
+      groupByExpressions.push(columnExpression);      
+      orderByExpressions.push(`${orderByExpression} ${sortDirection}`);
     }
     
     if (groupingSets.length){
-      // if we have to make grouping sets, then we need to add our "normal" group by clause too
-      groupingSets.push(groupByExpressions);
+      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
+        // if we have to make grouping sets, then we need to add our "normal" group by clause too
+        groupingSets.push([].concat(groupByExpressions));
+      }
       // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
       var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
       var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) AS ${groupingIdAlias}`;
@@ -92,8 +117,12 @@ class TupleSet extends DataSetComponent {
     var groupByClause = `GROUP BY `;
     if (groupingSets.length > 1) {
       groupByClause += 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
-        return `  (\n${groupingSet.join('\n  , ')}\n  )` ;
-      }).join(',') + ')';
+        return [
+          '  (',
+          `    ${groupingSet.join('\n  , ')}`,
+          '  )'
+        ].join('\n');
+      }).join(',') + '\n)';
     }
     else {
       groupByClause += groupByExpressions.join('\n,');

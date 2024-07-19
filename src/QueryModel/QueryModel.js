@@ -380,6 +380,13 @@ class QueryAxis {
   getItems() {
     return [].concat(this.#items);
   }
+  
+  getTotalsItems(){
+    var totalsItems = this.#items.filter(function(axisItem){
+      return axisItem.includeTotals === true;
+    });
+    return totalsItems.length ? totalsItems : undefined;
+  }
 
   setItems(items) {
     this.#items = items;
