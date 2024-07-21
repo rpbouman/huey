@@ -70,11 +70,15 @@ The Datasources have an explore button ![explore button](https://github.com/rpbo
  . After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
 
+![image](https://github.com/user-attachments/assets/d4caf74b-64ce-4722-ad55-d31cf192bff6)
+
 The pivot table has two axes for placing attribute values:
 1) Attributes appearing on the horizontal axis are used to generate column headers. For this reason the horizontal axis is also known as the 'columns'-axis.
 2) attributes appearing on the vertical axis are used to generate row headers. For this reason the vertical axis is also known as the 'rows'-axis.
 
 Right before the attribute item, there is a widget to expand the Attribute so its derived Attributes and Aggregates are revealed.
+
+![image](https://github.com/user-attachments/assets/db9e89c5-e7c3-44af-956b-9393dad6723c)
 
 You can think of a derived attribute as an expression (formulae) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
@@ -83,9 +87,14 @@ The values that are thus derived from the original attribute values can be thoug
 Aggregates are special expressions that calculate a result on a group of attribute values. 
 Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
 
+![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
+
 #### Filtering
+
 The query editor supports a special Filters axis. Items placed on the filters access support the Filters dialog which lets you choose values and operators to filter the query results.
 Items on the filter axis themselves are not visible in the query result, unless those items are also placed on the the columns or rows axis.
+
+![image](https://github.com/user-attachments/assets/beae75ae-b158-4e26-b30b-958bffd4f222)
 
 #### (Sub)totals
 
@@ -98,3 +107,6 @@ Huey provides export capabilities so you can use the results of your analysis ou
 The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
 
 Apart from the result data, Huey also lets you export the SQL statements that would produce the query result.
+
+![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
+
