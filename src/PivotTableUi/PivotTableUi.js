@@ -1387,6 +1387,9 @@ class PivotTableUi extends EventEmitter {
         status: 'error',
         error: e
       });
+      
+      // TODO: consider moving this to the app and handling it by listening to events.
+      showErrorDialog(eventData.error);
     }
     finally {
       tableDom.style.width = '99.99%';
@@ -1586,18 +1589,4 @@ function initPivotTableUi(){
     settings: settings
   });
   
-  pivotTableUi.addEventListener('updated', function(event){
-    var eventData = event.eventData;
-    switch (eventData.status) {
-      case 'success':
-        // by the time rendering the pivot is succesful, 
-        // we can safely update the page route.
-        var currentRoute = Routing.getRouteForView(pivotTableUi);
-        document.location.hash = currentRoute || '';
-        break;
-      case 'error':
-        showErrorDialog(eventData.error);
-        break;
-    }      
-  });
 }

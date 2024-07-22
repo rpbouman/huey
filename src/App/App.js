@@ -215,7 +215,18 @@ function initApplication(){
   initQueryUi();
   initPivotTableUi();
   initExecuteQuery();
-  
-  initPopstateHandler();
-  setPageState();
+ 
+  var pivotTableInitEventListener = function(){
+    initPageStateManager();
+    pivotTableUi.removeEventListener('updated', pivotTableInitEventListener);
+    
+    pageStateManager.observe(pivotTableUi);  
+    var currentRoute = Routing.getCurrentRoute();
+    if (!currentRoute){
+      return;
+    }
+    pageStateManager.setPageState(currentRoute);
+  };
+  pivotTableUi.addEventListener('updated', pivotTableInitEventListener);
+ 
 }

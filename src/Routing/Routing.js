@@ -46,14 +46,14 @@ class Routing {
     return queryModelObject;
   }
  
-  static getRouteForView(view, noHash){
+  static getRouteForView(view){
     var viewClass = view.constructor.name;
     
     var queryModel = view.getQueryModel();
     var queryModelObject = Routing.serializeQueryModel(queryModel);    
     
     if (queryModelObject === null) {
-      return null;
+      return undefined;
     }
     
     var viewObject = {
@@ -64,10 +64,7 @@ class Routing {
     var ascii = encodeURIComponent( json );
     var base64 = btoa( ascii ); 
     var route = base64;
-    if (noHash){
-      return route;
-    }
-    return `#${route}`;
+    return route;
   }
 
   static getViewstateFromRoute(route){
@@ -84,4 +81,27 @@ class Routing {
     }
   }
     
+  static getCurrentRoute(){
+    var hash = document.location.hash;
+
+    if (hash.startsWith('#')){
+      hash = hash.substring(1);
+    }
+
+    if (hash === ''){
+      return undefined;
+    }
+    
+    return hash;
+  }
+  
+  static updateRouteFromView(view){
+    var currentRoute = Routing.getCurrentRoute();
+    var newRoute = Routing.getRouteForView(view);
+    if (currentRoute === newRoute && Boolean(newRoute)) {
+      return;
+    }
+    var hash = newRoute ? `#${newRoute}` : '';
+    document.location.hash = hash;
+  }
 }
