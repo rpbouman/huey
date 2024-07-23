@@ -85,23 +85,43 @@
   /* file */
   content: '\eaa4';
 }
-
+ 
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > .icon::before {
   /* feather */
   content: '\ee8b';
 }
 
+/* this is used in the datasource menu when prompting for missing datasource */
+menu.dataSources {
+  padding-inline-start: 0px;
+}
+menu.dataSources > li {
+  list-style-type: none;
+}
+menu.dataSources > li > .icon {
+  display: inline-block;
+  font-family: var( --huey-icon-font-family ) !important;
+  font-size: var( --huey-icon-medium );
+  color: var( --huey-icon-color );
+  width: 24px;
+  padding: 6px 3px 0px 3px;
+  text-align: center;
+}
+/**/
 
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > .icon::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > .icon::before {
   /* file-type-csv */
   content: '\fb09';
 }
 
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > .icon::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > .icon::before {
   /* file-type-txt */
   content: '\fb19';
 }
 
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=json] > .icon::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=json] > summary > .icon::before {
   /* file-type-js */
   content: '\fb0e';
@@ -112,12 +132,13 @@
   content: '\fb0e';
 }
 
-
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > .icon::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > .icon::before {
   /* file-stack */
   content: '\f503';
 }
 
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > .icon::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > .icon::before {
   /* file-type-xls */
   content: '\fb1b';

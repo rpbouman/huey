@@ -51,38 +51,69 @@ class PageStateManager {
         resolve(desiredDataSource);
         return;
       }
-      
+      var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
       var title;
-      var message = `The requested datasource ${desiredDatasourceId} `;
+      var message = `The requested ${desiredDatasourceIdParts.type} ${desiredDatasourceIdParts.localId}`;
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
+      var openNewDatasourceItem;
       if (existingDatasource) {
+        openNewDatasourceItem = [
+          `<li data-nodetype="datasource">`,
+            `<input type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
+            '<span class="icon" role="img"></span>',
+            `<span class="label">Browse for a new Datasource</span>`,
+          `</li>`
+        ].join('\n')
         title = 'Incompatible Datasource';
-        message += 'is not compatible with your query:';
-        
+        message += ' isn\'t compatible with your query.';
         // TODO: show why it's not compatible
       }
       else {
+        openNewDatasourceItem = [
+          `<li data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
+            `<input type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
+            '<span class="icon" role="img"></span>',
+            `<span class="label">${desiredDatasourceIdParts.localId}</span>`,
+          `</li>`
+        ].join('\n');
         title = 'Datasource not found';
-        message += ' does not exist.' +
-        '<br/>Would you like to open it?';
+        message += 'doesn\'t exist.';
       }
+      
+      var list = '<menu class="dataSources">';
+      var datasourceType;
       var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
       if (compatibleDatasourceIds.length) {
-        message += '<br/>You can choose any of the compatible datasources instead, or else open a new one:';
-        var list = compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
-          return `<div><input type="radio" name="compatibleDatasources" value="${index}"/> ${compatibleDatasourceId}</div>`;
+        message += '<br/>You can choose any of the compatible datasources instead, or browse to open a new one:';
+        list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
+          var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
+          datasourceType = compatibleDatasource.getType();
+          var extraAtts = '';
+          switch (datasourceType) {
+            case DuckDbDataSource.types.FILE:
+              var fileName = compatibleDatasource.getFileName();
+              var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+              extraAtts = ` data-filetype="${fileNameParts.lowerCaseExtension}"`;
+              break;
+            default:
+          }
+          var caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
+          return [
+            `<li data-nodetype="datasource" data-datasourcetype="${datasourceType}" ${extraAtts}>`,
+              `<input type="radio" name="compatibleDatasources" value="${index}"/>`,
+              '<span class="icon" role="img"></span>',
+              `<span class="label">${caption}</span>`,
+            `</li>`
+          ].join('\n');
         });
-        list = `<form id="chooseCompatibleDatasourceForm">${list}</form>`;
-        message += list;
-      }
-      else {
-        message += 'Choose Ok to open it.'
       }
       
-      //message += `<div><button onclick="byId('uploader').click()">Open Datasource...</button></div>`;
+      list += openNewDatasourceItem;
+      list += "</menu>";
+      message += list;
       
       var choice = PromptUi.show({
-        title: 'Datasource not found',
+        title: title,
         contents: message
       });
       
@@ -91,10 +122,11 @@ class PageStateManager {
         switch (choice) {
           case 'accept':
             if (compatibleDatasources) {
-              var form = byId('chooseCompatibleDatasourceForm');
-              var radio = form.querySelector('input[name=compatibleDatasources]:checked')
-              var compatibleDatasourceId = radio ? compatibleDatasourceIds[parseInt(radio.value, 10)] : null;
-              if (compatibleDatasourceId) {
+              var promptUi = byId('promptUi');
+              var radio = promptUi.querySelector('input[name=compatibleDatasources]:checked');
+              var chosenOption = parseInt(radio.value, 10);
+              if (chosenOption !== -1) {
+                var compatibleDatasourceId = radio ? compatibleDatasourceIds[chosenOption] : null;
                 var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
                 resolve(compatibleDatasource);
                 return;
@@ -107,7 +139,7 @@ class PageStateManager {
             break;
         }
       })
-      .catch(function(){
+      .catch(function(error){
         reject();
       });
     });
