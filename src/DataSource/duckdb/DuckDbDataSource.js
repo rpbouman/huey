@@ -223,6 +223,15 @@ class DuckDbDataSource extends EventEmitter {
     return `${type}:${postFix}`;
   }
  
+  static parseId(datasourceId) {
+    var parts = datasourceId.split(':');
+    var type = parts.shift();
+    return {
+      type: type,
+      localId: parts.join(':')
+    };
+  }
+ 
   async registerFile(){
     var file = this.#file;
     if (! (file instanceof File)){

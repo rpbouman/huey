@@ -486,6 +486,31 @@ class QueryModel extends EventEmitter {
   getDatasource(){
     return this.#datasource;
   }
+  
+  /**
+  * finds all columns refs and lists the axes that use the column
+  */
+  getReferencedColumns(){
+    var referencedColumns = {};
+    Object.keys(this.#axes).forEach(function(axisId){
+      var axis = this.getQueryAxis(axisId);
+      axis.getItems().forEach(function(axisItem){
+        var columnName = axisItem.columnName;
+        var columnSpec = referencedColumns[columnName];
+        if (!columnSpec) {
+          columnSpec = {
+            columnType: axisItem.columnType,
+            axes: []
+          };          
+          referencedColumns[columnName] = columnSpec;
+        }
+        if (columnSpec.axes.indexOf(axisId) === -1){
+          columnSpec.axes.push(axisId);
+        }
+      });
+    }.bind(this))
+    return referencedColumns;
+  }
 
   findItem(config){
     var columnName = config.columnName;

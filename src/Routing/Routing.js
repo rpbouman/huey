@@ -46,30 +46,6 @@ class Routing {
     return queryModelObject;
   }
  
-  static getRouteForView(view, noHash){
-    var viewClass = view.constructor.name;
-    
-    var queryModel = view.getQueryModel();
-    var queryModelObject = Routing.serializeQueryModel(queryModel);    
-    
-    if (queryModelObject === null) {
-      return null;
-    }
-    
-    var viewObject = {
-      viewClass: viewClass,
-      queryModel: queryModelObject
-    };
-    var json = JSON.stringify( viewObject );
-    var ascii = encodeURIComponent( json );
-    var base64 = btoa( ascii ); 
-    var route = base64;
-    if (noHash){
-      return route;
-    }
-    return `#${route}`;
-  }
-
   static getViewstateFromRoute(route){
     try {
       var base64 = route;
@@ -83,5 +59,55 @@ class Routing {
       return null;
     }
   }
+      
+  static getRouteForView(view){
+    var viewClass = view.constructor.name;
     
+    var queryModel = view.getQueryModel();
+    var queryModelObject = Routing.serializeQueryModel(queryModel);    
+    
+    if (queryModelObject === null) {
+      return undefined;
+    }
+    
+    var viewObject = {
+      viewClass: viewClass,
+      queryModel: queryModelObject
+    };
+    var json = JSON.stringify( viewObject );
+    var ascii = encodeURIComponent( json );
+    var base64 = btoa( ascii ); 
+    var route = base64;
+    return route;
+  }
+
+  static getCurrentRoute(){
+    var hash = document.location.hash;
+
+    if (hash.startsWith('#')){
+      hash = hash.substring(1);
+    }
+
+    if (hash === ''){
+      return undefined;
+    }
+    
+    return hash;
+  }
+  
+  static isSynced(view) {
+    var viewRoute = Routing.getRouteForView(view);
+    var currentRoute = Routing.getCurrentRoute();
+    return viewRoute === currentRoute;
+  }
+
+  static updateRouteFromView(view){
+    var currentRoute = Routing.getCurrentRoute();
+    var newRoute = Routing.getRouteForView(view);
+    if (currentRoute === newRoute && Boolean(newRoute)) {
+      return;
+    }
+    var hash = newRoute ? `#${newRoute}` : '';
+    document.location.hash = hash;
+  }
 }

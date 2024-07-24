@@ -61,20 +61,30 @@ class EventEmitter {
     }
     
     var count = 0;
-    while (eventListeners.indexOf(listener) !== -1){
+    var index;
+    while ((index = eventListeners.indexOf(listener)) !== -1){
       eventListeners.splice(index, 1);
       count += 1;
     };
     return count;
   }
   
-  fireEvent(eventType, eventData) {
+  fireEvent(eventType, eventData, target) {
     var eventListeners = this.#eventListeners[eventType];
     if (!eventListeners) {
       return;
     }
+    var target = target || this;
     var event = new Event(eventType);
+    //https://stackoverflow.com/questions/37456443/how-set-the-eventtarget-of-an-event
+    var targetPropertyDefinition = {
+      writable: false,
+      value: target
+    };
+    Object.defineProperty(event, 'target', targetPropertyDefinition);
+    Object.defineProperty(event, 'currentTarget', targetPropertyDefinition);
     event.eventData = eventData;
+    eventData.emitter = target;
     eventListeners.forEach(function(listener){
       listener.call(null, event);
     });
