@@ -46,6 +46,20 @@ class Routing {
     return queryModelObject;
   }
  
+  static getViewstateFromRoute(route){
+    try {
+      var base64 = route;
+      var ascii = atob( base64 ); 
+      var json = decodeURIComponent( ascii );
+      var state = JSON.parse( json );
+            
+      return state;
+    }
+    catch(error){
+      return null;
+    }
+  }
+      
   static getRouteForView(view){
     var viewClass = view.constructor.name;
     
@@ -67,20 +81,6 @@ class Routing {
     return route;
   }
 
-  static getViewstateFromRoute(route){
-    try {
-      var base64 = route;
-      var ascii = atob( base64 ); 
-      var json = decodeURIComponent( ascii );
-      var state = JSON.parse( json );
-            
-      return state;
-    }
-    catch(error){
-      return null;
-    }
-  }
-    
   static getCurrentRoute(){
     var hash = document.location.hash;
 
@@ -95,6 +95,12 @@ class Routing {
     return hash;
   }
   
+  static isSynced(view) {
+    var viewRoute = Routing.getRouteForView(view);
+    var currentRoute = Routing.getCurrentRoute();
+    return viewRoute === currentRoute;
+  }
+
   static updateRouteFromView(view){
     var currentRoute = Routing.getCurrentRoute();
     var newRoute = Routing.getRouteForView(view);

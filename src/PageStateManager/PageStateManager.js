@@ -58,10 +58,10 @@ class PageStateManager {
       var openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = [
-          `<li data-nodetype="datasource">`,
-            `<input type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
+          `<li id="datasourceMenu-1" data-nodetype="datasource">`,
+            `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
             '<span class="icon" role="img"></span>',
-            `<span class="label">Browse for a new Datasource</span>`,
+            `<label for="datasourceMenu-1" class="label">Browse for a new Datasource</span>`,
           `</li>`
         ].join('\n')
         title = 'Incompatible Datasource';
@@ -70,10 +70,10 @@ class PageStateManager {
       }
       else {
         openNewDatasourceItem = [
-          `<li data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
-            `<input type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
+          `<li id="datasourceMenu-1" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
+            `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
             '<span class="icon" role="img"></span>',
-            `<span class="label">${desiredDatasourceIdParts.localId}</span>`,
+            `<label datasourceMenu-1 class="label">Browse to open ${desiredDatasourceIdParts.localId}</label>`,
           `</li>`
         ].join('\n');
         title = 'Datasource not found';
@@ -100,12 +100,12 @@ class PageStateManager {
           var caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
           return [
             `<li data-nodetype="datasource" data-datasourcetype="${datasourceType}" ${extraAtts}>`,
-              `<input type="radio" name="compatibleDatasources" value="${index}"/>`,
+              `<input id="datasourceMenu${index}" type="radio" name="compatibleDatasources" value="${index}"/>`,
               '<span class="icon" role="img"></span>',
-              `<span class="label">${caption}</span>`,
+              `<label for="datasourceMenu${index}" class="label">${caption}</label>`,
             `</li>`
           ].join('\n');
-        });
+        }).join('');
       }
       
       list += openNewDatasourceItem;
@@ -143,6 +143,10 @@ class PageStateManager {
         reject();
       });
     });
+  }
+
+  isSynced(){
+    return Routing.isSynced(this.#view);
   }
 
   async setPageState(newRoute){

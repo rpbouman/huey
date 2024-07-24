@@ -78,134 +78,9 @@ function initExecuteQuery(){
   });
 }
 
-function popstateHandler(event){
-  var hash = event.target.document.location.hash;
-  if (hash.length === 0){
-    return;
-  }
-  
-  var currentRoute = Routing.getRouteForView(pivotTableUi);
-  if (currentRoute === hash){
-    return;
-  }
-  setPageState(hash);
-}
-
-// TODO: refactor this, but not sure where to put it yet.
-async function setPageState(hash){
-  if (!hash){
-    hash = document.location.hash;
-  }
-  if (hash.length === 0){
-    return;
-  }
-  if (hash.startsWith('#')) {
-    hash = hash.substring(1);
-  }
-
-  var autoRunQuery = settings.getSettings('querySettings').autoRunQuery;
-  try {
-    
-    var currentRoute = Routing.getRouteForView(pivotTableUi, false);
-    if (currentRoute === hash){
-      return;
-    }
-    
-    var state = Routing.getViewstateFromRoute(hash);
-    var viewClass = state.viewClass;
-    var queryModelState = state.queryModel;
-    var datasourceId = queryModelState.datasourceId;
-    
-    var datasource = datasourcesUi.getDatasource(datasourceId);
-    if (!datasource) {
-      var choice = await PromptUi.show({
-        title: 'Datasource not found',
-        contents: [
-          'You are trying to open a query on datasource:',
-          `<center>${datasourceId}</center>`,
-          'Would you like to open the datasource?'
-        ].join('<br/>')
-      });
-      switch (choice) {
-        case 'accept':
-          byId('uploader').click();
-          break;
-        case 'reject':
-          document.location.hash = '';
-          break;
-      }
-      return;
-    }
-    var columnMetadata = await datasource.getColumnMetadata();
-    
-    var cellsHeadersAxis = queryModelState.cellsHeaders;
-    var axes = queryModelState.axes;
-    
-    if (autoRunQuery) {
-      settings.assignSettings(['querySettings', 'autoRunQuery'], false);
-    }
-    var queryModel = pivotTableUi.getQueryModel();
-    if (queryModel.getDatasource() === datasource) {
-      queryModel.clear();
-    }
-    else {
-      queryModel.setDatasource(datasource);
-    }
-    
-    for (var axisId in axes){
-      var items = axes[axisId];
-      for (var i = 0 ; i < items.length; i++){
-        var item = items[i];
-        var config = { columnName: item.column };
-
-        config.columnType = item.columnType;
-        config.derivation = item.derivation;
-        config.aggregator = item.aggregator;
-        if (item.includeTotals === true){
-          config.includeTotals = true;
-        }
-        
-        var formatter = QueryAxisItem.createFormatter(config);
-        if (formatter){
-          config.formatter = formatter;
-        }
-        
-        var literalWriter = QueryAxisItem.createLiteralWriter(config);
-        if (literalWriter){
-          config.literalWriter = literalWriter;
-        }
-        
-        if (axisId === QueryModel.AXIS_FILTERS) {
-          var filter = item.filter;
-          if (filter) {
-            config.filter = filter;
-          }
-        }
-        config.axis = axisId;
-        await queryModel.addItem(config);
-      }
-    }
-  }
-  catch(e){
-    showErrorDialog(e);
-    event.preventDefault = true;
-  }
-  finally{
-    if (autoRunQuery) {
-      settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
-      pivotTableUi.updatePivotTableUi();
-    }
-  }
-}
-
-function initPopstateHandler(){
-  window.addEventListener('popstate', popstateHandler);
-}
-
 function initApplication(){
   initErrorDialog();
   initDuckdbVersion();
-  initUploadUi();
   initDataSourcesUi();
   initQueryModel();
   initExportUi();
@@ -218,6 +93,8 @@ function initApplication(){
  
   var pivotTableInitEventListener = function(){
     initPageStateManager();
+    initUploadUi();
+
     pivotTableUi.removeEventListener('updated', pivotTableInitEventListener);
     
     pageStateManager.observe(pivotTableUi);  
@@ -226,6 +103,7 @@ function initApplication(){
       return;
     }
     pageStateManager.setPageState(currentRoute);
+        
   };
   pivotTableUi.addEventListener('updated', pivotTableInitEventListener);
  
