@@ -53,13 +53,15 @@ class Routing {
   }
 
   static updateRouteFromQueryModel(queryModel){
-    var currentRoute = Routing.getCurrentRoute();
     var newRoute = Routing.getRouteForQueryModel(queryModel);
-    if (currentRoute === newRoute && Boolean(newRoute)) {
-      return;
-    }
+    //if (currentRoute === newRoute && Boolean(newRoute)) {
+    //  return;
+   // }
     var hash = newRoute ? `#${newRoute}` : '';
     //document.location.hash = hash;
-    history.pushState(undefined, undefined, hash);
+    if (history.state === newRoute){
+      return;
+    }
+    history.pushState(newRoute, undefined, hash);
   }
 }
