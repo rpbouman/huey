@@ -110,3 +110,29 @@ Apart from the result data, Huey also lets you export the SQL statements that wo
 
 ![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
 
+### Settings
+The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![image](https://github.com/user-attachments/assets/ed7c5780-4795-44b0-98f0-f97f3e509e37). 
+Settings are persisted in the browser's local storage.
+Settings are organized in separate tabs:
+
+#### Datasource Settings
+This lets you control the behavior of datasources.
+- The UNION loose typing checkbox controls how Huey detects whether datasources have the same column signature. When unchecked, exact data type matching is used; when checked, a more loose typing rule is applied.
+
+#### Value formatting
+This tab bundles all settings that controls the default appearance of values
+- NULL-value label: a string that is used to symbolize NULL-values.
+- Totals label: a string that is used to indicate the value is the total of the item indicated by the header.
+- Use default locale: when checked, the Browser's default locale(s) are used to format numbers. When unchecked, the Locale setting becomes editable.
+- Locale: the custom locale to use. You need to uncheck the Use default locale checkbox to edit this setting
+- Min. integer digits: the minimal number of digits to use to denote the integer part of numbers
+- Min. fraction digits: the minimal number of fractional digits to denote
+- Max. fraction digits: the maximum number of fractional digits to denote
+#### Query
+Controls the behavior of the query editor.
+- Autorun: whether queries execute automatically after editing the query
+#### Pviot Table
+Settings that control the appearance and behavior of the Pivot Table
+- Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
+#### Theme
+- Themes dropdown: a dropdown showing the various themes/color schemes.
