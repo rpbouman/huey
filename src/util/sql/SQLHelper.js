@@ -1,11 +1,33 @@
-function createNumberFormatter(fractionDigits){
+function getDataTypeNameFromColumnType(columnType){
+  return /^[^\(]+/.exec(columnType)[0];
+}
+
+function getNullString(){
+  var generalSettings = settings.getSettings('localeSettings');
+  var nullString = generalSettings.nullString;
+  return nullString;
+}
+
+function getTotalsString(axisItem){
+  var generalSettings = settings.getSettings('localeSettings');
+  var totalsString = generalSettings.totalsString;
+  return totalsString;
+}
+
+function getLocales(){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
+  return locales;
+}
+
+function createNumberFormatter(fractionDigits){
+  var localeSettings = settings.getSettings('localeSettings');
   var options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
   
   var intFormatter, decimalSeparator;
+  var locales = getLocales();
   intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
@@ -39,7 +61,7 @@ function createNumberFormatter(fractionDigits){
   return {
     format: function(value, field){
       if (value === null) {
-        return '';
+        return getNullString();
       }
       
       if (field) {
@@ -72,6 +94,9 @@ function createNumberFormatter(fractionDigits){
                 var fractionalPartIndex = integerPart.length - fieldTypeScale;
                 fractionalPart = integerPart.slice(fractionalPartIndex);
                 integerPart = integerPart.slice(0, fractionalPartIndex);
+                if (integerPart === '-') {
+                  integerPart = '-0';
+                }
               }
             }
             stringValue = intFormatter.format(BigInt(integerPart));
@@ -92,7 +117,7 @@ function createNumberFormatter(fractionDigits){
 
 function fallbackFormatter(value){
   if (value === null || value === undefined){
-    return '';
+    return getNullString();
   }
   return String(value);
 }
@@ -103,8 +128,113 @@ function createDefaultLiteralWriter(type){
   }
 }
 
+function createDateFormatter(options){
+  var locales = getLocales();
+  var dateFormatter = new Intl.DateTimeFormat(locales, options);
+  return dateFormatter;
+}
+
+function createLocalDateFormatter(){
+  var dateFormatter = createDateFormatter({
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  });
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return dateFormatter.format(value);
+  }
+}
+
+function createMonthNameFormatter(){
+  var dateFormatter = createDateFormatter({
+    month: 'long'
+  });
+  var monthNames = [null];
+  var date;
+  for (var i = 0; i < 12; i++){
+    if (date){
+      date.setMonth(i);
+    }
+    else{
+      date = new Date(2000, i, 01);
+    }
+    var dateString = dateFormatter.format(date);
+    var monthName = dateString.replace(/[^\d\w]/g, '');
+    monthNames.push(monthName);
+  }
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return monthNames[value];
+  }
+}
+
+function createDayNameFormatter(){
+  var dateFormatter = createDateFormatter({
+    weekday: 'long'
+  });
+  var dayNames = [];
+  var date;
+  for (var i = 1; i < 8; i++){
+    if (date){
+      date.setDate(i);
+    }
+    else {
+      // 2023-01-01 started on a sunday
+      date = new Date(2023, 0, 01);
+    }
+    var dateString = dateFormatter.format(date);
+    var dayName = dateString.replace(/[^\d\w]/g, '');
+    dayNames.push(dayName);
+  }
+  return function(value){
+    if (value === null) {
+      return getNullString();
+    }
+    return dayNames[value];
+  }
+}
+
+function monthNumFormatter(monthNum){
+  if (monthNum === null){
+    return getNullString();
+  }
+  monthNum = String(monthNum);
+  if (monthNum.length === 1) {
+    monthNum = '0' + monthNum;
+  }
+  return monthNum;
+}
+
+function dayNumFormatter(dayNum){
+  if (dayNum === null){
+    return getNullString();
+  }
+  dayNum = String(dayNum);
+  if (dayNum.length === 1) {
+    dayNum = '0' + dayNum;
+  }
+  return dayNum;
+}
+
+function weekNumFormatter(weekNum){
+  if (weekNum === null){
+    return getNullString();
+  }
+  weekNum = String(weekNum);
+  if (weekNum.length === 1) {
+    weekNum = '0' + weekNum;
+  }
+  return weekNum;
+}
+
 var dataTypes = {
   'DECIMAL': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
@@ -117,6 +247,7 @@ var dataTypes = {
     }
   },
   'DOUBLE': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(true);
@@ -129,6 +260,7 @@ var dataTypes = {
     }    
   },
   'REAL': {
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     greaterPrecisionAlternative: "DOUBLE",
     createFormatter: function(){
@@ -142,6 +274,7 @@ var dataTypes = {
     }    
   },
   'BIGINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "HUGEINT",
@@ -156,7 +289,9 @@ var dataTypes = {
     }    
   },
   'HUGEINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
+    defaultAnalyticalRole: 'attribute',
     isInteger: true,
     createFormatter: function(){
       var formatter = createNumberFormatter(false);
@@ -169,6 +304,7 @@ var dataTypes = {
     }    
   },
   'INTEGER': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "BIGINT",
@@ -183,6 +319,7 @@ var dataTypes = {
     }    
   },
   'SMALLINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "INTEGER",
@@ -197,6 +334,7 @@ var dataTypes = {
     }    
   },
   'TINYINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "SMALLINT",
@@ -211,6 +349,7 @@ var dataTypes = {
     }    
   },
   'UBIGINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -226,6 +365,7 @@ var dataTypes = {
     }    
   },
   'UHUGEINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     createFormatter: function(){
@@ -239,6 +379,7 @@ var dataTypes = {
     }    
   },
   'UINTEGER': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -254,6 +395,7 @@ var dataTypes = {
     }    
   },
   'USMALLINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -269,6 +411,7 @@ var dataTypes = {
     }    
   },
   'UTINYINT': {
+    defaultAnalyticalRole: 'attribute',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -284,12 +427,16 @@ var dataTypes = {
     }    
   },
   'BIT': {
+    defaultAnalyticalRole: 'attribute',
   },
   'BOOLEAN': {
+    defaultAnalyticalRole: 'attribute',
   },
   'BLOB': {
+    defaultAnalyticalRole: 'attribute',
   },
   'DATE': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     createFormatter: function(){
       var localeSettings = settings.getSettings('localeSettings');
@@ -300,28 +447,27 @@ var dataTypes = {
         day: '2-digit'
       });
       return function(value, field){
+        if (value === null){
+          return getNullString();
+        }
         return formatter.format(value);
       };
     },
     createLiteralWriter: function(){
       return function(value, field){
-        var monthNum = String(1 + value.getUTCMonth());
-        if (monthNum.length === 1) {
-          monthNum = '0' + monthNum;
-        }
-        var dayNum = value.getUTCDate();
-        if (dayNum.length === 1) {
-          dayNum = '0' + dayNum;
-        }
+        var monthNum = monthNumFormatter(1 + value.getUTCMonth())
+        var dayNum = dayNumFormatter(value.getUTCDate());
         return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
       };
     }
   },
   'TIME': {
+    defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
     
   },
   'TIMESTAMP': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     hasTimeFields: true,
     createFormatter: function(){
@@ -342,7 +488,7 @@ var dataTypes = {
       });
       return function(value, field){
         if (value === null ){
-          return null;
+          return getNullString();
         }
         var date = new Date(value);
         var parts = String(value).split('.');
@@ -366,6 +512,7 @@ var dataTypes = {
     }
   },
   'TIMESTAMP WITH TIME ZONE': {
+    defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
     hasTimeFields: true,
     hasTimezone: true,
@@ -376,16 +523,20 @@ var dataTypes = {
     }
   },
   'INTERVAL': {
+    defaultAnalyticalRole: 'measure'
   },
   'UUID': {
+    defaultAnalyticalRole: 'attribute'
   },
   'ENUM': {
+    defaultAnalyticalRole: 'attribute'
   },
   'VARCHAR': {
+    defaultAnalyticalRole: 'attribute',
     createFormatter: function(){
       return function(value){
         if (value === null){
-          return '';
+          return getNullString();
         }
         return value;
       }
@@ -397,14 +548,19 @@ var dataTypes = {
     }
   },
   'ARRAY': {
+    defaultAnalyticalRole: 'attribute'
   },
   'LIST': {
+    defaultAnalyticalRole: 'attribute'
   },
   'MAP': {
+    defaultAnalyticalRole: 'attribute'
   },
   'STRUCT': {
+    defaultAnalyticalRole: 'attribute'
   },
   'UNION': {
+    defaultAnalyticalRole: 'attribute'
   }
 };
 
@@ -788,4 +944,15 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
     `${keywordFormatter('order')} ${keywordFormatter('by')} ${Object.keys(rowsExpressions).map(identifierQuoter).join(comma)}`
   ]).join('\n');
   return sql;
+}
+
+function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
+  var valuesClause = `(VALUES (${valueLiterals.join('),(')}) )`;
+  if (tableAlias){
+    valuesClause += ` AS ${tableAlias}`;
+    if (columnAlias){
+      valuesClause += `(${columnAlias})`;
+    }
+  }
+  return valuesClause;
 }

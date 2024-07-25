@@ -119,6 +119,23 @@ class DataSourcesUi {
     return actionButton;
   }
   
+  #getLooseColumnType(columnType){
+    var datasourceSettings = settings.getSettings('datasourceSettings');
+    var looseColumnTypes = datasourceSettings.looseColumnTypes;
+    var comparisonColumnType = undefined;
+    for (var looseType in looseColumnTypes){
+      var columnTypes = looseColumnTypes[looseType];
+      if (columnTypes.indexOf(columnType) === -1) {
+        continue;
+      }
+      comparisonColumnType = looseType;
+    }
+    if (comparisonColumnType === undefined) {
+      comparisonColumnType = columnType;
+    }
+    return comparisonColumnType;
+  }
+  
   async #getTabularDatasourceTypeSignature(datasource){
     var typeSignature;
     var type  = datasource.getType();
@@ -132,19 +149,7 @@ class DataSourcesUi {
       var row = columnMetadata.get(i);
       
       var columnType = row.column_type;
-      var comparisonColumnType = undefined;
-      if (useLooseColumnComparisonType) {
-        for (var looseType in looseColumnTypes){
-          var columnTypes = looseColumnTypes[looseType];
-          if (columnTypes.indexOf(columnType) === -1) {
-            continue;
-          }
-          comparisonColumnType = looseType;
-        }
-      }
-      if (comparisonColumnType === undefined) {
-        comparisonColumnType = columnType;
-      }
+      var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
       columnMetadataSerialized[row.column_name] = comparisonColumnType;
     }
     var columnMetadataSerializedJSON = JSON.stringify(columnMetadataSerialized);
@@ -657,6 +662,71 @@ class DataSourcesUi {
   
   getDatasource(id) {
     return this.#datasources[id];
+  }
+  
+  async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType){
+    var foundDatasources = {};
+    
+    var columnName, columnSpec, columnType, columnMetadata, searchColumnsSpec;
+    if (useLooseColumnComparisonType) {
+      searchColumnsSpec = {};
+      for (columnName in columnsSpec) {
+        columnSpec = columnsSpec[columnName];
+        columnType = columnSpec.columnType;
+        searchColumnsSpec[columnName] = {
+          columnType: this.#getLooseColumnType(columnType)
+        };
+      }
+    }
+    else {
+      searchColumnsSpec = columnsSpec;
+    }
+    
+    var datasources = this.#datasources;
+    _datasources: for (var datasourceId in datasources){
+      var datasource = datasources[datasourceId];
+      var datasourceType = datasource.getType();
+      switch (datasourceType) {
+        case DuckDbDataSource.types.FILE:
+        case DuckDbDataSource.types.FILES:
+          columnMetadata = await datasource.getColumnMetadata();
+          var columnNames = Object.keys(columnsSpec);
+          _columns: for (var i = 0; i < columnMetadata.numRows; i++){
+            var row = columnMetadata.get(i);
+            columnName = row.column_name;
+            columnSpec = searchColumnsSpec[columnName];
+            if (!columnSpec) {
+              continue _columns;
+            }
+            
+            columnType = row.column_type;
+            var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
+            if (columnSpec.columnType !== comparisonColumnType) {
+              //
+              continue _datasources;
+            }
+            columnNames.splice(columnNames.indexOf(columnName), 1);
+            if (!columnNames.length){
+              break _columns;
+            }
+          }
+          if (columnNames.length) {
+            continue _datasources;
+          }
+          foundDatasources[datasourceId] = datasource;
+          break;
+        case DuckDbDataSource.types.DUCKDB:
+        case DuckDbDataSource.types.SQLITE:
+          // TODO: look for objects in the database that could be a datasource.
+          break;
+        default:
+      }
+    }
+    
+    if (Object.keys(foundDatasources).length) {
+      return foundDatasources;
+    }
+    return undefined;
   }
 }
 

@@ -48,9 +48,14 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
     }
     else {
       count += 1;
+      // clear the timeout to kick of the final handler call, as we're not done receiving events.
       clearTimeout(timeoutId);
     }
-    handler.call(scope ? scope : null, event, count)
+    // alwayws call the handler with the event and the event count.
+    // This allows the handler to decide after how many events to handle something.
+    handler.call(scope ? scope : null, event, count);
+
+    // Set a timeout for the final call to the handler - this kicks in after the timeout after the last event has expired.
     timeoutId = setTimeout(function(){
       timeoutId = undefined;
       handler.call(scope ? scope : null, event);

@@ -170,6 +170,9 @@ class CellSet extends DataSetComponent {
     var columns = [CellSet.#cellIndexColumnName];
     var joinConditions = [];
     var rows = [];
+    var value;
+    var hasNulls = new Array(queryAxisItems.length).fill(false);
+    var lastIndex = cellIndices.length - 1;
     for (var i = 0; i < cellIndices.length; i++){
       var cellIndex = cellIndices[i];
       var tuple = tuples[cellIndex];
@@ -179,7 +182,15 @@ class CellSet extends DataSetComponent {
         if (queryAxisItem === undefined) {
           continue;
         }
-        if (i === 0) {
+        var literalWriter = queryAxisItem.literalWriter;
+        var value = tuple[j];
+        if (value === null){
+          hasNulls[j] = true;
+        }
+        var literal = literalWriter(value);
+        row.push(literal);
+
+        if (i === lastIndex) {
           var itemSql;
           if (queryAxisItem.derivation) {
             itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
@@ -189,12 +200,11 @@ class CellSet extends DataSetComponent {
           }
           columns.push(itemSql);
           var leftJoinColumn = getQualifiedIdentifier(CellSet.#tupleDataRelationName, itemSql);
-          var rightJoinColumn = getQualifiedIdentifier(CellSet.datasetRelationName, itemSql); 
-          joinConditions.push(`${leftJoinColumn} = ${rightJoinColumn}`);
+          var rightJoinColumn = getQualifiedIdentifier(CellSet.datasetRelationName, itemSql);
+          var joinOperator = hasNulls[j] ? 'IS NOT DISTINCT FROM' : '=';
+          joinConditions.push(`${leftJoinColumn} ${joinOperator} ${rightJoinColumn}`);
         }
-        var literalWriter = queryAxisItem.literalWriter;
-        var literal = literalWriter(tuple[j]);
-        row.push(literal);
+
       }
       rows.push(row);
     }

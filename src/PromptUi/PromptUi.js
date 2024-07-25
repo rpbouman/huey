@@ -1,11 +1,12 @@
 class PromptUi {
  
   static {
+    var promptUi = byId('promptUi');
     byId( 'promptDialogAcceptButton' ).addEventListener('click', function(event){
-      byId( 'promptUi').returnValue = 'accept';
+      promptUi.returnValue = 'accept';
     });
     byId( 'promptDialogRejectButton' ).addEventListener('click', function(event){
-      byId( 'promptUi').returnValue = 'reject';
+      promptUi.returnValue = 'reject';
     });
   }
  

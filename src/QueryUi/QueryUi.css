@@ -6,6 +6,13 @@
   user-select: none;
 }
 
+/**
+* Prevent Query UI events when the pivot table is busy:
+*/
+.workarea:has( > .pivotTableUiContainer[aria-busy=true] ) > .queryUi {
+  pointer-events: none;
+}
+
 .queryUi section,
 .queryUi menu,
 .queryUi ol,
@@ -290,11 +297,13 @@
   content: "\eb73";
 }
 
+.queryUi > section > ol > li[data-aggregator=geomean] > span:before,
 .queryUi > section > ol > li[data-aggregator=avg] > span:before {
   /* math-avg */
   content: "\f0f4";
 }
 
+.queryUi > section > ol > li[data-aggregator=mad] > span:before,
 .queryUi > section > ol > li[data-aggregator=median] > span:before {
   /* calculator */
   content: "\eb80";

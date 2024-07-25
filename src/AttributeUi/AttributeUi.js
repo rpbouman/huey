@@ -69,6 +69,25 @@ class AttributeUi {
         };
       }
     },
+    'geomean': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'GEOMEAN( ${columnName} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
+    'mad': {
+      folder: "statistics",
+      columnType: 'INTERVAL',
+      forNumeric: true,
+      expressionTemplate: 'MAD( ${columnName} )'
+    },
     'median': {
       folder: "statistics",
       expressionTemplate: 'MEDIAN( ${columnName} )',
@@ -143,10 +162,21 @@ class AttributeUi {
       expressionTemplate: "strftime( ${columnName}, '%x' )",
       columnType: 'VARCHAR'
     },
+    'local-date': {
+      folder: 'date fields',
+      // %x is isodate,
+      // see: https://duckdb.org/docs/sql/functions/dateformat.html
+      expressionTemplate: "${columnName}::DATE",
+      columnType: 'DATE',
+      createFormatter: createLocalDateFormatter
+    },
     'year': {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
-      columnType: 'INTEGER'
+      columnType: 'INTEGER',
+      createFormatter: function(){
+        return fallbackFormatter;
+      }
     },
     'quarter': {
       folder: 'date fields',
@@ -157,6 +187,9 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
       columnType: 'UTINYINT',
+      createFormatter: function(){
+        return monthNumFormatter
+      },
       formats: {
         'long': {
         },
@@ -166,10 +199,19 @@ class AttributeUi {
         }
       }
     },
+    'month name': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createMonthNameFormatter
+    },
     'week num': {
       folder: 'date fields',
       expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
-      columnType: 'UTINYINT'
+      columnType: 'UTINYINT',
+      createFormatter: function(){
+        return weekNumFormatter
+      },
     },
     'day of year': {
       folder: 'date fields',
@@ -179,20 +221,21 @@ class AttributeUi {
     'day of month': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
-      columnType: 'UTINYINT'
+      columnType: 'UTINYINT',
+      createFormatter: function(){
+        return dayNumFormatter
+      },
     },
     'day of week': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      formats: {
-        'long': {
-        },
-        'short': {
-        },
-        'narrow': {
-        }
-      }
+    },
+    'day of week name': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createDayNameFormatter
     }
   };
 
@@ -294,10 +337,17 @@ class AttributeUi {
   #renderAttributeUiNodeAxisButton(config, head, axisId){
     var name = `${config.type}_${config.profile.column_name}`;
     var id = `${name}`;
-    
+
+    var analyticalRole = 'attribute';
+    var aggregator = config.aggregator;
+        
     var createInput;
     switch (config.type) {
       case 'column':
+        var profile = config.profile;
+        var columnType = profile.column_type;
+        var dataTypeInfo = getDataTypeInfo(columnType);
+        analyticalRole = dataTypeInfo.defaultAnalyticalRole || analyticalRole;
       case 'derived':
         switch (axisId){
           case QueryModel.AXIS_FILTERS:
@@ -312,11 +362,17 @@ class AttributeUi {
             break;
           default:
         }
-        break;
+        if (analyticalRole === 'attribute'){
+          break;
+        }
+        else
+        if (analyticalRole === 'measure' && config.type === 'column'){
+          aggregator = aggregator || 'sum';
+        }
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            id += `_${config.aggregator}`;
+            id += `_${aggregator}`;
             createInput = 'checkbox';
             break;
           default:
@@ -344,9 +400,11 @@ class AttributeUi {
       'data-column_name': config.profile.column_name,
       'data-axis': axisId
     });
-    if (config.aggregator) {
-      axisButtonInput.setAttribute('data-aggregator', config.aggregator);
+    
+    if (aggregator && axisId === QueryModel.AXIS_CELLS) {
+      axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
+    
     if (config.derivation){      
       axisButtonInput.setAttribute('data-derivation', config.derivation);
     }
@@ -444,6 +502,7 @@ class AttributeUi {
     this.clear();
     var attributesUi = this.getDom();
     
+    // generic count(*) node
     var node = this.#renderAttributeUiNode({
       type: 'aggregate',
       aggregator: 'count',
@@ -455,7 +514,7 @@ class AttributeUi {
     });
     attributesUi.appendChild(node);
     
-    
+    // nodes for each column
     for (var i = 0; i < columnSummary.numRows; i++){
       var row = columnSummary.get(i);
       node = this.#renderAttributeUiNode({
@@ -513,7 +572,7 @@ class AttributeUi {
           if (childNode.getAttribute('data-nodetype') === 'folder'){
             continue;
           }
-          node.insertBefore(folderNode, childNode);
+          node.appendChild(folderNode);
           return acc;
         }
       }
@@ -575,7 +634,7 @@ class AttributeUi {
       column_name: columnName,
       column_type: columnType 
     };
-    var typeName = /^[^\(]+/.exec(columnType)[0];
+    var typeName = getDataTypeNameFromColumnType(columnType);
             
     this.#loadDerivationChildNodes(node, typeName, profile);
     this.#loadAggregatorChildNodes(node, typeName, profile);
@@ -607,14 +666,21 @@ class AttributeUi {
   async #axisButtonClicked(node, axis, checked){
     var head = node.childNodes.item(0);
     var inputs = head.getElementsByTagName('input');
+    var aggregator;
     switch (axis){
       case QueryModel.AXIS_ROWS:
       case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_CELLS:
         // implement mutual exclusive axes (either rows or columns, not both)
         for (var i = 0; i < inputs.length; i++){
           var input = inputs.item(i);
-          if (input.checked && input.parentNode.getAttribute('data-axis') !== axis) {
+          var inputAxis = input.getAttribute('data-axis');
+          if (input.checked && inputAxis !== axis) {
             input.checked = false;
+          }
+          
+          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
+            aggregator = input.getAttribute('data-aggregator');
           }
         }
         break;
@@ -622,7 +688,7 @@ class AttributeUi {
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
     var derivation = node.getAttribute('data-derivation');
-    var aggregator = node.getAttribute('data-aggregator');
+    var aggregator = aggregator || node.getAttribute('data-aggregator');
 
     
     var itemConfig = {
@@ -630,7 +696,7 @@ class AttributeUi {
       columnName: columnName,
       columnType: columnType,
       derivation: derivation,
-      aggregator: aggregator,
+      aggregator: aggregator
     };
     
     var formatter = QueryAxisItem.createFormatter(itemConfig);
@@ -678,6 +744,26 @@ class AttributeUi {
       }.bind(this), 0);
     }    
   }
+ 
+  #updateState(){
+    var inputs = this.getDom().getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++){
+      var input = inputs.item(i);
+      var columnName = input.getAttribute('data-column_name');
+      var axis = input.getAttribute('data-axis');
+      var aggregator = input.getAttribute('data-aggregator');
+      var derivation = input.getAttribute('data-derivation');
+      
+      var item = queryModel.findItem({
+        columnName: columnName,
+        axis: axis,
+        aggregator: aggregator,
+        derivation: derivation
+      });
+      
+      input.checked = Boolean(item);
+    }
+  }
   
   async #queryModelChangeHandler(event){
     var eventData = event.eventData;
@@ -698,25 +784,7 @@ class AttributeUi {
         byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
       }
     }
-    else {
-      var inputs = this.getDom().getElementsByTagName('input');
-      for (var i = 0; i < inputs.length; i++){
-        var input = inputs.item(i);
-        var columnName = input.getAttribute('data-column_name');
-        var axis = input.getAttribute('data-axis');
-        var aggregator = input.getAttribute('data-aggregator');
-        var derivation = input.getAttribute('data-derivation');
-        
-        var item = queryModel.findItem({
-          columnName: columnName,
-          axis: axis,
-          aggregator: aggregator,
-          derivation: derivation
-        });
-        
-        input.checked = Boolean(item);
-      }
-    }
+    this.#updateState();
   }
   
   getDom(){

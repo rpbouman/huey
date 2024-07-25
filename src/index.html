@@ -28,13 +28,14 @@
     </script>
 
     <!-- Inline tabler font to force early load -->
+    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.10.0/ -->
     <style type="text/css">
       @font-face {
         font-family: "tabler-icons";
         font-style: normal;
         font-weight: 400;
         font-display: block;
-        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/fonts/tabler-icons.woff2?v3.2.0") format("woff2");
+        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/fonts/tabler-icons.woff2?v3.10.0") format("woff2");
       }
 
       ul#resources > li::marker {
@@ -616,7 +617,10 @@
           <input id="datasourcesSettingTab" type="radio" name="settingsTabs" checked="true"/>
           <div role="tabpanel">
             <form id="datasourceSettings">
-              <label for="useLooseColumnTypeComparison">UNION loose typing</label>
+              <label 
+                for="useLooseColumnTypeComparison" 
+                title="Whether to use exact or loose typing for automatic creation of UNION datasources."
+              >UNION loose typing</label>
               <input id="useLooseColumnTypeComparison" type="checkbox"/>
             </form>
           </div>
@@ -629,12 +633,25 @@
             role="tab"
             for="localeSettingsTab"
           >
-            Locale
+            Value Formatting
           </label>
           <input id="localeSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="localeSettings">
-              <label for="useDefaultLocale">Use default locale</label>
+              <label 
+                for="nullString"
+                title="The string to use for displaying NULL-values"
+              >NULL-value label</label>
+              <input id="nullString" type="input"/>
+              <label 
+                for="totalsString"
+                title="The string to use for displaying totals"
+              >Totals label</label>
+              <input id="totalsString" type="input"/>
+              <label 
+                for="useDefaultLocale"
+                title="Check to use the browser's default locale, uncheck to enter a custom locale."
+              >Use default locale</label>
               <input id="useDefaultLocale" type="checkbox"/>
               <!--
                 see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
@@ -647,7 +664,10 @@
                 One or more BCP 47 extension sequences Optional
                 A private-use extension sequence Optional
               -->
-              <label for="locale">Locale</label>
+              <label 
+                for="locale"
+                title="The locale to use for creating value formatters"
+              >Locale</label>
               <!--
                 on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
                 and if that is empty it probably means the entered locale is either not valid or not supported.
@@ -711,7 +731,9 @@
           <input id="pivotSettingsTab" type="radio" name="settingsTabs"/>
           <div role="tabpanel">
             <form id="pivotSettings">
-              <label for="maxCellWidth">Max cellwidth (ch)</label>
+              <label for="maxCellWidth"
+                title="The maximum string length to consider when sizing pivot table cells and headers"
+              >Max cellwidth (ch)</label>
               <input id="maxCellWidth" type="number" min="1" max="256" value="30"/>
             </form>
           </div>
@@ -800,10 +822,10 @@
           A DuckDB User Interface
         </p>
         <ul>
-          <li>Huey version 0.0.4 - tricky duckling</li>
+          <li>Huey version 0.0.5 - Shelduck</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev215.0/+esm" target="jsdelivr">DuckDB WASM 1.28.1-dev215.0</a></li>
-          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.2.0</a></li>
+          <li><a href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev242.0/+esm" target="jsdelivr">DuckDB WASM 1.28.1-dev242.0</a></li>
+          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.10.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Source on Github</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
         </ul>
@@ -1080,10 +1102,11 @@
     <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>
     <script onload="resourceLoaded(this)" src="Routing/Routing.js"></script>
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
+    <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev215.0/+esm';
+      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev242.0/+esm';
 
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);

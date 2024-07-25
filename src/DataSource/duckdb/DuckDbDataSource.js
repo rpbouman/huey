@@ -65,7 +65,7 @@ class DuckDbDataSource extends EventEmitter {
   #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
-    super();
+    super('destroy');
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
@@ -221,6 +221,15 @@ class DuckDbDataSource extends EventEmitter {
         postFix = this.getQualifiedObjectName();
     }
     return `${type}:${postFix}`;
+  }
+ 
+  static parseId(datasourceId) {
+    var parts = datasourceId.split(':');
+    var type = parts.shift();
+    return {
+      type: type,
+      localId: parts.join(':')
+    };
   }
  
   async registerFile(){

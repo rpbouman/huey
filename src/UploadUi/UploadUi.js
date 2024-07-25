@@ -411,8 +411,9 @@ function initUploadUi(){
     await uploadUi.uploadFiles(files);
     fileControl.value = '';
     
-    if (document.location.hash && document.location.hash.length) {
-      setPageState(document.location.hash);
+    if (!Routing.isSynced(queryModel)) {
+      var currentRoute = Routing.getCurrentRoute();
+      pageStateManager.setPageState(currentRoute);
     }
     
     return;  

@@ -51,6 +51,8 @@ class Settings extends EventEmitter {
       }
     },
     localeSettings: {
+      nullString: '␀',
+      totalsString: 'Total',
       useDefaultLocale: true,
       locale: navigator.languages,
       minimumIntegerDigits: 1,
@@ -191,9 +193,9 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
-              "--huey-foreground-color": "#FFFFFF", /* White */
+              "--huey-foreground-color": "#BBBBBB", /* White */
               "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#F5F5F5", /* White Smoke */
+              "--huey-light-background-color": "#D5D5D5", /* White Smoke */
               "--huey-medium-background-color": "#D2B48C", /* Tan */
               "--huey-dark-background-color": "#008080", /* Teal */
               "--huey-light-border-color": "#8B4513", /* Saddle Brown */
@@ -263,7 +265,7 @@ class Settings extends EventEmitter {
   #settings = undefined;
   
   constructor(id){
-    super();
+    super('change');
     this.#id = id;
     this.#loadFromLocalStorage();
     this.#initDialog();
