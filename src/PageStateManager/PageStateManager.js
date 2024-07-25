@@ -1,13 +1,23 @@
 class PageStateManager {
 
-  #view = undefined;
-
   constructor(){
-    this.#initPopStateHandler();
+    //this.#initPopStateHandler();
+    this.#initHashChangeHandler();
   }
   
   #initPopStateHandler(){
     window.addEventListener('popstate', this.#popStateHandler.bind(this));
+  }
+  
+  #initHashChangeHandler(){
+    window.addEventListener('hashchange', this.#hashChangeHandler.bind(this));
+  }
+
+  // this basically means: load the query
+  #hashChangeHandler(event){
+    var currentRoute = Routing.getCurrentRoute();
+    // TODO: check if the current state already matches the route, if it does we're done.
+    this.setPageState(currentRoute);    
   }
   
   // this basically means: load the query
@@ -15,33 +25,6 @@ class PageStateManager {
     var currentRoute = Routing.getCurrentRoute();
     // TODO: check if the current state already matches the route, if it does we're done.
     this.setPageState(currentRoute);    
-  }
-
-  // this basically means: save the query
-  #handleViewUpdate(event){
-    var view = event.currentTarget;    
-    Routing.updateRouteFromView(view);
-  }
-
-  #getViewUpdateHandler(){
-    return this.#handleViewUpdate.bind(this);
-  }
-  
-  observe(view){
-    this.#view = view;
-    view.addEventListener('updated', this.#getViewUpdateHandler());
-  }
-
-  unobserve(view){
-    if (this.#view !== view) {
-      return;
-    }
-    view.removeEventListener('updated', this.#getViewUpdateHandler())
-    this.#view = null;
-  }
-
-  static openDatasource(event){
-    debugger;
   }
   
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
@@ -145,10 +128,6 @@ class PageStateManager {
     });
   }
 
-  isSynced(){
-    return Routing.isSynced(this.#view);
-  }
-
   async setPageState(newRoute){
         
     if (!newRoute){
@@ -156,21 +135,17 @@ class PageStateManager {
       return;
     }
     
-    if (!this.#view){
-      return;
-    }
-    var currentRoute = Routing.getRouteForView(this.#view);
+    var currentRoute = Routing.getRouteForQueryModel(queryModel);
     if (newRoute === currentRoute) {
       return;
     }
     
-    var state = Routing.getViewstateFromRoute(newRoute);
+    var state = Routing.getQueryModelStateFromRoute(newRoute);
     if (!state) {
       // TODO: maybe throw an error?
       return;
     }
     
-    var viewClass = state.viewClass;
     var queryModelState = state.queryModel;
     var axes = queryModelState.axes;
     var referencedColumns = Object.keys(axes).reduce(function(acc, curr){
@@ -209,73 +184,14 @@ class PageStateManager {
     else {
       datasource = datasourcesUi.getDatasource(datasourceId);
     }
-
-    var columnMetadata = await datasource.getColumnMetadata();
     
-    var cellsHeadersAxis = queryModelState.cellsHeaders;
-    var axes = queryModelState.axes;
-    
-    var autoRunQuery = settings.getSettings('querySettings').autoRunQuery;
-    try {
-      if (autoRunQuery) {
-        settings.assignSettings(['querySettings', 'autoRunQuery'], false);
-      }
-      var queryModel = pivotTableUi.getQueryModel();
-      if (queryModel.getDatasource() === datasource) {
-        queryModel.clear();
-      }
-      else {
-        queryModel.setDatasource(datasource);
-      }
-      
-      for (var axisId in axes){
-        var items = axes[axisId];
-        for (var i = 0 ; i < items.length; i++){
-          var item = items[i];
-          var config = { columnName: item.column };
-
-          config.columnType = item.columnType;
-          config.derivation = item.derivation;
-          config.aggregator = item.aggregator;
-          if (item.includeTotals === true){
-            config.includeTotals = true;
-          }
-          
-          var formatter = QueryAxisItem.createFormatter(config);
-          if (formatter){
-            config.formatter = formatter;
-          }
-          
-          var literalWriter = QueryAxisItem.createLiteralWriter(config);
-          if (literalWriter){
-            config.literalWriter = literalWriter;
-          }
-          
-          if (axisId === QueryModel.AXIS_FILTERS) {
-            var filter = item.filter;
-            if (filter) {
-              config.filter = filter;
-            }
-          }
-          config.axis = axisId;
-          await queryModel.addItem(config);
-        }
-      }
-    } 
-    catch (e) {
-      showErrorDialog(e);
-    }
-    finally {
-      if (autoRunQuery) {
-        settings.assignSettings(['querySettings', 'autoRunQuery'], true);
-        pivotTableUi.updatePivotTableUi();      
-      }
-    }
+    queryModelState.datasourceId = datasource.getId();
+    queryModel.setState(queryModelState);
   }
 
 }
 
 var pageStateManager;
 function initPageStateManager(){
-  pageStateManager = new PageStateManager();  
+  pageStateManager = new PageStateManager();
 }

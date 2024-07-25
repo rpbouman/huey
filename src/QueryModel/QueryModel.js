@@ -457,12 +457,19 @@ class QueryModel extends EventEmitter {
   }
 
   #destroyDatasourceHandler(event){
+    if (event.target !== this.#datasource) {
+      return;
+    }
     this.setDatasource(undefined);
   }
 
-  setDatasource(datasource){
+  setDatasource(datasource){    
     if (datasource === this.#datasource) {
       return;
+    }
+    else
+    if (this.#datasource) {
+      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
     }
 
     this.#clear(true);
@@ -840,46 +847,118 @@ class QueryModel extends EventEmitter {
     return condition;
   }
   
+  getState(){
+    var datasource = this.getDatasource();
+    if (!datasource) {
+      return null;
+    }
+    var datasourceId = datasource.getId();
+    
+    var queryModelObject = {
+      datasourceId: datasourceId,
+      cellsHeaders: this.getCellHeadersAxis(),
+      axes: {}
+    };
+    
+    var axisIds = this.getAxisIds().sort();
+    var hasItems = false;
+    axisIds.forEach(function(axisId){
+      var axis = this.getQueryAxis(axisId);
+      var items = axis.getItems();
+      if (items.length === 0) {
+        return '';
+      }
+      hasItems = true;
+      queryModelObject.axes[axisId] = items.map(function(axisItem){
+        var strippedItem = {column: axisItem.columnName};
+        
+        strippedItem.columnType = axisItem.columnType;
+        strippedItem.derivation = axisItem.derivation;
+        strippedItem.aggregator = axisItem.aggregator;
+        if (axisItem.includeTotals === true) {
+          strippedItem.includeTotals = true;
+        }
+        
+        if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
+          strippedItem.filter = axisItem.filter;
+        }
+        
+        return strippedItem;
+      });
+    }.bind(this));
+    if (!hasItems){
+      return null;
+    }
+    return queryModelObject;
+  }
+  
+  async setState(queryModelState){
+
+    var querySettings = settings.getSettings('querySettings');
+    var autoRunQuery = querySettings.autoRunQuery;
+        
+    settings.assignSettings(['querySettings', 'autoRunQuery'], false);
+
+    try {
+      var datasourceId = queryModelState.datasourceId;
+      var datasource = datasourcesUi.getDatasource(datasourceId);
+      if (this.getDatasource() === datasource) {
+        this.clear();
+      }
+      else {
+        this.setDatasource(datasource);
+      }
+      
+      var axes = queryModelState.axes;
+      for (var axisId in axes){
+        var items = axes[axisId];
+        for (var i = 0 ; i < items.length; i++){
+          var item = items[i];
+          var config = { columnName: item.column };
+
+          config.columnType = item.columnType;
+          config.derivation = item.derivation;
+          config.aggregator = item.aggregator;
+          if (item.includeTotals === true){
+            config.includeTotals = true;
+          }
+          
+          var formatter = QueryAxisItem.createFormatter(config);
+          if (formatter){
+            config.formatter = formatter;
+          }
+          
+          var literalWriter = QueryAxisItem.createLiteralWriter(config);
+          if (literalWriter){
+            config.literalWriter = literalWriter;
+          }
+          
+          if (axisId === QueryModel.AXIS_FILTERS) {
+            var filter = item.filter;
+            if (filter) {
+              config.filter = filter;
+            }
+          }
+          config.axis = axisId;
+          await this.addItem(config);
+        }
+      }
+    }
+    catch(e){
+    }
+    finally {
+      settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
+      if (autoRunQuery){
+        setTimeout(function(){
+          pivotTableUi.updatePivotTableUi();
+        }, 1000);
+      }
+    }
+  }
+  
 }
 
 var queryModel;
 function initQueryModel(){
   queryModel = new QueryModel();
-
-  queryModel.addEventListener('change', function(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var currentDatasourceCaption;
-        var datasource = eventData.propertiesChanged.datasource.newValue;
-        if (datasource) {
-          currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
-        }
-        else {
-          currentDatasourceCaption = '';
-        }
-        byId('currentDatasource').innerHTML = currentDatasourceCaption;
-      }
-    }
-
-    var exportUiActive;
-    if (
-      queryModel.getColumnsAxis().getItems().length === 0 &&
-      queryModel.getRowsAxis().getItems().length === 0 &&
-      queryModel.getCellsAxis().getItems().length === 0
-    ){
-      exportUiActive = false;
-    }
-    else {
-      exportUiActive = true;
-    }
-    var exportButton = byId('exportButton').parentNode;
-    exportButton.style.visibility = exportUiActive ? '' : 'hidden';
-    if (!exportUiActive){
-      byId('exportDialog').close();
-    }
-
-    var title = generateExportDialogTitle();
-    document.title = 'Huey - ' + title;
-  });
 }

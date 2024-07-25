@@ -744,6 +744,26 @@ class AttributeUi {
       }.bind(this), 0);
     }    
   }
+ 
+  #updateState(){
+    var inputs = this.getDom().getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++){
+      var input = inputs.item(i);
+      var columnName = input.getAttribute('data-column_name');
+      var axis = input.getAttribute('data-axis');
+      var aggregator = input.getAttribute('data-aggregator');
+      var derivation = input.getAttribute('data-derivation');
+      
+      var item = queryModel.findItem({
+        columnName: columnName,
+        axis: axis,
+        aggregator: aggregator,
+        derivation: derivation
+      });
+      
+      input.checked = Boolean(item);
+    }
+  }
   
   async #queryModelChangeHandler(event){
     var eventData = event.eventData;
@@ -764,25 +784,7 @@ class AttributeUi {
         byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
       }
     }
-    else {
-      var inputs = this.getDom().getElementsByTagName('input');
-      for (var i = 0; i < inputs.length; i++){
-        var input = inputs.item(i);
-        var columnName = input.getAttribute('data-column_name');
-        var axis = input.getAttribute('data-axis');
-        var aggregator = input.getAttribute('data-aggregator');
-        var derivation = input.getAttribute('data-derivation');
-        
-        var item = queryModel.findItem({
-          columnName: columnName,
-          axis: axis,
-          aggregator: aggregator,
-          derivation: derivation
-        });
-        
-        input.checked = Boolean(item);
-      }
-    }
+    this.#updateState();
   }
   
   getDom(){

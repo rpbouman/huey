@@ -1,5 +1,7 @@
 class EventEmitter {
   
+  #emitEvents = true;
+  #queuedEvents = undefined;
   #eventListeners = {};
   #supportedEvents = undefined;
   
@@ -85,9 +87,30 @@ class EventEmitter {
     Object.defineProperty(event, 'currentTarget', targetPropertyDefinition);
     event.eventData = eventData;
     eventData.emitter = target;
-    eventListeners.forEach(function(listener){
-      listener.call(null, event);
-    });
+    
+    if (this.#emitEvents) {
+      eventListeners.forEach(function(listener){
+        listener.call(null, event);
+      });
+    }
+    else {
+      this.#queuedEvents.push(event);
+    }
   }
-  
+
+  emitEvents(trueOrFalse) {
+    switch(trueOrFalse) {
+      case true:
+        if (this.#queuedEvents && this.#queuedEvents.length) {
+          debugger;
+        }
+        break;
+      case false:
+        this.#queuedEvents = [];
+        break;
+      default:
+        throw new Error(`Invalid argument, should be true or false`);
+    }
+    this.#emitEvents = trueOrFalse;
+  }
 }

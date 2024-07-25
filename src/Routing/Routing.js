@@ -1,52 +1,7 @@
 
 class Routing {
-  
-  static serializeQueryModel(queryModel){
-    var datasource = queryModel.getDatasource();
-    if (!datasource) {
-      return null;
-    }
-    var datasourceId = datasource.getId();
-    
-    var queryModelObject = {
-      datasourceId: datasourceId,
-      cellsHeaders: queryModel.getCellHeadersAxis(),
-      axes: {}
-    };
-    
-    var axisIds = queryModel.getAxisIds().sort();
-    var hasItems = false;
-    axisIds.forEach(function(axisId){
-      var axis = queryModel.getQueryAxis(axisId);
-      var items = axis.getItems();
-      if (items.length === 0) {
-        return '';
-      }
-      hasItems = true;
-      queryModelObject.axes[axisId] = items.map(function(axisItem){
-        var strippedItem = {column: axisItem.columnName};
-        
-        strippedItem.columnType = axisItem.columnType;
-        strippedItem.derivation = axisItem.derivation;
-        strippedItem.aggregator = axisItem.aggregator;
-        if (axisItem.includeTotals === true) {
-          strippedItem.includeTotals = true;
-        }
-        
-        if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
-          strippedItem.filter = axisItem.filter;
-        }
-        
-        return strippedItem;
-      });
-    });
-    if (!hasItems){
-      return null;
-    }
-    return queryModelObject;
-  }
  
-  static getViewstateFromRoute(route){
+  static getQueryModelStateFromRoute(route){
     try {
       var base64 = route;
       var ascii = atob( base64 ); 
@@ -60,21 +15,17 @@ class Routing {
     }
   }
       
-  static getRouteForView(view){
-    var viewClass = view.constructor.name;
-    
-    var queryModel = view.getQueryModel();
-    var queryModelObject = Routing.serializeQueryModel(queryModel);    
+  static getRouteForQueryModel(queryModel){
+    var queryModelObject = queryModel.getState();    
     
     if (queryModelObject === null) {
       return undefined;
     }
     
-    var viewObject = {
-      viewClass: viewClass,
+    var routeObject = {
       queryModel: queryModelObject
     };
-    var json = JSON.stringify( viewObject );
+    var json = JSON.stringify( routeObject );
     var ascii = encodeURIComponent( json );
     var base64 = btoa( ascii ); 
     var route = base64;
@@ -95,19 +46,20 @@ class Routing {
     return hash;
   }
   
-  static isSynced(view) {
-    var viewRoute = Routing.getRouteForView(view);
+  static isSynced(queryModel) {
+    var route = Routing.getRouteForQueryModel(queryModel);
     var currentRoute = Routing.getCurrentRoute();
-    return viewRoute === currentRoute;
+    return route === currentRoute;
   }
 
-  static updateRouteFromView(view){
+  static updateRouteFromQueryModel(queryModel){
     var currentRoute = Routing.getCurrentRoute();
-    var newRoute = Routing.getRouteForView(view);
+    var newRoute = Routing.getRouteForQueryModel(queryModel);
     if (currentRoute === newRoute && Boolean(newRoute)) {
       return;
     }
     var hash = newRoute ? `#${newRoute}` : '';
-    document.location.hash = hash;
+    //document.location.hash = hash;
+    history.pushState(undefined, undefined, hash);
   }
 }
