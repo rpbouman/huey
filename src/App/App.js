@@ -90,21 +90,21 @@ function initApplication(){
   initQueryUi();
   initPivotTableUi();
   initExecuteQuery();
+  initPageStateManager();
+  initUploadUi();
  
-  var pivotTableInitEventListener = function(){
-    initPageStateManager();
-    initUploadUi();
-
-    pivotTableUi.removeEventListener('updated', pivotTableInitEventListener);
-    
-    pageStateManager.observe(pivotTableUi);  
-    var currentRoute = Routing.getCurrentRoute();
-    if (!currentRoute){
+  var currentRoute = Routing.getCurrentRoute();
+  if (currentRoute){
+    pageStateManager.setPageState(currentRoute);
+  }
+ 
+  bufferEvents(queryModel, 'change', function(event, count){
+    if (count === 0) {
       return;
     }
-    pageStateManager.setPageState(currentRoute);
-        
-  };
-  pivotTableUi.addEventListener('updated', pivotTableInitEventListener);
+    console.log(queryModel.getState());
+    console.log(Routing.getRouteForQueryModel(queryModel));
+    Routing.updateRouteFromQueryModel(queryModel);
+  }, null, 1000);
  
 }

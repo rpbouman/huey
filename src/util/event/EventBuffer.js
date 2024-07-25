@@ -50,7 +50,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
       count += 1;
       clearTimeout(timeoutId);
     }
-    handler.call(scope ? scope : null, event, count)
+    handler.call(scope ? scope : null, event, count);
     timeoutId = setTimeout(function(){
       timeoutId = undefined;
       handler.call(scope ? scope : null, event);

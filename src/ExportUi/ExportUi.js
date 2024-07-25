@@ -266,4 +266,42 @@ function initExportUi(){
   
   byId('exportTitleTemplate')
   .addEventListener('change', updateExportTitle());
+  
+  queryModel.addEventListener('change', function(event){
+    var eventData = event.eventData;
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        var currentDatasourceCaption;
+        var datasource = eventData.propertiesChanged.datasource.newValue;
+        if (datasource) {
+          currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
+        }
+        else {
+          currentDatasourceCaption = '';
+        }
+        byId('currentDatasource').innerHTML = currentDatasourceCaption;
+      }
+    }
+
+    var exportUiActive;
+    if (
+      queryModel.getColumnsAxis().getItems().length === 0 &&
+      queryModel.getRowsAxis().getItems().length === 0 &&
+      queryModel.getCellsAxis().getItems().length === 0
+    ){
+      exportUiActive = false;
+    }
+    else {
+      exportUiActive = true;
+    }
+    var exportButton = byId('exportButton').parentNode;
+    exportButton.style.visibility = exportUiActive ? '' : 'hidden';
+    if (!exportUiActive){
+      byId('exportDialog').close();
+    }
+
+    var title = generateExportDialogTitle();
+    document.title = 'Huey - ' + title;
+  });
+  
 }
