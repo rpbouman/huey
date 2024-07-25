@@ -99,11 +99,11 @@ function initApplication(){
   }
  
   bufferEvents(queryModel, 'change', function(event, count){
-    if (count === 0) {
-      return;
+    if (count !== undefined) {
+      return;      
     }
-    console.log(queryModel.getState());
-    console.log(Routing.getRouteForQueryModel(queryModel));
+    console.log(`buffered Events, event:`);
+    console.log(event.eventData);
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
  

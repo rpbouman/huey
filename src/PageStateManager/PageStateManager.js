@@ -1,8 +1,8 @@
 class PageStateManager {
 
   constructor(){
-    //this.#initPopStateHandler();
-    this.#initHashChangeHandler();
+    this.#initPopStateHandler();
+    //this.#initHashChangeHandler();
   }
   
   #initPopStateHandler(){
@@ -22,9 +22,9 @@ class PageStateManager {
   
   // this basically means: load the query
   #popStateHandler(event){
-    var currentRoute = Routing.getCurrentRoute();
+    var newRoute = event.state;
     // TODO: check if the current state already matches the route, if it does we're done.
-    this.setPageState(currentRoute);    
+    this.setPageState(newRoute);    
   }
   
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
