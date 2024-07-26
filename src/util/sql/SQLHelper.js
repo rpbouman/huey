@@ -431,6 +431,9 @@ var dataTypes = {
   },
   'BOOLEAN': {
     defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(value, field){
+      return createDefaultLiteralWriter('BOOLEAN');
+    }    
   },
   'BLOB': {
     defaultAnalyticalRole: 'attribute',
