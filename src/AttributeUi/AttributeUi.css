@@ -37,6 +37,11 @@
   content: "\ec63";
 }
 
+.attributeUi details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
+  /* square check */
+  content: "\eb28";
+}
+
 .attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon::before
 {
