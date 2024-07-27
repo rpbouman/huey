@@ -175,9 +175,9 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
-              "--huey-foreground-color": "#000000", /* Black */
-              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#F0E68C", /* Khaki */
+              "--huey-foreground-color": "#000000", 
+              "--huey-placeholder-color": "#A9A9A9",
+              "--huey-light-background-color": "#F0E68C", 
               "--huey-medium-background-color": "#A7D3A4", 
               "--huey-dark-background-color": "#5B8266", 
               "--huey-light-border-color": "#A5B479", 
@@ -193,16 +193,16 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
-              "--huey-foreground-color": "#BBBBBB", /* White */
-              "--huey-placeholder-color": "#A9A9A9", /* Dark Gray */
-              "--huey-light-background-color": "#D5D5D5", /* White Smoke */
-              "--huey-medium-background-color": "#D2B48C", /* Tan */
-              "--huey-dark-background-color": "#008080", /* Teal */
-              "--huey-light-border-color": "#8B4513", /* Saddle Brown */
-              "--huey-dark-border-color": "#2F4F4F", /* Dark Slate Gray */
-              "--huey-icon-color-subtle": "#87CEFA", /* Light Sky Blue */
-              "--huey-icon-color": "#FFFFFF", /* White */
-              "--huey-icon-color-highlight": "#8B4513" /* Saddle Brown */
+              "--huey-foreground-color": "black",
+              "--huey-placeholder-color": "#A9A9A9", 
+              "--huey-light-background-color": "#D5D5D5", 
+              "--huey-medium-background-color": "#D2B48C", 
+              "--huey-dark-background-color": "#008080", 
+              "--huey-light-border-color": "#8B4513", 
+              "--huey-dark-border-color": "#2F4F4F", 
+              "--huey-icon-color-subtle": "##50AEbA", 
+              "--huey-icon-color": "#FFFFFF", 
+              "--huey-icon-color-highlight": "#8B4513" 
             },
             label: "Teal"
           },
