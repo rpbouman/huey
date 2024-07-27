@@ -262,6 +262,8 @@
 * Aggregator icons
 *
 */
+.queryUi > section > ol > li[data-aggregator="count if true"] > span:before,
+.queryUi > section > ol > li[data-aggregator="count if false"] > span:before,
 .queryUi > section > ol > li[data-aggregator=count] > span:before {
   /* tallymarks */
   content: "\ec4a";
@@ -337,6 +339,16 @@
 .queryUi > section > ol > li[data-aggregator=skewness] > span:before {
   /* calculator */
   content: "\eb80";
+}
+
+.queryUi > section > ol > li[data-aggregator=or] > span:before {
+  /* logical-or */
+  content: "\f245";
+}
+
+.queryUi > section > ol > li[data-aggregator=and] > span:before {
+  /* logical-and*/
+  content: "\f240";
 }
 
 /* buttons to move the item */
