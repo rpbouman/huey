@@ -151,6 +151,26 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'SKEWNESS( ${columnName} )',
       columnType: 'DOUBLE'
+    },
+    'and': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_AND( ${columnName} )',
+      columnType: 'BOOLEAN'
+    },
+    'or': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_OR( ${columnName} )',
+      columnType: 'BOOLEAN'
+    },
+    'count if true': {  
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnName} ) FILTER( ${columnName} )',
+      columnType: 'HUGEINT'
+    },
+    'count if false': {  
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnName} ) FILTER( NOT( ${columnName} ) )',
+      columnType: 'HUGEINT'
     }
   };
 
@@ -300,13 +320,14 @@ class AttributeUi {
     
     var isNumeric = Boolean(typeInfo.isNumeric);
     var isInteger = Boolean(typeInfo.isInteger);
-    var hasTimeFields = Boolean(typeInfo.hasTimeFields);
-    var hasDateFields = Boolean(typeInfo.hasDateFields);
             
     var applicableAggregators = {};
     for (var aggregationName in AttributeUi.aggregators) {
       var aggregator = AttributeUi.aggregators[aggregationName];
       if (aggregator.forNumeric && !isNumeric) {
+        continue;
+      }
+      if (aggregator.forBoolean && typeName !== 'BOOLEAN' ){
         continue;
       }
       applicableAggregators[aggregationName] = aggregator;

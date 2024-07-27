@@ -149,7 +149,8 @@
 * Aggregator icons
 *
 */
-
+.attributeUi details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > .icon::before,
+.attributeUi details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > .icon::before,
 .attributeUi details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon::before {
   /* tallymarks */
   content: "\ec4a";
@@ -232,6 +233,20 @@
   content: "\eb80";
 }
 
+.attributeUi details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
+  /* logical-and */
+  content: "\f240";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=or] > summary > .icon::before {
+  /* logical-or */
+  content: "\f245";
+}
+
+.attributeUi details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
+  /* logical-and */
+  content: "\f240";
+}
 
 /**
 * Prevent the Attribute UI events when the pivot table is busy:
