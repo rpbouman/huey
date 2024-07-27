@@ -1383,13 +1383,11 @@ class PivotTableUi extends EventEmitter {
       });
     }
     catch(e){
-      this.fireEvent('updated', {
+      var eventData = {
         status: 'error',
         error: e
-      });
-      
-      // TODO: consider moving this to the app and handling it by listening to events.
-      showErrorDialog(eventData.error);
+      };
+      this.fireEvent('updated', eventData);
     }
     finally {
       tableDom.style.width = '99.99%';
