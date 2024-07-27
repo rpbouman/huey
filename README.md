@@ -6,7 +6,6 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 ![image](https://github.com/rpbouman/huey/assets/647315/b2e45002-409c-4a98-8d38-f5a6bfc6b7e9)
 
-
 ## Key features
 - An intuitive and responsive pivot table that supports filtering and (sub)totals
 - Supports many different aggregate functions for reporting and data exploration
@@ -14,12 +13,11 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
 - Export of results and/or SQL queries to file or clipboard
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
-- Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
-
-Note: although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
+- Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
+- It's free! Huey is released under the MIT license, just like DuckDB.
 
 ## Limitations
-- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. 
+- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. This is not any judgement on browser quality but merely a matter of the most effective use of time and resources. That said, this does not mean we won't want to fix browser compatibility issues. If you spot them, please report an issue and we'll do our best to fix it. Or better yet: if you have a fix yourself, send a pull request.
 - Currently supports only local files. ("Local files" are files that logically exist in the local file system. This includes files from network drives and cloud drives like Google Drive and Microsoft OneDrive)
 
 ## Getting started
