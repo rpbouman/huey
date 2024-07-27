@@ -106,5 +106,12 @@ function initApplication(){
     console.log(event.eventData);
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
+  
+  pivotTableUi.addEventListener('updated', function(e){
+    var eventData = e.eventData;
+    if (eventData.status === 'error'){
+      showErrorDialog(eventData.error);      
+    }
+  });
  
 }
