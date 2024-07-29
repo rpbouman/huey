@@ -211,7 +211,7 @@
   /* letter q */
   content: "\ec60";
 }
-
+.queryUi > section > ol > li[data-derivation="month name"] > span:before,
 .queryUi > section > ol > li[data-derivation="month num"] > span:before {
   /* letter m */
   content: "\ec5c";
@@ -232,6 +232,7 @@
   content: "\fd2f";
 }
 
+.queryUi > section > ol > li[data-derivation="day of week name"] > span:before,
 .queryUi > section > ol > li[data-derivation="day of week"] > span:before {
   /* letter-d-small */
   content: "\fcca";
