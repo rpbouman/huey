@@ -41,8 +41,8 @@ class PivotTableUi extends EventEmitter {
     this.#rowsTupleSet = rowsTupleSet;
 
     this.#cellsSet = new CellSet(queryModel, [
-        rowsTupleSet,
-        columnsTupleSet
+      rowsTupleSet,
+      columnsTupleSet
     ]);
 
     this.#initQueryModelChangeHandler()
@@ -354,10 +354,14 @@ class PivotTableUi extends EventEmitter {
       // this is the last scroll event, update the table contents.
       this.#updateDataToScrollPosition()
       .then(function(){
-        // nothing to do here, yet.
+        this.fireEvent('updated', { status: 'success' });
       }.bind(this))
       .catch(function(error){
         console.error(error);
+        this.fireEvent('updated', { 
+          status: 'error',
+          error: e
+        });
       }.bind(this))
       .finally(function(){
         // for some reason, the attribute doesn't get updated unless we apply timeout.
@@ -1378,9 +1382,7 @@ class PivotTableUi extends EventEmitter {
       await this.#updateDataToScrollPosition();
       this.#setNeedsUpdate(false);
 
-      this.fireEvent('updated', {
-        status: 'success'
-      });
+      this.fireEvent('updated', { status: 'success' });
     }
     catch(e){
       var eventData = {
@@ -1403,6 +1405,9 @@ class PivotTableUi extends EventEmitter {
     tableBodyDom.innerHTML = '';
     this.#setHorizontalSize(0);
     this.#setVerticalSize(0);
+    this.fireEvent('updated', {
+      status: 'success'
+    });
   }
 
   getDom(){

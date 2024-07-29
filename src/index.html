@@ -846,6 +846,36 @@
       </footer>
     </dialog>
 
+    <dialog 
+      id="datasourceSettingsDialog"
+      aria-labelledby="datasourceSettingsDialogTitle"
+      popover="auto"
+    >
+      <header>
+        <h3 id="datasourceSettingsDialogTitle">Datasource Settings</h3>
+        <form>
+          <label for="datasourceFileType">Type</label>
+          <output id="datasourceFileType"></output>
+          <label for="datasourceName">Type</label>
+          <output id="datasourceName"></output>
+        </form>
+      </header>
+      <section>
+      </section>
+      <footer role="toolbar">
+        <button
+          id="datasourceSettingsDialogOkButton"
+          popovertarget="datasourceSettingsDialog"
+          popovertargetaction="hide"
+        >Ok</button>
+        <button
+          id="datasourceSettingsDialogCancelButton"
+          popovertarget="datasourceSettingsDialog"
+          popovertargetaction="hide"
+        >Cancel</button>
+      </footer>
+    </dialog>
+
     <main
       id="layout"
       class="layout"

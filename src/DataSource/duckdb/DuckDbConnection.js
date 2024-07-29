@@ -1,14 +1,15 @@
-class DuckDbConnection {
+class DuckDbConnection extends EventEmitter {
   
   #duckDbInstance = undefined;
   #physicalConnection = undefined;
   #state = 'unconnected';
   
   constructor(duckDbInstance) {
+    super(['beforequery','afterquery']);
     this.#duckDbInstance = duckDbInstance;
   }
 
-  async #getPhysicalConnection(){
+  async getPhysicalConnection(){
     if (this.#physicalConnection === undefined) {
       this.#state = 'connecting';
       this.#physicalConnection = await this.#duckDbInstance.connect();
@@ -18,7 +19,7 @@ class DuckDbConnection {
   }
   
   async prepareStatement(sql){
-    var connection = await this.#getPhysicalConnection();
+    var connection = await this.getPhysicalConnection();
     this.#state = 'preparing';
     var preparedStatement = await connection.prepare(sql);
     this.#state = 'prepared';
@@ -33,13 +34,27 @@ class DuckDbConnection {
   }
   
   async query(sql){
-    var connection = await this.#getPhysicalConnection();
+    var connection = await this.getPhysicalConnection();
+    
+    // TODO: allow query to be canceled?
+    this.fireEvent('beforequery', {
+      physicalConnection: connection,
+      sql: sql
+    });
+    
     this.#state = 'querying';
     var msg = `Executing ${sql} on connection ${this.getConnectionId()}`;
     console.time(msg);
     var result = await connection.query(sql);
     console.timeEnd(msg);
     this.#state = 'queried';
+    
+    this.fireEvent('afterquery', {
+      physicalConnection: connection,
+      sql: sql,
+      result: result
+    });
+    
     return result;
   }
 

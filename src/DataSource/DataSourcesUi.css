@@ -53,7 +53,7 @@
 }
 
 #datasourcesUi details > summary > .label  {
-  max-width: calc(100% - 104px);
+  max-width: calc(100% - 128px);
 }
 
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
@@ -142,6 +142,16 @@ menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-f
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > .icon::before {
   /* file-type-xls */
   content: '\fb1b';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-reject_count] > summary > .icon::before {
+  content: '\ede6';
+  color: red;
+}
+
+#datasourcesUi details > summary > label.editActionButton::before {
+  /* settings */
+  content: '\eb20';
 }
 
 #datasourcesUi details > summary > label.analyzeActionButton::before {

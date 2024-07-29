@@ -1,57 +1,75 @@
 class DuckDbDataSource extends EventEmitter {
   
   static types = {
-    'DUCKDB': 'duckdb',
-    'FILE': 'file',
-    'FILES': 'files',
-    'SQLITE': 'sqlite',
-    'SQLQUERY': 'sql',
-    'TABLE': 'table',
-    'TABLEFUNCTION': 'table function',
-    'VIEW': 'view'
+    "DUCKDB": 'duckdb',
+    "FILE": 'file',
+    "FILES": 'files',
+    "SQLITE": 'sqlite',
+    "SQLQUERY": 'sql',
+    "TABLE": 'table',
+    "TABLEFUNCTION": 'table function',
+    "VIEW": 'view'
   };
-  
+    
   static fileTypes = {
-    'csv': {
+    "csv": {
       datasourceType: DuckDbDataSource.types.FILE,
-      duckdb_reader: 'read_csv_auto',
+      duckdb_reader: 'read_csv',
     },
-    'tsv': {
+    "tsv": {
       datasourceType: DuckDbDataSource.types.FILE,
-      duckdb_reader: 'read_csv_auto'
+      duckdb_reader: 'read_csv'
     },
-    'txt': {
+    "txt": {
       datasourceType: DuckDbDataSource.types.FILE,
-      duckdb_reader: 'read_csv_auto'
+      duckdb_reader: 'read_csv'
     },
-    'json': {
+    "json": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_json_auto',
       duckdb_extension: 'json'
     },
-    'parquet': {
+    "parquet": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_parquet'
     },
-    'xlsx': {
+    "xlsx": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'st_read',
       duckdb_extension: 'spatial'
     },
-    'duckdb': {
+    "duckdb": {
       datasourceType: DuckDbDataSource.types.DUCKDB
     },
-    'sqlite': {
+    "sqlite": {
       datasourceType: DuckDbDataSource.types.SQLITE,
       duckdb_extension: 'sqlite_scanner'
     }
   };
+  
+  static #duckdb_reader_arguments = {
+    read_csv: {
+      // https://duckdb.org/docs/data/csv/reading_faulty_csv_files.html#retrieving-faulty-csv-lines
+      //"ignore_errors" : true,
+      "store_rejects" : true,
+      "rejects_scan": 'reject_scans',
+      "rejects_table": 'reject_errors',
+      "rejects_limit": 0
+    }
+  };
+
+  static #datasource_uid_generator = 0;
+  #datasource_uid = undefined;  
+  #rejects_tables = undefined;
+  #rejects_balance = 0n;
+  #reject_count = 0n;  
   
   #defaultSampleSize = 100;
   
   #duckDb = undefined;
   #duckDbInstance = undefined;
   #connection = undefined;
+  #managedConnection = undefined;
   #catalogName = undefined;
   #schemaName = undefined;
   #objectName = undefined;
@@ -65,7 +83,8 @@ class DuckDbDataSource extends EventEmitter {
   #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
-    super('destroy');
+    super(['destroy', 'rejectsdetected']);
+    this.#datasource_uid = ++DuckDbDataSource.#datasource_uid_generator;
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
@@ -124,10 +143,10 @@ class DuckDbDataSource extends EventEmitter {
     if (!fileType){
       throw new Error(`Could not determine filetype of file "${fileName}".`);
     }
-    
     var config = {
       type: fileType.datasourceType,
-      file: file 
+      file: file,
+      fileType: fileType
     };
     var instance = new DuckDbDataSource(duckdb, instance, config);
     return instance;
@@ -159,6 +178,8 @@ class DuckDbDataSource extends EventEmitter {
           default:
             throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
         }
+        var parts = DuckDbDataSource.getFileNameParts(this.#objectName);
+        this.#fileType = parts.lowerCaseExtension;
         break;
       case DuckDbDataSource.types.FILES:
         var fileNames = config.fileNames;
@@ -254,12 +275,88 @@ class DuckDbDataSource extends EventEmitter {
     );
   }
   
+  async getRejects(){
+    if (!this.#rejects_tables){
+      return undefined;
+    }
+    try {
+      var connection = await this.getManagedConnection();
+      var physicalConnection = await connection.getPhysicalConnection();
+      
+      var rejectsScanTable = this.#getRejectsScanTableName();
+      var rejectsTable = this.#getRejectsTableName();
+      var result = await physicalConnection.query([
+        'SELECT      max(s.scan_id)                                   AS max_scan_id',
+        ',           s.file_path                                      AS filename',
+        ',           r.line                                           AS line_position',
+        ',           r.column_idx                                     AS column_position',
+        ',           any_value(r.column_name)                         AS column_name',
+        ',           byte_position - line_byte_position               AS error_position',
+        ',           list(distinct error_type||\': \'||error_message) AS errors',
+        ',           any_value(r.csv_line)                            AS csv_line',
+        `FROM        ${rejectsScanTable}                              AS s`,
+        `INNER JOIN  ${rejectsTable}                                  AS r`,
+        'ON          s.scan_id = r.scan_id',
+        'AND         s.file_id = r.file_id',
+        'GROUP BY    s.file_path',
+        ',           r.line',
+        ',           byte_position',
+        ',           line_byte_position',
+        ',           r.column_idx',
+        'ORDER BY    filename',
+        ',           line_position',
+        ',           column_position',
+        ',           error_position'
+      ].join('\n'));
+      return result;
+    }
+    catch (e){
+      // 
+      return undefined;
+    }
+  }
+  
+  async clearRejects(){
+    if (!this.#rejects_tables){
+      return undefined;
+    }
+    try {
+      var connection = await this.getManagedConnection();
+      var physicalConnection = await connection.getPhysicalConnection();
+        
+      while(this.#rejects_tables.length) {
+        var rejectsTable = this.#rejects_tables.pop();
+        var sql = `TRUNCATE TABLE ${getQuotedIdentifier(rejectsTable)}`;
+        await connection.query(sql);
+      }
+      this.#rejects_balance = 0n;
+    }    
+    catch(e){
+      //
+    }
+  }
+  
   async destroy(){
     var id = this.getId();
     try {
       this.fireEvent('destroy', {});
+      
       if (this.#file) {
-        return this.#duckDbInstance.dropFile(this.#file.name);
+        await this.#duckDbInstance.dropFile(this.#file.name);
+      }
+      
+      if (this.#rejects_tables){
+        var connection = await this.getConnection();
+        
+        while(this.#rejects_tables.length) {
+          var rejectsTable = this.#rejects_tables.pop();
+          var sql = `DROP TABLE IF EXISTS ${getQuotedIdentifier(rejectsTable)}`;
+          await connection.query(sql);
+        }
+      }
+      
+      if (this.#connection){
+        await this.#connection.close();
       }
     }
     catch (error){
@@ -270,6 +367,7 @@ class DuckDbDataSource extends EventEmitter {
       super.destroy();
       this.#duckDb = undefined;
       this.#duckDbInstance = undefined;
+      
       this.#connection = undefined;
       this.#catalogName = undefined;
       this.#schemaName = undefined;
@@ -280,6 +378,7 @@ class DuckDbDataSource extends EventEmitter {
       this.#columnMetadata = undefined;
       this.#alias = undefined;
       this.#sqlQuery = undefined;
+      this.#rejects_tables = undefined;
     }
   }
   
@@ -349,29 +448,82 @@ class DuckDbDataSource extends EventEmitter {
     return qualifiedObjectName;
   }
   
+  #getRejectsScanTableName(quote){
+    var tableName = this.#rejects_tables[0];
+    if (quote){
+      tableName = getQuotedIdentifier(tableName);
+    }
+    return tableName;
+  }
+
+  #getRejectsTableName(quote){
+    var tableName = this.#rejects_tables[1];
+    if (quote){
+      tableName = getQuotedIdentifier(tableName);
+    }
+    return tableName;
+  }
+
+  #getDuckDbFileReaderCall(duckdb_reader, fileNames){
+    var fileName;
+    var duckdbReaderArguments = Object.assign({}, 
+      DuckDbDataSource.#duckdb_reader_arguments[duckdb_reader]
+    );
+    
+    if (duckdbReaderArguments.rejects_scan && duckdbReaderArguments.rejects_table){
+      this.#rejects_tables = [
+        duckdbReaderArguments.rejects_scan, 
+        duckdbReaderArguments.rejects_table
+      ];
+    }
+    
+    if (fileNames instanceof Array) {
+      fileName = '[' + map(function(fileName){
+        return quoteStringLiteral(fileName);
+      })
+      .join(', ') + ']';
+      duckdbReaderArguments.filename = true;
+    }
+    else
+    if (typeof fileNames === 'string'){
+      fileName = quoteStringLiteral(fileNames);
+    }
+    
+    duckdbReaderArguments = Object.keys(duckdbReaderArguments).reduce(function(acc, argName){
+      var argValue = duckdbReaderArguments[argName];
+      switch (typeof argValue){
+        case 'string':
+          argValue = quoteStringLiteral(argValue);
+          break;
+        case 'boolean':
+          argValue = String(argValue);
+          break;
+      }
+      acc.push(`${argName} = ${argValue}`);
+      return acc;
+    }, []);
+    duckdbReaderArguments.unshift(fileName);
+    return `${duckdb_reader}( ${duckdbReaderArguments.join(', ')} )`;
+  }
+  
   getRelationExpression(alias, sqlOptions){    
     sqlOptions = normalizeSqlOptions(sqlOptions);
     var comma = getComma(sqlOptions.commaStyle);
     
     var identifierQuoter = function(identifier){
       return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
-    }  
-    
+    }
+        
     var sql = '';
     switch (this.getType()) {
       case DuckDbDataSource.types.FILES:
-        var fileNames = this.#fileNames.map(function(fileName){
-          return identifierQuoter(fileName);
-        }.bind(this));
-        
         var fileExtension = this.#fileType;
         var fileType = DuckDbDataSource.fileTypes[fileExtension];
-        sql = `${fileType.duckdb_reader}( [\n ${fileNames.join(comma)}\n], filename = TRUE )`;
-        
+        var duckdb_reader = fileType.duckdb_reader;
+        sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames);
         break;
       case DuckDbDataSource.types.FILE:
         var fileName = this.getFileName();
-        var quotedFileName = getQuotedIdentifier(fileName);
         var fileExtension = this.getFileExtension();
         switch (fileExtension) {
           case 'csv':
@@ -381,7 +533,8 @@ class DuckDbDataSource extends EventEmitter {
           case 'parquet':
           case 'xlsx':
             var fileType = DuckDbDataSource.fileTypes[fileExtension];
-            sql = `${fileType.duckdb_reader}( ${quotedFileName} )`;
+            var duckdb_reader = fileType.duckdb_reader;
+            sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName);
             break;
           default: // for urls we will be lenient for now
             sql = quotedFileName;
@@ -461,9 +614,7 @@ class DuckDbDataSource extends EventEmitter {
     if (this.#connection === undefined) {
       this.#connection = await this.createNewConnection();
     }
-    return new Promise(function(resolve, reject){
-      resolve(this.#connection);
-    }.bind(this));
+    return this.#connection;
   }
   
   // this creates a new connection.
@@ -475,6 +626,63 @@ class DuckDbDataSource extends EventEmitter {
   createManagedConnection(){
     var managedConnection = new DuckDbConnection(this.#duckDbInstance);
     return managedConnection;
+  }
+  
+async #queryExecutionListener(event){
+    var managedConnection = event.currentTarget;
+    var eventData = event.eventData;
+    switch (event.type){
+      case 'beforequery':
+        
+        break;
+      case 'afterquery':
+        var physicalConnection = eventData.physicalConnection;
+        var rejects_count_column = 'rejects_count';
+        var sql = `SELECT COUNT(*) as ${rejects_count_column} FROM ${this.#getRejectsTableName()}`;
+        var result = await physicalConnection.query(sql);
+        var new_reject_count = result.get(0)[rejects_count_column];
+        if (new_reject_count !== this.#reject_count ) {
+          var new_reject_balance = new_reject_count - this.#reject_count;
+          this.fireEvent('rejectsdetected', {
+            old_reject_count: this.#reject_count,
+            new_reject_count: new_reject_count,
+            old_reject_balance: this.#rejects_balance,
+            new_reject_balance: new_reject_balance,
+          });
+          this.#reject_count = new_reject_count;
+          this.#rejects_balance = new_reject_balance;
+        }
+        break;
+    }
+  }
+
+  supportsRejectsDetection(){
+    switch (this.getType()){
+      case DuckDbDataSource.types.FILES:
+      case DuckDbDataSource.types.FILE:
+        break;
+      default:
+        return false;
+    }
+    var fileExtension = this.#fileType;
+    var fileType = DuckDbDataSource.fileTypes[fileExtension];
+    var duckdb_reader = fileType.duckdb_reader;
+    var reader_arguments = DuckDbDataSource.#duckdb_reader_arguments[duckdb_reader];
+    if (!reader_arguments){
+      return false;
+    }
+    return Boolean(reader_arguments.store_rejects);
+  }
+  
+  getManagedConnection(){
+    if (this.#managedConnection === undefined){
+      this.#managedConnection = this.createManagedConnection();
+      if (this.supportsRejectsDetection()){
+        this.#managedConnection.addEventListener('beforequery', this.#queryExecutionListener.bind(this));
+        this.#managedConnection.addEventListener('afterquery', this.#queryExecutionListener.bind(this));
+      }
+    }
+    return this.#managedConnection;
   }
   
   async prepareStatement(sql){

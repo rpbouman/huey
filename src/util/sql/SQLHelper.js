@@ -546,7 +546,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(){
       return function(value, field){
-        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;
+        return value === null ? 'NULL::VARCHAR' : quoteStringLiteral(value);
       };
     }
   },
@@ -596,6 +596,10 @@ function getDataTypeInfo(columnType){
   });
   var typeName = typeNames[0];
   return dataTypes[typeName];
+}
+
+function quoteStringLiteral(str){
+  return `'${str.replace(/'/g, "''")}'`; 
 }
 
 function identifierRequiresQuoting(identifier){

@@ -107,7 +107,7 @@ function initApplication(){
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
   
-  pivotTableUi.addEventListener('updated', function(e){
+  pivotTableUi.addEventListener('updated', async function(e){
     var eventData = e.eventData;
     if (eventData.status === 'error'){
       showErrorDialog(eventData.error);      
