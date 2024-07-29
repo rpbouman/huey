@@ -273,10 +273,11 @@ class TupleSet extends DataSetComponent {
     }
     axisSql = `${axisSql}\nLIMIT ${limit} OFFSET ${offset}`;
 
-    var connection = this.getManagedConnection();
+    var connection = await this.getManagedConnection();
     console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
     var resultset = await connection.query(axisSql);
     console.log(`Query method returned, connection ${connection.getConnectionId()} in state ${connection.getState()}` );
+    var rejects = await this.getQueryModel().getDatasource().getRejects();
     if (connection.getState() === 'canceled') {
       return 0;
     }

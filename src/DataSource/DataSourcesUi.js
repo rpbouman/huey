@@ -277,6 +277,16 @@ class DataSourcesUi {
       }
     });
     summaryElement.appendChild(removeActionButton);
+
+    var editActionButton = this.#renderDatasourceActionButton({
+      id: datasourceId + '_edit',
+      "className": "editActionButton",
+      title: 'Configure datasource details',
+      events: {
+        click: this.#configureDatasourceClicked.bind(this)
+      }
+    });
+    summaryElement.appendChild(editActionButton);
   }
   
   async #loadDatabaseDatasource(databaseDatasource){
@@ -349,7 +359,6 @@ class DataSourcesUi {
           schemaName: schemaName,
           objectName: tableName
         });
-        
         this.addDatasource(datasource);
       }
 
@@ -480,6 +489,46 @@ class DataSourcesUi {
     return datasource;
   }
   
+  #rejectsDetectedHandler(event){
+    var eventData = event.eventData;
+    var datasource = event.currentTarget;
+    var id = datasource.getId();
+    var datasourceNode = document.getElementById(id);
+    var new_reject_balance = eventData.new_reject_balance;
+    var old_reject_balance = eventData.old_reject_balance;
+    datasourceNode.setAttribute('data-reject_count', String(new_reject_balance));
+    if (new_reject_balance > old_reject_balance){
+      var diff = new_reject_balance - old_reject_balance;
+      var title, description;
+      if (old_reject_balance === 0n){
+        title = 'Errors found in Data file';
+        description = [
+          'Errors were encountered while executing the previous query.',
+          `${new_reject_balance} offending records were excluded from the results.`
+        ];
+      }
+      else {
+        title = 'New errors found in Data file';
+        description = [
+          `${diff} new errors were encountered while executing the previous query and skipped from the results.`,
+          `The total number of skipped records so far is ${new_reject_balance}.`
+        ];
+      }
+      description.push('Review datasource settings to inspect and fix the errors.');
+      showErrorDialog({
+        title: title,
+        description: description.join('<br/>\n')
+      });
+    }
+  }
+  
+  #attachRejectsDetection(duckdbDataSource) {
+    if(!duckdbDataSource.supportsRejectsDetection()) {
+      return;
+    }
+    duckdbDataSource.addEventListener('rejectsdetected', this.#rejectsDetectedHandler.bind(this));
+  }
+  
   #getDatasourceFromClickEvent(event){
     var node = this.#getTreeNodeFromClickEvent(event);
     var nodeType = node.getAttribute('data-nodetype');
@@ -511,6 +560,7 @@ class DataSourcesUi {
               fileNames: fileNames,
               fileType: fileType
             });
+            this.#attachRejectsDetection(datasource);
             break;
           default:
             throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
@@ -550,6 +600,11 @@ class DataSourcesUi {
         break;
     }    
     this.destroyDatasources(datasourceIdsList);
+  }
+  
+  #configureDatasourceClicked(event){
+    var datasourceSettingsDialog =  byId('datasourceSettingsDialog');
+    datasourceSettingsDialog.showPopover();
   }
   
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
@@ -637,6 +692,7 @@ class DataSourcesUi {
   
   addDatasource(datasource) {
     var id = datasource.getId();
+    this.#attachRejectsDetection(datasource);
     this.#datasources[id] = datasource;
   }
   

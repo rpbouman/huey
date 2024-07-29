@@ -7,10 +7,10 @@ class DataSetComponent {
     this.#queryModel = queryModel;
   }
 
-  #createManagedConnection(){
+  async #getDatasouceManagedConnection(){
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
-    var managedConnection = datasource.createManagedConnection();
+    var managedConnection = await datasource.getManagedConnection();
     return managedConnection;
   }
   
@@ -18,9 +18,9 @@ class DataSetComponent {
     return this.#queryModel;
   }
 
-  getManagedConnection(){
+  async getManagedConnection(){
     if (this.#managedConnection === undefined) {
-      this.#managedConnection = this.#createManagedConnection();
+      this.#managedConnection = await this.#getDatasouceManagedConnection();
     }
     return this.#managedConnection;
   }

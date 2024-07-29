@@ -15,7 +15,7 @@ nav#sidebar {
   grid-row: 2/ span 2;
   padding: 4px 4px 0px 4px;
   display: flex;
-  min-width: 200px;
+  min-width: 170px;
 }
 
 .workarea {
