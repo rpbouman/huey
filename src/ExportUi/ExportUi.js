@@ -263,9 +263,16 @@ function initExportUi(){
 
   byId('exportDialogExecuteButton')
   .addEventListener('click', executeExport);
+
+
+  var exportTitleTemplate = byId('exportTitleTemplate');
+  function titleTemplateChanged(){
+    settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
+    updateExportTitle();
+  }
   
-  byId('exportTitleTemplate')
-  .addEventListener('change', updateExportTitle());
+  exportTitleTemplate.addEventListener('change', titleTemplateChanged);
+  exportTitleTemplate.addEventListener('input', titleTemplateChanged);
   
   queryModel.addEventListener('change', function(event){
     var eventData = event.eventData;
