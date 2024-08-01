@@ -537,7 +537,7 @@ class DuckDbDataSource extends EventEmitter {
             sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName);
             break;
           default: // for urls we will be lenient for now
-            sql = quotedFileName;
+            sql = getQuotedIdentifier(fileName);
         }
         break;
       case DuckDbDataSource.types.SQLQUERY:
@@ -672,6 +672,10 @@ async #queryExecutionListener(event){
       return false;
     }
     return Boolean(reader_arguments.store_rejects);
+  }
+  
+  getFileType(){
+    return this.#fileType;
   }
   
   getManagedConnection(){

@@ -603,8 +603,8 @@ class DataSourcesUi {
   }
   
   #configureDatasourceClicked(event){
-    var datasourceSettingsDialog =  byId('datasourceSettingsDialog');
-    datasourceSettingsDialog.showPopover();
+    var datasource = this.#getDatasourceFromClickEvent(event);
+    datasourceSettingsDialog.open(datasource);
   }
   
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){

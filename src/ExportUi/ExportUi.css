@@ -17,12 +17,6 @@ form > fieldset {
   grid-column: span 1;
 }
 
-form > output {
-  grid-column: controls;
-  grid-row: auto;
-  justify-self:start;
-}
-
 dialog#exportDialog > dialog[role=progressbar] {
   z-index: 1;
   width: 200px;

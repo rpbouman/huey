@@ -246,6 +246,11 @@ form > label::after, form > fieldset > label::after {
   content: ":"
 }
 
+form > output {
+  margin-top: 2px;
+}
+
+form > output, 
 form > input,
 form > select {
   grid-column: controls;

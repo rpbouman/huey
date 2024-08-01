@@ -71,6 +71,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSourceSettingsDialog/DataSourceSettingsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -854,13 +855,67 @@
       <header>
         <h3 id="datasourceSettingsDialogTitle">Datasource Settings</h3>
         <form>
-          <label for="datasourceFileType">Type</label>
-          <output id="datasourceFileType"></output>
-          <label for="datasourceName">Type</label>
-          <output id="datasourceName"></output>
+          <fieldset>
+            <legend>General properties</legend>
+            <label for="datasourceType">Type</label>
+            <output id="datasourceType"></output>
+            <label for="datasourceName">Name</label>
+            <output id="datasourceName"></output>
+          </fieldset>
+          <fieldset>
+            <legend>Datasource Type properties</legend>
+            <label for="datasourceFileType">File Type</label>
+            <output id="datasourceFileType"></output>
+          </fieldset>
         </form>
       </header>
-      <section>
+      <section
+        role="tablist"
+      >
+        <!--
+          reader settings
+        -->
+        <div>
+          <label
+            role="tab"
+            for="readerParametersTab"
+          >
+            Reader Parameters
+          </label>
+          <input id="readerParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <div role="tabpanel">
+          
+          </div>
+        </div>
+        <!--
+          columns
+        -->
+        <div>
+          <label
+            role="tab"
+            for="columnsTab"
+          >
+            Columns
+          </label>
+          <input id="columnsTab" type="radio" name="datasourceSettingsTabs"/>
+          <div role="tabpanel">
+          </div>
+        </div>
+        <!--
+          rejects
+        -->
+        <div>
+          <label
+            role="tab"
+            for="rejectsTab"
+          >
+            Rejects
+          </label>
+          <input id="rejects  Tab" type="radio" name="datasourceSettingsTabs"/>
+          <div role="tabpanel">
+          </div>
+        </div>
+      
       </section>
       <footer role="toolbar">
         <button
@@ -1001,6 +1056,7 @@
 
       </nav>
       <div class="workarea">
+      
         <div
           id="queryUi"
           class="queryUi"
@@ -1050,8 +1106,6 @@
               <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
             </li>
           </template>
-          
-          
         </div>
         <!-- pivotTableUi: outmost container of the pivot table-->
         <div
@@ -1124,6 +1178,7 @@
     <script onload="resourceLoaded(this)" src="UploadUi/UploadUi.js"></script>
     <script onload="resourceLoaded(this)" src="ExportUi/ExportUi.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/DataSourcesUi.js"></script>
+    <script onload="resourceLoaded(this)" src="DataSourceSettingsDialog/DatasourceSettingsDialog.js"></script>
     <script onload="resourceLoaded(this)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>

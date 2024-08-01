@@ -1,0 +1,5 @@
+dialog#datasourceSettingsDialog {
+  width: 700px;
+  height: 440px;
+  resize: both;
+}

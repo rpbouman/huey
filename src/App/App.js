@@ -92,6 +92,7 @@ function initApplication(){
   initExecuteQuery();
   initPageStateManager();
   initUploadUi();
+  initDatasourceSettingsDialog();
  
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
@@ -113,5 +114,5 @@ function initApplication(){
       showErrorDialog(eventData.error);      
     }
   });
- 
+   
 }
