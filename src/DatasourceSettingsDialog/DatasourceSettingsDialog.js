@@ -1,6 +1,6 @@
 class DatasourceSettingsDialog {
   
-  #id = 'datasourceSettingsDialog';
+  static #id = 'datasourceSettingsDialog';
   
   constructor(){
     this.#initDatasourceSettingsDialog();
@@ -18,6 +18,29 @@ class DatasourceSettingsDialog {
       'click', 
       this.#datasourceSettingsDialogCancelButtonClicked.bind(this)
     );
+    this.#initColumnsTab();
+  }
+  
+  #initColumnsTab(){
+    var hueyDb = window.hueyDb;
+    var duckdb = hueyDb.duckdb;
+    var instance = hueyDb.instance;    
+    var datasource = DuckDbDataSource.createFromSql(
+      duckdb, 
+      instance, 
+      'SELECT 1'
+    );
+    var columnsQueryModel = new QueryModel();
+    columnsQueryModel.setDatasource(datasource);
+    
+    var tabId = 'datasourceSettingsDialogColumnsTab';
+    var columnsTabPanel = TabUi.getTabPanel(`#${DatasourceSettingsDialog.#id} > *[role=tablist]`, `#${tabId}`);
+    var columnsTable = new PivotTableUi({
+      container: columnsTabPanel,
+      id: tabId + 'Table',
+      queryModel: columnsQueryModel,
+      settings: settings
+    });
   }
   
   #datasourceSettingsDialogOkButtonClicked(event){
@@ -29,7 +52,7 @@ class DatasourceSettingsDialog {
   }
   
   #getDialog(){
-    return byId(this.#id);
+    return byId(DatasourceSettingsDialog.#id);
   }
   
   #getDatasourceType(){

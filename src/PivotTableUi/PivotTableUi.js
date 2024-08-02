@@ -1,5 +1,8 @@
 class PivotTableUi extends EventEmitter {
 
+  static #templateId = 'pivotTableUiTemplate';
+  static #defaultSettings = {};
+
   #id = undefined;
   #queryModel = undefined;
   #settings = undefined;
@@ -26,11 +29,10 @@ class PivotTableUi extends EventEmitter {
 
   constructor(config){
     super('updated');
+    this.#initDom(config);
     this.#id = config.id;
 
-    if (config.settings){
-      this.#initSettings(config.settings);
-    }
+    this.#initSettings(config.settings);
 
     var queryModel = config.queryModel;
     this.#queryModel = queryModel;
@@ -50,6 +52,24 @@ class PivotTableUi extends EventEmitter {
     this.#initResizeObserver();
     this.#initCancelQueryButtonClickHandler();
 
+  }
+  
+  #initDom(config) {
+    var template = byId(PivotTableUi.#templateId);
+    var clone = template.content.cloneNode(true);
+    var index = 0, element;
+    do {
+      element = clone.childNodes.item(index++);
+    } while (element && element.nodeType !== element.ELEMENT_NODE);
+    element.setAttribute('id', config.id);
+
+    var container = config.container;
+    switch (typeof container){
+      case 'string':
+        container = byId(config.container);
+    }
+    
+    container.appendChild(element);
   }
 
   getQueryModel(){
@@ -1587,6 +1607,7 @@ class PivotTableUi extends EventEmitter {
 var pivotTableUi;
 function initPivotTableUi(){
   pivotTableUi = new PivotTableUi({
+    container: 'workarea',
     id: 'pivotTableUi',
     queryModel: queryModel,
     settings: settings

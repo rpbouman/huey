@@ -404,8 +404,8 @@ var uploadUi;
 function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');  
   
-  byId("uploader")
-  .addEventListener("change", async function(event){
+  byId('uploader')
+  .addEventListener('change', async function(event){
     var fileControl = event.target;
     var files = fileControl.files;
     await uploadUi.uploadFiles(files);
@@ -418,5 +418,24 @@ function initUploadUi(){
     
     return;  
   }, false);
+  
+  
+  byId('loadFromUrl')
+  .addEventListener('click', async function(event){
+    var url = prompt('Enter URL');
+    if (!url || !url.length){
+      return;
+    }
+    var hueyDb = window.hueyDb;
+    var duckdb = hueyDb.duckdb;
+    var protocol = duckdb.DuckDBDataProtocol.HTTP;
+    var instance = hueyDb.instance;
+    var resp = await instance.registerFileURL(url, url, protocol);
+    var sql = `SELECT * FROM "${url}"`;
+    var conn = hueyDb.connection;
+    var result = await conn.query(sql);
+    
+  });
+
 }
 

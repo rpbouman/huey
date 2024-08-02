@@ -8,6 +8,7 @@ class DuckDbDataSource extends EventEmitter {
     "SQLQUERY": 'sql',
     "TABLE": 'table',
     "TABLEFUNCTION": 'table function',
+    "URL": 'url',
     "VIEW": 'view'
   };
     
@@ -126,8 +127,8 @@ class DuckDbDataSource extends EventEmitter {
       type: DuckDbDataSource.types.FILE,
       fileName: url 
     };
-    var instance = new DuckDbDataSource(duckdb, instance, config);
-    return instance;
+    var dsInstance = new DuckDbDataSource(duckdb, instance, config);
+    return dsInstance;
   }
 
   static createFromFile(duckdb, instance, file) {
@@ -148,8 +149,17 @@ class DuckDbDataSource extends EventEmitter {
       file: file,
       fileType: fileType
     };
-    var instance = new DuckDbDataSource(duckdb, instance, config);
-    return instance;
+    var dsInstance = new DuckDbDataSource(duckdb, instance, config);
+    return dsInstance;
+  }
+  
+  static createFromSql(duckdb,instance, sql){
+    var config = {
+      type: DuckDbDataSource.types.SQLQUERY,
+      sql: sql
+    };
+    var dsInstance = new DuckDbDataSource(duckdb, instance, config);
+    return dsInstance;
   }
   
   #init(config){
@@ -216,6 +226,9 @@ class DuckDbDataSource extends EventEmitter {
         this.#catalogName = config.catalogName;
         this.#schemaName = config.schemaName;
         this.#objectName = config.functionName || config.objectName;
+        break;
+      case DuckDbDataSource.types.SQLQUERY:
+        this.#sqlQuery = config.sql;
         break;
       default:
         throw new Error(`Could not initialize the datasource: unrecognized type ${type}`);
@@ -733,7 +746,7 @@ async #queryExecutionListener(event){
     return resultset;
   }
   
-  #getSqlForTableSchema(){
+  getSqlForTableSchema(){
     var fromClause = this.getFromClauseSql();
     var sql = `DESCRIBE SELECT * ${fromClause}`;
     return sql;
@@ -744,7 +757,7 @@ async #queryExecutionListener(event){
       return this.#columnMetadata;
     }
     
-    var sql = this.#getSqlForTableSchema();
+    var sql = this.getSqlForTableSchema();
     var connection = await this.getConnection();
     var columnMetadata = connection.query(sql);
     this.#columnMetadata = columnMetadata;

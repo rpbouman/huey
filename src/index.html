@@ -869,20 +869,18 @@
           </fieldset>
         </form>
       </header>
-      <section
-        role="tablist"
-      >
+      <section role="tablist">
         <!--
           reader settings
         -->
         <div>
           <label
             role="tab"
-            for="readerParametersTab"
+            for="datasourceSettingsDialogParametersTab"
           >
             Reader Parameters
           </label>
-          <input id="readerParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <input id="datasourceSettingsDialogParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
           <div role="tabpanel">
           
           </div>
@@ -893,11 +891,11 @@
         <div>
           <label
             role="tab"
-            for="columnsTab"
+            for="datasourceSettingsDialogColumnsTab"
           >
             Columns
           </label>
-          <input id="columnsTab" type="radio" name="datasourceSettingsTabs"/>
+          <input id="datasourceSettingsDialogColumnsTab" type="radio" name="datasourceSettingsTabs"/>
           <div role="tabpanel">
           </div>
         </div>
@@ -907,11 +905,11 @@
         <div>
           <label
             role="tab"
-            for="rejectsTab"
+            for="datasourceSettingsDialogRejectsTab"
           >
             Rejects
           </label>
-          <input id="rejects  Tab" type="radio" name="datasourceSettingsTabs"/>
+          <input id="datasourceSettingsDialogRejectsTab" type="radio" name="datasourceSettingsTabs"/>
           <div role="tabpanel">
           </div>
         </div>
@@ -944,6 +942,11 @@
             multiple="true"
             accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
+        </label>
+        <label for="loadFromUrl" title="Load data from URL">
+          <button
+            id="loadFromUrl"
+          >Data from URL</button>
         </label>
 
         <label for="runQueryButton" title="Execute Query">
@@ -1055,7 +1058,7 @@
         </div>
 
       </nav>
-      <div class="workarea">
+      <div id="workarea" class="workarea">
       
         <div
           id="queryUi"
@@ -1107,55 +1110,55 @@
             </li>
           </template>
         </div>
-        <!-- pivotTableUi: outmost container of the pivot table-->
-        <div
-          id="pivotTableUi"
-          class="pivotTableUiContainer"
-          style="
-            flex-grow: 1;
-            width: 100%;
-            height: 100%;
-            border-width: 1px;
-            border-color: var( --huey-dark-border-color );
-            border-top-style: solid;
-          "
-          aria-busy="false"
-          data-needs-update="false"
-        >
-          <dialog role="progressbar">
-            <header>
-              <div class="loader loader-medium">Loading...</div>
-              <div class="timer">
-                <span class="digit"></span>
-                <span class="digit"></span>
-                <span class="digit"></span>
-                <span class="digit"></span>
-              </div>
-            </header>
-            <section>
-              <!-- TODO: actual progress information -->
-            </section>
-            <footer>
-              <button id="cancelQueryButton">Cancel</button>
-            </footer>
-          </dialog>
+        <template id="pivotTableUiTemplate">
+          <!-- pivotTableUi: outmost container of the pivot table-->
           <div
-            class="pivotTableUiInnerContainer"
+            id=""
+            class="pivotTableUiContainer"
+            style="
+              flex-grow: 1;
+              width: 100%;
+              height: 100%;
+              border-width: 1px;
+              border-color: var( --huey-dark-border-color );
+              border-top-style: solid;
+            "
+            aria-busy="false"
+            data-needs-update="false"
           >
-            <!-- pivotTableColumnsSizer: sizer to generate the horizontal scrollbar -->
-            <div class="pivotTableUiSizer pivotTableUiHorizontalSizer"></div>
-            <!-- pivotTableColumnsSizer: sizer to generate the vertical scrollbar -->
-            <div class="pivotTableUiSizer pivotTableUiVerticalSizer"></div>
+            <div class="pivotTableUiInnerContainer">
+              <!-- pivotTableColumnsSizer: sizer to generate the horizontal scrollbar -->
+              <div class="pivotTableUiSizer pivotTableUiHorizontalSizer"></div>
+              <!-- pivotTableColumnsSizer: sizer to generate the vertical scrollbar -->
+              <div class="pivotTableUiSizer pivotTableUiVerticalSizer"></div>
 
-            <!-- the actual table structure -->
-            <div
-              class="pivotTableUiTable"
-            >
-              <div class="pivotTableUiTableHeader"></div>
-              <div class="pivotTableUiTableBody"></div>
+              <!-- the actual table structure -->
+              <div class="pivotTableUiTable">
+                <div class="pivotTableUiTableHeader"></div>
+                <div class="pivotTableUiTableBody"></div>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
+
+        <dialog id="visualizationProgressDialog" role="progressbar">
+          <header>
+            <div class="loader loader-medium">Loading...</div>
+            <div class="timer">
+              <span class="digit"></span>
+              <span class="digit"></span>
+              <span class="digit"></span>
+              <span class="digit"></span>
+            </div>
+          </header>
+          <section>
+            <!-- TODO: actual progress information -->
+          </section>
+          <footer>
+            <button id="cancelQueryButton">Cancel</button>
+          </footer>
+        </dialog>
+        
       </div>
     </main>
 
