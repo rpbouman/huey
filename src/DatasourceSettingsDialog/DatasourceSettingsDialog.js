@@ -2,6 +2,10 @@ class DatasourceSettingsDialog {
   
   static #id = 'datasourceSettingsDialog';
   
+  #columnsTabDatasource = undefined;
+  #columnsTabQueryModel = undefined;
+  #columnsTabPivotTableUi = undefined;
+  
   constructor(){
     this.#initDatasourceSettingsDialog();
   }
@@ -25,22 +29,30 @@ class DatasourceSettingsDialog {
     var hueyDb = window.hueyDb;
     var duckdb = hueyDb.duckdb;
     var instance = hueyDb.instance;    
-    var datasource = DuckDbDataSource.createFromSql(
+    this.#columnsTabDatasource = DuckDbDataSource.createFromSql(
       duckdb, 
       instance, 
-      'SELECT 1'
+      'DESCRIBE SELECT 1'
     );
-    var columnsQueryModel = new QueryModel();
-    columnsQueryModel.setDatasource(datasource);
     
+    this.#columnsTabQueryModel = new QueryModel();    
+        
     var tabId = 'datasourceSettingsDialogColumnsTab';
     var columnsTabPanel = TabUi.getTabPanel(`#${DatasourceSettingsDialog.#id} > *[role=tablist]`, `#${tabId}`);
-    var columnsTable = new PivotTableUi({
+    this.#columnsTabPivotTableUi = new PivotTableUi({
       container: columnsTabPanel,
-      id: tabId + 'Table',
-      queryModel: columnsQueryModel,
+      id: tabId + 'PivotTableUi',
+      queryModel: this.#columnsTabQueryModel,
       settings: settings
     });
+       
+  }
+
+  #updateColumnsTabData(){
+    this.#columnsTabQueryModel.setDatasource( null );
+    this.#columnsTabQueryModel.setDatasource( this.#columnsTabDatasource );
+    this.#columnsTabQueryModel.addItem({axis: QueryModel.AXIS_ROWS, columnName: 'column_name', columnType: 'VARCHAR'});
+    this.#columnsTabQueryModel.addItem({axis: QueryModel.AXIS_ROWS, columnName: 'column_type', columnType: 'VARCHAR'});
   }
   
   #datasourceSettingsDialogOkButtonClicked(event){
@@ -79,6 +91,9 @@ class DatasourceSettingsDialog {
         var fileType = datasource.getFileType();
         this.#getDatasourceFileType().value = fileType;
     }
+    var sql = datasource.getSqlForTableSchema();
+    this.#columnsTabDatasource.setSqlQuery(sql);
+    this.#updateColumnsTabData();
   }
   
   open(datasource) {

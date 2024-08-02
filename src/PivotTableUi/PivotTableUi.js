@@ -614,7 +614,7 @@ class PivotTableUi extends EventEmitter {
     var queryAxisItems = queryAxis.getItems();
     
     var tupleValueFields = tupleSet.getTupleValueFields();
-    var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex);
+    var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex || 0);
 
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
     var cellsAxisItems;

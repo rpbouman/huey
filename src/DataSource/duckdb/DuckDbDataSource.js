@@ -84,7 +84,7 @@ class DuckDbDataSource extends EventEmitter {
   #sqlQuery = undefined;
   
   constructor(duckDb, duckDbInstance, config){
-    super(['destroy', 'rejectsdetected']);
+    super(['destroy', 'rejectsdetected', 'change']);
     this.#datasource_uid = ++DuckDbDataSource.#datasource_uid_generator;
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
@@ -160,6 +160,25 @@ class DuckDbDataSource extends EventEmitter {
     };
     var dsInstance = new DuckDbDataSource(duckdb, instance, config);
     return dsInstance;
+  }
+  
+  setSqlQuery(sqlQuery){
+    // TODO: verify if this is a "query" - a statement that yields a resultset
+    // also, verify that this uses existing datasources.
+    var oldSqlQuery = this.#sqlQuery;
+    
+    //TODO: compare normalized versions of the query
+    if (oldSqlQuery === sqlQuery) {
+      return;
+    }
+    
+    this.#sqlQuery = sqlQuery;
+    this.fireEvent('change', {
+      'propertiesChanged': {
+        previousValue: oldSqlQuery,
+        newValue: sqlQuery       
+      }
+    });
   }
   
   #init(config){
