@@ -129,7 +129,7 @@ This tab bundles all settings that controls the default appearance of values
 #### Query
 Controls the behavior of the query editor.
 - Autorun: whether queries execute automatically after editing the query
-#### Pviot Table
+#### Pivot Table
 Settings that control the appearance and behavior of the Pivot Table
 - Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
 #### Theme
