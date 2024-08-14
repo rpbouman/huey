@@ -8,6 +8,11 @@
   flex-grow: 0;
 }
 
+*[role=tablist]> * > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ):hover {
+  background-color: var( --huey-light-background-color );
+  border-color: var( --huey-light-border-color );
+}
+
 *[role=tablist]> * > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ) {
   border-style: solid;
   border-color: var( --huey-light-border-color );
