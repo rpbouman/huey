@@ -1,5 +1,17 @@
 dialog#datasourceSettingsDialog {
   width: 700px;
-  height: 440px;
+  height: 725px;
   resize: both;
 }
+
+
+#csvReaderDelim,
+#csvReaderQuote,
+#csvReaderEscape,
+#csvReaderDecimalSeparator,
+#csvReaderDateformat,
+#csvReaderTimestampformat,
+#csvReaderNullstr {
+  font-family: var( --huey-mono-font-family );
+}
+

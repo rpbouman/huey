@@ -541,7 +541,10 @@ var dataTypes = {
         if (value === null){
           return getNullString();
         }
-        return value;
+        if (typeof value === 'string'){
+          value = value.replace(/\r\n|\n|\r/g, ' ');
+        }
+        return String(value);
       }
     },
     createLiteralWriter: function(){

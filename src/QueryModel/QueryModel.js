@@ -60,8 +60,26 @@ class QueryAxisItem {
     var dataTypeInfo = getDataTypeInfo(dataType);
     return dataTypeInfo.createLiteralWriter();
   }
+  
+  static getLiteralWriter(axisItem) {
+    var literalWriter = axisItem.literalWriter;
+    if (literalWriter) {
+      return literalWriter;
+    }
+    literalWriter = QueryAxisItem.createLiteralWriter(axisItem);
+    return literalWriter;
+  }
 
   static getCaptionForQueryAxisItem(axisItem){
+    var caption = axisItem.caption;
+    if (caption){
+      return caption;
+    }
+    caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
+    return caption;
+  }
+  
+  static createCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
     var postfix;
     if (axisItem.derivation) {
@@ -399,6 +417,8 @@ class QueryModel extends EventEmitter {
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
+  
+  static #defaultConfig = {};
 
   #axes = {
     filters: new QueryAxis(),
@@ -408,11 +428,15 @@ class QueryModel extends EventEmitter {
   };
 
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
-
+  #settings = undefined;
   #datasource = undefined;
   
-  constructor(){
+  constructor(config){
     super('change');
+    var config = Object.assign({}, QueryModel.#defaultConfig, config);
+    if (config.settings){
+      this.#settings = settings;
+    }
   }
 
   setCellHeadersAxis(cellheadersaxis) {
@@ -892,16 +916,41 @@ class QueryModel extends EventEmitter {
     return queryModelObject;
   }
   
+  get #autoUpdate(){
+    var autoUpdate;
+    var settings = this.#settings || {};
+    if (settings && typeof settings.getSettings === 'function'){
+      settings = settings.getSettings('querySettings');
+    }
+    if (settings.autoRunQuery !== undefined) {
+      autoUpdate = settings.autoRunQuery;
+    }
+    else {
+      autoUpdate = true;
+    }
+    return autoUpdate;
+  }
+  
   async setState(queryModelState){
 
-    var querySettings = settings.getSettings('querySettings');
-    var autoRunQuery = querySettings.autoRunQuery;
-        
-    settings.assignSettings(['querySettings', 'autoRunQuery'], false);
+    var autoRunQuery = this.#autoUpdate;
+    var canAssignSettings = this.#settings && typeof this.#settings.assignSettings === 'function';
+    
+    if (canAssignSettings){
+      settings.assignSettings(['querySettings', 'autoRunQuery'], false);
+    }
 
     try {
       var datasourceId = queryModelState.datasourceId;
-      var datasource = datasourcesUi.getDatasource(datasourceId);
+      var datasource;
+      if (datasourceId){
+        datasource = datasourcesUi.getDatasource(datasourceId);
+      }
+      else 
+      if(queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource){
+        datasource = queryModelState.datasource;
+      }
+       
       if (this.getDatasource() === datasource) {
         this.clear();
       }
@@ -919,6 +968,7 @@ class QueryModel extends EventEmitter {
           config.columnType = item.columnType;
           config.derivation = item.derivation;
           config.aggregator = item.aggregator;
+          config.caption = item.caption;
           if (item.includeTotals === true){
             config.includeTotals = true;
           }
@@ -945,9 +995,13 @@ class QueryModel extends EventEmitter {
       }
     }
     catch(e){
+      debugger;
     }
     finally {
-      settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
+      if (canAssignSettings){
+        this.#settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
+      }
+      
       if (autoRunQuery){
         setTimeout(function(){
           pivotTableUi.updatePivotTableUi();
@@ -960,5 +1014,7 @@ class QueryModel extends EventEmitter {
 
 var queryModel;
 function initQueryModel(){
-  queryModel = new QueryModel();
+  queryModel = new QueryModel({
+    settings: settings
+  });
 }

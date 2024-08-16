@@ -76,6 +76,8 @@ class DataSourcesUi {
         if (item.type !== 'text/uri-list'){
           continue;
         }
+        
+        // TODO: we should do something here to makr these data sources as URLs, not "files"
         item.getAsString(function(uri){
           uploadUi.uploadFiles([uri]);
         });
@@ -496,7 +498,15 @@ class DataSourcesUi {
     var datasourceNode = document.getElementById(id);
     var new_reject_balance = eventData.new_reject_balance;
     var old_reject_balance = eventData.old_reject_balance;
-    datasourceNode.setAttribute('data-reject_count', String(new_reject_balance));
+    var balanceAttribute;
+    if (new_reject_balance >= 0){
+      balanceAttribute = new_reject_balance;
+      datasourceNode.setAttribute('data-reject_count', balanceAttribute);
+    }
+    else {
+      balanceAttribute = 0;
+      datasourceNode.removeAttribute('data-reject_count');
+    }
     if (new_reject_balance > old_reject_balance){
       var diff = new_reject_balance - old_reject_balance;
       var title, description;

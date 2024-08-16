@@ -200,7 +200,7 @@ async function executeExport(){
       var datasource = queryModel.getDatasource();
       var connection, result;
       try {
-        connection = datasource.createManagedConnection();
+        connection = datasource.getManagedConnection();
         result = await connection.query(copyStatement);
         progressMessageElement.innerText = `Extracting from ${tmpFileName}`;
         data = await connection.copyFileToBuffer(tmpFileName);
@@ -209,11 +209,7 @@ async function executeExport(){
         if (data) {
           await connection.dropFile(tmpFileName);
         }
-        if (connection){
-          connection.destroy();
-        }
       }
-      
     }
     
     var destination;

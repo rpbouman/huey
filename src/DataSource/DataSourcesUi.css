@@ -53,7 +53,7 @@
 }
 
 #datasourcesUi details > summary > .label  {
-  max-width: calc(100% - 128px);
+  max-width: calc(100% - 136px);
 }
 
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,

@@ -20,17 +20,31 @@ dialog#uploadUi > section > details[aria-invalid=false] > summary > progress {
   accent-color: green;
 }
 
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for] {
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label[for] {
   float: right;
 }
 
-dialog#uploadUi > section > details > summary > label.analyzeActionButton > button {
+dialog#uploadUi > section > details > summary > label[for] > button {
   display: none;
 }
 
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]::after {
+dialog#uploadUi > header > p#uploadUiDescription > span::after,
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label[for]::after {
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
+  margin: 1px 3px 2px 3px;
+}
+
+
+dialog#uploadUi > header > p#uploadUiDescription > span.editActionButton::after,
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]::after {
+  /* settings */
+  content: '\eb20';
+}
+
+dialog#uploadUi > header > p#uploadUiDescription > span.analyzeActionButton::after,
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]::after {
+  /* analyze */
   content: '\f3a3';  
 }
 
@@ -62,8 +76,5 @@ dialog#uploadUi > header > p#uploadUiDescription > label[for=datasourcesTab] {
   cursor: pointer;
 }
 
-dialog#uploadUi > header > p#uploadUiDescription > span.analyzeActionButton::after {
-  font-family: var( --huey-icon-font-family );
-  font-size: var( --huey-icon-normal );
-  content: '\f3a3';
-}
+
+

@@ -114,5 +114,19 @@ function initApplication(){
       showErrorDialog(eventData.error);      
     }
   });
+
+  bufferEvents(pivotTableUi, 'busy', function(event, count){
+    if (count !== undefined) {
+      return;
+    }
+    var busy = event.eventData.busy;
+    var busyDialog = byId('visualizationProgressDialog');
+    if (busy) {
+      busyDialog.showModal();
+    }
+    else {
+      busyDialog.close();
+    }
+  });
    
 }

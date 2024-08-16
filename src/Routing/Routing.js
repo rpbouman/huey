@@ -59,9 +59,12 @@ class Routing {
    // }
     var hash = newRoute ? `#${newRoute}` : '';
     //document.location.hash = hash;
-    if (history.state === newRoute){
+    if (history.state === newRoute && Routing.getCurrentRoute() === newRoute){
       return;
     }
     history.pushState(newRoute, undefined, hash);
+    if (Routing.getCurrentRoute() !== newRoute){
+      document.location.hash = hash;
+    }
   }
 }

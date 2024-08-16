@@ -29,11 +29,16 @@ class PageStateManager {
   
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
     return new Promise(function(resolve, reject){
+      
+      // do we have the referenced datasource?
       var desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
       if (desiredDataSource){
+        // yes! we're done.
         resolve(desiredDataSource);
         return;
       }
+      
+      // figure out what kind of datasource is referenced
       var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
       var title;
       var message = `The requested ${desiredDatasourceIdParts.type} ${desiredDatasourceIdParts.localId}`;
@@ -175,7 +180,8 @@ class PageStateManager {
         );
       }
       catch (error){
-        debugger;
+        queryModel.clear();
+        Routing.updateRouteFromQueryModel(queryModel);
       }
       if (!datasource) {
         return;

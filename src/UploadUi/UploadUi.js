@@ -118,6 +118,14 @@ class UploadUi {
         "onclick": `byId("${this.#id}").close()`
       });
       summary.appendChild(analyzeButton);
+
+      var settingsButton = createEl('label', {
+        "class": 'editActionButton',
+        "for": `${datasourceId}_edit`,
+        "title": `Configure ${fileName}`,
+        "onclick": `byId("${this.#id}").close()`
+      });
+      summary.appendChild(settingsButton);
     }
     
     var progressBar = createEl('progress', {
@@ -174,7 +182,7 @@ class UploadUi {
       var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
       var fileExtension = fileNameParts.lowerCaseExtension;
       
-      var fileType = DuckDbDataSource.fileTypes[fileExtension];
+      var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
       if (!fileType){
         continue;
       }
@@ -340,12 +348,11 @@ class UploadUi {
       datasourcesUi.addDatasources(datasources);
     }
     var message, description;
-    var instruction
+    var countSuccess = uploadResults.length - countFail;
     if (countFail) {
-      var countSuccess = uploadResults.length - countFail;
       if (countSuccess){
         message = `${countSuccess} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, ${countFail} failed.`;
-        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
       }
       else {
         message = `${countFail} file${countFail > 1 ? 's' : ''} failed.`;
@@ -354,8 +361,18 @@ class UploadUi {
     }
     else {
       message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
-      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
     }
+    
+    if (countSuccess !== 0){
+      description = [
+        description,
+        '<br/>',
+        '<br/>Click the <span class="editActionButton"></span> button to configure the datasource.',
+       '<br/>Click the <span class="analyzeActionButton"></span> button to start exploring.'
+      ].join('\n');
+    }
+
     this.#getHeader().innerText = message;
     this.#getDescription().innerHTML = description;
   }
