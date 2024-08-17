@@ -256,8 +256,8 @@ class TupleSet extends DataSetComponent {
       for (var j = fieldOffset; j < fieldCount; j++){
         var field = fields[j];
         var fieldName = field.name;
-                
-        values[j - fieldOffset] = row[fieldName];
+        var value = row[fieldName];
+        values[j - fieldOffset] = value;
       }
 
       tuples[offset + i] = tuple;      
