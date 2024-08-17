@@ -58,7 +58,14 @@ class QueryAxisItem {
       return null;
     }
     var dataTypeInfo = getDataTypeInfo(dataType);
-    return dataTypeInfo.createLiteralWriter();
+    var literalWriter;
+    if (typeof dataTypeInfo.createLiteralWriter === 'function') {
+      literalWriter = dataTypeInfo.createLiteralWriter();
+    }
+    else {
+      return null;
+    }
+    return literalWriter;
   }
   
   static getLiteralWriter(axisItem) {
