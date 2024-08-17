@@ -197,7 +197,7 @@ class PivotTableUi extends EventEmitter {
       }
     }
     if (physicalColumnIndex === undefined){
-      throw new Error(`Internal error: could not determine physical column index`);
+      //throw new Error(`Internal error: could not determine physical column index`);
     }
     // TODO: return the actual info
   }

@@ -273,11 +273,15 @@ function getDuckDbLiteralForValue(value, type){
       break;
     case 12:  // LIST
     case 16:  // fixed size list
-      literal = type.children.map(function(element, index){
-        var elementValue = value.get(index);
-        var elementType = element.type;
-        return elementLiteral = getDuckDbLiteralForValue(elementValue, elementType);
-      }).join(',');
+      var literal;
+      var elementType = type.children[0].type;
+      for (var i = 0; i < value.length; i++){
+        if (i) {
+          literal += ',';
+        }
+        var elementValue = value.get(i);
+        literal += getDuckDbLiteralForValue(elementValue, elementType)
+      }
       literal = `[${literal}]`;
       break;
     case 13:  // Struct
