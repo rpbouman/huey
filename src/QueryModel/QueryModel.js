@@ -60,7 +60,7 @@ class QueryAxisItem {
     var dataTypeInfo = getDataTypeInfo(dataType);
     var literalWriter;
     if (typeof dataTypeInfo.createLiteralWriter === 'function') {
-      literalWriter = dataTypeInfo.createLiteralWriter();
+      literalWriter = dataTypeInfo.createLiteralWriter(dataTypeInfo, dataType);
     }
     else {
       return null;
