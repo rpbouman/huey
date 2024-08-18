@@ -36,6 +36,11 @@ class DuckDbDataSource extends EventEmitter {
       duckdb_reader: 'read_json_auto',
       duckdb_extension: 'json'
     },
+    "jsonl": {
+      datasourceType: DuckDbDataSource.types.FILE,
+      duckdb_reader: 'read_json_auto',
+      duckdb_extension: 'json'
+    },
     "parquet": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_parquet'
