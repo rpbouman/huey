@@ -148,7 +148,8 @@ class UploadUi {
     uploadItem.appendChild(summary);
 
     var label = createEl('label', {
-      for: extensionItemId
+      // label should technicall have a for attribute, but there is nothing to point it to.
+      //"for": extensionItemId
     }, `Extension: ${extensionName}`);
     summary.appendChild(label);
     var progressBar = createEl('progress', {
