@@ -21,10 +21,23 @@ function initDuckdbVersion(){
     return;
   }
   var connection = window.hueyDb.connection;
-  connection.query('SELECT version() as version')
+  var versionColumn = 'version';
+  var apiColumn = 'api';
+  var columns = {
+    "version()": versionColumn,
+    "current_setting('duckdb_api')": apiColumn
+  };
+  var selectListSql = Object.keys(columns).map(function(key){
+    return `${key} AS ${getQuotedIdentifier(columns[key])}`;
+  }).join('\n,');
+  var sql = `SELECT ${selectListSql}`
+  connection.query(sql)
   .then(function(resultset){
     var duckdbVersionLabel = byId('duckdbVersionLabel');
-    duckdbVersionLabel.innerText = `DuckDB ${resultset.get(0)['version']}`;
+    var row = resultset.get(0);
+    var version = row[versionColumn];
+    var api = row[apiColumn];
+    duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
 
     var spinner = byId('spinner');
     if (spinner){
