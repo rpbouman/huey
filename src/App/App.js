@@ -116,8 +116,20 @@ function initApplication(){
     if (count !== undefined) {
       return;      
     }
+    
     console.log(`buffered Events, event:`);
-    console.log(event.eventData);
+    var eventData = event.eventData;
+    console.log(eventData);
+    
+    var currentDatasourceCaption, datasource = queryModel.getDatasource();
+    if (datasource) {
+      currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
+    }
+    else {
+      currentDatasourceCaption = '';
+    }
+    byId('currentDatasource').innerHTML = currentDatasourceCaption;
+    
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
   

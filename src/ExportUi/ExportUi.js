@@ -56,7 +56,7 @@ var exportTitleFields = {
   },
   'filters-items': function(){
     return getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
-  },
+  }
 };
 
 function generateExportDialogTitle(){
@@ -271,20 +271,6 @@ function initExportUi(){
   exportTitleTemplate.addEventListener('input', titleTemplateChanged);
   
   queryModel.addEventListener('change', function(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var currentDatasourceCaption;
-        var datasource = eventData.propertiesChanged.datasource.newValue;
-        if (datasource) {
-          currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
-        }
-        else {
-          currentDatasourceCaption = '';
-        }
-        byId('currentDatasource').innerHTML = currentDatasourceCaption;
-      }
-    }
 
     var exportUiActive;
     if (
