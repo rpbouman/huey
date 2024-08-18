@@ -121,8 +121,8 @@ menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-f
   content: '\fb19';
 }
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=json] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=json] > summary > .icon::before {
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > .icon::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > .icon::before {
   /* file-type-js */
   content: '\fb0e';
 }
