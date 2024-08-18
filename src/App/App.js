@@ -130,6 +130,9 @@ function initApplication(){
     }
     byId('currentDatasource').innerHTML = currentDatasourceCaption;
     
+    var title = ExportUi.generateExportTitle(queryModel);
+    document.title = 'Huey - ' + title;
+    
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
   

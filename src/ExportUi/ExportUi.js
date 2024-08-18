@@ -1,82 +1,104 @@
-function downloadBlob(data, fileName, mimeType) {
-  var blob, url;
-  blob = new Blob([data], {
-    type: mimeType
-  });
-  url = window.URL.createObjectURL(blob);
-  downloadURL(url, fileName);
-  setTimeout(function() {
-    return window.URL.revokeObjectURL(url);
-  }, 1000);
-};
-
-function downloadURL(url, fileName) {
-  var a;
-  a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.style = 'display: none';
-  a.click();
-  a.remove();
-};
-
-function getCaptionForQueryAxis(axisId){
-  var queryAxis = queryModel.getQueryAxis(axisId);
-  var items = queryAxis.getItems();
-  if (items.length === 0){
-    return '<empty>';
+class ExportUi {
+  
+  static downloadURL(url, fileName) {
+    var a;
+    a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.click();
+    a.remove();
   }
-  var itemKeys = Object.keys(items);
-  var captions = itemKeys.map(function(itemKey){
-    var item = items[itemKey];
-    var caption = QueryAxisItem.getCaptionForQueryAxisItem(item);
-    return `"${caption}"`;
-  });
-  return captions.join(', ');
+  
+  static downloadBlob(data, fileName, mimeType, timeout) {
+    var blob, url;
+    blob = new Blob(
+      [data]
+    , {type: mimeType}
+    );
+    url = window.URL.createObjectURL(blob);
+    ExportUi.downloadURL(url, fileName);
+    timeout = timeout === undefined ? 100 : timeout;
+    setTimeout(function() {
+      return window.URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
+  static #exportTitleFields = {
+    'datasource': function(queryModel){
+      if (!queryModel) {
+        queryModel = window.queryModel;
+      }
+      var datasource = queryModel.getDatasource();
+      if (!datasource) {
+        return '<no datasource>';
+      }
+      var caption = DataSourcesUi.getCaptionForDatasource(datasource);
+      return caption;
+    },
+    'columns-items': function(queryModel){
+      if (!queryModel) {
+        queryModel = window.queryModel;
+      }
+      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_COLUMNS);
+      return caption;
+    },
+    'rows-items': function(queryModel){
+      if (!queryModel) {
+        queryModel = window.queryModel;
+      }
+      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_ROWS);
+      return caption;
+    },
+    'cells-items': function(queryModel){
+      if (!queryModel) {
+        queryModel = window.queryModel;
+      }
+      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_CELLS);
+      return caption;
+    },
+    'filters-items': function(queryModel){
+      if (!queryModel) {
+        queryModel = window.queryModel;
+      }
+      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
+      return caption;
+    }
+  }
+  
+  static generateExportTitle(queryModel, titleTemplate){
+    if (queryModel === undefined) {
+      queryModel = window.queryModel;
+    }
+    if (titleTemplate === undefined){
+      var exportTemplate = byId('exportTitleTemplate')
+      titleTemplate = exportTemplate.value;
+    }
+    var replacedTemplate = titleTemplate.replace(/\$\{[^\}]+\}/g, function(fieldRef){
+      // fieldnames are denoted as ${fieldName}, slice(2, -1) gets onlye the name
+      var fieldName = fieldRef.slice(2, -1);
+      var func = ExportUi.#exportTitleFields[fieldName];
+      if (typeof func === 'function'){
+        return func(queryModel); 
+      }
+      else {
+        return fieldRef;
+      }
+    });
+    return replacedTemplate;
+  }
 }
 
-var exportTitleFields = {
-  'datasource': function(){
-    var datasource = queryModel.getDatasource();
-    if (!datasource) {
-      return '<no datasource>';
-    }
-    var caption = DataSourcesUi.getCaptionForDatasource(datasource);
-    return caption;
-  },
-  'columns-items': function(){
-    return getCaptionForQueryAxis(QueryModel.AXIS_COLUMNS);
-  },
-  'rows-items': function(){
-    return getCaptionForQueryAxis(QueryModel.AXIS_ROWS);
-  },
-  'cells-items': function(){
-    return getCaptionForQueryAxis(QueryModel.AXIS_CELLS);
-  },
-  'filters-items': function(){
-    return getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
+function updateExportTitle(queryModel, titleTemplate){
+  if (!queryModel) {
+    queryModel = window.queryModel;
   }
-};
-
-function generateExportDialogTitle(){
-  var exportTemplate = byId('exportTitleTemplate')
-  var exportTemplateValue = exportTemplate.value;
-  var replacedTemplate = exportTemplateValue.replace(/\$\{[^\}]+\}/g, function(fieldRef){
-    var fieldName = fieldRef.slice(2, -1);
-    var func = exportTitleFields[fieldName];
-    if (typeof func === 'function'){
-      return func(); 
-    }
-    else {
-      return fieldRef;
-    }
-  });
-  return replacedTemplate;
-}
-
-function updateExportTitle(){
-  var title = generateExportDialogTitle();
+  if (titleTemplate === undefined){
+    var exportTemplate = byId('exportTitleTemplate')
+    titleTemplate = exportTemplate.value;
+  }
+  var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
   byId('exportTitle').innerText = title;
 }
 
@@ -225,7 +247,7 @@ async function executeExport(){
       case 'file':
         var fileName = [title, fileExtension].join('.');      
         progressMessageElement.innerText = `Download as ${fileName}`;
-        downloadBlob(data, fileName, mimeType);
+        ExportUi.downloadBlob(data, fileName, mimeType);
         break;
       case 'clipboard':
         var text;
@@ -288,9 +310,6 @@ function initExportUi(){
     if (!exportUiActive){
       byId('exportDialog').close();
     }
-
-    var title = generateExportDialogTitle();
-    document.title = 'Huey - ' + title;
   });
   
 }

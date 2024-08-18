@@ -330,7 +330,25 @@ class QueryAxisItem {
 class QueryAxis {
 
   #items = [];
-
+  
+  static getCaptionForQueryAxis(queryAxis){
+    var items = queryAxis.getItems();
+    if (items.length === 0){
+      return '<empty>';
+    }
+    var itemKeys = Object.keys(items);
+    var captions = itemKeys.map(function(itemKey){
+      var item = items[itemKey];
+      var caption = QueryAxisItem.getCaptionForQueryAxisItem(item);
+      return `"${caption}"`;
+    });
+    return captions.join(', ');
+  }
+  
+  getCaption(){
+    return QueryAxis.getCaptionForQueryAxis(this);
+  }
+  
   findItem(config){
     var columnName = config.columnName;
     var derivation = config.derivation;
@@ -437,7 +455,7 @@ class QueryModel extends EventEmitter {
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
   #settings = undefined;
   #datasource = undefined;
-  
+    
   constructor(config){
     super('change');
     var config = Object.assign({}, QueryModel.#defaultConfig, config);
@@ -469,6 +487,12 @@ class QueryModel extends EventEmitter {
 
   getQueryAxis(axisId){
     return this.#axes[axisId];
+  }
+  
+  getCaptionForQueryAxis(axisId){
+    var queryAxis = this.getQueryAxis(axisId);
+    var caption = queryAxis = queryAxis.getCaption();
+    return caption;
   }
 
   getFiltersAxis(){
