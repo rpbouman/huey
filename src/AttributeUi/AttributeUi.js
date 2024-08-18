@@ -457,20 +457,26 @@ class AttributeUi {
       'class': 'icon',
       'role': 'img'
     });
-    switch (config.type) {
-      case 'column':
-        icon.setAttribute('title', config.title || config.profile.column_type);
-        break;
-      case 'aggregate':
-      case 'derived':
-        icon.setAttribute('title', config.title || config.expressionTemplate);
-        break;
+    var title = config.title;
+    if (!title){
+      switch (config.type) {
+        case 'column':
+          title = `"${config.profile.column_name}": ${config.profile.column_type}`;
+          break;
+        case 'aggregate':
+        case 'derived':
+          var expressionTemplate = config.expressionTemplate;
+          title = expressionTemplate.replace(/\$\{columnName\}/g, `"${config.profile.column_name}"`);
+          break;
+      }
     }
+    icon.setAttribute('title', title);
     head.appendChild(icon);
     
     var caption = AttributeUi.#getUiNodeCaption(config);
     var label = createEl('span', {
-      "class": 'label'
+      "class": 'label',
+      "title": title
     }, caption);
     head.appendChild(label);
     
