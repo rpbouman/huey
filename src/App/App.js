@@ -96,7 +96,7 @@ function initApplication(){
   initDuckdbVersion();
   initDataSourcesUi();
   initQueryModel();
-  initExportUi();
+  initExportDialog();
   initAttributeUi();
   initSearch();
   initFilterUi();
