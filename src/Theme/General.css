@@ -85,9 +85,6 @@ input, select:not([multiple]), button {
   height: 22px;
 }
 
-select[multiple] {
-}
-
 input[type=radio] {
   height: 13px;
   width: 13px;
@@ -277,7 +274,6 @@ form > fieldset > select{
   justify-self:start;
   margin-top: 2px;
 }
-
 
 menu[role=toolbar] {
   list-style-type: none;
