@@ -65,7 +65,7 @@ class PageStateManager {
           `</li>`
         ].join('\n');
         title = 'Datasource not found';
-        message += 'doesn\'t exist.';
+        message += ' doesn\'t exist.';
       }
       
       var list = '<menu class="dataSources">';
