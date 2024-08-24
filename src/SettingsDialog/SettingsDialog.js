@@ -30,26 +30,6 @@ class Settings extends EventEmitter {
         binary: []
       }
     },
-    fileSettings: {
-      registeredFileTypes: {
-        options: [
-          {value: ".csv", label: "Comma seperated (*.csv)"},
-          {value: ".json", label: "JSON (*.json)"},
-          {value: ".parquet", label: "Parquet (*.parquet)"},
-          {value: ".txt", label: "Text (*.txt)"}
-        ],
-        value: '.csv'
-      },
-      defaultActionForFileType: {
-        options: [
-          {value: "SelectFrom", label: "SELECT FROM"},
-          {value: "csvWizard", label: "csv wizard"},
-          {value: "jsonWizard", label: "json wizard"},
-          {value: "parquetWizard", label: "parquet wizard"}
-        ],
-        value: '.csv'
-      }
-    },
     localeSettings: {
       nullString: '␀',
       totalsString: 'Total',

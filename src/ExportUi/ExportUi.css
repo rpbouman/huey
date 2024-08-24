@@ -9,7 +9,6 @@ dialog#exportDialog > header > form > input#exportTitleTemplate {
 }
 
 dialog#exportDialog > header > h3 {
-  top: -10px;
   position: relative;
 }
 

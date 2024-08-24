@@ -23,6 +23,13 @@ class RejectsDatasource extends DuckDbDataSource {
     var managedConnection = delegateDatasource.getManagedConnection();
     return managedConnection;
   }
+
+  getId(){
+    var delegateDatasource = this.#delegateDatasource;
+    var delegateDatasourceId = delegateDatasource.getId();
+    var id = `Rejects of ${delegateDatasourceId}`;
+    return id;
+  }
   
 }
 
@@ -137,6 +144,17 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
   
   async #downloadCsvReaderRejectsHandler(event){
+    var exportUiSettings = settings.getSettings('exportUi');
+    exportUiSettings.exportTitleTemplate = '${datasource}';
+    exportUiSettings.exportResultShapePivot = true;
+    
+    var ourSettings = new SettingsBase({
+      template: {exportUi: exportUiSettings}
+    });
+    exportDialog.open({
+      queryModel: this.#rejectsTabQueryModel,
+      settings: ourSettings
+    });
   }
   
   async #clearCsvReaderRejectsHandler(event){

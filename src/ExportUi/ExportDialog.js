@@ -130,7 +130,6 @@ class ExportDialog {
   }
   
   #updateDialog(){
-    this.#updateExportTitle();
     var dialog = this.#getDialog();
     var settings = this.#settings;
     
@@ -139,6 +138,7 @@ class ExportDialog {
       {"_": settings.getSettings('exportUi')}, 
       'dialog'
     );
+    this.#updateExportTitle();    
   }
 
   #getDialog(){
@@ -149,7 +149,6 @@ class ExportDialog {
     this.#queryModel = config.queryModel || queryModel;
     this.#settings = config.settings || settings;
     this.#updateDialog();
-    
     var dialog = this.#getDialog();
     dialog.showModal();
   }
@@ -162,6 +161,10 @@ class ExportDialog {
   async #executeExport(){
     var dialog = this.#getDialog();
     dialog.setAttribute('aria-busy', String(true));
+
+    var queryModel = this.#queryModel;
+    var settings = this.#settings;
+
     var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
     progressMessageElement.innerText = 'Preparing export...';
     try {
@@ -317,7 +320,7 @@ class ExportDialog {
           break;
       }
       progressMessageElement.innerText = `Success!`;
-      var exportSettings = this.#settings.getSettings('exportUi');
+      var exportSettings = settings.getSettings('exportUi');
       Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
       this.#settings.assignSettings('exportUi', exportSettings);
     }
