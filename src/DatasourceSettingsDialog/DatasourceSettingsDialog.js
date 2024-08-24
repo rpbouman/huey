@@ -139,7 +139,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       container: columnsTabPanel,
       id: tabId + 'PivotTableUi',
       queryModel: this.#columnsTabQueryModel,
-      settings: {}
+      settings: {autoRunQuery: true}
     });
   }
   
@@ -188,7 +188,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       container: section,
       id: tabId + 'PivotTableUi',
       queryModel: this.#rejectsTabQueryModel,
-      settings: {}
+      settings: {autoRunQuery: true}
     });
   }
 
