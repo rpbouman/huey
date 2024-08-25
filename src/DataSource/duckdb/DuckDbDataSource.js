@@ -17,45 +17,54 @@ class DuckDbDataSource extends EventEmitter {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_csv',
       duckdb_sniffer: 'sniff_csv',
-      reader_arguments_settings_key: 'csvReader'
+      reader_arguments_settings_key: 'csvReader',
+      mimeType: 'text/csv'
     },
     "tsv": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_csv',
       duckdb_sniffer: 'sniff_csv',
-      reader_arguments_settings_key: 'csvReader'
+      reader_arguments_settings_key: 'csvReader',
+      mimeType: 'text/tab-separated-values'
     },
     "txt": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_csv',
       duckdb_sniffer: 'sniff_csv',
-      reader_arguments_settings_key: 'csvReader'
+      reader_arguments_settings_key: 'csvReader',
+      mimeType: 'text/plain'
     },
     "json": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_json_auto',
-      duckdb_extension: 'json'
+      duckdb_extension: 'json',
+      mimeType: 'application/json'
     },
     "jsonl": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_json_auto',
-      duckdb_extension: 'json'
+      duckdb_extension: 'json',
+      mimeType: 'application/json'
     },
     "parquet": {
       datasourceType: DuckDbDataSource.types.FILE,
-      duckdb_reader: 'read_parquet'
+      duckdb_reader: 'read_parquet',
+      mimeType: 'application/vnd.apache.parquet'
     },
     "xlsx": {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'st_read',
-      duckdb_extension: 'spatial'
+      duckdb_extension: 'spatial',
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'      
     },
     "duckdb": {
-      datasourceType: DuckDbDataSource.types.DUCKDB
+      datasourceType: DuckDbDataSource.types.DUCKDB,
+      mimeType: 'application/duckdb'
     },
     "sqlite": {
       datasourceType: DuckDbDataSource.types.SQLITE,
-      duckdb_extension: 'sqlite_scanner'
+      duckdb_extension: 'sqlite_scanner',
+      mimeType: 'application/sqlite'
     }
   };
   
@@ -88,6 +97,7 @@ class DuckDbDataSource extends EventEmitter {
   #catalogName = undefined;
   #schemaName = undefined;
   #objectName = undefined;
+  #url = undefined;
   #file = undefined;
   #fileNames = undefined;
   #fileType = undefined;
@@ -111,6 +121,10 @@ class DuckDbDataSource extends EventEmitter {
     return this.#settings;
   }
   
+  get isUrl(){
+    return Boolean(this.#url);
+  }
+  
   static getFileNameParts(fileName){
     if (fileName instanceof File) {
       fileName = fileName.name;
@@ -131,6 +145,22 @@ class DuckDbDataSource extends EventEmitter {
     };
   }
   
+  static async getContentTypeForUrl(url){
+    return new Promise(function(resolve, reject){
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("error", function(error){
+        reject(error);
+      });
+      
+      xhr.addEventListener("load", function(){
+        var contentType = xhr.getResponseHeader('Content-Type');
+        resolve(contentType);
+      });
+      xhr.open('HEAD', url);
+      xhr.send();
+    });
+  }  
+  
   // this is a light weight method that should produce the id of a datasource that would be created for the given file.
   // this should not actually instantiate a datasource, merely its identifier. 
   // It is a service to easily create UI elements that may refer to a datasource without having to actually create one.
@@ -138,24 +168,41 @@ class DuckDbDataSource extends EventEmitter {
     return `${this.types.FILE}:${getQuotedIdentifier(fileName)}`;
   }
   
-  static createFromUrl(duckdb, instance, url) {
-    if (!(typeof url === 'string')){
-      throw new Error(`The url should be of type string`);
-    }
-        
-    var config = {
-      type: DuckDbDataSource.types.FILE,
-      fileName: url 
-    };
-    var dsInstance = new DuckDbDataSource(duckdb, instance, config);
-    return dsInstance;
-  }
-  
   static getFileTypeInfo(fileType){
     var fileTypeInfo = DuckDbDataSource.fileTypes[fileType];
     return fileTypeInfo;
   }
 
+  static async createFromUrl(duckdb, instance, url) {
+    if (!(typeof url === 'string')){
+      throw new Error(`The url should be of type string`);
+    }
+
+    var config = {
+      type: DuckDbDataSource.types.FILE,
+      fileName: url,
+      url: url
+    };
+    
+    var contentType = await DuckDbDataSource.getContentTypeForUrl(url);
+    config.contentType = contentType;
+    var contentTypes = contentType.split(';');
+    _outer: for (var i = 0; i < contentTypes.length; i++){
+      contentType = contentTypes[i];
+      for (var fileType in DuckDbDataSource.fileTypes){
+        var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+        var mimeType = fileTypeInfo.mimeType;
+        if (contentType === mimeType) {
+          config.fileType = fileType;
+          break _outer;
+        }
+      }
+    }
+    
+    var dsInstance = new DuckDbDataSource(duckdb, instance, config);
+    return dsInstance;
+  }
+  
   static createFromFile(duckdb, instance, file) {
     if (!(file instanceof File)){
       throw new Error(`The file argument must be an instance of File`);
@@ -212,28 +259,35 @@ class DuckDbDataSource extends EventEmitter {
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
-        var file = config.file;
-        switch (typeof file) {
-          case 'string':
-            this.#objectName = config.file;
-            break;
-          case 'object':
-            if (file instanceof File) {
-              this.#objectName = file.name;
-              this.#file = file;
-              this.#fileProtocol = config.protocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
-              break;
-            }
-          case 'undefined':
-            if (config.fileName) {
-              this.#objectName = config.fileName;
-              break;
-            }
-          default:
-            throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
+        if (config.url){
+          this.#url = config.url;
+          this.#objectName = config.url;
+          this.#fileType = config.fileType;
         }
-        var parts = DuckDbDataSource.getFileNameParts(this.#objectName);
-        this.#fileType = parts.lowerCaseExtension;
+        else {
+          var file = config.file;
+          switch (typeof file) {
+            case 'string':
+              this.#objectName = config.file;
+              break;
+            case 'object':
+              if (file instanceof File) {
+                this.#objectName = file.name;
+                this.#file = file;
+                this.#fileProtocol = config.protocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
+                break;
+              }
+            case 'undefined':
+              if (config.fileName) {
+                this.#objectName = config.fileName;
+                break;
+              }
+            default:
+              throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
+          }
+          var parts = DuckDbDataSource.getFileNameParts(this.#objectName);
+          this.#fileType = parts.lowerCaseExtension;
+        }
         break;
       case DuckDbDataSource.types.FILES:
         var fileNames = config.fileNames;
@@ -311,25 +365,40 @@ class DuckDbDataSource extends EventEmitter {
   }
  
   async registerFile(){
+    var url = this.#url;    
     var file = this.#file;
-    if (! (file instanceof File)){
-      throw new Error(`Configuration error: datasource of type ${requiredType} needs to have a FILE instance set in order to register it.`);
+    var promise;
+    if (url){
+      var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.HTTP;
+      promise = this.#duckDbInstance.registerFileURL(
+        url, 
+        url, 
+        protocol
+      );
     }
-    var type = this.getType();
-    switch (type){
-      case DuckDbDataSource.types.DUCKDB:
-      case DuckDbDataSource.types.FILE:
-      case DuckDbDataSource.types.SQLITE:
-        break;
-      default:
-        throw new Error(`Registerfile is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);      
+    else
+    if (file){
+      if ((file instanceof File)){
+        throw new Error(`Configuration error: datasource of type ${requiredType} needs to have a FILE instance set in order to register it.`);
+      }
+      var type = this.getType();
+      switch (type){
+        case DuckDbDataSource.types.DUCKDB:
+        case DuckDbDataSource.types.FILE:
+        case DuckDbDataSource.types.SQLITE:
+          break;
+        default:
+          throw new Error(`Registerfile is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);      
+      }
+      var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
+      promise = this.#duckDbInstance.registerFileHandle(
+        file.name, 
+        file, 
+        protocol
+      );
     }
-    var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
-    return this.#duckDbInstance.registerFileHandle(
-      file.name, 
-      file, 
-      protocol
-    );
+    
+    return promise;
   }
   
   getRejectsSql(){

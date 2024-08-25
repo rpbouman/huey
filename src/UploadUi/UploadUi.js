@@ -21,18 +21,18 @@ class UploadUi {
   init(){        
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
-      this.getDom().close();
+      this.getDialog().close();
     }.bind(this));
     
     this.#getOkButton().addEventListener('click', function(){
-      this.getDom().close();
+      this.getDialog().close();
     }.bind(this));
   }  
   
   async #cancelUploads(){
     this.#cancelPendingUploads = true;
   }
-    
+  
   async #uploadFile(file, uploadItem){
     
     var progressBar = uploadItem.getElementsByTagName('progress').item(0);
@@ -45,8 +45,11 @@ class UploadUi {
     var destroyDatasource = false;
     try {
       if (typeof file === 'string'){
-        duckDbDataSource = DuckDbDataSource.createFromUrl(duckdb, instance, file);
+        duckDbDataSource = await DuckDbDataSource.createFromUrl(duckdb, instance, file);
         progressBar.value = parseInt(progressBar.value, 10) + 20;
+
+        await duckDbDataSource.registerFile();
+        progressBar.value = parseInt(progressBar.value, 10) + 40;
       }
       else
       if (file instanceof File){ 
@@ -60,16 +63,15 @@ class UploadUi {
       var canAccess = await duckDbDataSource.validateAccess();
       progressBar.value = parseInt(progressBar.value, 10) + 30;
 
-      if (canAccess === true) {
-        if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
-          var columnMetadata = await duckDbDataSource.getColumnMetadata();
-        }
-        progressBar.value = 100;
-      }
-      else {
+      if (canAccess !== true) {
         destroyDatasource = true;
-        return new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
+        throw new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
       }
+
+      if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
+        var columnMetadata = await duckDbDataSource.getColumnMetadata();
+      }
+      progressBar.value = 100;
       return duckDbDataSource;
     }
     catch (error){
@@ -282,7 +284,7 @@ class UploadUi {
   
   async uploadFiles(files){
     this.#cancelPendingUploads = false;
-    var dom = this.getDom();
+    var dom = this.getDialog();
     dom.setAttribute('aria-busy', true);
     
     var numFiles = files.length;
@@ -378,28 +380,28 @@ class UploadUi {
     this.#getDescription().innerHTML = description;
   }
   
-  getDom(){
+  getDialog(){
     return byId(this.#id);
   }
   
   #getHeader(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     return byId(dom.getAttribute('aria-labelledby'));
   }
 
   #getDescription(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     return byId(dom.getAttribute('aria-describedby'));
   }
   
   #getBody(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     var article = dom.getElementsByTagName('section').item(0);
     return article;
   }
 
   #getFooter(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     var footer = dom.getElementsByTagName('footer').item(0);
     return footer;
   }
@@ -444,15 +446,7 @@ function initUploadUi(){
     if (!url || !url.length){
       return;
     }
-    var hueyDb = window.hueyDb;
-    var duckdb = hueyDb.duckdb;
-    var protocol = duckdb.DuckDBDataProtocol.HTTP;
-    var instance = hueyDb.instance;
-    var resp = await instance.registerFileURL(url, url, protocol);
-    var sql = `SELECT * FROM "${url}"`;
-    var conn = hueyDb.connection;
-    var result = await conn.query(sql);
-    
+    uploadUi.uploadFiles([url]);
   });
 
 }
