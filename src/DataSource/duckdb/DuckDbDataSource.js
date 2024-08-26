@@ -378,8 +378,8 @@ class DuckDbDataSource extends EventEmitter {
     }
     else
     if (file){
-      if ((file instanceof File)){
-        throw new Error(`Configuration error: datasource of type ${requiredType} needs to have a FILE instance set in order to register it.`);
+      if (!(file instanceof File)){
+        throw new Error(`Configuration error: datasource of type ${DuckDbDataSource.types.FILE} needs to have a file handle set in order to register it.`);
       }
       var type = this.getType();
       switch (type){
@@ -388,7 +388,7 @@ class DuckDbDataSource extends EventEmitter {
         case DuckDbDataSource.types.SQLITE:
           break;
         default:
-          throw new Error(`Registerfile is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);      
+          throw new Error(`Registerfile is not appropriate for datasources of type ${type}.`);      
       }
       var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
       promise = this.#duckDbInstance.registerFileHandle(
@@ -725,7 +725,7 @@ class DuckDbDataSource extends EventEmitter {
       case DuckDbDataSource.types.SQLITE:
         break;
       default:
-        throw new Error(`getFileName() is not appropriate for datasources of type ${type}, type ${requiredType} is required.`);
+        throw new Error(`getFileName() is not appropriate for datasources of type ${type}.`);
     }
     return this.#objectName;
   }
