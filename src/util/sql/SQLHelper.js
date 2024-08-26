@@ -232,6 +232,105 @@ function weekNumFormatter(weekNum){
   return weekNum;
 }
 
+// value: arrow value.
+// type: arrow type
+function getDuckDbLiteralForValue(value, type){
+  if (value === null){
+    return 'NULL';
+  }
+  var literal = '';
+  var typeId = type.typeId;
+  // see: https://github.com/apache/arrow/blob/main/js/src/enum.ts
+  switch (typeId){
+    case 1:   // Null
+      literal = 'NULL';
+      break;
+    case 2:   // Int
+    case 3:   // float
+    case 6:   // Bool
+    case 7:   // Decimal
+    case -2:  // Int8
+    case -3:  // Int16
+    case -4:  // Int32
+    case -5:  // Int64
+    case -6:  // UInt8
+    case -7:  // UInt16
+    case -8:  // UInt32
+    case -9:  // UInt64
+    case -10: // Float16
+    case -11: // Float32
+    case -12: // Float64
+      literal = String(value);
+      break;
+    case 5:   // Utf8 (string)
+      literal = quoteStringLiteral(value); 
+      break;
+    case 8:   // Date
+      literal = `DATE'${value.getUTCFullYear()}-${value.getUTCMonth() + 1}-${value.getUTCDate()}'`;
+      break;
+    case 10:   // Timestamp
+      literal = `to_timestamp( ${value}::DOUBLE / 1000)`;
+      break;
+    case 12:  // LIST
+    case 16:  // fixed size list
+      var literal;
+      var elementType = type.children[0].type;
+      for (var i = 0; i < value.length; i++){
+        if (i) {
+          literal += ',';
+        }
+        var elementValue = value.get(i);
+        literal += getDuckDbLiteralForValue(elementValue, elementType)
+      }
+      literal = `[${literal}]`;
+      break;
+    case 13:  // Struct
+    case 17:  // Map
+      literal = type.children.map(function(entry){
+        var entryName = entry.name;
+        var entryValue = value[entryName];
+        var entryType = entry.type;
+        var entryValueType = entryValue.type;
+        var entryValueLiteral = getDuckDbLiteralForValue(entryValue, entryType);
+        var entryLiteral = `${quoteStringLiteral(entryName)}: ${entryValueLiteral}`;
+        return entryLiteral;
+      }).join(',');            
+      literal = `{${literal}}`;
+      break;
+    case 0:   // None
+    case 4:   // Binary
+    case 9:   // Time
+    case 11:  // Interval
+    case 14:  // union
+    case 15:  // fixed size binary
+    case 18:  // duration
+    case 19:  // large binary
+    case 20:  // large utf8
+    case -1:  // Dictionary
+    case -13: // DateDay
+    case -14: // DateMillisecond
+    case -15: // TimestampSecond
+    case -16: // TimestampMillisecond
+    case -17: // TimestampMicrosecond
+    case -18: // TimestampNanosecond
+    case -19: // TimeSecond
+    case -20: // TimeMilliSecond
+    case -21: // TimeMicrosecond
+    case -22: // TimeNanosecond
+    case -23: // DenseUnion
+    case -24: // SparseUnion
+    case -25: // IntervalDayTime
+    case -26: // IntervalYearMonth
+    case -27: // DurationSecond
+    case -28: // DurationMillisecond
+    case -29: // DurationMicrosecond
+    case -30: // DurationNanosecond
+    default:
+      throw new Error(`Unrecognized arrow type ${typeId}`);
+  }
+  return literal;
+}
+
 var dataTypes = {
   'DECIMAL': {
     defaultAnalyticalRole: 'measure',
@@ -242,7 +341,7 @@ var dataTypes = {
         return formatter.format(value, field)
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('DECIMAL');
     }
   },
@@ -255,7 +354,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('DOUBLE');
     }    
   },
@@ -269,7 +368,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('REAL');
     }    
   },
@@ -284,7 +383,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('BIGINT');
     }    
   },
@@ -299,7 +398,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('HUGEINT');
     }    
   },
@@ -314,7 +413,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('INTEGER');
     }    
   },
@@ -329,7 +428,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('SMALLINT');
     }    
   },
@@ -344,7 +443,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('TINYINT');
     }    
   },
@@ -360,7 +459,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UBIGINT');
     }    
   },
@@ -374,7 +473,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UHUGEINT');
     }    
   },
@@ -390,7 +489,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UINTEGER');
     }    
   },
@@ -406,7 +505,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('USMALLINT');
     }    
   },
@@ -422,7 +521,7 @@ var dataTypes = {
         return formatter.format(value, field);
       };
     },
-    createLiteralWriter: function(value, field){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UTINYINT');
     }    
   },
@@ -431,6 +530,9 @@ var dataTypes = {
   },
   'BOOLEAN': {
     defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createDefaultLiteralWriter('BOOLEAN');
+    }    
   },
   'BLOB': {
     defaultAnalyticalRole: 'attribute',
@@ -453,7 +555,7 @@ var dataTypes = {
         return formatter.format(value);
       };
     },
-    createLiteralWriter: function(){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         var monthNum = monthNumFormatter(1 + value.getUTCMonth())
         var dayNum = dayNumFormatter(value.getUTCDate());
@@ -505,7 +607,7 @@ var dataTypes = {
         return `${dateTimeString} ${micros}μs`;
       };
     },
-    createLiteralWriter: function(){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         return value === null ? 'NULL::TIMESTAMP' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
@@ -516,7 +618,7 @@ var dataTypes = {
     hasDateFields: true,
     hasTimeFields: true,
     hasTimezone: true,
-    createLiteralWriter: function(){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         return value === null ? 'CAST(NULL AS TIMESTAMP WITH TIME ZONE)' : `to_timestamp(${value}::DOUBLE / 1000)`;
       };
@@ -538,12 +640,15 @@ var dataTypes = {
         if (value === null){
           return getNullString();
         }
-        return value;
+        if (typeof value === 'string'){
+          value = value.replace(/\r\n|\n|\r/g, ' ');
+        }
+        return String(value);
       }
     },
-    createLiteralWriter: function(){
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
-        return value === null ? 'NULL::VARCHAR' : `'${value.replace(/"'"/g, '\'\'')}'`;
+        return value === null ? 'NULL::VARCHAR' : quoteStringLiteral(value);
       };
     }
   },
@@ -557,7 +662,15 @@ var dataTypes = {
     defaultAnalyticalRole: 'attribute'
   },
   'STRUCT': {
-    defaultAnalyticalRole: 'attribute'
+    defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){      
+      return function(value, field){
+        var type = field.type;
+        var duckdbValue = getDuckDbLiteralForValue(value, type);
+        duckdbValue = `CAST( ${duckdbValue} AS ${dataType} )`;
+        return duckdbValue;
+      }
+    }
   },
   'UNION': {
     defaultAnalyticalRole: 'attribute'
@@ -593,6 +706,10 @@ function getDataTypeInfo(columnType){
   });
   var typeName = typeNames[0];
   return dataTypes[typeName];
+}
+
+function quoteStringLiteral(str){
+  return `'${str.replace(/'/g, "''")}'`; 
 }
 
 function identifierRequiresQuoting(identifier){

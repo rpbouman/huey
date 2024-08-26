@@ -21,18 +21,18 @@ class UploadUi {
   init(){        
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
-      this.getDom().close();
+      this.getDialog().close();
     }.bind(this));
     
     this.#getOkButton().addEventListener('click', function(){
-      this.getDom().close();
+      this.getDialog().close();
     }.bind(this));
   }  
   
   async #cancelUploads(){
     this.#cancelPendingUploads = true;
   }
-    
+  
   async #uploadFile(file, uploadItem){
     
     var progressBar = uploadItem.getElementsByTagName('progress').item(0);
@@ -45,8 +45,11 @@ class UploadUi {
     var destroyDatasource = false;
     try {
       if (typeof file === 'string'){
-        duckDbDataSource = DuckDbDataSource.createFromUrl(duckdb, instance, file);
+        duckDbDataSource = await DuckDbDataSource.createFromUrl(duckdb, instance, file);
         progressBar.value = parseInt(progressBar.value, 10) + 20;
+
+        await duckDbDataSource.registerFile();
+        progressBar.value = parseInt(progressBar.value, 10) + 40;
       }
       else
       if (file instanceof File){ 
@@ -60,16 +63,15 @@ class UploadUi {
       var canAccess = await duckDbDataSource.validateAccess();
       progressBar.value = parseInt(progressBar.value, 10) + 30;
 
-      if (canAccess === true) {
-        if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
-          var columnMetadata = await duckDbDataSource.getColumnMetadata();
-        }
-        progressBar.value = 100;
-      }
-      else {
+      if (canAccess !== true) {
         destroyDatasource = true;
-        return new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
+        throw new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
       }
+
+      if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
+        var columnMetadata = await duckDbDataSource.getColumnMetadata();
+      }
+      progressBar.value = 100;
       return duckDbDataSource;
     }
     catch (error){
@@ -118,6 +120,14 @@ class UploadUi {
         "onclick": `byId("${this.#id}").close()`
       });
       summary.appendChild(analyzeButton);
+
+      var settingsButton = createEl('label', {
+        "class": 'editActionButton',
+        "for": `${datasourceId}_edit`,
+        "title": `Configure ${fileName}`,
+        "onclick": `byId("${this.#id}").close()`
+      });
+      summary.appendChild(settingsButton);
     }
     
     var progressBar = createEl('progress', {
@@ -140,7 +150,8 @@ class UploadUi {
     uploadItem.appendChild(summary);
 
     var label = createEl('label', {
-      for: extensionItemId
+      // label should technicall have a for attribute, but there is nothing to point it to.
+      //"for": extensionItemId
     }, `Extension: ${extensionName}`);
     summary.appendChild(label);
     var progressBar = createEl('progress', {
@@ -174,7 +185,7 @@ class UploadUi {
       var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
       var fileExtension = fileNameParts.lowerCaseExtension;
       
-      var fileType = DuckDbDataSource.fileTypes[fileExtension];
+      var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
       if (!fileType){
         continue;
       }
@@ -273,7 +284,7 @@ class UploadUi {
   
   async uploadFiles(files){
     this.#cancelPendingUploads = false;
-    var dom = this.getDom();
+    var dom = this.getDialog();
     dom.setAttribute('aria-busy', true);
     
     var numFiles = files.length;
@@ -340,12 +351,11 @@ class UploadUi {
       datasourcesUi.addDatasources(datasources);
     }
     var message, description;
-    var instruction
+    var countSuccess = uploadResults.length - countFail;
     if (countFail) {
-      var countSuccess = uploadResults.length - countFail;
       if (countSuccess){
         message = `${countSuccess} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, ${countFail} failed.`;
-        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
       }
       else {
         message = `${countFail} file${countFail > 1 ? 's' : ''} failed.`;
@@ -354,34 +364,44 @@ class UploadUi {
     }
     else {
       message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
-      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>. Click the <span class="analyzeActionButton"></span> button to start exploring.';
+      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
     }
+    
+    if (countSuccess !== 0){
+      description = [
+        description,
+        '<br/>',
+        '<br/>Click the <span class="editActionButton"></span> button to configure the datasource.',
+       '<br/>Click the <span class="analyzeActionButton"></span> button to start exploring.'
+      ].join('\n');
+    }
+
     this.#getHeader().innerText = message;
     this.#getDescription().innerHTML = description;
   }
   
-  getDom(){
+  getDialog(){
     return byId(this.#id);
   }
   
   #getHeader(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     return byId(dom.getAttribute('aria-labelledby'));
   }
 
   #getDescription(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     return byId(dom.getAttribute('aria-describedby'));
   }
   
   #getBody(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     var article = dom.getElementsByTagName('section').item(0);
     return article;
   }
 
   #getFooter(){
-    var dom = this.getDom();
+    var dom = this.getDialog();
     var footer = dom.getElementsByTagName('footer').item(0);
     return footer;
   }
@@ -404,8 +424,8 @@ var uploadUi;
 function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');  
   
-  byId("uploader")
-  .addEventListener("change", async function(event){
+  byId('uploader')
+  .addEventListener('change', async function(event){
     var fileControl = event.target;
     var files = fileControl.files;
     await uploadUi.uploadFiles(files);
@@ -418,5 +438,16 @@ function initUploadUi(){
     
     return;  
   }, false);
+  
+  
+  byId('loadFromUrl')
+  .addEventListener('click', async function(event){
+    var url = prompt('Enter URL');
+    if (!url || !url.length){
+      return;
+    }
+    uploadUi.uploadFiles([url]);
+  });
+
 }
 

@@ -9,18 +9,11 @@ dialog#exportDialog > header > form > input#exportTitleTemplate {
 }
 
 dialog#exportDialog > header > h3 {
-  top: -10px;
   position: relative;
 }
 
 form > fieldset {
   grid-column: span 1;
-}
-
-form > output {
-  grid-column: controls;
-  grid-row: auto;
-  justify-self:start;
 }
 
 dialog#exportDialog > dialog[role=progressbar] {

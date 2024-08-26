@@ -15,7 +15,7 @@ nav#sidebar {
   grid-row: 2/ span 2;
   padding: 4px 4px 0px 4px;
   display: flex;
-  min-width: 200px;
+  min-width: 170px;
 }
 
 .workarea {
@@ -41,9 +41,11 @@ nav#sidebar {
   
 }
 
-menu[role=toolbar] > label[for=uploader] {
+menu[role=toolbar] > label {
   vertical-align: top;
+  position: relative;
 }
+
 
 menu[role=toolbar] > label[for=uploader]::before {
   content: "\eb47";
@@ -53,14 +55,17 @@ menu[role=toolbar] > label[for=uploader]::before {
   display: none;
 }
 
+menu[role=toolbar] > label[for=loadFromUrl]::before {
+  content: "\ea75";
+}
+
+
 menu[role=toolbar] > label[for=autoRunQuery]{
   position: relative;
-  vertical-align: top;
 }
 
 menu[role=toolbar] > label[for=runQueryButton]{
   position: relative;
-  vertical-align: top;
 }
 
 main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton] {

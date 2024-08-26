@@ -78,7 +78,7 @@ body {
   background-color: var( --huey-medium-background-color );
 }
 
-input, select, button {
+input, select:not([multiple]), button {
   border-style: solid;
   border-width: 1px;
   border-radius: 14px;
@@ -96,7 +96,10 @@ select[multiple] {
   border-radius: 14px 0px 0px 14px;
 }
 
-input[type=text], input[type=input], input[type=checkbox], select{
+input[type=text], 
+input[type=checkbox], 
+input[type=number],
+select {
   border-color: var( --huey-light-border-color );
   background-color: var( --huey-light-background-color );
   padding: 0px 2px 0px 8px;
@@ -196,10 +199,19 @@ dialog > footer button {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var( --huey-foreground-color );
+  margin-left:.5em;
+  margin-right:.5em;
 }
 
 *[role=toolbar] > button {
   user-select: none;
+}
+
+dialog > footer[role=toolbar] > button[value=Ok]:before{
+  content: "Ok"
+}
+dialog > footer[role=toolbar] > button[value=Cancel]:before{
+  content: "Cancel"
 }
 
 dialog h1:first-child,
@@ -231,6 +243,7 @@ form > fieldset {
   grid-column: span 2;  
 }
 
+form > fieldset > label,
 form > label {
   grid-column: labels;
   grid-row: auto;
@@ -246,13 +259,21 @@ form > label::after, form > fieldset > label::after {
   content: ":"
 }
 
+form > output {
+  margin-top: 2px;
+}
+
+form > output, 
+form > fieldset > output, 
 form > input,
-form > select {
+form > fieldset > input,
+form > select,
+form > fieldset > select{
   grid-column: controls;
   grid-row: auto;
   justify-self:start;
+  margin-top: 2px;
 }
-
 
 menu[role=toolbar] {
   list-style-type: none;
@@ -304,7 +325,7 @@ menu[role=menu] > li[role=menuitem] {
   border-radius: 14px;
 }
 
-footer[role=toolbar] > button:hover ,
+*[role=toolbar] > button:hover ,
 menu[role=menu] > li[role=menuitem]:hover {
   background-color: var( --huey-light-background-color );
   border-color: var( --huey-light-border-color );
@@ -315,3 +336,6 @@ menu[role=menu] > li[role=menuitem] > label > button {
   display: none;
 }
 
+code, pre {
+  font-family: var( --huey-mono-font-family );
+}

@@ -9,7 +9,6 @@
       rel="icon"
       href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLXRhYmxlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMyA1YTIgMiAwIDAgMSAyIC0yaDE0YTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxIC0yIDJoLTE0YTIgMiAwIDAgMSAtMiAtMnYtMTR6IiAvPjxwYXRoIGQ9Ik0zIDEwaDE4IiAvPjxwYXRoIGQ9Ik0xMCAzdjE4IiAvPjwvc3ZnPg=="
     />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
     <script>
     function resourceLoaded(element){
@@ -28,14 +27,14 @@
     </script>
 
     <!-- Inline tabler font to force early load -->
-    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.10.0/ -->
+    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.12.0/ -->
     <style type="text/css">
       @font-face {
         font-family: "tabler-icons";
         font-style: normal;
         font-weight: 400;
         font-display: block;
-        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/fonts/tabler-icons.woff2?v3.10.0") format("woff2");
+        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.12.0/dist/fonts/tabler-icons.woff2?v3.12.0") format("woff2");
       }
 
       ul#resources > li::marker {
@@ -71,6 +70,8 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSourceSettingsDialog/DataSourceSettingsDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSourceSettingsDialog/DataSourceSettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -78,6 +79,60 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="FilterUi/FilterUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PromptUi/PromptUi.css"/>
+    
+    <datalist id="commonCsvFieldDelimiters">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option value=",">Comma</option>
+      <option value=";">semi-colon</option>
+      <option value="|">pipe</option>
+      <option value="\t">horizontal tab</option>
+      <option value="&#11;">vertical tab</option>
+      <option value="&#30;">record separator</option>
+      <option value="&#31;">unit separator</option>
+      <option value="!">exclamation mark</option>
+      <option value=" ">space</option>
+    </datalist>
+
+    <datalist id="commonCsvQuoteCharacters">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option value="&apos;">single quote</option>
+      <option value="&quot;">double quote</option>
+      <option value="`">backtick</option>
+    </datalist>
+    
+    <datalist id="commonCsvEscapeCharacters">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option data-same-as-quotechar="true" value="same as quote char">same as quote char</option>
+      <option value="&quot;">double quote</option>
+      <option value="\">backslash</option>
+    </datalist>
+
+    <datalist id="commonDateFormats">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option value="%x">2024-06-03 (iso)</option>
+      <option value="%d/%m/%Y">03/06/2024</option>
+      <option value="%A, %-d %B %Y">Monday, 3 June 2024</option>
+    </datalist>
+
+    <datalist id="commonTimestampFormats">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option value="%c">2024-06-03 13:23:05 (iso)</option>
+      <option value="%d/%m/%Y %I:%M:%S %p">03/06/2024 01:23:05 am</option>
+      <option value="%A, %-d %B %Y %H:%M ">Monday, 3 June 2024 13:23</option>
+    </datalist>
+
+    <datalist id="commonDecimalSeparators">
+      <option data-auto="true" value="(default)">(default)</option>
+      <option value=".">dot</option>
+      <option value=",">comma</option>
+      <option value="_">underscore</option>
+      <option value=" ">space</option>
+    </datalist>
+    
+    <datalist id="commonCsvNullValueStrings">
+      <option data-auto="true" value="empty">(empty)</option>
+      <option data-auto="true" value="NULL">NULL</option>
+    </datalist>
   </head>
   <body>
     <div id="spinner">
@@ -264,6 +319,7 @@
                   title="Enter a valid DuckDB date format string."
                   type="text"
                   value="%x"
+                  list="commonDateFormats"
                 />
                 <label
                   for="exportDelimitedTimestampFormat"
@@ -274,16 +330,18 @@
                   title="Enter a valid DuckDB timestamp format string."
                   type="text"
                   value="%c"
+                  list="commonTimestampFormats"
                 />
                 <label
                   for="exportDelimitedNullString"
                   title="The NULL-string controls how SQL NULL-values are rendered to the result"
-                >NULL-value string</label>
+                ><code>NULL</code>-value string</label>
                 <input
                   id="exportDelimitedNullString"
                   title="Enter the string that should be written to the result to represent SQL NULL-values"
                   type="text"
                   value=""
+                  list="commonCsvNullValueStrings"
                 />
               </fieldset>
               <fieldset>
@@ -297,6 +355,7 @@
                   type="text"
                   value=","
                   title="Enter the character that is to be used as column delimiter."
+                  list="commonCsvFieldDelimiters"
                 />
                 <label
                   for="exportDelimitedQuote"
@@ -307,6 +366,7 @@
                   type="text"
                   value="&quot;"
                   title="Enter the character that is to be used as quote character."
+                  list="commonCsvQuoteCharacters"
                 />
                 <label
                   for="exportDelimitedEscape"
@@ -317,6 +377,7 @@
                   type="text"
                   value="&quot;"
                   title="Enter the character used to escape the quote character."
+                  list="commonCsvEscapeCharacters"
                 />
               </fieldset>
             </form>
@@ -641,7 +702,7 @@
               <label 
                 for="nullString"
                 title="The string to use for displaying NULL-values"
-              >NULL-value label</label>
+              ><code>NULL</code>-value label</label>
               <input id="nullString" type="input"/>
               <label 
                 for="totalsString"
@@ -822,10 +883,10 @@
           A DuckDB User Interface
         </p>
         <ul>
-          <li>Huey version 0.0.5 - Shelduck</li>
+          <li>Huey version 0.0.6 - Teal</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev242.0/+esm" target="jsdelivr">DuckDB WASM 1.28.1-dev242.0</a></li>
-          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.10.0</a></li>
+          <li><a href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev258.0/+esm" target="jsdelivr">DuckDB WASM 1.28.1-dev258.0</a></li>
+          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.12.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Source on Github</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
         </ul>
@@ -846,6 +907,209 @@
       </footer>
     </dialog>
 
+    <dialog 
+      id="datasourceSettingsDialog"
+      aria-labelledby="datasourceSettingsDialogTitle"
+      popover="auto"
+    >
+      <header>
+        <h3 id="datasourceSettingsDialogTitle">Datasource Settings</h3>
+        <form>
+          <fieldset>
+            <legend>General properties</legend>
+            <label for="datasourceType">Type</label>
+            <output id="datasourceType"></output>
+            <label for="datasourceName">Name</label>
+            <output id="datasourceName"></output>
+          </fieldset>
+          <fieldset>
+            <legend>Datasource Type properties</legend>
+            <label for="datasourceFileType">File Type</label>
+            <output id="datasourceFileType"></output>
+            <label for="datasourceFileSize">File Size</label>
+            <output id="datasourceFileSize"></output>
+          </fieldset>
+        </form>
+      </header>
+      <section role="tablist">
+        <!--
+          columns
+        -->
+        <div>
+          <label
+            role="tab"
+            for="datasourceSettingsDialogColumnsTab"
+          >
+            Columns
+          </label>
+          <input id="datasourceSettingsDialogColumnsTab" type="radio" name="datasourceSettingsTabs"/>
+          <div role="tabpanel">
+          </div>
+        </div>
+
+        <!--
+          CSV reader settings
+        -->
+        <div>
+          <label
+            role="tab"
+            for="datasourceSettingsDialogCsvReaderParametersTab"
+          >
+            CSV Reader Parameters
+          </label>
+          <input id="datasourceSettingsDialogCsvReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <div role="tabpanel">
+            <menu role="toolbar">
+              <button id="csvReaderRestoreDefaults">Restore defaults</button>
+              <button id="csvReaderDetectSettings">Detect settings</button>
+            </menu>
+            <form>
+              <fieldset>
+                <legend>Auto-detect</legend>
+                <label for="csvReaderAutoDetect" title="Enables auto detection of CSV parameters.">Auto-detect Options?</label>
+                <input id="csvReaderAutoDetect" type="checkbox"  title="Enables auto detection of CSV parameters."/>
+                <label for="csvReaderSampleSize" title="The number of sample rows for auto detection of parameters. Default: 20480">Sample size</label>
+                <input id="csvReaderSampleSize" type="number" min="0" title="he number of sample rows for auto detection of parameters. Default: 20480"/>
+              </fieldset>
+              <fieldset>
+                <legend>Limits &amp; Sizes</legend>
+                <label for="csvReaderSkip" title="The number of lines at the top of the file to skip. Default: 0">Skip lines</label>
+                <input id="csvReaderSkip" type="number" min="0" title="The number of lines at the top of the file to skip. Default: 0"/>
+                <label for="csvReaderMaxLineSize" title="The maximum line size in bytes. Default: 2097152">Maximum line size</label>
+                <input id="csvReaderMaxLineSize" type="number" min="0" title="The maximum line size in bytes. Default: 2097152"/>
+              </fieldset>
+              <fieldset>
+                <legend>Data Types</legend>
+                <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code>VARCHAR</code></label>
+                <input id="csvReaderAllVarchar" type="checkbox" title="Skip type detection and assume all columns to be of type VARCHAR."/>
+                <label for="csvReaderAutoTypeCandidates" title="The types that the sniffer considers when detecting column types. VARCHAR is always implied as fallback.">Type Candidates</label>
+                <select id="csvReaderAutoTypeCandidates" multiple="true" title="The types that the sniffer considers when detecting column types. VARCHAR is always implied as fallback.">
+                  <option label="BIGINT" value="BIGINT" />
+                  <option label="BOOLEAN" value="BOOLEAN" />
+                  <option label="DATE" value="DATE" />
+                  <option label="FLOAT" value="FLOAT" />
+                  <option label="DOUBLE" value="DOUBLE" />
+                  <option label="INTEGER" value="INTEGER" />
+                  <option label="SMALLINT" value="SMALLINT" />
+                  <option label="TIME" value="TIME" />
+                  <option label="TIMESTAMP" value="TIMESTAMP" />
+                  <option label="TINYINT" value="TINYINT" />
+                </select>                
+              </fieldset>
+              <fieldset>
+                <legend>Columns</legend>
+                <label for="csvReaderHeader" title="Specifies that the file contains a header line with the names of each column in the file.">Has Column Headers?</label>
+                <input id="csvReaderHeader" type="checkbox" title="Specifies that the file contains a header line with the names of each column in the file."/>
+                <label for="csvReaderNormalizeNames" title="Specifies whether or not column names should be normalized, removing any non-alphanumeric characters from them.">Normalize Column Names?</label>
+                <input id="csvReaderNormalizeNames" type="checkbox" title="Specifies whether or not column names should be normalized, removing any non-alphanumeric characters from them."/>
+                <label for="csvReaderNullPadding" title="If this option is enabled, when a row lacks columns, it will pad the remaining columns on the right with null values."><code>NULL</code>-pad missing columns?</label>
+                <input id="csvReaderNullPadding" type="checkbox" title="If this option is enabled, when a row lacks columns, it will pad the remaining columns on the right with null values."/>
+                <label for="csvReaderFileName" title="Whether to include a filename column in the result.">Add filename column?</label>
+                <input id="csvReaderFileName" type="checkbox" title="Whether to include a filename column in the result."/>
+              </fieldset>
+              <fieldset>
+                <legend>Delimiters</legend>
+                <label for="csvReaderDelim" title="The delimiter character separating the values within each line.">Field Delimiter</label>
+                <input id="csvReaderDelim" type="text" value="" length="1" list="commonCsvFieldDelimiters" title="The delimiter character separating the values within each line."/>
+                <label for="csvReaderNewLine" title="Set the new line character(s) in the file.">Row Delimiter</label>
+                <select id="csvReaderNewLine" title="Set the new line character(s) in the file.">
+                  <option value="" title="Automatically detect the row delimiter">(auto)</option>
+                  <option value="\r" title="Carriage Return">CR</option>
+                  <option value="\r\n" title="Carriage Return/Linefeed pair">CRLF</option>
+                  <option value="\n" title="Linefeed">LF</option>
+                </select>
+                <label for="csvReaderQuote" title="The string used to quote values">Quote Character</label>
+                <input id="csvReaderQuote" type="text" value="" length="1" list="commonCsvQuoteCharacters" title="The string used to quote values"/>
+                <label for="csvReaderEscape" title="The character used to precede the quote character to denote a literal occurrence of the character used as quote">Escape Character</label>
+                <input id="csvReaderEscape" type="text" value="" length="1" list="commonCsvEscapeCharacters" title="The character used to precede the quote character to denote a literal occurrence of the character used as quote"/>
+                <label for="csvReaderAllowQuotedNulls" title="Allow conversion of quoted values to NULL?">Quoted <code>NULL</code>s</label>
+                <input id="csvReaderAllowQuotedNulls" type="checkbox" title="Allow conversion of quoted values to NULL?"/>
+              </fieldset>
+              <fieldset>
+                <legend>Formats</legend>
+                <label for="csvReaderDecimalSeparator" title="The decimal separator for numeric values.">Decimal Separator</label>
+                <input id="csvReaderDecimalSeparator" type="text" value="" length="1" title="The decimal separator for numeric values." list="commonDecimalSeparators"/>
+                <label for="csvReaderDateformat" title="The format used to parse dates">Date Format</label>
+                <input id="csvReaderDateformat" type="text" value="" list="commonDateFormats" title="The format used to parse dates"/>
+                <label for="csvReaderTimestampformat" title="The format to use when parsing timestamps">Timestamp Format</label>
+                <input id="csvReaderTimestampformat" type="text" value="" list="commonTimestampFormats" title="The format to use when parsing timestamps"/>
+                <label for="csvReaderNullstr" title="A list of strings that represent a NULL value."><code>NULL</code>-strings</label>
+                <input id="csvReaderNullstr" type="text" list="commonCsvNullValueStrings" title="A list of strings that represent a NULL value."/>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+        
+        <!--
+          Parquet reader settings
+        -->
+        <div>
+          <label
+            role="tab"
+            for="datasourceSettingsDialogParquetReaderParametersTab"
+          >
+            Parquet Reader Parameters
+          </label>
+          <input id="datasourceSettingsDialogParquetReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <div role="tabpanel">
+            Parquet reader options
+          </div>
+        </div>
+
+        <!--
+          JSON reader settings
+        -->
+        <div>
+          <label
+            role="tab"
+            for="datasourceSettingsDialogJSONReaderParametersTab"
+          >
+            Parquet Reader Parameters
+          </label>
+          <input id="datasourceSettingsDialogJSONReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <div role="tabpanel">
+            JSON reader options
+          </div>
+        </div>
+
+        <!--
+          rejects
+        -->
+        <div>
+          <label
+            role="tab"
+            for="datasourceSettingsDialogCsvReaderRejectsTab"
+          >
+            Rejects
+          </label>
+          <input id="datasourceSettingsDialogCsvReaderRejectsTab" type="radio" name="datasourceSettingsTabs"/>
+          <div role="tabpanel">
+            <menu role="toolbar">
+              <button id="csvReaderDownloadRejects">Download</button>
+              <button id="csvReaderClearRejects">Clear</button>
+            </menu>
+            <section style="height: calc( 100% - 40px ) ">
+            </section>
+          </div>
+        </div>
+      
+      </section>
+      <footer role="toolbar">
+        <button
+          id="datasourceSettingsDialogOkButton"
+          popovertarget="datasourceSettingsDialog"
+          popovertargetaction="hide"
+          value="Ok"
+        />
+        <button
+          id="datasourceSettingsDialogCancelButton"
+          popovertarget="datasourceSettingsDialog"
+          popovertargetaction="hide"
+          value="Cancel"
+        />
+      </footer>
+    </dialog>
+
     <main
       id="layout"
       class="layout"
@@ -857,8 +1121,13 @@
             id="uploader"
             type="file"
             multiple="true"
-            accept=".csv,.duckdb,.json,.parquet,.sql,.sqlite,.tsv,.xlsx"
+            accept=".csv,.duckdb,.json,.jsonl,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
+        </label>
+        <label for="loadFromUrl" title="Load data from URL">
+          <button
+            id="loadFromUrl"
+          >Data from URL</button>
         </label>
 
         <label for="runQueryButton" title="Execute Query">
@@ -906,7 +1175,7 @@
             id="exportButton"
             popovertarget="exportDialog"
             popovertargetaction="show"
-          >Download</button>
+          >Download...</button>
         </label>
       </menu>
       <nav
@@ -970,7 +1239,8 @@
         </div>
 
       </nav>
-      <div class="workarea">
+      <div id="workarea" class="workarea">
+      
         <div
           id="queryUi"
           class="queryUi"
@@ -1020,58 +1290,57 @@
               <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
             </li>
           </template>
-          
-          
         </div>
-        <!-- pivotTableUi: outmost container of the pivot table-->
-        <div
-          id="pivotTableUi"
-          class="pivotTableUiContainer"
-          style="
-            flex-grow: 1;
-            width: 100%;
-            height: 100%;
-            border-width: 1px;
-            border-color: var( --huey-dark-border-color );
-            border-top-style: solid;
-          "
-          aria-busy="false"
-          data-needs-update="false"
-        >
-          <dialog role="progressbar">
-            <header>
-              <div class="loader loader-medium">Loading...</div>
-              <div class="timer">
-                <span class="digit"></span>
-                <span class="digit"></span>
-                <span class="digit"></span>
-                <span class="digit"></span>
-              </div>
-            </header>
-            <section>
-              <!-- TODO: actual progress information -->
-            </section>
-            <footer>
-              <button id="cancelQueryButton">Cancel</button>
-            </footer>
-          </dialog>
+        
+        <template id="pivotTableUiTemplate">
+          <!-- pivotTableUi: outmost container of the pivot table-->
           <div
-            class="pivotTableUiInnerContainer"
+            id=""
+            class="pivotTableUiContainer"
+            style="
+              flex-grow: 1;
+              width: 100%;
+              height: 100%;
+              border-width: 1px;
+              border-color: var( --huey-dark-border-color );
+              border-top-style: solid;
+            "
+            aria-busy="false"
+            data-needs-update="false"
           >
-            <!-- pivotTableColumnsSizer: sizer to generate the horizontal scrollbar -->
-            <div class="pivotTableUiSizer pivotTableUiHorizontalSizer"></div>
-            <!-- pivotTableColumnsSizer: sizer to generate the vertical scrollbar -->
-            <div class="pivotTableUiSizer pivotTableUiVerticalSizer"></div>
+            <div class="pivotTableUiInnerContainer">
+              <!-- pivotTableColumnsSizer: sizer to generate the horizontal scrollbar -->
+              <div class="pivotTableUiSizer pivotTableUiHorizontalSizer"></div>
+              <!-- pivotTableColumnsSizer: sizer to generate the vertical scrollbar -->
+              <div class="pivotTableUiSizer pivotTableUiVerticalSizer"></div>
 
-            <!-- the actual table structure -->
-            <div
-              class="pivotTableUiTable"
-            >
-              <div class="pivotTableUiTableHeader"></div>
-              <div class="pivotTableUiTableBody"></div>
+              <!-- the actual table structure -->
+              <div class="pivotTableUiTable">
+                <div class="pivotTableUiTableHeader"></div>
+                <div class="pivotTableUiTableBody"></div>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
+
+        <dialog id="visualizationProgressDialog" role="progressbar">
+          <header>
+            <div class="loader loader-medium">Loading...</div>
+            <div class="timer">
+              <span class="digit"></span>
+              <span class="digit"></span>
+              <span class="digit"></span>
+              <span class="digit"></span>
+            </div>
+          </header>
+          <section>
+            <!-- TODO: actual progress information -->
+          </section>
+          <footer>
+            <button id="cancelQueryButton">Cancel</button>
+          </footer>
+        </dialog>
+        
       </div>
     </main>
 
@@ -1081,6 +1350,8 @@
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
 
+    <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsBase.js"></script>
+    <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsDialogBase.js"></script>
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsDialog.js"></script>
     <script onload="resourceLoaded(this)" src="Theme/Theme.js"></script>
 
@@ -1092,8 +1363,10 @@
     <script onload="resourceLoaded(this)" src="DataSet/CellSet.js"></script>
     <script onload="resourceLoaded(this)" src="ErrorDialog/ErrorDialog.js"></script>
     <script onload="resourceLoaded(this)" src="UploadUi/UploadUi.js"></script>
-    <script onload="resourceLoaded(this)" src="ExportUi/ExportUi.js"></script>
+    <script onload="resourceLoaded(this)" src="ExportUi/ExportDialog.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/DataSourcesUi.js"></script>
+    <script onload="resourceLoaded(this)" src="DataSourceSettingsDialog/DatasourceSettings.js"></script>
+    <script onload="resourceLoaded(this)" src="DataSourceSettingsDialog/DatasourceSettingsDialog.js"></script>
     <script onload="resourceLoaded(this)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>
@@ -1106,7 +1379,7 @@
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev242.0/+esm';
+      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev258.0/+esm';
 
       const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
       const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);

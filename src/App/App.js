@@ -21,10 +21,23 @@ function initDuckdbVersion(){
     return;
   }
   var connection = window.hueyDb.connection;
-  connection.query('SELECT version() as version')
+  var versionColumn = 'version';
+  var apiColumn = 'api';
+  var columns = {
+    "version()": versionColumn,
+    "current_setting('duckdb_api')": apiColumn
+  };
+  var selectListSql = Object.keys(columns).map(function(key){
+    return `${key} AS ${getQuotedIdentifier(columns[key])}`;
+  }).join('\n,');
+  var sql = `SELECT ${selectListSql}`
+  connection.query(sql)
   .then(function(resultset){
     var duckdbVersionLabel = byId('duckdbVersionLabel');
-    duckdbVersionLabel.innerText = `DuckDB ${resultset.get(0)['version']}`;
+    var row = resultset.get(0);
+    var version = row[versionColumn];
+    var api = row[apiColumn];
+    duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
 
     var spinner = byId('spinner');
     if (spinner){
@@ -83,7 +96,7 @@ function initApplication(){
   initDuckdbVersion();
   initDataSourcesUi();
   initQueryModel();
-  initExportUi();
+  initExportDialog();
   initAttributeUi();
   initSearch();
   initFilterUi();
@@ -92,6 +105,7 @@ function initApplication(){
   initExecuteQuery();
   initPageStateManager();
   initUploadUi();
+  initDatasourceSettingsDialog();
  
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
@@ -102,9 +116,45 @@ function initApplication(){
     if (count !== undefined) {
       return;      
     }
+    
     console.log(`buffered Events, event:`);
-    console.log(event.eventData);
+    var eventData = event.eventData;
+    console.log(eventData);
+    
+    var currentDatasourceCaption, datasource = queryModel.getDatasource();
+    if (datasource) {
+      currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
+    }
+    else {
+      currentDatasourceCaption = '';
+    }
+    byId('currentDatasource').innerHTML = currentDatasourceCaption;
+    
+    var title = ExportUi.generateExportTitle(queryModel);
+    document.title = 'Huey - ' + title;
+    
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
- 
+  
+  pivotTableUi.addEventListener('updated', async function(e){
+    var eventData = e.eventData;
+    if (eventData.status === 'error'){
+      showErrorDialog(eventData.error);      
+    }
+  });
+
+  bufferEvents(pivotTableUi, 'busy', function(event, count){
+    if (count !== undefined) {
+      return;
+    }
+    var busy = event.eventData.busy;
+    var busyDialog = byId('visualizationProgressDialog');
+    if (busy) {
+      busyDialog.showModal();
+    }
+    else {
+      busyDialog.close();
+    }
+  });
+   
 }

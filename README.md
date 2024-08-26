@@ -6,7 +6,6 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 ![image](https://github.com/rpbouman/huey/assets/647315/b2e45002-409c-4a98-8d38-f5a6bfc6b7e9)
 
-
 ## Key features
 - An intuitive and responsive pivot table that supports filtering and (sub)totals
 - Supports many different aggregate functions for reporting and data exploration
@@ -14,12 +13,11 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
 - Export of results and/or SQL queries to file or clipboard
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
-- Zero install. Download or checkout the source tree, and open src/index.html in your browser! No server required.
-
-Note: although Huey can run locally, there is nothing that keeps you from deploying it in a webserver if you want to.
+- Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
+- It's free! Huey is released under the MIT license, just like DuckDB.
 
 ## Limitations
-- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. 
+- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. This is not any judgement on browser quality but merely a matter of the most effective use of time and resources. That said, this does not mean we won't want to fix browser compatibility issues. If you spot them, please report an issue and we'll do our best to fix it. Or better yet: if you have a fix yourself, send a pull request.
 - Currently supports only local files. ("Local files" are files that logically exist in the local file system. This includes files from network drives and cloud drives like Google Drive and Microsoft OneDrive)
 
 ## Getting started
@@ -110,3 +108,29 @@ Apart from the result data, Huey also lets you export the SQL statements that wo
 
 ![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
 
+### Settings
+The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![image](https://github.com/user-attachments/assets/ed7c5780-4795-44b0-98f0-f97f3e509e37). 
+Settings are persisted in the browser's local storage.
+Settings are organized in separate tabs:
+
+#### Datasource Settings
+This lets you control the behavior of datasources.
+- The UNION loose typing checkbox controls how Huey detects whether datasources have the same column signature. When unchecked, exact data type matching is used; when checked, a more loose typing rule is applied.
+
+#### Value formatting
+This tab bundles all settings that controls the default appearance of values
+- NULL-value label: a string that is used to symbolize NULL-values.
+- Totals label: a string that is used to indicate the value is the total of the item indicated by the header.
+- Use default locale: when checked, the Browser's default locale(s) are used to format numbers. When unchecked, the Locale setting becomes editable.
+- Locale: the custom locale to use. You need to uncheck the Use default locale checkbox to edit this setting
+- Min. integer digits: the minimal number of digits to use to denote the integer part of numbers
+- Min. fraction digits: the minimal number of fractional digits to denote
+- Max. fraction digits: the maximum number of fractional digits to denote
+#### Query
+Controls the behavior of the query editor.
+- Autorun: whether queries execute automatically after editing the query
+#### Pivot Table
+Settings that control the appearance and behavior of the Pivot Table
+- Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
+#### Theme
+- Themes dropdown: a dropdown showing the various themes/color schemes.

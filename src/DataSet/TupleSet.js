@@ -213,9 +213,8 @@ class TupleSet extends DataSetComponent {
 
   #loadTuples(resultSet, offset) {
     var numRows = resultSet.numRows;
-    var fields = resultSet.schema.fields;
     
-    this.#tupleValueFields = fields;
+    var fields = resultSet.schema.fields;
     
     var items = this.getQueryAxisItems();
     var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
@@ -239,6 +238,7 @@ class TupleSet extends DataSetComponent {
         this.#tupleCount = parseInt(String(totalCount), 10);
       }
     }
+    this.#tupleValueFields = fields.slice(fieldOffset, fieldCount);
         
     for (var i = 0; i < numRows; i++){
 
@@ -256,8 +256,8 @@ class TupleSet extends DataSetComponent {
       for (var j = fieldOffset; j < fieldCount; j++){
         var field = fields[j];
         var fieldName = field.name;
-                
-        values[j - fieldOffset] = row[fieldName];
+        var value = row[fieldName];
+        values[j - fieldOffset] = value;
       }
 
       tuples[offset + i] = tuple;      
@@ -273,10 +273,11 @@ class TupleSet extends DataSetComponent {
     }
     axisSql = `${axisSql}\nLIMIT ${limit} OFFSET ${offset}`;
 
-    var connection = this.getManagedConnection();
+    var connection = await this.getManagedConnection();
     console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
     var resultset = await connection.query(axisSql);
     console.log(`Query method returned, connection ${connection.getConnectionId()} in state ${connection.getState()}` );
+    var rejects = await this.getQueryModel().getDatasource().getRejects();
     if (connection.getState() === 'canceled') {
       return 0;
     }
