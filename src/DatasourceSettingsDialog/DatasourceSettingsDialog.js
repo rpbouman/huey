@@ -253,7 +253,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     this.#rejectsTabPivotTableUi.updatePivotTableUi();
   }
       
-  setDatasource(datasource){
+  async setDatasource(datasource){
     this.#datasource = datasource;
 
     var datasourceType = datasource.getType();
@@ -263,7 +263,9 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     var fileType, fileSize;
     switch(datasourceType){
       case DuckDbDataSource.types.FILE:
-        fileSize = datasource.getFileSize();
+        //stats look pretty useless.
+        //var fileStatistics = await datasource.getFileStatistics();
+        fileSize = datasource.isUrl ? '' : datasource.getFileSize();
       case DuckDbDataSource.types.FILES:
         fileType = datasource.getFileType();
         break;

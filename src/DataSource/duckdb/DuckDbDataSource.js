@@ -82,6 +82,63 @@ class DuckDbDataSource extends EventEmitter {
     }
   };
 
+  // this is a crutch for reading from url.
+  // basically this lets us find out what reader duckdb chose to read the url
+  static async #whatFileType(url, connection){
+    var fileTypes = DuckDbDataSource.fileTypes;
+    
+    var readers = Object.keys(fileTypes).reduce(function(acc, curr, index){
+      var fileType = fileTypes[curr];
+      var reader = fileType.duckdb_reader;
+      if (reader !== undefined && acc.indexOf(reader) === -1){
+        acc.push(reader);
+      }
+      return acc;
+    }, []);
+
+    var statementLines = [
+      'SELECT *',
+      'FROM',
+      '',
+      'LIMIT 0'
+    ];
+    connection = connection || window.hueyDb.connection;
+    try {
+      statementLines[2] = getQuotedIdentifier(url);
+      var sql = statementLines.join('\n');
+      var result = await connection.query(sql);
+      var fields = result.schema.fields;
+      var fieldsString = JSON.stringify(fields);
+
+      var promises = readers.map(function(reader){
+        var readerCall = `${reader}( ${quoteStringLiteral(url)} )`;
+        statementLines[2] = readerCall;
+        var sql = statementLines.join('\n');
+        return connection.query(sql);
+      });
+      
+      var reader;
+      var promiseResults = await Promise.allSettled(promises);
+      var index = promiseResults.findIndex(function(promiseResult){
+        return promiseResult.status === 'fulfilled';
+      });
+      if (index === -1){
+        return null;
+      }
+      
+      var reader = readers[index];
+      for (var fileTypeKey in fileTypes){
+        var fileType = fileTypes[fileTypeKey];
+        if (fileType.duckdb_reader === reader) {
+          return fileTypeKey;
+        }
+      }
+    }
+    catch (e){
+      return null;
+    }
+  }
+
   static #datasource_uid_generator = 0;
   #datasource_uid = undefined;  
   #rejects_tables = undefined;
@@ -98,7 +155,9 @@ class DuckDbDataSource extends EventEmitter {
   #schemaName = undefined;
   #objectName = undefined;
   #url = undefined;
+  #contentType = undefined;
   #file = undefined;
+  #fileRegistered = undefined;
   #fileNames = undefined;
   #fileType = undefined;
   #fileProtocol = undefined;
@@ -259,10 +318,12 @@ class DuckDbDataSource extends EventEmitter {
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
+        this.#fileRegistered = false;
         if (config.url){
           this.#url = config.url;
           this.#objectName = config.url;
           this.#fileType = config.fileType;
+          this.#contentType = config.contentType;
         }
         else {
           var file = config.file;
@@ -363,18 +424,31 @@ class DuckDbDataSource extends EventEmitter {
       localId: parts.join(':')
     };
   }
+  
+  get isFileRegistered(){
+    return Boolean(this.#fileRegistered);
+  }
  
   async registerFile(){
+    if (this.isFileRegistered === true) {
+      return true;
+    }
+    
     var url = this.#url;    
     var file = this.#file;
     var promise;
     if (url){
       var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.HTTP;
-      promise = this.#duckDbInstance.registerFileURL(
+      await this.#duckDbInstance.registerFileURL(
         url, 
         url, 
         protocol
       );
+      if (!this.#fileType){
+        var connection = await this.getConnection();
+        var fileType = await DuckDbDataSource.#whatFileType(url, connection);
+        this.#fileType = fileType;
+      }
     }
     else
     if (file){
@@ -391,14 +465,15 @@ class DuckDbDataSource extends EventEmitter {
           throw new Error(`Registerfile is not appropriate for datasources of type ${type}.`);      
       }
       var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.BROWSER_FILEREADER;
-      promise = this.#duckDbInstance.registerFileHandle(
+      await this.#duckDbInstance.registerFileHandle(
         file.name, 
         file, 
         protocol
       );
     }
     
-    return promise;
+    this.#fileRegistered = true;
+    return true;
   }
   
   getRejectsSql(){
@@ -772,7 +847,7 @@ class DuckDbDataSource extends EventEmitter {
     return managedConnection;
   }
   
-async #queryExecutionListener(event){
+  async #queryExecutionListener(event){
     var managedConnection = event.currentTarget;
     var eventData = event.eventData;
     switch (event.type){
@@ -828,6 +903,20 @@ async #queryExecutionListener(event){
     }
     var fileSize = this.#file.size;
     return fileSize;
+  }
+  
+  async getFileStatistics(){
+    var type = this.getType();
+    var expectedType = DuckDbDataSource.types.FILE;
+    if (type !== expectedType){
+      throw new Error(`Cannot get file statistics from datasource of type "${type}", expected type "${expectedType}".`);      
+    }
+    if (this.isFileRegistered !== true){
+      await this.registerFile();
+    }
+    var duckDbInstance = this.#duckDbInstance;
+    var fileName = this.#objectName;
+    return duckDbInstance.exportFileStatistics(fileName);
   }
   
   getManagedConnection(){
