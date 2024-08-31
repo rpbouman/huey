@@ -56,7 +56,13 @@ Files that cannot be grouped appear in a separate Miscellanous Files group.
 ### Using Remote Datasets
 
 In addition to local files, you can also register URLs. To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-attachments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be)
-. You will be prompted to enter the URL. After confirming, the upload dialog appears just like when uploading local files.
+. You will be prompted to enter the URL:
+
+![URL prompt](https://github.com/user-attachments/assets/2a11e0ca-a3c1-4b55-9bf9-8cc404332400)
+
+After confirming, the upload dialog appears just like when uploading local files.
+
+Note that loading data from URL is subject to certain restrictions due to browser security policies. Typically the URL needs to be either in the same domain as from where Huey is served, or the remote server needs to pass CORS headers to overcome the same-origin policy. 
 
 ### Opening DuckDb files
 Apart from reading data files directly, Huey can also open existing duckdb files and access its tables and views. The process for accessing duckdb files is exactly the same as for accessing data files. Just make sure you give your duckdb file a '.duckdb' extension - that's how Huey knows it's a duckdb file. (DuckDB data files are not required to have any particular name or extension, but Huey currently cannot detect that, so it relies on a file extension convention instead.) Successfully loaded .duckdb files will appear in the DuckDb Folder, which appears at the top of the DataSources tab. 
