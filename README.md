@@ -111,6 +111,28 @@ Items on the row or columns axis have a "totals" toggle-icon. When enabled, tota
 
 ![image](https://github.com/user-attachments/assets/4b9bed21-0d42-4af0-9b1c-b921f440de48)
 
+## Saving & Restoring your query 
+
+### Saving Queries
+Everytime you make a change to your query it will be encoded and appended to the URL as fragment (a.k.a. hash or anchor). You can bookmark the url and revisit it later, or you can copy the url from your browser's address bar and share it. 
+
+### Restoring Queries
+You can load queries simply by navigating to the respective url (including the fragment). The fragment includes the query and a reference to the datasource - not the actual data itself.
+
+When restoring the query, Huey checks if there is currently a datasource present that matches the referenced datasource's name and column signature. If so, it will use it. If there is currently no datasource that matches the referenced one, Huey will prompt you so you can upload it. 
+
+![prompt to load a referenced datasource](https://github.com/user-attachments/assets/fbf35cbd-9265-4b0e-be39-89503b997dcd)
+
+If the referenced datasource does not exist, but there are other datasources that could satisfy the query (based on whether it includes all attributes mentioned in the query), then the prompt will offer those datasources too as alternatives:
+
+![image](https://github.com/user-attachments/assets/4bed7810-74e9-4080-a6b5-dda478501870)
+
+If the datasource is built on a URL, Huey will attempt to access it directly. If that succeeds, you won't be prompted to confirm: Huey will simply load the remote datasource and restore the query. 
+
+### Undo & Redo
+
+Because the query state updates the page url, you can use the browser's standard Back and Forward buttons to browse between different versions of your query.
+
 ## Export
 Huey provides export capabilities so you can use the results of your analysis outside huey.
 The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
