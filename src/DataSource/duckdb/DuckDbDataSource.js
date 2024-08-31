@@ -206,17 +206,22 @@ class DuckDbDataSource extends EventEmitter {
   
   static async getContentTypeForUrl(url){
     return new Promise(function(resolve, reject){
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("error", function(error){
-        reject(error);
-      });
-      
-      xhr.addEventListener("load", function(){
-        var contentType = xhr.getResponseHeader('Content-Type');
-        resolve(contentType);
-      });
-      xhr.open('HEAD', url);
-      xhr.send();
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("error", function(error){
+          resolve(undefined);
+        });
+        
+        xhr.addEventListener("load", function(){
+          var contentType = xhr.getResponseHeader('Content-Type');
+          resolve(contentType);
+        });
+        xhr.open('HEAD', url);
+        xhr.send();
+      } 
+      catch(e){
+        resolve(undefined);
+      }
     });
   }  
   
@@ -243,17 +248,20 @@ class DuckDbDataSource extends EventEmitter {
       url: url
     };
     
-    var contentType = await DuckDbDataSource.getContentTypeForUrl(url);
-    config.contentType = contentType;
-    var contentTypes = contentType.split(';');
-    _outer: for (var i = 0; i < contentTypes.length; i++){
-      contentType = contentTypes[i];
-      for (var fileType in DuckDbDataSource.fileTypes){
-        var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
-        var mimeType = fileTypeInfo.mimeType;
-        if (contentType === mimeType) {
-          config.fileType = fileType;
-          break _outer;
+    var contentType;
+    contentType = await DuckDbDataSource.getContentTypeForUrl(url);
+    if (contentType){
+      config.contentType = contentType;
+      var contentTypes = contentType.split(';');
+      _outer: for (var i = 0; i < contentTypes.length; i++){
+        contentType = contentTypes[i];
+        for (var fileType in DuckDbDataSource.fileTypes){
+          var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+          var mimeType = fileTypeInfo.mimeType;
+          if (contentType === mimeType) {
+            config.fileType = fileType;
+            break _outer;
+          }
         }
       }
     }
@@ -419,9 +427,23 @@ class DuckDbDataSource extends EventEmitter {
   static parseId(datasourceId) {
     var parts = datasourceId.split(':');
     var type = parts.shift();
+    var localId = parts.join(':');
+    var unquoted;
+    var isUrl = false;
+    if (localId.startsWith('"') && localId.endsWith('"')){
+      unquoted = localId.slice(1, -1);
+      try {
+        var url = new URL(unquoted);
+        isUrl = true;
+      }
+      catch(e){
+      }
+    }
     return {
       type: type,
-      localId: parts.join(':')
+      localId: localId,
+      isUrl: isUrl,
+      resource: unquoted
     };
   }
   
