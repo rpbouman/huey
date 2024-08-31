@@ -384,6 +384,10 @@ class UploadUi {
     return byId(this.#id);
   }
   
+  close(){
+    this.getDialog().close();
+  }
+  
   #getHeader(){
     var dom = this.getDialog();
     return byId(dom.getAttribute('aria-labelledby'));

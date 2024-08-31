@@ -427,9 +427,23 @@ class DuckDbDataSource extends EventEmitter {
   static parseId(datasourceId) {
     var parts = datasourceId.split(':');
     var type = parts.shift();
+    var localId = parts.join(':');
+    var unquoted;
+    var isUrl = false;
+    if (localId.startsWith('"') && localId.endsWith('"')){
+      unquoted = localId.slice(1, -1);
+      try {
+        var url = new URL(unquoted);
+        isUrl = true;
+      }
+      catch(e){
+      }
+    }
     return {
       type: type,
-      localId: parts.join(':')
+      localId: localId,
+      isUrl: isUrl,
+      resource: unquoted
     };
   }
   
