@@ -28,7 +28,7 @@ class PageStateManager {
   }
   
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
-    return new Promise(function(resolve, reject){
+    return new Promise(async function(resolve, reject){
       
       // do we have the referenced datasource?
       var desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
@@ -40,6 +40,25 @@ class PageStateManager {
       
       // figure out what kind of datasource is referenced
       var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
+      
+      if (desiredDatasourceIdParts.isUrl) {
+        var url = desiredDatasourceIdParts.resource;
+        await uploadUi.uploadFiles([url]);
+        desiredDataSource = datasourcesUi.getDatasource(desiredDatasourceId);
+        if (desiredDataSource) {
+          var isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
+            desiredDatasourceId, 
+            referencedColumns, 
+            true
+          );
+          if (isCompatible) {
+            uploadUi.close();
+            resolve(desiredDataSource);
+            return;
+          }
+        }
+      }
+            
       var title;
       var message = `The requested ${desiredDatasourceIdParts.type} ${desiredDatasourceIdParts.localId}`;
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
@@ -56,7 +75,7 @@ class PageStateManager {
         message += ' isn\'t compatible with your query.';
         // TODO: show why it's not compatible
       }
-      else {
+      else {        
         openNewDatasourceItem = [
           `<li id="datasourceMenu-1" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
             `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
