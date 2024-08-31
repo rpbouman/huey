@@ -120,7 +120,8 @@ Apart from the result data, Huey also lets you export the SQL statements that wo
 ![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
 
 ## Settings
-The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![image](https://github.com/user-attachments/assets/ed7c5780-4795-44b0-98f0-f97f3e509e37). 
+The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![Gear icon](https://github.com/user-attachments/assets/c1d53e42-8d41-4128-ab06-12263e284edc)
+. 
 Settings are persisted in the browser's local storage.
 Settings are organized in separate tabs:
 
