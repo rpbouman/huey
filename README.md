@@ -16,14 +16,14 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
 - It's free! Huey is released under the MIT license, just like DuckDB.
 
-## Limitations
+### Limitations
 - Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. This is not any judgement on browser quality but merely a matter of the most effective use of time and resources. That said, this does not mean we won't want to fix browser compatibility issues. If you spot them, please report an issue and we'll do our best to fix it. Or better yet: if you have a fix yourself, send a pull request.
 - Currently supports only local files. ("Local files" are files that logically exist in the local file system. This includes files from network drives and cloud drives like Google Drive and Microsoft OneDrive)
 
 ## Getting started
 1) [Checkout](https://github.com/rpbouman/huey.git) or [Download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) from github
 2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on resources served by jsdelivr.com, so make sure you're connected to the internet.
-3) Register one or more files and start analyzing!
+3) Register one or more files or urls, and start analyzing!
 
 ## Registering and Analyzing Files with Huey
 
@@ -32,10 +32,10 @@ Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview)
 Due to general security policy, the web browser can not simply read files from your local computer: you need to explicitly select and register files in DuckDB WASM's virtual file system. 
 
 To register one or more files, you can either 
-1) Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
+- Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
 The upload button is always available as the leftmost button on the toolbar at the top of the page. The upload action will pop up a file browser dialog that lets you browse and choose one or more files from your local filesystem.
 In the file browser dialog, navigate to the file or files that you want to explore, select them and then confirm the dialog by clicking the 'Ok' button.
-2) Drag 'n Drop one or multiple files unto the "Datasources" tab in the sidebar. 
+- Drag 'n Drop one or multiple files unto the "Datasources" tab in the sidebar. 
 
 Either action will open the Upload dialog. The upload dialog will show a progress bar for each file that is being registered. Additional progress items may appear in case a duckdb extension needs to be installed and/or loaded. 
 
@@ -53,7 +53,11 @@ Huey will attempt to group files having similar column signature. The group appe
 
 Files that cannot be grouped appear in a separate Miscellanous Files group.
 
-#### Opening DuckDb files
+### Using Remote Datasets
+
+In addition to local files, you can also register URLs. To register a URL, click the "Load data from URL" button on the toolbar. You will be prompted to enter the URL. After confirming, the upload dialog appears just like when uploading local files.
+
+### Opening DuckDb files
 Apart from reading data files directly, Huey can also open existing duckdb files and access its tables and views. The process for accessing duckdb files is exactly the same as for accessing data files. Just make sure you give your duckdb file a '.duckdb' extension - that's how Huey knows it's a duckdb file. (DuckDB data files are not required to have any particular name or extension, but Huey currently cannot detect that, so it relies on a file extension convention instead.) Successfully loaded .duckdb files will appear in the DuckDb Folder, which appears at the top of the DataSources tab. 
 
 ![image](https://github.com/rpbouman/huey/assets/647315/c7ca5ed7-7454-4783-8dbc-493244f8bb28)
@@ -63,7 +67,7 @@ The schemas in the duckdb database file are presented as folders below the duckd
 Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
 But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
 
-### Exploring Datasources
+## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1)
  . After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
@@ -87,20 +91,20 @@ Aggregates cannot be placed on the horizontal or vertical axes of the pivot tabl
 
 ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
 
-#### Filtering
+### Filtering
 
 The query editor supports a special Filters axis. Items placed on the filters access support the Filters dialog which lets you choose values and operators to filter the query results.
 Items on the filter axis themselves are not visible in the query result, unless those items are also placed on the the columns or rows axis.
 
 ![image](https://github.com/user-attachments/assets/beae75ae-b158-4e26-b30b-958bffd4f222)
 
-#### (Sub)totals
+### (Sub)totals
 
 Items on the row or columns axis have a "totals" toggle-icon. When enabled, totals for that item will be displayed in a totals row or column.
 
 ![image](https://github.com/user-attachments/assets/4b9bed21-0d42-4af0-9b1c-b921f440de48)
 
-### Export
+## Export
 Huey provides export capabilities so you can use the results of your analysis outside huey.
 The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
 
@@ -108,16 +112,16 @@ Apart from the result data, Huey also lets you export the SQL statements that wo
 
 ![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
 
-### Settings
+## Settings
 The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![image](https://github.com/user-attachments/assets/ed7c5780-4795-44b0-98f0-f97f3e509e37). 
 Settings are persisted in the browser's local storage.
 Settings are organized in separate tabs:
 
-#### Datasource Settings
+### Datasource Settings
 This lets you control the behavior of datasources.
 - The UNION loose typing checkbox controls how Huey detects whether datasources have the same column signature. When unchecked, exact data type matching is used; when checked, a more loose typing rule is applied.
 
-#### Value formatting
+### Value formatting
 This tab bundles all settings that controls the default appearance of values
 - NULL-value label: a string that is used to symbolize NULL-values.
 - Totals label: a string that is used to indicate the value is the total of the item indicated by the header.
@@ -126,11 +130,11 @@ This tab bundles all settings that controls the default appearance of values
 - Min. integer digits: the minimal number of digits to use to denote the integer part of numbers
 - Min. fraction digits: the minimal number of fractional digits to denote
 - Max. fraction digits: the maximum number of fractional digits to denote
-#### Query
+### Query
 Controls the behavior of the query editor.
 - Autorun: whether queries execute automatically after editing the query
-#### Pivot Table
+### Pivot Table
 Settings that control the appearance and behavior of the Pivot Table
 - Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
-#### Theme
+### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
