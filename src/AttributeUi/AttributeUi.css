@@ -10,21 +10,34 @@
   margin-left: 16px;
 }
 
-.attributeUi details > summary > .label  {
-  max-width: calc(100% - 166px);
-}
-
 /**
 * folder icons
 */
-.attributeUi details[data-nodetype=folder] > summary > .icon::before {
-  /* folder */
-  content: "\eaad";
-}
 
-.attributeUi details[data-nodetype=folder][open] > summary > .icon::before {
-  /* folder-open */
-  content: "\faf7";
+.attributeUi details {
+  
+  [data-nodetype=derived] > summary,
+  [data-nodetype=aggregate] > summary,
+  [data-nodetype=derived][open] > summary,
+  [data-nodetype=aggregate][open] > summary {
+    list-style: none;
+    margin-left: 16px;
+  }
+  
+  summary > .label  {
+    max-width: calc(100% - 166px);
+  }
+  
+  [data-nodetype=folder] > summary > .icon::before {
+    /* folder */
+    content: "\eaad";
+  }
+  
+  [data-nodetype=folder][open] > summary > .icon::before {
+    /* folder-open */
+    content: "\faf7";
+  }
+  
 }
 
 /**
