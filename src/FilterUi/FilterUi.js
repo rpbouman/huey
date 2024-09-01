@@ -823,7 +823,7 @@ class FilterDialog {
       option = createEl('option', {
         value: value,
         label: label,
-        "data-sql-literal": literalWriter(row.value)
+        "data-sql-literal": literalWriter(row.value, valueField)
       });
       if (value === null){
         option.setAttribute('data-sql-null', true);
