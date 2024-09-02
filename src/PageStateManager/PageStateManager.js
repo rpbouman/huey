@@ -65,7 +65,7 @@ class PageStateManager {
       var openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = [
-          `<li id="datasourceMenu-1" data-nodetype="datasource">`,
+          `<li id="datasourceMenu" data-nodetype="datasource">`,
             `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
             '<span class="icon" role="img"></span>',
             `<label for="datasourceMenu-1" class="label">Browse for a new Datasource</span>`,
@@ -77,10 +77,10 @@ class PageStateManager {
       }
       else {        
         openNewDatasourceItem = [
-          `<li id="datasourceMenu-1" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
+          `<li id="datasourceMenu" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
             `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
             '<span class="icon" role="img"></span>',
-            `<label datasourceMenu-1 class="label">Browse to open ${desiredDatasourceIdParts.localId}</label>`,
+            `<label for="datasourceMenu-1" class="label">Browse to open ${desiredDatasourceIdParts.localId}</label>`,
           `</li>`
         ].join('\n');
         title = 'Datasource not found';
