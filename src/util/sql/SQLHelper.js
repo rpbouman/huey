@@ -1073,3 +1073,85 @@ function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
   }
   return valuesClause;
 }
+
+function getStructTypeDescriptor(structColumnType){
+  var index = 0;
+  var keyword = 'STRUCT';
+  if (!structColumnType.startsWith(keyword)){
+    throw new Error(`Type "${structColumnType}" is not a STRUCT: expected keyword ${keyword} at position ${index}`);
+  }
+  index = keyword.length;
+  if (structColumnType.charAt(index) !== '(') {
+    throw new Error(`Type "${structColumnType}" is not a STRUCT: expected "("  at position ${index} `);
+  }
+  index += 1;
+  var structure = {};
+  
+  function parseMemberName(){
+    var memberName;
+    var startOfMemberName = index;
+    var endOfMemberName;
+    if (structColumnType.charAt(index) === '"') {
+      startOfMemberName += 1;
+      endOfMemberName = structColumnType.indexOf('"', startOfMemberName);
+      index = endOfMemberName + 1;
+    }
+    else {
+      endOfMemberName = structColumnType.indexOf(' ', startOfMemberName);
+      index = endOfMemberName;
+    }
+    memberName = structColumnType.substring(startOfMemberName, endOfMemberName);
+    return memberName;
+  }
+  
+  function parseMemberType(){
+    var startOfMemberType = index;
+    var level = 0;
+    _loop: while (index < structColumnType.length){
+      var ch = structColumnType.charAt(index);
+      switch (ch) {
+        case '(':
+          level++;
+          break;
+        case ')':
+        case ',':
+          if (level === 0) {
+            endOfMemberType = index;
+            break _loop;
+          }
+          else
+          if (ch === ')'){
+            level--;
+          }
+      }
+      index++;
+    }
+    var memberType = structColumnType.substring(startOfMemberType, endOfMemberType);
+    return memberType;
+  }
+  
+  _loop: while (index < structColumnType.length) {
+
+    var memberName = parseMemberName();
+    if (structColumnType.charAt(index) !== ' '){
+      throw new Error(`Error parsing STRUCT ${structColumnType}: expected "  "  at ${index}`);
+    }
+    index += 1;
+    var type = parseMemberType();
+    structure[memberName] = type;
+    
+    var ch = structColumnType.charAt(index);
+    switch(ch) {
+      case ',':
+        index += 1;
+        if (structColumnType.charAt(index) !== ' ') {
+          throw new Error(`Error parsing STRUCT ${structColumnType}: expected " " at ${index}`);
+        }
+        index += 1;
+        continue _loop;
+      case ')':
+        break _loop;
+    }
+  }
+  return structure;
+}
