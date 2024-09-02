@@ -37,7 +37,7 @@
     /* folder-open */
     content: "\faf7";
   }
-  
+
 }
 
 /**
@@ -45,16 +45,20 @@
 * Data type icons
 *
 */
+.attributeUi details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
   /* letter T */
   content: "\ec63";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
   /* square check */
   content: "\eb28";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type$=INT] > summary > .icon::before,
+.attributeUi details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon::before
 {
@@ -62,12 +66,23 @@
   content: "\f554";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
 {
   /* code-dots */
   content: "\f61a";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
+{
+  /* code-dots */
+  content: "\f1e5";
+}
+
+.attributeUi details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > .icon::before,
+.attributeUi details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > .icon::before,
+.attributeUi details[data-nodetype=member][data-member_expression_type=REAL] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=REAL] > summary > .icon::before {
@@ -75,19 +90,28 @@
   content: "\fa26";
 }
 
-.attributeUi details[data-nodetype=column][data-column_type*=TIMESTAMP] > summary > .icon::before {
+.attributeUi details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > .icon::before {
   /* calendar-clock */
   content: "\fd2e";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type=DATE] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=DATE] > summary > .icon::before {
   /* calendar */
   content: "\ea53";
 }
 
+.attributeUi details[data-nodetype=member][data-member_expression_type=TIME] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=TIME] > summary > .icon::before {
   /* clock */
   content: "\ea70";
+}
+
+.attributeUi details[data-nodetype=member][data-member_expression_type=JSON] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type=JSON] > summary > .icon::before {
+  /* JSON */
+  content: "\f7b2";
 }
 
 /**
