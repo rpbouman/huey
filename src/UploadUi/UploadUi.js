@@ -107,7 +107,7 @@ class UploadUi {
     });
     uploadItem.appendChild(summary);
 
-    var label = createEl('label', {
+    var label = createEl('span', {
     }, fileName);
     summary.appendChild(label);
     
@@ -149,7 +149,7 @@ class UploadUi {
     });
     uploadItem.appendChild(summary);
 
-    var label = createEl('label', {
+    var label = createEl('span', {
       // label should technicall have a for attribute, but there is nothing to point it to.
       //"for": extensionItemId
     }, `Extension: ${extensionName}`);
@@ -341,7 +341,7 @@ class UploadUi {
       
       uploadItem
       .getElementsByTagName('summary').item(0)
-      .getElementsByTagName('label').item(0)
+      .getElementsByTagName('*').item(0)
       .innerHTML += ' ' + UploadUi.#fileSizeFormatter.format(files[i].size)
       ;      
     }
