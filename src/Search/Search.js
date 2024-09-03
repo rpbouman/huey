@@ -25,14 +25,29 @@ function handleAttributeSearch(event, count){
     }
     else {
       var columnName = attributeNode.getAttribute('data-column_name');
+      var memberExpressionPath = attributeNode.getAttribute('data-member_expression_path');
       if (columnName) {
         match = columnName.toUpperCase().indexOf(searchString) !== -1;
       }
-      else {
+      
+      if (memberExpressionPath && !match) {
+        match = memberExpressionPath.toUpperCase().indexOf(searchString) !== -1;
+      }
+      
+      if (!match) {
         match = false;
+        attributeNode.removeAttribute('open');
       }
     }
     attributeNode.setAttribute('data-matches-searchstring', match);
+    
+    if (match === true) {
+      var parentNode = attributeNode;
+      while ((parentNode = parentNode.parentNode) && parentNode.nodeName === 'DETAILS') {
+        parentNode.setAttribute('data-matches-searchstring', match);
+        parentNode.setAttribute('open', true);
+      }
+    }
   }
 }
 
