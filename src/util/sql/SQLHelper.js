@@ -672,6 +672,8 @@ var dataTypes = {
       }
     }
   },
+  'JSON': {
+  },
   'UNION': {
     defaultAnalyticalRole: 'attribute'
   }
