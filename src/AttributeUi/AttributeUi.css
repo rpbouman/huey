@@ -47,8 +47,8 @@
 */
 .attributeUi details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
-  /* letter T */
-  content: "\ec63";
+  /* txt */
+  content: "\f3b1";
 }
 
 .attributeUi details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
