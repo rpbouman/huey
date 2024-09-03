@@ -339,13 +339,17 @@ class AttributeUi {
     switch (config.type){
       case 'column':
         return config.profile.column_name;
+      case 'member':
+        var memberExpressionPath = config.memberExpressionPath;
+        var tmp = [].concat(memberExpressionPath);
+        return tmp.pop();
       case 'derived':
         return config.derivation;
       case 'aggregate':
         return config.aggregator;
     }
   }
-  
+    
   constructor(id, queryModel){
     this.#id = id;
     this.#queryModel = queryModel;
@@ -354,9 +358,128 @@ class AttributeUi {
     dom.addEventListener('click', this.#clickHandler.bind(this));
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
+  
+  async #queryModelChangeHandler(event){
+    var eventData = event.eventData;
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        var searchAttributeUiDisplay;
+        if (eventData.propertiesChanged.datasource.newValue) {
+          this.clear(true);          
+          var datasource = eventData.propertiesChanged.datasource.newValue;
+          var columnMetadata = await datasource.getColumnMetadata();
+          this.render(columnMetadata);
+          searchAttributeUiDisplay = '';
+        }
+        else {
+          this.clear(false);
+          searchAttributeUiDisplay = 'none';
+        }
+        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
+      }
+    }
+    this.#updateState();
+  }
+  
+  #clickHandler(event){
+    var target = event.target;
+    var classNames = getClassNames(target);
+    event.stopPropagation();
     
+    var node = getAncestorWithTagName(target, 'details');
+    if (!node) {
+      return;
+    }
+    
+    if (classNames.indexOf('attributeUiAxisButton') !== -1){
+      var input = target.getElementsByTagName('input').item(0);
+      var axisId = target.getAttribute('data-axis');
+      setTimeout(function(){
+        this.#axisButtonClicked(node, axisId, input.checked);
+      }.bind(this), 0);
+    }
+  }
+    
+  async #axisButtonClicked(node, axis, checked){
+    var queryModel = this.#queryModel;
+    var head = node.childNodes.item(0);
+    var inputs = head.getElementsByTagName('input');
+    var aggregator;
+    switch (axis){
+      case QueryModel.AXIS_ROWS:
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_CELLS:
+        // implement mutual exclusive axes (either rows or columns, not both)
+        for (var i = 0; i < inputs.length; i++){
+          var input = inputs.item(i);
+          var inputAxis = input.getAttribute('data-axis');
+          if (input.checked && inputAxis !== axis) {
+            input.checked = false;
+          }
+          
+          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
+            aggregator = input.getAttribute('data-aggregator');
+          }
+        }
+        break;
+    }
+    var columnName = node.getAttribute('data-column_name');
+    var columnType = node.getAttribute('data-column_type');
+ 
+    var memberExpressionPath = node.getAttribute('data-member_expression_path');
+    if (memberExpressionPath) {
+      memberExpressionPath = JSON.parse(memberExpressionPath);
+      columnType = node.getAttribute('data-member_expression_type');
+    }
+    
+    var derivation = node.getAttribute('data-derivation');
+    var aggregator = aggregator || node.getAttribute('data-aggregator');
+
+    
+    var itemConfig = {
+      axis: axis,
+      columnName: columnName,
+      columnType: columnType,
+      derivation: derivation,
+      aggregator: aggregator,
+      memberExpressionPath: memberExpressionPath
+    };
+    
+    var formatter = QueryAxisItem.createFormatter(itemConfig);
+    if (formatter){
+      itemConfig.formatter = formatter;
+    }
+
+    if (itemConfig.aggregator) {
+      //noop
+    }
+    else {
+      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
+      if (literalWriter){
+        itemConfig.literalWriter = literalWriter;
+      }
+    }
+    
+    if (checked) {
+      await queryModel.addItem(itemConfig);
+      
+      if (axis === QueryModel.AXIS_FILTERS) {
+        queryUi.openFilterDialogForQueryModelItem(itemConfig);
+      }
+    }
+    else {
+      queryModel.removeItem(itemConfig);
+    }
+  }
+  
   #renderAttributeUiNodeAxisButton(config, head, axisId){
-    var name = `${config.type}_${config.profile.column_name}`;
+    var columnExpression = config.profile.column_name;
+    var memberExpressionPath = config.memberExpressionPath;
+    if (memberExpressionPath){
+      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+    }
+    
+    var name = `${config.type}_${columnExpression}`;
     var id = `${name}`;
 
     var analyticalRole = 'attribute';
@@ -365,18 +488,21 @@ class AttributeUi {
     var createInput;
     switch (config.type) {
       case 'column':
+      case 'member':
         var profile = config.profile;
-        var columnType = profile.column_type;
+        var columnType = config.columnType || config.profile.column_type;
         var dataTypeInfo = getDataTypeInfo(columnType);
-        analyticalRole = dataTypeInfo.defaultAnalyticalRole || analyticalRole;
+        analyticalRole = dataTypeInfo && dataTypeInfo.defaultAnalyticalRole ? dataTypeInfo.defaultAnalyticalRole : analyticalRole;
       case 'derived':
         switch (axisId){
           case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
-            if (config.type === 'derived') {
-              var derivation = config.derivation;
-              id += `_${derivation}`;
+            switch (config.type) {
+              case 'derived':
+                var derivation = config.derivation;
+                id += `_${derivation}`;
+                break;
             }
             id += `_${axisId}`;
             createInput = 'radio';
@@ -417,8 +543,6 @@ class AttributeUi {
     var axisButtonInput = createEl('input', {
       type: 'checkbox',
       id: id,
-      'data-nodetype': config.type,
-      'data-column_name': config.profile.column_name,
       'data-axis': axisId
     });
     
@@ -450,6 +574,12 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeHead(config) {
+    var columnExpression = config.profile.column_name;
+    var memberExpressionPath = config.memberExpressionPath;
+    if (memberExpressionPath){
+      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+    }
+    
     var head = createEl('summary', {
     });
     
@@ -461,12 +591,15 @@ class AttributeUi {
     if (!title){
       switch (config.type) {
         case 'column':
-          title = `"${config.profile.column_name}": ${config.profile.column_type}`;
+          title = `"${columnExpression}": ${config.profile.column_type}`;
+          break;
+        case 'member':
+          title = `${columnExpression}: ${config.columnType}`;
           break;
         case 'aggregate':
         case 'derived':
           var expressionTemplate = config.expressionTemplate;
-          title = expressionTemplate.replace(/\$\{columnName\}/g, `"${config.profile.column_name}"`);
+          title = expressionTemplate.replace(/\$\{columnName\}/g, `${columnExpression}`);
           break;
       }
     }
@@ -485,15 +618,23 @@ class AttributeUi {
   }
 
   #renderAttributeUiNode(config){
+    var columnType = config.profile.column_type;
     var node = createEl('details', {
       role: 'treeitem',      
       'data-nodetype': config.type,
       'data-column_name': config.profile.column_name,
-      'data-column_type': config.profile.column_type
+      'data-column_type': columnType
     });
     switch (config.type){
       case 'column':
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+      case 'member':
+        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+        var memberExpressionPath = config.memberExpressionPath;
+        if (memberExpressionPath) {
+          node.setAttribute('data-member_expression_path', JSON.stringify(memberExpressionPath));
+          node.setAttribute('data-member_expression_type', config.columnType);
+        }
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
@@ -509,6 +650,15 @@ class AttributeUi {
     
     var head = this.#renderAttributeUiNodeHead(config);
     node.appendChild(head);
+
+    switch (config.type){
+      case 'column':
+      case 'member':
+        if (columnType.startsWith('STRUCT')) {
+          this.#loadChildNodes(node);
+        }
+        break;
+    }
 
     return node;
   }
@@ -582,9 +732,11 @@ class AttributeUi {
       if (!folder) {
         return acc;
       }
+      
       if (acc[folder]) {
         return acc;
       }
+      
       var folderNode = this.#renderFolderNode({caption: folder});
       acc[folder] = folderNode;
 
@@ -608,6 +760,27 @@ class AttributeUi {
       return acc;      
     }.bind(this), {});
     return folders;
+  }
+  
+  #loadMemberChildNodes(node, typeName, profile){
+    var folderNode = this.#renderFolderNode({caption: 'members'});
+    var columnType = profile.memberExpressionType || profile.column_type;
+    var memberExpressionPath = profile.memberExpressionPath || [];
+    var structure = getStructTypeDescriptor(columnType);
+    var columnName = profile.column_name
+    for (var memberName in  structure){
+      var memberExpression = quoteStringLiteral(memberName);
+      var memberType = structure[memberName];
+      var config = {
+        type: 'member',
+        memberExpressionPath: memberExpressionPath.concat([memberName]),
+        columnType: memberType,
+        profile: profile
+      }
+      var memberNode = this.#renderAttributeUiNode(config);
+      folderNode.appendChild(memberNode);
+    }
+    node.appendChild(folderNode);
   }
 
   #loadDerivationChildNodes(node, typeName, profile){
@@ -657,14 +830,38 @@ class AttributeUi {
   #loadChildNodesForColumnNode(node){    
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
+    
+    var memberExpressionPath;
+    var memberExpressionType = node.getAttribute('data-member_expression_type');
+    if (memberExpressionType) {
+      memberExpressionPath = node.getAttribute('data-member_expression_path');
+      memberExpressionPath = JSON.parse(memberExpressionPath);
+    }
+    
     var profile = {
       column_name: columnName,
-      column_type: columnType 
+      column_type: columnType,
+      memberExpressionType: memberExpressionType,
+      memberExpressionPath: memberExpressionPath
     };
-    var typeName = getDataTypeNameFromColumnType(columnType);
-            
+    
+    var expressionType = memberExpressionType || columnType;
+    
+    var typeName = getDataTypeNameFromColumnType(expressionType);
+    
+    if (expressionType.endsWith('[]')){
+      
+    }
+    else
+    if (expressionType.startsWith('STRUCT')){
+      this.#loadMemberChildNodes(node, typeName, profile);
+    }
     this.#loadDerivationChildNodes(node, typeName, profile);
     this.#loadAggregatorChildNodes(node, typeName, profile);
+  }
+  
+  #loadChildNodesForMemberNode(node){
+    this.#loadChildNodesForColumnNode(node);
   }
   
   #loadChildNodes(node){
@@ -673,8 +870,8 @@ class AttributeUi {
       case 'column':
         this.#loadChildNodesForColumnNode(node);
         break;
-      case 'derived':
-        // TODO
+      case 'member':
+        this.#loadChildNodesForMemberNode(node);
         break;
       default:
         throw new Error(`Unrecognized nodetype ${nodeType}`);
@@ -689,131 +886,31 @@ class AttributeUi {
       }
     }
   }
-  
-  async #axisButtonClicked(node, axis, checked){
-    var head = node.childNodes.item(0);
-    var inputs = head.getElementsByTagName('input');
-    var aggregator;
-    switch (axis){
-      case QueryModel.AXIS_ROWS:
-      case QueryModel.AXIS_COLUMNS:
-      case QueryModel.AXIS_CELLS:
-        // implement mutual exclusive axes (either rows or columns, not both)
-        for (var i = 0; i < inputs.length; i++){
-          var input = inputs.item(i);
-          var inputAxis = input.getAttribute('data-axis');
-          if (input.checked && inputAxis !== axis) {
-            input.checked = false;
-          }
-          
-          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
-            aggregator = input.getAttribute('data-aggregator');
-          }
-        }
-        break;
-    }
-    var columnName = node.getAttribute('data-column_name');
-    var columnType = node.getAttribute('data-column_type');
-    var derivation = node.getAttribute('data-derivation');
-    var aggregator = aggregator || node.getAttribute('data-aggregator');
-
-    
-    var itemConfig = {
-      axis: axis,
-      columnName: columnName,
-      columnType: columnType,
-      derivation: derivation,
-      aggregator: aggregator
-    };
-    
-    var formatter = QueryAxisItem.createFormatter(itemConfig);
-    if (formatter){
-      itemConfig.formatter = formatter;
-    }
-
-    if (itemConfig.aggregator) {
-      //noop
-    }
-    else {
-      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
-      if (literalWriter){
-        itemConfig.literalWriter = literalWriter;
-      }
-    }
-    
-    if (checked) {
-      await this.#queryModel.addItem(itemConfig);
-      
-      if (axis === QueryModel.AXIS_FILTERS) {
-        queryUi.openFilterDialogForQueryModelItem(itemConfig);
-      }
-    }
-    else {
-      this.#queryModel.removeItem(itemConfig);
-    }
-  }
-  
-  #clickHandler(event) {
-    var target = event.target;
-    var classNames = getClassNames(target);
-    event.stopPropagation();
-    
-    var node = getAncestorWithTagName(target, 'details');
-    if (!node) {
-      return;
-    }
-    
-    if (classNames.indexOf('attributeUiAxisButton') !== -1){
-      var input = target.getElementsByTagName('input').item(0);
-      var axisId = target.getAttribute('data-axis');
-      setTimeout(function(){
-        this.#axisButtonClicked(node, axisId, input.checked);
-      }.bind(this), 0);
-    }    
-  }
- 
+         
   #updateState(){
     var inputs = this.getDom().getElementsByTagName('input');
     for (var i = 0; i < inputs.length; i++){
       var input = inputs.item(i);
-      var columnName = input.getAttribute('data-column_name');
       var axis = input.getAttribute('data-axis');
-      var aggregator = input.getAttribute('data-aggregator');
-      var derivation = input.getAttribute('data-derivation');
+
+      var node = getAncestorWithTagName(input, 'details')
+      var columnName = node.getAttribute('data-column_name');
+      var aggregator = node.getAttribute('data-aggregator');
+      var derivation = node.getAttribute('data-derivation');
+      var memberExpressionPath = node.getAttribute('data-member_expression_path');
       
       var item = queryModel.findItem({
         columnName: columnName,
         axis: axis,
         aggregator: aggregator,
-        derivation: derivation
+        derivation: derivation,
+        memberExpressionPath: memberExpressionPath
       });
       
       input.checked = Boolean(item);
     }
   }
-  
-  async #queryModelChangeHandler(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var searchAttributeUiDisplay;
-        if (eventData.propertiesChanged.datasource.newValue) {
-          this.clear(true);          
-          var datasource = eventData.propertiesChanged.datasource.newValue;
-          var columnMetadata = await datasource.getColumnMetadata();
-          this.render(columnMetadata);
-          searchAttributeUiDisplay = '';
-        }
-        else {
-          this.clear(false);
-          searchAttributeUiDisplay = 'none';
-        }
-        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
-      }
-    }
-    this.#updateState();
-  }
-  
+      
   getDom(){
     return byId(this.#id);
   }

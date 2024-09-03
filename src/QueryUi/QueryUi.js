@@ -149,12 +149,20 @@ class QueryUi {
   }
 
   #getQueryAxisItemUiCaption(axisItem){
+    if (axisItem.caption) {
+      return axisItem.caption;
+    }
+    else
+    if (axisItem.memberExpressionPath) {
+      return `${axisItem.columnName}.${axisItem.memberExpressionPath.join('.')}`;
+    }
     return axisItem.columnName;
   }
 
   #getQueryModelItem(queryAxisItemUi){
     var searchItem = {
       columnName: queryAxisItemUi.getAttribute('data-column_name'),
+      memberExpressionPath: queryAxisItemUi.getAttribute('data-member_expression_path'),
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
       aggregator: queryAxisItemUi.getAttribute('data-aggregator')
     };
@@ -175,12 +183,19 @@ class QueryUi {
   #getQueryAxisItemUi(queryModelAxisItem){
     var axisId = queryModelAxisItem.axis;
     var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName}"]`;
+    
+    if (queryModelAxisItem.memberExpressionPath){
+      cssSelector += `[data-member_expression_path="${queryModelAxisItem.memberExpressionPath}"]`;
+    }
+    
     if (queryModelAxisItem.derivation){
       cssSelector += `[data-derivation="${queryModelAxisItem.derivation}"]`;
     }
+    
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
     }
+    
     return document.querySelector(cssSelector);
   }
 
@@ -205,6 +220,14 @@ class QueryUi {
     itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
     itemUi.setAttribute('title',  QueryAxisItem.getCaptionForQueryAxisItem(axisItem));
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
+
+    var memberExpressionPath = axisItem.memberExpressionPath;
+    if (memberExpressionPath) {
+      if (memberExpressionPath instanceof Array) {
+        memberExpressionPath = JSON.stringify(memberExpressionPath);
+      }
+      itemUi.setAttribute('data-member_expression_path', memberExpressionPath);
+    }
 
     var derivation = axisItem.derivation;
     if (derivation) {

@@ -88,17 +88,22 @@ class QueryAxisItem {
   
   static createCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
-    var postfix;
+    var postfix = '';
+    
+    if (axisItem.memberExpressionPath){
+      postfix += `.${axisItem.memberExpressionPath.join('.')}`;
+    }
+    
     if (axisItem.derivation) {
-      postfix = axisItem.derivation;
+      postfix += ` ${axisItem.derivation}`;
     }
     else
     if (axisItem.aggregator){
-      postfix = axisItem.aggregator;
+      postfix = ` ${axisItem.aggregator}`;
     }
 
     if (postfix) {
-      caption += ` ${postfix}`;
+      caption += `${postfix}`;
     }
     return caption;
   }
@@ -108,43 +113,50 @@ class QueryAxisItem {
     return id;
   }
 
-  static getSqlForAggregatedQueryAxisItem(item, alias){
-    var columnName = item.columnName;
+  static #getSqlForColumnExpression(item, alias, sqlOptions) {
+    var sqlExpression = [item.columnName];
 
-    if (columnName === '*') {
+    if (item.memberExpressionPath) {
+      sqlExpression = sqlExpression.concat(item.memberExpressionPath);
+    }
+
+    if (alias){
+      sqlExpression.unshift(alias);
+    }
+    
+    sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
+    return sqlExpression;
+  }
+
+  static getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions){
+    var columnExpression = item.columnName;
+
+    if (columnExpression === '*') {
       if (alias) {
-        columnName = `${getQuotedIdentifier(alias)}.*`;
+        columnExpression = `${getQuotedIdentifier(alias)}.*`;
       }
     }
-    else
-    if (alias){
-      columnName = getQualifiedIdentifier(alias, columnName);
-    }
     else {
-      columnName = getQuotedIdentifier(columnName);
+      columnExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
     }
 
     var aggregator = item.aggregator;
     var aggregatorInfo = AttributeUi.aggregators[aggregator];
     var expressionTemplate = aggregatorInfo.expressionTemplate;
-    var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
-    return expression;
+    columnExpression = expressionTemplate.replace(/\$\{columnName\}/g, columnExpression);
+    return columnExpression;
   }
 
-  static getSqlForDerivedQueryAxisItem(item, alias){
-    var columnName = item.columnName;
-    if (alias){
-      columnName = getQualifiedIdentifier(alias, columnName);
-    }
-    else {
-      columnName = getQuotedIdentifier(columnName);
-    }
+  static getSqlForDerivedQueryAxisItem(item, alias, sqlOptions){
+    var columnExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
+
     var derivation = item.derivation;
     var derivationInfo;
     derivationInfo = AttributeUi.dateFields[derivation] || AttributeUi.timeFields[derivation];
-    var expressionTemplate = derivationInfo.expressionTemplate;
-    var expression = expressionTemplate.replace(/\$\{columnName\}/g, columnName);
-    return expression;
+    var derivationExpressionTemplate = derivationInfo.expressionTemplate;
+    columnExpression = derivationExpressionTemplate.replace(/\$\{columnName\}/g, columnExpression);
+    
+    return columnExpression;
   }
 
   static getSqlForQueryAxisItem(item, alias, sqlOptions){
@@ -158,12 +170,7 @@ class QueryAxisItem {
       sqlExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias, sqlOptions);
     }
     else {
-      if (alias){
-        sqlExpression = getQualifiedIdentifier(alias, item.columnName, sqlOptions);
-      }
-      else {
-        sqlExpression = getIdentifier(item.columnName, sqlOptions.alwaysQuoteIdentifiers);
-      }
+      sqlExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
     }
     return sqlExpression;
   }
@@ -353,10 +360,27 @@ class QueryAxis {
     var columnName = config.columnName;
     var derivation = config.derivation;
     var aggregator = config.aggregator;
+    var memberExpressionPath = config.memberExpressionPath;
+    if (memberExpressionPath instanceof Array){
+      memberExpressionPath = JSON.stringify(memberExpressionPath);
+    }
 
     var items = this.#items;
     var itemIndex = items.findIndex(function(item){
       if (item.columnName !== columnName){
+        return false;
+      }
+
+      if (memberExpressionPath) {
+        if (!item.memberExpressionPath){
+          return false;
+        }
+        if (memberExpressionPath !== JSON.stringify(item.memberExpressionPath)) {
+          return false;
+        }
+      }
+      else
+      if (item.memberExpressionPath) {
         return false;
       }
 
@@ -576,6 +600,7 @@ class QueryModel extends EventEmitter {
 
   findItem(config){
     var columnName = config.columnName;
+    var memberExpressionPath = config.memberExpressionPath;
     var derivation = config.derivation;
     var aggregator = config.aggregator;
 
@@ -595,6 +620,7 @@ class QueryModel extends EventEmitter {
 
     var findConfig = {
       columnName: config.columnName,
+      memberExpressionPath: memberExpressionPath,
       derivation: config.derivation,
       aggregator: config.aggregator
     };
