@@ -635,6 +635,7 @@ var dataTypes = {
   },
   'VARCHAR': {
     defaultAnalyticalRole: 'attribute',
+    hasTextDerivations: true,
     createFormatter: function(){
       return function(value){
         if (value === null){

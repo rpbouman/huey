@@ -156,7 +156,7 @@ class QueryAxisItem {
 
     var derivation = item.derivation;
     var derivationInfo;
-    derivationInfo = AttributeUi.dateFields[derivation] || AttributeUi.timeFields[derivation];
+    derivationInfo = AttributeUi.getDerivationInfo(derivation);
     var derivationExpressionTemplate = derivationInfo.expressionTemplate;
     columnExpression = extrapolateColumnExpression(derivationExpressionTemplate, columnExpression);
     

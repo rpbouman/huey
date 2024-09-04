@@ -181,6 +181,36 @@
   content: "\ec62";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation=lowercase] > summary > .icon::before {
+  /* letter-case-lower */
+  content: "\eea2";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=uppercase] > summary > .icon::before {
+  /* letter-case-upper */
+  content: "\eea4";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=NOACCENT] > summary > .icon::before {
+  /* letter-case */
+  content: "\eea5";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation=NOCASE] > summary > .icon::before {
+  /* letter-case */
+  content: "\eea5";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation='first letter'] > summary > .icon::before {
+  /* sort-a-z */
+  content: "\f54f";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation='length'] > summary > .icon::before {
+  /* ruler-3 */
+  content: "\f290";
+}
+
 /**
 *
 * Aggregator icons

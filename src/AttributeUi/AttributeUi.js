@@ -173,7 +173,7 @@ class AttributeUi {
       columnType: 'HUGEINT'
     }
   };
-
+  
   static dateFields = {
     'iso-date': {
       folder: 'date fields',
@@ -288,15 +288,50 @@ class AttributeUi {
     }
   };
 
+  static textDerivations = {
+    'NOACCENT': {
+      folder: 'text',
+      expressionTemplate: "${columnExpression} COLLATE NOACCENT",
+      preservesColumnType: true
+    },
+    'NOCASE': {
+      folder: 'text',
+      expressionTemplate: "${columnExpression} COLLATE NOCASE",
+      preservesColumnType: true
+    },
+    'lowercase': {
+      folder: 'text',
+      expressionTemplate: "LOWER( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    'uppercase': {
+      folder: 'text',
+      expressionTemplate: "UPPER( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    "first letter": {
+      folder: 'text',
+      expressionTemplate: "upper( ${columnExpression}[1] )",
+      preservesColumnType: true
+    },
+    "length": {
+      folder: 'text',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    }
+  }
+
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
     
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
+    var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
     
     var applicableDerivations = Object.assign({}, 
       hasDateFields ? AttributeUi.dateFields : undefined, 
-      hasTimeFields ? AttributeUi.timeFields : undefined
+      hasTimeFields ? AttributeUi.timeFields : undefined,
+      hasTextDerivations ? AttributeUi.textDerivations : undefined,
     );
     return applicableDerivations;
   }
@@ -304,7 +339,8 @@ class AttributeUi {
   static getDerivationInfo(derivationName){
     var derivations = Object.assign({}, 
       AttributeUi.dateFields, 
-      AttributeUi.timeFields
+      AttributeUi.timeFields,
+      AttributeUi.textDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
