@@ -7,44 +7,44 @@ class AttributeUi {
     'count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( ${columnName} )',
+      expressionTemplate: 'COUNT( ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'distinct count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( DISTINCT ${columnName} )',
+      expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'min': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MIN( ${columnName} )'
+      expressionTemplate: 'MIN( ${columnExpression} )'
     },
     'max': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MAX( ${columnName} )'
+      expressionTemplate: 'MAX( ${columnExpression} )'
     },
     'list': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( ${columnName} )',
+      expressionTemplate: 'LIST( ${columnExpression} )',
       isArray: true
     },
     'distinct list': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( DISTINCT ${columnName} )',
+      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
       isArray: true      
     },
     'histogram': {
       folder: "list aggregators",
-      expressionTemplate: 'HISTOGRAM( ${columnName} )',
+      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
       isStruct: true,
     },
     'sum': {
       isNumeric: true,
       forNumeric: true,
-      expressionTemplate: 'SUM( ${columnName} )',
+      expressionTemplate: 'SUM( ${columnExpression} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
         var dataTypeInfo = getDataTypeInfo(columnType);
@@ -61,7 +61,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'AVG( ${columnName} )',
+      expressionTemplate: 'AVG( ${columnExpression} )',
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
@@ -74,7 +74,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'GEOMEAN( ${columnName} )',
+      expressionTemplate: 'GEOMEAN( ${columnExpression} )',
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
@@ -86,11 +86,11 @@ class AttributeUi {
       folder: "statistics",
       columnType: 'INTERVAL',
       forNumeric: true,
-      expressionTemplate: 'MAD( ${columnName} )'
+      expressionTemplate: 'MAD( ${columnExpression} )'
     },
     'median': {
       folder: "statistics",
-      expressionTemplate: 'MEDIAN( ${columnName} )',
+      expressionTemplate: 'MEDIAN( ${columnExpression} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
         var dataTypeInfo = getDataTypeInfo(columnType);
@@ -111,14 +111,14 @@ class AttributeUi {
     'mode': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MODE( ${columnName} )'
+      expressionTemplate: 'MODE( ${columnExpression} )'
     },
     'stdev': {
       folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'STDDEV_SAMP( ${columnName} )',
+      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'variance': {
@@ -126,14 +126,14 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'VAR_SAMP( ${columnName} )',
+      expressionTemplate: 'VAR_SAMP( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'entropy': {
       folder: "statistics",
       isNumeric: true,
       isInteger: false,
-      expressionTemplate: 'ENTROPY( ${columnName} )',
+      expressionTemplate: 'ENTROPY( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'kurtosis': {
@@ -141,7 +141,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'KURTOSIS( ${columnName} )',
+      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'skewness': {
@@ -149,27 +149,27 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'SKEWNESS( ${columnName} )',
+      expressionTemplate: 'SKEWNESS( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'and': {
       forBoolean: true,
-      expressionTemplate: 'BOOL_AND( ${columnName} )',
+      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
       columnType: 'BOOLEAN'
     },
     'or': {
       forBoolean: true,
-      expressionTemplate: 'BOOL_OR( ${columnName} )',
+      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
       columnType: 'BOOLEAN'
     },
     'count if true': {  
       forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnName} ) FILTER( ${columnName} )',
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'count if false': {  
       forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnName} ) FILTER( NOT( ${columnName} ) )',
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
       columnType: 'HUGEINT'
     }
   };
@@ -179,20 +179,20 @@ class AttributeUi {
       folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
-      expressionTemplate: "strftime( ${columnName}, '%x' )",
+      expressionTemplate: "strftime( ${columnExpression}, '%x' )",
       columnType: 'VARCHAR'
     },
     'local-date': {
       folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
-      expressionTemplate: "${columnName}::DATE",
+      expressionTemplate: "${columnExpression}::DATE",
       columnType: 'DATE',
       createFormatter: createLocalDateFormatter
     },
     'year': {
       folder: 'date fields',
-      expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
+      expressionTemplate: "CAST( YEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
       createFormatter: function(){
         return fallbackFormatter;
@@ -200,12 +200,12 @@ class AttributeUi {
     },
     'quarter': {
       folder: 'date fields',
-      expressionTemplate: "'Q' || QUARTER( ${columnName} )",
+      expressionTemplate: "'Q' || QUARTER( ${columnExpression} )",
       columnType: 'VARCHAR'
     },    
     'month num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return monthNumFormatter
@@ -221,13 +221,13 @@ class AttributeUi {
     },
     'month name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createMonthNameFormatter
     },
     'week num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( WEEK( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return weekNumFormatter
@@ -235,12 +235,12 @@ class AttributeUi {
     },
     'day of year': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as USMALLINT)",
+      expressionTemplate: "CAST( DAYOFYEAR( ${columnExpression} ) as USMALLINT)",
       columnType: 'USMALLINT'
     },
     'day of month': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( DAYOFMONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return dayNumFormatter
@@ -248,12 +248,12 @@ class AttributeUi {
     },
     'day of week': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
     },
     'day of week name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createDayNameFormatter
     }
@@ -262,12 +262,12 @@ class AttributeUi {
   static timeFields = {
     'iso-time': {
       folder: 'time fields',
-      expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
+      expressionTemplate: "strftime( ${columnExpression}, '%H:%M:%S' )",
       columnType: 'VARCHAR'
     },
     'hour': {
       folder: 'time fields',
-      expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( HOUR( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       formats: {
         'short': {
@@ -278,12 +278,12 @@ class AttributeUi {
     },
     'minute': {
       folder: 'time fields',
-      expressionTemplate: "CAST( MINUTE( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( MINUTE( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT'
     },
     'second': {
       folder: 'time fields',
-      expressionTemplate: "CAST( SECOND( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( SECOND( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT'
     }
   };
@@ -340,7 +340,7 @@ class AttributeUi {
       case 'column':
         return config.profile.column_name;
       case 'member':
-        var memberExpressionPath = config.memberExpressionPath;
+        var memberExpressionPath = config.profile.memberExpressionPath;
         var tmp = [].concat(memberExpressionPath);
         return tmp.pop();
       case 'derived':
@@ -474,7 +474,7 @@ class AttributeUi {
   
   #renderAttributeUiNodeAxisButton(config, head, axisId){
     var columnExpression = config.profile.column_name;
-    var memberExpressionPath = config.memberExpressionPath;
+    var memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
     }
@@ -575,7 +575,7 @@ class AttributeUi {
 
   #renderAttributeUiNodeHead(config) {
     var columnExpression = config.profile.column_name;
-    var memberExpressionPath = config.memberExpressionPath;
+    var memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
     }
@@ -599,7 +599,7 @@ class AttributeUi {
         case 'aggregate':
         case 'derived':
           var expressionTemplate = config.expressionTemplate;
-          title = expressionTemplate.replace(/\$\{columnName\}/g, `${columnExpression}`);
+          title = extrapolateColumnExpression(expressionTemplate, columnExpression);
           break;
       }
     }
@@ -619,22 +619,24 @@ class AttributeUi {
 
   #renderAttributeUiNode(config){
     var columnType = config.profile.column_type;
-    var node = createEl('details', {
+    var attributes = {
       role: 'treeitem',      
       'data-nodetype': config.type,
       'data-column_name': config.profile.column_name,
       'data-column_type': columnType
-    });
+    };
+    var memberExpressionPath = config.profile.memberExpressionPath;
+    if (memberExpressionPath) {
+      attributes['data-member_expression_path'] = JSON.stringify(memberExpressionPath);
+      attributes['data-member_expression_type'] = config.profile.memberExpressionType;
+    }
+    
+    var node = createEl('details', attributes);
+
     switch (config.type){
       case 'column':
-        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
       case 'member':
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
-        var memberExpressionPath = config.memberExpressionPath;
-        if (memberExpressionPath) {
-          node.setAttribute('data-member_expression_path', JSON.stringify(memberExpressionPath));
-          node.setAttribute('data-member_expression_type', config.columnType);
-        }
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
@@ -651,6 +653,9 @@ class AttributeUi {
     var head = this.#renderAttributeUiNodeHead(config);
     node.appendChild(head);
 
+    // for STRUCT columns and members, preload the child nodes (instead of lazy load)
+    // this is necessary so that a search will always find all applicable attributes
+    // with lazy load it would only find whatever happens to be visited/browsed already.
     switch (config.type){
       case 'column':
       case 'member':
@@ -769,13 +774,16 @@ class AttributeUi {
     var structure = getStructTypeDescriptor(columnType);
     var columnName = profile.column_name
     for (var memberName in  structure){
-      var memberExpression = quoteStringLiteral(memberName);
       var memberType = structure[memberName];
       var config = {
         type: 'member',
-        memberExpressionPath: memberExpressionPath.concat([memberName]),
         columnType: memberType,
-        profile: profile
+        profile: {
+          column_name: profile.column_name,
+          column_type: profile.column_type,
+          memberExpressionPath: memberExpressionPath.concat([memberName]),
+          memberExpressionType: memberType
+        }
       }
       var memberNode = this.#renderAttributeUiNode(config);
       folderNode.appendChild(memberNode);

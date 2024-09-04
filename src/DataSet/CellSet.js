@@ -116,7 +116,7 @@ class CellSet extends DataSetComponent {
       queryAxisItems.forEach(function(queryAxisItem){
         var itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
         var alias;
-        if (queryAxisItem.derivation) {
+        if (queryAxisItem.memberExpressionPath || queryAxisItem.derivation) {
           alias = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
         }
         else {
@@ -191,7 +191,7 @@ class CellSet extends DataSetComponent {
 
         if (i === lastIndex) {
           var itemSql;
-          if (queryAxisItem.derivation) {
+          if (queryAxisItem.memberExpressionPath || queryAxisItem.derivation) {
             itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
           }
           else {
@@ -262,6 +262,7 @@ class CellSet extends DataSetComponent {
         }        
       }
       groupingId = (groupingId).toString(2);
+      // zero padd the grouping id
       groupingId = (new Array(allQueryAxisItems.length)).fill(0, 0, allQueryAxisItems.length - groupingId.length).join('') + groupingId;
       var group = groups[groupingId];
       

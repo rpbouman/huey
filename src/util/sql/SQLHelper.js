@@ -1157,3 +1157,7 @@ function getStructTypeDescriptor(structColumnType){
   }
   return structure;
 }
+
+function extrapolateColumnExpression(expressionTemplate, columnExpression){
+  return expressionTemplate.replace(/\$\{columnExpression\}/g, `${columnExpression}`);
+}

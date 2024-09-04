@@ -89,6 +89,7 @@ class QueryAxisItem {
   static createCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
     var postfix = '';
+    var prefix = '';
     
     if (axisItem.memberExpressionPath){
       postfix += `.${axisItem.memberExpressionPath.join('.')}`;
@@ -99,11 +100,14 @@ class QueryAxisItem {
     }
     else
     if (axisItem.aggregator){
-      postfix = ` ${axisItem.aggregator}`;
+      prefix = `${axisItem.aggregator} of `;
     }
 
     if (postfix) {
       caption += `${postfix}`;
+    }
+    if (prefix) {
+      caption = prefix + caption;
     }
     return caption;
   }
@@ -143,7 +147,7 @@ class QueryAxisItem {
     var aggregator = item.aggregator;
     var aggregatorInfo = AttributeUi.aggregators[aggregator];
     var expressionTemplate = aggregatorInfo.expressionTemplate;
-    columnExpression = expressionTemplate.replace(/\$\{columnName\}/g, columnExpression);
+    columnExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
     return columnExpression;
   }
 
@@ -154,7 +158,7 @@ class QueryAxisItem {
     var derivationInfo;
     derivationInfo = AttributeUi.dateFields[derivation] || AttributeUi.timeFields[derivation];
     var derivationExpressionTemplate = derivationInfo.expressionTemplate;
-    columnExpression = derivationExpressionTemplate.replace(/\$\{columnName\}/g, columnExpression);
+    columnExpression = extrapolateColumnExpression(derivationExpressionTemplate, columnExpression);
     
     return columnExpression;
   }
