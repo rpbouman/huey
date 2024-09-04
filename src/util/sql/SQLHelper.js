@@ -653,7 +653,15 @@ var dataTypes = {
     }
   },
   'ARRAY': {
-    defaultAnalyticalRole: 'attribute'
+    defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){      
+      return function(value, field){
+        var type = field.type;
+        var duckdbValue = getDuckDbLiteralForValue(value, type);
+        duckdbValue = `CAST( ${duckdbValue} AS ${dataType} )`;
+        return duckdbValue;
+      }
+    }
   },
   'LIST': {
     defaultAnalyticalRole: 'attribute'
@@ -680,6 +688,9 @@ var dataTypes = {
 };
 
 function getDataTypeInfo(columnType){
+  if (columnType.endsWith('[]')) {
+    return dataTypes['ARRAY'];
+  }
   var columnTypeUpper = columnType.toUpperCase();
   var typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
     return columnTypeUpper.startsWith(dataTypeName.toUpperCase());
