@@ -155,6 +155,42 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
+              "--huey-foreground-color": "rgb(30,144,255)", // Dodger Blue
+              "--huey-placeholder-color": "rgb(173,216,230)", // Light Blue
+              "--huey-light-background-color": "rgb(240,248,255)", // Alice Blue
+              "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
+              "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
+              "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
+              "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
+              "--huey-icon-color-subtle": "rgb(173,216,230)", // Light Blue
+              "--huey-icon-color": "rgb(30,144,255)", // Dodger Blue
+              "--huey-icon-color-highlight": "rgb(0,191,255)" // Deep Sky Blue
+            },
+            label: "Mint"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "system-ui",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "monospace",
+              "--huey-foreground-color": "rgb(70,130,180)", // Steel Blue
+              "--huey-placeholder-color": "rgb(176,196,222)", // Light Steel Blue
+              "--huey-light-background-color": "rgb(245,245,255)", // Lavender
+              "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
+              "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
+              "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
+              "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
+              "--huey-icon-color-subtle": "rgb(176,196,222)", // Light Steel Blue
+              "--huey-icon-color": "rgb(70,130,180)", // Steel Blue
+              "--huey-icon-color-highlight": "rgb(65,105,225)" // Royal Blue
+            },
+            label: "Lila"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "system-ui",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "#000000", 
               "--huey-placeholder-color": "#A9A9A9",
               "--huey-light-background-color": "#F0E68C", 
