@@ -2,24 +2,11 @@
   user-select: none;
 }
 
-.attributeUi details[data-nodetype=derived] > summary,
-.attributeUi details[data-nodetype=aggregate] > summary,
-.attributeUi details[data-nodetype=derived][open] > summary,
-.attributeUi details[data-nodetype=aggregate][open] > summary {
-  list-style: none;
-  margin-left: 16px;
-}
-
-/**
-* folder icons
-*/
 
 .attributeUi details {
   
-  [data-nodetype=derived] > summary,
-  [data-nodetype=aggregate] > summary,
-  [data-nodetype=derived][open] > summary,
-  [data-nodetype=aggregate][open] > summary {
+  [data-nodetype=derived]:not( [data-derivation=elements] ) > summary,
+  [data-nodetype=aggregate] > summary {
     list-style: none;
     margin-left: 16px;
   }
@@ -28,6 +15,9 @@
     max-width: calc(100% - 166px);
   }
   
+  /**
+  * folder icons
+  */
   [data-nodetype=folder] > summary > .icon::before {
     /* folder */
     content: "\eaad";
@@ -45,18 +35,22 @@
 * Data type icons
 *
 */
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
   /* txt */
   content: "\f3b1";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=BOOLEAN] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
   /* square check */
   content: "\eb28";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=INT] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=INTEGER] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type$=INT] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
@@ -66,6 +60,7 @@
   content: "\f554";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type^=STRUCT] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
 {
@@ -73,6 +68,7 @@
   content: "\f61a";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
 {
@@ -209,6 +205,11 @@
 .attributeUi details[data-nodetype=derived][data-derivation='length'] > summary > .icon::before {
   /* ruler-3 */
   content: "\f290";
+}
+
+.attributeUi details[data-nodetype=derived][data-derivation='element indices'] > summary > .icon::before {
+  /* list-numbers */
+  content: "\ef11";
 }
 
 /**

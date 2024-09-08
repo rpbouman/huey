@@ -320,6 +320,26 @@ class AttributeUi {
       columnType: 'BIGINT'
     }
   }
+  
+  static arrayDerivations = {
+    "length": {
+      folder: 'array',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    "element indices": {
+      folder: 'array',
+      expressionTemplate: "generate_subscripts( ${columnExpression}, 1 )",
+      columnType: 'BIGINT',
+      isUnnestingOperation: true
+    },
+    "elements": {
+      folder: 'array',
+      expressionTemplate: "unnest( ${columnExpression} )",
+      hasElementDataType: true,
+      isUnnestingOperation: true
+    }    
+  }
 
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
@@ -369,6 +389,10 @@ class AttributeUi {
       applicableAggregators[aggregationName] = aggregator;
     }
     return applicableAggregators;
+  }
+  
+  static getArrayDerivations(typeName){
+    return AttributeUi.arrayDerivations;
   }
   
   static #getUiNodeCaption(config){
@@ -669,6 +693,7 @@ class AttributeUi {
     
     var node = createEl('details', attributes);
 
+    var derivation = config.derivation;
     switch (config.type){
       case 'column':
       case 'member':
@@ -678,10 +703,12 @@ class AttributeUi {
         node.setAttribute('data-aggregator', config.aggregator);
         break;
       case 'derived':
-        var derivation = config.derivation;
         node.setAttribute('data-derivation', config.derivation);
-        if (derivation.formats) {
-          node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+        if (derivation === 'elements') {
+          var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
+          // remove the trailing '[]' to get the element type.
+          elementType = elementType.slice(0, -2);
+          node.setAttribute('data-element_type', elementType);
         }
         break;
     }
@@ -693,6 +720,10 @@ class AttributeUi {
     // this is necessary so that a search will always find all applicable attributes
     // with lazy load it would only find whatever happens to be visited/browsed already.
     switch (config.type){
+      case 'derived':
+        if (derivation !== 'elements') {
+          break;
+        }
       case 'column':
       case 'member':
         if (columnType.startsWith('STRUCT')) {
@@ -802,9 +833,9 @@ class AttributeUi {
     }.bind(this), {});
     return folders;
   }
-  
+    
   #loadMemberChildNodes(node, typeName, profile){
-    var folderNode = this.#renderFolderNode({caption: 'members'});
+    var folderNode = this.#renderFolderNode({caption: 'struct'});
     var columnType = profile.memberExpressionType || profile.column_type;
     var memberExpressionPath = profile.memberExpressionPath || [];
     var structure = getStructTypeDescriptor(columnType);
@@ -848,6 +879,28 @@ class AttributeUi {
       }
     }
   }
+
+  #loadArrayChildNodes(node, typeName, profile){
+    var arrayDerivations = AttributeUi.getArrayDerivations(typeName);
+    var folders = this.#createFolders(arrayDerivations, node);
+    for (var derivationName in arrayDerivations) {
+      var derivation = arrayDerivations[derivationName];
+      var config = {
+        type: 'derived',
+        derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
+        profile: profile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (derivation.folder) {
+        folders[derivation.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);    
+      }
+    }
+  }
     
   #loadAggregatorChildNodes(node, typeName, profile) {
     var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
@@ -871,7 +924,7 @@ class AttributeUi {
     }    
   }
   
-  #loadChildNodesForColumnNode(node){    
+  #loadChildNodes(node){    
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
     
@@ -882,6 +935,8 @@ class AttributeUi {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
     
+    var elementType = node.getAttribute('data-element_type');
+    
     var profile = {
       column_name: columnName,
       column_type: columnType,
@@ -889,39 +944,27 @@ class AttributeUi {
       memberExpressionPath: memberExpressionPath
     };
     
-    var expressionType = memberExpressionType || columnType;
-    
+    var expressionType = elementType || memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
     
     if (expressionType.endsWith('[]')){
-      
+      this.#loadArrayChildNodes(node, typeName, profile);
     }
     else
     if (expressionType.startsWith('STRUCT')){
       this.#loadMemberChildNodes(node, typeName, profile);
     }
-    this.#loadDerivationChildNodes(node, typeName, profile);
-    this.#loadAggregatorChildNodes(node, typeName, profile);
-  }
-  
-  #loadChildNodesForMemberNode(node){
-    this.#loadChildNodesForColumnNode(node);
-  }
-  
-  #loadChildNodes(node){
+    
     var nodeType = node.getAttribute('data-nodetype');
-    switch (nodeType){
+    
+    switch (nodeType) {
       case 'column':
-        this.#loadChildNodesForColumnNode(node);
-        break;
       case 'member':
-        this.#loadChildNodesForMemberNode(node);
-        break;
-      default:
-        throw new Error(`Unrecognized nodetype ${nodeType}`);
-    }
-  }  
-  
+        this.#loadDerivationChildNodes(node, typeName, profile);
+        this.#loadAggregatorChildNodes(node, typeName, profile);
+    }      
+  }
+    
   #toggleNodeState(event){
     var node = event.target;
     if (event.newState === 'open'){ 
