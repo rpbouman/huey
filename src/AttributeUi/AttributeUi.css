@@ -2,14 +2,16 @@
   user-select: none;
 }
 
+.attributeUi details[role=treeitem][data-nodetype='aggregate'] > summary, 
+.attributeUi details[data-nodetype='derived']:not( [data-derivation='elements'] ) > summary
+{
+  list-style: none;
+  margin-left: 16px;
+}
 
-.attributeUi details {
-  
-  [data-nodetype=derived]:not( [data-derivation=elements] ) > summary,
-  [data-nodetype=aggregate] > summary {
-    list-style: none;
-    margin-left: 16px;
-  }
+
+
+.attributeUi details[role=treeitem] {
   
   summary > .label  {
     max-width: calc(100% - 166px);
@@ -250,8 +252,8 @@
 }
 
 .attributeUi details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon::before {
-  /* list numbers */
-  content: "\ef11";
+  /* chart-bar */
+  content: "\ea59";
 }
 
 .attributeUi details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon::before {
