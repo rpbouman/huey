@@ -329,15 +329,15 @@ class AttributeUi {
     },
     "element indices": {
       folder: 'array',
-      expressionTemplate: "generate_subscripts( ${columnExpression}, 1 )",
       columnType: 'BIGINT',
-      isUnnestingOperation: true
+      expressionTemplate: "generate_subscripts( ${columnExpression}, 1 )",
+      unnestingFunction: 'generate_subscripts'
     },
     "elements": {
       folder: 'array',
-      expressionTemplate: "unnest( ${columnExpression} )",
       hasElementDataType: true,
-      isUnnestingOperation: true
+      expressionTemplate: "unnest( ${columnExpression} )",
+      unnestingFunction: 'unnest'
     }    
   }
 
@@ -360,7 +360,8 @@ class AttributeUi {
     var derivations = Object.assign({}, 
       AttributeUi.dateFields, 
       AttributeUi.timeFields,
-      AttributeUi.textDerivations
+      AttributeUi.textDerivations,
+      AttributeUi.arrayDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -493,9 +494,11 @@ class AttributeUi {
     }
     
     var derivation = node.getAttribute('data-derivation');
+    if (derivation ===  'elements') {
+      columnType = node.getAttribute('data-element_type');
+    }
     var aggregator = aggregator || node.getAttribute('data-aggregator');
 
-    
     var itemConfig = {
       axis: axis,
       columnName: columnName,
@@ -704,12 +707,12 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', config.derivation);
-        if (derivation === 'elements') {
-          var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
+        //if (derivation === 'elements') {
+        //  var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
           // remove the trailing '[]' to get the element type.
-          elementType = elementType.slice(0, -2);
-          node.setAttribute('data-element_type', elementType);
-        }
+        //  elementType = elementType.slice(0, -2);
+        //  node.setAttribute('data-element_type', elementType);
+        //}
         break;
     }
     
@@ -883,14 +886,32 @@ class AttributeUi {
   #loadArrayChildNodes(node, typeName, profile){
     var arrayDerivations = AttributeUi.getArrayDerivations(typeName);
     var folders = this.#createFolders(arrayDerivations, node);
+    var memberExpressionPath = profile.memberExpressionPath || [];
     for (var derivationName in arrayDerivations) {
       var derivation = arrayDerivations[derivationName];
+      var nodeProfile;
+      if (derivation.unnestingFunction) {
+        nodeProfile = JSON.parse(JSON.stringify(profile));
+        var memberExpressionPath = nodeProfile.memberExpressionPath || [];
+        memberExpressionPath.push(derivation.unnestingFunction + '()');
+        nodeProfile.memberExpressionPath = memberExpressionPath;
+        var memberExpressionType = derivation.columnType;
+        if (!memberExpressionType){
+          memberExpressionType = profile.memberExpressionType || profile.column_type;
+          memberExpressionType = memberExpressionType.slice(0, -2);
+        }
+        nodeProfile.column_type =  memberExpressionType;  
+        nodeProfile.memberExpressionType = memberExpressionType;
+      }
+      else {
+        nodeProfile = profile;
+      }
       var config = {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
         expressionTemplate: derivation.expressionTemplate,
-        profile: profile
+        profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
       if (derivation.folder) {
@@ -944,7 +965,7 @@ class AttributeUi {
       memberExpressionPath: memberExpressionPath
     };
     
-    var expressionType = elementType || memberExpressionType || columnType;
+    var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
     
     if (expressionType.endsWith('[]')){
