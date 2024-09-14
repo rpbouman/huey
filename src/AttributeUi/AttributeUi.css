@@ -37,22 +37,22 @@
 * Data type icons
 *
 */
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=VARCHAR] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
   /* txt */
   content: "\f3b1";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=BOOLEAN] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
   /* square check */
   content: "\eb28";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=INT] > summary > .icon::before,
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type=INTEGER] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type$=INT] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
@@ -62,7 +62,7 @@
   content: "\f554";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type^=STRUCT] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
 {
@@ -70,7 +70,7 @@
   content: "\f61a";
 }
 
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-element_type$='[]'] > summary > .icon::before,
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
 {
