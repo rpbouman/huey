@@ -759,26 +759,20 @@ class DuckDbDataSource extends EventEmitter {
     switch (this.getType()) {
       case DuckDbDataSource.types.FILES:
         var fileExtension = this.#fileType;
-        var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+        var fileType = DuckDbDataSource.getFileTypeInfo(fileExten);
         var duckdb_reader = fileType.duckdb_reader;
         sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames);
         break;
       case DuckDbDataSource.types.FILE:
         var fileName = this.getFileName();
         var fileExtension = this.getFileExtension();
-        switch (fileExtension) {
-          case 'csv':
-          case 'tsv':
-          case 'txt':
-          case 'json':
-          case 'parquet':
-          case 'xlsx':
-            var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
-            var duckdb_reader = fileType.duckdb_reader;
-            sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName);
-            break;
-          default: // for urls we will be lenient for now
-            sql = getQuotedIdentifier(fileName);
+        var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+        if (fileType) {
+          var duckdb_reader = fileType.duckdb_reader;
+          sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName);
+        }
+        else {
+          sql = getQuotedIdentifier(fileName);
         }
         break;
       case DuckDbDataSource.types.SQLQUERY:
