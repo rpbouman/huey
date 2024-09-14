@@ -152,11 +152,21 @@ class QueryUi {
     if (axisItem.caption) {
       return axisItem.caption;
     }
-    else
+    
+    var expression = axisItem.columnName;
     if (axisItem.memberExpressionPath) {
-      return `${axisItem.columnName}.${axisItem.memberExpressionPath.join('.')}`;
+      return `${expression}.${axisItem.memberExpressionPath.join('.')}`;
     }
-    return axisItem.columnName;
+    
+    if (axisItem.derivation) {
+      expression = `${axisItem.derivation} of ${expression}`;
+    }
+    else 
+    if (axisItem.aggregator) {
+      expression = `${axisItem.aggregator} of ${expression}`;
+    }
+    
+    return expression;
   }
 
   #getQueryModelItem(queryAxisItemUi){
@@ -185,7 +195,7 @@ class QueryUi {
     var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName}"]`;
     
     if (queryModelAxisItem.memberExpressionPath){
-      cssSelector += `[data-member_expression_path="${queryModelAxisItem.memberExpressionPath}"]`;
+      cssSelector += `[data-member_expression_path='${JSON.stringify(queryModelAxisItem.memberExpressionPath)}']`;
     }
     
     if (queryModelAxisItem.derivation){
