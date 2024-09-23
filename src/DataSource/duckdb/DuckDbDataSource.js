@@ -759,7 +759,7 @@ class DuckDbDataSource extends EventEmitter {
     switch (this.getType()) {
       case DuckDbDataSource.types.FILES:
         var fileExtension = this.#fileType;
-        var fileType = DuckDbDataSource.getFileTypeInfo(fileExten);
+        var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
         var duckdb_reader = fileType.duckdb_reader;
         sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames);
         break;
