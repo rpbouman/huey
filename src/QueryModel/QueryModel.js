@@ -82,6 +82,32 @@ class QueryAxisItem {
     if (caption){
       return caption;
     }
+
+    if (axisItem.axis === QueryModel.AXIS_FILTERS) {
+      if (axisItem.filter === undefined || axisItem.filter.values === undefined) {
+        return 'No filter set'
+      }
+      var filter = axisItem.filter;
+      var values = filter.values;
+      var valueKeys = Object.keys(values);
+      var valueLabels = [];
+      var toValues = filter.toValues;
+      var toValueKeys = toValues? Object.keys(toValues) : undefined;
+      for (var i = 0; i < valueKeys.length; i++){
+        var valueKey = valueKeys[i];
+        var valueObject = values[valueKey];
+        var valueLabel = valueObject.label;
+        if (toValueKeys && i < toValueKeys.length){
+          var toValueKey = toValueKeys[i];
+          var toValueObject = toValues[toValueKey];
+          valueLabel += ' - ' + toValueObject.label;
+        }
+        valueLabels.push(valueLabel);
+      }
+      caption = valueLabels.join("\n");
+      return caption;
+    }
+
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
     return caption;
   }
