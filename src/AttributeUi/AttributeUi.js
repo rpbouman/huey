@@ -290,32 +290,32 @@ class AttributeUi {
 
   static textDerivations = {
     'NOACCENT': {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOACCENT",
       preservesColumnType: true
     },
     'NOCASE': {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOCASE",
       preservesColumnType: true
     },
     'lowercase': {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "LOWER( ${columnExpression} )",
       preservesColumnType: true
     },
     'uppercase': {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
       preservesColumnType: true
     },
     "first letter": {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
       preservesColumnType: true
     },
     "length": {
-      folder: 'text',
+      folder: 'string operations',
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
     }
@@ -323,18 +323,18 @@ class AttributeUi {
   
   static arrayDerivations = {
     "length": {
-      folder: 'array',
+      folder: 'array operations',
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
     },
     "element indices": {
-      folder: 'array',
+      folder: 'array operations',
       columnType: 'BIGINT',
       expressionTemplate: "generate_subscripts( ${columnExpression}, 1 )",
       unnestingFunction: 'generate_subscripts'
     },
     "elements": {
-      folder: 'array',
+      folder: 'array operations',
       hasElementDataType: true,
       expressionTemplate: "unnest( ${columnExpression} )",
       unnestingFunction: 'unnest'
