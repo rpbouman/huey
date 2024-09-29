@@ -103,13 +103,8 @@ class DuckDbDataSource extends EventEmitter {
       'LIMIT 0'
     ];
     connection = connection || window.hueyDb.connection;
+    var possibleTypes = [];
     try {
-      statementLines[2] = getQuotedIdentifier(url);
-      var sql = statementLines.join('\n');
-      var result = await connection.query(sql);
-      var fields = result.schema.fields;
-      var fieldsString = JSON.stringify(fields);
-
       var promises = readers.map(function(reader){
         var readerCall = `${reader}( ${quoteStringLiteral(url)} )`;
         statementLines[2] = readerCall;
@@ -119,24 +114,37 @@ class DuckDbDataSource extends EventEmitter {
       
       var reader;
       var promiseResults = await Promise.allSettled(promises);
-      var index = promiseResults.findIndex(function(promiseResult){
-        return promiseResult.status === 'fulfilled';
-      });
-      if (index === -1){
-        return null;
-      }
-      
-      var reader = readers[index];
-      for (var fileTypeKey in fileTypes){
-        var fileType = fileTypes[fileTypeKey];
-        if (fileType.duckdb_reader === reader) {
-          return fileTypeKey;
+      var fulfilled = [];
+      promiseResults.forEach(function(promiseResult, index){
+        if (promiseResult.status === 'fulfilled'){
+          fulfilled.push(index);
         }
+      });
+      switch (fulfilled.length) {
+        case 0:
+          return null;
+        case 1:
+        default:
+          for (var i = 0; i < fulfilled.length; i++){
+            var index = fulfilled[i];
+            var reader = readers[index];
+            for (var fileTypeKey in fileTypes){
+              var fileType = fileTypes[fileTypeKey];
+              if (fileType.duckdb_reader === reader) {
+                possibleTypes.push( fileTypeKey );
+              }
+            }
+          }
+          break;
       }
     }
     catch (e){
       return null;
     }
+    if (possibleTypes.length){
+      return possibleTypes;
+    }
+    return null;
   }
 
   static #datasource_uid_generator = 0;
@@ -461,15 +469,17 @@ class DuckDbDataSource extends EventEmitter {
     var promise;
     if (url){
       var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.HTTP;
-      await this.#duckDbInstance.registerFileURL(
-        url, 
-        url, 
-        protocol
-      );
       if (!this.#fileType){
         var connection = await this.getConnection();
-        var fileType = await DuckDbDataSource.#whatFileType(url, connection);
-        this.#fileType = fileType;
+        var fileTypes = await DuckDbDataSource.#whatFileType(url, connection);
+        if (fileTypes) {
+          if (fileTypes.length === 1){
+            this.#fileType = fileTypes[0];
+          }
+          else {
+            throw new Error(`Found multiple possible filetypes for url "${url}": ${fileTypes.join(';')}`);
+          }
+        }
       }
     }
     else
