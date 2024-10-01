@@ -11,6 +11,8 @@
     />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
     <script>
+    var duckdbLibraryVersion = '1.28.1-dev287.0';
+    var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
     function resourceLoaded(element){
       var url = element.href || element.src;
       console.log(`Loaded ${url}`);
@@ -566,7 +568,7 @@
             <header>
               <input
                 id="filterSearch"
-                placeholder="Use a LIKE pattern to find values..."
+                placeholder="Type a LIKE pattern to find values..."
                 type="search"
                 title="Enter a search string to filter the value picklist (LIKE wildcards supported)"
               />
@@ -885,7 +887,7 @@
         <ul>
           <li>Huey version 0.0.7 - Alabio</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev287.0/+esm" target="jsdelivr">DuckDB WASM 1.28.1-dev287.0</a></li>
+          <li><a id="duckDbLibraryUrl" target="_blank"></a></li>
           <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.12.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
@@ -1356,6 +1358,8 @@
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsDialog.js"></script>
     <script onload="resourceLoaded(this)" src="Theme/Theme.js"></script>
 
+    <script onload="resourceLoaded(this)" src="AboutDialog/AboutDialog.js"></script>
+
     <script onload="resourceLoaded(this)" src="util/sql/SQLHelper.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbConnection.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
@@ -1380,30 +1384,30 @@
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
-      import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev287.0/+esm';
+      import(duckDbLibraryUrl)
+      .then(async function(duckdb){
+        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
-      const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-      const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+        const worker_url = URL.createObjectURL(
+          new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
+        );
+        const worker = new Worker(worker_url);
+        const logger = new duckdb.ConsoleLogger();
+        const db = new duckdb.AsyncDuckDB(logger, worker);
+        URL.revokeObjectURL(worker_url);
 
-      const worker_url = URL.createObjectURL(
-        new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
-      );
-      const worker = new Worker(worker_url);
-      const logger = new duckdb.ConsoleLogger();
-      const db = new duckdb.AsyncDuckDB(logger, worker);
-      URL.revokeObjectURL(worker_url);
+        await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+        const connection = await db.connect();
 
-      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-      const connection = await db.connect();
+        window.hueyDb = {
+          duckdb: duckdb,
+          instance: db,
+          connection: connection
+        };
 
-      window.hueyDb = {
-        duckdb: duckdb,
-        instance: db,
-        connection: connection
-      };
-
-      initApplication();
-
+        initApplication();
+      });
     </script>
   </body>
 </html>
