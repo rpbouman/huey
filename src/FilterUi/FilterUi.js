@@ -103,6 +103,15 @@ class FilterDialog {
       this.#updatePicklist(0, this.#valuePicklistPageSize);
     }.bind(this));
 
+    var autoWildcardsCheckbox = this.#getAutoWildChards();
+    autoWildcardsCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchAutoWildcards']);
+    autoWildcardsCheckbox.addEventListener('change', function(event){
+      var target = event.target;
+      settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
+
+      this.#updatePicklist(0, this.#valuePicklistPageSize);
+    }.bind(this));
+
     bufferEvents(this.#getSearch(), 'input', function(event, count){
       if (count === undefined) {
         this.#updatePicklist(0, this.#valuePicklistPageSize);
@@ -521,6 +530,10 @@ class FilterDialog {
   #getIncludeAllFilters(){
     return byId('filterSearchApplyAll');
   }
+  
+  #getAutoWildChards(){
+    return byId('filterSearchAutoWildcards');
+  }
 
   #getFilterType(){
     return byId('filterType');
@@ -580,6 +593,7 @@ class FilterDialog {
     var filterDialog = this.getDom();
     filterDialog.showModal();
     this.#updatePicklist(0, this.#valuePicklistPageSize);
+    this.#getSearch().focus();
   }
 
   #updateDialogState(){
@@ -708,7 +722,9 @@ class FilterDialog {
           if (condition && condition.length) {
             condition += '\nAND ';
           }
-          condition += `${sqlExpression} like ?`;
+          // TODO: implement toggle for the collation.
+          // however it's currently not working anyway (see PR: https://github.com/duckdb/duckdb/pull/12359)
+          condition += `${sqlExpression} COLLATE NOCASE LIKE ?`;
           bindValue = `${searchString}`;
           break;
       }
@@ -719,6 +735,10 @@ class FilterDialog {
     }
 
     if (bindValue){
+      var autoWildcards = this.#getAutoWildChards().checked;
+      if (autoWildcards){
+        bindValue = `%${bindValue}%`;
+      }
       parameters.push(bindValue);
     }
 

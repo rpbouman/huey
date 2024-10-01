@@ -555,6 +555,7 @@
       <section>
         <header>
           <menu role="toolbar">
+
             <label
               for="filterSearchApplyAll"
               title="Check to include the other filter items (in addition to the search string) to populate the picklist"
@@ -562,6 +563,15 @@
               Apply all filters:
               <input id="filterSearchApplyAll" type="checkbox"/>
             </label>
+
+            <label
+              for="filterSearchAutoWildcards"
+              title="Check to automatically apply LIKE wildcards"
+            >
+              Auto-wildcards:
+              <input id="filterSearchAutoWildcards" type="checkbox"/>
+            </label>
+            
           </menu>
           <section>
             <div id="filterDialogSpinner" class="loader loader-medium"></div>

@@ -127,6 +127,7 @@ class Settings extends EventEmitter {
     },
     filterDialogSettings: {
       filterSearchApplyAll: false,
+      filterSearchAutoWildcards: true,
       caseSensitive: true
     },
     themeSettings: {

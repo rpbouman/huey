@@ -39,6 +39,7 @@ dialog#filterDialog > header[role=toolbar] {
 dialog#filterDialog > section > header > menu[role=toolbar] {
   padding: unset;
   height: unset;
+  margin-bottom: 4px;
 }
 
 dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] )::after {
@@ -124,13 +125,10 @@ dialog#filterDialog > section > header > section > section > select#filterPickli
 }
 
 dialog#filterDialog > footer {
-  margin-top: 0px;
+  margin-top: 2px;
   margin-bottom: 0px;
   padding: 4px 4px 0px 4px;
   height: 30px;
-  border-top-width: 1px;
-  border-top-style: solid;
-  border-top-color: var( --huey-light-border-color );
 }
 
 dialog#filterDialog > section {
@@ -158,6 +156,7 @@ dialog#filterDialog > section > header > section > header > input[type=search]#f
   border-bottom-style: none;
   border-color: var( --huey-light-border-color ); 
   width: 100%;
+  padding-left: .5em;
 }
 
 dialog#filterDialog > section > header > section > section > select#filterPicklist {
