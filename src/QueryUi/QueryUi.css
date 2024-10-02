@@ -175,7 +175,7 @@
 /* label holding the item caption */
 .queryUi > section > ol > li > details > summary > span,
 .queryUi > section > ol > li > span {
-  margin-left: -6px;
+  margin-left: 0px;
 }
 
 .queryUi > section > ol > li > details:has( > ol > li )> summary > span {
