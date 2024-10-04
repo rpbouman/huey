@@ -23,8 +23,98 @@ class TupleSet extends DataSetComponent {
     }
     return selectListExpressions;
   }
+  
+  static getSqlSelectStatementXXX(queryModel, axisId, includeCountAll) {
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    if (!queryAxisItems.length) {
+      return undefined;
+    }
+    
+    var dataFoundationAlias = '__huey_data_foundation';
+    var datasource = queryModel.getDatasource();
+    var fromClause = datasource.getFromClauseSql(dataFoundationAlias);
+        
+    var filterAxis = queryModel.getFiltersAxis();
+    var filterAxisItems = filterAxis.getItems();
+    
+    var unnestingFunctions = [];
+    Object.keys(AttributeUi.arrayDerivations).forEach(function(arrayDerivationKey){
+      var arrayDerivation = AttributeUi.arrayDerivations[arrayDerivationKey];
+      var unnestingFunction = arrayDerivation.unnestingFunction;
+      if (!unnestingFunction){
+        return;
+      }
+      unnestingFunctions.push(unnestingFunction + '()');
+    });
+    
+    var cteIndex = 0;
+    var currentItems = queryAxisItems;
+    var cte, ctes = [{
+      items: [],
+      from: fromClause
+    }];
+    
+    while (cte = ctes[cteIndex]) {
+      
+      var unnestingItem = undefined;
+      var unnestingItemMemberExpressionPathIndex = undefined;
+      var unnestingItemMemberExpressionPathPrefix = undefined;
+      var unnestingItemMemberExpressionPathPrefixString = undefined;
+      var newItems = [];
+      
+      for (var i = 0; i < currentItems.length; i++){
+
+        var currentItem = currentItems[i];
+        var currentItemMemberExpressionPath = currentItem.memberExpressionPath;
+    
+        if (!currentItemMemberExpressionPath) {
+          newItems.push(currentItem);
+          continue;
+        }
+        
+        if (!unnestingItem) {
+          for (var j = 0; j < currentItemMemberExpressionPath.length; j++) {
+            memberPathExpressionElement = currentItemMemberExpressionPath[j];
+            if (unnestingFunctions.indexOf(memberPathExpressionElement) === -1) {
+              continue;
+            }
+            unnestingItem = currentItem;
+            unnestingItemMemberExpressionPathIndex = j;
+            unnestingItemMemberExpressionPathPrefix = currentItemMemberExpressionPath.slice(0, j);
+            unnestingItemMemberExpressionPathPrefixString = unnestingItemMemberExpressionPathPrefix.join('.');
+            break;
+          }
+        }
+        
+        if (
+          !unnestingItem || 
+          currentItem.columnName !== unnestingItem.columnName ||
+          unnestingItemMemberExpressionPathPrefixString !== currentItemMemberExpressionPath.slice(0, unnestingItemMemberExpressionPathIndex).join('.')
+        ){
+          newItems.push(currentItem);
+          continue;
+        }
+        
+      }
+      
+      cte = {
+        items: newItems
+      };
+      ctes.push(cte);
+      cteIndex += 1;
+      
+      if (!unnestingItem) {
+        break;
+      }
+    };
+    
+  }
       
   static getSqlSelectStatement(queryModel, axisId, includeCountAll) {
+    // this is here just for testing and development
+    //var tmp = TupleSet.getSqlSelectStatementXXX(queryModel, axisId, includeCountAll);
+    
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
     if (!queryAxisItems.length) {
@@ -63,6 +153,7 @@ class TupleSet extends DataSetComponent {
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
       
       if (queryAxisItem.includeTotals){
+        /*
         var groupingSet = [].concat(
           groupByExpressions, 
           columnIds
@@ -76,6 +167,8 @@ class TupleSet extends DataSetComponent {
             return columnExpressions[columnId];
           })
         );
+        */
+        var groupingSet = [].concat(groupByExpressions, [columnExpression]);
         groupingSets.push(groupingSet);
         
         // if we have an axis item with includeTotals, then we want the super-aggregate rows (the totels) 
