@@ -486,7 +486,11 @@ class PivotTableUi extends EventEmitter {
   // totalsItems are all query axis items having includeTotals
   // queryAxisItem is the current member
   static #isTotalsMember(groupingId, queryAxisItems, queryAxisItem){
-    if (groupingId === undefined || queryAxisItem === undefined || queryAxisItem.includeTotals !== true) {
+    if (
+      groupingId === undefined || 
+      queryAxisItem === undefined /*|| 
+      queryAxisItem.includeTotals !== true*/
+    ) {
       return false;
     }
     var index = queryAxisItems.indexOf(queryAxisItem);
