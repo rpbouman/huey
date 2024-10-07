@@ -45,7 +45,9 @@ class Settings extends EventEmitter {
       commaStyle: 'newlineBefore'
     },
     querySettings: {
-      autoRunQuery: false
+      autoRunQuery: false,
+      filterValuePicklistPageSize: 100,
+      filterSearchAutoQueryTimeoutInMilliseconds: 1000
     },
     pivotSettings: {
       maxCellWidth: 30

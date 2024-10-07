@@ -12,13 +12,36 @@ class FilterDialog {
   #queryAxisItem = undefined;
   #queryModel = undefined;
 
-  #valuePicklistPageSize = 100;
-  #searchAutoQueryTimeout = 1000;
+  #defaultValuePicklistPageSize = 100;
+  #defaultSearchAutoQueryTimeout = 1000;
+  #currentSearchAutoQueryTimeout = undefined;
+  #searchQueryHandler = undefined;
+  
+  #settings = undefined;
+
+  #getValuePicklistPageSize(){
+    var settings = this.#settings;
+    if (!settings){
+      return this.#defaultValuePicklistPageSize
+    }
+    var valuePicklistPageSize = settings.getSettings(['querySettings', 'filterValuePicklistPageSize']);
+    return valuePicklistPageSize;
+  }
+  
+  #getSearchAutoQueryTimeout(){  
+    var settings = this.#settings;
+    if (!settings){
+      return this.#defaultSearchAutoQueryTimeout;
+    }
+    var searchAutoQueryTimeout = settings.getSettings(['querySettings', 'filterSearchAutoQueryTimeoutInMilliseconds']);
+    return searchAutoQueryTimeout;
+  }
 
   constructor(config){
     this.#id = config.id;
     this.#queryModel = config.queryModel;
-    this.#initEvents();
+    this.#settings = config.settings || settings;
+    this.#initEvents();    
   }
 
   #initEvents(){
@@ -100,7 +123,7 @@ class FilterDialog {
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
 
-      this.#updatePicklist(0, this.#valuePicklistPageSize);
+      this.#updatePicklist(0, this.#getValuePicklistPageSize());
     }.bind(this));
 
     var autoWildcardsCheckbox = this.#getAutoWildChards();
@@ -109,14 +132,30 @@ class FilterDialog {
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
 
-      this.#updatePicklist(0, this.#valuePicklistPageSize);
+      this.#updatePicklist(0, this.#getValuePicklistPageSize());
     }.bind(this));
 
-    bufferEvents(this.#getSearch(), 'input', function(event, count){
+    this.#initSearchQueryHandler();
+  }
+
+  #initSearchQueryHandler(){
+    var searchAutoQueryTimeout = this.#getSearchAutoQueryTimeout();
+    if (this.#currentSearchAutoQueryTimeout === searchAutoQueryTimeout){
+      return;
+    }
+    
+    var search = this.#getSearch();
+    if (this.#searchQueryHandler){
+      search.removeEventListener('input', this.#searchQueryHandler);
+    }
+
+    this.#searchQueryHandler = bufferEvents(search, 'input', function(event, count){
       if (count === undefined) {
-        this.#updatePicklist(0, this.#valuePicklistPageSize);
+        this.#updatePicklist(0, this.#getValuePicklistPageSize());
       }
-    }, this, this.#searchAutoQueryTimeout);
+    }, this, searchAutoQueryTimeout);
+    
+    this.#currentSearchAutoQueryTimeout = searchAutoQueryTimeout;
   }
 
   #handleFilterValuesListChange(event){
@@ -582,6 +621,7 @@ class FilterDialog {
   }
 
   async openFilterDialog(queryModel, queryModelItem, queryAxisItemUi){
+    this.#initSearchQueryHandler();
     this.#clearDialog();
 
     this.#queryAxisItem = queryModelItem;
@@ -592,7 +632,7 @@ class FilterDialog {
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
     filterDialog.showModal();
-    this.#updatePicklist(0, this.#valuePicklistPageSize);
+    this.#updatePicklist(0, this.#getValuePicklistPageSize());
     this.#getSearch().focus();
   }
 
@@ -715,16 +755,17 @@ class FilterDialog {
     var bindValue;
     if (searchString.length){
       var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
+      var collation = '';
       switch (dataType) {
         case 'VARCHAR':
-        // TODO: think of a more clever way to deal with non-VARCHAR values.
+          collation = ' COLLATE NOCASE ';
         default:
           if (condition && condition.length) {
             condition += '\nAND ';
           }
           // TODO: implement toggle for the collation.
           // however it's currently not working anyway (see PR: https://github.com/duckdb/duckdb/pull/12359)
-          condition += `${sqlExpression} COLLATE NOCASE LIKE ?`;
+          condition += `${sqlExpression}::VARCHAR${collation} LIKE ?`;
           bindValue = `${searchString}`;
           break;
       }
@@ -745,10 +786,13 @@ class FilterDialog {
     if (offset === 0){
       sql.push(`GROUP BY ${sqlExpression}`);
     }
-    sql.push(`ORDER BY ${sqlExpression}`);
+    // todo: 
+    // - make it an option whether NULL value appears first or last
+    // - make the sort direction (ASC|DESC) an option
+    sql.push(`ORDER BY ${sqlExpression} NULLS FIRST`);
 
     if (limit === undefined) {
-      limit = this.#valuePicklistPageSize;
+      limit = this.#getValuePicklistPageSize();
     }
     parameters.push(limit);
     sql.push('LIMIT ?');
@@ -881,6 +925,7 @@ var filterDialog;
 function initFilterUi(){
   filterDialog = new FilterDialog({
     id: 'filterDialog',
-    queryModel: queryModel
+    queryModel: queryModel,
+    settings: settings
   });
 }
