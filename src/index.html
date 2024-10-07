@@ -787,6 +787,17 @@
                 title="When enabled the pivot table is updated automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
               >Autorun Query</label>
               <input id="autoRunQuery" type="checkbox"/>
+              <fieldset>
+                <legend>Filter</legend>
+                <label
+                  for="filterSearchAutoQueryTimeoutInMilliseconds"
+                >Search timeout (ms)</label>
+                <input id="filterSearchAutoQueryTimeoutInMilliseconds" min="1" type="number" step="1"/>
+                <label
+                  for="filterValuePicklistPageSize"
+                >Picklist Pagesize</label>
+                <input id="filterValuePicklistPageSize" type="number" min="1" step="1"/>
+              </fieldset>
             </form>
           </div>
         </div>
