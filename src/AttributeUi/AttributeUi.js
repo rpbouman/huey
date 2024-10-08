@@ -486,6 +486,7 @@ class AttributeUi {
     }
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
+    var originalType = columnType;
  
     var memberExpressionPath = node.getAttribute('data-member_expression_path');
     if (memberExpressionPath) {
@@ -501,8 +502,9 @@ class AttributeUi {
 
     var itemConfig = {
       axis: axis,
+      originalType: originalType, // the type of column from where this item is derived
       columnName: columnName,
-      columnType: columnType,
+      columnType: columnType,     // the type of this item's values
       derivation: derivation,
       aggregator: aggregator,
       memberExpressionPath: memberExpressionPath
@@ -991,6 +993,7 @@ class AttributeUi {
     if (event.newState === 'open'){ 
       if (node.childNodes.length === 1){
         this.#loadChildNodes(node);
+        this.#updateState();
       }
     }
   }
@@ -1003,7 +1006,7 @@ class AttributeUi {
 
       var node = getAncestorWithTagName(input, 'details')
       var columnName = node.getAttribute('data-column_name');
-      var aggregator = node.getAttribute('data-aggregator');
+      var aggregator = input.getAttribute('data-aggregator');
       var derivation = node.getAttribute('data-derivation');
       var memberExpressionPath = node.getAttribute('data-member_expression_path');
       
