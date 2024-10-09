@@ -143,18 +143,25 @@ class QueryAxisItem {
     return id;
   }
 
-  static #getSqlForColumnExpression(item, alias, sqlOptions) {
+  static getSqlForColumnExpression(item, alias, sqlOptions) {
     var sqlExpression = [item.columnName];
-
-    if (item.memberExpressionPath) {
-      sqlExpression = sqlExpression.concat(item.memberExpressionPath);
-    }
 
     if (alias){
       sqlExpression.unshift(alias);
     }
     
     sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
+
+    if (item.memberExpressionPath) {
+      var memberExpressionPath = item.memberExpressionPath;
+      var memberExpression = memberExpressionPath
+      .map(function(memberExpressionPathElement){
+        // todo: escape single quote in memberExpressionPathElement
+        return `['${memberExpressionPathElement}']`;
+      })
+      .join('');
+      sqlExpression += memberExpression;
+    }
     return sqlExpression;
   }
 
@@ -167,7 +174,7 @@ class QueryAxisItem {
       }
     }
     else {
-      columnExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
+      columnExpression = QueryAxisItem.getSqlForColumnExpression(item, alias, sqlOptions);
     }
 
     var aggregator = item.aggregator;
@@ -178,7 +185,7 @@ class QueryAxisItem {
   }
 
   static getSqlForDerivedQueryAxisItem(item, alias, sqlOptions){
-    var columnExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
+    var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, alias, sqlOptions);
 
     var derivation = item.derivation;
     var derivationInfo;
@@ -200,7 +207,7 @@ class QueryAxisItem {
       sqlExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias, sqlOptions);
     }
     else {
-      sqlExpression = QueryAxisItem.#getSqlForColumnExpression(item, alias, sqlOptions);
+      sqlExpression = QueryAxisItem.getSqlForColumnExpression(item, alias, sqlOptions);
     }
     return sqlExpression;
   }
