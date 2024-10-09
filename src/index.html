@@ -203,7 +203,11 @@
           >Title template</label>
           <input
             id="exportTitleTemplate"
-            title="The title template is used to generate a file name for downloads"
+            type="text"
+            title="
+              Export filename template. Special fields ${datasource}, ${cells-itms}, ${rows-items}, ${columns-items}, and ${filters-items} are replaced with the respective element from the current query. 
+              Use fields ${timestamp} or ${iso-timestamp} to include date/time.
+            "
             value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
           />
           <label

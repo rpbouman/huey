@@ -64,6 +64,27 @@ class ExportUi {
       }
       var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
       return caption;
+    },
+    'utc-timestamp': function(queryModel){
+      return (new Date(Date.now())).toISOString().split('.')[0];
+    },
+    'timestamp': function(queryModel){
+      var date = new Date();
+      
+      function padDigit(digit) {
+        return digit < 10 ? '0' + digit : digit;
+      }
+      
+      return [
+        date.getFullYear()
+      , padDigit(date.getMonth() + 1)
+      , padDigit(date.getDate())
+      ].join('-') + 
+      'T'+ [
+        padDigit(date.getHours())
+      , padDigit(date.getMinutes())
+      , padDigit(date.getSeconds())
+      ].join(':')
     }
   }
   

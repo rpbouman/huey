@@ -5,7 +5,7 @@ dialog#exportDialog {
 }
 
 dialog#exportDialog > header > form > input#exportTitleTemplate {
-  width: 100%;
+  width: calc( 100% - 14px);
 }
 
 dialog#exportDialog > header > h3 {
