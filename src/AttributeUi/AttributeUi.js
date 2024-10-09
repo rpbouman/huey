@@ -330,13 +330,13 @@ class AttributeUi {
     "element indices": {
       folder: 'array operations',
       columnType: 'BIGINT',
-      expressionTemplate: "generate_subscripts( ${columnExpression}, 1 )",
+      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1 )",
       unnestingFunction: 'generate_subscripts'
     },
     "elements": {
       folder: 'array operations',
       hasElementDataType: true,
-      expressionTemplate: "unnest( ${columnExpression} )",
+      expressionTemplate: "unnest( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end )",
       unnestingFunction: 'unnest'
     }    
   }
@@ -840,7 +840,7 @@ class AttributeUi {
   }
     
   #loadMemberChildNodes(node, typeName, profile){
-    var folderNode = this.#renderFolderNode({caption: 'struct'});
+    var folderNode = this.#renderFolderNode({caption: 'structure'});
     var columnType = profile.memberExpressionType || profile.column_type;
     var memberExpressionPath = profile.memberExpressionPath || [];
     var structure = getStructTypeDescriptor(columnType);
@@ -902,7 +902,7 @@ class AttributeUi {
           memberExpressionType = profile.memberExpressionType || profile.column_type;
           memberExpressionType = memberExpressionType.slice(0, -2);
         }
-        nodeProfile.column_type =  memberExpressionType;  
+        nodeProfile.column_type = profile.column_type;  
         nodeProfile.memberExpressionType = memberExpressionType;
       }
       else {
