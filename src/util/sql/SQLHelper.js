@@ -799,6 +799,9 @@ function getQualifiedIdentifier(){
         case 'string':
           return getQualifiedIdentifier([arguments[0], arguments[1]]);
           break;
+        case 'undefined':
+          return getQualifiedIdentifier(arguments[0], normalizeSqlOptions());
+          break;
         default:
           throw new Error(`Invalid argument type ${typeof arguments[1]}`);
       }
@@ -1168,6 +1171,18 @@ function getStructTypeDescriptor(structColumnType){
     }
   }
   return structure;
+}
+
+function getMemberExpressionType(type, memberExpressionPath){
+  if (memberExpressionPath.length) {
+    var typeDescriptor = getStructTypeDescriptor(type);
+    var memberExpression = memberExpressionPath[0];
+    var memberExpressionType = typeDescriptor[memberExpression];
+    return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
+  }
+  else {
+    return type;
+  }
 }
 
 function extrapolateColumnExpression(expressionTemplate, columnExpression){
