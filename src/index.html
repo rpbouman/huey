@@ -279,7 +279,12 @@
             for="exportDelimited"
             title="Use this tab to export data as delimited text, like .CSV, TSV, etc."
           >Delimited text</label>
-          <input id="exportDelimited" name="exportFormat" type="radio" checked="true"/>
+          <input 
+            id="exportDelimited" 
+            name="exportFormat" 
+            type="radio" 
+            checked="true"
+          />
           <div role="tabpanel">
             <form id="exportDelimitedSettings">
               <label
@@ -398,7 +403,11 @@
             for="exportJson"
             title="Use this tab to export data in the JSON format"
           >JSON</label>
-          <input id="exportJson" name="exportFormat" type="radio"/>
+          <input 
+            id="exportJson" 
+            name="exportFormat" 
+            type="radio"
+          />
           <div role="tabpanel">
             <form id="exportJsonSettings">
               <label
@@ -455,7 +464,11 @@
             for="exportParquet"
             title="Use this tab to export data in Parquet format"
           >Parquet</label>
-          <input id="exportParquet" name="exportFormat" type="radio"/>
+          <input 
+            id="exportParquet" 
+            name="exportFormat" 
+            type="radio"
+          />
           <div role="tabpanel">
             <form id="exportParquetSettings">
               <label
@@ -475,7 +488,11 @@
             for="exportSql"
             title="Use this tab to export a SQL query that would produce this result."
           >SQL</label>
-          <input id="exportSql" name="exportFormat" type="radio"/>
+          <input 
+            id="exportSql" 
+            name="exportFormat" 
+            type="radio"
+          />
           <div role="tabpanel">
             <form id="exportSqlSettings">
               <label
@@ -565,7 +582,10 @@
               title="Check to include the other filter items (in addition to the search string) to populate the picklist"
             >
               Apply all filters:
-              <input id="filterSearchApplyAll" type="checkbox"/>
+              <input 
+                id="filterSearchApplyAll" 
+                type="checkbox"
+              />
             </label>
 
             <label
@@ -573,7 +593,10 @@
               title="Check to automatically apply LIKE wildcards"
             >
               Auto-wildcards: 
-              <input id="filterSearchAutoWildcards" type="checkbox"/>
+              <input 
+                id="filterSearchAutoWildcards" 
+                type="checkbox"
+              />
             </label>
             
           </menu>
@@ -691,14 +714,22 @@
           >
             Datasources
           </label>
-          <input id="datasourcesSettingTab" type="radio" name="settingsTabs" checked="true"/>
+          <input 
+            id="datasourcesSettingTab" 
+            type="radio" 
+            name="settingsTabs" 
+            checked="true"
+          />
           <div role="tabpanel">
             <form id="datasourceSettings">
               <label 
                 for="useLooseColumnTypeComparison" 
                 title="Whether to use exact or loose typing for automatic creation of UNION datasources."
               >UNION loose typing</label>
-              <input id="useLooseColumnTypeComparison" type="checkbox"/>
+              <input 
+                id="useLooseColumnTypeComparison" 
+                type="checkbox"
+              />
             </form>
           </div>
         </div>
@@ -712,24 +743,37 @@
           >
             Value Formatting
           </label>
-          <input id="localeSettingsTab" type="radio" name="settingsTabs"/>
+          <input 
+            id="localeSettingsTab" 
+            type="radio" 
+            name="settingsTabs"
+          />
           <div role="tabpanel">
             <form id="localeSettings">
               <label 
                 for="nullString"
                 title="The string to use for displaying NULL-values"
               ><code>NULL</code>-value label</label>
-              <input id="nullString" type="input"/>
+              <input 
+                id="nullString" 
+                type="text"
+              />
               <label 
                 for="totalsString"
                 title="The string to use for displaying totals"
               >Totals label</label>
-              <input id="totalsString" type="input"/>
+              <input 
+                id="totalsString" 
+                type="text"
+              />
               <label 
                 for="useDefaultLocale"
                 title="Check to use the browser's default locale, uncheck to enter a custom locale."
               >Use default locale</label>
-              <input id="useDefaultLocale" type="checkbox"/>
+              <input 
+                id="useDefaultLocale" 
+                type="checkbox"
+              />
               <!--
                 see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
                 A locale identifier is a string that consists of:
@@ -749,7 +793,9 @@
                 on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
                 and if that is empty it probably means the entered locale is either not valid or not supported.
               -->
-              <input id="locale"
+              <input 
+                id="locale"
+                type="text"
                 pattern="^(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?)(\s*,\s*(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?))*$"
                 data-value-getter="new Function('control','settings','return control.value.split(String.fromCharCode(44));')"
                 data-value-setter="new Function('control','value','settings','control.value = value.join();')"
@@ -758,17 +804,35 @@
               <label for="minimumIntegerDigits"
                 title="The minimum number of integer digits to use. A value with a smaller number of integer digits than this number will be left-padded with zeros (to the specified length) when formatted. Possible values are from 1 to 21; the default is 1."
               >Min. integer digits</label>
-              <input id="minimumIntegerDigits" type="number" min="1" max="21" value="1"/>
+              <input 
+                id="minimumIntegerDigits" 
+                type="number" 
+                min="1" 
+                max="21" 
+                value="1"
+              />
               <!-- minimum fraction digits -->
               <label for="minimumFractionDigits"
                 title="The minimum number of fraction digits to use. .Possible values are from 0 to 20; the default for plain number and percent formatting is 0; the default for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information)."
               >Min. fraction digits</label>
-              <input id="minimumFractionDigits" type="number" min="0" max="20" value="2"/>
+              <input 
+                id="minimumFractionDigits" 
+                type="number" 
+                min="0" 
+                max="20" 
+                value="2"
+              />
               <!-- maximum fraction digits -->
               <label for="maximumFractionDigits"
                 title="The maximum number of fraction digits to use. Possible values are from 0 to 20; the default for plain number formatting is the larger of minimumFractionDigits and 3; the default for currency formatting is the larger of minimumFractionDigits and the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information); the default for percent formatting is the larger of minimumFractionDigits and 0."
               >Max. fraction digits</label>
-              <input id="maximumFractionDigits" type="number" min="0" max="20" value="2"/>
+              <input 
+                id="maximumFractionDigits" 
+                type="number" 
+                min="0" 
+                max="20" 
+                value="2"
+              />
             </form>
           </div>
         </div>
@@ -783,24 +847,41 @@
           >
             Query
           </label>
-          <input id="querySettingsTab" type="radio" name="settingsTabs"/>
+          <input 
+            id="querySettingsTab" 
+            type="radio" 
+            name="settingsTabs"
+          />
           <div role="tabpanel">
             <form id="querySettings">
               <label 
                 for="autoRunQuery"
                 title="When enabled the pivot table is updated automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
               >Autorun Query</label>
-              <input id="autoRunQuery" type="checkbox"/>
+              <input 
+                id="autoRunQuery" 
+                type="checkbox"
+              />
               <fieldset>
                 <legend>Filter</legend>
                 <label
                   for="filterSearchAutoQueryTimeoutInMilliseconds"
                 >Search timeout (ms)</label>
-                <input id="filterSearchAutoQueryTimeoutInMilliseconds" min="1" type="number" step="1"/>
+                <input 
+                  id="filterSearchAutoQueryTimeoutInMilliseconds" 
+                  min="1" 
+                  type="number" 
+                  step="1"
+                />
                 <label
                   for="filterValuePicklistPageSize"
                 >Picklist Pagesize</label>
-                <input id="filterValuePicklistPageSize" type="number" min="1" step="1"/>
+                <input 
+                  id="filterValuePicklistPageSize" 
+                  type="number" 
+                  min="1" 
+                  step="1"
+                />
               </fieldset>
             </form>
           </div>
@@ -816,13 +897,23 @@
           >
             Pivot Table
           </label>
-          <input id="pivotSettingsTab" type="radio" name="settingsTabs"/>
+          <input 
+            id="pivotSettingsTab" 
+            type="radio" 
+            name="settingsTabs"
+          />
           <div role="tabpanel">
             <form id="pivotSettings">
               <label for="maxCellWidth"
                 title="The maximum string length to consider when sizing pivot table cells and headers"
               >Max cellwidth (ch)</label>
-              <input id="maxCellWidth" type="number" min="1" max="256" value="30"/>
+              <input 
+                id="maxCellWidth" 
+                type="number" 
+                min="1" 
+                max="256" 
+                value="30"
+              />
             </form>
           </div>
         </div>
@@ -837,7 +928,11 @@
           >
             Theme
           </label>
-          <input id="themeSettingsTab" type="radio" name="settingsTabs"/>
+          <input 
+            id="themeSettingsTab" 
+            type="radio" 
+            name="settingsTabs"
+          />
           <div role="tabpanel">
             <form id="themeSettings">
               <label for="themes">Themes</label>
@@ -970,7 +1065,11 @@
           >
             Columns
           </label>
-          <input id="datasourceSettingsDialogColumnsTab" type="radio" name="datasourceSettingsTabs"/>
+          <input 
+            id="datasourceSettingsDialogColumnsTab" 
+            type="radio" 
+            name="datasourceSettingsTabs"
+          />
           <div role="tabpanel">
           </div>
         </div>
@@ -985,7 +1084,12 @@
           >
             CSV Reader Parameters
           </label>
-          <input id="datasourceSettingsDialogCsvReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <input 
+            id="datasourceSettingsDialogCsvReaderParametersTab" 
+            type="radio" 
+            name="datasourceSettingsTabs" 
+            checked="true"
+          />
           <div role="tabpanel">
             <menu role="toolbar">
               <button id="csvReaderRestoreDefaults">Restore defaults</button>
@@ -995,23 +1099,50 @@
               <fieldset>
                 <legend>Auto-detect</legend>
                 <label for="csvReaderAutoDetect" title="Enables auto detection of CSV parameters.">Auto-detect Options?</label>
-                <input id="csvReaderAutoDetect" type="checkbox"  title="Enables auto detection of CSV parameters."/>
+                <input 
+                  id="csvReaderAutoDetect" 
+                  type="checkbox"  
+                  title="Enables auto detection of CSV parameters."
+                />
                 <label for="csvReaderSampleSize" title="The number of sample rows for auto detection of parameters. Default: 20480">Sample size</label>
-                <input id="csvReaderSampleSize" type="number" min="0" title="he number of sample rows for auto detection of parameters. Default: 20480"/>
+                <input 
+                  id="csvReaderSampleSize" 
+                  type="number" 
+                  min="0" 
+                  title="he number of sample rows for auto detection of parameters. Default: 20480"
+                />
               </fieldset>
               <fieldset>
                 <legend>Limits &amp; Sizes</legend>
                 <label for="csvReaderSkip" title="The number of lines at the top of the file to skip. Default: 0">Skip lines</label>
-                <input id="csvReaderSkip" type="number" min="0" title="The number of lines at the top of the file to skip. Default: 0"/>
+                <input 
+                  id="csvReaderSkip" 
+                  type="number" 
+                  min="0" 
+                  title="The number of lines at the top of the file to skip. Default: 0"
+                />
                 <label for="csvReaderMaxLineSize" title="The maximum line size in bytes. Default: 2097152">Maximum line size</label>
-                <input id="csvReaderMaxLineSize" type="number" min="0" title="The maximum line size in bytes. Default: 2097152"/>
+                <input 
+                  id="csvReaderMaxLineSize" 
+                  type="number" 
+                  min="0" 
+                  title="The maximum line size in bytes. Default: 2097152"
+                />
               </fieldset>
               <fieldset>
                 <legend>Data Types</legend>
                 <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code>VARCHAR</code></label>
-                <input id="csvReaderAllVarchar" type="checkbox" title="Skip type detection and assume all columns to be of type VARCHAR."/>
+                <input 
+                  id="csvReaderAllVarchar" 
+                  type="checkbox" 
+                  title="Skip type detection and assume all columns to be of type VARCHAR."
+                />
                 <label for="csvReaderAutoTypeCandidates" title="The types that the sniffer considers when detecting column types. VARCHAR is always implied as fallback.">Type Candidates</label>
-                <select id="csvReaderAutoTypeCandidates" multiple="true" title="The types that the sniffer considers when detecting column types. VARCHAR is always implied as fallback.">
+                <select 
+                  id="csvReaderAutoTypeCandidates" 
+                  multiple="true" 
+                  title="The types that the sniffer considers when detecting column types. VARCHAR is always implied as fallback."
+                >
                   <option label="BIGINT" value="BIGINT" />
                   <option label="BOOLEAN" value="BOOLEAN" />
                   <option label="DATE" value="DATE" />
@@ -1027,42 +1158,109 @@
               <fieldset>
                 <legend>Columns</legend>
                 <label for="csvReaderHeader" title="Specifies that the file contains a header line with the names of each column in the file.">Has Column Headers?</label>
-                <input id="csvReaderHeader" type="checkbox" title="Specifies that the file contains a header line with the names of each column in the file."/>
+                <input 
+                  id="csvReaderHeader" 
+                  type="checkbox" 
+                  title="Specifies that the file contains a header line with the names of each column in the file."
+                />
                 <label for="csvReaderNormalizeNames" title="Specifies whether or not column names should be normalized, removing any non-alphanumeric characters from them.">Normalize Column Names?</label>
-                <input id="csvReaderNormalizeNames" type="checkbox" title="Specifies whether or not column names should be normalized, removing any non-alphanumeric characters from them."/>
+                <input 
+                  id="csvReaderNormalizeNames" 
+                  type="checkbox" 
+                  title="Specifies whether or not column names should be normalized, removing any non-alphanumeric characters from them."
+                />
                 <label for="csvReaderNullPadding" title="If this option is enabled, when a row lacks columns, it will pad the remaining columns on the right with null values."><code>NULL</code>-pad missing columns?</label>
-                <input id="csvReaderNullPadding" type="checkbox" title="If this option is enabled, when a row lacks columns, it will pad the remaining columns on the right with null values."/>
+                <input 
+                  id="csvReaderNullPadding" 
+                  type="checkbox" 
+                  title="If this option is enabled, when a row lacks columns, it will pad the remaining columns on the right with null values."
+                />
                 <label for="csvReaderFileName" title="Whether to include a filename column in the result.">Add filename column?</label>
-                <input id="csvReaderFileName" type="checkbox" title="Whether to include a filename column in the result."/>
+                <input 
+                  id="csvReaderFileName" 
+                  type="checkbox" 
+                  title="Whether to include a filename column in the result."
+                />
               </fieldset>
               <fieldset>
                 <legend>Delimiters</legend>
                 <label for="csvReaderDelim" title="The delimiter character separating the values within each line.">Field Delimiter</label>
-                <input id="csvReaderDelim" type="text" value="" length="1" list="commonCsvFieldDelimiters" title="The delimiter character separating the values within each line."/>
+                <input 
+                  id="csvReaderDelim" 
+                  type="text" 
+                  value="" 
+                  length="1" 
+                  list="commonCsvFieldDelimiters" 
+                  title="The delimiter character separating the values within each line."
+                />
                 <label for="csvReaderNewLine" title="Set the new line character(s) in the file.">Row Delimiter</label>
-                <select id="csvReaderNewLine" title="Set the new line character(s) in the file.">
+                <select 
+                  id="csvReaderNewLine" 
+                  title="Set the new line character(s) in the file."
+                >
                   <option value="" title="Automatically detect the row delimiter">(auto)</option>
                   <option value="\r" title="Carriage Return">CR</option>
                   <option value="\r\n" title="Carriage Return/Linefeed pair">CRLF</option>
                   <option value="\n" title="Linefeed">LF</option>
                 </select>
                 <label for="csvReaderQuote" title="The string used to quote values">Quote Character</label>
-                <input id="csvReaderQuote" type="text" value="" length="1" list="commonCsvQuoteCharacters" title="The string used to quote values"/>
+                <input 
+                  id="csvReaderQuote" 
+                  type="text" value="" 
+                  length="1" 
+                  list="commonCsvQuoteCharacters" 
+                  title="The string used to quote values"
+                />
                 <label for="csvReaderEscape" title="The character used to precede the quote character to denote a literal occurrence of the character used as quote">Escape Character</label>
-                <input id="csvReaderEscape" type="text" value="" length="1" list="commonCsvEscapeCharacters" title="The character used to precede the quote character to denote a literal occurrence of the character used as quote"/>
+                <input 
+                  id="csvReaderEscape" 
+                  type="text" 
+                  value="" 
+                  length="1" 
+                  list="commonCsvEscapeCharacters" 
+                  title="The character used to precede the quote character to denote a literal occurrence of the character used as quote"
+                />
                 <label for="csvReaderAllowQuotedNulls" title="Allow conversion of quoted values to NULL?">Quoted <code>NULL</code>s</label>
-                <input id="csvReaderAllowQuotedNulls" type="checkbox" title="Allow conversion of quoted values to NULL?"/>
+                <input 
+                  id="csvReaderAllowQuotedNulls" 
+                  type="checkbox" 
+                  title="Allow conversion of quoted values to NULL?"
+                />
               </fieldset>
               <fieldset>
                 <legend>Formats</legend>
                 <label for="csvReaderDecimalSeparator" title="The decimal separator for numeric values.">Decimal Separator</label>
-                <input id="csvReaderDecimalSeparator" type="text" value="" length="1" title="The decimal separator for numeric values." list="commonDecimalSeparators"/>
+                <input 
+                  id="csvReaderDecimalSeparator" 
+                  type="text" 
+                  value=""
+                  length="1" 
+                  title="The decimal separator for numeric values." 
+                  list="commonDecimalSeparators"
+                />
                 <label for="csvReaderDateformat" title="The format used to parse dates">Date Format</label>
-                <input id="csvReaderDateformat" type="text" value="" list="commonDateFormats" title="The format used to parse dates"/>
+                <input 
+                  id="csvReaderDateformat" 
+                  type="text" 
+                  value="" 
+                  list="commonDateFormats" 
+                  title="The format used to parse dates"
+                />
                 <label for="csvReaderTimestampformat" title="The format to use when parsing timestamps">Timestamp Format</label>
-                <input id="csvReaderTimestampformat" type="text" value="" list="commonTimestampFormats" title="The format to use when parsing timestamps"/>
+                <input 
+                  id="csvReaderTimestampformat" 
+                  type="text" 
+                  value="" 
+                  list="commonTimestampFormats" 
+                  title="The format to use when parsing timestamps"
+                />
                 <label for="csvReaderNullstr" title="A list of strings that represent a NULL value."><code>NULL</code>-strings</label>
-                <input id="csvReaderNullstr" type="text" list="commonCsvNullValueStrings" title="A list of strings that represent a NULL value."/>
+                <input 
+                  id="csvReaderNullstr" 
+                  type="text" 
+                  list="commonCsvNullValueStrings" 
+                  title="A list of strings that represent a NULL value."
+                />
               </fieldset>
             </form>
           </div>
@@ -1078,7 +1276,12 @@
           >
             Parquet Reader Parameters
           </label>
-          <input id="datasourceSettingsDialogParquetReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <input 
+            id="datasourceSettingsDialogParquetReaderParametersTab" 
+            type="radio" 
+            name="datasourceSettingsTabs" 
+            checked="true"
+          />
           <div role="tabpanel">
             Parquet reader options
           </div>
@@ -1094,7 +1297,12 @@
           >
             Parquet Reader Parameters
           </label>
-          <input id="datasourceSettingsDialogJSONReaderParametersTab" type="radio" name="datasourceSettingsTabs" checked="true"/>
+          <input 
+            id="datasourceSettingsDialogJSONReaderParametersTab" 
+            type="radio" 
+            name="datasourceSettingsTabs" 
+            checked="true"
+          />
           <div role="tabpanel">
             JSON reader options
           </div>
@@ -1110,7 +1318,11 @@
           >
             Rejects
           </label>
-          <input id="datasourceSettingsDialogCsvReaderRejectsTab" type="radio" name="datasourceSettingsTabs"/>
+          <input 
+            id="datasourceSettingsDialogCsvReaderRejectsTab" 
+            type="radio" 
+            name="datasourceSettingsTabs"
+          />
           <div role="tabpanel">
             <menu role="toolbar">
               <button id="csvReaderDownloadRejects">Download</button>
@@ -1220,7 +1432,12 @@
             role="tab"
             title="Files, database tables and so on that provide data you'd like to explore."
           >Datasources</label>
-          <input id="datasourcesTab" type="radio" name="sidebarTabs" checked="true"/>
+          <input 
+            id="datasourcesTab" 
+            type="radio" 
+            name="sidebarTabs" 
+            checked="true"
+          />
           <div
             role="tabpanel"
           >
@@ -1238,7 +1455,11 @@
             role="tab"
             title="Columns, formulas and aggregates to query and pivot"
           >Attributes</label>
-          <input id="attributesTab" type="radio" name="sidebarTabs"/>
+          <input 
+            id="attributesTab" 
+            type="radio" 
+            name="sidebarTabs"
+          />
           <div role="tabpanel">
             <search
               id="searchAttributeUi"
@@ -1294,17 +1515,27 @@
               <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
               <span>caption</span>
               <menu>
-                <label title="Calculate totals for this level"><input id="-toggle-totals" type="checkbox"/></label>
-                <label title="Move this item to the other axis"><button id="-move-to-other-axis">Move item to other axis</button></label>
-                <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
+                <label title="Calculate totals for this level">
+                  <input id="-toggle-totals" type="checkbox"/>
+                </label>
+                <label title="Move this item to the other axis">
+                  <button id="-move-to-other-axis">Move item to other axis</button>
+                </label>
+                <label title="Remove this item from the axis">
+                  <button id="-remove-from-axis">Remove item from axis</button>
+                </label>
               </menu>
-              <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
+              <label title="Move this item to the right">
+                <button id="-move-right">Move item right</button>
+              </labe>
             </li>
           </template>
 
           <template id="queryUiFilterAxisItem">
             <li>
-              <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
+              <label title="Move this item to the left">
+                <button id="-move-left">Move item left</button>
+              </label>
               <details>
                 <summary>
                   <span>caption</span>
@@ -1312,10 +1543,16 @@
                 <ol></ol>
               </details>
               <menu>
-                <label title="Click to open the filter dialog to edit the filter."><button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button></label>
-                <label title="Remove this item from the axis"><button id="-remove-from-axis">Remove item from axis</button></label>
+                <label title="Click to open the filter dialog to edit the filter.">
+                  <button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button>
+                </label>
+                <label title="Remove this item from the axis">
+                  <button id="-remove-from-axis">Remove item from axis</button>
+                </label>
               </menu>
-              <label title="Move this item to the right"><button id="-move-right">Move item right</button></labe>
+              <label title="Move this item to the right">
+                <button id="-move-right">Move item right</button>
+              </labe>
             </li>
           </template>
         </div>
