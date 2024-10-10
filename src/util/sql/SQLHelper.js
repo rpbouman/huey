@@ -99,13 +99,28 @@ function createNumberFormatter(fractionDigits){
                 }
               }
             }
-            stringValue = intFormatter.format(BigInt(integerPart));
-            if (fractionalPart && options.minimumFractionDigits > 0) {
+
+            integerPart = BigInt(integerPart);
+
+            if (fractionalPart) {
+              if (fractionalPart.length > options.maximumFractionDigits) {
+                fractionalPart = parseFloat('0.' + fractionalPart).toFixed(options.maximumFractionDigits);
+                if (parseFloat(fractionalPart) >= 1) {
+                  integerPart += 1n;
+                }
+                fractionalPart = String(fractionalPart).split('.')[1];
+              }
+              
               if (decimalSeparator === undefined) {
                 decimalSeparator = '.';
               }
-              stringValue += decimalSeparator + fractionalPart;
             }
+            
+            stringValue = intFormatter.format(integerPart);
+            if (fractionalPart) {
+              stringValue = `${stringValue}${decimalSeparator}${fractionalPart}`;
+            }
+            
             return stringValue;
         }
       }
