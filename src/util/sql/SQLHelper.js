@@ -100,13 +100,13 @@ function createNumberFormatter(fractionDigits){
               }
             }
 
-            integerPart = BigInt(integerPart);
+            var integerPart = BigInt(integerPart);
 
             if (fractionalPart) {
               if (fractionalPart.length > options.maximumFractionDigits) {
                 fractionalPart = parseFloat('0.' + fractionalPart).toFixed(options.maximumFractionDigits);
                 if (parseFloat(fractionalPart) >= 1) {
-                  integerPart += 1n;
+                  integerPart += (integerPart >= 0n ? 1n : -1n);
                 }
                 fractionalPart = String(fractionalPart).split('.')[1];
               }
