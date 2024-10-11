@@ -157,6 +157,10 @@ class SqlQueryGenerator {
           columnName: unnestingOperationItem.alias,
           memberExpressionPath: unnestingItemMemberExpressionPathPostfix
         });
+        if (!unnestingItemMemberExpressionPathPostfix.length) {
+          delete newItem.derivation;
+          delete newItem.memberExpressionPath;
+        }
         newItems.push(newItem);
         
       } // end items loop
@@ -174,11 +178,11 @@ class SqlQueryGenerator {
     return ctes;
   }
   
-  static #getSqlSelectStatementForFinalStage(cte){
+  static #getSqlSelectStatementForFinalStage(cte, originalQueryAxisItems, includeCountAll){
     var sql = '';
     var columnExpressions = {};
     cte.items.forEach(function(item, index){
-      var originalItem = queryAxisItems[index];
+      var originalItem = originalQueryAxisItems[index];
       var caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
       var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
       columnExpressions[caption] = selectListExpression;
@@ -201,7 +205,7 @@ class SqlQueryGenerator {
       var columnExpression = columnExpressions[columnId];
       var orderByExpression = columnExpression;
       
-      if (includeCountAll && i >= queryAxisItems.length) {
+      if (includeCountAll && i >= originalQueryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
         // we need that count all to figure out how many tuples there are on the axis in total
         selectListExpressions.push(columnExpression);
@@ -210,7 +214,7 @@ class SqlQueryGenerator {
       }
       
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
-      var queryAxisItem = queryAxisItems[i];
+      var queryAxisItem = originalQueryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
       
       if (queryAxisItem.includeTotals){
@@ -274,6 +278,41 @@ class SqlQueryGenerator {
     return sql;
   }
 
+  static #getSqlSelectStatementForIntermediateStage(cte, sqlOptions){
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    var sql;
+    var selectListExpressions = {};
+    cte.items.forEach(function(item){
+      if (item.isUnnestingExpression === true) {
+        var arrayDerivation = unnestingFunctions[item.unnestingFunction];
+        var expressionTemplate = arrayDerivation.expressionTemplate;
+        var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
+        var unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
+        selectListExpressions[item.alias] = unnestingExpression;
+      }
+      else {
+        var column = item.alias || item.columnName;
+        if (selectListExpressions[column] === undefined) {
+          selectListExpressions[column] = getQualifiedIdentifier(cte.alias, item.columnName);
+        }
+      }
+    });
+    var sqlSelectList = Object.keys(selectListExpressions).map(function(columnId){
+      return `${selectListExpressions[columnId]} AS ${getQuotedIdentifier(columnId)}`
+    });
+    sql = [
+      `SELECT ${sqlSelectList.join('\n,')}`,
+      cte.from
+    ];
+    if (cte.where){
+      sql.push(`WHERE ${cte.where}`);
+    }
+    sql.unshift(`"${cte.alias}" AS (`)
+    sql.push(')');
+    sql = sql.join('\n');
+    return sql;
+  }
+
   static getSqlSelectStatement(queryModel, axisId, includeCountAll) {
     var sqlOptions = normalizeSqlOptions();
     var queryAxis = queryModel.getQueryAxis(axisId);
@@ -284,8 +323,6 @@ class SqlQueryGenerator {
     
     var datasource = queryModel.getDatasource();
         
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-
     // analyze the filter items and store them in a dict: 
     // - filter items that require unnesting are stored by memberExpressionPath
     var filterAxis = queryModel.getFiltersAxis();
@@ -299,41 +336,14 @@ class SqlQueryGenerator {
       filterAxisItemsByNestingStage
     );
     
-    var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(ctes.pop()); 
+    var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(
+      ctes.pop(), 
+      queryAxisItems, 
+      includeCountAll
+    ); 
     var sqls = ctes.map(function(cte){
-      var sql;
-      var selectListExpressions = {};
-      cte.items.forEach(function(item){
-        if (item.isUnnestingExpression === true) {
-          var arrayDerivation = unnestingFunctions[item.unnestingFunction];
-          var expressionTemplate = arrayDerivation.expressionTemplate;
-          var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
-          var unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
-          selectListExpressions[item.alias] = unnestingExpression;
-        }
-        else {
-          var column = item.alias || item.columnName;
-          if (selectListExpressions[column] === undefined) {
-            selectListExpressions[column] = getQualifiedIdentifier(cte.alias, item.columnName);
-          }
-        }
-      });
-      var sqlSelectList = Object.keys(selectListExpressions).map(function(columnId){
-        return `${selectListExpressions[columnId]} AS ${getQuotedIdentifier(columnId)}`
-      });
-      sql = [
-        `SELECT ${sqlSelectList.join('\n,')}`,
-        cte.from
-      ];
-      if (cte.where){
-        sql.push(`WHERE ${cte.where}`);
-      }
-      sql.unshift(`"${cte.alias}" AS (`)
-      sql.push(')');
-      sql = sql.join('\n');
-      return sql;
+      return SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
     });
-
     if (sqls.length) {
       sql = `WITH ${sqls.join('\n,')}\n${sql}`;
     }
