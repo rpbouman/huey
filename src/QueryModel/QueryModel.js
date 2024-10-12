@@ -990,7 +990,7 @@ class QueryModel extends EventEmitter {
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
         var strippedItem = {column: axisItem.columnName};
-        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
+        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;  
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
         strippedItem.aggregator = axisItem.aggregator;
