@@ -213,8 +213,12 @@ class QueryAxisItem {
   }
 
   static getQueryAxisItemDataType(queryAxisItem){
-    var columnType = queryAxisItem.columnType;    
+    var columnType = queryAxisItem.columnType;
     var dataType = columnType;
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
+    }
 
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
@@ -225,9 +229,6 @@ class QueryAxisItem {
       else
       if (derivationInfo.preservesColumnType){
         dataType = columnType;
-      }
-      else {
-        dataType = undefined;
       }
     }
 

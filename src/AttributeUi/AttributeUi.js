@@ -486,23 +486,17 @@ class AttributeUi {
     }
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
-    var originalType = columnType;
  
     var memberExpressionPath = node.getAttribute('data-member_expression_path');
     if (memberExpressionPath) {
       memberExpressionPath = JSON.parse(memberExpressionPath);
-      columnType = node.getAttribute('data-member_expression_type');
     }
     
     var derivation = node.getAttribute('data-derivation');
-    if (derivation ===  'elements') {
-      columnType = node.getAttribute('data-element_type');
-    }
     var aggregator = aggregator || node.getAttribute('data-aggregator');
 
     var itemConfig = {
       axis: axis,
-      originalType: originalType, // the type of column from where this item is derived
       columnName: columnName,
       columnType: columnType,     // the type of this item's values
       derivation: derivation,

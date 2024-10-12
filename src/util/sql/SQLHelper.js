@@ -1177,7 +1177,13 @@ function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
     var typeDescriptor = getStructTypeDescriptor(type);
     var memberExpression = memberExpressionPath[0];
-    var memberExpressionType = typeDescriptor[memberExpression];
+    var memberExpressionType;
+    if (memberExpression === 'unnest()'){
+      memberExpressionType = type.slice(0, -2);
+    }
+    else {
+      memberExpressionType = typeDescriptor[memberExpression];
+    }
     return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
   }
   else {
