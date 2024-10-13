@@ -57,7 +57,7 @@ class SqlQueryGenerator {
   }
   
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();    
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
     var dataFoundationAlias = '__huey_data_foundation';
     var fromClause = datasource.getFromClauseSql(dataFoundationAlias);
     
@@ -82,8 +82,10 @@ class SqlQueryGenerator {
     do {
       cte = ctes[cteIndex++];
       // at the start of a new stage, initialize
+      var unnestingDerivation = undefined;
       var unnestingItem = undefined;
       var unnestingOperationItem = undefined;
+      var memberPathExpressionElement;
       var unnestingItemMemberExpressionPathIndex = undefined;
       var unnestingItemMemberExpressionPathPrefix = undefined;
       var unnestingItemMemberExpressionPathPrefixString = undefined;
@@ -110,17 +112,21 @@ class SqlQueryGenerator {
           // if we haven't found an unnesting operation yet, we go looking for
           // by examining each part of the member expression path.
           for (var j = 0; j < currentItemMemberExpressionPath.length; j++) {
-            var memberPathExpressionElement = currentItemMemberExpressionPath[j];
-            var unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
+            memberPathExpressionElement = currentItemMemberExpressionPath[j];
+            unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
             if (unnestingDerivation === undefined) {
               continue;
             }
+            
             // we found an unnesting operation!
             unnestingItem = currentItem;
             unnestingItemMemberExpressionPathIndex = j;
             unnestingItemMemberExpressionPathPrefix = currentItemMemberExpressionPath.slice(0, j);
             unnestingItemMemberExpressionPathPrefixString = unnestingItemMemberExpressionPathPrefix.join('.');
-            unnestingItemMemberExpressionType = unnestingDerivation.columnType || (getMemberExpressionType(currentItem.columnType, unnestingItemMemberExpressionPathPrefix)).slice(0,-2);
+            unnestingItemMemberExpressionType = getMemberExpressionType(
+              currentItem.columnType, 
+              unnestingItemMemberExpressionPathPrefix
+            ).slice(0,-2);
             
             // add an unnesting operation to the current cte.
             unnestingOperationItem = {
@@ -129,15 +135,16 @@ class SqlQueryGenerator {
               columnType: currentItem.columnType,
               elementType: unnestingItemMemberExpressionType,
               memberExpressionPath: unnestingItemMemberExpressionPathPrefix,
-              unnestingFunction: memberPathExpressionElement,
-              alias: [
-                currentItem.columnName, 
-                unnestingItemMemberExpressionPathPrefixString, 
-                currentItemMemberExpressionPath[j]
-              ].join('.')
+              // we use this to record which unnesting functions should be called at this level.
+              // currently it could be either unnest(), generate_subscrips(), or both
+              // at the bottem part of the outer loop, when creating items for the next cte, 
+              // we count how many times there are items based on either of these functions.
+              // Then, when generating SQL we figure if we have have to generate SQL expressions
+              // for either or both these functions
+              unnestingFunctions: {}
             };
-            cte.items.push(unnestingOperationItem);
             
+            cte.items.push(unnestingOperationItem);
             break;
           }
         }
@@ -158,13 +165,31 @@ class SqlQueryGenerator {
         // if we arrive here, it means the current item belongs to the current unnesting stage.
         // we already added the unnesting operation to the current cte
         // so where we add the rewritten version of the item as items for the next cte.
+        
         var unnestingItemMemberExpressionPathPostfix = currentItemMemberExpressionPath.slice(unnestingItemMemberExpressionPathIndex + 1);
+        memberPathExpressionElement = currentItemMemberExpressionPath[unnestingItemMemberExpressionPathIndex];
+        if (unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] === undefined){
+          unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] = 1;
+        }
+        else {
+          unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] += 1;
+        }
+        unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
         var newItem = Object.assign({}, currentItem, {
-          columnName: unnestingOperationItem.alias,
-          columnType: unnestingOperationItem.elementType,
+          columnName: [
+            unnestingItem.columnName,
+            unnestingItemMemberExpressionPathPrefixString, 
+            memberPathExpressionElement
+          ].join('.'),
+          columnType: unnestingDerivation.columnType || unnestingOperationItem.elementType,
           memberExpressionPath: unnestingItemMemberExpressionPathPostfix
         });
+        
         if (!unnestingItemMemberExpressionPathPostfix.length) {
+          // if the unnesting operation is the terminal operation in the memberExpressionPath,
+          // then the new item should be made terminal as well.
+          // the unnesting operation itself is a derivation, and since that was unnested in the previous cte,
+          // it must not be unnested again at a later level, so we remove that info here.
           delete newItem.derivation;
           delete newItem.memberExpressionPath;
         }
@@ -291,11 +316,15 @@ class SqlQueryGenerator {
     var selectListExpressions = {};
     cte.items.forEach(function(item){
       if (item.isUnnestingExpression === true) {
-        var arrayDerivation = unnestingFunctions[item.unnestingFunction];
-        var expressionTemplate = arrayDerivation.expressionTemplate;
-        var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
-        var unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
-        selectListExpressions[item.alias] = unnestingExpression;
+        var itemUnnestingFunctions = item.unnestingFunctions;
+        Object.keys(itemUnnestingFunctions).forEach(function(unnestingFunction){
+          var arrayDerivation = unnestingFunctions[unnestingFunction];
+          var expressionTemplate = arrayDerivation.expressionTemplate;
+          var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
+          var unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
+          var alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
+          selectListExpressions[alias] = unnestingExpression;
+        });
       }
       else {
         var column = item.alias || item.columnName;
