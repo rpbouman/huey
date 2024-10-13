@@ -213,8 +213,12 @@ class QueryAxisItem {
   }
 
   static getQueryAxisItemDataType(queryAxisItem){
-    var columnType = queryAxisItem.columnType;    
+    var columnType = queryAxisItem.columnType;
     var dataType = columnType;
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
+    }
 
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
@@ -225,9 +229,6 @@ class QueryAxisItem {
       else
       if (derivationInfo.preservesColumnType){
         dataType = columnType;
-      }
-      else {
-        dataType = undefined;
       }
     }
 
@@ -989,7 +990,7 @@ class QueryModel extends EventEmitter {
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
         var strippedItem = {column: axisItem.columnName};
-        
+        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;  
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
         strippedItem.aggregator = axisItem.aggregator;
