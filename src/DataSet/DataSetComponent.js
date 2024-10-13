@@ -10,6 +10,9 @@ class DataSetComponent {
   async #getDatasouceManagedConnection(){
     var queryModel = this.#queryModel;
     var datasource = queryModel.getDatasource();
+    if (!datasource){
+      return undefined;
+    }
     var managedConnection = await datasource.getManagedConnection();
     return managedConnection;
   }
