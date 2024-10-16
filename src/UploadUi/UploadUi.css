@@ -10,6 +10,7 @@ dialog#uploadUi > section > details > summary > label {
 dialog#uploadUi > section > details > summary > progress {
   display: block;
   width: 100%;
+  margin-top: 2px;
 }
 
 dialog#uploadUi > section > details[aria-invalid=true] > summary > progress {
@@ -46,6 +47,16 @@ dialog#uploadUi > header > p#uploadUiDescription > span.analyzeActionButton::aft
 dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]::after {
   /* analyze */
   content: '\f3a3';  
+}
+
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]:after,
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]:after {
+  color: var( --huey-icon-color-subtle );
+}
+
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]:hover::after,
+dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]:hover::after {
+  color: var( --huey-icon-color-highlight );
 }
 
 dialog#uploadUi > section > details > summary {
