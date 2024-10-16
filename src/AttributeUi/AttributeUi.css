@@ -70,6 +70,14 @@
   content: "\f61a";
 }
 
+.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > .icon::before,
+.attributeUi details[data-nodetype=member][data-member_expression_type^=MAP] > summary > .icon::before,
+.attributeUi details[data-nodetype=column][data-column_type^=MAP] > summary > .icon::before
+{
+  /* list-letters */
+  content: "\fc47";
+}
+
 .attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
 .attributeUi details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
