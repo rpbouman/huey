@@ -1,31 +1,22 @@
 class TupleSet extends DataSetComponent {
 
   static groupingIdAlias = '__huey_grouping_id';
-   
-  static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
+       
+  static getSqlSelectStatement(queryModel, axisId, includeCountAll){
+    var datasource = queryModel.getDatasource();
+
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
-    if (!queryAxisItems.length) {
-      return undefined;
-    }
-    
-    var selectListExpressions = {};
-    for (var i = 0; i < queryAxisItems.length; i++) {
-      var queryAxisItem = queryAxisItems[i];
-      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
-      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-      selectListExpressions[caption] = selectListExpression;
-    }
-    
-    if (includeCountAll) {
-      var countExpression = 'COUNT(*) OVER ()';
-      selectListExpressions[countExpression] = countExpression;
-    }
-    return selectListExpressions;
-  }
-    
-  static getSqlSelectStatement(queryModel, axisId, includeCountAll){
-    var sql = SqlQueryGenerator.getSqlSelectStatementForTupleSet(queryModel, axisId, includeCountAll);
+
+    var filterAxis = queryModel.getFiltersAxis();
+    var filterAxisItems = filterAxis.getItems();
+
+    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
+      datasource, 
+      queryAxisItems, 
+      filterAxisItems, 
+      includeCountAll
+    );    
     return sql;
   }
          

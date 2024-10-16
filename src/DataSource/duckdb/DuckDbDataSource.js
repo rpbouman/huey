@@ -956,6 +956,12 @@ class DuckDbDataSource extends EventEmitter {
     return this.#managedConnection;
   }
   
+  async query(sql){
+    var connection = await this.getConnection();
+    var result = await connection.query(sql);
+    return result;
+  }
+  
   async prepareStatement(sql){
     var connection = await this.getConnection();
     var preparedStatement = await connection.prepare(sql);

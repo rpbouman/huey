@@ -306,6 +306,7 @@ class QueryAxisItem {
       operator = 'IS';
       switch (filter.filterType) {
         case FilterDialog.filterTypes.EXCLUDE:
+        case FilterDialog.filterTypes.NOTLIKE:
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator += ' NOT';
       }
@@ -322,6 +323,8 @@ class QueryAxisItem {
     var sql = '', logicalOperator;
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
+
+        // INCLUDE and EXCLUDE logic        
         case FilterDialog.filterTypes.EXCLUDE:
           // in case of exclude, keep NULL values unless NULL is also in the valuelist.
           // https://github.com/rpbouman/huey/issues/90
@@ -341,6 +344,28 @@ class QueryAxisItem {
           }
           sql = `( ${sql} )`;
           break;
+
+        // LIKE and NOT LIKE logic        
+        case FilterDialog.filterTypes.NOTLIKE:
+          operator = 'NOT ';
+        case FilterDialog.filterTypes.LIKE:
+          var dataType = QueryAxisItem.getQueryAxisItemDataType(queryAxisItem);
+          if (dataType !== 'VARCHAR'){
+            columnExpression = `${columnExpression}::VARCHAR`;
+          }
+          operator += 'LIKE';
+          sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
+            acc += '\n';
+            if (currIndex) {
+              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+            }
+            var value = literalLists.valueLiterals[currIndex];
+            acc += `${columnExpression} ${operator} ${value}`;
+            return acc;
+          }, '');
+          break;          
+
+        // BETWEEN and NOT BETWEEN logic        
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator = 'NOT ';
           logicalOperator = 'AND';

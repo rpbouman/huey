@@ -4,6 +4,8 @@ class FilterDialog {
   static filterTypes = {
     INCLUDE: 'in',
     EXCLUDE: 'notin',
+    LIKE: 'like',
+    NOTLIKE: 'notlike',
     BETWEEN: 'between',
     NOTBETWEEN: 'notbetween'
   };
@@ -549,6 +551,14 @@ class FilterDialog {
         case FilterDialog.filterTypes.EXCLUDE:
           verb = 'excluded';
           break;
+        case FilterDialog.filterTypes.LIKE:
+          object += ' pattern';
+          verb = 'included';
+          break;
+        case FilterDialog.filterTypes.NOTLIKE:
+          object += ' pattern';
+          verb = 'excluded';
+          break;
         case FilterDialog.filterTypes.BETWEEN:
           object += ' range';
           verb = 'included';
@@ -703,8 +713,72 @@ class FilterDialog {
     }.bind(this));
     return otherFilterAxisItems;
   }
+  
+  #getSqlSelectStatementForPickList(offset, limit){
+    var datasource = this.#queryModel.getDatasource();
+    var queryAxisItem = this.#queryAxisItem;
+    
+    var queryAxisItems = [
+      Object.assign({}, queryAxisItem, {caption: 'value'}),
+      Object.assign({}, queryAxisItem, {caption: 'label'})
+    ];
+
+    var filterAxisItems = [];
+    var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
+    if (filterSearchApplyAll) {
+      filterAxisItems = filterAxisItems.concat(this.#getOtherFilterAxisItems(true));
+    }
+    
+    var search = this.#getSearch();
+    var searchString = search.value.trim();
+    if (searchString.length){
+      var autoWildcards = this.#getAutoWildChards().checked;
+      if (autoWildcards){
+        searchString = `%${searchString}%`;
+      }
+
+      var picklistFilterItem = Object.assign({}, queryAxisItem);
+      var filterValues = {};
+      filterValues[searchString] = {
+        value: searchString,
+        label: searchString,
+        literal: quoteStringLiteral(searchString)
+      }; 
+      picklistFilterItem.filter = {
+        filterType: FilterDialog.filterTypes.LIKE,
+        values: filterValues
+      }
+      filterAxisItems.push(picklistFilterItem);
+    }
+    
+    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
+      datasource, 
+      queryAxisItems,
+      filterAxisItems, 
+      offset === 0,
+      FilterDialog.#numRowsColumnName
+    );    
+    return sql;
+  }
 
   async #getPicklistValues(offset, limit){
+    var sql = this.#getSqlSelectStatementForPickList(offset, limit);
+    if (limit === undefined) {
+      limit = this.#getValuePicklistPageSize();
+      if (offset === undefined){
+        offset = 0;
+      }
+      sql += `\nLIMIT ${limit} OFFSET ${offset}`;
+    }
+    var timeMessage = `Executing filter dialog picklist query.`;
+    console.time(timeMessage);
+    var datasource = this.#queryModel.getDatasource();
+    var result = await datasource.query(sql);
+    console.timeEnd(timeMessage);
+    return result;
+  }
+
+  async #getPicklistValuesXX(offset, limit){
     this.setBusy(true);
 
     if (offset === 0) {

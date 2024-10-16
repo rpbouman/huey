@@ -14,11 +14,14 @@ class SqlQueryGenerator {
   }
 
   static #getFilterItemsByNestingStage(filterAxisItems){
+    var filterAxisItemsByNestingStage = {};
+    if (!filterAxisItems || !filterAxisItems.length){
+      return filterAxisItemsByNestingStage;
+    }
+
     // analyze the filter items and store them in a dict: 
     // - filter items that require unnesting are stored by memberExpressionPath
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    
-    var filterAxisItemsByNestingStage = {};
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();    
     _filterAxisIems: for (var i = 0; i < filterAxisItems.length; i++){
       var filterAxisItem = filterAxisItems[i];
       var memberExpressionPath = filterAxisItem.memberExpressionPath;
@@ -210,7 +213,12 @@ class SqlQueryGenerator {
     return ctes;
   }
   
-  static #getSqlSelectStatementForFinalStage(cte, originalQueryAxisItems, includeCountAll){
+  static #getSqlSelectStatementForFinalStage(
+    cte, 
+    originalQueryAxisItems, 
+    includeCountAll,
+    countAllAlias
+  ){
     var sql = '';
     var columnExpressions = {};
     cte.items.forEach(function(item, index){
@@ -280,7 +288,8 @@ class SqlQueryGenerator {
 
     if (includeCountAll) {
       var countExpression = 'COUNT(*) OVER ()';
-      selectListExpressions.push(`${countExpression} AS "${countExpression}"`);
+      countAllAlias = countAllAlias || countExpression;
+      selectListExpressions.push(`${countExpression} AS "${countAllAlias}"`);
     }
 
     var sql = [
@@ -349,23 +358,19 @@ class SqlQueryGenerator {
     return sql;
   }
 
-  static getSqlSelectStatementForTupleSet(queryModel, axisId, includeCountAll) {
-    var sqlOptions = normalizeSqlOptions();
-    var queryAxis = queryModel.getQueryAxis(axisId);
-    var queryAxisItems = queryAxis.getItems();
+  static getSqlSelectStatementForAxisItems(
+    datasource, 
+    queryAxisItems, 
+    filterAxisItems, 
+    includeCountAll,
+    countAllAlias
+  ) {
     if (!queryAxisItems.length) {
       return undefined;
     }
-    
-    var datasource = queryModel.getDatasource();
-        
-    // analyze the filter items and store them in a dict: 
-    // - filter items that require unnesting are stored by memberExpressionPath
-    var filterAxis = queryModel.getFiltersAxis();
-    var filterAxisItems = filterAxis.getItems();
-    
-    var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);    
+    var sqlOptions = normalizeSqlOptions();
 
+    var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);    
     var ctes = SqlQueryGenerator.#getUnnestingStages(
       datasource,
       queryAxisItems, 
@@ -375,7 +380,8 @@ class SqlQueryGenerator {
     var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(
       ctes.pop(), 
       queryAxisItems, 
-      includeCountAll
+      includeCountAll,
+      countAllAlias
     ); 
     var sqls = ctes.map(function(cte){
       var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
@@ -387,6 +393,5 @@ class SqlQueryGenerator {
     
     return sql;
   }
-
 
 }
