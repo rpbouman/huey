@@ -83,6 +83,8 @@ class QueryAxisItem {
       return caption;
     }
 
+    caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
+
     if (axisItem.axis === QueryModel.AXIS_FILTERS) {
       if (axisItem.filter === undefined || axisItem.filter.values === undefined) {
         return 'No filter set'
@@ -104,11 +106,9 @@ class QueryAxisItem {
         }
         valueLabels.push(valueLabel);
       }
-      caption = valueLabels.join("\n");
-      return caption;
+      caption = `${filter.filterType} ${valueLabels.join('\n')}`;
     }
 
-    caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
     return caption;
   }
   
