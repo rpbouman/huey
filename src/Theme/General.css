@@ -287,10 +287,13 @@ menu[role=toolbar] {
   overflow: hidden;
 }
 
-menu[role=toolbar] > label > button {
+header[role=toolbar] > label > button,
+menu[role=toolbar] > label > button,
+menu[role=menu] > li[role=menuitem] > label > button {
   display: none;
 }
 
+header[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > input[type=file] )::before 
 {  
@@ -301,6 +304,7 @@ menu[role=toolbar] > label:has( > input[type=file] )::before
   margin: 4px 4px 0px 4px;
 }
 
+header[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > input[type=file] )::before {
   color: var( --huey-icon-color-highlight );
@@ -331,10 +335,6 @@ menu[role=menu] > li[role=menuitem]:hover {
   border-color: var( --huey-light-border-color );
 }
 
-
-menu[role=menu] > li[role=menuitem] > label > button {
-  display: none;
-}
 
 code, pre {
   font-family: var( --huey-mono-font-family );

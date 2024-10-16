@@ -11,7 +11,7 @@
     />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
     <script>
-    var duckdbLibraryVersion = '1.28.1-dev287.0';
+    var duckdbLibraryVersion = '1.29.1-dev3.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
     function resourceLoaded(element){
       var url = element.href || element.src;
@@ -29,14 +29,14 @@
     </script>
 
     <!-- Inline tabler font to force early load -->
-    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.12.0/ -->
+    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/ -->
     <style type="text/css">
       @font-face {
         font-family: "tabler-icons";
         font-style: normal;
         font-weight: 400;
         font-display: block;
-        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.12.0/dist/fonts/tabler-icons.woff2?v3.12.0") format("woff2");
+        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/fonts/tabler-icons.woff2?v3.19.0") format("woff2");
       }
 
       ul#resources > li::marker {
@@ -569,6 +569,8 @@
         <select id="filterType">
           <option value="in" title="Include data that matches any of the selected values">Include</option>
           <option value="notin" title="Exclude data that matches any of the selected values">Exclude</option>
+          <option value="like" title="Include data that matches the selected patterns">Like</option>
+          <option value="notlike" title="Exclude data that matches the selected patterns">Not Like</option>
           <option value="between" title="Include data within any of the specified value ranges">Between</option>
           <option value="notbetween" title="Exclude data within any of the specified value ranges">Not Between</option>
         </select>
@@ -602,12 +604,18 @@
           </menu>
           <section>
             <div id="filterDialogSpinner" class="loader loader-medium"></div>
-            <header>
+            <header role="toolbar">
               <input
                 id="filterSearch"
                 placeholder="Type a LIKE pattern to find values..."
                 type="search"
                 title="Enter a search string to filter the value picklist (LIKE wildcards supported)"
+                tabindex="0"
+              />
+              <button 
+                id="addFilterValueButton"
+                tabindex="0"
+                title="Click to add the entered value to the list of applied filter values."
               />
             </header>
             <section>
@@ -616,6 +624,7 @@
                 multiple="true"
                 size="5"
                 title="Choose values from the picklist to add them to the Filter values list. Hold SHIFT-key to select multiple items."
+                tabindex="0"                
               >
               </select>
             </section>
@@ -624,7 +633,7 @@
         </header>
         <section>
           <div>
-            <label for="filterValueList">Select values:</label>
+            <label for="filterValueList">Applied filter values:</label>
             <select
               id="filterValueList"
               multiple="true"
@@ -1008,7 +1017,7 @@
           <li>Huey version 0.0.7 - Alabio</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
           <li><a id="duckDbLibraryUrl" target="_blank"></a></li>
-          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.12.0</a></li>
+          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.19.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
