@@ -138,8 +138,11 @@ class FilterDialog {
     }.bind(this));
 
     this.#initSearchQueryHandler();
+    this.#initAddFilterValueButton();
   }
 
+  // this adds the event handler that fires on search to update the values list
+  // we need to check everytime if the timeout has changed, because then we have to update the handler.
   #initSearchQueryHandler(){
     var searchAutoQueryTimeout = this.#getSearchAutoQueryTimeout();
     if (this.#currentSearchAutoQueryTimeout === searchAutoQueryTimeout){
@@ -158,6 +161,121 @@ class FilterDialog {
     }, this, searchAutoQueryTimeout);
     
     this.#currentSearchAutoQueryTimeout = searchAutoQueryTimeout;
+  }
+  
+  #initAddFilterValueButton(){
+    var addFilterValueButton = this.#getAddFilterValueButton();
+    addFilterValueButton.addEventListener('click', function(event){
+      this.#addValueToFilterValues(event);
+    }.bind(this));
+  }
+  
+  #addValueToFilterValues(){
+    // grab the value from the search input
+    var value = this.#getSearch().value;
+    value = value.trim();
+    // if there is no value (or empty string), do nothing
+    // (might have to revisit empty string behavior)
+    if (!value.length){
+      return;
+    }
+    // check the filter type (opearator)
+    var filterType = this.#getFilterType().value;
+    var isRangeFilterType = false, isPatternFilterType = false;
+    switch (filterType){
+      case FilterDialog.filterTypes.LIKE:
+      case FilterDialog.filterTypes.NOTLIKE:
+        isPatternFilterType = true;
+        break;
+      case FilterDialog.filterTypes.BETWEEN:
+      case FilterDialog.filterTypes.NOTBETWEEN:
+        isRangeFilterType = true;
+        break;
+      default:
+    }
+
+    // if the filter type is LIKE or NOT LIKE then check whether auto-wildcards is enabled
+    if (isPatternFilterType) {
+      // if auto-wildcards is enabled then modify the value to have leading and trailing wildcard.  
+      var autoWildcards = this.#getAutoWildChards().checked;
+      if (autoWildcards) {
+        var wildcard = '%';
+        if (!value.startsWith('%')) {
+          value = wildcard + value;
+        }
+        if (!value.endsWith('%')){
+          value = value + wildcard;
+        }
+      }
+    }
+
+    var label = value;
+    var literal = this.#queryAxisItem.literalWriter(value);
+
+    var options, option;
+
+    var toFilterValuesList = this.#getToFilterValuesList();
+    if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
+      var option = toFilterValuesList.options[toFilterValuesList.selectedIndex];
+      option.value = value;
+      option.label = label;
+      option.setAttribute('data-sql-literal', literal);
+      toFilterValuesList.selectedIndex = -1;
+      return;
+    }
+
+    var filterValuesList = this.#getFilterValuesList();
+    var option, options = filterValuesList.options;
+    var sameValueOptions = [];
+    var valueAdded = false;
+    for (var i = 0; i < options.length; i++){
+      option = options[i];
+      if (option.selected) {
+        option.value = value;
+        option.label = label;
+        option.setAttribute('data-sql-literal', literal);
+        valueAdded = true;
+        continue;
+      }
+      if (option.value === value) {
+        sameValueOptions.push(option);
+      }
+    }
+    
+    if(valueAdded === true){
+      if (sameValueOptions.length) {
+        for (var i = 0; i < sameValueOptions.length; i++){
+          option = sameValueOptions[i];
+          option.parentNode.removeChild(option);
+        }
+      }
+    } 
+    else 
+    if (sameValueOptions.length) {
+      for (var i = 1; i < sameValueOptions.length; i++){
+        option = sameValueOptions[i];
+        option.parentNode.removeChild(option);
+      }
+    }
+    else {
+      option = this.#createOptionElementFromValues({
+        value: value,
+        label: label,
+        literal: literal
+      });
+      filterValuesList.appendChild(option);
+      if (isRangeFilterType) {
+        option = this.#createOptionElementFromValues({
+          value: value,
+          label: label,
+          literal: literal
+        });
+        var selectedIndex = toFilterValuesList.options.length;
+        toFilterValuesList.appendChild(option);
+        toFilterValuesList.selectedIndex = selectedIndex;
+      }
+    }
+    
   }
 
   #handleFilterValuesListChange(event){
@@ -217,7 +335,7 @@ class FilterDialog {
     };
   }
 
-  #extractValuesFromOption(option){
+  #extractValueFromOption(option){
     var valueObject = {
       value: option.value,
       label: option.label,
@@ -227,6 +345,16 @@ class FilterDialog {
       valueObject.isSqlNull = true;
     }
     return valueObject;
+  }
+  
+  #extractValuesFromOptions(options){
+    var optionObjects = {};
+    for (var i = 0; i < options.length; i++){
+      var option = options[i];
+      var valueObject = this.#extractValueFromOption(option);
+      optionObjects[option.value] = valueObject;
+    }
+    return optionObjects;
   }
 
   #createOptionElementFromValues(valueObject){
@@ -241,15 +369,10 @@ class FilterDialog {
     return optionElement;
   }
 
-  #extractOptionsFromSelectList(selectList){
-    var optionObjects = {};
-    var options = selectList.options;
-    for (var i = 0; i < options.length; i++){
-      var option = options[i];
-      var valueObject = this.#extractValuesFromOption(option);
-      optionObjects[option.value] = valueObject;
-    }
-    return optionObjects;
+  #extractOptionsFromSelectList(selectList, selected){
+    var options = selectList[ selected === true ? 'selectedOptions' : 'options'];
+    var values = this.#extractValuesFromOptions(options);
+    return values;
   }
 
   #renderOptionsToSelectList(options, selectList){
@@ -277,8 +400,8 @@ class FilterDialog {
     var selectedOption;
     if (selectedOptions.length === 1) {
       var selectedOption = selectedOptions[0];
-      // it is a loader option, so load more values and exit.
       if (selectedOption.getAttribute('data-next-page-loader') === 'true') {
+        // it is a loader option, so load more values and exit.
         var offset = parseInt(selectedOption.getAttribute('data-offset'), 10);
         var limit = parseInt(selectedOption.getAttribute('data-limit'), 10);
         this.#updatePicklist(offset, limit);
@@ -357,7 +480,7 @@ class FilterDialog {
           var correspondingOptionValueObject = correspondingValues[correspondingValue];
           delete correspondingValues[correspondingValue];
 
-          values[selectedOption.value] = this.#extractValuesFromOption(selectedOption);
+          values[selectedOption.value] = this.#extractValueFromOption(selectedOption);
           correspondingValues[correspondingValue] = correspondingOptionValueObject;
           valueSelectionStatusText = `Range modified.`;
         }
@@ -378,12 +501,12 @@ class FilterDialog {
           if (option.selected) {
             // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
-              rangeStart = this.#extractValuesFromOption(option);
+              rangeStart = this.#extractValueFromOption(option);
             }
 
             // update the end of the current range (we keep updating it as long as the options are selected)
             if (rangeStart !== undefined) {
-              rangeEnd = this.#extractValuesFromOption(option);
+              rangeEnd = this.#extractValueFromOption(option);
             }
           }
 
@@ -417,7 +540,7 @@ class FilterDialog {
         if (currentValues[selectedOption.value] !== undefined) {
           continue;
         }
-        currentValues[selectedOption.value] = this.#extractValuesFromOption(selectedOption);
+        currentValues[selectedOption.value] = this.#extractValueFromOption(selectedOption);
       }
     }
 
@@ -470,9 +593,9 @@ class FilterDialog {
       }
       else {
         // neither side has a selected option, so we add it to preserve
-        currentValues[option.value] = this.#extractValuesFromOption(option);
+        currentValues[option.value] = this.#extractValueFromOption(option);
         if (toOption){
-          currentToValues[toOption.value] = this.#extractValuesFromOption(toOption);
+          currentToValues[toOption.value] = this.#extractValueFromOption(toOption);
         }
       }
     }
@@ -489,6 +612,10 @@ class FilterDialog {
     var footer = filterDialog.getElementsByTagName('footer').item(0);
     var buttons = footer.getElementsByTagName('button');
     return buttons;
+  }
+
+  #getAddFilterValueButton(){
+    return byId('addFilterValueButton');
   }
 
   #getOkButton(){
