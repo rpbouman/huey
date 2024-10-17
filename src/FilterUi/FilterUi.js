@@ -73,23 +73,13 @@ class FilterDialog {
     }.bind(this));
 
     // clear selected button clears the selected values from the value lists
-    this.#getClearSelectedButton().addEventListener('click', function(event){
-      this.#removeSelectedValues();
-      this.#updateValueSelectionStatusText();
-    }.bind(this));
+    this.#getClearSelectedButton().addEventListener('click', this.#clearHighlightedValues.bind(this));
 
     // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
     this.#getValuePicklist().addEventListener('change', this.#handleValuePicklistChange.bind(this));
 
-    this.#getFilterValuesList().addEventListener('change', this.#handleFilterValuesListChange.bind(this));
-    this.#getToFilterValuesList().addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
-
-    // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
-    // this handler ensures the scrolbar moves both lists.
-    this.#getToFilterValuesList().addEventListener('scroll', function(event){
-      var target = event.target;
-      this.#getFilterValuesList().scrollTop = target.scrollTop;
-    }.bind(this));
+    this.#initFilterValuesList();
+    this.#initToFilterValuesList();
 
     this.#getFilterType().addEventListener('change', function(event){
       var filterType = event.target;
@@ -145,6 +135,38 @@ class FilterDialog {
       }
     }.bind(this));
     this.#initAddFilterValueButton();
+  }
+
+  #clearHighlightedValues(){
+    this.#removeSelectedValues();
+    this.#updateValueSelectionStatusText();
+  }
+
+  #initFilterValuesList(){
+    var filterValuesList = this.#getFilterValuesList();
+    filterValuesList.addEventListener('change', this.#handleFilterValuesListChange.bind(this));
+    filterValuesList.addEventListener('keydown', this.#handleFilterValuesListKeyDown.bind(this));
+  }
+
+  #initToFilterValuesList(){
+    var toFilterValuesList = this.#getToFilterValuesList();
+    
+    toFilterValuesList.addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
+    toFilterValuesList.addEventListener('keydown', this.#handleFilterValuesListKeyDown.bind(this));
+    
+    // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
+    // this handler ensures the scrolbar moves both lists.
+    toFilterValuesList.addEventListener('scroll', function(event){
+      var target = event.target;
+      this.#getFilterValuesList().scrollTop = target.scrollTop;
+    }.bind(this));
+  }
+  
+  #handleFilterValuesListKeyDown(event){
+    if (event.code !== 'Delete'){
+      return;
+    }
+    this.#clearHighlightedValues();
   }
 
   // this adds the event handler that fires on search to update the values list
