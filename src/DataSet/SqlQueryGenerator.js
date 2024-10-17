@@ -53,6 +53,9 @@ class SqlQueryGenerator {
   
   static #getConditionForFilterItems(filterItems, tableAlias){
     return filterItems
+    .filter(function(filterItem){
+      return filterItem.filter && Object.keys(filterItem.filter.values).length
+    })
     .map(function(filterItem){
       return QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
     })
@@ -217,7 +220,8 @@ class SqlQueryGenerator {
     cte, 
     originalQueryAxisItems, 
     includeCountAll,
-    countAllAlias
+    countAllAlias,
+    defaultSortNulls
   ){
     var sql = '';
     var columnExpressions = {};
@@ -256,6 +260,8 @@ class SqlQueryGenerator {
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
       var queryAxisItem = originalQueryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
+      var sortNulls = queryAxisItem.sortNulls || defaultSortNulls
+      sortNulls = sortNulls ? ` NULLS ${sortNulls}` : '';
       
       if (queryAxisItem.includeTotals){
         var groupingSet = [].concat(groupByExpressions, [columnExpression]);
@@ -270,8 +276,10 @@ class SqlQueryGenerator {
         orderByExpression = `${orderByAggregate}( ${orderByExpression} )`;
       }
       
-      groupByExpressions.push(columnExpression);      
-      orderByExpressions.push(`${orderByExpression} ${sortDirection}`);
+      groupByExpressions.push(columnExpression);
+      orderByExpression = `${orderByExpression} ${sortDirection}`;
+      orderByExpression += sortNulls;
+      orderByExpressions.push(orderByExpression);
     }
     
     if (groupingSets.length){
@@ -363,7 +371,8 @@ class SqlQueryGenerator {
     queryAxisItems, 
     filterAxisItems, 
     includeCountAll,
-    countAllAlias
+    countAllAlias,
+    defaultSortNulls
   ) {
     if (!queryAxisItems.length) {
       return undefined;
@@ -381,7 +390,8 @@ class SqlQueryGenerator {
       ctes.pop(), 
       queryAxisItems, 
       includeCountAll,
-      countAllAlias
+      countAllAlias,
+      defaultSortNulls
     ); 
     var sqls = ctes.map(function(cte){
       var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
