@@ -1,6 +1,29 @@
 class TupleSet extends DataSetComponent {
 
   static groupingIdAlias = '__huey_grouping_id';
+  
+  //  
+  static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    if (!queryAxisItems.length) {
+      return undefined;
+    }
+    
+    var selectListExpressions = {};
+    for (var i = 0; i < queryAxisItems.length; i++) {
+      var queryAxisItem = queryAxisItems[i];
+      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+      selectListExpressions[caption] = selectListExpression;
+    }
+    
+    if (includeCountAll) {
+      var countExpression = 'COUNT(*) OVER ()';
+      selectListExpressions[countExpression] = countExpression;
+    }
+    return selectListExpressions;
+  }       
        
   static getSqlSelectStatement(queryModel, axisId, includeCountAll){
     var datasource = queryModel.getDatasource();
