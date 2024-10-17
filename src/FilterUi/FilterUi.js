@@ -138,6 +138,12 @@ class FilterDialog {
     }.bind(this));
 
     this.#initSearchQueryHandler();
+    this.#getSearch().addEventListener('keydown', function(event){
+      if (event.code === 'Enter'){
+        this.#addValueToFilterValues(event);
+        event.target.value = '';
+      }
+    }.bind(this));
     this.#initAddFilterValueButton();
   }
 
@@ -172,7 +178,8 @@ class FilterDialog {
   
   #addValueToFilterValues(){
     // grab the value from the search input
-    var value = this.#getSearch().value;
+    var search = this.#getSearch(); 
+    var value = search.value;
     value = value.trim();
     // if there is no value (or empty string), do nothing
     // (might have to revisit empty string behavior)
@@ -221,6 +228,7 @@ class FilterDialog {
       option.label = label;
       option.setAttribute('data-sql-literal', literal);
       toFilterValuesList.selectedIndex = -1;
+      search.focus();
       return;
     }
 
@@ -275,7 +283,7 @@ class FilterDialog {
         toFilterValuesList.selectedIndex = selectedIndex;
       }
     }
-    
+    search.focus();
   }
 
   #handleFilterValuesListChange(event){
@@ -883,7 +891,8 @@ class FilterDialog {
       queryAxisItems,
       filterAxisItems, 
       offset === 0,
-      FilterDialog.#numRowsColumnName
+      FilterDialog.#numRowsColumnName,
+      'FIRST'
     );    
     return sql;
   }
