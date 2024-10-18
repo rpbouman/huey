@@ -1088,6 +1088,7 @@ class QueryModel extends EventEmitter {
           config.columnType = item.columnType;
           config.derivation = item.derivation;
           config.aggregator = item.aggregator;
+          config.memberExpressionPath = item.memberExpressionPath;
           config.caption = item.caption;
           if (item.includeTotals === true){
             config.includeTotals = true;
