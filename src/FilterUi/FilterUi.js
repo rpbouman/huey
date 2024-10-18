@@ -129,7 +129,7 @@ class FilterDialog {
 
     this.#initSearchQueryHandler();
     this.#getSearch().addEventListener('keydown', function(event){
-      if (event.code === 'Enter'){
+      if (event.key === 'Enter'){
         this.#addValueToFilterValues(event);
         event.target.value = '';
       }
@@ -163,7 +163,7 @@ class FilterDialog {
   }
   
   #handleFilterValuesListKeyDown(event){
-    if (event.code !== 'Delete'){
+    if (event.key !== 'Delete'){
       return;
     }
     this.#clearHighlightedValues();
