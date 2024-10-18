@@ -931,8 +931,9 @@ class PivotTableUi extends EventEmitter {
             columnWidth += 'ch';
             label = createEl('span', {
               "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
-              title: labelText
-            }, labelText);
+            });
+            label.title = labelText;
+            label.innerText = labelText;
             tableCell.appendChild(label);
           }
           else
@@ -965,10 +966,10 @@ class PivotTableUi extends EventEmitter {
         var columnsAxisItem = columnsAxisItems[i];
         labelText = QueryAxisItem.getCaptionForQueryAxisItem(columnsAxisItem);
         label = createEl('span', {
-          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
-          title: labelText
-        }, labelText);
-
+          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
+        });
+        label.title = labelText;
+        label.innerText = labelText;
         columnWidth = labelText.length + 1;
         
         if (columnWidth > PivotTableUi.#maximumCellWidth) {
@@ -1114,10 +1115,11 @@ class PivotTableUi extends EventEmitter {
           }
 
           var label = createEl('span', {
-            "class": "pivotTableUiCellLabel",
-            title: labelText
-          }, labelText);
-
+            "class": "pivotTableUiCellLabel"
+          });
+          label.title = labelText;
+          label.innerText = labelText;
+          
           cell.appendChild(label);
 
           if (j === 0){
@@ -1290,8 +1292,9 @@ class PivotTableUi extends EventEmitter {
 
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
-            title: labelText
-          }, labelText);
+          });
+          label.title = labelText;
+          label.innerText = labelText;
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){
