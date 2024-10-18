@@ -1055,7 +1055,7 @@ class FilterDialog {
       if (count) {
         count = resultset.get(0)[FilterDialog.#numRowsColumnName];
       }
-      searchStatus.innerHTML = `${count} values found.`;
+      searchStatus.innerHTML = `${count} values found. Click to add to Filter values list`;
     }
 
     var listOfValues = this.#getValuePicklist();

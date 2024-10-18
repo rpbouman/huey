@@ -29,7 +29,7 @@ class SqlQueryGenerator {
       if (memberExpressionPath){
         _memberExpressionPath: for (var j = 0; j < memberExpressionPath.length; j++) {
           var memberExpressionPathElement = memberExpressionPath[j];
-          if (unnestingFunctions[memberPathExpressionElement] === undefined) {
+          if (unnestingFunctions[memberExpressionPathElement] === undefined) {
             continue;
           }
           memberExpressionPathString = [filterAxisItem.columnName].concat(memberExpressionPath).join('.');
