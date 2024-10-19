@@ -117,7 +117,7 @@ class FilterDialog {
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
 
-      this.#updatePicklist(0, this.#getValuePicklistPageSize());
+      this.#updatePicklist();
     }.bind(this));
 
     var autoWildcardsCheckbox = this.#getAutoWildChards();
@@ -126,7 +126,7 @@ class FilterDialog {
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
 
-      this.#updatePicklist(0, this.#getValuePicklistPageSize());
+      this.#updatePicklist();
     }.bind(this));
 
     this.#initSearchQueryHandlerOnce();
@@ -176,7 +176,7 @@ class FilterDialog {
     search.addEventListener('paste', function(event){
       event.preventDefault();
       var pastedText = getPastedText(event);
-      pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+      pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
       search.value = pastedText;      
     }.bind(this));
     this.#initSearchQueryHandler();
@@ -197,7 +197,7 @@ class FilterDialog {
 
     this.#searchQueryHandler = bufferEvents(search, 'input', function(event, count){
       if (count === undefined) {
-        this.#updatePicklist(0, this.#getValuePicklistPageSize());
+        this.#updatePicklist();
       }
     }, this, searchAutoQueryTimeout);
     
@@ -326,8 +326,9 @@ class FilterDialog {
         }
       }      
     }.bind(this));
-
+    search.value = '';
     search.focus();
+    this.#updatePicklist();
   }
 
   #handleFilterValuesListChange(event){
@@ -821,7 +822,7 @@ class FilterDialog {
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
     filterDialog.showModal();
-    this.#updatePicklist(0, this.#getValuePicklistPageSize());
+    this.#updatePicklist();
     this.#getSearch().focus();
   }
 
@@ -857,6 +858,12 @@ class FilterDialog {
   }
 
   async #updatePicklist(offset, limit){
+    if (offset === undefined){
+      offset = 0;
+    }
+    if (limit === undefined){
+      limit = this.#getValuePicklistPageSize();
+    }
     var result = await this.#getPicklistValues(offset, limit);
     this.#populatePickList(result, offset, limit);
   }
