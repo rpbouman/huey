@@ -1,5 +1,7 @@
 class FilterDialog {
 
+  static MULTIPLE_VALUES_SEPARATOR = ';';
+  
   static #numRowsColumnName = '__huey_numrows';
   static filterTypes = {
     INCLUDE: 'in',
@@ -127,13 +129,7 @@ class FilterDialog {
       this.#updatePicklist(0, this.#getValuePicklistPageSize());
     }.bind(this));
 
-    this.#initSearchQueryHandler();
-    this.#getSearch().addEventListener('keydown', function(event){
-      if (event.key === 'Enter'){
-        this.#addValueToFilterValues(event);
-        event.target.value = '';
-      }
-    }.bind(this));
+    this.#initSearchQueryHandlerOnce();
     this.#initAddFilterValueButton();
   }
 
@@ -169,6 +165,23 @@ class FilterDialog {
     this.#clearHighlightedValues();
   }
 
+  #initSearchQueryHandlerOnce(){
+    var search = this.#getSearch();
+    search.addEventListener('keydown', function(event){
+      if (event.key === 'Enter'){
+        this.#addValueToFilterValues(event);
+        event.target.value = '';
+      }
+    }.bind(this));
+    search.addEventListener('paste', function(event){
+      event.preventDefault();
+      var pastedText = getPastedText(event);
+      pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+      search.value = pastedText;      
+    }.bind(this));
+    this.#initSearchQueryHandler();
+  }
+
   // this adds the event handler that fires on search to update the values list
   // we need to check everytime if the timeout has changed, because then we have to update the handler.
   #initSearchQueryHandler(){
@@ -198,16 +211,33 @@ class FilterDialog {
     }.bind(this));
   }
   
+  static #addWildcards(searchString){
+    var wildcard = '%';
+    if (!searchString.startsWith('%')) {
+      searchString = wildcard + searchString;
+    }
+    if (!searchString.endsWith('%')){
+      searchString = searchString + wildcard;
+    }
+    return searchString;
+  }
+  
   #addValueToFilterValues(){
     // grab the value from the search input
     var search = this.#getSearch(); 
-    var value = search.value;
-    value = value.trim();
+    var searchString = search.value;
+    searchString = searchString.trim();
     // if there is no value (or empty string), do nothing
     // (might have to revisit empty string behavior)
-    if (!value.length){
+    if (!searchString.length){
       return;
     }
+    
+    var searchStrings = FilterDialog.#splitSearchString(searchString);
+    if (!searchStrings.length){
+      return;
+    }
+    
     // check the filter type (opearator)
     var filterType = this.#getFilterType().value;
     var isRangeFilterType = false, isPatternFilterType = false;
@@ -223,88 +253,80 @@ class FilterDialog {
       default:
     }
 
-    // if the filter type is LIKE or NOT LIKE then check whether auto-wildcards is enabled
-    if (isPatternFilterType) {
-      // if auto-wildcards is enabled then modify the value to have leading and trailing wildcard.  
-      var autoWildcards = this.#getAutoWildChards().checked;
-      if (autoWildcards) {
-        var wildcard = '%';
-        if (!value.startsWith('%')) {
-          value = wildcard + value;
-        }
-        if (!value.endsWith('%')){
-          value = value + wildcard;
-        }
-      }
-    }
-
-    var label = value;
-    var literal = this.#queryAxisItem.literalWriter(value);
-
-    var options, option;
-
     var toFilterValuesList = this.#getToFilterValuesList();
-    if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
-      var option = toFilterValuesList.options[toFilterValuesList.selectedIndex];
-      option.value = value;
-      option.label = label;
-      option.setAttribute('data-sql-literal', literal);
-      toFilterValuesList.selectedIndex = -1;
-      search.focus();
-      return;
-    }
-
     var filterValuesList = this.#getFilterValuesList();
-    var option, options = filterValuesList.options;
-    var sameValueOptions = [];
-    var valueAdded = false;
-    for (var i = 0; i < options.length; i++){
-      option = options[i];
-      if (option.selected) {
-        option.value = value;
+    var autoWildcards = this.#getAutoWildChards().checked;
+    var literalWriter = this.#queryAxisItem.literalWriter;
+    searchStrings.forEach(function(searchString){
+      if (isPatternFilterType && autoWildcards) {
+        searchString = FilterDialog.#addWildcards(searchString);
+      }
+      var label = searchString ;
+      var literal = literalWriter ? literalWriter(searchString) : searchString;
+      
+      var options, option;
+
+      if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
+        option = toFilterValuesList.options[toFilterValuesList.selectedIndex];
+        option.value = searchString;
         option.label = label;
         option.setAttribute('data-sql-literal', literal);
-        valueAdded = true;
-        continue;
+        toFilterValuesList.selectedIndex = -1;
+        return;
       }
-      if (option.value === value) {
-        sameValueOptions.push(option);
+
+      options = filterValuesList.options;
+      var sameValueOptions = [];
+      var valueAdded = false;
+      for (var i = 0; i < options.length; i++){
+        option = options[i];
+        if (option.selected) {
+          option.value = searchString;
+          option.label = label;
+          option.setAttribute('data-sql-literal', literal);
+          valueAdded = true;
+          continue;
+        }
+        if (option.value === searchString) {
+          sameValueOptions.push(option);
+        }
       }
-    }
-    
-    if(valueAdded === true){
+      
+      if(valueAdded === true){
+        if (sameValueOptions.length) {
+          for (var i = 0; i < sameValueOptions.length; i++){
+            option = sameValueOptions[i];
+            option.parentNode.removeChild(option);
+          }
+        }
+      } 
+      else 
       if (sameValueOptions.length) {
-        for (var i = 0; i < sameValueOptions.length; i++){
+        for (var i = 1; i < sameValueOptions.length; i++){
           option = sameValueOptions[i];
           option.parentNode.removeChild(option);
         }
       }
-    } 
-    else 
-    if (sameValueOptions.length) {
-      for (var i = 1; i < sameValueOptions.length; i++){
-        option = sameValueOptions[i];
-        option.parentNode.removeChild(option);
-      }
-    }
-    else {
-      option = this.#createOptionElementFromValues({
-        value: value,
-        label: label,
-        literal: literal
-      });
-      filterValuesList.appendChild(option);
-      if (isRangeFilterType) {
+      else {
         option = this.#createOptionElementFromValues({
-          value: value,
+          value: searchString,
           label: label,
           literal: literal
         });
-        var selectedIndex = toFilterValuesList.options.length;
-        toFilterValuesList.appendChild(option);
-        toFilterValuesList.selectedIndex = selectedIndex;
-      }
-    }
+        filterValuesList.appendChild(option);
+        if (isRangeFilterType) {
+          option = this.#createOptionElementFromValues({
+            value: searchString,
+            label: label,
+            literal: literal
+          });
+          var selectedIndex = toFilterValuesList.options.length;
+          toFilterValuesList.appendChild(option);
+          toFilterValuesList.selectedIndex = selectedIndex;
+        }
+      }      
+    }.bind(this));
+
     search.focus();
   }
 
@@ -871,6 +893,16 @@ class FilterDialog {
     return otherFilterAxisItems;
   }
   
+  static #splitSearchString(searchString){
+    return searchString.split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
+    .map(function(searchString){
+      return searchString.trim();
+    })
+    .filter(function(searchString){
+      return Boolean(searchString.length);
+    });
+  }
+  
   #getSqlSelectStatementForPickList(offset, limit){
     var datasource = this.#queryModel.getDatasource();
     var queryAxisItem = this.#queryAxisItem;
@@ -887,20 +919,22 @@ class FilterDialog {
     }
     
     var search = this.#getSearch();
-    var searchString = search.value.trim();
-    if (searchString.length){
-      var autoWildcards = this.#getAutoWildChards().checked;
-      if (autoWildcards){
-        searchString = `%${searchString}%`;
-      }
+    var searchStrings = FilterDialog.#splitSearchString(search.value);
 
-      var picklistFilterItem = Object.assign({}, queryAxisItem);
+    if (searchStrings.length) {
       var filterValues = {};
-      filterValues[searchString] = {
-        value: searchString,
-        label: searchString,
-        literal: quoteStringLiteral(searchString)
-      }; 
+      var autoWildcards = this.#getAutoWildChards().checked;
+      var picklistFilterItem = Object.assign({}, queryAxisItem);
+      searchStrings.forEach(function(searchString){
+        if (autoWildcards){
+          searchString = FilterDialog.#addWildcards(searchString);
+        }
+        filterValues[searchString] = {
+          value: searchString,
+          label: searchString,
+          literal: quoteStringLiteral(searchString)
+        }; 
+      });
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
         values: filterValues
