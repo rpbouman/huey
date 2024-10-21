@@ -156,5 +156,9 @@ function initApplication(){
       busyDialog.close();
     }
   });
-   
+  
+  initPostMessageInterface();
+  if (postMessageInterface) {
+    postMessageInterface.sendReadyMessage()
+  }
 }

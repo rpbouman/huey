@@ -653,6 +653,7 @@ class DuckDbDataSource extends EventEmitter {
             sql += ` (TYPE SQLITE)`;
           }
       }
+      await this.registerFile();
       var resultSet = await connection.query(sql);
       result = true;
     }
@@ -1019,6 +1020,7 @@ class DuckDbDataSource extends EventEmitter {
     
     var sql = this.getSqlForTableSchema();
     var connection = await this.getConnection();
+    await this.registerFile();
     var columnMetadata = connection.query(sql);
     this.#columnMetadata = columnMetadata;
     return columnMetadata;

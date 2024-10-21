@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      textarea {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="postUi" style="display:none">
+      <label for="file">File:</label>
+      <input type="file" id="file"/>
+      <script src="PostMessageProtocol.js"></script>
+    </div>
+    
+    <iframe id="hueyFrame" height="600" width="800" src=""></iframe>
+    
+    <script>
+      function getHueyFrame(){
+        return document.getElementById('hueyFrame');
+      }
+      
+      var messageExchangeId = 0;
+      
+      document.getElementById('file').addEventListener('change', function(event){
+        var frame = getHueyFrame();
+        var input = event.target;
+        var files = input.files;
+        for (var i = 0; i < files.length; i++){
+          var file = files[i];
+          messageExchangeId++;
+          var message = {
+            requestId: messageExchangeId,
+            requestType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
+            body: {
+              file: file
+            }
+          };
+          
+          console.log('sending message:');
+          console.log(message);
+          
+          frame.contentWindow.postMessage(message, {
+            "targetOrigin": '*'
+          });
+        }
+      });
+      
+      window.addEventListener('message', function(event){
+        var consoleMethod = console.log;
+        var data = event.data;
+        switch(data.status.code) {
+          case PostMessageProtocol.STATUS_READY:
+            document.getElementById('postUi').style.display = 'block';
+            break;
+          case PostMessageProtocol.STATUS_OK:
+            break;
+          case PostMessageProtocol.STATUS_DEFERRED:
+            break;
+          case PostMessageProtocol.STATUS_BAD_REQUEST:
+            consoleMethod = console.error;
+            break;
+          case PostMessageProtocol.STATUS_INTERNAL_ERROR:
+            consoleMethod = console.error;
+            break;
+          default:
+            console.error('Unrecognized status')
+            break;
+        }
+        consoleMethod.call(console, 'received message');
+        consoleMethod.call(console, data);
+      });      
+      
+      var hueyUrl = '..\\index.html';
+      hueyFrame.src = hueyUrl;
+    </script>
+  </body>
+</html>
