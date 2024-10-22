@@ -153,6 +153,8 @@ class DuckDbDataSource extends EventEmitter {
   #rejects_balance = 0n;
   #reject_count = 0n;  
   
+  #originalConfig = undefined;
+  
   #defaultSampleSize = 100;
   
   #duckDb = undefined;
@@ -178,10 +180,15 @@ class DuckDbDataSource extends EventEmitter {
   
   constructor(duckDb, duckDbInstance, config){
     super(['destroy', 'rejectsdetected', 'change']);
+    this.#originalConfig = Object.assign({}, config);
     this.#datasource_uid = ++DuckDbDataSource.#datasource_uid_generator;
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
+  }
+  
+  getOriginalConfig(){
+    return this.#originalConfig;
   }
   
   getSettings(){
@@ -300,7 +307,7 @@ class DuckDbDataSource extends EventEmitter {
     return dsInstance;
   }
   
-  static createFromSql(duckdb,instance, sql){
+  static createFromSql(duckdb, instance, sql){
     var config = {
       type: DuckDbDataSource.types.SQLQUERY,
       sql: sql
@@ -406,7 +413,7 @@ class DuckDbDataSource extends EventEmitter {
         this.#sqlQuery = config.sql;
         break;
       default:
-        throw new Error(`Could not initialize the datasource: unrecognized type ${type}`);
+        throw new Error(`Could not initialize the datasource: unrecognized type "${type}"`);
     }
     this.#type = type;
   }
@@ -653,6 +660,7 @@ class DuckDbDataSource extends EventEmitter {
             sql += ` (TYPE SQLITE)`;
           }
       }
+      await this.registerFile();
       var resultSet = await connection.query(sql);
       result = true;
     }
@@ -1019,6 +1027,7 @@ class DuckDbDataSource extends EventEmitter {
     
     var sql = this.getSqlForTableSchema();
     var connection = await this.getConnection();
+    await this.registerFile();
     var columnMetadata = connection.query(sql);
     this.#columnMetadata = columnMetadata;
     return columnMetadata;

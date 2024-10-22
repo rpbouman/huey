@@ -203,6 +203,7 @@ dialog > footer button {
   margin-right:.5em;
 }
 
+*[role=toolbar],
 *[role=toolbar] > button {
   user-select: none;
 }

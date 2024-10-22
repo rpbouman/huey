@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      textarea {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!-- 
+      Local UI for controlling the embedded Huey application
+    -->
+    <div id="postUi" style="display:none">
+      <section>
+        <h3>Request</h3>
+        <label for="file">Choose a File to create a Huey Data Source:</label>
+        <input type="file" id="file"/>
+      </section>
+      <section>
+        <h3>Response</h3>
+        <div>
+          <label for="output">Status:</label>
+          <output id="status"/>
+        </div>
+        <div>
+          <label for="responseBody">Body:</label>
+          <textarea id="responseBody" style="width: 99%" rows="10"></textarea>
+        </div>
+      </section>
+    </div>
+    
+    <!-- 
+      Frame for the embedded Huey application
+    -->
+    <iframe id="hueyFrame" height="600" width="800" src=""></iframe>
+    
+    <script src="PostMessageProtocol.js"></script>
+    <script>
+      function getHueyFrame(){
+        return document.getElementById('hueyFrame');
+      }
+      
+      var messageExchangeId = 0;
+      
+      document.getElementById('file').addEventListener('change', function(event){
+        var frame = getHueyFrame();
+        var input = event.target;
+        var files = input.files;
+        for (var i = 0; i < files.length; i++){
+          var file = files[i];
+          messageExchangeId++;
+          var message = {
+            requestId: messageExchangeId,
+            messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
+            body: {
+              selectForAnalysis: true,
+              datasourceConfig: {
+                type: 'file',
+                file: file
+              }
+            }
+          };
+          frame.contentWindow.postMessage(message, {
+            "targetOrigin": '*'
+          });
+        }
+      });
+      
+      window.addEventListener('message', function(event){
+        var consoleMethod = console.log;
+        var data = event.data;
+        switch(data.status.code) {
+          case PostMessageProtocol.STATUS_READY:
+            document.getElementById('postUi').style.display = 'block';
+            break;
+          case PostMessageProtocol.STATUS_OK:
+            break;
+          case PostMessageProtocol.STATUS_DEFERRED:
+            break;
+          case PostMessageProtocol.STATUS_BAD_REQUEST:
+            consoleMethod = console.error;
+            break;
+          case PostMessageProtocol.STATUS_INTERNAL_ERROR:
+            consoleMethod = console.error;
+            break;
+          default:
+            console.error('Unrecognized status')
+            break;
+        }
+        consoleMethod.call(console, 'received message');
+        consoleMethod.call(console, data);
+
+        var status = document.getElementById('status');
+        var msg = `${data.status.code} - ${data.status.message}`;
+        status.value = msg;
+        
+        var responseBody = document.getElementById('responseBody');
+        responseBody.value = data.body ? JSON.stringify(data.body, null, 2) : '';
+      });      
+      
+      var hueyUrl = '..\\index.html';
+      hueyFrame.src = hueyUrl;
+    </script>
+  </body>
+</html>

@@ -730,6 +730,10 @@ class DataSourcesUi {
     return this.#datasources[id];
   }
   
+  getDatasourceIds(){
+    return Object.keys(this.#datasources);
+  }
+  
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
     
     var columnName, columnSpec, columnType, searchColumnsSpec;
