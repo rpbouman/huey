@@ -300,7 +300,7 @@ class DuckDbDataSource extends EventEmitter {
     return dsInstance;
   }
   
-  static createFromSql(duckdb,instance, sql){
+  static createFromSql(duckdb, instance, sql){
     var config = {
       type: DuckDbDataSource.types.SQLQUERY,
       sql: sql
@@ -406,7 +406,7 @@ class DuckDbDataSource extends EventEmitter {
         this.#sqlQuery = config.sql;
         break;
       default:
-        throw new Error(`Could not initialize the datasource: unrecognized type ${type}`);
+        throw new Error(`Could not initialize the datasource: unrecognized type "${type}"`);
     }
     this.#type = type;
   }

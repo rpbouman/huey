@@ -8,14 +8,35 @@
     </style>
   </head>
   <body>
+    
+    <!-- 
+      Local UI for controlling the embedded Huey application
+    -->
     <div id="postUi" style="display:none">
-      <label for="file">File:</label>
-      <input type="file" id="file"/>
-      <script src="PostMessageProtocol.js"></script>
+      <section>
+        <h3>Request</h3>
+        <label for="file">Choose a File to create a Huey Data Source:</label>
+        <input type="file" id="file"/>
+      </section>
+      <section>
+        <h3>Response</h3>
+        <div>
+          <label for="output">Status:</label>
+          <output id="status"/>
+        </div>
+        <div>
+          <label for="responseBody">Body:</label>
+          <textarea id="responseBody" style="width: 99%" rows="10"></textarea>
+        </div>
+      </section>
     </div>
     
+    <!-- 
+      Frame for the embedded Huey application
+    -->
     <iframe id="hueyFrame" height="600" width="800" src=""></iframe>
     
+    <script src="PostMessageProtocol.js"></script>
     <script>
       function getHueyFrame(){
         return document.getElementById('hueyFrame');
@@ -34,13 +55,12 @@
             requestId: messageExchangeId,
             requestType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
             body: {
-              file: file
+              datasourceConfig: {
+                type: 'file',
+                file: file
+              }
             }
           };
-          
-          console.log('sending message:');
-          console.log(message);
-          
           frame.contentWindow.postMessage(message, {
             "targetOrigin": '*'
           });
@@ -70,6 +90,13 @@
         }
         consoleMethod.call(console, 'received message');
         consoleMethod.call(console, data);
+
+        var status = document.getElementById('status');
+        var msg = `${data.status.code} - ${data.status.message}`;
+        status.value = msg;
+        
+        var responseBody = document.getElementById('responseBody');
+        responseBody.value = data.body ? JSON.stringify(data.body, null, 2) : '';
       });      
       
       var hueyUrl = '..\\index.html';

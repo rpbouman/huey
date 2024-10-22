@@ -71,30 +71,10 @@ class PostMessageInterface {
           throw new Error('Request body is mandatory', {cause: 'body is null or not an object'});
         }
         
-        var method;
         var duckdb = window.hueyDb.duckdb;
-        var instance = window.hueyDb.instance;
-        var methodArgs = [duckdb, instance];
-        if (body.file){
-          if (!(body.file instanceof File)){
-            throw new Error('Invalid file', 'The file property is not an instance of the File class.');
-          }
-          method = DuckDbDataSource.createFromFile;
-          methodArgs.push(body.file);
-        }
-        else
-        if (body.url){
-          if (typeof body.url !== 'string'){
-            throw new Error('Invalid url', 'The url property is not a string.');
-          }
-          method = DuckDbDataSource.createFromUrl;
-          methodArgs.push(body.url);
-        }
-        else {
-          throw new Error('Body should define either file or url.', {cause: 'No file or url specified in body.'});
-        }
-        
-        duckDbDataSource = method.apply(null, methodArgs);
+        var duckDbInstance = window.hueyDb.instance;
+        var datasourceConfig = body.datasourceConfig;
+        duckDbDataSource = new DuckDbDataSource(duckdb, duckDbInstance, datasourceConfig);
 
       }
       catch (error){
@@ -105,7 +85,7 @@ class PostMessageInterface {
       var datasources = [duckDbDataSource];
       datasourcesUi.addDatasources(datasources);
       response.status.code = PostMessageProtocol.STATUS_OK;
-      response.status.message = 'Datasource ${duckDbDataSource.getId()} created.';
+      response.status.message = `Datasource '${duckDbDataSource.getId()}' created.`;
       response.body = {
         datasource: {
           id: duckDbDataSource.getId(),
@@ -131,9 +111,8 @@ class PostMessageInterface {
     window.parent.postMessage({
       status: {
         code: PostMessageProtocol.STATUS_READY,
-        message: 'Huey PostMessageInterface ready for requests.'
-      },
-      timing: {
+        message: 'Huey PostMessageInterface ready for requests.',
+        sent: Date.now()
       },
     }, {targetOrigin: '*'});
   }
