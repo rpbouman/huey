@@ -1379,6 +1379,12 @@
           >Data from URL</button>
         </label>
 
+        <label for="cloneHueySession" title="Open a new Huey browser tab including the currently loaded datasources and query">
+          <button
+            id="cloneHueySession"
+          >Clone Huey Session</button>
+        </label>
+        
         <label for="runQueryButton" title="Execute Query">
           <button
             id="runQueryButton"
@@ -1659,6 +1665,7 @@
 
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageProtocol.js"></script>
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageInterface.js"></script>
+    <script onload="resourceLoaded(this)" src="SessionCloner/SessionCloner.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">

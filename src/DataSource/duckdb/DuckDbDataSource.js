@@ -153,6 +153,8 @@ class DuckDbDataSource extends EventEmitter {
   #rejects_balance = 0n;
   #reject_count = 0n;  
   
+  #originalConfig = undefined;
+  
   #defaultSampleSize = 100;
   
   #duckDb = undefined;
@@ -178,10 +180,15 @@ class DuckDbDataSource extends EventEmitter {
   
   constructor(duckDb, duckDbInstance, config){
     super(['destroy', 'rejectsdetected', 'change']);
+    this.#originalConfig = Object.assign({}, config);
     this.#datasource_uid = ++DuckDbDataSource.#datasource_uid_generator;
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
+  }
+  
+  getOriginalConfig(){
+    return this.#originalConfig;
   }
   
   getSettings(){

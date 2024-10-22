@@ -53,8 +53,9 @@
           messageExchangeId++;
           var message = {
             requestId: messageExchangeId,
-            requestType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
+            messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
             body: {
+              selectForAnalysis: true,
               datasourceConfig: {
                 type: 'file',
                 file: file
