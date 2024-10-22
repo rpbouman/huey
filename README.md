@@ -100,10 +100,52 @@ Aggregates cannot be placed on the horizontal or vertical axes of the pivot tabl
 
 ### Filtering
 
-The query editor supports a special Filters axis. Items placed on the filters access support the Filters dialog which lets you choose values and operators to filter the query results.
-Items on the filter axis themselves are not visible in the query result, unless those items are also placed on the the columns or rows axis.
+The query editor supports a special Filters axis. Items placed on the filters axis represent conditions that are applied on the underlying dataset. Items can appear independently on the filter axis: they are not automatically visible in the query result, but items that appear on the filter axis may also (additionally) be placed on the rows or columns axis.
+
+Immediately after placing a new item on the Filters axis, the Filter Dialog pops up right below the Filter axis item. The Filter dialog lets you choose values and operators to filter the query results.
 
 ![image](https://github.com/user-attachments/assets/beae75ae-b158-4e26-b30b-958bffd4f222)
+
+#### Filter Type
+The Filter type dropdown appears in the top of the Filter Dialog. Here you choose the operator that should be used to filter the data. The options are:
+- Include: the values in the data must match any of the filter values exactly
+- Exclude: rows from the data appear only when the value from the respective item does not match any of the filter values.
+- Like: the values in the data must match the pattern of one or more filter values
+- Not Like: the values in the data must not match the pattern of any of the filter values
+- Between: the values of the data must be between the filter value-ranges
+- Not Between: the values of the data must not be between any of the filter value-ranges
+
+#### Finding Filter Values
+In the top of the Filter Dialog there is an input where you can type a value that will be used as a pattern for retrieving values from the respective item.
+
+The pattern is used in a LIKE comparison to retrieve the items values. 
+LIKE patterns support two wildcards: 
+- `'%'` (percent sign) is a wildcard for any character sequence, of any length; 
+- `'_'` (underscore) is a wildcard for any single character.
+
+The input supports multiple patterns. To enter multiple patterns, separate them by a semi-colon.
+You can also paste delimited data (such as a range of cells from an Excel workbook) and paste them directly into the input.
+
+The retrieved values are placed in the Picklist appearing below the input.
+
+Right above the input, there appear two checkboxes:
+- Apply all filters: when checked, the Filter Picklist will be populated with values from only rows that (in addition to the pattern in the input) also respect all other filter items (if present)
+- Auto-wildcards: when checked, texts entered or pasted into the input are automatically pre- and postfixed with the `'%'` wildcard, effectively finding all values that contain the entered text.
+
+#### Adding/Deleting Filter Values
+
+Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them.
+Alternatively, values in the input may be applied explicitly by clicking the button next to the input, or by hitting the Enter button on the keyboard.
+Applying a value in this way while an already applied value is selected will overwrite the applied value with the new one.
+
+Applied values may be removed by selecting them and then hitting the Clear Highlighted dialog button, or the Delete key on the keyboard.
+Hitting the Clear All button will remove all applied values. 
+
+#### Filter Dialog Buttons
+
+- The Apply button will actually apply the chosen values to the filter and close the Filter Dialog.
+- The Remove button will remove the filter item entirely from the Filter axis and close the Filter Dialog
+- The Cancel button will close the Filter Dialag without changing the state of the filter item.
 
 ### (Sub)totals
 
@@ -132,6 +174,10 @@ If the datasource is built on a URL, Huey will attempt to access it directly. If
 ### Undo & Redo
 
 Because the query state updates the page url, you can use the browser's standard Back and Forward buttons to browse between different versions of your query.
+
+### Cloning the Huey Window
+
+Hitting the Clone button on the toolbar will open a new instance of Huey in a new browser tab, while preserving the existing data sources as well as the current query.
 
 ## Export
 Huey provides export capabilities so you can use the results of your analysis outside huey.
@@ -172,3 +218,8 @@ Settings that control the appearance and behavior of the Pivot Table
 - Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
 ### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
+
+## Integrating and/or Embedding Huey
+
+You can embed huey inside a frame on your own webpage and control the application by sending it commands using the [`postMessage()`-method](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
