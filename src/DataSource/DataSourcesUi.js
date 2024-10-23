@@ -297,7 +297,7 @@ class DataSourcesUi {
     var sql = `
       SELECT table_schema, table_name, table_type 
       FROM information_schema.tables 
-      WHERE table_catalog = ? 
+      WHERE table_catalog = ?
       AND   table_schema NOT IN ('information_schema', 'pg_catalog')
       ORDER BY table_schema, table_name
     `;
@@ -361,7 +361,7 @@ class DataSourcesUi {
           schemaName: schemaName,
           objectName: tableName
         });
-        this.addDatasource(datasource);
+        this.#addDatasource(datasource);
       }
 
       var tableNode = this.#createDatasourceNode(datasource);
@@ -410,9 +410,10 @@ class DataSourcesUi {
       "title": caption,
       "open": true
     });
+    
     if (attributes){
       for (var attributeName in attributes){ 
-      datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
+        datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
       }
     }
     
@@ -659,7 +660,7 @@ class DataSourcesUi {
         }
         
         if (datasourceGroup.typeSignature) {
-          groupTitle = 'Bucked of similarly typed files.';
+          groupTitle = 'Bucket of similarly typed files.';
         }
         break;
       default:
@@ -689,7 +690,7 @@ class DataSourcesUi {
     var datasources = datasourceGroup.datasources;
     var datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
-    datasourceKeys.map(function(datasourceId){
+    datasourceKeys.forEach(function(datasourceId){
       var datasource = datasources[datasourceId];
       var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
@@ -700,7 +701,7 @@ class DataSourcesUi {
     return groupNode;
   }
   
-  addDatasource(datasource) {
+  #addDatasource(datasource) {
     var id = datasource.getId();
     this.#attachRejectsDetection(datasource);
     this.#datasources[id] = datasource;
@@ -708,9 +709,13 @@ class DataSourcesUi {
   
   addDatasources(datasources){
     datasources.forEach(function(datasource){
-      this.addDatasource(datasource);
+      this.#addDatasource(datasource);
     }.bind(this));
     this.#renderDatasources();
+  }
+  
+  addDatasource(datasource){
+    this.addDatasources([datasource]);
   }
   
   destroyDatasources(datasourceIds) {
