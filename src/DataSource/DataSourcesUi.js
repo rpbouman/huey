@@ -735,6 +735,10 @@ class DataSourcesUi {
   }
   
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
+    var columnNames = Object.keys(columnsSpec);
+    if (columnNames.length === 0){
+      return true;
+    }
     
     var columnName, columnSpec, columnType, searchColumnsSpec;
     if (useLooseColumnComparisonType) {
@@ -774,7 +778,6 @@ class DataSourcesUi {
       return false;
     }
 
-    var columnNames = Object.keys(columnsSpec);
     _columns: for (var i = 0; i < columnMetadata.numRows; i++){
       var row = columnMetadata.get(i);
       var columnName = row.column_name;
