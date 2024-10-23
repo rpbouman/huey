@@ -219,27 +219,50 @@ class DuckDbDataSource extends EventEmitter {
     };
   }
   
-  static async getContentTypeForUrl(url){
+  static async getResourceInfoForUrl(url, httpMethod, requestHeaders){
     return new Promise(function(resolve, reject){
       try {
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("error", function(error){
-          resolve(undefined);
+          reject(error);
         });
         
         xhr.addEventListener("load", function(){
-          var contentType = xhr.getResponseHeader('Content-Type');
-          resolve(contentType);
+          var allResponseHeaders = xhr.getAllResponseHeaders();
+          var headersArray = allResponseHeaders.split('\r\n');
+          var headers = headersArray.reduce(function(headers, header){
+            var nameValue = header.split(':');
+            var name = nameValue.shift().trim();
+            if (name.length) {
+              name = name.toLowerCase();
+              var value = nameValue.join(':').trim();
+              headers[name] = value;
+            }
+            return headers;
+          }, {});
+          resolve({
+            headers: headers,
+            status: xhr.status,
+            statusText: xhr.statusText,
+            responseType: xhr.responseType,
+            responseText: xhr.responseText
+          });
         });
-        xhr.open('HEAD', url);
+        
+        xhr.open(httpMethod || 'GET', url);
+        if (requestHeaders){
+          for (var requestHeader in requestHeaders){
+            xhr.setRequestHeader(requestHeader, requestHeaders[requestHeader]);
+          }
+        }
         xhr.send();
       } 
       catch(e){
-        resolve(undefined);
+        reject(e);
       }
     });
-  }  
-  
+  }
+    
   // this is a light weight method that should produce the id of a datasource that would be created for the given file.
   // this should not actually instantiate a datasource, merely its identifier. 
   // It is a service to easily create UI elements that may refer to a datasource without having to actually create one.
@@ -263,8 +286,8 @@ class DuckDbDataSource extends EventEmitter {
       url: url
     };
     
-    var contentType;
-    contentType = await DuckDbDataSource.getContentTypeForUrl(url);
+    var response = await DuckDbDataSource.getResourceInfoForUrl(url, 'HEAD');
+    var contentType = response.headers['content-type'];
     if (contentType){
       config.contentType = contentType;
       var contentTypes = contentType.split(';');
@@ -277,6 +300,32 @@ class DuckDbDataSource extends EventEmitter {
             config.fileType = fileType;
             break _outer;
           }
+        }
+      }
+      // if we couldn't identify a file type then we can try to examine the file to read a magic number.
+      if (!config.fileType){
+        switch (response.headers['accept-ranges']) {
+          case 'bytes':
+            var response = await DuckDbDataSource.getResourceInfoForUrl(url, 'GET', {
+              "Accept": contentType,
+              "Range": 'bytes=0-16'
+            });
+            var responseText = response.responseText;
+            if (responseText.startsWith('SQLite format 3\0')) {
+              config.type = DuckDbDataSource.types.SQLITE;
+            }
+            else 
+            if (responseText.substring(7, 7 + 'DUCK'.length) === 'DUCK') {
+              config.type = DuckDbDataSource.types.DUCKDB;
+            }
+            if (config.type) {
+              delete config.url;
+            }
+            break;
+          case 'none':
+          case undefined:
+          default:
+            // alas
         }
       }
     }
