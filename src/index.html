@@ -1692,6 +1692,15 @@
         };
 
         initApplication();
+        
+        // custom script to load a duckdb database on startup.
+        var datasource = await DuckDbDataSource.createFromUrl(
+          window.hueyDb.duckdb, 
+          window.hueyDb.instance,
+          'http://localhost/files/tripdata.duckdb'
+        );
+        await datasource.validateAccess();
+        datasourcesUi.addDatasource(datasource);
       });
     </script>
   </body>
