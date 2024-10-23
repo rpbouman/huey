@@ -1,13 +1,23 @@
 class PromptUi {
- 
+  
   static {
-    var promptUi = byId('promptUi');
-    byId( 'promptDialogAcceptButton' ).addEventListener('click', function(event){
-      promptUi.returnValue = 'accept';
+    
+    byId('promptDialogAcceptButton')
+    .addEventListener('click', function(event){
+      var dialog = byId('promptUi');
+      dialog.returnValue = 'accept';
+      // firefox seems to forget the returnValue
+      dialog.setAttribute('data-returnValue', dialog.returnValue);
     });
-    byId( 'promptDialogRejectButton' ).addEventListener('click', function(event){
-      promptUi.returnValue = 'reject';
+    
+    byId('promptDialogRejectButton')
+    .addEventListener('click', function(event){
+      var dialog = byId('promptUi');
+      dialog.returnValue = 'reject';
+      // firefox seems to forget the returnValue
+      dialog.setAttribute('data-returnValue', dialog.returnValue);
     });
+    
   }
  
   static show(config){    
@@ -17,8 +27,8 @@ class PromptUi {
       promptDialog.querySelector('section').innerHTML = config.contents;
       
       var closeHandler = function(event){
-        resolve(promptDialog.returnValue);
-        promptDialog.removeEventListener('close', closeHandler);
+        byId('promptUi').removeEventListener('close', closeHandler);
+        resolve(byId('promptUi').getAttribute('data-returnValue'));
       };
       promptDialog.addEventListener('close', closeHandler);
       promptDialog.showModal();
