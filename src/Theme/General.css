@@ -248,7 +248,7 @@ form > fieldset > label,
 form > label {
   grid-column: labels;
   grid-row: auto;
-  margin-top: 2px;
+  margin-top: 4px;
   justify-self: end;
 }
 

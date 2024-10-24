@@ -37,7 +37,8 @@ class Settings extends EventEmitter {
       locale: navigator.languages,
       minimumIntegerDigits: 1,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
+      linkMinimumAndMaximumDecimals: true
     },
     sqlSettings: {
       keywordLetterCase: 'upperCase',
