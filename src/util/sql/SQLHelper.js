@@ -1032,7 +1032,7 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
   var aggregateExpressions = {};
   
   if (cellsAxisItems.length === 0){
-    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( keywordFormatter('null') )`;
+    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( ${keywordFormatter('null')} )`;
   }
   else {
     cellsAxisItems.forEach(function(cellsAxisItem){

@@ -261,6 +261,7 @@ class ExportDialog {
       }
 
       var sql, structure;
+      
       if (byId('exportResultShapePivot').checked){
         structure = 'pivot';
         sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
@@ -270,7 +271,7 @@ class ExportDialog {
         structure = 'table';
         sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
       }
-      
+            
       if (sqlOptions) {
         data = sql;
       }
