@@ -29,14 +29,14 @@
     </script>
 
     <!-- Inline tabler font to force early load -->
-    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/ -->
+    <!-- see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.20.0/ -->
     <style type="text/css">
       @font-face {
         font-family: "tabler-icons";
         font-style: normal;
         font-weight: 400;
         font-display: block;
-        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/fonts/tabler-icons.woff2?v3.19.0") format("woff2");
+        src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.20.0/dist/fonts/tabler-icons.woff2?v3.20.0") format("woff2");
       }
 
       ul#resources > li::marker {
@@ -759,89 +759,105 @@
           />
           <div role="tabpanel">
             <form id="localeSettings">
-              <label 
-                for="nullString"
-                title="The string to use for displaying NULL-values"
-              ><code>NULL</code>-value label</label>
-              <input 
-                id="nullString" 
-                type="text"
-              />
-              <label 
-                for="totalsString"
-                title="The string to use for displaying totals"
-              >Totals label</label>
-              <input 
-                id="totalsString" 
-                type="text"
-              />
-              <label 
-                for="useDefaultLocale"
-                title="Check to use the browser's default locale, uncheck to enter a custom locale."
-              >Use default locale</label>
-              <input 
-                id="useDefaultLocale" 
-                type="checkbox"
-              />
-              <!--
-                see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
-                A locale identifier is a string that consists of:
+              <fieldset>
+                <legend>Labels</legend>
+                <label 
+                  for="nullString"
+                  title="The string to use for displaying NULL-values"
+                ><code>NULL</code>-value label</label>
+                <input 
+                  id="nullString" 
+                  type="text"
+                />
+                <label 
+                  for="totalsString"
+                  title="The string to use for displaying totals"
+                >Totals label</label>
+                <input 
+                  id="totalsString" 
+                  type="text"
+                />
+              </fieldset>
+              <fieldset>
+                <legend>Locale</legend>
+                <label 
+                  for="useDefaultLocale"
+                  title="Check to use the browser's default locale, uncheck to enter a custom locale."
+                >Use default locale</label>
+                <input 
+                  id="useDefaultLocale" 
+                  type="checkbox"
+                />
+                <!--
+                  see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
+                  A locale identifier is a string that consists of:
 
-                A language subtag with 2–3 or 5–8 letters
-                A script subtag with 4 letters Optional
-                A region subtag with either 2 letters or 3 digits Optional
-                One or more variant subtags (all of which must be unique), each with either 5–8 alphanumerals or a digit followed by 3 alphanumerals Optional
-                One or more BCP 47 extension sequences Optional
-                A private-use extension sequence Optional
-              -->
-              <label 
-                for="locale"
-                title="The locale to use for creating value formatters"
-              >Locale</label>
-              <!--
-                on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
-                and if that is empty it probably means the entered locale is either not valid or not supported.
-              -->
-              <input 
-                id="locale"
-                type="text"
-                pattern="^(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?)(\s*,\s*(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?))*$"
-                data-value-getter="new Function('control','settings','return control.value.split(String.fromCharCode(44));')"
-                data-value-setter="new Function('control','value','settings','control.value = value.join();')"
-              />
-              <!-- minimum integer digits -->
-              <label for="minimumIntegerDigits"
-                title="The minimum number of integer digits to use. A value with a smaller number of integer digits than this number will be left-padded with zeros (to the specified length) when formatted. Possible values are from 1 to 21; the default is 1."
-              >Min. integer digits</label>
-              <input 
-                id="minimumIntegerDigits" 
-                type="number" 
-                min="1" 
-                max="21" 
-                value="1"
-              />
+                  A language subtag with 2–3 or 5–8 letters
+                  A script subtag with 4 letters Optional
+                  A region subtag with either 2 letters or 3 digits Optional
+                  One or more variant subtags (all of which must be unique), each with either 5–8 alphanumerals or a digit followed by 3 alphanumerals Optional
+                  One or more BCP 47 extension sequences Optional
+                  A private-use extension sequence Optional
+                -->
+                <label 
+                  for="locale"
+                  title="The locale to use for creating value formatters"
+                >Locale</label>
+                <!--
+                  on change we should try to call Intl.DisplayNames.supportedLocalesOf('DE-AU'). this will return an array
+                  and if that is empty it probably means the entered locale is either not valid or not supported.
+                -->
+                <input 
+                  id="locale"
+                  type="text"
+                  pattern="^(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?)(\s*,\s*(([A-Za-z]{2,3}|[A-Za-z]{5,8})(-[A-Za-z]{4})?(-([A-Za-z]{2}|\d{3}))?(-([0-9A-Za-z]{5,8}|\d[0-9A-Za-z]{3}))?))*$"
+                  data-value-getter="new Function('control','settings','return control.value.split(String.fromCharCode(44));')"
+                  data-value-setter="new Function('control','value','settings','control.value = value.join();')"
+                />
+              </fieldset>
+
+              <fieldset>
+                <legend>Integer</legend>
+                <!-- minimum integer digits -->
+                <label for="minimumIntegerDigits"
+                  title="The minimum number of integer digits to use. A value with a smaller number of integer digits than this number will be left-padded with zeros (to the specified length) when formatted. Possible values are from 1 to 21; the default is 1."
+                >Minimum digits</label>
+                <input 
+                  id="minimumIntegerDigits" 
+                  type="number" 
+                  min="1" 
+                  max="21" 
+                  value="1"
+                />
+              </fieldset>
+              
               <!-- minimum fraction digits -->
-              <label for="minimumFractionDigits"
-                title="The minimum number of fraction digits to use. .Possible values are from 0 to 20; the default for plain number and percent formatting is 0; the default for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information)."
-              >Min. fraction digits</label>
-              <input 
-                id="minimumFractionDigits" 
-                type="number" 
-                min="0" 
-                max="20" 
-                value="2"
-              />
-              <!-- maximum fraction digits -->
-              <label for="maximumFractionDigits"
-                title="The maximum number of fraction digits to use. Possible values are from 0 to 20; the default for plain number formatting is the larger of minimumFractionDigits and 3; the default for currency formatting is the larger of minimumFractionDigits and the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information); the default for percent formatting is the larger of minimumFractionDigits and 0."
-              >Max. fraction digits</label>
-              <input 
-                id="maximumFractionDigits" 
-                type="number" 
-                min="0" 
-                max="20" 
-                value="2"
-              />
+              <fieldset>
+                <legend>Decimals</legend>
+                <label for="linkMinimumAndMaximumDecimals">Link min. and max. decimals</label>
+                <input id="linkMinimumAndMaximumDecimals" type="checkbox"/>
+                <label for="minimumFractionDigits"
+                  title="The minimum number of fraction digits to use. .Possible values are from 0 to 20; the default for plain number and percent formatting is 0; the default for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information)."
+                ></label>
+                <input 
+                  id="minimumFractionDigits" 
+                  type="number" 
+                  min="0" 
+                  max="20" 
+                  value="2"
+                />
+                <!-- maximum fraction digits -->
+                <label for="maximumFractionDigits"
+                  title="The maximum number of fraction digits to use. Possible values are from 0 to 20; the default for plain number formatting is the larger of minimumFractionDigits and 3; the default for currency formatting is the larger of minimumFractionDigits and the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information); the default for percent formatting is the larger of minimumFractionDigits and 0."
+                >Maximum decimals</label>
+                <input 
+                  id="maximumFractionDigits" 
+                  type="number" 
+                  min="0" 
+                  max="20" 
+                  value="2"
+                />
+              </fieldset>
             </form>
           </div>
         </div>
@@ -865,7 +881,7 @@
             <form id="querySettings">
               <label 
                 for="autoRunQuery"
-                title="When enabled the pivot table is updated automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
+                title="When enabled, the pivot table will update automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
               >Autorun Query</label>
               <input 
                 id="autoRunQuery" 
@@ -874,6 +890,7 @@
               <fieldset>
                 <legend>Filter</legend>
                 <label
+                  title="How many milliseconds to wait to search for filter values."
                   for="filterSearchAutoQueryTimeoutInMilliseconds"
                 >Search timeout (ms)</label>
                 <input 
@@ -883,6 +900,7 @@
                   step="1"
                 />
                 <label
+                  title="How many filter values to fetch."
                   for="filterValuePicklistPageSize"
                 >Picklist Pagesize</label>
                 <input 
@@ -1017,7 +1035,7 @@
           <li>Huey version 0.0.7 - Alabio</li>
           <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
           <li><a id="duckDbLibraryUrl" target="_blank"></a></li>
-          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.19.0</a></li>
+          <li><a href="https://tabler.io/icons" target="_tabler-icons">Tabler Icons v3.20.0</a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>

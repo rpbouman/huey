@@ -31,7 +31,7 @@ function createNumberFormatter(fractionDigits){
   intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
-    options.maximumFractionDigits = localeSettings.maximumFractionDigits;
+    options.maximumFractionDigits = localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits;
     if (options.maximumFractionDigits < options.minimumFractionDigits) {
       options.maximumFractionDigits = options.minimumFractionDigits;
     }
