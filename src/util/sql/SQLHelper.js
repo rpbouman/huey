@@ -738,7 +738,7 @@ function getDataTypeInfo(columnType){
 }
 
 function quoteStringLiteral(str){
-  return `'${str.replace(/'/g, "''")}'`; 
+  return typeof str === 'string'  ? `'${str.replace(/'/g, "''")}'` : str; 
 }
 
 function identifierRequiresQuoting(identifier){

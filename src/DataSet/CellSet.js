@@ -82,6 +82,7 @@ class CellSet extends DataSetComponent {
 
     var tupleSetIndex = numTupleSets - numRanges;
     var tupleSet = tupleSets[tupleSetIndex];
+    var tupleCount = tupleSet.getTupleCountSync();
 
     var range = ranges.shift();
     var fromTuple = range[0];
@@ -89,6 +90,11 @@ class CellSet extends DataSetComponent {
     
     if (fromTuple === 0 && toTuple === 0) {
       toTuple = 1;
+    }
+    
+    // Make sure we stay within the range of actual number of tuples.
+    if (toTuple > tupleCount){
+      toTuple = tupleCount;
     }
     
     for (var i = fromTuple; i < toTuple; i++){
@@ -482,7 +488,9 @@ class CellSet extends DataSetComponent {
                 
         var tuple = tupleSet.getTupleSync(tupleIndex);
         if (!tuple) {
-          //console.error(`Couldn't find tuple ${tupleIndex} in tupleset for query axis ${tupleSet.getQueryAxisId()}`);
+          // this shouldn't happen! 
+          // if we arrive here it means we messed up while calculating the tuple ranges.
+          console.error(`Couldn't find tuple ${tupleIndex} in tupleset for query axis ${tupleSet.getQueryAxisId()}`);
           continue;
         }
         tuplesForCell[j] = tuple;

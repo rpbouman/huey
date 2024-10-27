@@ -113,9 +113,6 @@ class TupleSet extends DataSetComponent {
   }
     
   async getTupleCount(){
-    if (this.#tupleCount === undefined) {
-      
-    }
     return new Promise(function(resolve, reject){
       resolve(this.#tupleCount);
     });
