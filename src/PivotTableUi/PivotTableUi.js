@@ -1178,6 +1178,25 @@ class PivotTableUi extends EventEmitter {
     }
   }
 
+  #removeExcessRows(){
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var headerRows = tableHeaderDom.childNodes;
+
+    var containerDom = this.#getInnerContainerDom();
+    var innerContainerHeight = containerDom.clientHeight;
+    var tableDom = this.#getTableDom();
+
+    var tableBodyDom = this.#getTableBodyDom();
+    var tableBodyDomRows = tableBodyDom.childNodes;
+
+    var cellIndex;
+    while (tableDom.clientHeight > innerContainerHeight && tableBodyDomRows.length > 1) {
+      // the last row is the stuffer row, remove the row before that.
+      var tableBodyRow = tableBodyDomRows[tableBodyDomRows.length - 2];
+      tableBodyDom.removeChild(tableBodyRow);
+    }
+  }
+
   #renderRows(tuples){
     var containerDom = this.#getInnerContainerDom();
     var innerContainerHeight = containerDom.clientHeight;
@@ -1378,6 +1397,12 @@ class PivotTableUi extends EventEmitter {
     return maxCellWidth;
   }
   
+  async wait(ms){
+    return new Promise(function(resolve, reject){
+      setTimeout(resolve, ms);
+    });
+  }
+  
   async updatePivotTableUi(){
     if (this.#getBusy()) {
       return;
@@ -1420,17 +1445,22 @@ class PivotTableUi extends EventEmitter {
 
       var rowTuples = renderAxisPromisesResults[1];
       this.#setVerticalSize(0);
+      
       this.#renderRows(rowTuples);
-           
+      
       this.#updateVerticalSizer();      
-      this.#removeExcessColumns();
       this.#toggleObserveColumnsResizing(true);
-      this.#updateHorizontalSizer();
 
       this.#renderCells();
 
       //await this.#updateCellData(0, 0);
       await this.#updateDataToScrollPosition();
+      setTimeout(function(){
+        this.#removeExcessColumns();
+        this.#updateHorizontalSizer();
+        this.#removeExcessRows();
+        this.#updateVerticalSizer();
+      }.bind(this), 1000)
       this.#setNeedsUpdate(false);
 
       this.fireEvent('updated', { status: 'success' });
