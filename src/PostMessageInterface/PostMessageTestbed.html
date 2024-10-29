@@ -5,6 +5,14 @@
       textarea {
         display: block;
       }
+      
+      li:has( > input[type=radio][name=postMessageChoice]) > div {
+        display: none;
+      }
+
+      li:has( > input[type=radio][name=postMessageChoice]:checked) > div {
+        display: block
+      }
     </style>
   </head>
   <body>
@@ -15,8 +23,31 @@
     <div id="postUi" style="display:none">
       <section>
         <h3>Request</h3>
-        <label for="file">Choose a File to create a Huey Data Source:</label>
-        <input type="file" id="file"/>
+        <ul>
+          <li>
+            <input type="radio" id="postMessageChoiceFile" name="postMessageChoice" checked="true"/>
+            <label for="postMessageChoiceFile">File: </label>            
+            <div>
+              <label for="file">Choose a File to create a Huey Data Source:</label>
+              <input type="file" id="file"/>
+            </div>
+          </li>
+          <li>
+            <input type="radio" id="postMessageChoiceRaw" name="postMessageChoice"/>
+            <label for="postMessageChoiceRaw">Raw:</label>
+            <div>
+              <label for="rawName" title="Name">Name:</label><input id="rawName" type="text" value="fruit.csv"/>
+              <label for="rawContents" title="Contents">Contents:</label>
+              <textarea id="rawContents" style="width: 99%" rows="10">Name;Calories
+Apple;52
+Apricots;48
+Banana;89
+Cantaloupe;34</textarea>
+              <button id="rawSend" title="Send raw">Send</button>
+            </div>
+          </li>
+        </ul>
+        
       </section>
       <section>
         <h3>Response</h3>
@@ -42,30 +73,41 @@
         return document.getElementById('hueyFrame');
       }
       
+      function createDatasourceFromFile(file){
+        messageExchangeId++;
+        var message = {
+          requestId: messageExchangeId,
+          messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
+          body: {
+            selectForAnalysis: true,
+            datasourceConfig: {
+              type: 'file',
+              file: file
+            }
+          }
+        };
+        var frame = getHueyFrame();
+        frame.contentWindow.postMessage(message, {
+          "targetOrigin": '*'
+        });
+      }
+      
       var messageExchangeId = 0;
       
       document.getElementById('file').addEventListener('change', function(event){
-        var frame = getHueyFrame();
         var input = event.target;
         var files = input.files;
         for (var i = 0; i < files.length; i++){
           var file = files[i];
-          messageExchangeId++;
-          var message = {
-            requestId: messageExchangeId,
-            messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
-            body: {
-              selectForAnalysis: true,
-              datasourceConfig: {
-                type: 'file',
-                file: file
-              }
-            }
-          };
-          frame.contentWindow.postMessage(message, {
-            "targetOrigin": '*'
-          });
+          createDatasourceFromFile(file);
         }
+      });
+      
+      document.getElementById('rawSend').addEventListener('click',function(event){
+        var name = document.getElementById('rawName').value;
+        var contents = [document.getElementById('rawContents').value];
+        var file = new File(contents, name);
+        createDatasourceFromFile(file)
       });
       
       window.addEventListener('message', function(event){
