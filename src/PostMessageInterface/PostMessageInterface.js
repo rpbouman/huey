@@ -49,21 +49,27 @@ class PostMessageInterface {
     return response;
   }
     
+  #getErrorResponseBody(error){
+    return {
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      }
+    };
+  }    
+    
   #initInternalErrorResponse(error, response){
     response.status.code = PostMessageProtocol.STATUS_INTERNAL_ERROR;
     response.status.message = error.message;
-    response.body = {
-      stack: error.stack
-    }
+    response.body = this.#getErrorResponseBody(error);
   }
 
   #initBadRequestResponse(error, response){
     response.status.code = PostMessageProtocol.STATUS_BAD_REQUEST;
     response.status.message = error.message;
     if (error.cause){
-      response.body = {
-        details: error.cause
-      }
+      response.body = this.#getErrorResponseBody(error.cause);
     }
   }
   
@@ -117,7 +123,7 @@ class PostMessageInterface {
       }
       
       var datasources = [duckDbDataSource];
-      datasourcesUi.addDatasources(datasources);
+      await datasourcesUi.addDatasources(datasources);
       
       if (body.selectForAnalysis === true){
         analyzeDatasource(duckDbDataSource);
