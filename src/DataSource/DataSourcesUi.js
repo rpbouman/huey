@@ -707,18 +707,18 @@ class DataSourcesUi {
     this.#datasources[id] = datasource;
   }
   
-  addDatasources(datasources){
+  async addDatasources(datasources){
     datasources.forEach(function(datasource){
       this.#addDatasource(datasource);
     }.bind(this));
-    this.#renderDatasources();
+    await this.#renderDatasources();
   }
   
   addDatasource(datasource){
     this.addDatasources([datasource]);
   }
   
-  destroyDatasources(datasourceIds) {
+  async destroyDatasources(datasourceIds) {
     for (var i = 0; i < datasourceIds.length; i++){
       var datasourceId = datasourceIds[i];
       var datasource = this.getDatasource(datasourceId);
@@ -728,7 +728,7 @@ class DataSourcesUi {
       datasource.destroy();
       delete this.#datasources[datasourceId];
     }
-    this.#renderDatasources();
+    await this.#renderDatasources();
   }
   
   getDatasource(id) {
