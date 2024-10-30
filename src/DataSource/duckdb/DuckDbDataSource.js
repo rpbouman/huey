@@ -1077,7 +1077,7 @@ class DuckDbDataSource extends EventEmitter {
     var sql = this.getSqlForTableSchema();
     var connection = await this.getConnection();
     await this.registerFile();
-    var columnMetadata = connection.query(sql);
+    var columnMetadata = await connection.query(sql);
     this.#columnMetadata = columnMetadata;
     return columnMetadata;
   }
