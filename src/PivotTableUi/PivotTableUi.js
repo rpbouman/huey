@@ -815,6 +815,10 @@ class PivotTableUi extends EventEmitter {
         }
 
         var cellElement = cellElements.item(j);
+        if (!cellElement){
+          console.error(`Warning: no DOM found for cell ${i},${j}`);
+          continue;
+        }
         var headerCell = firstTableHeaderRowCells.item(j);
         cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
 
