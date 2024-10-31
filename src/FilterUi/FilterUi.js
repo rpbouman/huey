@@ -177,7 +177,8 @@ class FilterDialog {
       event.preventDefault();
       var pastedText = getPastedText(event);
       pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
-      search.value = pastedText;      
+      search.value = pastedText;  
+      this.#updatePicklist();      
     }.bind(this));
     this.#initSearchQueryHandler();
   }
