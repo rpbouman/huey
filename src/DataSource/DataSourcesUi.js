@@ -234,13 +234,6 @@ class DataSourcesUi {
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
     
-    this.showLoadDatasourcesHint();
-  }
-
-  showLoadDatasourcesHint(){
-    if (!Object.keys(this.#datasources).length){
-      this.getDom().innerHTML = `<label for="uploader">Drop some files here, or click the Upload button:</label>`;
-    }
   }
   
   static getCaptionForDatasource(datasource){
@@ -826,5 +819,4 @@ class DataSourcesUi {
 var datasourcesUi;
 function initDataSourcesUi(){
   datasourcesUi = new DataSourcesUi('datasourcesUi');
-  datasourcesUi.showLoadDatasourcesHint();
 }
