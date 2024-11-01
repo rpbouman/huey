@@ -97,6 +97,7 @@ select[multiple] {
 }
 
 input[type=text], 
+input[type=search],
 input[type=checkbox], 
 input[type=number],
 select {
