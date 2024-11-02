@@ -212,6 +212,9 @@ class PageStateManager {
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
     analyzeDatasource(datasource);
+    setTimeout(function(){
+      attributeUi.revealAllQueryAttributes();
+    }, 1000);
   }
 
 }
