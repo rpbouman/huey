@@ -1,0 +1,40 @@
+/**
+*
+* Hide attribute UI by default
+*
+*/
+nav#sidebar[role=tablist] > div:has( > label[for=attributesTab]) {
+  display: none;
+}
+/**
+*
+* Show attribute UI if there is at least one data source
+*
+*/
+nav#sidebar[role=tablist]:has( > div > div[role=tabpanel] > div#datasourcesUi details ) > div:has( > label[for=attributesTab]) {
+  display: block;
+}
+
+/**
+*
+* If the Attribute UI is not visible, then we won't see the "filler" tab at the end (which draws the tabstrip line). 
+* The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
+*
+*/
+nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ){
+  flex-grow: 1;
+}
+
+nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi details ){
+  flex-grow: 0;
+}
+
+nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ):after {
+    content: ' ';
+    width: 100%;
+    border-bottom-style: solid;
+    border-color: var(--huey-light-border-color);
+    border-width: 2px;
+    display: block;
+    margin-top: 2px;
+}
