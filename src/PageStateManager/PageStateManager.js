@@ -209,9 +209,9 @@ class PageStateManager {
     else {
       datasource = datasourcesUi.getDatasource(datasourceId);
     }
-    
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
+    analyzeDatasource(datasource);
   }
 
 }
