@@ -12,41 +12,80 @@ class SqlQueryGenerator {
     });
     return unnestingFunctions;
   }
+  
+  static #getExpressionString(columnName, memberExpressionPath){
+    var columnExpression = getQuotedIdentifier(columnName);
+    var pathExpression = memberExpressionPath.map(function(memberExpressionPathElement){
+      return `[${quoteStringLiteral( memberExpressionPathElement ) }]`
+    }).join('');
+    return `${columnExpression}${pathExpression}`;    
+  }
+
+  static #getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem){
+    var memberExpressionPath = filterAxisItem.memberExpressionPath;
+    if (!memberExpressionPath || !memberExpressionPath.length){
+      return undefined;
+    }
+    var memberExpressionPathString = undefined;
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    for (var j = 0; j < memberExpressionPath.length; j++) {
+      var memberExpressionPathElement = memberExpressionPath[j];
+      if (unnestingFunctions[memberExpressionPathElement] === undefined) {
+        continue;
+      }
+      memberExpressionPathString = SqlQueryGenerator.#getExpressionString(
+        filterAxisItem.columnName, 
+        memberExpressionPath
+      );
+      break;
+    }
+    return memberExpressionPathString;
+  }
 
   static #getFilterItemsByNestingStage(filterAxisItems){
     var filterAxisItemsByNestingStage = {};
-    if (!filterAxisItems || !filterAxisItems.length){
+    if (!filterAxisItems){
+      return filterAxisItemsByNestingStage;
+    }
+    
+    // only retain filter items that have values
+    filterAxisItems = filterAxisItems.filter(function(filterAxisItem){
+      var filter = filterAxisItem.filter;
+      if (!filter){
+        return false;
+      }
+      var values = filter.values;
+      if (!values){
+        return false;
+      }
+      if (!Object.keys(values).length){
+        return false;
+      }
+      return true;
+    });
+    
+    if (!filterAxisItems.length){
       return filterAxisItemsByNestingStage;
     }
 
     // analyze the filter items and store them in a dict: 
     // - filter items that require unnesting are stored by memberExpressionPath
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();    
-    _filterAxisIems: for (var i = 0; i < filterAxisItems.length; i++){
+    var topLevelFilterAxisItems = [];
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    for (var i = 0; i < filterAxisItems.length; i++){
       var filterAxisItem = filterAxisItems[i];
-      var memberExpressionPath = filterAxisItem.memberExpressionPath;
-      var memberExpressionPathString = undefined;
-      if (memberExpressionPath){
-        _memberExpressionPath: for (var j = 0; j < memberExpressionPath.length; j++) {
-          var memberExpressionPathElement = memberExpressionPath[j];
-          if (unnestingFunctions[memberExpressionPathElement] === undefined) {
-            continue;
-          }
-          memberExpressionPathString = [filterAxisItem.columnName].concat(memberExpressionPath).join('.');
-          break;
-        }
+      var memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
+      if (memberExpressionPathString) {
+        filterAxisItemsByNestingStage[memberExpressionPathString] = filterAxisItem;
       }
-      
-      if (!memberExpressionPathString) {
-        memberExpressionPathString = '';
+      else {
+        topLevelFilterAxisItems.push(filterAxisItem);
       }
-      
-      var filterAxisItemsForStage = filterAxisItemsByNestingStage[memberExpressionPathString];
-      if (!filterAxisItemsForStage) {
-        filterAxisItemsForStage = [];
-        filterAxisItemsByNestingStage[memberExpressionPathString] = filterAxisItemsForStage;
-      }
-      filterAxisItemsForStage.push(filterAxisItem);
+    }
+    
+    // - filter items that do not require unnesting are stored separateley and finally stored by path ''
+    if (topLevelFilterAxisItems.length){
+      filterAxisItemsByNestingStage[''] = topLevelFilterAxisItems;
     }
     return filterAxisItemsByNestingStage;
   }
@@ -62,24 +101,89 @@ class SqlQueryGenerator {
     .join('\nAND ');
   }
   
+  static #transformFilterItems(
+    filterAxisItemsByNestingStage, 
+    unnestingItemMemberExpressionPathPrefixString, 
+    unnestingOperationItem, 
+    cte
+  ){
+    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    var unnestingFunctionNames = Object.keys(unnestingFunctions);
+    var filters = [];
+    
+    // check each filter path to see if it matches this unnesting stage
+    var filterPaths = Object.keys(filterAxisItemsByNestingStage);
+    for (var i = 0; i < filterPaths.length; i++){
+      var filterPath = filterPaths[i];
+      if (!filterPath.startsWith(unnestingItemMemberExpressionPathPrefixString)){
+        // filter path prefix does not match this path prefix, so leave it
+        continue;
+      }
+      
+      // check if there is an unnesting function in the filter, immediately after the prefix
+      for (var j = 0; j < unnestingFunctionNames.length; j++){
+        var unnestingFunctionName = unnestingFunctionNames[j];
+        var unnestingExpression = unnestingItemMemberExpressionPathPrefixString + `['${unnestingFunctionName}']`;
+        if (!filterPath.startsWith(unnestingExpression)){
+          // filter path does not match this unnesting function, so try the next
+          continue;
+        }
+        
+        // this filter path matches this unnesting stage, so register that in the unnesting operation
+        if (unnestingOperationItem.unnestingFunctions[unnestingFunctionName] === undefined){
+          unnestingOperationItem.unnestingFunctions[unnestingFunctionName] = 0;
+        }
+        unnestingOperationItem.unnestingFunctions[unnestingFunctionName] += 1;
+        
+        // since these filter items are part of this unnesting stage, 
+        // we need replace them with new filter items that reference the column of the unnested item
+        var originalFilterAxisItem = filterAxisItemsByNestingStage[filterPath];
+        var substituteMemberExpressionPath = originalFilterAxisItem.memberExpressionPath.slice(unnestingOperationItem.memberExpressionPath.length + 1);
+        var columnExpression = [unnestingOperationItem.columnName].concat(unnestingOperationItem.memberExpressionPath);
+        columnExpression.push(unnestingFunctionName);
+        var filterAxisItem = Object.assign({}, originalFilterAxisItem, {
+          columnName: columnExpression.join('.')
+        });
+        
+        if (substituteMemberExpressionPath.length){
+          filterAxisItem.memberExpressionPath = substituteMemberExpressionPath;
+        }
+        else {
+          delete filterAxisItem.memberExpressionPath;
+          delete filterAxisItem.derivation;
+        }
+        
+        // now we have to check whether the remaining expressionpath of the filter item still contains unnesting expressions.
+        // if it does, then we have to replace the original item in filterAxisItemsByNestingStage with the substituted one
+        // if it does not, then we have to remove the path and the item from filterAxisItemsByNestingStage and add them to the cte
+        var memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
+        if (memberExpressionPathString) {
+          // replace the original filter axis item with the one that substitutes the path prefix with the column name of the corresponding unnesting operation
+          filterAxisItemsByNestingStage[filterPath] = filterAxisItem;
+        }
+        else {
+          // no more unnesting operations for this filter item past this stage, so we have to apply it here.
+          filters.push(filterAxisItem);
+        }
+      }
+    }
+    return filters.length ? filters : undefined;
+  }
+  
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
     var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
     var dataFoundationAlias = '__huey_data_foundation';
     var fromClause = datasource.getFromClauseSql(dataFoundationAlias);
     
-    var whereCondition = undefined;
     var filterAxisItems = filterAxisItemsByNestingStage[''];
-    if (filterAxisItems && filterAxisItems.length) {
-      whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, dataFoundationAlias);
-      delete filterAxisItemsByNestingStage[''];
-    }
+    delete filterAxisItemsByNestingStage[''];
     
     var cteIndex = 0;
     var currentItems = queryAxisItems;
     var cte, ctes = [{
       items: currentItems,
       from: fromClause,
-      where: whereCondition,
+      filters: filterAxisItems,
       alias: dataFoundationAlias,
     }];
     
@@ -98,7 +202,7 @@ class SqlQueryGenerator {
       var unnestingItemMemberExpression = undefined;
       var unnestingItemMemberExpressionType = undefined;
       var newItems = [];
-
+      var filters;
       var currentItems = cte.items;
       cte.items = [];
       // go over the items currently in scope
@@ -128,11 +232,19 @@ class SqlQueryGenerator {
             unnestingItem = currentItem;
             unnestingItemMemberExpressionPathIndex = j;
             unnestingItemMemberExpressionPathPrefix = currentItemMemberExpressionPath.slice(0, j);
-            unnestingItemMemberExpressionPathPrefixString = unnestingItemMemberExpressionPathPrefix.join('.');
+
+            unnestingItemMemberExpressionPathPrefixString = SqlQueryGenerator.#getExpressionString(
+              unnestingItem.columnName, 
+              unnestingItemMemberExpressionPathPrefix
+            );
+            
+            // get the type of the array we're unnesting
             unnestingItemMemberExpressionType = getMemberExpressionType(
               currentItem.columnType, 
               unnestingItemMemberExpressionPathPrefix
-            ).slice(0,-2);
+            );
+            // to get the element type, remove the trailing []
+            unnestingItemMemberExpressionType = unnestingItemMemberExpressionType.slice(0, -2);
             
             // add an unnesting operation to the current cte.
             unnestingOperationItem = {
@@ -150,6 +262,14 @@ class SqlQueryGenerator {
               unnestingFunctions: {}
             };
             
+            // check if there are any filter items at this unnesting level.
+            filters = SqlQueryGenerator.#transformFilterItems(
+              filterAxisItemsByNestingStage, 
+              unnestingItemMemberExpressionPathPrefixString, 
+              unnestingOperationItem, 
+              cte
+            );
+            
             cte.items.push(unnestingOperationItem);
             break;
           }
@@ -159,9 +279,11 @@ class SqlQueryGenerator {
         // or if the current item is not part of the unnesting stage, 
         // then carry the current item and continue with the next
         if (
-          !unnestingItem || 
-          currentItem.columnName !== unnestingItem.columnName ||
-          unnestingItemMemberExpressionPathPrefixString !== currentItemMemberExpressionPath.slice(0, unnestingItemMemberExpressionPathIndex).join('.')
+          !unnestingItem ||
+          unnestingItemMemberExpressionPathPrefixString !== SqlQueryGenerator.#getExpressionString(
+            currentItem.columnName, 
+            currentItemMemberExpressionPath.slice(0, unnestingItemMemberExpressionPathIndex)
+          )
         ){
           cte.items.push(currentItem);
           newItems.push(currentItem);
@@ -174,17 +296,17 @@ class SqlQueryGenerator {
         
         var unnestingItemMemberExpressionPathPostfix = currentItemMemberExpressionPath.slice(unnestingItemMemberExpressionPathIndex + 1);
         memberPathExpressionElement = currentItemMemberExpressionPath[unnestingItemMemberExpressionPathIndex];
+        
         if (unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] === undefined){
-          unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] = 1;
+          unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] = 0;
         }
-        else {
-          unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] += 1;
-        }
+        unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] += 1;
+        
         unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
         var newItem = Object.assign({}, currentItem, {
           columnName: [
             unnestingItem.columnName,
-            unnestingItemMemberExpressionPathPrefixString, 
+            unnestingItemMemberExpressionPathPrefix.join('.'), 
             memberPathExpressionElement
           ].join('.'),
           columnType: unnestingDerivation.columnType || unnestingOperationItem.elementType,
@@ -208,7 +330,8 @@ class SqlQueryGenerator {
         ctes.push({
           items: newItems,
           alias: alias,
-          from: `FROM ${cte.alias} AS "${alias}"`
+          from: `FROM ${cte.alias} AS "${alias}"`,
+          filters: filters
         });
       }
       // if we didn't find a new unnesting stage, we are done.
@@ -304,9 +427,8 @@ class SqlQueryGenerator {
       `SELECT ${selectListExpressions.join('\n,')}`,
       cte.from
     ];
-    if (cte.where) {
-      sql.push(`WHERE ${cte.where}`);
-    }
+    
+    SqlQueryGenerator.#generateWhereClause(cte, sql);
     
     var groupByClause = `GROUP BY `;
     if (groupingSets.length > 1) {
@@ -357,13 +479,21 @@ class SqlQueryGenerator {
       `SELECT ${sqlSelectList.join('\n,')}`,
       cte.from
     ];
-    if (cte.where){
-      sql.push(`WHERE ${cte.where}`);
-    }
+    
+    SqlQueryGenerator.#generateWhereClause(cte, sql);
+    
     sql.unshift(`"${cte.alias}" AS (`)
     sql.push(')');
     sql = sql.join('\n');
     return sql;
+  }
+  
+  static #generateWhereClause(cte, sql){
+    var filterAxisItems = cte.filters;
+    if (filterAxisItems && filterAxisItems.length){
+      var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
+      sql.push(`WHERE ${whereCondition}`);
+    }
   }
 
   static getSqlSelectStatementForAxisItems(
