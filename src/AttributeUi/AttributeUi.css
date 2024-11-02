@@ -401,3 +401,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   content: "\ed2c";
 }
 
+/**
+*
+* https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
+* 
+*/
+.attributeUi details > summary:has( > label > input[type=checkbox]:checked ) > span.label,
+.attributeUi details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
+  font-weight: bold;
+}
