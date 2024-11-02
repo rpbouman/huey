@@ -538,7 +538,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UTINYINT');
-    }    
+    }
   },
   'BIT': {
     defaultAnalyticalRole: 'attribute',
@@ -546,8 +546,10 @@ var dataTypes = {
   'BOOLEAN': {
     defaultAnalyticalRole: 'attribute',
     createLiteralWriter: function(dataTypeInfo, dataType){
-      return createDefaultLiteralWriter('BOOLEAN');
-    }    
+      return function(value, field){
+        return `${value === null ? 'NULL::BOOLEAN' : Boolean(value)}`;
+      }
+    }
   },
   'BLOB': {
     defaultAnalyticalRole: 'attribute',
@@ -557,7 +559,7 @@ var dataTypes = {
     hasDateFields: true,
     createFormatter: function(){
       var localeSettings = settings.getSettings('localeSettings');
-      var locales = localeSettings.locale;      
+      var locales = localeSettings.locale;
       var formatter = new Intl.DateTimeFormat(locales, {
         year: 'numeric',
         month: 'short',
