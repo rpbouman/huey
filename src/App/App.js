@@ -55,6 +55,7 @@ async function analyzeDatasource(datasource){
   try {
     TabUi.setSelectedTab('#sidebar', '#attributesTab');
     clearSearch();
+    uploadUi.getDialog().close();
     queryModel.setDatasource(datasource);
   }
   catch (error) {

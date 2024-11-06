@@ -187,8 +187,8 @@ class PageStateManager {
     },{});
     
     var datasourceId = queryModelState.datasourceId;
-    var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);    
-    
+    var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
+
     var datasource;
     if (!compatibleDatasources || !compatibleDatasources[datasourceId]) {
       try {
