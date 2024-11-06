@@ -18,7 +18,7 @@ class UploadUi {
     this.init();
   }
   
-  init(){        
+  init(){
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
       this.getDialog().close();
@@ -346,9 +346,12 @@ class UploadUi {
       ;      
     }
     
-    dom.setAttribute('aria-busy', false);    
+    dom.setAttribute('aria-busy', false);
     if (datasources.length) {
       datasourcesUi.addDatasources(datasources);
+      if (!countFail && datasources.length === 1){
+        analyzeDatasource(datasources[0]);
+      }
     }
     var message, description;
     var countSuccess = uploadResults.length - countFail;
