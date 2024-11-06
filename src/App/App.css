@@ -66,6 +66,7 @@ menu[role=toolbar] > label[for=cloneHueySession]::before {
 
 menu[role=toolbar] > label[for=autoRunQuery]{
   position: relative;
+  top: -3px;
 }
 
 menu[role=toolbar] > label[for=runQueryButton]{
@@ -101,9 +102,11 @@ body > main > menu[role=toolbar] > label[for=autoRunQuery]::after {
   margin-left: .2em;
   /* square */
   content: "\eb2c";
+  position: relative;
+  top: 3px;
 }
 
-body > main > menu[role=toolbar] > label[for=autoRunQuery]::after:hover {
+body > main > menu[role=toolbar] > label[for=autoRunQuery]:hover::after {
   color: var( --huey-icon-color-highlight );
 }
 
@@ -131,5 +134,6 @@ menu[role=toolbar] > #currentDatasource {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc( 100% - 450px);
+  vertical-align: top;
 }
 

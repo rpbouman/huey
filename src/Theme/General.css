@@ -341,3 +341,13 @@ menu[role=menu] > li[role=menuitem]:hover {
 code, pre {
   font-family: var( --huey-mono-font-family );
 }
+
+*[role=separator][aria-orientation=vertical] {
+    display: inline-block;
+    border-width: 1px;
+    height: 28px;
+    border-left-style: solid;
+    border-left-color: var(--huey-light-border-color);
+    border-right-color: var(--huey-dark-border-color);
+    margin-left: 2px;
+    margin-right: 2px;}
