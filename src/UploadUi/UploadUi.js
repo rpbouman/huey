@@ -18,7 +18,7 @@ class UploadUi {
     this.init();
   }
   
-  init(){        
+  init(){
     this.#getCancelButton().addEventListener('click', async function(){
       await this.#cancelUploads();
       this.getDialog().close();
@@ -107,7 +107,7 @@ class UploadUi {
     });
     uploadItem.appendChild(summary);
 
-    var label = createEl('label', {
+    var label = createEl('span', {
     }, fileName);
     summary.appendChild(label);
     
@@ -149,7 +149,7 @@ class UploadUi {
     });
     uploadItem.appendChild(summary);
 
-    var label = createEl('label', {
+    var label = createEl('span', {
       // label should technicall have a for attribute, but there is nothing to point it to.
       //"for": extensionItemId
     }, `Extension: ${extensionName}`);
@@ -341,14 +341,17 @@ class UploadUi {
       
       uploadItem
       .getElementsByTagName('summary').item(0)
-      .getElementsByTagName('label').item(0)
+      .getElementsByTagName('*').item(0)
       .innerHTML += ' ' + UploadUi.#fileSizeFormatter.format(files[i].size)
       ;      
     }
     
-    dom.setAttribute('aria-busy', false);    
+    dom.setAttribute('aria-busy', false);
     if (datasources.length) {
       datasourcesUi.addDatasources(datasources);
+      if (!countFail && datasources.length === 1){
+        analyzeDatasource(datasources[0]);
+      }
     }
     var message, description;
     var countSuccess = uploadResults.length - countFail;

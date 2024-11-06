@@ -1,56 +1,56 @@
 class AttributeUi {
-  
+
   #id = undefined;
   #queryModel = undefined;
-  
+
   static aggregators = {
     'count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( ${columnName} )',
+      expressionTemplate: 'COUNT( ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'distinct count': {
       isNumeric: true,
       isInteger: true,
-      expressionTemplate: 'COUNT( DISTINCT ${columnName} )',
+      expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'min': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MIN( ${columnName} )'
+      expressionTemplate: 'MIN( ${columnExpression} )'
     },
     'max': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MAX( ${columnName} )'
+      expressionTemplate: 'MAX( ${columnExpression} )'
     },
     'list': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( ${columnName} )',
+      expressionTemplate: 'LIST( ${columnExpression} )',
       isArray: true
     },
     'distinct list': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( DISTINCT ${columnName} )',
-      isArray: true      
+      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
+      isArray: true
     },
     'histogram': {
       folder: "list aggregators",
-      expressionTemplate: 'HISTOGRAM( ${columnName} )',
+      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
       isStruct: true,
     },
     'sum': {
       isNumeric: true,
       forNumeric: true,
-      expressionTemplate: 'SUM( ${columnName} )',
+      expressionTemplate: 'SUM( ${columnExpression} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
         var dataTypeInfo = getDataTypeInfo(columnType);
         var isInteger = dataTypeInfo.isInteger;
         var formatter = createNumberFormatter(isInteger !== true);
-        
+
         return function(value, field){
           return formatter.format(value, field);
         };
@@ -61,7 +61,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'AVG( ${columnName} )',
+      expressionTemplate: 'AVG( ${columnExpression} )',
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
@@ -74,7 +74,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'GEOMEAN( ${columnName} )',
+      expressionTemplate: 'GEOMEAN( ${columnExpression} )',
       createFormatter: function(axisItem){
         var formatter = createNumberFormatter(true);
         return function(value, field){
@@ -86,11 +86,11 @@ class AttributeUi {
       folder: "statistics",
       columnType: 'INTERVAL',
       forNumeric: true,
-      expressionTemplate: 'MAD( ${columnName} )'
+      expressionTemplate: 'MAD( ${columnExpression} )'
     },
     'median': {
       folder: "statistics",
-      expressionTemplate: 'MEDIAN( ${columnName} )',
+      expressionTemplate: 'MEDIAN( ${columnExpression} )',
       createFormatter: function(axisItem){
         var columnType = axisItem.columnType;
         var dataTypeInfo = getDataTypeInfo(columnType);
@@ -111,14 +111,14 @@ class AttributeUi {
     'mode': {
       folder: "statistics",
       preservesColumnType: true,
-      expressionTemplate: 'MODE( ${columnName} )'
+      expressionTemplate: 'MODE( ${columnExpression} )'
     },
     'stdev': {
       folder: "statistics",
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'STDDEV_SAMP( ${columnName} )',
+      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'variance': {
@@ -126,14 +126,14 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'VAR_SAMP( ${columnName} )',
+      expressionTemplate: 'VAR_SAMP( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'entropy': {
       folder: "statistics",
       isNumeric: true,
       isInteger: false,
-      expressionTemplate: 'ENTROPY( ${columnName} )',
+      expressionTemplate: 'ENTROPY( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'kurtosis': {
@@ -141,7 +141,7 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'KURTOSIS( ${columnName} )',
+      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'skewness': {
@@ -149,27 +149,27 @@ class AttributeUi {
       isNumeric: true,
       isInteger: false,
       forNumeric: true,
-      expressionTemplate: 'SKEWNESS( ${columnName} )',
+      expressionTemplate: 'SKEWNESS( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
     'and': {
       forBoolean: true,
-      expressionTemplate: 'BOOL_AND( ${columnName} )',
+      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
       columnType: 'BOOLEAN'
     },
     'or': {
       forBoolean: true,
-      expressionTemplate: 'BOOL_OR( ${columnName} )',
+      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
       columnType: 'BOOLEAN'
     },
-    'count if true': {  
+    'count if true': {
       forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnName} ) FILTER( ${columnName} )',
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
       columnType: 'HUGEINT'
     },
-    'count if false': {  
+    'count if false': {
       forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnName} ) FILTER( NOT( ${columnName} ) )',
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
       columnType: 'HUGEINT'
     }
   };
@@ -179,20 +179,20 @@ class AttributeUi {
       folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
-      expressionTemplate: "strftime( ${columnName}, '%x' )",
+      expressionTemplate: "strftime( ${columnExpression}, '%x' )",
       columnType: 'VARCHAR'
     },
     'local-date': {
       folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
-      expressionTemplate: "${columnName}::DATE",
+      expressionTemplate: "${columnExpression}::DATE",
       columnType: 'DATE',
       createFormatter: createLocalDateFormatter
     },
     'year': {
       folder: 'date fields',
-      expressionTemplate: "CAST( YEAR( ${columnName} ) AS INT)",
+      expressionTemplate: "CAST( YEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
       createFormatter: function(){
         return fallbackFormatter;
@@ -200,12 +200,12 @@ class AttributeUi {
     },
     'quarter': {
       folder: 'date fields',
-      expressionTemplate: "'Q' || QUARTER( ${columnName} )",
+      expressionTemplate: "'Q' || QUARTER( ${columnExpression} )",
       columnType: 'VARCHAR'
-    },    
+    },
     'month num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return monthNumFormatter
@@ -221,13 +221,13 @@ class AttributeUi {
     },
     'month name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createMonthNameFormatter
     },
     'week num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( WEEK( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( WEEK( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return weekNumFormatter
@@ -235,12 +235,12 @@ class AttributeUi {
     },
     'day of year': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFYEAR( ${columnName} ) as USMALLINT)",
+      expressionTemplate: "CAST( DAYOFYEAR( ${columnExpression} ) as USMALLINT)",
       columnType: 'USMALLINT'
     },
     'day of month': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFMONTH( ${columnName} ) AS UTINYINT)",
+      expressionTemplate: "CAST( DAYOFMONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return dayNumFormatter
@@ -248,12 +248,12 @@ class AttributeUi {
     },
     'day of week': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
     },
     'day of week name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createDayNameFormatter
     }
@@ -262,12 +262,12 @@ class AttributeUi {
   static timeFields = {
     'iso-time': {
       folder: 'time fields',
-      expressionTemplate: "strftime( ${columnName}, '%H:%M:%S' )",
+      expressionTemplate: "strftime( ${columnExpression}, '%H:%M:%S' )",
       columnType: 'VARCHAR'
     },
     'hour': {
       folder: 'time fields',
-      expressionTemplate: "CAST( HOUR( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( HOUR( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       formats: {
         'short': {
@@ -278,33 +278,90 @@ class AttributeUi {
     },
     'minute': {
       folder: 'time fields',
-      expressionTemplate: "CAST( MINUTE( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( MINUTE( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT'
     },
     'second': {
       folder: 'time fields',
-      expressionTemplate: "CAST( SECOND( ${columnName} ) as UTINYINT)",
+      expressionTemplate: "CAST( SECOND( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT'
     }
   };
 
+  static textDerivations = {
+    'NOACCENT': {
+      folder: 'string operations',
+      expressionTemplate: "${columnExpression} COLLATE NOACCENT",
+      preservesColumnType: true
+    },
+    'NOCASE': {
+      folder: 'string operations',
+      expressionTemplate: "${columnExpression} COLLATE NOCASE",
+      preservesColumnType: true
+    },
+    'lowercase': {
+      folder: 'string operations',
+      expressionTemplate: "LOWER( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    'uppercase': {
+      folder: 'string operations',
+      expressionTemplate: "UPPER( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    "first letter": {
+      folder: 'string operations',
+      expressionTemplate: "upper( ${columnExpression}[1] )",
+      preservesColumnType: true
+    },
+    "length": {
+      folder: 'string operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    }
+  }
+
+  static arrayDerivations = {
+    "length": {
+      folder: 'array operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    "element indices": {
+      folder: 'array operations',
+      columnType: 'BIGINT',
+      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1 )",
+      unnestingFunction: 'generate_subscripts'
+    },
+    "elements": {
+      folder: 'array operations',
+      hasElementDataType: true,
+      expressionTemplate: "unnest( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end )",
+      unnestingFunction: 'unnest'
+    }
+  }
+
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
-    
+
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
-    
-    var applicableDerivations = Object.assign({}, 
-      hasDateFields ? AttributeUi.dateFields : undefined, 
-      hasTimeFields ? AttributeUi.timeFields : undefined
+    var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+
+    var applicableDerivations = Object.assign({},
+      hasDateFields ? AttributeUi.dateFields : undefined,
+      hasTimeFields ? AttributeUi.timeFields : undefined,
+      hasTextDerivations ? AttributeUi.textDerivations : undefined,
     );
     return applicableDerivations;
   }
 
   static getDerivationInfo(derivationName){
-    var derivations = Object.assign({}, 
-      AttributeUi.dateFields, 
-      AttributeUi.timeFields
+    var derivations = Object.assign({},
+      AttributeUi.dateFields,
+      AttributeUi.timeFields,
+      AttributeUi.textDerivations,
+      AttributeUi.arrayDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -314,13 +371,13 @@ class AttributeUi {
     var aggregatorInfo = AttributeUi.aggregators[aggregatorName];
     return aggregatorInfo;
   }
-  
+
   static getApplicableAggregators(typeName) {
     var typeInfo = getDataTypeInfo(typeName);
-    
+
     var isNumeric = Boolean(typeInfo.isNumeric);
     var isInteger = Boolean(typeInfo.isInteger);
-            
+
     var applicableAggregators = {};
     for (var aggregationName in AttributeUi.aggregators) {
       var aggregator = AttributeUi.aggregators[aggregationName];
@@ -334,18 +391,26 @@ class AttributeUi {
     }
     return applicableAggregators;
   }
-  
+
+  static getArrayDerivations(typeName){
+    return AttributeUi.arrayDerivations;
+  }
+
   static #getUiNodeCaption(config){
     switch (config.type){
       case 'column':
         return config.profile.column_name;
+      case 'member':
+        var memberExpressionPath = config.profile.memberExpressionPath;
+        var tmp = [].concat(memberExpressionPath);
+        return tmp.pop();
       case 'derived':
         return config.derivation;
       case 'aggregate':
         return config.aggregator;
     }
   }
-  
+
   constructor(id, queryModel){
     this.#id = id;
     this.#queryModel = queryModel;
@@ -354,29 +419,149 @@ class AttributeUi {
     dom.addEventListener('click', this.#clickHandler.bind(this));
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
-    
+
+  async #queryModelChangeHandler(event){
+    var eventData = event.eventData;
+    if (eventData.propertiesChanged) {
+      if (eventData.propertiesChanged.datasource) {
+        var searchAttributeUiDisplay;
+        if (eventData.propertiesChanged.datasource.newValue) {
+          this.clear(true);
+          var datasource = eventData.propertiesChanged.datasource.newValue;
+          var columnMetadata = await datasource.getColumnMetadata();
+          this.render(columnMetadata);
+          searchAttributeUiDisplay = '';
+        }
+        else {
+          this.clear(false);
+          searchAttributeUiDisplay = 'none';
+        }
+        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
+      }
+    }
+    this.#updateState();
+  }
+
+  #clickHandler(event){
+    var target = event.target;
+    var classNames = getClassNames(target);
+    event.stopPropagation();
+
+    var node = getAncestorWithTagName(target, 'details');
+    if (!node) {
+      return;
+    }
+
+    if (classNames.indexOf('attributeUiAxisButton') !== -1){
+      var input = target.getElementsByTagName('input').item(0);
+      var axisId = target.getAttribute('data-axis');
+      setTimeout(function(){
+        this.#axisButtonClicked(node, axisId, input.checked);
+      }.bind(this), 0);
+    }
+  }
+
+  async #axisButtonClicked(node, axis, checked){
+    var queryModel = this.#queryModel;
+    var head = node.childNodes.item(0);
+    var inputs = head.getElementsByTagName('input');
+    var aggregator;
+    switch (axis){
+      case QueryModel.AXIS_ROWS:
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_CELLS:
+        // implement mutual exclusive axes (either rows or columns, not both)
+        for (var i = 0; i < inputs.length; i++){
+          var input = inputs.item(i);
+          var inputAxis = input.getAttribute('data-axis');
+          if (input.checked && inputAxis !== axis) {
+            input.checked = false;
+          }
+
+          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
+            aggregator = input.getAttribute('data-aggregator');
+          }
+        }
+        break;
+    }
+    var columnName = node.getAttribute('data-column_name');
+    var columnType = node.getAttribute('data-column_type');
+
+    var memberExpressionPath = node.getAttribute('data-member_expression_path');
+    if (memberExpressionPath) {
+      memberExpressionPath = JSON.parse(memberExpressionPath);
+    }
+
+    var derivation = node.getAttribute('data-derivation');
+    var aggregator = aggregator || node.getAttribute('data-aggregator');
+
+    var itemConfig = {
+      axis: axis,
+      columnName: columnName,
+      columnType: columnType,     // the type of this item's values
+      derivation: derivation,
+      aggregator: aggregator,
+      memberExpressionPath: memberExpressionPath
+    };
+
+    var formatter = QueryAxisItem.createFormatter(itemConfig);
+    if (formatter){
+      itemConfig.formatter = formatter;
+    }
+
+    if (itemConfig.aggregator) {
+      //noop
+    }
+    else {
+      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
+      if (literalWriter){
+        itemConfig.literalWriter = literalWriter;
+      }
+    }
+
+    if (checked) {
+      await queryModel.addItem(itemConfig);
+
+      if (axis === QueryModel.AXIS_FILTERS) {
+        queryUi.openFilterDialogForQueryModelItem(itemConfig);
+      }
+    }
+    else {
+      queryModel.removeItem(itemConfig);
+    }
+  }
+
   #renderAttributeUiNodeAxisButton(config, head, axisId){
-    var name = `${config.type}_${config.profile.column_name}`;
+    var columnExpression = config.profile.column_name;
+    var memberExpressionPath = config.profile.memberExpressionPath;
+    if (memberExpressionPath){
+      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+    }
+
+    var name = `${config.type}_${columnExpression}`;
     var id = `${name}`;
 
     var analyticalRole = 'attribute';
     var aggregator = config.aggregator;
-        
+
     var createInput;
     switch (config.type) {
       case 'column':
+      case 'member':
         var profile = config.profile;
-        var columnType = profile.column_type;
+        var columnType = config.columnType || config.profile.column_type;
         var dataTypeInfo = getDataTypeInfo(columnType);
-        analyticalRole = dataTypeInfo.defaultAnalyticalRole || analyticalRole;
+        analyticalRole = dataTypeInfo && dataTypeInfo.defaultAnalyticalRole ? dataTypeInfo.defaultAnalyticalRole : analyticalRole;
       case 'derived':
         switch (axisId){
           case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
-            if (config.type === 'derived') {
-              var derivation = config.derivation;
-              id += `_${derivation}`;
+            switch (config.type) {
+              case 'derived':
+                var derivation = config.derivation;
+                id += `_${derivation}`;
+                break;
             }
             id += `_${axisId}`;
             createInput = 'radio';
@@ -406,32 +591,30 @@ class AttributeUi {
       'data-axis': axisId,
       "class": 'attributeUiAxisButton'
     });
-    
+
     if (!createInput){
       return axisButton;
     }
 
     axisButton.setAttribute('title', `Toggle to add or remove this attribute on the ${axisId} axis.`);
-    
+
     axisButton.setAttribute('for', id);
     var axisButtonInput = createEl('input', {
       type: 'checkbox',
       id: id,
-      'data-nodetype': config.type,
-      'data-column_name': config.profile.column_name,
       'data-axis': axisId
     });
-    
+
     if (aggregator && axisId === QueryModel.AXIS_CELLS) {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
-    
-    if (config.derivation){      
+
+    if (config.derivation){
       axisButtonInput.setAttribute('data-derivation', config.derivation);
     }
-    
+
     axisButton.appendChild(axisButtonInput);
-    
+
     return axisButton;
   }
 
@@ -450,9 +633,15 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeHead(config) {
+    var columnExpression = config.profile.column_name;
+    var memberExpressionPath = config.profile.memberExpressionPath;
+    if (memberExpressionPath){
+      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+    }
+
     var head = createEl('summary', {
     });
-    
+
     var icon = createEl('span', {
       'class': 'icon',
       'role': 'img'
@@ -461,58 +650,90 @@ class AttributeUi {
     if (!title){
       switch (config.type) {
         case 'column':
-          title = `"${config.profile.column_name}": ${config.profile.column_type}`;
+          title = `"${columnExpression}": ${config.profile.column_type}`;
+          break;
+        case 'member':
+          title = `${columnExpression}: ${config.columnType}`;
           break;
         case 'aggregate':
         case 'derived':
           var expressionTemplate = config.expressionTemplate;
-          title = expressionTemplate.replace(/\$\{columnName\}/g, `"${config.profile.column_name}"`);
+          title = extrapolateColumnExpression(expressionTemplate, columnExpression);
           break;
       }
     }
     icon.setAttribute('title', title);
     head.appendChild(icon);
-    
+
     var caption = AttributeUi.#getUiNodeCaption(config);
     var label = createEl('span', {
       "class": 'label',
       "title": title
     }, caption);
     head.appendChild(label);
-    
+
     this.#renderAttributeUiNodeAxisButtons(config, head);
     return head;
   }
 
   #renderAttributeUiNode(config){
-    var node = createEl('details', {
-      role: 'treeitem',      
+    var columnType = config.profile.column_type;
+    var attributes = {
+      role: 'treeitem',
       'data-nodetype': config.type,
       'data-column_name': config.profile.column_name,
-      'data-column_type': config.profile.column_type
-    });
+      'data-column_type': columnType
+    };
+    var memberExpressionPath = config.profile.memberExpressionPath;
+    if (memberExpressionPath) {
+      attributes['data-member_expression_path'] = JSON.stringify(memberExpressionPath);
+      attributes['data-member_expression_type'] = config.profile.memberExpressionType;
+    }
+
+    var node = createEl('details', attributes);
+
+    var derivation = config.derivation;
     switch (config.type){
       case 'column':
+      case 'member':
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
         break;
       case 'derived':
-        var derivation = config.derivation;
         node.setAttribute('data-derivation', config.derivation);
-        if (derivation.formats) {
-          node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
-        }
+        //if (derivation === 'elements') {
+        //  var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
+          // remove the trailing '[]' to get the element type.
+        //  elementType = elementType.slice(0, -2);
+        //  node.setAttribute('data-element_type', elementType);
+        //}
         break;
     }
-    
+
     var head = this.#renderAttributeUiNodeHead(config);
     node.appendChild(head);
 
+    // for STRUCT columns and members, preload the child nodes (instead of lazy load)
+    // this is necessary so that a search will always find all applicable attributes
+    // with lazy load it would only find whatever happens to be visited/browsed already.
+    switch (config.type){
+      case 'derived':
+        if (derivation !== 'elements') {
+          break;
+        }
+      case 'column':
+      case 'member':
+        if (columnType.startsWith('STRUCT')) {
+          this.#loadChildNodes(node);
+        }
+        break;
+    }
+
     return node;
   }
-    
+
   clear(showBusy){
     var attributesUi = this.getDom();
     var content;
@@ -524,11 +745,11 @@ class AttributeUi {
     }
     attributesUi.innerHTML = content;
   }
-  
+
   render(columnSummary){
     this.clear();
     var attributesUi = this.getDom();
-    
+
     // generic count(*) node
     var node = this.#renderAttributeUiNode({
       type: 'aggregate',
@@ -540,7 +761,7 @@ class AttributeUi {
       }
     });
     attributesUi.appendChild(node);
-    
+
     // nodes for each column
     for (var i = 0; i < columnSummary.numRows; i++){
       var row = columnSummary.get(i);
@@ -554,19 +775,19 @@ class AttributeUi {
 
   #renderFolderNode(config){
     var node = createEl('details', {
-      role: 'treeitem',      
+      role: 'treeitem',
       'data-nodetype': 'folder',
     });
-    
+
     var head = createEl('summary', {
     });
-    
+
     var icon = createEl('span', {
       'class': 'icon',
       'role': 'img'
     });
     head.appendChild(icon);
-    
+
     var label = createEl('span', {
       "class": 'label'
     }, config.caption);
@@ -582,15 +803,17 @@ class AttributeUi {
       if (!folder) {
         return acc;
       }
+
       if (acc[folder]) {
         return acc;
       }
+
       var folderNode = this.#renderFolderNode({caption: folder});
       acc[folder] = folderNode;
 
       var childNodes = node.childNodes;
       if (childNodes.length) {
-        // folders got before any other child, 
+        // folders got before any other child,
         for (var i = 0; i < childNodes.length ; i++){
           var childNode = childNodes.item(i);
           if (childNode.nodeType !== 1) {
@@ -603,11 +826,35 @@ class AttributeUi {
           return acc;
         }
       }
-      
+
       node.appendChild(folderNode);
-      return acc;      
+      return acc;
     }.bind(this), {});
     return folders;
+  }
+
+  #loadMemberChildNodes(node, typeName, profile){
+    var folderNode = this.#renderFolderNode({caption: 'structure'});
+    var columnType = profile.memberExpressionType || profile.column_type;
+    var memberExpressionPath = profile.memberExpressionPath || [];
+    var structure = getStructTypeDescriptor(columnType);
+    var columnName = profile.column_name
+    for (var memberName in  structure){
+      var memberType = structure[memberName];
+      var config = {
+        type: 'member',
+        columnType: memberType,
+        profile: {
+          column_name: profile.column_name,
+          column_type: profile.column_type,
+          memberExpressionPath: memberExpressionPath.concat([memberName]),
+          memberExpressionType: memberType
+        }
+      }
+      var memberNode = this.#renderAttributeUiNode(config);
+      folderNode.appendChild(memberNode);
+    }
+    node.appendChild(folderNode);
   }
 
   #loadDerivationChildNodes(node, typeName, profile){
@@ -627,11 +874,51 @@ class AttributeUi {
         folders[derivation.folder].appendChild(childNode);
       }
       else {
-        node.appendChild(childNode);    
+        node.appendChild(childNode);
       }
     }
   }
-    
+
+  #loadArrayChildNodes(node, typeName, profile){
+    var arrayDerivations = AttributeUi.getArrayDerivations(typeName);
+    var folders = this.#createFolders(arrayDerivations, node);
+    var memberExpressionPath = profile.memberExpressionPath || [];
+    for (var derivationName in arrayDerivations) {
+      var derivation = arrayDerivations[derivationName];
+      var nodeProfile;
+      if (derivation.unnestingFunction) {
+        nodeProfile = JSON.parse(JSON.stringify(profile));
+        var memberExpressionPath = nodeProfile.memberExpressionPath || [];
+        memberExpressionPath.push(derivation.unnestingFunction + '()');
+        nodeProfile.memberExpressionPath = memberExpressionPath;
+        var memberExpressionType = derivation.columnType;
+        if (!memberExpressionType){
+          memberExpressionType = profile.memberExpressionType || profile.column_type;
+          memberExpressionType = memberExpressionType.slice(0, -2);
+        }
+        nodeProfile.column_type = profile.column_type;
+        nodeProfile.memberExpressionType = memberExpressionType;
+      }
+      else {
+        nodeProfile = profile;
+      }
+      var config = {
+        type: 'derived',
+        derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
+        profile: nodeProfile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (derivation.folder) {
+        folders[derivation.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);
+      }
+    }
+  }
+
   #loadAggregatorChildNodes(node, typeName, profile) {
     var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
     var folders = this.#createFolders(applicableAggregators, node);
@@ -649,178 +936,103 @@ class AttributeUi {
         folders[aggregator.folder].appendChild(childNode);
       }
       else {
-        node.appendChild(childNode);    
+        node.appendChild(childNode);
       }
-    }    
+    }
   }
-  
-  #loadChildNodesForColumnNode(node){    
+
+  #loadChildNodes(node){
     var columnName = node.getAttribute('data-column_name');
     var columnType = node.getAttribute('data-column_type');
+
+    var memberExpressionPath;
+    var memberExpressionType = node.getAttribute('data-member_expression_type');
+    if (memberExpressionType) {
+      memberExpressionPath = node.getAttribute('data-member_expression_path');
+      memberExpressionPath = JSON.parse(memberExpressionPath);
+    }
+
+    var elementType = node.getAttribute('data-element_type');
+
     var profile = {
       column_name: columnName,
-      column_type: columnType 
+      column_type: columnType,
+      memberExpressionType: memberExpressionType,
+      memberExpressionPath: memberExpressionPath
     };
-    var typeName = getDataTypeNameFromColumnType(columnType);
-            
-    this.#loadDerivationChildNodes(node, typeName, profile);
-    this.#loadAggregatorChildNodes(node, typeName, profile);
-  }
-  
-  #loadChildNodes(node){
-    var nodeType = node.getAttribute('data-nodetype');
-    switch (nodeType){
-      case 'column':
-        this.#loadChildNodesForColumnNode(node);
-        break;
-      case 'derived':
-        // TODO
-        break;
-      default:
-        throw new Error(`Unrecognized nodetype ${nodeType}`);
+
+    var expressionType = memberExpressionType || columnType;
+    var typeName = getDataTypeNameFromColumnType(expressionType);
+
+    if (expressionType.endsWith('[]')){
+      this.#loadArrayChildNodes(node, typeName, profile);
     }
-  }  
-  
+    else
+    if (expressionType.startsWith('STRUCT')){
+      this.#loadMemberChildNodes(node, typeName, profile);
+    }
+
+    var nodeType = node.getAttribute('data-nodetype');
+
+    switch (nodeType) {
+      case 'column':
+      case 'member':
+        this.#loadDerivationChildNodes(node, typeName, profile);
+        this.#loadAggregatorChildNodes(node, typeName, profile);
+    }
+  }
+
   #toggleNodeState(event){
     var node = event.target;
-    if (event.newState === 'open'){ 
+    if (event.newState === 'open'){
       if (node.childNodes.length === 1){
         this.#loadChildNodes(node);
+        this.#updateState();
       }
     }
   }
-  
-  async #axisButtonClicked(node, axis, checked){
-    var head = node.childNodes.item(0);
-    var inputs = head.getElementsByTagName('input');
-    var aggregator;
-    switch (axis){
-      case QueryModel.AXIS_ROWS:
-      case QueryModel.AXIS_COLUMNS:
-      case QueryModel.AXIS_CELLS:
-        // implement mutual exclusive axes (either rows or columns, not both)
-        for (var i = 0; i < inputs.length; i++){
-          var input = inputs.item(i);
-          var inputAxis = input.getAttribute('data-axis');
-          if (input.checked && inputAxis !== axis) {
-            input.checked = false;
-          }
-          
-          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
-            aggregator = input.getAttribute('data-aggregator');
-          }
-        }
-        break;
-    }
-    var columnName = node.getAttribute('data-column_name');
-    var columnType = node.getAttribute('data-column_type');
-    var derivation = node.getAttribute('data-derivation');
-    var aggregator = aggregator || node.getAttribute('data-aggregator');
 
-    
-    var itemConfig = {
-      axis: axis,
-      columnName: columnName,
-      columnType: columnType,
-      derivation: derivation,
-      aggregator: aggregator
-    };
-    
-    var formatter = QueryAxisItem.createFormatter(itemConfig);
-    if (formatter){
-      itemConfig.formatter = formatter;
-    }
-
-    if (itemConfig.aggregator) {
-      //noop
-    }
-    else {
-      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
-      if (literalWriter){
-        itemConfig.literalWriter = literalWriter;
-      }
-    }
-    
-    if (checked) {
-      await this.#queryModel.addItem(itemConfig);
-      
-      if (axis === QueryModel.AXIS_FILTERS) {
-        queryUi.openFilterDialogForQueryModelItem(itemConfig);
-      }
-    }
-    else {
-      this.#queryModel.removeItem(itemConfig);
-    }
-  }
-  
-  #clickHandler(event) {
-    var target = event.target;
-    var classNames = getClassNames(target);
-    event.stopPropagation();
-    
-    var node = getAncestorWithTagName(target, 'details');
-    if (!node) {
-      return;
-    }
-    
-    if (classNames.indexOf('attributeUiAxisButton') !== -1){
-      var input = target.getElementsByTagName('input').item(0);
-      var axisId = target.getAttribute('data-axis');
-      setTimeout(function(){
-        this.#axisButtonClicked(node, axisId, input.checked);
-      }.bind(this), 0);
-    }    
-  }
- 
   #updateState(){
     var inputs = this.getDom().getElementsByTagName('input');
     for (var i = 0; i < inputs.length; i++){
       var input = inputs.item(i);
-      var columnName = input.getAttribute('data-column_name');
       var axis = input.getAttribute('data-axis');
+
+      var node = getAncestorWithTagName(input, 'details')
+      var columnName = node.getAttribute('data-column_name');
       var aggregator = input.getAttribute('data-aggregator');
-      var derivation = input.getAttribute('data-derivation');
-      
+      var derivation = node.getAttribute('data-derivation');
+      var memberExpressionPath = node.getAttribute('data-member_expression_path');
+
       var item = queryModel.findItem({
         columnName: columnName,
         axis: axis,
         aggregator: aggregator,
-        derivation: derivation
+        derivation: derivation,
+        memberExpressionPath: memberExpressionPath
       });
-      
+
       input.checked = Boolean(item);
     }
   }
-  
-  async #queryModelChangeHandler(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var searchAttributeUiDisplay;
-        if (eventData.propertiesChanged.datasource.newValue) {
-          this.clear(true);          
-          var datasource = eventData.propertiesChanged.datasource.newValue;
-          var columnMetadata = await datasource.getColumnMetadata();
-          this.render(columnMetadata);
-          searchAttributeUiDisplay = '';
-        }
-        else {
-          this.clear(false);
-          searchAttributeUiDisplay = 'none';
-        }
-        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
-      }
+
+  revealAllQueryAttributes() {
+    // TODO: ensure all query attributes are rendered
+    var dom = this.getDom();
+    var detailsList = document.querySelectorAll('.attributeUi details:has( details > summary > label > input[type=checkbox]:checked )');
+    for (var i = 0; i < detailsList.length; i++){
+      var details = detailsList.item(i);
+      details.setAttribute('open', 'true');
     }
-    this.#updateState();
   }
-  
+
   getDom(){
     return byId(this.#id);
   }
-  
+
 }
 
 var attributeUi;
 function initAttributeUi(){
-  attributeUi = new AttributeUi('attributeUi', queryModel); 
+  attributeUi = new AttributeUi('attributeUi', queryModel);
 }

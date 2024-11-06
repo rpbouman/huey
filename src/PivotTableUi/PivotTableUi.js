@@ -486,7 +486,11 @@ class PivotTableUi extends EventEmitter {
   // totalsItems are all query axis items having includeTotals
   // queryAxisItem is the current member
   static #isTotalsMember(groupingId, queryAxisItems, queryAxisItem){
-    if (groupingId === undefined || queryAxisItem === undefined || queryAxisItem.includeTotals !== true) {
+    if (
+      groupingId === undefined || 
+      queryAxisItem === undefined /*|| 
+      queryAxisItem.includeTotals !== true*/
+    ) {
       return false;
     }
     var index = queryAxisItems.indexOf(queryAxisItem);
@@ -811,6 +815,10 @@ class PivotTableUi extends EventEmitter {
         }
 
         var cellElement = cellElements.item(j);
+        if (!cellElement){
+          console.error(`Warning: no DOM found for cell ${i},${j}`);
+          continue;
+        }
         var headerCell = firstTableHeaderRowCells.item(j);
         cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
 
@@ -927,8 +935,9 @@ class PivotTableUi extends EventEmitter {
             columnWidth += 'ch';
             label = createEl('span', {
               "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
-              title: labelText
-            }, labelText);
+            });
+            label.title = labelText;
+            label.innerText = labelText;
             tableCell.appendChild(label);
           }
           else
@@ -961,10 +970,10 @@ class PivotTableUi extends EventEmitter {
         var columnsAxisItem = columnsAxisItems[i];
         labelText = QueryAxisItem.getCaptionForQueryAxisItem(columnsAxisItem);
         label = createEl('span', {
-          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
-          title: labelText
-        }, labelText);
-
+          "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
+        });
+        label.title = labelText;
+        label.innerText = labelText;
         columnWidth = labelText.length + 1;
         
         if (columnWidth > PivotTableUi.#maximumCellWidth) {
@@ -1110,10 +1119,11 @@ class PivotTableUi extends EventEmitter {
           }
 
           var label = createEl('span', {
-            "class": "pivotTableUiCellLabel",
-            title: labelText
-          }, labelText);
-
+            "class": "pivotTableUiCellLabel"
+          });
+          label.title = labelText;
+          label.innerText = labelText;
+          
           cell.appendChild(label);
 
           if (j === 0){
@@ -1169,6 +1179,25 @@ class PivotTableUi extends EventEmitter {
         }
         headerRow.removeChild(lastCell);
       }
+    }
+  }
+
+  #removeExcessRows(){
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var headerRows = tableHeaderDom.childNodes;
+
+    var containerDom = this.#getInnerContainerDom();
+    var innerContainerHeight = containerDom.clientHeight;
+    var tableDom = this.#getTableDom();
+
+    var tableBodyDom = this.#getTableBodyDom();
+    var tableBodyDomRows = tableBodyDom.childNodes;
+
+    var cellIndex;
+    while (tableDom.clientHeight > innerContainerHeight && tableBodyDomRows.length > 1) {
+      // the last row is the stuffer row, remove the row before that.
+      var tableBodyRow = tableBodyDomRows[tableBodyDomRows.length - 2];
+      tableBodyDom.removeChild(tableBodyRow);
     }
   }
 
@@ -1286,8 +1315,9 @@ class PivotTableUi extends EventEmitter {
 
           var label = createEl('span', {
             "class": "pivotTableUiCellLabel",
-            title: labelText
-          }, labelText);
+          });
+          label.title = labelText;
+          label.innerText = labelText;
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){
@@ -1371,6 +1401,12 @@ class PivotTableUi extends EventEmitter {
     return maxCellWidth;
   }
   
+  async wait(ms){
+    return new Promise(function(resolve, reject){
+      setTimeout(resolve, ms);
+    });
+  }
+  
   async updatePivotTableUi(){
     if (this.#getBusy()) {
       return;
@@ -1413,17 +1449,22 @@ class PivotTableUi extends EventEmitter {
 
       var rowTuples = renderAxisPromisesResults[1];
       this.#setVerticalSize(0);
+      
       this.#renderRows(rowTuples);
-           
+      
       this.#updateVerticalSizer();      
-      this.#removeExcessColumns();
       this.#toggleObserveColumnsResizing(true);
-      this.#updateHorizontalSizer();
 
       this.#renderCells();
 
       //await this.#updateCellData(0, 0);
       await this.#updateDataToScrollPosition();
+      setTimeout(function(){
+        this.#removeExcessColumns();
+        this.#updateHorizontalSizer();
+        this.#removeExcessRows();
+        this.#updateVerticalSizer();
+      }.bind(this), 1000)
       this.#setNeedsUpdate(false);
 
       this.fireEvent('updated', { status: 'success' });

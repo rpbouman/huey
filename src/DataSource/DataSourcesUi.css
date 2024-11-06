@@ -1,9 +1,12 @@
-#datasourcesUi {
-  padding-top: 12px;
-  height: calc(100% - 36px);
+nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader] {
+  position: relative;
+  left: 1em;
+  top: 1em;
+  width: calc( 100% - 1em );
+  display: inline-block
 }
 
-#datasourcesUi label[for=uploader]::after {
+nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader]::after {
   display:inline-block;
   font-size: 140px;
   width: 100%;
@@ -12,8 +15,25 @@
   text-align: center;
   color: var( --huey-icon-color-subtle );
 }
-#datasourcesUi label[for=uploader]:hover::after {
+nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi ) > label[for=uploader]:hover::after {
   color: var( --huey-icon-color-highlight );
+}
+
+nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi details) > label[for=uploader] {
+  display: none;
+}
+
+nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi {
+  display: none;
+}
+
+nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > details ){
+  display: block;
+}
+
+#datasourcesUi {
+  padding-top: 12px;
+  height: calc(100% - 36px);
 }
 
 #datasourcesUi[data-drop-allowed=true] {

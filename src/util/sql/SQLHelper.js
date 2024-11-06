@@ -31,7 +31,7 @@ function createNumberFormatter(fractionDigits){
   intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
-    options.maximumFractionDigits = localeSettings.maximumFractionDigits;
+    options.maximumFractionDigits = localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits;
     if (options.maximumFractionDigits < options.minimumFractionDigits) {
       options.maximumFractionDigits = options.minimumFractionDigits;
     }
@@ -99,13 +99,28 @@ function createNumberFormatter(fractionDigits){
                 }
               }
             }
-            stringValue = intFormatter.format(BigInt(integerPart));
-            if (fractionalPart && options.minimumFractionDigits > 0) {
+
+            var integerPart = BigInt(integerPart);
+
+            if (fractionalPart) {
+              if (fractionalPart.length > options.maximumFractionDigits) {
+                fractionalPart = parseFloat('0.' + fractionalPart).toFixed(options.maximumFractionDigits);
+                if (parseFloat(fractionalPart) >= 1) {
+                  integerPart += (integerPart >= 0n ? 1n : -1n);
+                }
+                fractionalPart = String(fractionalPart).split('.')[1];
+              }
+              
               if (decimalSeparator === undefined) {
                 decimalSeparator = '.';
               }
-              stringValue += decimalSeparator + fractionalPart;
             }
+            
+            stringValue = intFormatter.format(integerPart);
+            if (fractionalPart) {
+              stringValue = `${stringValue}${decimalSeparator}${fractionalPart}`;
+            }
+            
             return stringValue;
         }
       }
@@ -523,7 +538,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('UTINYINT');
-    }    
+    }
   },
   'BIT': {
     defaultAnalyticalRole: 'attribute',
@@ -531,8 +546,10 @@ var dataTypes = {
   'BOOLEAN': {
     defaultAnalyticalRole: 'attribute',
     createLiteralWriter: function(dataTypeInfo, dataType){
-      return createDefaultLiteralWriter('BOOLEAN');
-    }    
+      return function(value, field){
+        return `${value === null ? 'NULL::BOOLEAN' : Boolean(value)}`;
+      }
+    }
   },
   'BLOB': {
     defaultAnalyticalRole: 'attribute',
@@ -542,7 +559,7 @@ var dataTypes = {
     hasDateFields: true,
     createFormatter: function(){
       var localeSettings = settings.getSettings('localeSettings');
-      var locales = localeSettings.locale;      
+      var locales = localeSettings.locale;
       var formatter = new Intl.DateTimeFormat(locales, {
         year: 'numeric',
         month: 'short',
@@ -635,6 +652,7 @@ var dataTypes = {
   },
   'VARCHAR': {
     defaultAnalyticalRole: 'attribute',
+    hasTextDerivations: true,
     createFormatter: function(){
       return function(value){
         if (value === null){
@@ -653,7 +671,15 @@ var dataTypes = {
     }
   },
   'ARRAY': {
-    defaultAnalyticalRole: 'attribute'
+    defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){      
+      return function(value, field){
+        var type = field.type;
+        var duckdbValue = getDuckDbLiteralForValue(value, type);
+        duckdbValue = `CAST( ${duckdbValue} AS ${dataType} )`;
+        return duckdbValue;
+      }
+    }
   },
   'LIST': {
     defaultAnalyticalRole: 'attribute'
@@ -672,12 +698,17 @@ var dataTypes = {
       }
     }
   },
+  'JSON': {
+  },
   'UNION': {
     defaultAnalyticalRole: 'attribute'
   }
 };
 
 function getDataTypeInfo(columnType){
+  if (columnType.endsWith('[]')) {
+    return dataTypes['ARRAY'];
+  }
   var columnTypeUpper = columnType.toUpperCase();
   var typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
     return columnTypeUpper.startsWith(dataTypeName.toUpperCase());
@@ -709,7 +740,7 @@ function getDataTypeInfo(columnType){
 }
 
 function quoteStringLiteral(str){
-  return `'${str.replace(/'/g, "''")}'`; 
+  return typeof str === 'string'  ? `'${str.replace(/'/g, "''")}'` : str; 
 }
 
 function identifierRequiresQuoting(identifier){
@@ -784,6 +815,9 @@ function getQualifiedIdentifier(){
           break;
         case 'string':
           return getQualifiedIdentifier([arguments[0], arguments[1]]);
+          break;
+        case 'undefined':
+          return getQualifiedIdentifier(arguments[0], normalizeSqlOptions());
           break;
         default:
           throw new Error(`Invalid argument type ${typeof arguments[1]}`);
@@ -1000,7 +1034,7 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
   var aggregateExpressions = {};
   
   if (cellsAxisItems.length === 0){
-    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( keywordFormatter('null') )`;
+    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( ${keywordFormatter('null')} )`;
   }
   else {
     cellsAxisItems.forEach(function(cellsAxisItem){
@@ -1072,4 +1106,108 @@ function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
     }
   }
   return valuesClause;
+}
+
+function getStructTypeDescriptor(structColumnType){
+  var index = 0;
+  var keyword = 'STRUCT';
+  if (!structColumnType.startsWith(keyword)){
+    throw new Error(`Type "${structColumnType}" is not a STRUCT: expected keyword ${keyword} at position ${index}`);
+  }
+  index = keyword.length;
+  if (structColumnType.charAt(index) !== '(') {
+    throw new Error(`Type "${structColumnType}" is not a STRUCT: expected "("  at position ${index} `);
+  }
+  index += 1;
+  var structure = {};
+  
+  function parseMemberName(){
+    var memberName;
+    var startOfMemberName = index;
+    var endOfMemberName;
+    if (structColumnType.charAt(index) === '"') {
+      startOfMemberName += 1;
+      endOfMemberName = structColumnType.indexOf('"', startOfMemberName);
+      index = endOfMemberName + 1;
+    }
+    else {
+      endOfMemberName = structColumnType.indexOf(' ', startOfMemberName);
+      index = endOfMemberName;
+    }
+    memberName = structColumnType.substring(startOfMemberName, endOfMemberName);
+    return memberName;
+  }
+  
+  function parseMemberType(){
+    var startOfMemberType = index;
+    var level = 0;
+    _loop: while (index < structColumnType.length){
+      var ch = structColumnType.charAt(index);
+      switch (ch) {
+        case '(':
+          level++;
+          break;
+        case ')':
+        case ',':
+          if (level === 0) {
+            endOfMemberType = index;
+            break _loop;
+          }
+          else
+          if (ch === ')'){
+            level--;
+          }
+      }
+      index++;
+    }
+    var memberType = structColumnType.substring(startOfMemberType, endOfMemberType);
+    return memberType;
+  }
+  
+  _loop: while (index < structColumnType.length) {
+
+    var memberName = parseMemberName();
+    if (structColumnType.charAt(index) !== ' '){
+      throw new Error(`Error parsing STRUCT ${structColumnType}: expected "  "  at ${index}`);
+    }
+    index += 1;
+    var type = parseMemberType();
+    structure[memberName] = type;
+    
+    var ch = structColumnType.charAt(index);
+    switch(ch) {
+      case ',':
+        index += 1;
+        if (structColumnType.charAt(index) !== ' ') {
+          throw new Error(`Error parsing STRUCT ${structColumnType}: expected " " at ${index}`);
+        }
+        index += 1;
+        continue _loop;
+      case ')':
+        break _loop;
+    }
+  }
+  return structure;
+}
+
+function getMemberExpressionType(type, memberExpressionPath){
+  if (memberExpressionPath.length) {
+    var typeDescriptor = getStructTypeDescriptor(type);
+    var memberExpression = memberExpressionPath[0];
+    var memberExpressionType;
+    if (memberExpression === 'unnest()'){
+      memberExpressionType = type.slice(0, -2);
+    }
+    else {
+      memberExpressionType = typeDescriptor[memberExpression];
+    }
+    return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
+  }
+  else {
+    return type;
+  }
+}
+
+function extrapolateColumnExpression(expressionTemplate, columnExpression){
+  return expressionTemplate.replace(/\$\{columnExpression\}/g, `${columnExpression}`);
 }

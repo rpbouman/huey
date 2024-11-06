@@ -42,6 +42,12 @@
   overflow: auto;  
 }
 
+/* see rule above. This is an extra rule to ensure there is room for the resizer */
+*.resizeHorizontal[role=tablist]> * > *[role=tabpanel] {
+  height: calc( 100% - 40px );
+}
+
+
 *[role=tablist]> *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > *[role=tabpanel] {
   display: block;
 }

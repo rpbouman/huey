@@ -37,7 +37,8 @@ class Settings extends EventEmitter {
       locale: navigator.languages,
       minimumIntegerDigits: 1,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
+      linkMinimumAndMaximumDecimals: true
     },
     sqlSettings: {
       keywordLetterCase: 'upperCase',
@@ -45,7 +46,9 @@ class Settings extends EventEmitter {
       commaStyle: 'newlineBefore'
     },
     querySettings: {
-      autoRunQuery: false
+      autoRunQuery: false,
+      filterValuePicklistPageSize: 100,
+      filterSearchAutoQueryTimeoutInMilliseconds: 1000
     },
     pivotSettings: {
       maxCellWidth: 30
@@ -127,6 +130,7 @@ class Settings extends EventEmitter {
     },
     filterDialogSettings: {
       filterSearchApplyAll: false,
+      filterSearchAutoWildcards: true,
       caseSensitive: true
     },
     themeSettings: {
@@ -149,6 +153,42 @@ class Settings extends EventEmitter {
               "--huey-icon-color-highlight": "rgb(0,0,0)"
             },
             label: "Default"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "system-ui",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "monospace",
+              "--huey-foreground-color": "rgb(30,144,255)", // Dodger Blue
+              "--huey-placeholder-color": "rgb(173,216,230)", // Light Blue
+              "--huey-light-background-color": "rgb(240,248,255)", // Alice Blue
+              "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
+              "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
+              "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
+              "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
+              "--huey-icon-color-subtle": "rgb(173,216,230)", // Light Blue
+              "--huey-icon-color": "rgb(30,144,255)", // Dodger Blue
+              "--huey-icon-color-highlight": "rgb(0,191,255)" // Deep Sky Blue
+            },
+            label: "Mint"
+          },
+          {
+            value: {
+              "--huey-text-font-family": "system-ui",
+              "--huey-text-font-size": "10pt",
+              "--huey-mono-font-family": "monospace",
+              "--huey-foreground-color": "rgb(70,130,180)", // Steel Blue
+              "--huey-placeholder-color": "rgb(176,196,222)", // Light Steel Blue
+              "--huey-light-background-color": "rgb(245,245,255)", // Lavender
+              "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
+              "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
+              "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
+              "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
+              "--huey-icon-color-subtle": "rgb(176,196,222)", // Light Steel Blue
+              "--huey-icon-color": "rgb(70,130,180)", // Steel Blue
+              "--huey-icon-color-highlight": "rgb(65,105,225)" // Royal Blue
+            },
+            label: "Lila"
           },
           {
             value: {

@@ -1,11 +1,11 @@
 dialog#exportDialog {
   width: 700px;
-  height: 440px;
+  height: 460px;
   resize: both;
 }
 
 dialog#exportDialog > header > form > input#exportTitleTemplate {
-  width: 100%;
+  width: calc( 100% - 14px);
 }
 
 dialog#exportDialog > header > h3 {

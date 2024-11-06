@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Huey PostMessageInterface Demo</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Illustration of the Huey PostMessageInterface, which allows external windows to control a Huey application."/>
+    <link
+      rel="icon"
+      href="data:image/svg+xml;base64,PHN2ZyAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiAgd2lkdGg9IjI0IiAgaGVpZ2h0PSIyNCIgIHZpZXdCb3g9IjAgMCAyNCAyNCIgIGZpbGw9Im5vbmUiICBzdHJva2U9ImN1cnJlbnRDb2xvciIgIHN0cm9rZS13aWR0aD0iMiIgIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgIHN0cm9rZS1saW5lam9pbj0icm91bmQiICBjbGFzcz0iaWNvbiBpY29uLXRhYmxlciBpY29ucy10YWJsZXItb3V0bGluZSBpY29uLXRhYmxlci1tZXNzYWdlcyI+PHBhdGggc3Ryb2tlPSJub25lIiBkPSJNMCAwaDI0djI0SDB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTIxIDE0bC0zIC0zaC03YTEgMSAwIDAgMSAtMSAtMXYtNmExIDEgMCAwIDEgMSAtMWg5YTEgMSAwIDAgMSAxIDF2MTAiIC8+PHBhdGggZD0iTTE0IDE1djJhMSAxIDAgMCAxIC0xIDFoLTdsLTMgM3YtMTBhMSAxIDAgMCAxIDEgLTFoMiIgLz48L3N2Zz4="
+    />
+  
+    <style>
+      textarea {
+        display: block;
+      }
+      
+      li:has( > input[type=radio][name=postMessageChoice]) > div {
+        display: none;
+      }
+
+      li:has( > input[type=radio][name=postMessageChoice]:checked) > div {
+        display: block
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!-- 
+      Local UI for controlling the embedded Huey application
+    -->
+    <div id="postUi" style="display:none">
+      <section>
+        <h3>Request</h3>
+        <ul>
+          <li>
+            <input type="radio" id="postMessageChoiceFile" name="postMessageChoice" checked="true"/>
+            <label for="postMessageChoiceFile">File: </label>            
+            <div>
+              <label for="file">Choose a File to create a Huey Data Source:</label>
+              <input type="file" id="file"/>
+            </div>
+          </li>
+          <li>
+            <input type="radio" id="postMessageChoiceRaw" name="postMessageChoice"/>
+            <label for="postMessageChoiceRaw">Raw:</label>
+            <div>
+              <div>Enter a file name and contents to send to huey:</div>
+              <label for="rawName" title="Name">Name:</label><input id="rawName" type="text" value="fruit.csv"/>
+              <label for="rawContents" title="Contents">Contents:</label>
+              <textarea id="rawContents" style="width: 99%" rows="10">Name;Calories
+Apple;52
+Apricots;48
+Banana;89
+Cantaloupe;34</textarea>
+              <button id="rawSend" title="Send raw">Send</button>
+            </div>
+          </li>
+        </ul>
+        
+      </section>
+      <section>
+        <h3>Response</h3>
+        <div>
+          <label for="output">Status:</label>
+          <output id="status"/>
+        </div>
+        <div>
+          <label for="responseBody">Body:</label>
+          <textarea id="responseBody" style="width: 99%" rows="10"></textarea>
+        </div>
+      </section>
+    </div>
+    
+    <!-- 
+      Frame for the embedded Huey application
+    -->
+    <iframe id="hueyFrame" height="600" width="800" src=""></iframe>
+    
+    <script src="PostMessageProtocol.js"></script>
+    <script>
+      function getHueyFrame(){
+        return document.getElementById('hueyFrame');
+      }
+      
+      function createDatasourceFromFile(file){
+        messageExchangeId++;
+        var message = {
+          requestId: messageExchangeId,
+          messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
+          body: {
+            selectForAnalysis: true,
+            datasourceConfig: {
+              type: 'file',
+              file: file
+            }
+          }
+        };
+        var frame = getHueyFrame();
+        frame.contentWindow.postMessage(message, {
+          "targetOrigin": '*'
+        });
+      }
+      
+      var messageExchangeId = 0;
+      
+      document.getElementById('file').addEventListener('change', function(event){
+        var input = event.target;
+        var files = input.files;
+        for (var i = 0; i < files.length; i++){
+          var file = files[i];
+          createDatasourceFromFile(file);
+        }
+      });
+      
+      document.getElementById('rawSend').addEventListener('click',function(event){
+        var name = document.getElementById('rawName').value;
+        var contents = [document.getElementById('rawContents').value];
+        var file = new File(contents, name);
+        createDatasourceFromFile(file)
+      });
+      
+      window.addEventListener('message', function(event){
+        var consoleMethod = console.log;
+        var data = event.data;
+        switch(data.status.code) {
+          case PostMessageProtocol.STATUS_READY:
+            document.getElementById('postUi').style.display = 'block';
+            break;
+          case PostMessageProtocol.STATUS_OK:
+            break;
+          case PostMessageProtocol.STATUS_DEFERRED:
+            break;
+          case PostMessageProtocol.STATUS_BAD_REQUEST:
+            consoleMethod = console.error;
+            break;
+          case PostMessageProtocol.STATUS_INTERNAL_ERROR:
+            consoleMethod = console.error;
+            break;
+          default:
+            console.error('Unrecognized status')
+            break;
+        }
+        consoleMethod.call(console, 'received message');
+        consoleMethod.call(console, data);
+
+        var status = document.getElementById('status');
+        var msg = `${data.status.code} - ${data.status.message}`;
+        status.value = msg;
+        
+        var responseBody = document.getElementById('responseBody');
+        responseBody.value = data.body ? JSON.stringify(data.body, null, 2) : '';
+      });      
+      
+      var hueyUrl = '..\\index.html';
+      hueyFrame.src = hueyUrl;
+    </script>
+  </body>
+</html>

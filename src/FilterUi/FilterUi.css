@@ -4,6 +4,8 @@ dialog#filterDialog {
   resize: both;
   padding: 2px 0px 0px 2px;
   min-height: 300px;
+  min-width: 280px;
+  width: 280px;
 }
 
 #filterDialogSpinner {
@@ -39,6 +41,7 @@ dialog#filterDialog > header[role=toolbar] {
 dialog#filterDialog > section > header > menu[role=toolbar] {
   padding: unset;
   height: unset;
+  margin-bottom: 4px;
 }
 
 dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] )::after {
@@ -124,13 +127,10 @@ dialog#filterDialog > section > header > section > section > select#filterPickli
 }
 
 dialog#filterDialog > footer {
-  margin-top: 0px;
+  margin-top: 2px;
   margin-bottom: 0px;
   padding: 4px 4px 0px 4px;
   height: 30px;
-  border-top-width: 1px;
-  border-top-style: solid;
-  border-top-color: var( --huey-light-border-color );
 }
 
 dialog#filterDialog > section {
@@ -152,20 +152,30 @@ dialog#filterDialog section > footer[role=toolbar]:has( > button ){
   text-align: center;
 }
 
+dialog#filterDialog > section > header {
+  white-space: nowrap;
+}
+
 dialog#filterDialog > section > header > section > header > input[type=search]#filterSearch {
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-  border-bottom-style: none;
   border-color: var( --huey-light-border-color ); 
-  width: 100%;
+  width: calc( 100% - 40px );
+  position:relative;
+  height: 24px;
+  top: -3px;
+  padding-left: .5em;
+}
+
+dialog#filterDialog > section > header > section > header > button#addFilterValueButton::before {
+  font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-medium );
+  content: "\fa02"
 }
 
 dialog#filterDialog > section > header > section > section > select#filterPicklist {
-  border-top-left-radius: 0px;
-  border-top-style: none;
   box-shadow: 0px 0px 0px transparent;
   width: 100%;
   height: 100%;
+  overflow-x: scroll;
   resize: vertical;
 }
 
@@ -219,6 +229,7 @@ dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]
 
 dialog#filterDialog #filterValueList,
 dialog#filterDialog #toFilterValueList {
+  padding-top: .5em;
   overflow: auto;
 }
 

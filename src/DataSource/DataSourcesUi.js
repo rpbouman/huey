@@ -234,13 +234,6 @@ class DataSourcesUi {
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
     
-    this.showLoadDatasourcesHint();
-  }
-
-  showLoadDatasourcesHint(){
-    if (!Object.keys(this.#datasources).length){
-      this.getDom().innerHTML = `<label for="uploader">Drop some files here, or click the Upload button:</label>`;
-    }
   }
   
   static getCaptionForDatasource(datasource){
@@ -297,7 +290,7 @@ class DataSourcesUi {
     var sql = `
       SELECT table_schema, table_name, table_type 
       FROM information_schema.tables 
-      WHERE table_catalog = ? 
+      WHERE table_catalog = ?
       AND   table_schema NOT IN ('information_schema', 'pg_catalog')
       ORDER BY table_schema, table_name
     `;
@@ -361,7 +354,7 @@ class DataSourcesUi {
           schemaName: schemaName,
           objectName: tableName
         });
-        this.addDatasource(datasource);
+        this.#addDatasource(datasource);
       }
 
       var tableNode = this.#createDatasourceNode(datasource);
@@ -410,9 +403,10 @@ class DataSourcesUi {
       "title": caption,
       "open": true
     });
+    
     if (attributes){
       for (var attributeName in attributes){ 
-      datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
+        datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
       }
     }
     
@@ -659,7 +653,7 @@ class DataSourcesUi {
         }
         
         if (datasourceGroup.typeSignature) {
-          groupTitle = 'Bucked of similarly typed files.';
+          groupTitle = 'Bucket of similarly typed files.';
         }
         break;
       default:
@@ -689,7 +683,7 @@ class DataSourcesUi {
     var datasources = datasourceGroup.datasources;
     var datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
-    datasourceKeys.map(function(datasourceId){
+    datasourceKeys.forEach(function(datasourceId){
       var datasource = datasources[datasourceId];
       var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
@@ -700,20 +694,24 @@ class DataSourcesUi {
     return groupNode;
   }
   
-  addDatasource(datasource) {
+  #addDatasource(datasource) {
     var id = datasource.getId();
     this.#attachRejectsDetection(datasource);
     this.#datasources[id] = datasource;
   }
   
-  addDatasources(datasources){
+  async addDatasources(datasources){
     datasources.forEach(function(datasource){
-      this.addDatasource(datasource);
+      this.#addDatasource(datasource);
     }.bind(this));
-    this.#renderDatasources();
+    await this.#renderDatasources();
   }
   
-  destroyDatasources(datasourceIds) {
+  addDatasource(datasource){
+    this.addDatasources([datasource]);
+  }
+  
+  async destroyDatasources(datasourceIds) {
     for (var i = 0; i < datasourceIds.length; i++){
       var datasourceId = datasourceIds[i];
       var datasource = this.getDatasource(datasourceId);
@@ -723,14 +721,22 @@ class DataSourcesUi {
       datasource.destroy();
       delete this.#datasources[datasourceId];
     }
-    this.#renderDatasources();
+    await this.#renderDatasources();
   }
   
   getDatasource(id) {
     return this.#datasources[id];
   }
   
+  getDatasourceIds(){
+    return Object.keys(this.#datasources);
+  }
+  
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
+    var columnNames = Object.keys(columnsSpec);
+    if (columnNames.length === 0){
+      return true;
+    }
     
     var columnName, columnSpec, columnType, searchColumnsSpec;
     if (useLooseColumnComparisonType) {
@@ -770,7 +776,6 @@ class DataSourcesUi {
       return false;
     }
 
-    var columnNames = Object.keys(columnsSpec);
     _columns: for (var i = 0; i < columnMetadata.numRows; i++){
       var row = columnMetadata.get(i);
       var columnName = row.column_name;
@@ -814,5 +819,4 @@ class DataSourcesUi {
 var datasourcesUi;
 function initDataSourcesUi(){
   datasourcesUi = new DataSourcesUi('datasourcesUi');
-  datasourcesUi.showLoadDatasourcesHint();
 }

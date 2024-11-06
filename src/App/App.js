@@ -55,6 +55,7 @@ async function analyzeDatasource(datasource){
   try {
     TabUi.setSelectedTab('#sidebar', '#attributesTab');
     clearSearch();
+    uploadUi.getDialog().close();
     queryModel.setDatasource(datasource);
   }
   catch (error) {
@@ -106,6 +107,7 @@ function initApplication(){
   initPageStateManager();
   initUploadUi();
   initDatasourceSettingsDialog();
+  initSessionCloner();
  
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
@@ -156,5 +158,9 @@ function initApplication(){
       busyDialog.close();
     }
   });
-   
+  
+  initPostMessageInterface();
+  if (postMessageInterface) {
+    postMessageInterface.sendReadyMessage();
+  }
 }

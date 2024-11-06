@@ -1,33 +1,38 @@
-/* in case of auto detect */
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderAllVarchar],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderAllVarchar,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderAutoTypeCandidates],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > select#csvReaderAutoTypeCandidates,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderDelim],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderDelim,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderNewLine],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > select#csvReaderNewLine,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderQuote],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderQuote,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderEscape],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderEscape,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderAllowQuotedNulls],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderAllowQuotedNulls,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderDecimalSeparator],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderDecimalSeparator,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderDateformat],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderDateformat,
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > label[for=csvReaderTimestampformat],
-dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset > input#csvReaderTimestampformat
-{
-  user-select: none;
-  --webkit-touch-callout: none;
-  --webkit-user-select: none;
-  --moz-user-select: none;
-  pointer-events: none; 
-  background-color: var( --huey-medium-background-color );
-  color: var( --huey-placeholder-color );   
+/* in case of auto detect, disable controls */
+dialog#datasourceSettingsDialog > section[role=tablist] > div:has( input[type=radio]#datasourceSettingsDialogCsvReaderParametersTab ) > div[role=tabpanel] > form:has( fieldset > input[type=checkbox]#csvReaderAutoDetect:checked ) > fieldset {
+
+  label[for=csvReaderAllVarchar],
+  input#csvReaderAllVarchar,
+  label[for=csvReaderAutoTypeCandidates],
+  select#csvReaderAutoTypeCandidates,
+  label[for=csvReaderDelim],
+  input#csvReaderDelim,
+  label[for=csvReaderNewLine],
+  select#csvReaderNewLine,
+  label[for=csvReaderQuote],
+  input#csvReaderQuote,
+  label[for=csvReaderEscape],
+  input#csvReaderEscape,
+  label[for=csvReaderAllowQuotedNulls],
+  input#csvReaderAllowQuotedNulls,
+  label[for=csvReaderDecimalSeparator],
+  input#csvReaderDecimalSeparator,
+  label[for=csvReaderDateformat],
+  input#csvReaderDateformat,
+  label[for=csvReaderTimestampformat],
+  input#csvReaderTimestampformat
+  {
+    user-select: none;
+    --webkit-touch-callout: none;
+    --webkit-user-select: none;
+    --moz-user-select: none;
+    pointer-events: none; 
+    background-color: var( --huey-medium-background-color );
+    color: var( --huey-placeholder-color );   
+  }
+  
 }
+
 
 
 /* hide the csv reader options tab when the file type is not csv */

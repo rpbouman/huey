@@ -60,6 +60,10 @@ menu[role=toolbar] > label[for=loadFromUrl]::before {
 }
 
 
+menu[role=toolbar] > label[for=cloneHueySession]::before {
+  content: "\ea7a";
+}
+
 menu[role=toolbar] > label[for=autoRunQuery]{
   position: relative;
 }

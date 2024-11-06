@@ -1,4 +1,4 @@
-form#localeSettings:has(> input#useDefaultLocale:checked) > input#locale {
+form#localeSettings > fieldset:has(> input#useDefaultLocale:checked) > input#locale {
   --webkit-touch-callout: none;
   --webkit-user-select: none;
   --moz-user-select: none;
@@ -8,7 +8,7 @@ form#localeSettings:has(> input#useDefaultLocale:checked) > input#locale {
   color: var( --huey-placeholder-color ); 
 }  
 
-form#localeSettings:has(> input#useDefaultLocale:checked) > label[for=locale] {
+form#localeSettings > fieldset:has(> input#useDefaultLocale:checked) > label[for=locale] {
   --webkit-touch-callout: none;
   --webkit-user-select: none;
   --moz-user-select: none;
@@ -16,3 +16,18 @@ form#localeSettings:has(> input#useDefaultLocale:checked) > label[for=locale] {
   pointer-events: none;
   color: var( --huey-placeholder-color );
 }  
+
+form#localeSettings > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > label[for=maximumFractionDigits],
+form#localeSettings > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > input#maximumFractionDigits {
+  display: none
+}  
+
+
+form#localeSettings > fieldset:has(> input#linkMinimumAndMaximumDecimals:not(:checked)) > label[for=minimumFractionDigits]::before {
+  content: "Minimum Decimals"
+}
+
+form#localeSettings > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > label[for=minimumFractionDigits]::before {
+  content: "Decimals"
+}
+
