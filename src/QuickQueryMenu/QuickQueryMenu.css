@@ -1,0 +1,20 @@
+menu[role=toolbar]:has( #currentDatasource:empty ) > label#quickQueryMenuLabel {
+  display: none;
+}
+
+menu[role=menu]#quickQueryMenu:popover-open {
+  left: 235px;
+  top: 30px;
+}
+
+
+/* "Clear All" quick query is not availabel by default */
+menu#quickQueryMenu > li:has( label[for=quickQueryClearAllButton] ) {
+  display: none;
+}
+
+/* if the query ui has at least one item somewhere, then the "Clear All" quick query is available */
+body:has( > main > #workarea > #queryUi > section > ol > li) > menu#quickQueryMenu > li:has( label[for=quickQueryClearAllButton] ) {
+  display: list-item;
+}
+

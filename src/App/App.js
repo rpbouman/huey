@@ -72,11 +72,11 @@ async function analyzeDatasource(datasource){
 }
 
 function initExecuteQuery(){
-  
+
   byId('runQueryButton').addEventListener('click', function(event){
     pivotTableUi.updatePivotTableUi();
   });
-  
+
   var autoRunQuery = byId('autoRunQuery');
   var settingsPath = ['querySettings', 'autoRunQuery'];
   autoRunQuery.checked = Boolean( settings.getSettings(settingsPath) );
@@ -108,21 +108,22 @@ function initApplication(){
   initUploadUi();
   initDatasourceSettingsDialog();
   initSessionCloner();
- 
+  initQuickQueryMenu();
+
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
     pageStateManager.setPageState(currentRoute);
   }
- 
+
   bufferEvents(queryModel, 'change', function(event, count){
     if (count !== undefined) {
-      return;      
+      return;
     }
-    
+
     console.log(`buffered Events, event:`);
     var eventData = event.eventData;
     console.log(eventData);
-    
+
     var currentDatasourceCaption, datasource = queryModel.getDatasource();
     if (datasource) {
       currentDatasourceCaption = DataSourcesUi.getCaptionForDatasource(datasource);
@@ -131,17 +132,17 @@ function initApplication(){
       currentDatasourceCaption = '';
     }
     byId('currentDatasource').innerHTML = currentDatasourceCaption;
-    
+
     var title = ExportUi.generateExportTitle(queryModel);
     document.title = 'Huey - ' + title;
-    
+
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
-  
+
   pivotTableUi.addEventListener('updated', async function(e){
     var eventData = e.eventData;
     if (eventData.status === 'error'){
-      showErrorDialog(eventData.error);      
+      showErrorDialog(eventData.error);
     }
   });
 
@@ -158,7 +159,7 @@ function initApplication(){
       busyDialog.close();
     }
   });
-  
+
   initPostMessageInterface();
   if (postMessageInterface) {
     postMessageInterface.sendReadyMessage();

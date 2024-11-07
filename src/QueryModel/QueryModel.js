@@ -1078,6 +1078,9 @@ class QueryModel extends EventEmitter {
         this.setDatasource(datasource);
       }
       
+      var cellsHeaders = queryModelState.cellsHeaders || QueryModel.AXIS_COLUMNS;
+      this.setCellHeadersAxis(cellsHeaders);
+      
       var axes = queryModelState.axes;
       for (var axisId in axes){
         var items = axes[axisId];

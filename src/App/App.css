@@ -42,8 +42,7 @@ nav#sidebar {
 }
 
 menu[role=toolbar] > label {
-  vertical-align: top;
-  position: relative;
+  vertical-align: middle;
 }
 
 
@@ -59,19 +58,11 @@ menu[role=toolbar] > label[for=loadFromUrl]::before {
   content: "\ea75";
 }
 
-
 menu[role=toolbar] > label[for=cloneHueySession]::before {
   content: "\ea7a";
 }
 
-menu[role=toolbar] > label[for=autoRunQuery]{
-  position: relative;
-  top: -3px;
-}
-
-menu[role=toolbar] > label[for=runQueryButton]{
-  position: relative;
-}
+/**/
 
 main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] > label[for=runQueryButton] {
   pointer-events: none;
@@ -95,15 +86,53 @@ main:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > la
   pointer-events: none;
 }
 
+menu[role=toolbar] > label[for=autoRunQuery] {
+  position:relative;
+  top:3px;
+}
+
 body > main > menu[role=toolbar] > label[for=autoRunQuery]::after {
   font-family: var( --huey-icon-font-family );
   font-size: var(--huey-icon-normal);
+  vertical-align: middle;
   color: var(--huey-icon-color-subtle);
-  margin-left: .2em;
+  margin: 0px 4px 0px 4px;
+  display: inline-block;
   /* square */
   content: "\eb2c";
-  position: relative;
-  top: 3px;
+}
+
+/*
+  separators between the top menu bar items
+*/
+
+menu[role=toolbar] > label[for=cloneHueySession]::before,
+menu[role=toolbar] > label[for=quickQueryMenuButton]::before 
+{
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: var(--huey-light-border-color);
+}
+
+menu[role=toolbar] > label[for=cloneHueySession]::before {
+  padding-left: 8px;
+}
+
+menu[role=toolbar] > label[for=quickQueryMenuButton]::after {
+  content: '\00a0';
+}
+
+menu[role=toolbar] > label[for=quickQueryMenuButton]::after,
+body > main > menu[role=toolbar] > label[for=autoRunQuery]::after,
+menu[role=toolbar] > label[for=cloneHueySession]::before {
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: var(--huey-light-border-color);
+  padding-right: 8px;
+}
+
+menu[role=toolbar] > label[for=runQueryButton]::before {
+  margin-left: 0px;
 }
 
 body > main > menu[role=toolbar] > label[for=autoRunQuery]:hover::after {
@@ -121,12 +150,12 @@ body:has( #autoRunQuery:checked ) > main > menu[role=toolbar] > label[for=runQue
 }
 
 menu[role=toolbar] > #currentDatasource:not( :empty )::before {
-  content: 'Datasource: '
+  content: 'Datasource: ';
 }
+
 menu[role=toolbar] > #currentDatasource {
   display: inline-block;
   padding-left: 4px;
-  padding-top: 4px;
   margin-block-start: 0em;
   margin-block-end: 0em;
   font-size: 1em;
@@ -134,6 +163,5 @@ menu[role=toolbar] > #currentDatasource {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc( 100% - 450px);
-  vertical-align: top;
+  vertical-align: middle;
 }
-
