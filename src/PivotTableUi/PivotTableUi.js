@@ -1400,13 +1400,7 @@ class PivotTableUi extends EventEmitter {
     }
     return maxCellWidth;
   }
-  
-  async wait(ms){
-    return new Promise(function(resolve, reject){
-      setTimeout(resolve, ms);
-    });
-  }
-  
+    
   async updatePivotTableUi(){
     if (this.#getBusy()) {
       return;
@@ -1540,7 +1534,7 @@ class PivotTableUi extends EventEmitter {
     }
     var tupleCount = tupleSet.getTupleCountSync();
     if (tupleCount === undefined) {
-      return 0;
+      tupleCount = 1;
     }
     var numberOfPhysicalRows = tupleCount * factor;
     return numberOfPhysicalRows;
@@ -1612,8 +1606,8 @@ class PivotTableUi extends EventEmitter {
       console.warn('updateHorizontalSizer: no sizeInfo');
       return;
     }
-    var physicalColumnWidth = sizeInfo.columns.width / sizeInfo.columns.columnCount;
-    var requiredWidth = physicalColumnWidth * numberOfPhysicalTuples;
+    var avgColumnWidth = sizeInfo.columns.width / sizeInfo.columns.columnCount;
+    var requiredWidth = avgColumnWidth * numberOfPhysicalTuples;
     var totalWidth = sizeInfo.headers.width + requiredWidth;
     this.#setHorizontalSize(totalWidth);
   }
