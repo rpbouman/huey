@@ -209,3 +209,18 @@ function getChildWithClassName(dom, className){
   }
   throw new Error(`Couldn't find element with classname ${className}`);
 }
+
+function escapeHtmlText(text){
+  return text.replace(/[&<>]/g, function(match){
+    switch(match) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;'
+      default:
+        return match;
+    }
+  });
+}
