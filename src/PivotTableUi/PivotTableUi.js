@@ -660,24 +660,21 @@ class PivotTableUi extends EventEmitter {
         var cell = cells.item(j);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
 
-        var labelText;
-        var tupleValue;
+        var labelText = undefined;
         var numMembers = tuple ? tuple.values.length : 0;
         if (tuple && j < numMembers) {
           var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, queryAxisItems, queryAxisItem);
-          tupleValue = tuple.values[j];
+          var tupleValue = tuple.values[j];
           
-          if (cellsAxisItemIndex === 0 || i === 0) {
-            if (isTotalsMember) {
-              labelText = getTotalsString(queryAxisItem);
-            }
-            else
-            if (queryAxisItem.formatter) {
-              labelText = queryAxisItem.formatter(tupleValue, tupleValueFields[j]);
-            }
-            else {
-              labelText = String(tupleValue);
-            }
+          if (isTotalsMember) {
+            labelText = getTotalsString(queryAxisItem);
+          }
+          else
+          if (queryAxisItem.formatter) {
+            labelText = queryAxisItem.formatter(tupleValue, tupleValueFields[j]);
+          }
+          else {
+            labelText = String(tupleValue);
           }
         }
         else
@@ -696,7 +693,7 @@ class PivotTableUi extends EventEmitter {
 
       if (doCellHeaders) {
         cellsAxisItemIndex += 1;
-        if (cellsAxisItemIndex === cellsAxisItems.length) {
+        if (cellsAxisItemIndex === cellsAxisItems.length || cellsAxisItems.length === 0) {
           cellsAxisItemIndex = 0;
           tupleIndex += 1;
         }
@@ -1292,12 +1289,12 @@ class PivotTableUi extends EventEmitter {
             if (k === 0 && tuple) {
               var value = tuple.values[j];
               var rowAxisItem = rowAxisItems[j];
+
               if (rowAxisItem.formatter) {
                 var tupleValueField = tupleValueFields[j];
-                labelText= rowAxisItem.formatter(value, tupleValueField);
+                labelText = rowAxisItem.formatter(value, tupleValueField);
               }
               else {
-                var value = String(value);
                 labelText = String(value);
               }
             }
