@@ -18,3 +18,15 @@ body:has( > main > #workarea > #queryUi > section > ol > li) > menu#quickQueryMe
   display: list-item;
 }
 
+/* "Destructured Data Preview" quick query is not availabel by default */
+menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ) {
+  display: none;
+}
+
+/* if the attribute ui has at least one item of the STRUCT, MAP, or Array type, then display the destructured data preview item */
+body:has( #attributeUi > details[data-column_type^=STRUCT] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
+body:has( #attributeUi > details[data-column_type^=MAP] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
+body:has( #attributeUi > details[data-column_type$="[]"] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ) {
+  display: list-item;
+}
+
