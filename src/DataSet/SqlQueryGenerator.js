@@ -173,7 +173,7 @@ class SqlQueryGenerator {
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
     var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
     var dataFoundationAlias = '__huey_data_foundation';
-    var fromClause = datasource.getFromClauseSql(dataFoundationAlias);
+    var fromClause = datasource.getFromClauseSql();
     
     var filterAxisItems = filterAxisItemsByNestingStage[''];
     delete filterAxisItemsByNestingStage[''];
@@ -344,7 +344,8 @@ class SqlQueryGenerator {
     originalQueryAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls
+    defaultSortNulls,
+    samplingConfig
   ){
     var sql = '';
     var columnExpressions = {};
@@ -425,8 +426,12 @@ class SqlQueryGenerator {
 
     var sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
-      cte.from
+      cte.from + ` AS ${cte.alias}`
     ];
+    
+    if (samplingConfig){
+      sql.push( getUsingSampleClause(samplingConfig, true) );
+    }
     
     SqlQueryGenerator.#generateWhereClause(cte, sql);
     
@@ -502,7 +507,8 @@ class SqlQueryGenerator {
     filterAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls
+    defaultSortNulls,
+    samplingConfig
   ) {
     if (!queryAxisItems.length) {
       return undefined;
@@ -521,10 +527,14 @@ class SqlQueryGenerator {
       queryAxisItems, 
       includeCountAll,
       countAllAlias,
-      defaultSortNulls
+      defaultSortNulls,
+      ctes.length ? undefined : samplingConfig
     ); 
-    var sqls = ctes.map(function(cte){
-      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
+    var sqls = ctes.map(function(cte, index){
+      if (index !== 0){
+        samplingConfig = undefined;
+      }
+      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions, samplingConfig);
       return sql;
     });
     if (sqls.length) {

@@ -67,7 +67,7 @@ class QueryAxisItem {
     }
     return literalWriter;
   }
-  
+
   static getLiteralWriter(axisItem) {
     var literalWriter = axisItem.literalWriter;
     if (literalWriter) {
@@ -111,16 +111,16 @@ class QueryAxisItem {
 
     return caption;
   }
-  
+
   static createCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
     var postfix = '';
     var prefix = '';
-    
+
     if (axisItem.memberExpressionPath){
       postfix += `.${axisItem.memberExpressionPath.join('.')}`;
     }
-    
+
     if (axisItem.derivation) {
       postfix += ` ${axisItem.derivation}`;
     }
@@ -149,7 +149,7 @@ class QueryAxisItem {
     if (alias){
       sqlExpression.unshift(alias);
     }
-    
+
     sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
 
     if (item.memberExpressionPath) {
@@ -192,7 +192,7 @@ class QueryAxisItem {
     derivationInfo = AttributeUi.getDerivationInfo(derivation);
     var derivationExpressionTemplate = derivationInfo.expressionTemplate;
     columnExpression = extrapolateColumnExpression(derivationExpressionTemplate, columnExpression);
-    
+
     return columnExpression;
   }
 
@@ -282,7 +282,7 @@ class QueryAxisItem {
       toValueLiterals: toValueLiterals
     };
   }
-  
+
   static getFilterConditionSql(queryAxisItem, alias){
     var filter = queryAxisItem.filter;
     if (!filter) {
@@ -301,7 +301,7 @@ class QueryAxisItem {
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
       return value.startsWith('NULL::');
     });
-    
+
     if (indexOfNull !== -1) {
       operator = 'IS';
       switch (filter.filterType) {
@@ -324,7 +324,7 @@ class QueryAxisItem {
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
 
-        // INCLUDE and EXCLUDE logic        
+        // INCLUDE and EXCLUDE logic
         case FilterDialog.filterTypes.EXCLUDE:
           // in case of exclude, keep NULL values unless NULL is also in the valuelist.
           // https://github.com/rpbouman/huey/issues/90
@@ -345,7 +345,7 @@ class QueryAxisItem {
           sql = `( ${sql} )`;
           break;
 
-        // LIKE and NOT LIKE logic        
+        // LIKE and NOT LIKE logic
         case FilterDialog.filterTypes.NOTLIKE:
           operator = 'NOT ';
         case FilterDialog.filterTypes.LIKE:
@@ -363,9 +363,9 @@ class QueryAxisItem {
             acc += `${columnExpression} ${operator} ${value}`;
             return acc;
           }, '');
-          break;          
+          break;
 
-        // BETWEEN and NOT BETWEEN logic        
+        // BETWEEN and NOT BETWEEN logic
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator = 'NOT ';
           logicalOperator = 'AND';
@@ -400,7 +400,7 @@ class QueryAxisItem {
 class QueryAxis {
 
   #items = [];
-  
+
   static getCaptionForQueryAxis(queryAxis){
     var items = queryAxis.getItems();
     if (items.length === 0){
@@ -414,11 +414,11 @@ class QueryAxis {
     });
     return captions.join(', ');
   }
-  
+
   getCaption(){
     return QueryAxis.getCaptionForQueryAxis(this);
   }
-  
+
   findItem(config){
     var columnName = config.columnName;
     var derivation = config.derivation;
@@ -510,7 +510,7 @@ class QueryAxis {
   getItems() {
     return [].concat(this.#items);
   }
-  
+
   getTotalsItems(){
     var totalsItems = this.#items.filter(function(axisItem){
       return axisItem.includeTotals === true;
@@ -529,7 +529,7 @@ class QueryModel extends EventEmitter {
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
-  
+
   static #defaultConfig = {};
 
   #axes = {
@@ -542,7 +542,8 @@ class QueryModel extends EventEmitter {
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
   #settings = undefined;
   #datasource = undefined;
-    
+  #sampling = undefined;
+
   constructor(config){
     super('change');
     var config = Object.assign({}, QueryModel.#defaultConfig, config);
@@ -551,6 +552,19 @@ class QueryModel extends EventEmitter {
     }
   }
 
+  getSampling(axisId){
+    var sampling = this.#sampling;
+    if (!sampling){
+      return undefined;
+    }
+    
+    if (axisId === undefined){
+      return sampling;
+    }
+    
+    return sampling[axisId];
+  }
+  
   setCellHeadersAxis(cellheadersaxis) {
     var oldCellHeadersAxis = this.#cellheadersaxis;
     this.#cellheadersaxis = cellheadersaxis;
@@ -575,7 +589,7 @@ class QueryModel extends EventEmitter {
   getQueryAxis(axisId){
     return this.#axes[axisId];
   }
-  
+
   getCaptionForQueryAxis(axisId){
     var queryAxis = this.getQueryAxis(axisId);
     var caption = queryAxis = queryAxis.getCaption();
@@ -605,7 +619,7 @@ class QueryModel extends EventEmitter {
     this.setDatasource(undefined);
   }
 
-  setDatasource(datasource){    
+  setDatasource(datasource){
     if (datasource === this.#datasource) {
       return;
     }
@@ -635,7 +649,7 @@ class QueryModel extends EventEmitter {
   getDatasource(){
     return this.#datasource;
   }
-  
+
   /**
   * finds all columns refs and lists the axes that use the column
   */
@@ -650,7 +664,7 @@ class QueryModel extends EventEmitter {
           columnSpec = {
             columnType: axisItem.columnType,
             axes: []
-          };          
+          };
           referencedColumns[columnName] = columnSpec;
         }
         if (columnSpec.axes.indexOf(axisId) === -1){
@@ -990,20 +1004,21 @@ class QueryModel extends EventEmitter {
     var condition = conditions.join('\nAND ');
     return condition;
   }
-  
+
   getState(){
     var datasource = this.getDatasource();
     if (!datasource) {
       return null;
     }
     var datasourceId = datasource.getId();
-    
+
     var queryModelObject = {
       datasourceId: datasourceId,
       cellsHeaders: this.getCellHeadersAxis(),
-      axes: {}
+      axes: {},
+      sampling: this.#sampling
     };
-    
+
     var axisIds = this.getAxisIds().sort();
     var hasItems = false;
     axisIds.forEach(function(axisId){
@@ -1015,18 +1030,18 @@ class QueryModel extends EventEmitter {
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
         var strippedItem = {column: axisItem.columnName};
-        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;  
+        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
         strippedItem.aggregator = axisItem.aggregator;
         if (axisItem.includeTotals === true) {
           strippedItem.includeTotals = true;
         }
-        
+
         if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
           strippedItem.filter = axisItem.filter;
         }
-        
+
         return strippedItem;
       });
     }.bind(this));
@@ -1035,7 +1050,7 @@ class QueryModel extends EventEmitter {
     }
     return queryModelObject;
   }
-  
+
   get #autoUpdate(){
     var autoUpdate;
     var settings = this.#settings || {};
@@ -1050,12 +1065,12 @@ class QueryModel extends EventEmitter {
     }
     return autoUpdate;
   }
-  
+
   async setState(queryModelState){
 
     var autoRunQuery = this.#autoUpdate;
     var canAssignSettings = this.#settings && typeof this.#settings.assignSettings === 'function';
-    
+
     if (canAssignSettings){
       settings.assignSettings(['querySettings', 'autoRunQuery'], false);
     }
@@ -1066,24 +1081,27 @@ class QueryModel extends EventEmitter {
       if (datasourceId){
         datasource = datasourcesUi.getDatasource(datasourceId);
       }
-      else 
+      else
       if(queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource){
         datasource = queryModelState.datasource;
       }
-       
+
       if (this.getDatasource() === datasource) {
         this.clear();
       }
       else {
         this.setDatasource(datasource);
       }
-      
+
       var cellsHeaders = queryModelState.cellsHeaders || QueryModel.AXIS_COLUMNS;
       this.setCellHeadersAxis(cellsHeaders);
-      
-      var axes = queryModelState.axes;
+
+      var axes = queryModelState.axes || {};
       for (var axisId in axes){
         var items = axes[axisId];
+        if(!items) {
+          continue;
+        }
         for (var i = 0 ; i < items.length; i++){
           var item = items[i];
           var config = { columnName: item.column };
@@ -1096,17 +1114,17 @@ class QueryModel extends EventEmitter {
           if (item.includeTotals === true){
             config.includeTotals = true;
           }
-          
+
           var formatter = QueryAxisItem.createFormatter(config);
           if (formatter){
             config.formatter = formatter;
           }
-          
+
           var literalWriter = QueryAxisItem.createLiteralWriter(config);
           if (literalWriter){
             config.literalWriter = literalWriter;
           }
-          
+
           if (axisId === QueryModel.AXIS_FILTERS) {
             var filter = item.filter;
             if (filter) {
@@ -1117,6 +1135,9 @@ class QueryModel extends EventEmitter {
           await this.addItem(config);
         }
       }
+      
+      var sampling = queryModelState.sampling || undefined;
+      this.#sampling = sampling;
     }
     catch(e){
       debugger;
@@ -1125,7 +1146,7 @@ class QueryModel extends EventEmitter {
       if (canAssignSettings){
         this.#settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       }
-      
+
       if (autoRunQuery){
         setTimeout(function(){
           pivotTableUi.updatePivotTableUi();
@@ -1133,7 +1154,7 @@ class QueryModel extends EventEmitter {
       }
     }
   }
-  
+
 }
 
 var queryModel;

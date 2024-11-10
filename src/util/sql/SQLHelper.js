@@ -1211,3 +1211,11 @@ function getMemberExpressionType(type, memberExpressionPath){
 function extrapolateColumnExpression(expressionTemplate, columnExpression){
   return expressionTemplate.replace(/\$\{columnExpression\}/g, `${columnExpression}`);
 }
+
+function getUsingSampleClause(samplingConfig, useTableSample){
+  var size = samplingConfig.size || 100;
+  var unit = samplingConfig.unit || 'ROWS';
+  var method = samplingConfig.method || 'SYSTEM';
+  var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
+  return `${sampleKeyword} ${size} ${unit} (${method})`;
+}
