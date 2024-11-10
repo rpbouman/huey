@@ -1,15 +1,15 @@
 class TupleSet extends DataSetComponent {
 
   static groupingIdAlias = '__huey_grouping_id';
-  
-  //  
+
+  //
   static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
     if (!queryAxisItems.length) {
       return undefined;
     }
-    
+
     var selectListExpressions = {};
     for (var i = 0; i < queryAxisItems.length; i++) {
       var queryAxisItem = queryAxisItems[i];
@@ -17,14 +17,14 @@ class TupleSet extends DataSetComponent {
       var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
       selectListExpressions[caption] = selectListExpression;
     }
-    
+
     if (includeCountAll) {
       var countExpression = 'COUNT(*) OVER ()';
       selectListExpressions[countExpression] = countExpression;
     }
     return selectListExpressions;
-  }       
-       
+  }
+
   static getSqlSelectStatement(queryModel, axisId, includeCountAll){
     var datasource = queryModel.getDatasource();
 
@@ -34,32 +34,40 @@ class TupleSet extends DataSetComponent {
     var filterAxis = queryModel.getFiltersAxis();
     var filterAxisItems = filterAxis.getItems();
 
+    var sampling;
+    if (includeCountAll) {
+      sampling = queryModel.getSampling(axisId);
+    }
+
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
-      datasource, 
-      queryAxisItems, 
-      filterAxisItems, 
-      includeCountAll
-    );    
+      datasource,
+      queryAxisItems,
+      filterAxisItems,
+      includeCountAll,
+      undefined,
+      undefined,
+      sampling
+    );
     return sql;
   }
-         
+
   #queryAxisId = undefined;
 
   #tuples = [];
   #tupleValueFields = [];
-  
+
   #tupleCount = undefined;
   #pageSize = 50;
-  
+
   constructor(queryModel, axisId){
     super(queryModel);
-    this.#queryAxisId = axisId;  
+    this.#queryAxisId = axisId;
   }
 
   getTupleValueFields(){
     return this.#tupleValueFields;
   }
-  
+
   getPageSize(){
     return this.#pageSize;
   }
@@ -67,7 +75,7 @@ class TupleSet extends DataSetComponent {
   setPageSize(pageSize){
     this.#pageSize = pageSize;
   }
-  
+
   getQueryAxisId(){
     return this.#queryAxisId;
   }
@@ -75,7 +83,7 @@ class TupleSet extends DataSetComponent {
   getQueryAxisItems(){
     var queryModel = this.getQueryModel();
     var axisId = this.#queryAxisId;
-    
+
     var queryAxis = queryModel.getQueryAxis(axisId);
     var items = queryAxis.getItems();
     return items;
@@ -87,31 +95,31 @@ class TupleSet extends DataSetComponent {
       return undefined;
     }
     var sql = TupleSet.getSqlSelectStatement(
-      queryModel, 
-      this.#queryAxisId, 
-      includeCountAll, 
+      queryModel,
+      this.#queryAxisId,
+      includeCountAll,
       values
     );
     return sql;
   }
-  
+
   clear(){
     this.#tuples = [];
     this.#tupleCount = undefined;
   }
-  
+
   getTupleCountSync() {
     return this.#tupleCount;
   }
-  
+
   getTuplesSync(from, to){
     return this.#tuples.slice(from, to);
   }
-  
+
   getTupleSync(index){
     return this.#tuples[index];
   }
-    
+
   async getTupleCount(){
     return new Promise(function(resolve, reject){
       resolve(this.#tupleCount);
@@ -120,9 +128,9 @@ class TupleSet extends DataSetComponent {
 
   #loadTuples(resultSet, offset) {
     var numRows = resultSet.numRows;
-    
+
     var fields = resultSet.schema.fields;
-    
+
     var items = this.getQueryAxisItems();
     var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
     if (fields[0].name === TupleSet.groupingIdAlias) {
@@ -146,7 +154,7 @@ class TupleSet extends DataSetComponent {
       }
     }
     this.#tupleValueFields = fields.slice(fieldOffset, fieldCount);
-        
+
     for (var i = 0; i < numRows; i++){
 
       var row = resultSet.get(i);
@@ -167,7 +175,7 @@ class TupleSet extends DataSetComponent {
         values[j - fieldOffset] = value;
       }
 
-      tuples[offset + i] = tuple;      
+      tuples[offset + i] = tuple;
     }
   }
 
@@ -207,7 +215,7 @@ class TupleSet extends DataSetComponent {
   }
 
   async getTuples(count, offset){
-    
+
     var data = this.#tuples;
     var tuples = [];
 
@@ -217,7 +225,7 @@ class TupleSet extends DataSetComponent {
     if (this.#tupleCount !== undefined && offset + count > this.#tupleCount) {
       count = this.#tupleCount - offset;
     }
-    
+
     while (i < count) {
       var tupleIndex = offset + i;
       var tuple = data[tupleIndex];
@@ -226,7 +234,7 @@ class TupleSet extends DataSetComponent {
           firstIndexToFetch = tupleIndex;
           lastIndexToFetch = tupleIndex;
         }
-        else 
+        else
         if (tupleIndex > lastIndexToFetch) {
           lastIndexToFetch = tupleIndex;
         }
@@ -236,20 +244,20 @@ class TupleSet extends DataSetComponent {
       }
       i += 1;
     }
-    
+
     if (firstIndexToFetch === undefined) {
       return tuples;
     }
-    
+
     lastIndexToFetch += 1;
     var newCount = (lastIndexToFetch - firstIndexToFetch);
     if (newCount < this.#pageSize && (offset + count === lastIndexToFetch) && lastIndexToFetch < this.#tupleCount) {
       newCount = this.#pageSize;
     }
-    
+
     var numRows = await this.#executeAxisQuery(newCount, firstIndexToFetch);
     tuples = data.slice(offset, offset + count);
     return tuples;
-  }    
-  
+  }
+
 }

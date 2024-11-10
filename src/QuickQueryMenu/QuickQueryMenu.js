@@ -107,6 +107,13 @@ class QuickQueryMenu {
       };
       items.push(item);
     });
+    
+    queryModelState.sampling = {};
+    queryModelState.sampling[QueryModel.AXIS_ROWS] = {
+      size: 100,
+      unit: 'ROWS',
+      method: 'RESERVOIR'
+    };
 
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
