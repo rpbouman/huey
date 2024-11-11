@@ -89,7 +89,7 @@ class TupleSet extends DataSetComponent {
     return items;
   }
 
-  #getSqlSelectStatement(includeCountAll, values){
+  #getSqlSelectStatement(includeCountAll){
     var queryModel = this.getQueryModel();
     if (!queryModel) {
       return undefined;
@@ -97,8 +97,7 @@ class TupleSet extends DataSetComponent {
     var sql = TupleSet.getSqlSelectStatement(
       queryModel,
       this.#queryAxisId,
-      includeCountAll,
-      values
+      includeCountAll
     );
     return sql;
   }
