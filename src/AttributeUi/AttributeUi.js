@@ -173,6 +173,14 @@ class AttributeUi {
       columnType: 'HUGEINT'
     }
   };
+  
+  static tupleNumberDerivations = {
+    rownumber: {
+      expressionTemplate: "ROW_NUMBER() OVER ()::INTEGER",
+      columnType: 'INTEGER',
+      isWindowFunction: true
+    }
+  };
 
   static dateFields = {
     'iso-date': {
@@ -358,6 +366,7 @@ class AttributeUi {
 
   static getDerivationInfo(derivationName){
     var derivations = Object.assign({},
+      AttributeUi.tupleNumberDerivations,
       AttributeUi.dateFields,
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
@@ -751,7 +760,7 @@ class AttributeUi {
     var attributesUi = this.getDom();
 
     // generic count(*) node
-    var node = this.#renderAttributeUiNode({
+    var countAllNode = this.#renderAttributeUiNode({
       type: 'aggregate',
       aggregator: 'count',
       title: 'Generic rowcount',
@@ -760,12 +769,12 @@ class AttributeUi {
         column_type: 'INTEGER'
       }
     });
-    attributesUi.appendChild(node);
-
+    attributesUi.appendChild(countAllNode);
+    
     // nodes for each column
     for (var i = 0; i < columnSummary.numRows; i++){
       var row = columnSummary.get(i);
-      node = this.#renderAttributeUiNode({
+      var node = this.#renderAttributeUiNode({
         type: 'column',
         profile: row.toJSON()
       });

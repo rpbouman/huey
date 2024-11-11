@@ -122,36 +122,6 @@
   text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-.pivotTableUiContainer > *[role=progressbar] {
-  position: absolute;
-  top: 50%;
-  z-index: 100;
-  width: 200px;
-  height: 180px;
-  background-color: var( --huey-light-background-color );
-  border-color: var( --huey-light-border-color );
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 20px;
-}
-
-.pivotTableUiContainer > *[role=progressbar] > * {
-  background-color: var( --huey-light-background-color );
-}
-
-.pivotTableUiContainer[aria-busy=false] > *[role=progressbar] {
-  display: none;
-}
-
-.pivotTableUiContainer[aria-busy=true] > *[role=progressbar] {
-  display: block;
-}
-
-.pivotTableUiContainer > *[role=progressbar] > section {
-  display: flex;
-  flex-direction: column;
-}
-
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
   border-bottom-color: var( --huey-dark-border-color );
 }
@@ -194,20 +164,25 @@
   border-right-color: var( --huey-dark-border-color );
 }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel  {
-  font-family: var( --huey-mono-font-family );  
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
+  .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel {
+    font-family: var( --huey-mono-font-family );
+  }
 }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiValueCell[data-value-type^=Int] > .pivotTableUiCellLabel {
-  text-align: right;
+.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
+  .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel {
+    text-align: right;
+  }
 }
+
 
 /* Totals */
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,

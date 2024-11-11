@@ -759,6 +759,9 @@ function quoteIdentifierWhenRequired(identifier){
 }
 
 function getQuotedIdentifier(identifier){
+  if (typeof identifier !== 'string'){
+    identifier = String(identifier);
+  }
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
@@ -1217,5 +1220,6 @@ function getUsingSampleClause(samplingConfig, useTableSample){
   var unit = samplingConfig.unit || 'ROWS';
   var method = samplingConfig.method || 'SYSTEM';
   var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
-  return `${sampleKeyword} ${size} ${unit} (${method})`;
+  var sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  return sampleClause;
 }

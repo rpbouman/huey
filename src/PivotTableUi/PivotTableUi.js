@@ -364,12 +364,12 @@ class PivotTableUi extends EventEmitter {
 
     this.updatePivotTableUi();
   }
-
+  
   #setBusy(busy){
     var dom = this.getDom();
     dom.setAttribute('aria-busy', String(Boolean(busy)));
     this.fireEvent('busy', {
-      busy: busy
+      busy: Boolean(busy)
     })
   }
 
@@ -413,10 +413,10 @@ class PivotTableUi extends EventEmitter {
     var left = innerContainer.scrollLeft;
 
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
-    var headersWidth = columnsAxisSizeInfo.headers.width;
+    var headersWidth = columnsAxisSizeInfo ? columnsAxisSizeInfo.headers.width : 0;
     var horizontallyScrolledFraction = left / (scrollWidth - headersWidth);
     var numberOfPhysicalColumnsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_COLUMNS);
-    var physicalColumnsAxisTupleIndex = Math.round(numberOfPhysicalColumnsAxisTuples * horizontallyScrolledFraction);
+    var physicalColumnsAxisTupleIndex = Math.round((columnsAxisSizeInfo.headers.columnCount + numberOfPhysicalColumnsAxisTuples) * horizontallyScrolledFraction);
 
     //
     var scrollHeight = innerContainer.scrollHeight;
@@ -704,6 +704,11 @@ class PivotTableUi extends EventEmitter {
     }
   }
 
+  #setCellValueType(cellElement, valueField) {
+    var cellValueType = String(valueField.type);
+    cellElement.setAttribute('data-value-type', cellValueType);
+  }
+
   #renderCellValue(cell, cellsAxisItem, cellElement){
     var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
     if (!cell || !cellsAxisItem){
@@ -717,9 +722,7 @@ class PivotTableUi extends EventEmitter {
 
     var cellValueFields = this.#cellsSet.getCellValueFields();
     var cellValueField = cellValueFields[sqlExpression];
-    var cellValueType = String(cellValueField.type);
-
-    cellElement.setAttribute('data-value-type', cellValueType);
+    this.#setCellValueType(cellElement, cellValueField);
 
     var labelText;
     var formatter = cellsAxisItem.formatter;
@@ -1088,8 +1091,9 @@ class PivotTableUi extends EventEmitter {
           if (values && j < values.length) {
             if (k === 0) {
               var value = values[j];
+              var tupleValueField = tupleValueFields[j];
+              this.#setCellValueType(cell, tupleValueField);
               if (queryAxisItem.formatter) {
-                var tupleValueField = tupleValueFields[j];
                 labelText = queryAxisItem.formatter(value, tupleValueField);
               }
               else {
@@ -1290,8 +1294,10 @@ class PivotTableUi extends EventEmitter {
               var value = tuple.values[j];
               var rowAxisItem = rowAxisItems[j];
 
+              var tupleValueField = tupleValueFields[j];
+              this.#setCellValueType(cell, tupleValueField);
+
               if (rowAxisItem.formatter) {
-                var tupleValueField = tupleValueFields[j];
                 labelText = rowAxisItem.formatter(value, tupleValueField);
               }
               else {
@@ -1574,7 +1580,8 @@ class PivotTableUi extends EventEmitter {
      var sizeInfo = {
       headers: {
         width: 0,
-        columnCount: numHeaderItems
+        columnCount: numHeaderItems,
+        numPhysicalHeaders: 0
       },
       columns: {
         width: 0,
@@ -1586,6 +1593,7 @@ class PivotTableUi extends EventEmitter {
       var cell = cells.item(i);
       if (i < numHeaderItems) {
         sizeInfo.headers.width += cell.clientWidth;
+        sizeInfo.headers.numPhysicalHeaders += 1;
       }
       else {
         sizeInfo.columns.width += cell.clientWidth;
@@ -1603,9 +1611,27 @@ class PivotTableUi extends EventEmitter {
       console.warn('updateHorizontalSizer: no sizeInfo');
       return;
     }
-    var avgColumnWidth = sizeInfo.columns.width / sizeInfo.columns.columnCount;
+    
+    var avgColumnWidth;
+    if (sizeInfo.columns.columnCount === 0) {
+      avgColumnWidth = 0;
+    }
+    else {
+      avgColumnWidth = sizeInfo.columns.width / sizeInfo.columns.columnCount;
+    }
     var requiredWidth = avgColumnWidth * numberOfPhysicalTuples;
-    var totalWidth = sizeInfo.headers.width + requiredWidth;
+
+    var headersWidth;
+    if (sizeInfo.headers.numPhysicalHeaders === sizeInfo.headers.columnCount) {
+      // all headers are rendered, the headersWidth is the actual width;
+      headersWidth = sizeInfo.headers.width;
+    }
+    else {
+      var avgHeaderWidth = sizeInfo.headers.width / sizeInfo.headers.numPhysicalHeaders;
+      headersWidth = avgHeaderWidth * sizeInfo.headers.columnCount;
+    }
+    
+    var totalWidth = headersWidth + requiredWidth;
     this.#setHorizontalSize(totalWidth);
   }
 

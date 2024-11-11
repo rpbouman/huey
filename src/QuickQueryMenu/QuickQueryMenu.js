@@ -96,24 +96,36 @@ class QuickQueryMenu {
   
   async #dataPreviewButtonClickHandler(event){
     var queryModelState = this.#newQueryModelState();
-    var items = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
+    
+    var rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
+    rowsAxisItems.push({
+      derivation: 'rownumber',
+      caption: '#'
+    });
+    
+    var cellsAxisItems = queryModelState.axes[QueryModel.AXIS_CELLS] = [];
     
     await this.#forEachColumn(function(columnMetadata,columnIndex){
       var columnName = columnMetadata.column_name;
       var columnType = columnMetadata.column_type;
       var item = {
         column: columnName,
-        columnType: columnType
+        columnType: columnType,
+        caption: columnName,
+        aggregator: 'min'
       };
-      items.push(item);
+      cellsAxisItems.push(item);
     });
     
-    queryModelState.sampling = {};
-    queryModelState.sampling[QueryModel.AXIS_ROWS] = {
+    var samplingConfig = {
       size: 100,
       unit: 'ROWS',
-      method: 'RESERVOIR'
+      method: 'RESERVOIR',
+      seed: 100
     };
+    queryModelState.sampling = {};
+    queryModelState.sampling[QueryModel.AXIS_ROWS] = samplingConfig;
+    queryModelState.sampling[QueryModel.AXIS_CELLS] = samplingConfig;
 
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);

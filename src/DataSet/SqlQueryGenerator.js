@@ -400,7 +400,10 @@ class SqlQueryGenerator {
         orderByExpression = `${orderByAggregate}( ${orderByExpression} )`;
       }
       
-      groupByExpressions.push(columnExpression);
+      var originalQueryAxisItem = originalQueryAxisItems[i];
+      if (originalQueryAxisItem.derivation !== 'rownumber'){
+        groupByExpressions.push(columnExpression);
+      }
       orderByExpression = `${orderByExpression} ${sortDirection}`;
       orderByExpression += sortNulls;
       orderByExpressions.push(orderByExpression);
@@ -435,9 +438,9 @@ class SqlQueryGenerator {
     
     SqlQueryGenerator.#generateWhereClause(cte, sql);
     
-    var groupByClause = `GROUP BY `;
+    var groupByClause = undefined;
     if (groupingSets.length > 1) {
-      groupByClause += 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
+      groupByClause = 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
         return [
           '  (',
           `    ${groupingSet.join('\n  , ')}`,
@@ -445,11 +448,21 @@ class SqlQueryGenerator {
         ].join('\n');
       }).join(',') + '\n)';
     }
-    else {
-      groupByClause += groupByExpressions.join('\n,');
+    else
+    if (groupByExpressions.length) {
+      groupByClause = groupByExpressions.join('\n,');
     }
-    sql.push(groupByClause);
+    if (groupByClause) {
+      groupByClause = `GROUP BY ${groupByClause}`;
+      sql.push(groupByClause);
+    }
+    
     sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+
+    if (samplingConfig){
+      //sql.push(`LIMIT ${samplingConfig.size}`);
+    }
+
     sql = sql.join('\n');
     return sql;
   }

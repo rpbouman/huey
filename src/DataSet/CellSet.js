@@ -155,13 +155,23 @@ class CellSet extends DataSetComponent {
       fromClause
     ];
 
+    var samplingConfig = queryModel.getSampling(QueryModel.AXIS_CELLS);
+    if (samplingConfig) {
+      //var tableSamplingClause = getUsingSampleClause(samplingConfig, true);
+      //sql.push(tableSamplingClause);
+    }
+
     var filterSql = queryModel.getFilterConditionSql(false, alias);
     if (filterSql) {
       filterSql = filterSql.replace(/\n/g, '\n  ');
       sql.push(`  WHERE ${filterSql}`);
     }
     sql.unshift(`${getQuotedIdentifier(alias)} AS (`);
+    if (samplingConfig){
+      sql.push(`LIMIT ${samplingConfig.size}`);
+    }
     sql.push(')');
+    
     return sql.join('\n');
   }
 
