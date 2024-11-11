@@ -1002,10 +1002,51 @@ class AttributeUi {
   }
 
   #updateState(){
+    var queryModel = this.#queryModel;
+
+    // to satisfy https://github.com/rpbouman/huey/issues/220, 
+    // we need to ensure derivations and aggregates are loaded.
+    
+    // First we get the column names of those query items that have a derivation or aggregator
+    var referencedColumns = {};
+    var axisIds = queryModel.getAxisIds();
+    for (var i = 0; i < axisIds.length; i++) {
+      var axisId = axisIds[i];
+      var queryAxis = queryModel.getQueryAxis(axisId);
+      var items = queryAxis.getItems();
+      for (var j = 0; j < items.length; j++){
+        var item = items[j];
+        if (!item.derivation && !item.aggregator){
+          continue;
+        }
+        referencedColumns[item.columnName] = true;
+      }
+    }
+    
+    // then, check all top-level attribute nodes that don't have child nodes
+    // if the associated column name is referenced in the query, then load its childnodes.
+    var attributeNodes = this.getDom().childNodes;
+    for (var i = 0; i < attributeNodes.length; i++){
+      var attributeNode = attributeNodes.item(i);
+      if (attributeNode.nodeType !== 1 || attributeNode.nodeName !== 'DETAILS') {
+        continue;
+      }
+      var columnName = attributeNode.getAttribute('data-column_name');
+      if (referencedColumns[columnName] === undefined) {
+        continue;
+      }
+      var descendants = attributeNode.childNodes;
+      if (descendants.length > 1) {
+        continue;
+      }
+      this.#loadChildNodes(attributeNode);
+    }
+    
+    // make sure all the selectors checkboxes are (un)checked according to the query state.
     var inputs = this.getDom().getElementsByTagName('input');
     for (var i = 0; i < inputs.length; i++){
       var input = inputs.item(i);
-      var axis = input.getAttribute('data-axis');
+      var axisId = input.getAttribute('data-axis');
 
       var node = getAncestorWithTagName(input, 'details')
       var columnName = node.getAttribute('data-column_name');
@@ -1015,7 +1056,7 @@ class AttributeUi {
 
       var item = queryModel.findItem({
         columnName: columnName,
-        axis: axis,
+        axis: axisId,
         aggregator: aggregator,
         derivation: derivation,
         memberExpressionPath: memberExpressionPath
