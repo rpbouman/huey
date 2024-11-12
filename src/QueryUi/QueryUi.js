@@ -228,7 +228,15 @@ class QueryUi {
         itemUiTemplateId = 'queryUiAxisItem';
     }
     itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
-    itemUi.setAttribute('title',  QueryAxisItem.getCaptionForQueryAxisItem(axisItem));
+    
+    var title;
+    if (axisId === QueryModel.AXIS_FILTERS && !axisItem.filter || !axisItem.values || !axisItem.values.length) {
+      title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
+    }
+    else {
+      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+    }
+    itemUi.setAttribute('title', title);
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
 
     var memberExpressionPath = axisItem.memberExpressionPath;
@@ -259,46 +267,55 @@ class QueryUi {
     }
     
     if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter && axisItem.filter.values) {
-      var valuesUi = itemUi.getElementsByTagName('ol')[0];
-      var filter = axisItem.filter;
-      itemUi.setAttribute('data-filterType', filter.filterType);
-      
-      var detailsElement = itemUi.getElementsByTagName('details')[0];
-      detailsElement.addEventListener('toggle', this.#filterItemToggleHandler.bind(this));
-      detailsElement.open = filter.toggleState === 'open';
-      
-      var values = filter.values;
-      var valueKeys = Object.keys(values);
-      
-      var toValues = filter.toValues;
-      var toValueKeys = toValues? Object.keys(toValues) : undefined;
-
-      for (var i = 0; i < valueKeys.length; i++){
-        var valueKey = valueKeys[i];
-        var valueObject = values[valueKey];
-        
-        var valueLabel = valueObject.label;
-        if (toValueKeys && i < toValueKeys.length){
-          var toValueKey = toValueKeys[i];
-          var toValueObject = toValues[toValueKey];
-          
-          valueLabel += ' - ' + toValueObject.label;
-        }
-        
-        var valueUi = createEl('li', {
-        }, valueLabel);
-        valuesUi.appendChild(valueUi);
-      }
+      this.#createQueryAxisItemFilterUi(itemUi, axisItem);
     }
 
     return itemUi;
   }
   
+  #createQueryAxisItemFilterUi(itemUi, axisItem){
+    var valuesUi = itemUi.getElementsByTagName('ol')[0];
+    var filter = axisItem.filter;
+    itemUi.setAttribute('data-filterType', filter.filterType);
+    
+    var detailsElement = itemUi.getElementsByTagName('details')[0];
+    if (filter.toggleState === 'open') {
+      detailsElement.setAttribute('open', String(true) );
+    }
+    setTimeout(function(){
+      detailsElement.addEventListener('toggle', this.#filterItemToggleHandler.bind(this));
+    }.bind(this), 1000)
+          
+    var values = filter.values;
+    var valueKeys = Object.keys(values);
+    
+    var toValues = filter.toValues;
+    var toValueKeys = toValues? Object.keys(toValues) : undefined;
+
+    for (var i = 0; i < valueKeys.length; i++){
+      var valueKey = valueKeys[i];
+      var valueObject = values[valueKey];
+      
+      var valueLabel = valueObject.label;
+      if (toValueKeys && i < toValueKeys.length){
+        var toValueKey = toValueKeys[i];
+        var toValueObject = toValues[toValueKey];
+        
+        valueLabel += ' - ' + toValueObject.label;
+      }
+      
+      var valueUi = createEl('li', {
+      }, valueLabel);
+      valuesUi.appendChild(valueUi);
+    }
+    
+  }
+  
   #filterItemToggleHandler(event){
     var target = event.target;
     var queryModelItem = this.#getQueryModelItem(target.parentNode);
-    var filter = queryModelItem.filter;
-    filter.toggleState = event.newState;
+    var toggleState = event.newState;
+    this.#queryModel.setQueryAxisItemFilterToggleState(queryModelItem, toggleState);
   }
 
   #updateQueryAxisUi(axisUi, queryModelAxis) {

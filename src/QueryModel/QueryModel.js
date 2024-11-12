@@ -942,6 +942,10 @@ class QueryModel extends EventEmitter {
   }
 
   setQueryAxisItemFilter(queryAxisItem, filter){
+    if (queryAxisItem.axis !== QueryModel.AXIS_FILTERS){
+      throw new Error(`Item is not a filter axis item!`);
+    }
+    
     var queryModelItem = this.findItem(queryAxisItem);
     if (!queryModelItem) {
       throw new Error(`Item is not part of the model!`);
@@ -971,6 +975,21 @@ class QueryModel extends EventEmitter {
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
+  }
+  
+  setQueryAxisItemFilterToggleState(queryAxisItem, toggleState){
+    if (queryAxisItem.axis !== QueryModel.AXIS_FILTERS){
+      throw new Error(`Item is not a filter axis item!`);
+    }
+    
+    var queryModelItem = this.findItem(queryAxisItem);
+    if (!queryModelItem) {
+      throw new Error(`Item is not part of the model!`);
+    }
+
+    var axis = this.getQueryAxis(queryModelItem.axis);
+    var items = axis.getItems();
+    items[queryModelItem.index].filter.toggleState = toggleState;
   }
 
   /**
