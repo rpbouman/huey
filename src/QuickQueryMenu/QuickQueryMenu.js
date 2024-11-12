@@ -5,9 +5,11 @@ class QuickQueryMenu {
   constructor(queryModel){
     this.#queryModel = queryModel;
     
+    this.#initFlipAxesButton();
+    this.#initCellHeadersOnColumnsButton();
+    this.#initCellHeadersOnRowsButton();
     this.#initClearAllButton();
     this.#initColumnStatisticsButton();
-    this.#initAnalyticalPreviewButton();
     this.#initDataPreviewButton();
     this.#initDestructuredDataPreviewButton();
   }
@@ -41,6 +43,36 @@ class QuickQueryMenu {
     }
   }
     
+  #initFlipAxesButton(){
+    byId('quickQueryFlipAxesButton')
+    .addEventListener('click', this.#flipAxesButtonClickHandler.bind(this));
+  }
+  
+  #flipAxesButtonClickHandler(event){
+    var queryModel = this.#queryModel;
+    queryModel.flipAxes();
+  }
+
+  #initCellHeadersOnColumnsButton(){
+    byId('quickQueryCellHeadersOnColumnsButton')
+    .addEventListener('click', this.#cellHeadersOnColumnsButtonClickHandler.bind(this));
+  }
+  
+  #cellHeadersOnColumnsButtonClickHandler(event){
+    var queryModel = this.#queryModel;
+    queryModel.setCellHeadersAxis(QueryModel.AXIS_COLUMNS);
+  }
+
+  #initCellHeadersOnRowsButton(){
+    byId('quickQueryCellHeadersOnRowsButton')
+    .addEventListener('click', this.#cellHeadersOnRowsButtonClickHandler.bind(this));
+  }
+  
+  #cellHeadersOnRowsButtonClickHandler(event){
+    var queryModel = this.#queryModel;
+    queryModel.setCellHeadersAxis(QueryModel.AXIS_ROWS);
+  }
+
   #initClearAllButton(){
     byId('quickQueryClearAllButton')
     .addEventListener('click', this.#clearAllButtonClickHandler.bind(this));
@@ -79,14 +111,6 @@ class QuickQueryMenu {
 
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
-  }
-
-  #initAnalyticalPreviewButton(){
-    byId('quickQueryAnalyticalPreviewButton')
-    .addEventListener('click', this.#analyticalPreviewButtonClickHandler.bind(this));
-  }
-  
-  async #analyticalPreviewButtonClickHandler(event){
   }
   
   #initDataPreviewButton(){

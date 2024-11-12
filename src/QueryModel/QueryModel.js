@@ -894,6 +894,20 @@ class QueryModel extends EventEmitter {
   }
 
   flipAxes(axisId1, axisId2) {
+    if (axisId2 === undefined){
+      switch (axisId1) {
+        case QueryModel.AXIS_COLUMNS:
+          axisId2 = QueryModel.AXIS_ROWS;
+          break;
+        case QueryModel.AXIS_ROWS:
+          axisId2 = QueryModel.AXIS_COLUMNS;
+          break;
+        case undefined:
+          axisId1 = QueryModel.AXIS_COLUMNS;
+          axisId2 = QueryModel.AXIS_ROWS;
+      }
+    }
+    
     var axesChangeInfo = {};
 
     var axis1 = this.getQueryAxis(axisId1);
