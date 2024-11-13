@@ -463,6 +463,12 @@
       > details:has( ol > li:nth-child(11) ) > summary > span:after {
         content: ' (> 10)'
       }
+      > details:has( ol > li:nth-child(21) ) > summary > span:after {
+        content: ' (> 20)'
+      }
+      > details:has( ol > li:nth-child(31) ) > summary > span:after {
+        content: ' (> 30)'
+      }
 
       > menu {
         > label:nth-child(1):has( > button )::after {
