@@ -305,21 +305,25 @@ menu[role=menu] > li[role=menuitem] > label:has( > button ){
   width: 100%;
 }
 
+
 header[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > button )::before,
-menu[role=toolbar] > label:has( > input[type=file] )::before 
+menu[role=toolbar] > label:has( > input[type=file] )::before,
+menu[role=menu] > li[role=menuitem] > label:has( > button)::before 
 {  
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
-  vertical-align:middle;
+  vertical-align: bottom;
   color: var( --huey-icon-color-subtle );
-  margin: 4px 4px 0px 4px;
+  margin: 0px 4px 0px 0px;
   display: inline-block;
 }
 
 header[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > button )::before,
-menu[role=toolbar] > label:hover:has( > input[type=file] )::before {
+menu[role=toolbar] > label:hover:has( > input[type=file] )::before,
+menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before
+{
   color: var( --huey-icon-color-highlight );
 }
 
@@ -355,7 +359,7 @@ menu[role=menu] {
 
 menu[role=menu] > li[role=menuitem] {
   line-height: 24px;
-  padding: 2px 4px 2px 10px;
+  padding: 2px 4px 2px 4px;
 }
 
 dialog,
