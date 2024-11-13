@@ -1,20 +1,14 @@
 class PivotTableUi extends EventEmitter {
 
   static #templateId = 'pivotTableUiTemplate';
-  static #defaultSettings = {};
 
   #id = undefined;
   #queryModel = undefined;
   #settings = undefined;
-  #needsUpdate = false;
 
   #columnsTupleSet = undefined;
   #rowsTupleSet = undefined;
   #cellsSet = undefined;
-
-  //
-  #rowIndex = 0;
-  #columnIndex = 0;
 
   #resizeObserver = undefined;
   #resizeTimeoutId = undefined;
@@ -240,8 +234,6 @@ class PivotTableUi extends EventEmitter {
   }
 
   #setNeedsUpdate(needsUpdate){
-    this.#needsUpdate = needsUpdate;
-
     var dom = this.getDom();
     dom.setAttribute('data-needs-update', String(Boolean(needsUpdate)));
   }
@@ -378,31 +370,46 @@ class PivotTableUi extends EventEmitter {
     return dom.getAttribute('aria-busy') === 'true';
   }
 
-  #handleInnerContainerScrolled(event, count){
+  #fireUpdatedSuccess(){
+    var tupleCounts = {};
+    tupleCounts[QueryModel.AXIS_ROWS] = this.#rowsTupleSet.getTupleCountSync();
+    tupleCounts[QueryModel.AXIS_COLUMNS] = this.#columnsTupleSet.getTupleCountSync();
+    
+    var status = { 
+      status: 'success',
+      tupleCounts: tupleCounts
+    }
+    this.fireEvent('updated', status);
+  }
+
+  async #handleInnerContainerScrolled(event, count){
+    var physicalTupleIndices = this.#getPhysicalTupleIndices();
+    
+    var physicalColumnsAxisTupleIndex = physicalTupleIndices.physicalColumnsAxisTupleIndex;
+    var physicalRowsAxisTupleIndex = physicalTupleIndices.physicalRowsAxisTupleIndex;
+    
     if (count === undefined){
       // this is the last scroll event, update the table contents.
-      this.#updateDataToScrollPosition()
-      .then(function(){
-        this.fireEvent('updated', { status: 'success' });
-      }.bind(this))
-      .catch(function(error){
+      try {
+        this.#setBusy(true);
+        await this.#updateDataToScrollPosition();
+        this.#fireUpdatedSuccess();
+      }
+      catch(error){
         console.error(error);
         this.fireEvent('updated', { 
           status: 'error',
           error: error
         });
-      }.bind(this))
-      .finally(function(){
-        // for some reason, the attribute doesn't get updated unless we apply timeout.
-        setTimeout(this.#setBusy.bind(this), 1);
-      }.bind(this));
+      }
+      setTimeout(this.#setBusy.bind(this), 1);
     }
     else
     if (count !== 0) {
       return;
     }
     // this is the first scroll event, set the busy indicator
-    this.#setBusy(true);
+    this.getDom().setAttribute('aria-busy', String(true));
   }
   
   #getPhysicalTupleIndices(){
@@ -446,8 +453,7 @@ class PivotTableUi extends EventEmitter {
     var rowAxisPromise = this.#updateRowsAxisTupleData(physicalRowsAxisTupleIndex);
     
     await Promise.all([columnAxisPromise, rowAxisPromise]);
-
-    return this.#updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex);
+    await this.#updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex);
   }
 
   #getTupleIndexForPhysicalIndex(axisId, physicalIndex){
@@ -499,6 +505,135 @@ class PivotTableUi extends EventEmitter {
     return Boolean(isTotalsMember);
   }
 
+  #ascertainColumnAxisTuples(physicalColumnsAxisTupleIndex){
+    var axisId = QueryModel.AXIS_COLUMNS;
+    var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
+
+    var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    var count = columnsAxisSizeInfo.columns.columnCount;
+    var tupleCount = Math.ceil(count / (tupleIndexInfo.factor - tupleIndexInfo.cellsAxisItemIndex));
+    
+    var tupleSet = this.#columnsTupleSet;
+    var tuples = tupleSet.getTuplesSync(tupleIndexInfo.tupleIndex, tupleIndexInfo.tupleIndex + tupleCount);
+    var doesNotHaveAllTuples = tuples.some(function(element){
+      return element === undefined;
+    });
+    return doesNotHaveAllTuples ? false : tuples;
+  }
+    
+  #refreshColumnAxisTuples(tuples, tupleValueFields){
+    var axisId = QueryModel.AXIS_COLUMNS;
+    var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
+    var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    var count = columnsAxisSizeInfo.columns.columnCount;
+    var maxColumnIndex = columnsAxisSizeInfo.headers.columnCount + count;
+
+    var queryModel = this.getQueryModel();
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var queryAxisItems = queryAxis.getItems();
+    
+    // local tuple index in our array of tuples
+    var tupleIndex = 0;
+
+    var cellHeadersAxis = queryModel.getCellHeadersAxis();
+    var cellsAxisItems, numCellsAxisItems;
+    var doCellHeaders = (cellHeadersAxis === axisId);
+    if (doCellHeaders) {
+      var cellsAxis = queryModel.getCellsAxis();
+      cellsAxisItems = cellsAxis.getItems();
+      if (cellsAxisItems.length === 0){
+        doCellHeaders = false;
+      }
+    }
+
+    var cellsAxisItemIndex = tupleIndexInfo.cellsAxisItemIndex;
+
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var rows = tableHeaderDom.childNodes;
+    var numRows = rows.length;
+    if (!doCellHeaders){
+      numRows -= 1;
+    }
+
+    // for each tuple
+    for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
+      var tuple = tuples[tupleIndex];
+      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
+      var isTotalsColumn = Boolean(groupingId);
+
+      //for each header row
+      for (var j = 0; j < numRows; j++){
+        var queryAxisItem = queryAxisItems[j];
+        var row = rows.item(j);
+        var cells = row.childNodes;
+        var cell = cells.item(i);
+        cell.setAttribute('data-totals', isTotalsColumn);
+        var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
+        var isTotalsMember = PivotTableUi.#isTotalsMember(
+          groupingId, 
+          queryAxisItems, 
+          queryAxisItem
+        );
+
+        var labelText = undefined;
+        var tupleValue;
+        if (tuple && j < tuple.values.length){
+          tupleValue = tuple.values[j];
+
+          if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
+            if (isTotalsMember) {
+              labelText = getTotalsString();
+            }
+            else
+            if (queryAxisItem.formatter) {
+              labelText = queryAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
+          }
+        }
+        else
+        if (doCellHeaders) {
+          if (cellsAxisItems.length) {
+            var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
+            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
+          }
+        }
+
+        if (!labelText || !labelText.length) {
+          labelText = String.fromCharCode(160);
+        }
+        
+        label.innerText = labelText;
+        label.title = labelText;
+        
+        if (j === 0){
+          if (tuple && tuple.widths) {
+            var cellsAxisItem = cellsAxisItems.length === 0 ? null : cellsAxisItems[cellsAxisItemIndex];
+            var cellsAxisItemLabel = cellsAxisItems.length === 0 ? '' : QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem);
+            var width = tuple.widths[cellsAxisItemLabel];
+            if (width !== undefined) {
+              cell.style.width = width + 'px';
+            }
+          }
+        }
+        
+      }
+
+      if (doCellHeaders) {
+        cellsAxisItemIndex += 1;
+        if (cellsAxisItemIndex === cellsAxisItems.length) {
+          cellsAxisItemIndex = 0;
+          tupleIndex += 1;
+        }
+      }
+      else {
+        tupleIndex += 1;
+      }
+    }
+  }
+  
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
     var axisId = QueryModel.AXIS_COLUMNS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
@@ -538,11 +673,9 @@ class PivotTableUi extends EventEmitter {
       numRows -= 1;
     }
 
-    var columnWidth;
     // for each tuple
     for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
-      var numMembers = tuple ? tuple.length : 0;
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       var isTotalsColumn = Boolean(groupingId);
 
@@ -595,7 +728,7 @@ class PivotTableUi extends EventEmitter {
             var cellsAxisItemLabel = cellsAxisItems.length === 0 ? '' : QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem);
             var width = tuple.widths[cellsAxisItemLabel];
             if (width !== undefined) {
-              cell.style.width = width + 'px';              
+              cell.style.width = width + 'px';
             }
           }
         }
@@ -1463,8 +1596,7 @@ class PivotTableUi extends EventEmitter {
         this.#updateVerticalSizer();
       }.bind(this), 1000)
       this.#setNeedsUpdate(false);
-
-      this.fireEvent('updated', { status: 'success' });
+      this.#fireUpdatedSuccess();
     }
     catch(e){
       var eventData = {
@@ -1487,9 +1619,7 @@ class PivotTableUi extends EventEmitter {
     tableBodyDom.innerHTML = '';
     this.#setHorizontalSize(0);
     this.#setVerticalSize(0);
-    this.fireEvent('updated', {
-      status: 'success'
-    });
+    this.#fireUpdatedSuccess();
   }
 
   getDom(){
@@ -1684,6 +1814,7 @@ class PivotTableUi extends EventEmitter {
   #getTableBodyDom(){
     return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
   }
+  
 }
 
 var pivotTableUi;
@@ -1693,5 +1824,6 @@ function initPivotTableUi(){
     id: 'pivotTableUi',
     queryModel: queryModel,
     settings: settings
-  });  
+  });
+  
 }

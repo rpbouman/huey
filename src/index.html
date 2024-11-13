@@ -1498,7 +1498,7 @@
       class="layout"
       style="display: none"
     >
-      <menu class="toolbar" role="toolbar">
+      <menu role="toolbar">
       
         <label for="uploader" title="Register local data files to explore their contents with Huey">
           <input
@@ -1545,10 +1545,15 @@
 
         <!-- title in the toolbar identifies the currently selected datasource -->
         <h1 id="currentDatasource"></h1>
-
+        <label for="queryResultRowsInfo">
+          <output id="queryResultRowsInfo"/>
+        </label>
+        <label for="queryResultColumnsInfo">
+          <output id="queryResultColumnsInfo"/>
+        </label>
+        
         <label
           for="aboutButton"
-          class="aboutButton"
           title="About Huey..."
         >
           <button
@@ -1560,7 +1565,6 @@
 
         <label
           for="settingsButton"
-          class="button settings"
           title="Open the Huey Settings dialog."
         >
           <button
@@ -1572,7 +1576,6 @@
 
         <label
           for="exportButton"
-          class="button"
           title="Export &amp; Download queries and/or result data..."
           style="visibility: hidden"
         >
