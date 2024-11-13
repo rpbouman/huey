@@ -1,5 +1,5 @@
 class ExportUi {
-  
+
   static downloadURL(url, fileName) {
     var a;
     a = document.createElement('a');
@@ -10,7 +10,7 @@ class ExportUi {
     a.click();
     a.remove();
   }
-  
+
   static downloadBlob(data, fileName, mimeType, timeout) {
     var blob, url;
     blob = new Blob(
@@ -70,16 +70,16 @@ class ExportUi {
     },
     'timestamp': function(queryModel){
       var date = new Date();
-      
+
       function padDigit(digit) {
         return digit < 10 ? '0' + digit : digit;
       }
-      
+
       return [
         date.getFullYear()
       , padDigit(date.getMonth() + 1)
       , padDigit(date.getDate())
-      ].join('-') + 
+      ].join('-') +
       'T'+ [
         padDigit(date.getHours())
       , padDigit(date.getMinutes())
@@ -87,7 +87,7 @@ class ExportUi {
       ].join(':')
     }
   }
-  
+
   static generateExportTitle(queryModel, titleTemplate){
     if (queryModel === undefined) {
       queryModel = window.queryModel;
@@ -101,7 +101,7 @@ class ExportUi {
       var fieldName = fieldRef.slice(2, -1);
       var func = ExportUi.#exportTitleFields[fieldName];
       if (typeof func === 'function'){
-        return func(queryModel); 
+        return func(queryModel);
       }
       else {
         return fieldRef;
@@ -112,29 +112,29 @@ class ExportUi {
 }
 
 class ExportDialog {
-  
+
   static #id = 'exportDialog';
-  
+
   #queryModel = undefined;
   #settings = undefined;
-  
+
   constructor(){
     this.#initExportDialog();
   }
-  
+
   #initExportDialog(){
     byId('exportDialogCloseButton')
     .addEventListener('click', this.close.bind(this));
-    
+
     byId('exportDialogExecuteButton')
     .addEventListener('click', this.#executeExport.bind(this));
-    
+
     var exportTitleTemplate = byId('exportTitleTemplate');
     exportTitleTemplate.addEventListener('change', this.#titleTemplateChangedHandler.bind(this));
     exportTitleTemplate.addEventListener('input', this.#titleTemplateChangedHandler.bind(this));
-    
+
   }
-  
+
   #titleTemplateChangedHandler(event){
     var exportTitleTemplate = byId('exportTitleTemplate');
     this.#settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
@@ -145,27 +145,27 @@ class ExportDialog {
     var queryModel = this.#queryModel;
     var exportTemplate = byId('exportTitleTemplate')
     var titleTemplate = exportTemplate.value;
-    
+
     var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
     byId('exportTitle').innerText = title;
   }
-  
+
   #updateDialog(){
     var dialog = this.#getDialog();
     var settings = this.#settings;
-    
+
     Settings.synchronize(
-      dialog, 
-      {"_": settings.getSettings('exportUi')}, 
+      dialog,
+      {"_": settings.getSettings('exportUi')},
       'dialog'
     );
-    this.#updateExportTitle();    
+    this.#updateExportTitle();
   }
 
   #getDialog(){
     return byId(ExportDialog.#id);
   }
-  
+
   open(config){
     this.#queryModel = config.queryModel || queryModel;
     this.#settings = config.settings || settings;
@@ -173,12 +173,12 @@ class ExportDialog {
     var dialog = this.#getDialog();
     dialog.showModal();
   }
-  
+
   close(){
     var dialog = this.#getDialog();
     dialog.close();
   }
-  
+
   async #executeExport(){
     var dialog = this.#getDialog();
     dialog.setAttribute('aria-busy', String(true));
@@ -190,10 +190,10 @@ class ExportDialog {
     progressMessageElement.innerText = 'Preparing export...';
     try {
       var title = byId('exportTitle').innerText;
-            
+
       var selectedTab = TabUi.getSelectedTab('#exportDialog');
       var tabName = selectedTab.getAttribute('for');
-      
+
       var mimeType, compression, includeHeaders,
           dateFormat, timestampFormat, nullValueString,
           columnDelimiter, quote, escape, rowDelimiter
@@ -256,12 +256,12 @@ class ExportDialog {
           sqlOptions.alwaysQuoteIdentifiers = alwaysQuoteIdentifiers;
           var commaStyle = byId(tabName + 'CommaStyle').value;
           sqlOptions.commaStyle = commaStyle;
-          fileExtension = 'sql';        
+          fileExtension = 'sql';
           break;
       }
 
       var sql, structure;
-      
+
       if (byId('exportResultShapePivot').checked){
         structure = 'pivot';
         sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
@@ -271,7 +271,7 @@ class ExportDialog {
         structure = 'table';
         sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
       }
-            
+
       if (sqlOptions) {
         data = sql;
       }
@@ -282,10 +282,10 @@ class ExportDialog {
         }
         else {
           switch (compression){
-            case 'GZIP':  
+            case 'GZIP':
               mimeType = 'application/gzip';
               break;
-            case 'ZTSD':  
+            case 'ZTSD':
               mimeType = 'application/ztsd';
               break;
             default:
@@ -294,7 +294,7 @@ class ExportDialog {
           fileExtension += `.${compression.toLowerCase()}`;
         }
       }
-      
+
       if (copyStatementOptions){
         var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
         progressMessageElement.innerText = `Preparing copy to ${tmpFileName}`;
@@ -313,7 +313,7 @@ class ExportDialog {
           }
         }
       }
-      
+
       var destination;
       if (byId('exportDestinationFile').checked){
         destination = 'file';
@@ -322,10 +322,10 @@ class ExportDialog {
       if (byId('exportDestinationClipboard').checked){
         destination = 'clipboard';
       }
-      
+
       switch (destination){
         case 'file':
-          var fileName = [title, fileExtension].join('.');      
+          var fileName = [title, fileExtension].join('.');
           progressMessageElement.innerText = `Download as ${fileName}`;
           ExportUi.downloadBlob(data, fileName, mimeType);
           break;
@@ -353,15 +353,15 @@ class ExportDialog {
     finally {
       dialog.setAttribute('aria-busy', String(false));
     }
-  }  
+  }
 }
 
 var exportDialog;
 function initExportDialog(){
   exportDialog = new ExportDialog();
-  
+
   var exportButton = byId('exportButton');
-  
+
   exportButton.addEventListener('click', function(event){
     exportDialog.open({
       queryModel: queryModel,
@@ -374,25 +374,4 @@ function initExportDialog(){
     settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
     updateExportTitle();
   }
-    
-  queryModel.addEventListener('change', function(event){
-
-    var exportUiActive;
-    if (
-      queryModel.getColumnsAxis().getItems().length === 0 &&
-      queryModel.getRowsAxis().getItems().length === 0 &&
-      queryModel.getCellsAxis().getItems().length === 0
-    ){
-      exportUiActive = false;
-    }
-    else {
-      exportUiActive = true;
-    }
-    var exportButtonParent = exportButton.parentNode;
-    exportButtonParent.style.visibility = exportUiActive ? '' : 'hidden';
-    if (!exportUiActive){
-      exportDialog.close();
-    }
-  });
-  
 }
