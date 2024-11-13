@@ -139,11 +139,31 @@ function initApplication(){
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 1000);
 
+  var tupleNumberFormatter = createNumberFormatter(0).format;
   pivotTableUi.addEventListener('updated', async function(e){
     var eventData = e.eventData;
-    if (eventData.status === 'error'){
-      showErrorDialog(eventData.error);
+    var status = eventData.status;
+    
+    var numRowsTuples = '';
+    var numColumnsTuples = '';
+    
+    switch (status) {
+      case 'error':
+        showErrorDialog(eventData.error);
+        break;
+      case 'success':
+        var tupleCounts = eventData.tupleCounts;
+        
+        var numRowsTuples = tupleCounts[QueryModel.AXIS_ROWS];
+        numRowsTuples = typeof numRowsTuples === 'number' ? tupleNumberFormatter(numRowsTuples) : '';
+        
+        var numColumnsTuples = tupleCounts[QueryModel.AXIS_COLUMNS];
+        numColumnsTuples = typeof numColumnsTuples === 'number' ? tupleNumberFormatter(numColumnsTuples) : '';
+        
+        break;
     }
+    byId('queryResultRowsInfo').innerText = numRowsTuples;
+    byId('queryResultColumnsInfo').innerText = numColumnsTuples;
   });
 
   bufferEvents(pivotTableUi, 'busy', function(event, count){
