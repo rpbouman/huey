@@ -469,9 +469,30 @@ class AttributeUi {
       }.bind(this), 0);
     }
   }
+  
+  #createQueryAxisItemForAttributeUiNode(node){
+    var columnName = node.getAttribute('data-column_name');
+    var columnType = node.getAttribute('data-column_type');
+
+    var memberExpressionPath = node.getAttribute('data-member_expression_path');
+    if (memberExpressionPath) {
+      memberExpressionPath = JSON.parse(memberExpressionPath);
+    }
+
+    var derivation = node.getAttribute('data-derivation');
+    var aggregator = node.getAttribute('data-aggregator');
+
+    var itemConfig = {
+      columnName: columnName,
+      columnType: columnType,
+      derivation: derivation,
+      aggregator: aggregator,
+      memberExpressionPath: memberExpressionPath
+    };
+    return itemConfig;
+  }
 
   async #axisButtonClicked(node, axis, checked){
-    var queryModel = this.#queryModel;
     var head = node.childNodes.item(0);
     var inputs = head.getElementsByTagName('input');
     var aggregator;
@@ -493,47 +514,17 @@ class AttributeUi {
         }
         break;
     }
-    var columnName = node.getAttribute('data-column_name');
-    var columnType = node.getAttribute('data-column_type');
 
-    var memberExpressionPath = node.getAttribute('data-member_expression_path');
-    if (memberExpressionPath) {
-      memberExpressionPath = JSON.parse(memberExpressionPath);
+    var itemConfig = this.#createQueryAxisItemForAttributeUiNode(node);
+    itemConfig.axis = axis;
+
+    if (aggregator) {
+      itemConfig.aggregator = aggregator;
     }
 
-    var derivation = node.getAttribute('data-derivation');
-    var aggregator = aggregator || node.getAttribute('data-aggregator');
-
-    var itemConfig = {
-      axis: axis,
-      columnName: columnName,
-      columnType: columnType,     // the type of this item's values
-      derivation: derivation,
-      aggregator: aggregator,
-      memberExpressionPath: memberExpressionPath
-    };
-
-    var formatter = QueryAxisItem.createFormatter(itemConfig);
-    if (formatter){
-      itemConfig.formatter = formatter;
-    }
-
-    if (itemConfig.aggregator) {
-      //noop
-    }
-    else {
-      var literalWriter = QueryAxisItem.createLiteralWriter(itemConfig);
-      if (literalWriter){
-        itemConfig.literalWriter = literalWriter;
-      }
-    }
-
+    var queryModel = this.#queryModel;
     if (checked) {
       await queryModel.addItem(itemConfig);
-
-      if (axis === QueryModel.AXIS_FILTERS) {
-        queryUi.openFilterDialogForQueryModelItem(itemConfig);
-      }
     }
     else {
       queryModel.removeItem(itemConfig);
@@ -671,11 +662,15 @@ class AttributeUi {
     var caption = AttributeUi.#getUiNodeCaption(config);
     var label = createEl('span', {
       "class": 'label',
-      "title": title
+      "title": title,
+      "draggable": true
     }, caption);
     head.appendChild(label);
 
     this.#renderAttributeUiNodeAxisButtons(config, head);
+
+    label.addEventListener('dragstart', function(event){
+    });
     return head;
   }
 
