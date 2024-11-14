@@ -346,6 +346,18 @@ class QueryUi {
         this.getDom().style.display = display;
       }
     }
+    
+    var axesChanged = eventData.axesChanged;
+    if (axesChanged) {
+      var filters = axesChanged[QueryModel.AXIS_FILTERS];
+      if (filters) {
+        var filtersAdded = filters.added;
+        if (filtersAdded && filtersAdded.length) {
+          var lastFilterItem = filtersAdded[filtersAdded.length - 1];
+          this.openFilterDialogForQueryModelItem(lastFilterItem);
+        }
+      }
+    }
   }
 
   #initEvents(){

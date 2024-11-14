@@ -762,19 +762,42 @@ class QueryModel extends EventEmitter {
       if (removedItem && removedItem.columnType) {
         config.columnType = removedItem.columnType;
       }
-    }
-
-    if (!config.columnType) {
-      var datasource = this.#datasource;
-      var columnMetadata = await datasource.getColumnMetadata();
-      for (var i = 0; i < columnMetadata.numRows; i++){
-        var row = columnMetadata.get(i);
-        if (row.column_name === config.columnName) {
-          config.columnType = row.column_type;
+      else {
+        var datasource = this.#datasource;
+        var columnMetadata = await datasource.getColumnMetadata();
+        for (var i = 0; i < columnMetadata.numRows; i++){
+          var row = columnMetadata.get(i);
+          if (row.column_name === config.columnName) {
+            config.columnType = row.column_type;
+          }
         }
       }
     }
 
+    if (!config.formatter) {
+      if (removedItem && removedItem.formatter) {
+        config.formatter = removedItem.formatter;
+      }
+      else {
+        var formatter = QueryAxisItem.createFormatter(config);
+        if (formatter){
+          config.formatter = formatter;
+        }
+      }
+    }
+
+    if (!config.literalWriter) {
+      if (removedItem && removedItem.literalWriter) {
+        config.literalWriter = removedItem.literalWriter;
+      }
+      else {
+        var literalWriter = QueryAxisItem.createLiteralWriter(config);
+        if (literalWriter){
+          config.literalWriter = literalWriter;
+        }
+      }
+    }
+    
     var addedItem = this.#addItem(config);
 
     var axesChangeInfo = {};
