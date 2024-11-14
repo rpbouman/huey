@@ -16,19 +16,29 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   
   details[role=treeitem] {
     
-    summary > .label  {
+    > summary::before {
+      display: inline-block;
+      font-family: var( --huey-icon-font-family ) !important;
+      font-size: var( --huey-icon-medium );
+      color: var( --huey-icon-color );
+      width: 24px;
+      padding: 6px 3px 0px 3px;
+      text-align: center;
+    }
+    
+    > summary > .label  {
       max-width: calc(100% - 166px);
     }
     
     /**
     * folder icons
     */
-    [data-nodetype=folder] > summary > .icon::before {
+    [data-nodetype=folder] > summary::before {
       /* folder */
       content: "\eaad";
     }
     
-    [data-nodetype=folder][open] > summary > .icon::before {
+    [data-nodetype=folder][open] > summary::before {
       /* folder-open */
       content: "\faf7";
     }
@@ -39,85 +49,85 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Data type icons
   *
   */
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary::before,
+  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary::before,
+  details[data-nodetype=column][data-column_type=VARCHAR] > summary::before {
     /* txt */
     content: "\f3b1";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary::before,
+  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary::before,
+  details[data-nodetype=column][data-column_type=BOOLEAN] > summary::before {
     /* square check */
     content: "\eb28";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > .icon::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type$=INT] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary::before,
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary::before,
+  details[data-nodetype=member][data-member_expression_type$=INT] > summary::before,
+  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary::before,
+  details[data-nodetype=column][data-column_type$=INT] > summary::before,
+  details[data-nodetype=column][data-column_type=INTEGER] > summary::before
   {
     /* 123 */
     content: "\f554";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary::before,
+  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary::before,
+  details[data-nodetype=column][data-column_type^=STRUCT] > summary::before
   {
     /* code-dots */
     content: "\f61a";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type^=MAP] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type^=MAP] > summary > .icon::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary::before,
+  details[data-nodetype=member][data-member_expression_type^=MAP] > summary::before,
+  details[data-nodetype=column][data-column_type^=MAP] > summary::before
   {
     /* list-letters */
     content: "\fc47";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary::before,
+  details[data-nodetype=member][data-member_expression_type$='[]'] > summary::before,
+  details[data-nodetype=column][data-column_type$='[]'] > summary::before
   {
     /* code-dots */
     content: "\f1e5";
   }
 
-  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > .icon::before,
-  details[data-nodetype=member][data-member_expression_type=REAL] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=REAL] > summary > .icon::before {
+  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary::before,
+  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary::before,
+  details[data-nodetype=member][data-member_expression_type=REAL] > summary::before,
+  details[data-nodetype=column][data-column_type^=DECIMAL] > summary::before,
+  details[data-nodetype=column][data-column_type=DOUBLE] > summary::before,
+  details[data-nodetype=column][data-column_type=REAL] > summary::before {
     /* decimal */
     content: "\fa26";
   }
 
-  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > .icon::before {
+  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary::before,
+  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary::before {
     /* calendar-clock */
     content: "\fd2e";
   }
 
-  details[data-nodetype=member][data-member_expression_type=DATE] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=DATE] > summary > .icon::before {
+  details[data-nodetype=member][data-member_expression_type=DATE] > summary::before,
+  details[data-nodetype=column][data-column_type=DATE] > summary::before {
     /* calendar */
     content: "\ea53";
   }
 
-  details[data-nodetype=member][data-member_expression_type=TIME] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=TIME] > summary > .icon::before {
+  details[data-nodetype=member][data-member_expression_type=TIME] > summary::before,
+  details[data-nodetype=column][data-column_type=TIME] > summary::before {
     /* clock */
     content: "\ea70";
   }
 
-  details[data-nodetype=member][data-member_expression_type=JSON] > summary > .icon::before,
-  details[data-nodetype=column][data-column_type=JSON] > summary > .icon::before {
+  details[data-nodetype=member][data-member_expression_type=JSON] > summary::before,
+  details[data-nodetype=column][data-column_type=JSON] > summary::before {
     /* JSON */
     content: "\f7b2";
   }
@@ -127,99 +137,99 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Derivation icons
   *
   */
-  details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon::before,
-  details[data-nodetype=derived][data-derivation=local-date] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=iso-date] > summary::before,
+  details[data-nodetype=derived][data-derivation=local-date] > summary::before {
     /* calendar */
     content: "\ea53";
   }
-  details[data-nodetype=derived][data-derivation=year] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=year] > summary::before {
     /* letter-y */
     content: "\ec68";
   }
 
-  details[data-nodetype=derived][data-derivation=quarter] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=quarter] > summary::before {
     /* letter q */
     content: "\ec60";
   }
 
-  details[data-nodetype=derived][data-derivation="month name"] > summary > .icon::before,
-  details[data-nodetype=derived][data-derivation="month num"] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation="month name"] > summary::before,
+  details[data-nodetype=derived][data-derivation="month num"] > summary::before {
     /* letter m */
     content: "\ec5c";
   }
 
-  details[data-nodetype=derived][data-derivation="week num"] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation="week num"] > summary::before {
     /* calendar-week */
     content: "\fd30";
   }
 
-  details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation="day of year"] > summary::before {
     /* letter-d */
     content: "\ec53";
   }
 
-  details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation="day of month"] > summary::before {
     /* calendar-month */
     content: "\fd2f";
   }
 
-  details[data-nodetype=derived][data-derivation="day of week name"] > summary > .icon::before,
-  details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation="day of week name"] > summary::before,
+  details[data-nodetype=derived][data-derivation="day of week"] > summary::before {
     /* letter-d-small */
     content: "\fcca";
   }
 
-  details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=iso-time] > summary::before {
     /* clock */
     content: "\ea70";
   }
 
-  details[data-nodetype=derived][data-derivation=hour] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=hour] > summary::before {
     /* letter-h */
     content: "\ec57";
   }
 
-  details[data-nodetype=derived][data-derivation=minute] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=minute] > summary::before {
     /* letter-m-small */
     content: "\fcd3";
   }
 
-  details[data-nodetype=derived][data-derivation=second] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=second] > summary::before {
     /* letter-s */
     content: "\ec62";
   }
 
-  details[data-nodetype=derived][data-derivation=lowercase] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=lowercase] > summary::before {
     /* letter-case-lower */
     content: "\eea2";
   }
 
-  details[data-nodetype=derived][data-derivation=uppercase] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=uppercase] > summary::before {
     /* letter-case-upper */
     content: "\eea4";
   }
 
-  details[data-nodetype=derived][data-derivation=NOACCENT] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=NOACCENT] > summary::before {
     /* letter-case */
     content: "\eea5";
   }
 
-  details[data-nodetype=derived][data-derivation=NOCASE] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation=NOCASE] > summary::before {
     /* letter-case */
     content: "\eea5";
   }
 
-  details[data-nodetype=derived][data-derivation='first letter'] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation='first letter'] > summary::before {
     /* sort-a-z */
     content: "\f54f";
   }
 
-  details[data-nodetype=derived][data-derivation='length'] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation='length'] > summary::before {
     /* ruler-3 */
     content: "\f290";
   }
 
-  details[data-nodetype=derived][data-derivation='element indices'] > summary > .icon::before {
+  details[data-nodetype=derived][data-derivation='element indices'] > summary::before {
     /* list-numbers */
     content: "\ef11";
   }
@@ -229,101 +239,101 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Aggregator icons
   *
   */
-  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > .icon::before,
-  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > .icon::before,
-  details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary::before,
+  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary::before,
+  details[data-nodetype=aggregate][data-aggregator=count] > summary::before {
     /* tallymarks */
     content: "\ec4a";
   }
 
-  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary::before {
     /* tallymark-4 */
     content: "\ec49";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=max] > summary::before {
     /* math-max */
     content: "\f0f5";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=min] > summary::before {
     /* math-min */
     content: "\f0f6";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=list] > summary::before {
     /* list */
     content: "\eb6b";
   }
 
-  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary::before {
     /* list details */
     content: "\ef40";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=histogram] > summary::before {
     /* chart-bar */
     content: "\ea59";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=sum] > summary::before {
     /* sum */
     content: "\eb73";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=geomean] > summary > .icon::before,
-  details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=geomean] > summary::before,
+  details[data-nodetype=aggregate][data-aggregator=avg] > summary::before {
     /* math-avg */
     content: "\f0f4";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=mad] > summary > .icon::before,
-  details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=mad] > summary::before,
+  details[data-nodetype=aggregate][data-aggregator=median] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=mode] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=stdev] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=variance] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=entropy] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=skewness] > summary::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=and] > summary::before {
     /* logical-and */
     content: "\f240";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=or] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=or] > summary::before {
     /* logical-or */
     content: "\f245";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
+  details[data-nodetype=aggregate][data-aggregator=and] > summary::before {
     /* logical-and */
     content: "\f240";
   }

@@ -651,10 +651,6 @@ class AttributeUi {
     var head = createEl('summary', {
     });
 
-    var icon = createEl('span', {
-      'class': 'icon',
-      'role': 'img'
-    });
     var title = config.title;
     if (!title){
       switch (config.type) {
@@ -671,8 +667,6 @@ class AttributeUi {
           break;
       }
     }
-    icon.setAttribute('title', title);
-    head.appendChild(icon);
 
     var caption = AttributeUi.#getUiNodeCaption(config);
     var label = createEl('span', {
@@ -790,12 +784,6 @@ class AttributeUi {
 
     var head = createEl('summary', {
     });
-
-    var icon = createEl('span', {
-      'class': 'icon',
-      'role': 'img'
-    });
-    head.appendChild(icon);
 
     var label = createEl('span', {
       "class": 'label'
