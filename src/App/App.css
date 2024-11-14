@@ -48,13 +48,10 @@ body {
     > menu[role=toolbar] {
 
       > label {
-        vertical-align: middle;
       }  
 
-      > label[for=quickQueryMenuButton]::after,
       > label[for=autoRunQuery]::after,
-      > label[for=cloneHueySession]::before,
-      > #currentDatasource::after
+      > label[for=cloneHueySession]::before
       {
         border-right-width: 1px;
         border-right-style: solid;
@@ -62,10 +59,6 @@ body {
         padding-right: 8px;
       }
       
-      > #currentDatasource::after {
-        content: '';
-      }
-
       > label[for=uploader] {
         > input[type=file]#uploader {
           display: none;
@@ -88,14 +81,12 @@ body {
       }
 
       > label[for=autoRunQuery] {
-        position:relative;
-        top:3px;
       }
       
       > label[for=autoRunQuery]::after {
         font-family: var( --huey-icon-font-family );
         font-size: var(--huey-icon-normal);
-        vertical-align: middle;
+        vertical-align: sub;
         color: var(--huey-icon-color-subtle);
         margin: 0px 4px 0px 4px;
         display: inline-block;
@@ -136,11 +127,23 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: calc( 100% - 450px);
-        vertical-align: middle;
+        vertical-align: text-bottom;
       }
 
       > #currentDatasource:not( :empty )::before {
         content: 'Datasource: ';
+        padding-left: 8px;
+        border-left-style: solid;
+        border-left-width: 1px;
+        border-left-color: var(--huey-light-border-color);
+      }
+
+      > #currentDatasource:not( :empty )::after {
+        content: ' ';
+        padding-right: 8px;
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-right-color: var(--huey-light-border-color);
       }
 
       > label[for=queryResultRowsInfo]:has( > output#queryResultRowsInfo:empty ),
