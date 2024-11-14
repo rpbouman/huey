@@ -347,14 +347,34 @@ class QueryUi {
       }
     }
     
+    // if a filter was added by the user, then we want to pop up the filter Dialog
+    // we can't really distinguish between the user adding them, or them being added because of page state restore
+    // but we're assuming that if there is a filter item without any values, it must have been added by the user.
+    // so, in that case, we pop up the filter dialog.
     var axesChanged = eventData.axesChanged;
     if (axesChanged) {
       var filters = axesChanged[QueryModel.AXIS_FILTERS];
       if (filters) {
-        var filtersAdded = filters.added;
-        if (filtersAdded && filtersAdded.length) {
-          var lastFilterItem = filtersAdded[filtersAdded.length - 1];
-          this.openFilterDialogForQueryModelItem(lastFilterItem);
+        var filterItems = filters.added;
+        if (filterItems) {
+          filterItems = filterItems.filter(function(filterItem){
+            var filter = filterItem.filter;
+            if (!filter) {
+              return true;
+            }
+            var values = filter.values;
+            if (!values) {
+              return true;
+            }
+            if (!Object.keys(values).length){
+              return true;
+            }
+            return false;
+          });
+          if (filterItems.length) {
+            var lastFilterItem = filterItems[filterItems.length - 1];
+            this.openFilterDialogForQueryModelItem(lastFilterItem);
+          }
         }
       }
     }
