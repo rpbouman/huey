@@ -1171,15 +1171,6 @@ class QueryModel extends EventEmitter {
             config.includeTotals = true;
           }
 
-          var formatter = QueryAxisItem.createFormatter(config);
-          if (formatter){
-            config.formatter = formatter;
-          }
-
-          var literalWriter = QueryAxisItem.createLiteralWriter(config);
-          if (literalWriter){
-            config.literalWriter = literalWriter;
-          }
 
           if (axisId === QueryModel.AXIS_FILTERS) {
             var filter = item.filter;
