@@ -574,9 +574,13 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
-        var monthNum = monthNumFormatter(1 + value.getUTCMonth())
-        var dayNum = dayNumFormatter(value.getUTCDate());
-        return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
+        if (value === null) {
+          return 'NULL::DATE';
+        }
+        var dateValue = new Date(value);
+        var monthNum = monthNumFormatter(1 + dateValue.getUTCMonth())
+        var dayNum = dayNumFormatter(dateValue.getUTCDate());
+        return `DATE'${dateValue.getUTCFullYear()}-${monthNum}-${dayNum}'`;
       };
     }
   },
