@@ -20,10 +20,14 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       display: inline-block;
       font-family: var( --huey-icon-font-family ) !important;
       font-size: var( --huey-icon-medium );
-      color: var( --huey-icon-color );
+      color: var( --huey-icon-color-subtle );
       width: 24px;
       padding: 6px 3px 0px 3px;
       text-align: center;
+    }
+    
+    > summary:hover::before {
+      color: var( --huey-icon-color-highlight );
     }
     
     > summary > .label  {
@@ -422,8 +426,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
     font-weight: bold;
   }
+
+  details > summary:has( > label > input[type=checkbox]:checked ):before,
+  details:has( details > summary > label > input[type=checkbox]:checked ) > summary:before {
+    color: var( --huey-icon-color-highlight );
+  }
+  
 }
-
-
-
-

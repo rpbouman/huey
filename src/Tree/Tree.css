@@ -9,8 +9,7 @@
 }
 
 *[role=tree] details[role=treeitem] > summary:hover {
-  background-color: var( --huey-dark-background-color );
-  color: var( --huey-icon-color-highlight );
+  background-color: var( --huey-light-background-color );
 }
 
 *[role=tree] details[role=treeitem] > summary:hover::marker {
