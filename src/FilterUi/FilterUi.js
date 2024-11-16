@@ -824,7 +824,6 @@ class FilterDialog {
     var filterDialog = this.getDom();
     filterDialog.showModal();
     this.#updatePicklist();
-    this.#getSearch().focus();
   }
 
   #updateDialogState(){
@@ -965,11 +964,11 @@ class FilterDialog {
     var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
-      if (offset === undefined){
-        offset = 0;
-      }
-      sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     }
+    if (offset === undefined){
+      offset = 0;
+    }
+    sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     var timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
     var datasource = this.#queryModel.getDatasource();
