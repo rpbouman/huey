@@ -389,7 +389,6 @@ class QueryUi {
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
 
     var prevElements = undefined;
-    
     function cleanupPrevElements(){
       if (!prevElements) {
         return;
@@ -403,24 +402,6 @@ class QueryUi {
       prevElements = undefined;
     }
     
-    function extractDragInfo(event){
-      var dataTransfer = event.dataTransfer;
-      var types = dataTransfer.types;
-      var info = types.reduce(function(info, type){
-        var typeParts = type.split('/');
-        var name = typeParts[0];
-        var value = typeParts[1] || '';
-        info[name] = value;
-        return info;
-      }, {});
-      return info;
-    }
-    
-    function decodeItemId(itemId){
-      return itemId.split(',').map(function(charCode){
-        return String.fromCharCode(charCode);
-      }).join('');
-    }
     
     dom.addEventListener('dragend', function(event){
       event.preventDefault();
@@ -429,10 +410,12 @@ class QueryUi {
 
     dom.addEventListener('dragover', function(event){
       event.preventDefault();
+      var dataTransfer = event.dataTransfer;
       var queryUiElements = QueryUi.#findQueryUiElements(event);
 
       var axis = queryUiElements.axis;
       if (!axis){
+        dataTransfer.effectAllowed = dataTransfer.dropEffect = 'none';
         cleanupPrevElements();
         return;
       }
@@ -441,13 +424,13 @@ class QueryUi {
       var item = queryUiElements.item;
       
       var axisId = axis.getAttribute('data-axis');
-      var info = extractDragInfo(event);
+      var info = DragAndDropHelper.getData(event);
       
       var isAggregator = Boolean(info.aggregator);
       var isDefaultAggregator = Boolean(info.defaultaggregator);
 
       var existingId = this.#id;
-      var isSameAxis = info.axis === axisId;
+      var isSameAxis = Boolean(info.axis) && info.axis.key === axisId;
       var isCellsAxis;
       switch (axisId) {
         case QueryModel.AXIS_CELLS:
@@ -458,13 +441,13 @@ class QueryUi {
             isSameAxis = true;
           }
         default:
-          if (isSameAxis && info.id) {
-            existingId += '-' + decodeItemId(info.id);
+          if (isSameAxis && info.id.key) {
+            existingId += '-' + info.id.key;
           }
           else
-          if (isCellsAxis && info.defaultaggregator && info.defaultaggregator.length) {
+          if (isCellsAxis && Boolean(info.defaultaggregator) && info.defaultaggregator.key.length) {
             isSameAxis = true;
-            existingId += '-' + decodeItemId(info.defaultaggregator);
+            existingId += '-' + info.defaultaggregator.key;
           }
           else {
             existingId = undefined;
@@ -528,7 +511,7 @@ class QueryUi {
       }
       
       if (dropEffect) {
-        event.dataTransfer.effectAllowed = event.dataTransfer.dropEffect = dropEffect;
+        dataTransfer.effectAllowed = dataTransfer.dropEffect = dropEffect;
       }
       if (dropEffect === 'none') {
         axis.removeAttribute('data-dragover');
@@ -555,11 +538,11 @@ class QueryUi {
 
       var axisId = queryUiElements.axis.getAttribute('data-axis');
       
-      var data = dataTransfer.getData('application/json');
-      var queryAxisItem = JSON.parse(data);
+      var info = DragAndDropHelper.getData(event);
+      var queryAxisItem = info['application/json'];
 
       if (axisId === QueryModel.AXIS_CELLS && !Boolean(queryAxisItem.aggregator)) {
-        var defaultAggregator = dataTransfer.getData('defaultaggregator');
+        var defaultAggregator = info.defaultaggregator.value;
         queryAxisItem.aggregator = defaultAggregator;
       }
       

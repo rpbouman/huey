@@ -426,6 +426,7 @@ class AttributeUi {
 
     var dom = this.getDom();
     dom.addEventListener('click', this.#clickHandler.bind(this));
+    dom.addEventListener('dragstart', this.#dragStartHandler.bind(this));
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
 
@@ -669,30 +670,22 @@ class AttributeUi {
 
     this.#renderAttributeUiNodeAxisButtons(config, head);
 
-    label.addEventListener('dragstart', this.#attributeUiNodeLabelDragStartHandler.bind(this));
     return head;
   }
 
-  #attributeUiNodeLabelDragStartHandler(event){
+  #dragStartHandler(event){
     var dataTransfer = event.dataTransfer;
+    var data = {};
     
     var element = event.target;
     var summary = element.parentNode;
     var details = summary.parentNode;
     var queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
-    
-    function getEncodedItemId(item){
-      var id = QueryAxisItem.getIdForQueryAxisItem(item);
-      id = id.split('').map(function(ch){
-        return ch.charCodeAt(0);
-      }).join(',');
-      return id;
-    }
-    
+        
     var itemId;
     // if this is an aggregat item, mark that
     if (queryAxisItem.aggregator) {
-      dataTransfer.setData('aggregator', queryAxisItem.aggregator);
+      data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
     }
     else {
       // if this is not an aggregate item, then this attribute ui item could have a default aggregator
@@ -705,12 +698,8 @@ class AttributeUi {
         copyOfQueryAxisItem.axis = QueryModel.AXIS_CELLS;
         copyOfQueryAxisItem.aggregator = defaultAggregator;
         var cellsAxisItem = this.#queryModel.findItem(copyOfQueryAxisItem);
-        var defaultAggregatorKey = 'defaultaggregator';
-        if (cellsAxisItem){
-          itemId = getEncodedItemId(cellsAxisItem);
-          defaultAggregatorKey += `/${itemId}`;
-        }
-        dataTransfer.setData(defaultAggregatorKey, defaultAggregator);
+        itemId = cellsAxisItem ? QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem) : '';
+        data.defaultaggregator = {key: itemId, value: defaultAggregator};
       }
     }
      
@@ -718,17 +707,17 @@ class AttributeUi {
     var queryModelItem = this.#queryModel.findItem(queryAxisItem);
     if (queryModelItem) {
       queryAxisItem.axis = queryModelItem.axis;
-      dataTransfer.setData(`axis/${queryAxisItem.axis}`, queryAxisItem.axis);
+      data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
       queryAxisItem.index = queryModelItem.index;
-      dataTransfer.setData(`index/${queryAxisItem.index}`, queryAxisItem.index);
-      itemId = getEncodedItemId(queryAxisItem);
-      dataTransfer.setData(`id/${itemId}`, itemId);
+      data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
+      itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+      data.id = {key: itemId, value: itemId};
     }
     
     var filtersAxis = this.#queryModel.getFiltersAxis();
     var filtersAxisItem = filtersAxis.findItem(queryAxisItem);
     if (filtersAxisItem){
-      dataTransfer.setData(`filters/${filtersAxisItem.index}`, filtersAxisItem.index);
+      data.filters = {key: filtersAxisItem.index, value: filtersAxisItem.index};
       if (!queryModelItem) {
         var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
         id = id.split('').map(function(ch){
@@ -738,9 +727,9 @@ class AttributeUi {
       }
     }
     
-    var data = JSON.stringify(queryAxisItem);
-    dataTransfer.setData('application/json', data);
+    data['application/json'] = queryAxisItem;
     
+    DragAndDropHelper.setData(event, data);
     dataTransfer.dropEffect = dataTransfer.effectAllowed = queryModelItem ? 'move' : 'all';
     dataTransfer.setDragImage(element, -20, 0);
   }
