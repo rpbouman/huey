@@ -681,6 +681,15 @@ class AttributeUi {
     var details = summary.parentNode;
     var queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
     
+    function getEncodedItemId(item){
+      var id = QueryAxisItem.getIdForQueryAxisItem(item);
+      id = id.split('').map(function(ch){
+        return ch.charCodeAt(0);
+      }).join(',');
+      return id;
+    }
+    
+    var itemId;
     // if this is an aggregat item, mark that
     if (queryAxisItem.aggregator) {
       dataTransfer.setData('aggregator', queryAxisItem.aggregator);
@@ -690,7 +699,18 @@ class AttributeUi {
       var defaultAggregatorInput = summary.querySelector('label[data-axis=cells] > input[type=checkbox]');
       if (defaultAggregatorInput) {
         var defaultAggregator = defaultAggregatorInput.getAttribute('data-aggregator');
-        dataTransfer.setData('defaultaggregator', defaultAggregator);
+        // since this item could be dropped on the cells axis,
+        // we should check if the cells axis already contains an item that would result from applying the default aggregator
+        var copyOfQueryAxisItem = Object.assign({}, queryAxisItem);
+        copyOfQueryAxisItem.axis = QueryModel.AXIS_CELLS;
+        copyOfQueryAxisItem.aggregator = defaultAggregator;
+        var cellsAxisItem = this.#queryModel.findItem(copyOfQueryAxisItem);
+        var defaultAggregatorKey = 'defaultaggregator';
+        if (cellsAxisItem){
+          itemId = getEncodedItemId(cellsAxisItem);
+          defaultAggregatorKey += `/${itemId}`;
+        }
+        dataTransfer.setData(defaultAggregatorKey, defaultAggregator);
       }
     }
      
@@ -701,11 +721,8 @@ class AttributeUi {
       dataTransfer.setData(`axis/${queryAxisItem.axis}`, queryAxisItem.axis);
       queryAxisItem.index = queryModelItem.index;
       dataTransfer.setData(`index/${queryAxisItem.index}`, queryAxisItem.index);
-      var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
-      id = id.split('').map(function(ch){
-        return ch.charCodeAt(0);
-      }).join(',');
-      dataTransfer.setData(`id/${id}`, id);
+      itemId = getEncodedItemId(queryAxisItem);
+      dataTransfer.setData(`id/${itemId}`, itemId);
     }
     
     var filtersAxis = this.#queryModel.getFiltersAxis();

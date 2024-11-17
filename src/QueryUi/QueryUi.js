@@ -389,23 +389,42 @@ class QueryUi {
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
 
     var prevElements = undefined;
-    dom.addEventListener('dragleave', function(event){
-      event.preventDefault();
-    });
-    dom.addEventListener('dragenter', function(event){
-      event.preventDefault();
-    });
+    
+    function cleanupPrevElements(){
+      if (!prevElements) {
+        return;
+      }
+      if (prevElements.axis) {
+        prevElements.axis.removeAttribute('data-dragover');
+      }
+      if (prevElements.item) {
+        prevElements.item.removeAttribute('data-dragoverside');
+      }
+      prevElements = undefined;
+    }
+    
+    function extractDragInfo(event){
+      var dataTransfer = event.dataTransfer;
+      var types = dataTransfer.types;
+      var info = types.reduce(function(info, type){
+        var typeParts = type.split('/');
+        var name = typeParts[0];
+        var value = typeParts[1] || '';
+        info[name] = value;
+        return info;
+      }, {});
+      return info;
+    }
+    
+    function decodeItemId(itemId){
+      return itemId.split(',').map(function(charCode){
+        return String.fromCharCode(charCode);
+      }).join('');
+    }
+    
     dom.addEventListener('dragend', function(event){
       event.preventDefault();
-      if (prevElements) {
-        if (prevElements.axis) {
-          prevElements.axis.removeAttribute('data-dragover');
-        }
-        if (prevElements.item) {
-          prevElements.item.removeAttribute('data-dragoverside');
-        }
-        prevElements = undefined;
-      }
+      cleanupPrevElements();
     });
 
     dom.addEventListener('dragover', function(event){
@@ -413,36 +432,19 @@ class QueryUi {
       var queryUiElements = QueryUi.#findQueryUiElements(event);
 
       var axis = queryUiElements.axis;
-      var items = queryUiElements.items;
-      var item = queryUiElements.item;
       if (!axis){
-        if (prevElements) {
-          if (prevElements.axis) {
-            prevElements.axis.removeAttribute('data-dragover');
-          }
-          if (prevElements.item) {
-            prevElements.item.removeAttribute('data-dragoverside');
-          }
-          prevElements = undefined;
-        }
+        cleanupPrevElements();
         return;
       }
+
+      var items = queryUiElements.items;
+      var item = queryUiElements.item;
       
-      var axisId = queryUiElements.axis.getAttribute('data-axis');
-      
-      var dataTransfer = event.dataTransfer;
-      var types = dataTransfer.types;
-      var info = types.reduce(function(info, type){
-        var typeParts = type.split('/');
-        var name = typeParts[0];
-        var value = typeParts[1] || name;
-        info[name] = value;
-        return info;
-      }, {});
+      var axisId = axis.getAttribute('data-axis');
+      var info = extractDragInfo(event);
       
       var isAggregator = Boolean(info.aggregator);
       var isDefaultAggregator = Boolean(info.defaultaggregator);
-      var existingItemId = info.id;
 
       var existingId = this.#id;
       var isSameAxis = info.axis === axisId;
@@ -457,9 +459,12 @@ class QueryUi {
           }
         default:
           if (isSameAxis && info.id) {
-            existingId += '-' + info.id.split(',').map(function(charCode){
-              return String.fromCharCode(charCode);
-            }).join('');
+            existingId += '-' + decodeItemId(info.id);
+          }
+          else
+          if (isCellsAxis && info.defaultaggregator && info.defaultaggregator.length) {
+            isSameAxis = true;
+            existingId += '-' + decodeItemId(info.defaultaggregator);
           }
           else {
             existingId = undefined;
@@ -478,12 +483,14 @@ class QueryUi {
         // if this is not the cells axis, but the item is an aggregator, drop is forbidden
         dropEffect = 'none';
       }
-            
+      
+      // if we're dragging over an existing query ui item
       if (item) {
         if (dropEffect !== 'none') {
           var middle = item.offsetLeft + item.clientWidth/2;
           var dragOverSide = event.clientX <= middle ? 'left' : 'right';
           if (isSameAxis) {
+            dropEffect = 'move';
             if (
               item.id === existingId  ||
               (dragOverSide === 'left' && item.previousSibling && item.previousSibling.id === existingId) ||
@@ -505,6 +512,9 @@ class QueryUi {
         }
       }
       else {
+        // if we're not dragging over an item but are dragging over an axis,
+        // and the axis' last item is the same as  the dragged item,
+        // then dropping wouldn't change the query, so indicate drop is not allowed.
         if (existingId && items && items.lastChild.id === existingId) {
           dropEffect = 'none';
         }
@@ -517,15 +527,17 @@ class QueryUi {
         prevElements.axis.removeAttribute('data-dragover');
       }
       
-      if (dropEffect !== 'none') {
+      if (dropEffect) {
+        event.dataTransfer.effectAllowed = event.dataTransfer.dropEffect = dropEffect;
+      }
+      if (dropEffect === 'none') {
+        axis.removeAttribute('data-dragover');
+      }
+      else {
         axis.setAttribute('data-dragover', item ? 1 : 0);
       }
       
       prevElements = queryUiElements;
-      
-      if (dropEffect) {
-        dataTransfer.effectAllowed = dataTransfer.dropEffect = 'none';
-      }
 
     }.bind(this));
     
@@ -553,24 +565,16 @@ class QueryUi {
       
       queryAxisItem.axis = axisId;
       
-      if (prevElements) {
-        if (prevElements.item) {
-          var queryModelItem = this.#getQueryModelItem(prevElements.item);
-          var index;
-          if  (queryModelItem) {
-            index = queryModelItem.index;
-          }
-          if (prevElements.item.getAttribute('data-dragoverside') === 'right') {
-            index += 1;
-          }
-          queryAxisItem.index = index;
-          prevElements.item.removeAttribute('data-dragoverside');
+      var prevItem = prevElements ? prevElements.item : undefined;
+      if (prevItem) {
+        var queryModelItem = this.#getQueryModelItem(prevItem);
+        var index = queryModelItem.index;
+        if (prevItem.getAttribute('data-dragoverside') === 'right') {
+          index += 1;
         }
-        if (prevElements.axis) {
-          prevElements.axis.removeAttribute('data-dragover');
-        }
-        prevElements = undefined;
+        queryAxisItem.index = index;
       }
+      cleanupPrevElements();
       
       this.#queryModel.addItem(queryAxisItem);
     }.bind(this));
