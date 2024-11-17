@@ -34,6 +34,136 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
 #datasourcesUi {
   padding-top: 12px;
   height: calc(100% - 36px);
+
+  details > summary > span.label {
+    max-width: calc(100% - 136px);
+  }
+
+  details[role=treeitem] {
+
+    > summary {
+
+      > label {
+        > button {
+          display: none;
+          appearance: none;
+        }
+      }
+
+      > span.label::before {
+        display: inline-block;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color );
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        text-align: center;
+        position: relative;
+        top: 3px;
+      }
+
+      > label:has( > button )::before {
+        display: block;
+        float: inline-end;
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color-subtle );
+      }
+
+      > label:has( > button ):hover::before {
+        color: var( --huey-icon-color-highlight );
+      }
+
+      > label.editActionButton::before {
+        /* settings */
+        content: '\eb20';
+      }
+
+      > label.analyzeActionButton::before {
+        /* analyze */
+        content: '\f3a3';
+      }
+
+      > label.removeActionButton::before {
+        /* trash */
+        content: '\eb41';
+      }
+    }
+  }
+
+  details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > span.label::before,
+  details[data-nodetype=datasourcegroup][data-grouptype=file] > summary > span.label::before,
+  details[data-nodetype=datasourcegroup][data-grouptype=sqlite] > summary > span.label::before,
+  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > span.label::before
+  {
+    /* folder */
+    content: '\eaad';
+  }
+
+  details[data-nodetype=datasourcegroup][open][data-grouptype=duckdb] > summary > span.label::before,
+  details[data-nodetype=datasourcegroup][open][data-grouptype=file] > summary > span.label::before,
+  details[data-nodetype=datasourcegroup][open][data-grouptype=sqlite] > summary > span.label::before,
+  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
+   {
+    /* folder open */
+    content: '\faf7';
+  }
+
+  details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
+    /* bucket */
+    content: '\ea47';
+  }
+
+  details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
+    /* bucket droplet */
+    content: '\f56a';
+  }
+
+  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
+  details[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
+    list-style: none;
+    margin-left: 16px;
+  }
+
+  details[data-nodetype=datasource][data-datasourcetype=duckdb] {
+    > summary > span.label::before {
+      /* file-database */
+      /* content: '\f037';*/
+      /* database*/
+      content: '\ea88';
+    }
+
+    > details[data-nodetype=duckdb_schema] {
+
+      > details[data-nodetype=datasource][data-datasourcetype=table] summary > span.label::before {
+        /* table */
+        content: '\eba1';
+      }
+
+      > details[data-nodetype=datasource][data-datasourcetype=view] summary > span.label::before {
+        /* table-options */
+        content: '\f25c';
+      }
+    }
+  }
+
+  details[data-nodetype=datasource][data-datasourcetype=file] > summary > span.label::before {
+    /* file */
+    content: '\eaa4';
+  }
+
+  details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > span.label::before {
+    /* feather */
+    content: '\ee8b';
+  }
+
+  details[data-nodetype=datasource][data-reject_count] > summary > span.label::before {
+    content: '\ede6';
+    color: red;
+  }
+
 }
 
 #datasourcesUi[data-drop-allowed=true] {
@@ -44,164 +174,60 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   cursor: 'not-allowed';
 }
 
-#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=sqlite] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > .icon::before
-{
-  /* folder */
-  content: '\eaad';
-}
-
-#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=duckdb] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=file] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasourcegroup][open][data-grouptype=sqlite] > summary > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > .icon::before
- {
-  /* folder open */
-  content: '\faf7';
-}
-
-#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
-  /* bucket */
-  content: '\ea47';
-}
-
-#datasourcesUi details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > .icon::before {
-  /* bucket droplet */
-  content: '\f56a';
-}
-
-#datasourcesUi details > summary > .label  {
-  max-width: calc(100% - 136px);
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
-#datasourcesUi details[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
-  list-style: none;
-  margin-left: 16px;
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > summary > .icon::before {
-  /* file-database */
-  /* content: '\f037';*/
-  /* database*/
-  content: '\ea88';
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=table] summary > .icon::before 
-{
-  /* table */
-  content: '\eba1';
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details[data-nodetype=datasource][data-datasourcetype=view] summary > .icon::before 
-{
-  /* table-options */
-  content: '\f25c';
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file] > summary > .icon::before {
-  /* file */
-  content: '\eaa4';
-}
- 
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > .icon::before {
-  /* feather */
-  content: '\ee8b';
-}
-
 /* this is used in the datasource menu when prompting for missing datasource */
 menu.dataSources {
   padding-inline-start: 0px;
+
+  > li {
+    list-style-type: none;
+
+    .icon {
+      display: inline-block;
+      font-family: var( --huey-icon-font-family ) !important;
+      font-size: var( --huey-icon-medium );
+      color: var( --huey-icon-color );
+      width: 24px;
+      padding: 6px 3px 0px 3px;
+      text-align: center;
+    }
+
+  }
 }
-menu.dataSources > li {
-  list-style-type: none;
-}
-menu.dataSources > li > .icon {
-  display: inline-block;
-  font-family: var( --huey-icon-font-family ) !important;
-  font-size: var( --huey-icon-medium );
-  color: var( --huey-icon-color );
-  width: 24px;
-  padding: 6px 3px 0px 3px;
-  text-align: center;
-}
+
 /**/
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > span.label::before {
   /* file-type-csv */
   content: '\fb09';
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > span.label::before {
   /* file-type-txt */
   content: '\fb19';
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > span.label::before {
   /* file-type-js */
   content: '\fb0e';
 }
 
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > span.label::before {
   /* file-type-sql */
   content: '\fb0e';
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > span.label::before {
   /* file-stack */
   content: '\f503';
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > .icon::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > .icon::before {
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > span.label::before {
   /* file-type-xls */
   content: '\fb1b';
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-reject_count] > summary > .icon::before {
-  content: '\ede6';
-  color: red;
-}
-
-#datasourcesUi details > summary > label.editActionButton::before {
-  /* settings */
-  content: '\eb20';
-}
-
-#datasourcesUi details > summary > label.analyzeActionButton::before {
-  /* analyze */
-  content: '\f3a3';
-}
-
-#datasourcesUi details > summary > label.removeActionButton::before {
-  /* trash */
-  content: '\eb41';
-}
-
-#datasourcesUi details > summary > label:has( > button )::before 
-{
-  display: block;
-  float: inline-end;
-  width: 24px;
-  padding: 6px 3px 0px 3px;
-  font-family: var( --huey-icon-font-family ) !important;
-  font-size: var( --huey-icon-medium );
-  color: var( --huey-icon-color-subtle );
-}
-
-#datasourcesUi details > summary > label:has( > button ):hover::before {
-  color: var( --huey-icon-color-highlight );
-}
-
-
-#datasourcesUi details > summary > label > button {
-  display: none;
-  appearance: none;
 }
 
