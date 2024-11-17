@@ -210,9 +210,7 @@ class QueryUi {
   }
 
   #createQueryAxisItemUi(axisItem){
-
     var axisId = axisItem.axis;
-
     var id = this.#id
     if (axisId === QueryModel.AXIS_FILTERS) {
       id += `-${axisId}`;
@@ -387,7 +385,54 @@ class QueryUi {
     dom.addEventListener('click', this.#queryUiClickHandler.bind(this));
 
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
+    
+    this.#initDragAndDrop();
+  }
+  
+  #initDragAndDrop(){
+    this.#initDrag();
+    this.#initDrop();
+  }
+  
+  #initDrag(){
+    var dom = this.getDom();
+    
+    dom.addEventListener('dragstart', function(event){
+      var queryAxisItemUi = event.target;
+      var queryAxisItemsUi = queryAxisItemUi.parentNode;
+      var axisUi = queryAxisItemsUi.parentNode;
+      var axisId = axisUi.getAttribute('data-axis');
+      
+      var queryAxisItem = this.#getQueryModelItem(queryAxisItemUi);
+      var data = {};
+      
+      if (queryAxisItem.aggregator){
+        data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
+      }
 
+      data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
+      data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
+      var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+      data.id = {key: id, value: id};
+      
+      if (axisId === QueryModel.AXIS_FILTERS){
+        data.filters = {key: queryAxisItem.index, value: queryAxisItem.index};
+      }
+
+      data['application/json'] = queryAxisItem;
+
+      DragAndDropHelper.setData(event, data);
+      var dataTransfer = event.dataTransfer;
+      dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
+      dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
+      
+    }.bind(this));
+    
+  }
+  
+  #initDrop(){
+    var dom = this.getDom();
+    
     var prevElements = undefined;
     function cleanupPrevElements(){
       if (!prevElements) {
@@ -561,7 +606,6 @@ class QueryUi {
       
       this.#queryModel.addItem(queryAxisItem);
     }.bind(this));
-    
   }
 
   #axisClearButtonClicked(axis){
