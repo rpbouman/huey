@@ -24,6 +24,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       width: 24px;
       padding: 6px 3px 0px 3px;
       text-align: center;
+      position: relative;
+      top: 3px;
     }
     
     > summary:hover::before {
@@ -355,7 +357,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         display: block;
         float: inline-end;
         width: 24px;
-        padding: 4px 3px 0px 3px;
+        padding: 6px 3px 0px 3px;
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
         color: var( --huey-icon-color-subtle );
