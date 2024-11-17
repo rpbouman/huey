@@ -719,11 +719,8 @@ class AttributeUi {
     if (filtersAxisItem){
       data.filters = {key: filtersAxisItem.index, value: filtersAxisItem.index};
       if (!queryModelItem) {
-        var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
-        id = id.split('').map(function(ch){
-          return ch.charCodeAt(0);
-        }).join(',');
-        dataTransfer.setData(`id/${id}`, id);
+        itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+        data.id = {key: itemId, value: itemId};
       }
     }
     
