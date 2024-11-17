@@ -798,6 +798,10 @@ class QueryModel extends EventEmitter {
       }
     }
     
+    if (axis === QueryModel.AXIS_FILTERS && !config.filter && removedItem && removedItem.filter){
+      config.filter = removedItem.filter;
+    }
+    
     var addedItem = this.#addItem(config);
 
     var axesChangeInfo = {};

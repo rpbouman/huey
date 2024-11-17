@@ -669,9 +669,63 @@ class AttributeUi {
 
     this.#renderAttributeUiNodeAxisButtons(config, head);
 
-    label.addEventListener('dragstart', function(event){
-    });
+    label.addEventListener('dragstart', this.#attributeUiNodeLabelDragStartHandler.bind(this));
     return head;
+  }
+
+  #attributeUiNodeLabelDragStartHandler(event){
+    var dataTransfer = event.dataTransfer;
+    
+    var element = event.target;
+    var summary = element.parentNode;
+    var details = summary.parentNode;
+    var queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
+    
+    // if this is an aggregat item, mark that
+    if (queryAxisItem.aggregator) {
+      dataTransfer.setData('aggregator', queryAxisItem.aggregator);
+    }
+    else {
+      // if this is not an aggregate item, then this attribute ui item could have a default aggregator
+      var defaultAggregatorInput = summary.querySelector('label[data-axis=cells] > input[type=checkbox]');
+      if (defaultAggregatorInput) {
+        var defaultAggregator = defaultAggregatorInput.getAttribute('data-aggregator');
+        dataTransfer.setData('defaultaggregator', defaultAggregator);
+      }
+    }
+     
+    // see if this item is already part of the query model
+    var queryModelItem = this.#queryModel.findItem(queryAxisItem);
+    if (queryModelItem) {
+      queryAxisItem.axis = queryModelItem.axis;
+      dataTransfer.setData(`axis/${queryAxisItem.axis}`, queryAxisItem.axis);
+      queryAxisItem.index = queryModelItem.index;
+      dataTransfer.setData(`index/${queryAxisItem.index}`, queryAxisItem.index);
+      var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+      id = id.split('').map(function(ch){
+        return ch.charCodeAt(0);
+      }).join(',');
+      dataTransfer.setData(`id/${id}`, id);
+    }
+    
+    var filtersAxis = this.#queryModel.getFiltersAxis();
+    var filtersAxisItem = filtersAxis.findItem(queryAxisItem);
+    if (filtersAxisItem){
+      dataTransfer.setData(`filters/${filtersAxisItem.index}`, filtersAxisItem.index);
+      if (!queryModelItem) {
+        var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+        id = id.split('').map(function(ch){
+          return ch.charCodeAt(0);
+        }).join(',');
+        dataTransfer.setData(`id/${id}`, id);
+      }
+    }
+    
+    var data = JSON.stringify(queryAxisItem);
+    dataTransfer.setData('application/json', data);
+    
+    dataTransfer.dropEffect = dataTransfer.effectAllowed = queryModelItem ? 'move' : 'all';
+    dataTransfer.setDragImage(element, -20, 0);
   }
 
   #renderAttributeUiNode(config){

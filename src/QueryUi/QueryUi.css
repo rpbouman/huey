@@ -62,6 +62,7 @@
       }
     }
 
+
     /* query ui axis items */
     > ol {
       flex-grow: 1;
@@ -331,6 +332,36 @@
 
     }
   }
+  
+  /* item separators for d */
+  > section[data-axis] > ol::after, 
+  > section[data-axis] > ol > li::before {
+    width: 3px;
+    height: 20px;
+    background-color: transparent;
+    display:inline-block;
+    content: '';
+  }
+  
+  > section[data-axis] > ol::after {
+    top: 2px;
+    position: relative;
+  }
+  
+  > section[data-axis] > ol > li::before {
+    float: left;
+  }
+
+  > section[data-axis][data-dragover] > ol:empty::after,
+  > section[data-axis][data-dragover] > ol:has( > li[data-dragoverside=right]:last-child )::after,
+  > section[data-axis][data-dragover='0'] > ol::after,
+  > section[data-axis]> ol > li[data-dragoverside=left]::before,
+  > section[data-axis]> ol > li[data-dragoverside=right] + li::before {
+    background-color: var( --huey-dark-background-color) ;
+  }  
+  
+  /* end of item separatores */
+
 
   > section[data-axis]:last-child {
     margin-bottom: 1px;

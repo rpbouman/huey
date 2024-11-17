@@ -16,7 +16,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   
   details[role=treeitem] {
     
-    > summary::before {
+    > summary > span.label::before {
       display: inline-block;
       font-family: var( --huey-icon-font-family ) !important;
       font-size: var( --huey-icon-medium );
@@ -37,12 +37,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     /**
     * folder icons
     */
-    [data-nodetype=folder] > summary::before {
+    [data-nodetype=folder] > summary > span.label::before {
       /* folder */
       content: "\eaad";
     }
     
-    [data-nodetype=folder][open] > summary::before {
+    [data-nodetype=folder][open] > summary > span.label::before {
       /* folder-open */
       content: "\faf7";
     }
@@ -53,85 +53,85 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Data type icons
   *
   */
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary::before,
-  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary::before,
-  details[data-nodetype=column][data-column_type=VARCHAR] > summary::before {
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=VARCHAR] > summary > span.label::before {
     /* txt */
     content: "\f3b1";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary::before,
-  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary::before,
-  details[data-nodetype=column][data-column_type=BOOLEAN] > summary::before {
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=BOOLEAN] > summary > span.label::before {
     /* square check */
     content: "\eb28";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary::before,
-  details[data-nodetype=member][data-member_expression_type$=INT] > summary::before,
-  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary::before,
-  details[data-nodetype=column][data-column_type$=INT] > summary::before,
-  details[data-nodetype=column][data-column_type=INTEGER] > summary::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type$=INT] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type$=INT] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=INTEGER] > summary > span.label::before
   {
     /* 123 */
     content: "\f554";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary::before,
-  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary::before,
-  details[data-nodetype=column][data-column_type^=STRUCT] > summary::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=STRUCT] > summary > span.label::before
   {
     /* code-dots */
     content: "\f61a";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary::before,
-  details[data-nodetype=member][data-member_expression_type^=MAP] > summary::before,
-  details[data-nodetype=column][data-column_type^=MAP] > summary::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type^=MAP] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=MAP] > summary > span.label::before
   {
     /* list-letters */
     content: "\fc47";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary::before,
-  details[data-nodetype=member][data-member_expression_type$='[]'] > summary::before,
-  details[data-nodetype=column][data-column_type$='[]'] > summary::before
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type$='[]'] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type$='[]'] > summary > span.label::before
   {
     /* code-dots */
     content: "\f1e5";
   }
 
-  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary::before,
-  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary::before,
-  details[data-nodetype=member][data-member_expression_type=REAL] > summary::before,
-  details[data-nodetype=column][data-column_type^=DECIMAL] > summary::before,
-  details[data-nodetype=column][data-column_type=DOUBLE] > summary::before,
-  details[data-nodetype=column][data-column_type=REAL] > summary::before {
+  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=REAL] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=DECIMAL] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=REAL] > summary > span.label::before {
     /* decimal */
     content: "\fa26";
   }
 
-  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary::before,
-  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary::before {
+  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > span.label::before {
     /* calendar-clock */
     content: "\fd2e";
   }
 
-  details[data-nodetype=member][data-member_expression_type=DATE] > summary::before,
-  details[data-nodetype=column][data-column_type=DATE] > summary::before {
+  details[data-nodetype=member][data-member_expression_type=DATE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=DATE] > summary > span.label::before {
     /* calendar */
     content: "\ea53";
   }
 
-  details[data-nodetype=member][data-member_expression_type=TIME] > summary::before,
-  details[data-nodetype=column][data-column_type=TIME] > summary::before {
+  details[data-nodetype=member][data-member_expression_type=TIME] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=TIME] > summary > span.label::before {
     /* clock */
     content: "\ea70";
   }
 
-  details[data-nodetype=member][data-member_expression_type=JSON] > summary::before,
-  details[data-nodetype=column][data-column_type=JSON] > summary::before {
+  details[data-nodetype=member][data-member_expression_type=JSON] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=JSON] > summary > span.label::before {
     /* JSON */
     content: "\f7b2";
   }
@@ -141,99 +141,99 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Derivation icons
   *
   */
-  details[data-nodetype=derived][data-derivation=iso-date] > summary::before,
-  details[data-nodetype=derived][data-derivation=local-date] > summary::before {
+  details[data-nodetype=derived][data-derivation=iso-date] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation=local-date] > summary > span.label::before {
     /* calendar */
     content: "\ea53";
   }
-  details[data-nodetype=derived][data-derivation=year] > summary::before {
+  details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
     /* letter-y */
     content: "\ec68";
   }
 
-  details[data-nodetype=derived][data-derivation=quarter] > summary::before {
+  details[data-nodetype=derived][data-derivation=quarter] > summary > span.label::before {
     /* letter q */
     content: "\ec60";
   }
 
-  details[data-nodetype=derived][data-derivation="month name"] > summary::before,
-  details[data-nodetype=derived][data-derivation="month num"] > summary::before {
+  details[data-nodetype=derived][data-derivation="month name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="month num"] > summary > span.label::before {
     /* letter m */
     content: "\ec5c";
   }
 
-  details[data-nodetype=derived][data-derivation="week num"] > summary::before {
+  details[data-nodetype=derived][data-derivation="week num"] > summary > span.label::before {
     /* calendar-week */
     content: "\fd30";
   }
 
-  details[data-nodetype=derived][data-derivation="day of year"] > summary::before {
+  details[data-nodetype=derived][data-derivation="day of year"] > summary > span.label::before {
     /* letter-d */
     content: "\ec53";
   }
 
-  details[data-nodetype=derived][data-derivation="day of month"] > summary::before {
+  details[data-nodetype=derived][data-derivation="day of month"] > summary > span.label::before {
     /* calendar-month */
     content: "\fd2f";
   }
 
-  details[data-nodetype=derived][data-derivation="day of week name"] > summary::before,
-  details[data-nodetype=derived][data-derivation="day of week"] > summary::before {
+  details[data-nodetype=derived][data-derivation="day of week name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="day of week"] > summary > span.label::before {
     /* letter-d-small */
     content: "\fcca";
   }
 
-  details[data-nodetype=derived][data-derivation=iso-time] > summary::before {
+  details[data-nodetype=derived][data-derivation=iso-time] > summary > span.label::before {
     /* clock */
     content: "\ea70";
   }
 
-  details[data-nodetype=derived][data-derivation=hour] > summary::before {
+  details[data-nodetype=derived][data-derivation=hour] > summary > span.label::before {
     /* letter-h */
     content: "\ec57";
   }
 
-  details[data-nodetype=derived][data-derivation=minute] > summary::before {
+  details[data-nodetype=derived][data-derivation=minute] > summary > span.label::before {
     /* letter-m-small */
     content: "\fcd3";
   }
 
-  details[data-nodetype=derived][data-derivation=second] > summary::before {
+  details[data-nodetype=derived][data-derivation=second] > summary > span.label::before {
     /* letter-s */
     content: "\ec62";
   }
 
-  details[data-nodetype=derived][data-derivation=lowercase] > summary::before {
+  details[data-nodetype=derived][data-derivation=lowercase] > summary > span.label::before {
     /* letter-case-lower */
     content: "\eea2";
   }
 
-  details[data-nodetype=derived][data-derivation=uppercase] > summary::before {
+  details[data-nodetype=derived][data-derivation=uppercase] > summary > span.label::before {
     /* letter-case-upper */
     content: "\eea4";
   }
 
-  details[data-nodetype=derived][data-derivation=NOACCENT] > summary::before {
+  details[data-nodetype=derived][data-derivation=NOACCENT] > summary > span.label::before {
     /* letter-case */
     content: "\eea5";
   }
 
-  details[data-nodetype=derived][data-derivation=NOCASE] > summary::before {
+  details[data-nodetype=derived][data-derivation=NOCASE] > summary > span.label::before {
     /* letter-case */
     content: "\eea5";
   }
 
-  details[data-nodetype=derived][data-derivation='first letter'] > summary::before {
+  details[data-nodetype=derived][data-derivation='first letter'] > summary > span.label::before {
     /* sort-a-z */
     content: "\f54f";
   }
 
-  details[data-nodetype=derived][data-derivation='length'] > summary::before {
+  details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
     /* ruler-3 */
     content: "\f290";
   }
 
-  details[data-nodetype=derived][data-derivation='element indices'] > summary::before {
+  details[data-nodetype=derived][data-derivation='element indices'] > summary > span.label::before {
     /* list-numbers */
     content: "\ef11";
   }
@@ -243,101 +243,101 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Aggregator icons
   *
   */
-  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary::before,
-  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary::before,
-  details[data-nodetype=aggregate][data-aggregator=count] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=count] > summary > span.label::before {
     /* tallymarks */
     content: "\ec4a";
   }
 
-  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > span.label::before {
     /* tallymark-4 */
     content: "\ec49";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=max] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=max] > summary > span.label::before {
     /* math-max */
     content: "\f0f5";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=min] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=min] > summary > span.label::before {
     /* math-min */
     content: "\f0f6";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=list] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=list] > summary > span.label::before {
     /* list */
     content: "\eb6b";
   }
 
-  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > span.label::before {
     /* list details */
     content: "\ef40";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=histogram] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=histogram] > summary > span.label::before {
     /* chart-bar */
     content: "\ea59";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=sum] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=sum] > summary > span.label::before {
     /* sum */
     content: "\eb73";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=geomean] > summary::before,
-  details[data-nodetype=aggregate][data-aggregator=avg] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=geomean] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=avg] > summary > span.label::before {
     /* math-avg */
     content: "\f0f4";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=mad] > summary::before,
-  details[data-nodetype=aggregate][data-aggregator=median] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=mad] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=median] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=mode] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=mode] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=stdev] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=stdev] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=variance] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=variance] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=entropy] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=entropy] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=skewness] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=skewness] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=and] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
     /* logical-and */
     content: "\f240";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=or] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=or] > summary > span.label::before {
     /* logical-or */
     content: "\f245";
   }
 
-  details[data-nodetype=aggregate][data-aggregator=and] > summary::before {
+  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
     /* logical-and */
     content: "\f240";
   }
@@ -427,8 +427,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     font-weight: bold;
   }
 
-  details > summary:has( > label > input[type=checkbox]:checked ):before,
-  details:has( details > summary > label > input[type=checkbox]:checked ) > summary:before {
+  details > summary:has( > label > input[type=checkbox]:checked ) > span.label:before,
+  details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label:before {
     color: var( --huey-icon-color-highlight );
   }
   

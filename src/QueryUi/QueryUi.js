@@ -317,14 +317,16 @@ class QueryUi {
     var toggleState = event.newState;
     this.#queryModel.setQueryAxisItemFilterToggleState(queryModelItem, toggleState);
   }
-
+  
   #updateQueryAxisUi(axisUi, queryModelAxis) {
     var axisItemsUi = axisUi.getElementsByTagName('ol').item(0);
     axisItemsUi.innerHTML = '';
     var items = queryModelAxis.getItems();
-    for (var i = 0; i < items.length; i++){
-      var item = items[i];
-      var queryAxisItemUi = this.#createQueryAxisItemUi(item);
+    var n = items.length;
+    var separator, item, queryAxisItemUi;
+    for (var i = 0; i < n; i++){
+      item = items[i];
+      queryAxisItemUi = this.#createQueryAxisItemUi(item);
       axisItemsUi.appendChild(queryAxisItemUi);
     }
   }
@@ -385,6 +387,194 @@ class QueryUi {
     dom.addEventListener('click', this.#queryUiClickHandler.bind(this));
 
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
+
+    var prevElements = undefined;
+    dom.addEventListener('dragleave', function(event){
+      event.preventDefault();
+    });
+    dom.addEventListener('dragenter', function(event){
+      event.preventDefault();
+    });
+    dom.addEventListener('dragend', function(event){
+      event.preventDefault();
+      if (prevElements) {
+        if (prevElements.axis) {
+          prevElements.axis.removeAttribute('data-dragover');
+        }
+        if (prevElements.item) {
+          prevElements.item.removeAttribute('data-dragoverside');
+        }
+        prevElements = undefined;
+      }
+    });
+
+    dom.addEventListener('dragover', function(event){
+      event.preventDefault();
+      var queryUiElements = QueryUi.#findQueryUiElements(event);
+
+      var axis = queryUiElements.axis;
+      var items = queryUiElements.items;
+      var item = queryUiElements.item;
+      if (!axis){
+        if (prevElements) {
+          if (prevElements.axis) {
+            prevElements.axis.removeAttribute('data-dragover');
+          }
+          if (prevElements.item) {
+            prevElements.item.removeAttribute('data-dragoverside');
+          }
+          prevElements = undefined;
+        }
+        return;
+      }
+      
+      var axisId = queryUiElements.axis.getAttribute('data-axis');
+      
+      var dataTransfer = event.dataTransfer;
+      var types = dataTransfer.types;
+      var info = types.reduce(function(info, type){
+        var typeParts = type.split('/');
+        var name = typeParts[0];
+        var value = typeParts[1] || name;
+        info[name] = value;
+        return info;
+      }, {});
+      
+      var isAggregator = Boolean(info.aggregator);
+      var isDefaultAggregator = Boolean(info.defaultaggregator);
+      var existingItemId = info.id;
+
+      var existingId = this.#id;
+      var isSameAxis = info.axis === axisId;
+      var isCellsAxis;
+      switch (axisId) {
+        case QueryModel.AXIS_CELLS:
+          isCellsAxis = true;
+        case QueryModel.AXIS_FILTERS:
+          if (Boolean(info.filters)) {
+            existingId += `-${axisId}`;
+            isSameAxis = true;
+          }
+        default:
+          if (isSameAxis && info.id) {
+            existingId += '-' + info.id.split(',').map(function(charCode){
+              return String.fromCharCode(charCode);
+            }).join('');
+          }
+          else {
+            existingId = undefined;
+          }
+      }
+      
+      var dropEffect;
+      if (isCellsAxis){
+        if (! (isAggregator || isDefaultAggregator) ){
+          // if this is the cells axis, but this item cannot be an aggregator, then drop is forbidden.
+          dropEffect = 'none';
+        }
+      }
+      else
+      if (isAggregator) {
+        // if this is not the cells axis, but the item is an aggregator, drop is forbidden
+        dropEffect = 'none';
+      }
+            
+      if (item) {
+        if (dropEffect !== 'none') {
+          var middle = item.offsetLeft + item.clientWidth/2;
+          var dragOverSide = event.clientX <= middle ? 'left' : 'right';
+          if (isSameAxis) {
+            if (
+              item.id === existingId  ||
+              (dragOverSide === 'left' && item.previousSibling && item.previousSibling.id === existingId) ||
+              (dragOverSide === 'right' && item.nextSibling && item.nextSibling.id === existingId)
+            ) {
+              dropEffect = 'none';
+            }
+            else {
+              item.setAttribute('data-dragoverside', dragOverSide);
+            }
+          }
+          else {
+            item.setAttribute('data-dragoverside', dragOverSide);
+          }
+        }
+
+        if (prevElements && prevElements.item && (prevElements.item !== item || dropEffect === 'none')) {
+          prevElements.item.removeAttribute('data-dragoverside');
+        }
+      }
+      else {
+        if (existingId && items && items.lastChild.id === existingId) {
+          dropEffect = 'none';
+        }
+        if (prevElements && prevElements.item){
+          prevElements.item.removeAttribute('data-dragoverside');
+        }
+      }
+
+      if (prevElements && prevElements.axis && prevElements.axis !== axis) {
+        prevElements.axis.removeAttribute('data-dragover');
+      }
+      
+      if (dropEffect !== 'none') {
+        axis.setAttribute('data-dragover', item ? 1 : 0);
+      }
+      
+      prevElements = queryUiElements;
+      
+      if (dropEffect) {
+        dataTransfer.effectAllowed = dataTransfer.dropEffect = 'none';
+      }
+
+    }.bind(this));
+    
+    dom.addEventListener('drop', function(event){
+      event.preventDefault();
+      var queryUiElements = QueryUi.#findQueryUiElements(event);
+      if (!queryUiElements.axis){
+        return;
+      }
+
+      var dataTransfer = event.dataTransfer;
+      if (dataTransfer.effectAllowed === 'none') {
+        return;
+      }
+
+      var axisId = queryUiElements.axis.getAttribute('data-axis');
+      
+      var data = dataTransfer.getData('application/json');
+      var queryAxisItem = JSON.parse(data);
+
+      if (axisId === QueryModel.AXIS_CELLS && !Boolean(queryAxisItem.aggregator)) {
+        var defaultAggregator = dataTransfer.getData('defaultaggregator');
+        queryAxisItem.aggregator = defaultAggregator;
+      }
+      
+      queryAxisItem.axis = axisId;
+      
+      if (prevElements) {
+        if (prevElements.item) {
+          var queryModelItem = this.#getQueryModelItem(prevElements.item);
+          var index;
+          if  (queryModelItem) {
+            index = queryModelItem.index;
+          }
+          if (prevElements.item.getAttribute('data-dragoverside') === 'right') {
+            index += 1;
+          }
+          queryAxisItem.index = index;
+          prevElements.item.removeAttribute('data-dragoverside');
+        }
+        if (prevElements.axis) {
+          prevElements.axis.removeAttribute('data-dragover');
+        }
+        prevElements = undefined;
+      }
+      
+      this.#queryModel.addItem(queryAxisItem);
+    }.bind(this));
+    
   }
 
   #axisClearButtonClicked(axis){
@@ -452,11 +642,38 @@ class QueryUi {
     var cellsAxisPrimaryActionTitle = `Move the cell headers to the ${targetAxis} axis`;
     return cellsAxisPrimaryActionTitle;
   }
+  
+  static #findQueryUiElements(event){
+    var queryUi = event.currentTarget;
+    var el = event.target;
+    
+    var elements = {};
+    while (el && el !== queryUi){
+      switch (el.tagName) {
+        case 'LI':
+          elements.item = el;
+          break;
+        case 'OL':
+          elements.items = el;
+          break;
+        case 'SECTION':
+          var axisId = el.getAttribute('data-axis');
+          if (axisId) {
+            elements.axis = el;
+          }
+        
+      }
+      el = el.parentNode;
+    }
+    return elements;
+  }
 
   #renderAxis(config){
     var axisId = config.axisId;
     var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
     var axis = this.#instantiateTemplate(this.#queryAxisTemplateId, this.#id + '-' + axisId);
+    
+    var itemArea = axis.querySelector('ol');
 
     var primaryAxisActionLabelTitle;
     if (config.primaryAxisActionLabelTitle){
