@@ -54,7 +54,7 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
         display: inline-block;
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
-        color: var( --huey-icon-color );
+        color: var( --huey-icon-color-subtle );
         width: 24px;
         padding: 6px 3px 0px 3px;
         text-align: center;
@@ -91,6 +91,11 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
         content: '\eb41';
       }
     }
+    
+    > summary:hover  > span.label::before {
+      color: var( --huey-icon-color-highlight );
+    }
+
   }
 
   details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > span.label::before,
