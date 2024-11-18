@@ -388,7 +388,7 @@ class SqlQueryGenerator {
       sortNulls = sortNulls ? ` NULLS ${sortNulls}` : '';
       
       if (queryAxisItem.includeTotals){
-        var groupingSet = [].concat(groupByExpressions, [columnExpression]);
+        var groupingSet = [].concat(groupByExpressions);
         groupingSets.push(groupingSet);
         
         // if we have an axis item with includeTotals, then we want the super-aggregate rows (the totels) 
