@@ -593,13 +593,10 @@ class QueryUi {
       
       queryAxisItem.axis = axisId;
       
-      var prevItem = prevElements ? prevElements.item : undefined;
-      if (prevItem) {
-        var queryModelItem = this.#getQueryModelItem(prevItem);
+      var item = queryUiElements.item; //prevElements ? prevElements.item : undefined;
+      if (item) {
+        var queryModelItem = this.#getQueryModelItem(item);
         var index = queryModelItem.index;
-        if (prevItem.getAttribute('data-dragoverside') === 'right') {
-          index += 1;
-        }
         queryAxisItem.index = index;
       }
       cleanupPrevElements();
