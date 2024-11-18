@@ -624,6 +624,7 @@
                 type="search"
                 title="Type a search string to filter the value picklist (LIKE wildcards supported). Hit enter-key to add the typed value to the Filter values list"
                 tabindex="0"
+                autofocus="true"
               />
               <button
                 id="addFilterValueButton"
@@ -1492,6 +1493,15 @@
         </labe>
       </li>
     </menu>
+    
+    <menu role="menu" id="pivotTableContextMenu" popover="auto">
+      <li role="menuitem">
+        <label for="pivotTableContextMenuItem">
+          Test
+          <button id="pivotTableContextMenuItem">Test</button>
+        </label>
+      </li>
+    </menu>
 
     <main
       id="layout"
@@ -1628,6 +1638,7 @@
               id="searchAttributeUi"
               class="search"
               style="display:none"
+              autofocus="true"
             >
               <fieldset>
                 <legend id="searchAttributesLabel">Search for Attributes</legend>
@@ -1673,8 +1684,10 @@
           </template>
 
           <template id="queryUiAxisItem">
-            <li>
-              <label title="Move this item to the left"><button id="-move-left">Move item left</button></label>
+            <li draggable="true">
+              <label title="Move this item to the left">
+                <button id="-move-left">Move item left</button>
+              </label>
               <span>caption</span>
               <menu>
                 <label title="Calculate totals for this level">
@@ -1689,12 +1702,12 @@
               </menu>
               <label title="Move this item to the right">
                 <button id="-move-right">Move item right</button>
-              </labe>
+              </label>
             </li>
           </template>
 
           <template id="queryUiFilterAxisItem">
-            <li>
+            <li draggable="true">
               <label title="Move this item to the left">
                 <button id="-move-left">Move item left</button>
               </label>
@@ -1714,7 +1727,7 @@
               </menu>
               <label title="Move this item to the right">
                 <button id="-move-right">Move item right</button>
-              </labe>
+              </label>
             </li>
           </template>
         </div>
@@ -1775,7 +1788,10 @@
     <script onload="resourceLoaded(this)" src="util/clipboard/clipboard.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
+    <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
+    
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
+    <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsBase.js"></script>
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsDialogBase.js"></script>
