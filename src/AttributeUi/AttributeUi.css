@@ -16,26 +16,98 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   
   details[role=treeitem] {
     
-    > summary > span.label::before {
-      display: inline-block;
-      font-family: var( --huey-icon-font-family ) !important;
-      font-size: var( --huey-icon-medium );
-      color: var( --huey-icon-color-subtle );
-      width: 24px;
-      padding: 6px 3px 0px 3px;
-      text-align: center;
-      position: relative;
-      top: 3px;
+    > summary {
+
+      > span.label  {
+        max-width: calc(100% - 166px);
+      }
+
+      > span.label::before {
+        display: inline-block;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color-subtle );
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        text-align: center;
+        
+      }
+
+      /**
+      *
+      * Axis Buttons
+      *
+      */
+      > span.attributeUiAxisButton,
+      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+        display: block;
+        float: inline-end;
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color-subtle );
+      }
+
+      > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
+        color: var( --huey-icon-color-highlight );
+      }
+
+      .attributeUiAxisButton > input[type=checkbox] {
+        display: none;
+      }
+      
+      > .attributeUiAxisButton[data-axis=rows]::before {
+        /* table-column */
+        /* 
+          It may seem backward that we're using the table-column icon for the rows axis, 
+          but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+        */
+        content: "\faff";
+      }
+      
+      > .attributeUiAxisButton[data-axis=columns]::before {
+        /* table-row */
+        /* 
+          It may seem backward that we're using the table-row icon for the columns axis, 
+          but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+        */
+        content: "\fb00";
+      }
+
+      > .attributeUiAxisButton[data-axis=cells]::before {
+        /* layout grid */
+        content: "\edba";
+      }
+
+      > span.attributeUiAxisButton {
+        visibility:hidden;
+      }
+      
+      > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
+        color: var( --huey-icon-color-highlight );
+      }
+
+      > .attributeUiAxisButton[data-axis=filters]::before {
+        /* filter-plus */
+        /* content: "\fa02"; */
+        /* filter */
+        content: "\eaa5";
+      }
+      
+      > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
+        /* filter-x */
+        /* content: "\fa04"; */
+        /* filter-off */
+        content: "\ed2c";
+      }
+      
     }
-    
+        
     > summary:hover  > span.label::before {
       color: var( --huey-icon-color-highlight );
     }
-    
-    > summary > span.label  {
-      max-width: calc(100% - 166px);
-    }
-    
+        
     /**
     * folder icons
     */
@@ -342,81 +414,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
     /* logical-and */
     content: "\f240";
-  }
-
-  details {
-    > summary {
-
-      /**
-      *
-      * Axis Buttons
-      *
-      */
-      > span.attributeUiAxisButton,
-      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
-        display: block;
-        float: inline-end;
-        width: 24px;
-        padding: 6px 3px 0px 3px;
-        font-family: var( --huey-icon-font-family ) !important;
-        font-size: var( --huey-icon-medium );
-        color: var( --huey-icon-color-subtle );
-      }
-
-      > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
-        color: var( --huey-icon-color-highlight );
-      }
-
-      .attributeUiAxisButton > input[type=checkbox] {
-        display: none;
-      }
-      
-      > .attributeUiAxisButton[data-axis=rows]::before {
-        /* table-column */
-        /* 
-          It may seem backward that we're using the table-column icon for the rows axis, 
-          but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
-        */
-        content: "\faff";
-      }
-      
-      > .attributeUiAxisButton[data-axis=columns]::before {
-        /* table-row */
-        /* 
-          It may seem backward that we're using the table-row icon for the columns axis, 
-          but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
-        */
-        content: "\fb00";
-      }
-
-      > .attributeUiAxisButton[data-axis=cells]::before {
-        /* layout grid */
-        content: "\edba";
-      }
-
-      > span.attributeUiAxisButton {
-        visibility:hidden;
-      }
-      
-      > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
-        color: var( --huey-icon-color-highlight );
-      }
-
-      > .attributeUiAxisButton[data-axis=filters]::before {
-        /* filter-plus */
-        /* content: "\fa02"; */
-        /* filter */
-        content: "\eaa5";
-      }
-      
-      > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
-        /* filter-x */
-        /* content: "\fa04"; */
-        /* filter-off */
-        content: "\ed2c";
-      }
-
-    }
   }
 
   /**
