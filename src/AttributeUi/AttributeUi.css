@@ -28,11 +28,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       top: 3px;
     }
     
-    > summary:hover::before {
+    > summary:hover  > span.label::before {
       color: var( --huey-icon-color-highlight );
     }
     
-    > summary > .label  {
+    > summary > span.label  {
       max-width: calc(100% - 166px);
     }
     
