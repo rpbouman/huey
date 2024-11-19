@@ -86,27 +86,31 @@ class QueryAxisItem {
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
 
     if (axisItem.axis === QueryModel.AXIS_FILTERS) {
-      if (axisItem.filter === undefined || axisItem.filter.values === undefined) {
-        return 'No filter set'
-      }
+      caption = 'No filters set.';
       var filter = axisItem.filter;
-      var values = filter.values;
-      var valueKeys = Object.keys(values);
-      var valueLabels = [];
-      var toValues = filter.toValues;
-      var toValueKeys = toValues? Object.keys(toValues) : undefined;
-      for (var i = 0; i < valueKeys.length; i++){
-        var valueKey = valueKeys[i];
-        var valueObject = values[valueKey];
-        var valueLabel = valueObject.label;
-        if (toValueKeys && i < toValueKeys.length){
-          var toValueKey = toValueKeys[i];
-          var toValueObject = toValues[toValueKey];
-          valueLabel += ' - ' + toValueObject.label;
+      if (filter) {
+        var values = filter.values;
+        if (values) {
+          var valueKeys = Object.keys(values);
+          if (valueKeys.length){
+            var valueLabels = [];
+            var toValues = filter.toValues;
+            var toValueKeys = toValues? Object.keys(toValues) : undefined;
+            for (var i = 0; i < valueKeys.length; i++){
+              var valueKey = valueKeys[i];
+              var valueObject = values[valueKey];
+              var valueLabel = valueObject.label;
+              if (toValueKeys && i < toValueKeys.length){
+                var toValueKey = toValueKeys[i];
+                var toValueObject = toValues[toValueKey];
+                valueLabel += ' - ' + toValueObject.label;
+              }
+              valueLabels.push(valueLabel);
+            }
+            caption = `${filter.filterType} ${valueLabels.join('\n')}`;
+          }
         }
-        valueLabels.push(valueLabel);
       }
-      caption = `${filter.filterType} ${valueLabels.join('\n')}`;
     }
 
     return caption;
