@@ -213,8 +213,7 @@ class QueryUi {
     var title;
     if (
       axisItem.axis === QueryModel.AXIS_FILTERS && !axisItem.filter || 
-      !axisItem.filter.values || 
-      Object.keys(axisItem.filter.values).length === 0
+      axisItem.filter && Object.keys(axisItem.filter.values).length === 0
     ) {
       title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
     }
