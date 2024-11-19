@@ -208,6 +208,21 @@ class QueryUi {
     
     return document.querySelector(cssSelector);
   }
+  
+  static #getQueryAxisItemUiTitle(axisItem){
+    var title;
+    if (
+      axisItem.axis === QueryModel.AXIS_FILTERS && !axisItem.filter || 
+      !axisItem.filter.values || 
+      Object.keys(axisItem.filter.values).length === 0
+    ) {
+      title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
+    }
+    else {
+      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+    }
+    return title;
+  }
 
   #createQueryAxisItemUi(axisItem){
     var axisId = axisItem.axis;
@@ -227,13 +242,7 @@ class QueryUi {
     }
     itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
     
-    var title;
-    if (axisId === QueryModel.AXIS_FILTERS && !axisItem.filter || !axisItem.values || !axisItem.values.length) {
-      title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
-    }
-    else {
-      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
-    }
+    var title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
     itemUi.setAttribute('title', title);
     itemUi.setAttribute('data-column_name',  axisItem.columnName);
 
