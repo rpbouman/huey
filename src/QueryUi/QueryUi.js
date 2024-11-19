@@ -339,20 +339,37 @@ class QueryUi {
 
   #queryModelChangeHandler(event) {
     var eventData = event.eventData;
-    // TODO: examine the event Data and figure out if we have to update the entire ui or just bits of it.
-    this.#updateQueryUi();
-
+    var needsUpdate = false;
     if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var display;
-        if (eventData.propertiesChanged.datasource.newValue) {
-          display = '';
+      needsUpdate = true;
+    }
+    else
+    if (eventData.axesChanged){
+      var axisChangeInfo = eventData.axesChanged[QueryModel.AXIS_FILTERS];
+      if (axisChangeInfo){
+        if (
+          axisChangeInfo.added && axisChangeInfo.added.length ||
+          axisChangeInfo.removed && axisChangeInfo.removed.length
+        ) {
+          needsUpdate = true;
         }
-        else {
-          display = 'none';
+        else
+        if (axisChangeInfo.changed){
+          for (var itemId in axisChangeInfo.changed){
+            var itemChangeInfo = axisChangeInfo.changed[itemId];
+            if (itemChangeInfo.filter){
+              needsUpdate = true;
+            }
+          }
         }
-        this.getDom().style.display = display;
       }
+      else {
+        needsUpdate = true;
+      }
+    }
+    
+    if (needsUpdate){
+      this.#updateQueryUi();
     }
     
     // if a filter was added by the user, then we want to pop up the filter Dialog
@@ -364,7 +381,7 @@ class QueryUi {
       var filters = axesChanged[QueryModel.AXIS_FILTERS];
       if (filters) {
         var filterItems = filters.added;
-        if (filterItems) {
+        if (filterItems && filterItems.length === 1) {
           filterItems = filterItems.filter(function(filterItem){
             var filter = filterItem.filter;
             if (!filter) {
@@ -551,7 +568,7 @@ class QueryUi {
         // if we're not dragging over an item but are dragging over an axis,
         // and the axis' last item is the same as  the dragged item,
         // then dropping wouldn't change the query, so indicate drop is not allowed.
-        if (existingId && items && items.lastChild.id === existingId) {
+        if (existingId && items && items.lastChild && items.lastChild.id === existingId) {
           dropEffect = 'none';
         }
         if (prevElements && prevElements.item){

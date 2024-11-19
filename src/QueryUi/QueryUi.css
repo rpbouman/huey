@@ -5,6 +5,10 @@
   pointer-events: none;
 }
 
+body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea > #queryUi {
+  display: none;
+}  
+
 .queryUi {
   display: flex;
   flex-direction: column;

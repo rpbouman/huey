@@ -854,6 +854,24 @@ class QueryModel extends EventEmitter {
     return removedItem;
   }
 
+  static #getAxisItemChangeInfo(queryModelItem, propertyName, newValue){
+    var itemChangeInfo = {}, propertyChangeInfo = {};
+    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryModelItem);
+    itemChangeInfo[itemId] = propertyChangeInfo;
+    propertyChangeInfo[propertyName] = {
+      oldValue: queryModelItem[propertyName],
+      newValue: newValue
+    };
+
+    var axesChangeInfo = {};
+    var axisId = queryModelItem.axis;
+    axesChangeInfo[axisId] = {
+      changed: itemChangeInfo
+    };
+    
+    return axesChangeInfo;
+  }
+
   toggleTotals(queryItemConfig, value){
     if (Boolean(value) !== value) {
       return;
@@ -866,12 +884,15 @@ class QueryModel extends EventEmitter {
     var axisId = queryModelItem.axis;
     var axis = this.getQueryAxis(axisId);
     var items = axis.getItems();
-    items[queryModelItem.index].includeTotals = value;
-
-    var axesChangeInfo = {};
-    axesChangeInfo[axisId] = {
-      changed: [items[queryModelItem.index]]
-    };
+    var item = items[queryModelItem.index];
+    
+    var propertyName = 'includeTotals';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      item, 
+      propertyName, 
+      value
+    );
+    item[propertyName] = value;
 
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
@@ -973,7 +994,8 @@ class QueryModel extends EventEmitter {
   }
 
   setQueryAxisItemFilter(queryAxisItem, filter){
-    if (queryAxisItem.axis !== QueryModel.AXIS_FILTERS){
+    var axisId = queryAxisItem.axis;
+    if (axisId !== QueryModel.AXIS_FILTERS){
       throw new Error(`Item is not a filter axis item!`);
     }
     
@@ -994,15 +1016,16 @@ class QueryModel extends EventEmitter {
     else {
       filter = undefined;
     }
-    items[queryModelItem.index].filter = filter;
-
-    var axesChangeInfo = {};
-    axesChangeInfo[queryAxisItem.axis] = {
-      changed: {
-        changed: [queryAxisItem]
-      }
-    };
-
+    var queryAxisItem = items[queryModelItem.index];
+    
+    var propertyName = 'filter';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      queryAxisItem, 
+      propertyName, 
+      filter
+    );
+    queryAxisItem[propertyName] = filter;
+    
     this.fireEvent('change', {
       axesChanged: axesChangeInfo
     });
@@ -1020,7 +1043,19 @@ class QueryModel extends EventEmitter {
 
     var axis = this.getQueryAxis(queryModelItem.axis);
     var items = axis.getItems();
-    items[queryModelItem.index].filter.toggleState = toggleState;
+    var item = items[queryModelItem.index];
+
+    var propertyName = 'toggleState';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      item, 
+      propertyName, 
+      toggleState
+    );
+    item.filter[propertyName] = toggleState;
+    
+    this.fireEvent('change', {
+      axesChanged: axesChangeInfo
+    })
   }
 
   /**

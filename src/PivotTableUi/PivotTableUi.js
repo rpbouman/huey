@@ -287,8 +287,27 @@ class PivotTableUi extends EventEmitter {
         }
 
         if (axesChangedInfo[QueryModel.AXIS_FILTERS].changed){
-          needsUpdate = true;
-          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+          var axisChangeInfo = axesChangedInfo[QueryModel.AXIS_FILTERS].changed;
+          if (
+            axisChangeInfo.added && axisChangeInfo.added.length || 
+            axisChangeInfo.removed && axisChangeInfo.removed.length
+          ) {
+            needsUpdate = true;
+          }
+          else
+          if (axisChangeInfo.changed) {
+            var itemChangeInfo = axisChangeInfo.changed;
+            for (var itemId in itemChangeInfo) {
+              var propertyChangeInfo = itemChangeInfo[itemId];
+              if (propertyChangeInfo.filter) {
+                needsUpdate = true;
+              }
+            }
+          }
+          
+          if (needsUpdate === true){
+            clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+          }
         }
       }
 
@@ -354,7 +373,9 @@ class PivotTableUi extends EventEmitter {
       return;
     }
 
-    this.updatePivotTableUi();
+    if (needsUpdate){
+      this.updatePivotTableUi();
+    }
   }
   
   #setBusy(busy){
@@ -1815,6 +1836,9 @@ class PivotTableUi extends EventEmitter {
     return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
   }
   
+  contextMenuItemClicked(event) {
+    debugger;
+  }
 }
 
 var pivotTableUi;
@@ -1826,4 +1850,5 @@ function initPivotTableUi(){
     settings: settings
   });
   
+  //var pivotTableUiContextMenu = new ContextMenu(pivotTableUi, 'pivotTableContextMenu');
 }
