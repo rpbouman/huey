@@ -1195,7 +1195,7 @@ class QueryModel extends EventEmitter {
       this.#sampling = sampling;
     }
     catch(e){
-      debugger;
+      showErrorDialog(e);
     }
     finally {
       if (canAssignSettings){
