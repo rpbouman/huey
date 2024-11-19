@@ -45,7 +45,7 @@ class TupleSet extends DataSetComponent {
       filterAxisItems,
       includeCountAll,
       undefined,
-      undefined,
+      'FIRST',
       sampling
     );
     return sql;
