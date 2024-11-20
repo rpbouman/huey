@@ -254,14 +254,24 @@ class QueryAxisItem {
     return dataType;
   }
 
-  static #getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem){
+  // includeDisabledItems: if true then return all values, if not true then exclude values that have enabled===false;
+  static #getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem, includeDisabledItems){
     var sql;
     var filter = queryAxisItem.filter;
 
     var values = filter.values;
     var toValues = filter.toValues;
 
-    var valueLiterals = Object.keys(values).map(function(key){
+    var keys = Object.keys(values);
+    
+    if (includeDisabledItems !== true) {
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+    }
+    
+    var valueLiterals = keys.map(function(key){
       var entry = values[key];
       return entry.literal;
     });
