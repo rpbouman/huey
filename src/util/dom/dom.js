@@ -18,6 +18,20 @@ function createEl(tagName, attributes, content){
   return el;
 }
 
+function instantiateTemplate(templateId, instanceId) {
+  var template = byId(templateId);
+  var clone = template.content.cloneNode(true);
+  var index = 0, node;
+  do {
+    node = clone.childNodes.item(index++);
+  } while (node && node.nodeType !== node.ELEMENT_NODE);
+  
+  if (instanceId !== undefined) {
+    node.setAttribute('id', instanceId);
+  }
+  return node;
+}
+
 function setAttribute(dom, attName, attValue){
   switch (attName) {
     case 'style':

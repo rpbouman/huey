@@ -458,6 +458,25 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         > ol {
           
           > li {
+            
+            > label:has( > input[type=checkbox] ):before {
+              display: inline-block;
+              width: 16px;
+              padding: 0px 2px 0px 2px;
+              font-family: var( --huey-icon-font-family ) !important;
+              font-size: var( --huey-icon-medium );
+            }
+            
+            > label:has( > input[type=checkbox] ):before {
+              content: "\eb2c";
+              color: var( --huey-icon-color-subtle );
+            }
+            
+            > label:has( > input[type=checkbox]:checked ):before {
+              content: "\eba6";
+              color: var( --huey-icon-color );
+            }
+            
           }
         }
       }

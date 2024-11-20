@@ -19,13 +19,22 @@ class QueryUi {
 
   #queryUiClickHandler(event){
     var target = event.target;
-    if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT'){
-      return;
+    var tagName = target.tagName;
+    switch (tagName){
+      case 'BUTTON':
+      case 'INPUT':
+      case 'LABEL':
+      case 'SPAN':
+        break;
+      default:
+        return;
     }
     var node = target;
     var axis, queryAxisItemUi;
     var isClearAxisAction, isPrimaryAxisAction, isAxisItemAction;
     var dom = this.getDom();
+    var dataValueKey, dataValueEnabled;
+    
     while (node && node !== dom){
       switch (node.tagName){
         case 'SECTION':
@@ -33,6 +42,9 @@ class QueryUi {
           break;
         case 'LI':
           queryAxisItemUi = node;
+          if (!dataValueKey) {
+            dataValueKey = node.getAttribute('data-value');
+          }
           break;
       }
       node = node.parentNode;
@@ -43,40 +55,51 @@ class QueryUi {
     }
 
     var targetId = target.getAttribute('id');
-    if (targetId.endsWith('-axis-primary-action')) {
-      this.#axisPrimaryActionButtonClicked(axis);
-    }
-    else
-    if (targetId.endsWith('-clear-axis')){
-      this.#axisClearButtonClicked(axis);
+    if (targetId) {
+      if (targetId.endsWith('-axis-primary-action')) {
+        this.#axisPrimaryActionButtonClicked(axis);
+      }
+      else
+      if (targetId.endsWith('-clear-axis')){
+        this.#axisClearButtonClicked(axis);
+      }
     }
 
     if (!queryAxisItemUi){
       return;
     }
 
-    if (targetId.endsWith('-move-left')) {
-      this.#queryAxisUiItemMoveLeftClicked(queryAxisItemUi);
-    }
-    else
-    if (targetId.endsWith('-move-right')) {
-      this.#queryAxisUiItemMoveRightClicked(queryAxisItemUi);
-    }
-    else
-    if (targetId.endsWith('-remove-from-axis')){
-      this.#queryAxisUiItemRemoveClicked(queryAxisItemUi);
-    }
-    else
-    if (targetId.endsWith('-move-to-other-axis')){
-      this.#queryAxisUiItemMoveToAxisClicked(queryAxisItemUi);
-    }
-    else
-    if (targetId.endsWith('-edit-filter-condition')){
-      this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
-    }
-    else
-    if (targetId.endsWith('-toggle-totals')){
-      this.#queryAxisUiItemToggleTotals(queryAxisItemUi);
+    if (targetId) {
+      if (targetId.endsWith('-move-left')) {
+        this.#queryAxisUiItemMoveLeftClicked(queryAxisItemUi);
+      }
+      else
+      if (targetId.endsWith('-move-right')) {
+        this.#queryAxisUiItemMoveRightClicked(queryAxisItemUi);
+      }
+      else
+      if (targetId.endsWith('-remove-from-axis')){
+        this.#queryAxisUiItemRemoveClicked(queryAxisItemUi);
+      }
+      else
+      if (targetId.endsWith('-move-to-other-axis')){
+        this.#queryAxisUiItemMoveToAxisClicked(queryAxisItemUi);
+      }
+      else
+      if (targetId.endsWith('-edit-filter-condition')){
+        this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
+      }
+      else
+      if (targetId.endsWith('-toggle-totals')){
+        this.#queryAxisUiItemToggleTotals(queryAxisItemUi);
+      }
+      else 
+      if (dataValueKey){
+        this.#queryAxisUiItemToggleEnableDataValue(
+          queryAxisItemUi,
+          dataValueKey
+        );
+      }
     }
   }
 
@@ -131,6 +154,21 @@ class QueryUi {
     var value = toggleTotalsCheckbox.checked;
     var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     queryModel.toggleTotals(queryModelItem, value);
+  }
+  
+  #queryAxisUiItemToggleEnableDataValue(queryAxisItemUi, dataValueKey){
+    var id = queryAxisItemUi.getAttribute('id');
+    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    var filter = queryModelItem.filter;
+    var values = filter.values;
+    var valueObject = values[dataValueKey];
+    if (valueObject.enabled === false) {
+      delete valueObject.enabled;
+    }
+    else {
+      valueObject.enabled = false;
+    }
+    this.#queryModel.setQueryAxisItemFilter(queryModelItem, filter);
   }
 
   #updateQueryUi(){
@@ -239,7 +277,7 @@ class QueryUi {
       default:
         itemUiTemplateId = 'queryUiAxisItem';
     }
-    itemUi = this.#instantiateTemplate(itemUiTemplateId, id);
+    itemUi = this.#instantiateQueryUiTemplate(itemUiTemplateId, id);
     
     var title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
     itemUi.setAttribute('title', title);
@@ -302,19 +340,27 @@ class QueryUi {
       var valueKey = valueKeys[i];
       var valueObject = values[valueKey];
       
+      var valueId = itemUi.id + '-' + i;
       var valueLabel = valueObject.label;
+      
+      var valueUi = instantiateTemplate('queryUiFilterAxisItemValue');
+      var label = valueUi.querySelector('label');
+      label.setAttribute('for', valueId);
+      valueUi.setAttribute('data-value-index', i);
+      valueUi.setAttribute('data-value', valueKey);
+      var checkbox = label.querySelector('input[type=checkbox]');
+      checkbox.setAttribute('id', valueId);
+      checkbox.checked = valueObject.enabled !== false;
       if (toValueKeys && i < toValueKeys.length){
         var toValueKey = toValueKeys[i];
         var toValueObject = toValues[toValueKey];
-        
-        valueLabel += ' - ' + toValueObject.label;
+        valueUi.setAttribute('data-to-value', toValueKey);
       }
-      
-      var valueUi = createEl('li', {
-      }, valueLabel);
+
+      var labelSpan = label.querySelector('span');
+      labelSpan.textContent = valueLabel;
       valuesUi.appendChild(valueUi);
     }
-    
   }
   
   #filterItemToggleHandler(event){
@@ -659,16 +705,8 @@ class QueryUi {
     }
   }
 
-  #instantiateTemplate(templateId, instanceId) {
-    var template = byId(templateId);
-    var clone = template.content.cloneNode(true);
-    var index = 0;
-    var node;
-    do {
-      var node = clone.childNodes.item(index++);
-    } while (node && node.nodeType !== node.ELEMENT_NODE);
-    node.setAttribute('id', instanceId);
-
+  #instantiateQueryUiTemplate(templateId, instanceId) {
+    var node = instantiateTemplate(templateId, instanceId);
     //
     var buttons = node.querySelectorAll('menu > label > button, menu > label > input[type=checkbox]');
     for (var i = 0; i < buttons.length; i++){
@@ -724,7 +762,7 @@ class QueryUi {
   #renderAxis(config){
     var axisId = config.axisId;
     var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
-    var axis = this.#instantiateTemplate(this.#queryAxisTemplateId, this.#id + '-' + axisId);
+    var axis = this.#instantiateQueryUiTemplate(this.#queryAxisTemplateId, this.#id + '-' + axisId);
     
     var itemArea = axis.querySelector('ol');
 

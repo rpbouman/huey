@@ -58,7 +58,12 @@ class SqlQueryGenerator {
       if (!values){
         return false;
       }
-      if (!Object.keys(values).length){
+      var keys = Object.keys(values);
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+      if (!keys.length){
         return false;
       }
       return true;
@@ -93,7 +98,25 @@ class SqlQueryGenerator {
   static #getConditionForFilterItems(filterItems, tableAlias){
     return filterItems
     .filter(function(filterItem){
-      return filterItem.filter && Object.keys(filterItem.filter.values).length
+      var filter = filterItem.filter;
+      if (!filter) {
+        return false;
+      }
+      
+      var values = filter.values;
+      if (!values){
+        return false;
+      }
+      
+      var keys = Object.keys(values);
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+      if (keys.length === 0) {
+        return false;
+      }
+      return true;
     })
     .map(function(filterItem){
       return QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
