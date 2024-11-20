@@ -442,10 +442,10 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
     content: "\faff";
   }
 
-  /* filter with no items does not have expandable element */
   > section[data-axis=filters] > ol {
     > li {
 
+      /* filter with no items does not have expandable element */
       > details:has( > ol:empty ) > summary {
         list-style: none;
       }
@@ -526,6 +526,34 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
     > li[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {
       /* filter exclamation */
       content: "\fb82";
+    }
+    
+    /* 
+    * issue https://github.com/rpbouman/huey/issues/245: 
+    * label text indicating the filter type.
+    */
+    > li[data-filterType] > details > header{
+      margin: .5em 0em .5em 0em;
+      font-weight: bold;
+    }
+    
+    > li[data-filterType=in] > details > header:before {
+      content: 'Include:';
+    }
+    > li[data-filterType=notin] > details > header:before {
+      content: 'Exclude:';
+    }
+    > li[data-filterType=like] > details > header:before {
+      content: 'Like:';
+    }
+    > li[data-filterType=notlike] > details > header:before {
+      content: 'Not Like:';
+    }
+    > li[data-filterType=between] > details > header:before {
+      content: 'Between:';
+    }
+    > li[data-filterType=notbetween] > details > header:before {
+      content: 'Not Between:';
     }
     
   }

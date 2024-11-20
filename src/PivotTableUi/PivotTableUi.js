@@ -270,7 +270,9 @@ class PivotTableUi extends EventEmitter {
         }
       }
 
-      if (axesChangedInfo[QueryModel.AXIS_FILTERS] !== undefined) {
+      var axisChangeInfo = axesChangedInfo[QueryModel.AXIS_FILTERS];
+      if (axisChangeInfo !== undefined) {
+        
         if (axesChangedInfo[QueryModel.AXIS_FILTERS].added) {
           needsUpdate = axesChangedInfo[QueryModel.AXIS_FILTERS].added.some(function(item){
             var changed = item.filter && Object.keys(item.filter.values).length > 0;
@@ -281,33 +283,22 @@ class PivotTableUi extends EventEmitter {
           });
         }
 
-        if (axesChangedInfo[QueryModel.AXIS_FILTERS].removed) {
+        if (axisChangeInfo.removed) {
           needsUpdate = true;
           clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
         }
 
-        if (axesChangedInfo[QueryModel.AXIS_FILTERS].changed){
-          var axisChangeInfo = axesChangedInfo[QueryModel.AXIS_FILTERS].changed;
-          if (
-            axisChangeInfo.added && axisChangeInfo.added.length || 
-            axisChangeInfo.removed && axisChangeInfo.removed.length
-          ) {
-            needsUpdate = true;
-          }
-          else
-          if (axisChangeInfo.changed) {
-            var itemChangeInfo = axisChangeInfo.changed;
-            for (var itemId in itemChangeInfo) {
-              var propertyChangeInfo = itemChangeInfo[itemId];
-              if (propertyChangeInfo.filter) {
-                needsUpdate = true;
-              }
+        if (axisChangeInfo.changed){
+          for (var itemId in axisChangeInfo.changed){
+            var itemChangeInfo = axisChangeInfo.changed[itemId];
+            if (itemChangeInfo.filter){
+              needsUpdate = true;
             }
           }
-          
-          if (needsUpdate === true){
-            clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
-          }
+        }
+
+        if (needsUpdate === true){
+          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
         }
       }
 
