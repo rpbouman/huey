@@ -455,9 +455,21 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         > summary::marker {
         }
         
-        > ol {
+        > ol[role=menu] {
           
-          > li {
+          > li[role=menuitem] {
+            
+            display: list-item;
+            
+            > label {
+              display: inline-block;
+              width: 100%;
+              
+              > span {
+                display: inline-block;
+                width: 100%;
+              }
+            }
             
             > label:has( > input[type=checkbox] ):before {
               display: inline-block;
@@ -478,7 +490,17 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
             }
             
           }
+          
+          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover {
+            background-color: var( --huey-light-background-color );
+          }
+
+          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover > label::before {
+            color: var( --huey-icon-color-highlight );
+          }
+          
         }
+        
       }
       
       > details:has( ol:empty ) > summary > span:after {

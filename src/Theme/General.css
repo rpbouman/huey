@@ -300,7 +300,10 @@ menu[role=menu] > li[role=menuitem] > label > button {
 * this is to ensure that if the user clicks somewhere on the item, it will register as a click on the button inside the label.
 * if you don't do this, user has to click inside the label.
 */
-menu[role=menu] > li[role=menuitem] > label:has( > button ){
+menu[role=menu] > li[role=menuitem] > label:has( > button )
+menu[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
+ol[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
+{
   display: block;
   width: 100%;
 }
@@ -309,7 +312,8 @@ menu[role=menu] > li[role=menuitem] > label:has( > button ){
 header[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > input[type=file] )::before,
-menu[role=menu] > li[role=menuitem] > label:has( > button)::before 
+menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
+*[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox])::before 
 {  
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
@@ -322,7 +326,8 @@ menu[role=menu] > li[role=menuitem] > label:has( > button)::before
 header[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > input[type=file] )::before,
-menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before
+menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before,
+*[role=menu] > li[role=menuitem]:hover > label:has( > input[type=checkbox])::before
 {
   color: var( --huey-icon-color-highlight );
 }
