@@ -110,7 +110,17 @@ class QueryUi {
 
   openFilterDialogForQueryModelItem(queryModelItem){
     var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
-    this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+    // when we're restoring page state, the queryUi may be populated but hidden.
+    // in this case we need to wait a bit until the query ui is rendered
+    // else the filter dialog will pop up at the entirely wrong position.
+    if (queryAxisItemUi.clientWidth === 0){
+      setTimeout(function(){
+        this.openFilterDialogForQueryModelItem(queryModelItem);
+      }.bind(this), 100);
+    }
+    else {
+      this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+    }
   }
 
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
