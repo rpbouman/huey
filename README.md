@@ -100,6 +100,8 @@ By default, the cell headers appear on the Columns axis, below the last Column A
 The cell headers can also by placed on the Rows axis, in which case they appear right to the values of the last row axis item:
 ![image](https://github.com/user-attachments/assets/e66b033a-e345-4ec5-ad03-9b353f97f5d5)
 
+(Note that for this particular example, which has only one aggregator on the cells-axis, its placement on either cells or rows doesn't make much difference.)
+
 ### Placing Attributes
 Attributes can be placed either by clicking one of the desired axis-placement buttons, which appear to the left of the attribute name.
 Alternatively, you can drag attributes form the Attributes sidebar to the desired position on the axis in the Query interface.
