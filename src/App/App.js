@@ -137,7 +137,7 @@ function initApplication(){
     document.title = 'Huey - ' + title;
 
     Routing.updateRouteFromQueryModel(queryModel);
-  }, null, 1000);
+  }, null, 50);
 
   var tupleNumberFormatter = createNumberFormatter(0).format;
   pivotTableUi.addEventListener('updated', async function(e){

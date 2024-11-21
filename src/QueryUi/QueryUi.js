@@ -180,19 +180,75 @@ class QueryUi {
     }
     this.#queryModel.setQueryAxisItemFilter(queryModelItem, filter);
   }
+  
+  #getAxisUiElements(){
+    var dom = this.getDom();
+    var axisUiElements = dom.querySelectorAll('SECTION[data-axis]');
+    return axisUiElements;
+  }
 
+  #checkOverflowTimeout = undefined;
   #updateQueryUi(){
     var dom = this.getDom();
     dom.setAttribute('data-cellheadersaxis', this.#queryModel.getCellHeadersAxis());
-    var axes = dom.childNodes;
+    var axes = this.#getAxisUiElements();
     for (var i = 0; i < axes.length; i++){
       var axis = axes.item(i);
-      if (axis.nodeType !== 1 || axis.tagName !== 'SECTION') {
-        continue;
-      }
       var axisId = axis.getAttribute('data-axis');
       var queryModelAxis = queryModel.getQueryAxis(axisId);
       this.#updateQueryAxisUi(axis, queryModelAxis);
+    }
+    
+    if (this.#checkOverflowTimeout !== undefined) {
+      clearTimeout(this.#checkOverflowTimeout);
+      this.#checkOverflowTimeout = undefined;
+    }
+    if (dom.clientHeight === 0) {
+      return;
+    }
+    setTimeout(function(){
+      this.#checkOverflow();
+    }.bind(this), 100);
+  }
+
+  #checkOverflow(axisUi){
+    if (axisUi) {
+      var ol = axisUi.getElementsByTagName('OL').item(0);
+      // this is the explicitly set height. If it is not NaN, it means the element has been resized.
+      var style = ol.style;
+      var height = parseInt(style.height, 10);
+
+      // this is the minimum height.
+      var computedStyle = getComputedStyle(ol);
+      var minHeight = parseInt(computedStyle.minHeight, 10);
+
+      // this is the actual, runtime height of the element
+      var clientHeight = ol.clientHeight;
+
+      style.height = '';
+      var resize, overflow;
+      if (ol.clientHeight > minHeight) {
+        // restor height
+        if (!isNaN(height)) {
+          style.height = height + 'px';
+        }
+        resize = 'vertical';
+        overflow = 'scroll';
+      }
+      else {
+        // this is perfect - we can remove the resizer because the user doesn't need it.
+        resize = 'none';
+        overflow = 'auto';
+      }
+      style.resize = resize;
+      style.overflowY = overflow;
+      return;
+    }
+    
+    var axes = this.#getAxisUiElements();
+    for (var i = 0; i < axes.length; i++){
+      var axisUi = axes.item(i);
+      this.#checkOverflow(axisUi);
     }
   }
 
@@ -425,7 +481,9 @@ class QueryUi {
     }
     
     if (needsUpdate){
-      this.#updateQueryUi();
+      setTimeout(function(){
+        this.#updateQueryUi();
+      }.bind(this), 100);
     }
     
     // if a filter was added by the user, then we want to pop up the filter Dialog
