@@ -96,15 +96,24 @@ Likewise, the attribute "dispatching_base_num" is placed on the Rows axis, and t
 Finally, the generic "count" aggregator is placed on the cells axis. This causes the value of the aggregate to be computed for each combination of values of the rows- and columns-headings.
 The aggregated value are placed in the cells at the intersection of the corresponding row and column.
 
+By default, the cell headers appear on the Columns axis, below the last Column Axis item (if any).
+The cell headers can also by placed on the Rows axis, in which case they appear right to the values of the last row axis item:
+![image](https://github.com/user-attachments/assets/e66b033a-e345-4ec5-ad03-9b353f97f5d5)
+
+### Placing Attributes
 Attributes can be placed either by clicking one of the desired axis-placement buttons, which appear to the left of the attribute name.
 Alternatively, you can drag attributes form the Attributes sidebar to the desired position on the axis in the Query interface.
 
+Once the items are placed in the rows and column axes, you can move and flip the axes by clicking on the axis icon that appears right before the "Rows" and "Columns" axis header text.
+Clicking on the axis icon of the Cells axis will affect the placement of the cell headers on either of the Rows- and Columns- axes. 
+
+### Query Execution
 After changing the Query, it must be executed so the pivot table may be updated. 
 If the "Autorun query" checkbox on the toolbar is checked, this will happen automatically.
 If the "Autorun query" checkbox is not checked, then you can execute the query by clicking the "play" button that appears just in front of the checkbox label:
 ![image](https://github.com/user-attachments/assets/0d32ac87-25fa-49d2-8d1b-31e615e8378c)
 
-#### Derived Attributes
+### Derived Attributes
 Right before the attribute item, there is a widget to expand the Attribute so its derived Attributes and Aggregates are revealed.
 
 ![image](https://github.com/user-attachments/assets/db9e89c5-e7c3-44af-956b-9393dad6723c)
