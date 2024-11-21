@@ -17,8 +17,7 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - It's free! Huey is released under the MIT license, just like DuckDB.
 
 ### Limitations
-- Developed on latest/recent versions of Google Chrome. Most features will work on other major browsers as well, browser compatibility is currently not the highest priority. This is not any judgement on browser quality but merely a matter of the most effective use of time and resources. That said, this does not mean we won't want to fix browser compatibility issues. If you spot them, please report an issue and we'll do our best to fix it. Or better yet: if you have a fix yourself, send a pull request.
-- Currently supports only local files. ("Local files" are files that logically exist in the local file system. This includes files from network drives and cloud drives like Google Drive and Microsoft OneDrive)
+- Huey is based on DuckDB WASM. DuckDB is awesome! However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. That said, DuckDB WASM is still incredibly fast when compared to any in-browser alternative. 
 
 ## Getting started
 1) [Checkout](https://github.com/rpbouman/huey.git) or [Download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) from github
@@ -77,14 +76,35 @@ But native duckdb tables, as well as views based on duckdb base tables work marv
 ## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1)
  . After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
-You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
 
+### Attributes, Derived Attributes, and Aggregates
+You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table. 
 ![image](https://github.com/user-attachments/assets/d4caf74b-64ce-4722-ad55-d31cf192bff6)
 
 The pivot table has two axes for placing attribute values:
 1) Attributes appearing on the horizontal axis are used to generate column headers. For this reason the horizontal axis is also known as the 'columns'-axis.
 2) attributes appearing on the vertical axis are used to generate row headers. For this reason the vertical axis is also known as the 'rows'-axis.
 
+The selection of attributes and their placement on the axis is represented by the Query interface. The following screenshot showing the Attribute Sidebar (left), the Query Interface (top right), and the pivot table (bottom right) may help to explain:
+![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
+
+The screenshot shows a simple query, with one attribute "hvfhs_license_num" placed on the columns axis of the Query interface. 
+Placing the attribute on the Columns axis causes its values to be shown as column headings of the pivot table.
+
+Likewise, the attribute "dispatching_base_num" is placed on the Rows axis, and this causes its values to show as row headings in the pivot table.
+
+Finally, the generic "count" aggregator is placed on the cells axis. This causes the value of the aggregate to be computed for each combination of values of the rows- and columns-headings.
+The aggregated value are placed in the cells at the intersection of the corresponding row and column.
+
+Attributes can be placed either by clicking one of the desired axis-placement buttons, which appear to the left of the attribute name.
+Alternatively, you can drag attributes form the Attributes sidebar to the desired position on the axis in the Query interface.
+
+After changing the Query, it must be executed so the pivot table may be updated. 
+If the "Autorun query" checkbox on the toolbar is checked, this will happen automatically.
+If the "Autorun query" checkbox is not checked, then you can execute the query by clicking the "play" button that appears just in front of the checkbox label:
+![image](https://github.com/user-attachments/assets/0d32ac87-25fa-49d2-8d1b-31e615e8378c)
+
+#### Derived Attributes
 Right before the attribute item, there is a widget to expand the Attribute so its derived Attributes and Aggregates are revealed.
 
 ![image](https://github.com/user-attachments/assets/db9e89c5-e7c3-44af-956b-9393dad6723c)
@@ -92,6 +112,8 @@ Right before the attribute item, there is a widget to expand the Attribute so it
 You can think of a derived attribute as an expression (formulae) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
 The values that are thus derived from the original attribute values can be thought of as a 'virtual' column and can appear on wither of the pivot table axes.
+
+### Aggregates
 
 Aggregates are special expressions that calculate a result on a group of attribute values. 
 Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
