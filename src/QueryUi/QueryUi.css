@@ -68,12 +68,66 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
 
 
     /* query ui axis items */
+    /*
+    
+    > ol::-webkit-scrollbar{
+    }
+        
+    > ol::-webkit-scrollbar-button {
+      background-color: var( --huey-light-background-color );
+    }
+    */
+
+    > ol::-webkit-scrollbar-button, 
+    > ol::-webkit-scrollbar{
+      border-top-right-radius: 15px;
+    }
+
+    > ol::-webkit-resizer{ 
+      /*
+      * caret-up-down
+      * https://tabler.io/icons/icon/caret-up-down
+      */
+    
+      background-image: url('data:image/svg+xml,%3Csvg%20%20xmlns=%22http://www.w3.org/2000/svg%22%20%20width=%2224%22%20%20height=%2224%22%20%20viewBox=%220%200%2024%2024%22%20%20fill=%22none%22%20%20stroke=%22currentColor%22%20%20stroke-width=%221%22%20%20stroke-linecap=%22round%22%20%20stroke-linejoin=%22round%22%20%20class=%22icon%20icon-tabler%20icons-tabler-outline%20icon-tabler-caret-up-down%22%3E%3Cpath%20stroke=%22none%22%20d=%22M0%200h24v24H0z%22%20fill=%22none%22/%3E%3Cpath%20d=%22M18%2010l-6%20-6l-6%206h12%22%20/%3E%3Cpath%20d=%22M18%2014l-6%206l-6%20-6h12%22%20/%3E%3C/svg%3E');
+      background-size: 16px;
+      border-bottom-right-radius: 15px;
+    }
+    
+    > ol::-webkit-scrollbar-corner{
+      background-color: var( --huey-light-background-color );
+      border-bottom-right-radius: 15px;
+    }
+    
+    > ol::-webkit-scrollbar-thumb {
+      background-color: var( --huey-dark-background-color );
+      border-radius: 15px;
+    }
+    > ol::-webkit-scrollbar-track {
+      background-color: var( --huey-light-background-color );
+      border-top-right-radius: 15px;
+    }
+    
     > ol {
       flex-grow: 1;
       list-style-type: none;
+      background-color: var( --huey-light-background-color );
       margin: 0px;
       padding: 0px;
       display: inline-block;
+      
+      /** 
+      * https://github.com/rpbouman/huey/issues/244 
+      * make the area where the axis items are resizeable so that if there are too many items, 
+      * the user can control how much space is allocated on the axis
+      */
+      
+      /* ensures the area can always have at least one line of items fully visible*/
+      min-height: 24px; 
+      /* allow the user to scroll through the items when not all items can fit in the area*/
+      overflow-y: scroll; 
+      /* allow the user to control the size of the area */
+      resize: vertical;
 
       border-color: var( --huey-light-border-color );
       background-color: var( --huey-light-background-color );
