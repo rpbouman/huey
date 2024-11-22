@@ -512,7 +512,9 @@ class QueryUi {
           });
           if (filterItems.length) {
             var lastFilterItem = filterItems[filterItems.length - 1];
-            this.openFilterDialogForQueryModelItem(lastFilterItem);
+            setTimeout(function(){
+              this.openFilterDialogForQueryModelItem(lastFilterItem);
+            }.bind(this), 500);
           }
         }
       }
