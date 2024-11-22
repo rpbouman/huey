@@ -449,6 +449,8 @@ class QueryUi {
     }
   }
 
+  #updateTimeout = undefined;
+  #openFilterUiTimeout = undefined;
   #queryModelChangeHandler(event) {
     var eventData = event.eventData;
     var needsUpdate = false;
@@ -481,7 +483,12 @@ class QueryUi {
     }
     
     if (needsUpdate){
-      setTimeout(function(){
+      if (this.#updateTimeout !== undefined){
+        clearTimeout(this.#updateTimeout);
+        this.#updateTimeout = undefined;
+      }
+      this.#updateTimeout = setTimeout(function(){
+        this.#updateTimeout = undefined;
         this.#updateQueryUi();
       }.bind(this), 100);
     }
@@ -512,7 +519,12 @@ class QueryUi {
           });
           if (filterItems.length) {
             var lastFilterItem = filterItems[filterItems.length - 1];
-            setTimeout(function(){
+            if (this.#openFilterUiTimeout !== undefined){
+              clearTimeout(this.#openFilterUiTimeout);
+              this.#openFilterUiTimeout = undefined;
+            }
+            this.#openFilterUiTimeout = setTimeout(function(){
+              this.#openFilterUiTimeout = undefined;
               this.openFilterDialogForQueryModelItem(lastFilterItem);
             }.bind(this), 500);
           }
