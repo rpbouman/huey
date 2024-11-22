@@ -345,47 +345,55 @@ class FilterDialog {
     }
   }
 
-  #sortValues(values){
+  #sortValueLists(valuesList, toValuesList){
+    var dataTypeInfo;
     var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
       var dataTypeInfo = getDataTypeInfo(dataType);
-      if (dataTypeInfo.isNumeric){
-        return values.sort(function(a, b){
-          a = parseFloat(a);
-          b = parseFloat(b);
-          if (a > b) {
-            return 1;
-          }
-          if (a < b) {
-            return -1;
-          }
-          return 0;
-        });
-      }
     }
-    return values.sort();
-  }
-
-  #sortValueLists(valuesList, toValuesList){
-    var sortedValuesList = {}, sortedToValuesList, toKeys;
+    var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
     var keys = Object.keys(valuesList);
-    var sortedKeys = this.#sortValues([].concat(keys));
-    if (toValuesList) {
-      sortedToValuesList = {};
-      toKeys = Object.keys(toValuesList);
-    }
-
-    sortedKeys.forEach(function(key){
-      sortedValuesList[key] = valuesList[key];
-      if (toValuesList) {
-        var toKey = toKeys[keys.indexOf(key)];
-        sortedToValuesList[toKey] = toValuesList[toKey];
+    keys.sort(function(key1, key2){
+      var valueObject1 = valuesList[key1];
+      var literal1 = valueObject1.literal;
+      var postFix = '::' + dataType;
+      var valueObject2 = valuesList[key2];
+      var literal2 = valueObject2.literal;
+      
+      if (dataTypeInfo.isNumeric){
+        literal1 = parseInt(literal1, 10);
+        literal2 = parseInt(literal2, 10);
       }
+      
+      if (literal1.startsWith('NULL::')) {
+        // nulls sort first
+        return literal2.startsWith('NULL::') ? 0 : -1;
+      }
+      else
+      if (literal2.startsWith('NULL::')){
+        return 1;
+      }
+      else
+      if (literal1 > literal2) {
+        return 1;
+      }
+      else
+      if ( literal1 < literal2) {
+        return -1;
+      }
+      return 0;
+    }).forEach(function(key){
+      sortedList[key] = valuesList[key];
+      if (!toValuesList) {
+        return;
+      }
+      sortedToList[key] = toValuesList[key];
     });
+    
 
     return {
-      valuesList: sortedValuesList,
-      toValuesList: sortedToValuesList
+      valuesList: sortedList,
+      toValuesList: sortedToList
     };
   }
 
