@@ -157,6 +157,11 @@ dialog {
   color: var( --huey-foreground-color );
 }
 
+dialog::-webkit-scrollbar-corner,
+dialog *::-webkit-scrollbar-corner {
+  background-color: var( --huey-medium-background-color );
+}
+
 dialog:popover-open,
 dialog[open] {
   display: flex;
