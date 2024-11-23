@@ -33,7 +33,7 @@ class QueryUi {
     var axis, queryAxisItemUi;
     var isClearAxisAction, isPrimaryAxisAction, isAxisItemAction;
     var dom = this.getDom();
-    var dataValueKey, dataValueEnabled;
+    var dataValueKey = null, dataValueEnabled;
     
     while (node && node !== dom){
       switch (node.tagName){
@@ -42,7 +42,7 @@ class QueryUi {
           break;
         case 'LI':
           queryAxisItemUi = node;
-          if (!dataValueKey) {
+          if (dataValueKey === null) {
             dataValueKey = node.getAttribute('data-value');
           }
           break;
@@ -94,7 +94,7 @@ class QueryUi {
         this.#queryAxisUiItemToggleTotals(queryAxisItemUi);
       }
       else 
-      if (dataValueKey){
+      if (dataValueKey !== null){
         this.#queryAxisUiItemToggleEnableDataValue(
           queryAxisItemUi,
           dataValueKey
