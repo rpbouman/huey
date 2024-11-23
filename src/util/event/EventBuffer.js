@@ -58,7 +58,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
     // Set a timeout for the final call to the handler - this kicks in after the timeout after the last event has expired.
     timeoutId = setTimeout(function(){
       timeoutId = undefined;
-      handler.call(scope ? scope : null, event);
+      handler.call(scope ? scope : null, event, undefined);
     }, timeout);
   };
   
