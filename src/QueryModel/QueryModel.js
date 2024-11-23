@@ -297,21 +297,26 @@ class QueryAxisItem {
     };
   }
 
-  static getFilterConditionSql(queryAxisItem, alias){
+  static isFilterItemEffective(queryAxisItem){
     var filter = queryAxisItem.filter;
     if (!filter) {
       return undefined;
     }
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
+    return literalLists.valueLiterals.length !== 0;
+  }
 
-    if (literalLists.valueLiterals.length === 0){
+  static getFilterConditionSql(queryAxisItem, alias){
+    if (!QueryAxisItem.isFilterItemEffective(queryAxisItem)) {
       return undefined;
     }
+    var filter = queryAxisItem.filter;
 
     var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
     var operator = '';
 
     var nullCondition;
+    var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
       return value.startsWith('NULL::');
     });
@@ -485,6 +490,9 @@ class QueryAxis {
     }
     var item = items[itemIndex];
     var copyOfItem = Object.assign({}, item);
+    if (item.filter) {
+      copyOfItem.filter = JSON.parse(JSON.stringify(item.filter));
+    }
     copyOfItem.index = itemIndex;
     return copyOfItem;
   }
@@ -559,7 +567,7 @@ class QueryModel extends EventEmitter {
   #sampling = undefined;
 
   constructor(config){
-    super('change');
+    super(['change', 'beforechange']);
     var config = Object.assign({}, QueryModel.#defaultConfig, config);
     if (config.settings){
       this.#settings = settings;
@@ -581,15 +589,21 @@ class QueryModel extends EventEmitter {
   
   setCellHeadersAxis(cellheadersaxis) {
     var oldCellHeadersAxis = this.#cellheadersaxis;
-    this.#cellheadersaxis = cellheadersaxis;
-    this.fireEvent('change', {
+    if (cellheadersaxis === oldCellHeadersAxis) {
+      return;
+    }
+    var eventData = {
       propertiesChanged: {
         cellHeadersAxis: {
           previousValue: oldCellHeadersAxis,
           newValue: cellheadersaxis
         }
       }
-    });
+    };
+
+    this.fireEvent('beforechange', eventData);
+    this.#cellheadersaxis = cellheadersaxis;
+    this.fireEvent('change', eventData);
   }
 
   getAxisIds(){
@@ -634,30 +648,38 @@ class QueryModel extends EventEmitter {
   }
 
   setDatasource(datasource){
-    if (datasource === this.#datasource) {
+    var oldDatasource = this.#datasource;
+    if (datasource === oldDatasource) {
       return;
     }
-    else
-    if (this.#datasource) {
-      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
-    }
 
-    this.#clear(true);
-    var oldDatasource = this.#datasource;
-    this.#datasource = datasource;
-
-    if (datasource){
-      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
-    }
-
-    this.fireEvent('change', {
+    var eventData = {
       propertiesChanged: {
         datasource: {
           previousValue: oldDatasource,
           newValue: datasource
         }
       }
-    });
+    }
+
+    this.fireEvent('beforechange', eventData);
+
+    if (oldDatasource) {
+      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+    }
+    
+    // TODO: it is not absoltely self-evident that the query model should be cleared when changing the datasource
+    // if the current query could be satisfied by the new datasource, then we could swap the datasource without clearing,
+    // effectively running the current query on the new datasource.
+    // of course, the method should be changed to allow the caller to express the desired behavior
+    this.#clear();
+    this.#datasource = datasource;
+
+    if (datasource){
+      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+    }
+
+    this.fireEvent('change', eventData);
   }
 
   getDatasource(){
@@ -764,17 +786,11 @@ class QueryModel extends EventEmitter {
     if (axis !== QueryModel.AXIS_FILTERS){
       delete copyOfConfig['axis'];
     }
-    var item = this.findItem(copyOfConfig);
-
-    var removedItem;
-    if (item) {
-      // if the item already exits in this model, we first remove it.
-      removedItem = this.#removeItem(item);
-    }
+    var foundItem = this.findItem(copyOfConfig);
 
     if (!config.columnType) {
-      if (removedItem && removedItem.columnType) {
-        config.columnType = removedItem.columnType;
+      if (foundItem && foundItem.columnType) {
+        config.columnType = foundItem.columnType;
       }
       else {
         var datasource = this.#datasource;
@@ -789,8 +805,8 @@ class QueryModel extends EventEmitter {
     }
 
     if (!config.formatter) {
-      if (removedItem && removedItem.formatter) {
-        config.formatter = removedItem.formatter;
+      if (foundItem && foundItem.formatter) {
+        config.formatter = foundItem.formatter;
       }
       else {
         var formatter = QueryAxisItem.createFormatter(config);
@@ -801,8 +817,8 @@ class QueryModel extends EventEmitter {
     }
 
     if (!config.literalWriter) {
-      if (removedItem && removedItem.literalWriter) {
-        config.literalWriter = removedItem.literalWriter;
+      if (foundItem && foundItem.literalWriter) {
+        config.literalWriter = foundItem.literalWriter;
       }
       else {
         var literalWriter = QueryAxisItem.createLiteralWriter(config);
@@ -812,55 +828,72 @@ class QueryModel extends EventEmitter {
       }
     }
     
-    if (axis === QueryModel.AXIS_FILTERS && !config.filter && removedItem && removedItem.filter){
-      config.filter = removedItem.filter;
+    if (axis === QueryModel.AXIS_FILTERS && !config.filter && foundItem && foundItem.filter){
+      config.filter = foundItem.filter;
     }
     
-    var addedItem = this.#addItem(config);
-
     var axesChangeInfo = {};
-    axesChangeInfo[addedItem.axis] = {
-      added: [addedItem]
-    };
-    if (removedItem){
-      axesChangeInfo[removedItem.axis] = {
-        removed: [removedItem]
-      };
-    }
-
-    this.fireEvent('change', {
+    var eventData = {
       axesChanged: axesChangeInfo
-    });
+    };
+    axesChangeInfo[config.axis] = {
+      added: [config]
+    };
+    if (foundItem){
+      var axisChangeInfo = axesChangeInfo[foundItem.axis];
+      if (!axisChangeInfo) {
+        axisChangeInfo = {};
+        axesChangeInfo[foundItem.axis] = axisChangeInfo;
+      }
+      axisChangeInfo.removed = [foundItem];
+    }
+    this.fireEvent('beforechange', eventData);
 
+    var removedItem;
+    if (foundItem) {
+      // if the item already exits in this model, we first remove it.
+      removedItem = this.#removeItem(foundItem);
+      axesChangeInfo[removedItem.axis].removed = [removedItem];
+    }
+    var addedItem = this.#addItem(config);
+    axesChangeInfo[addedItem.axis].added = [addedItem];
+
+    this.fireEvent('change', eventData);
     return addedItem;
   }
 
   removeItem(config){
     var copyOfConfig = Object.assign({}, config);
 
-    var axisId = copyOfConfig['axis'];
-    if (axisId && axisId !== QueryModel.AXIS_FILTERS) {
-      delete copyOfConfig[axisId];
+    var newAxisId = copyOfConfig.axis;
+    if (newAxisId && newAxisId !== QueryModel.AXIS_FILTERS) {
+      delete copyOfConfig.axis;
     }
 
     var item = this.findItem(copyOfConfig);
     if (!item){
       return undefined;
     }
-    var axisId = item.axis;
-    var axis = this.getQueryAxis(axisId);
-    var removedItem = axis.removeItem(item);
-    removedItem.axis = axisId;
 
     var axesChangeInfo = {};
-    axesChangeInfo[axisId] = {
+    var eventData = {
+      axesChanged: axesChangeInfo
+    };
+    
+    var oldAxisId = item.axis;
+    axesChangeInfo[oldAxisId] = {
+      removed: [item]
+    };
+    this.fireEvent('beforechange', eventData);
+    
+    var axis = this.getQueryAxis(oldAxisId);
+    var removedItem = axis.removeItem(item);
+
+    axesChangeInfo[oldAxisId] = {
       removed: [removedItem]
     };
 
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
-
+    this.fireEvent('change', eventData);
     return removedItem;
   }
 
@@ -891,6 +924,11 @@ class QueryModel extends EventEmitter {
       return;
     }
 
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    };
+    
     var axisId = queryModelItem.axis;
     var axis = this.getQueryAxis(axisId);
     var items = axis.getItems();
@@ -902,16 +940,34 @@ class QueryModel extends EventEmitter {
       propertyName, 
       value
     );
+    
+    this.fireEvent('beforechange', eventData);
     item[propertyName] = value;
-
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
+    this.fireEvent('change', eventData);
 
     return queryModelItem;
   }
 
-  #clear(suppressFireEvent, axisId){
+  #clear(axisId){
+    var axisIds;
+    if (axisId) {
+      axisIds = [axisId];
+    }
+    else {
+      axisIds = Object.keys(this.#axes);
+    }
+    for (var i = 0; i < axisIds.length; i++) {
+      var axisId = axisIds[i];
+      var axis = this.getQueryAxis(axisId);
+      axis.clear();
+    }
+  }
+
+  clear(axisId) {
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    }
     var axisIds;
     if (axisId) {
       axisIds = [axisId];
@@ -920,7 +976,6 @@ class QueryModel extends EventEmitter {
       axisIds = Object.keys(this.#axes);
     }
 
-    var axesChangeInfo = {};
     for (var i = 0; i < axisIds.length; i++) {
       var axisId = axisIds[i];
       var axis = this.getQueryAxis(axisId);
@@ -933,26 +988,15 @@ class QueryModel extends EventEmitter {
       axesChangeInfo[axisId] = {
         removed: items
       };
-      axis.clear();
     }
 
     if (!Object.keys(axesChangeInfo).length){
       // no change, don't fire event.
       return;
     }
-
-    if (suppressFireEvent) {
-      return;
-    }
-
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
-  }
-
-  clear(axisId) {
-    // clear and send event;
-    this.#clear(false, axisId);
+    this.fireEvent('beforechange', eventData);
+    this.#clear(axisId);
+    this.fireEvent('change', eventData);
   }
 
   flipAxes(axisId1, axisId2) {
@@ -969,8 +1013,6 @@ class QueryModel extends EventEmitter {
           axisId2 = QueryModel.AXIS_ROWS;
       }
     }
-    
-    var axesChangeInfo = {};
 
     var axis1 = this.getQueryAxis(axisId1);
     var axis1Items = axis1.getItems();
@@ -978,29 +1020,29 @@ class QueryModel extends EventEmitter {
     var axis2 = this.getQueryAxis(axisId2);
     var axis2Items = axis2.getItems();
 
-    axis1.setItems(axis2Items);
-    axis2.setItems(axis1Items);
+    if (!axis1Items.length && !axis2Items.length) {
+      return;
+    }
+
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    }
+    
+    axesChangeInfo[axisId1] = {};
+    axesChangeInfo[axisId2] = {};
 
     if (axis1Items.length) {
-      axesChangeInfo[axisId1] = {
-        removed: axis1Items
-      }
-      axesChangeInfo[axisId2] = {
-        added: axis1Items
-      };
+      axesChangeInfo[axisId1].removed = axesChangeInfo[axisId2].added = axis1Items;
     }
     if (axis2Items.length) {
-      axesChangeInfo[axisId2] = {
-        removed: axis2Items
-      };
-      axesChangeInfo[axisId1] = {
-        added: axis2Items
-      };
+      axesChangeInfo[axisId2].removed = axesChangeInfo[axisId1].added = axis2Items;
     }
 
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
+    this.fireEvent('beforechange', eventData);
+    axis1.setItems(axis2Items);
+    axis2.setItems(axis1Items);
+    this.fireEvent('change', eventData);
   }
 
   setQueryAxisItemFilter(queryAxisItem, filter){
@@ -1034,11 +1076,12 @@ class QueryModel extends EventEmitter {
       propertyName, 
       filter
     );
-    queryAxisItem[propertyName] = filter;
-    
-    this.fireEvent('change', {
+    var eventData = {
       axesChanged: axesChangeInfo
-    });
+    }
+    this.fireEvent('beforechange', eventData);
+    queryAxisItem[propertyName] = filter;
+    this.fireEvent('change', eventData);
   }
   
   setQueryAxisItemFilterToggleState(queryAxisItem, toggleState){
@@ -1061,11 +1104,12 @@ class QueryModel extends EventEmitter {
       propertyName, 
       toggleState
     );
-    item.filter[propertyName] = toggleState;
-    
-    this.fireEvent('change', {
+    var eventData = {
       axesChanged: axesChangeInfo
-    })
+    }
+    this.fireEvent('beforechange', eventData);
+    item.filter[propertyName] = toggleState;
+    this.fireEvent('change', eventData);
   }
 
   /**
@@ -1099,19 +1143,147 @@ class QueryModel extends EventEmitter {
       });
     }
 
-    var conditions = items.filter(function(item){
-      if (!item.filter) {
-        return false;
-      }
-      if (Object.keys(item.filter.values) === 0) {
-        return false;
-      }
-      return true;
-    }).map(function(item){
-      return QueryAxisItem.getFilterConditionSql(item, alias);
+    // Only keep items that can contribute to the filter.
+    // This means less work for the next steps and easier debugging.
+    items = items.filter(function(item){
+      return QueryAxisItem.isFilterItemEffective(item);
     });
+
+    // Sort the items.
+    // The implied SQL condition is independent of the order of the items
+    // and by sorting, we make it easy to see if a change in the filter axis 
+    // could actually affect the result.
+    items = items.sort(function(filterItem1, filterItem2){
+      var id1 = QueryAxisItem.getIdForQueryAxisItem(filterItem1);
+      var id2 = QueryAxisItem.getIdForQueryAxisItem(filterItem2);
+      if (id1 > id2) {
+        return 1;
+      }
+      else
+      if (id1 < id2) {
+        return -1;
+      }
+      return 0;
+    });
+    
+    // Generate the SQL for each item.
+    var conditions = items.map(function(item){
+      var itemCondition = QueryAxisItem.getFilterConditionSql(item, alias);
+      return itemCondition;
+    });
+    
+    if (!conditions.length) {
+      return undefined;
+    }
+    // Combine the individual item conditions
     var condition = conditions.join('\nAND ');
     return condition;
+  }
+
+  static compareStates(oldState, newState){
+    oldState = oldState || {};
+    newState = newState || {};
+    
+    function getPropertyNames(){
+      var propertyNames = {};
+      for (var i = 0; i < arguments.length; i++){
+        var object = arguments[i];
+        if (!object) {
+          continue;
+        }
+        Object.keys(arguments[i]).forEach(function(propertyName){
+          propertyNames[propertyName] = propertyName;
+        });
+      }
+      return Object.keys(propertyNames);
+    }
+    
+    function compareObjects(oldState, newState, ignoreProperties){
+      var propertiesChanged = {};
+      var propertyNames = getPropertyNames(oldState, newState);
+      for (var i = 0; i < propertyNames.length; i++){
+        var propertyName = propertyNames[i];
+        if (ignoreProperties && ignoreProperties.indexOf(propertyName) !== -1){
+          continue;
+        }
+        var oldValue = oldState[propertyName];
+        var newValue = newState[propertyName];
+        
+        if (JSON.stringify(oldValue) === JSON.stringify(newValue)) {
+          continue;
+        }
+        
+        propertiesChanged[propertyName] = {
+          oldValue: oldValue,
+          newValue: newValue
+        };
+      }
+      return Object.keys(propertiesChanged).length ? propertiesChanged : undefined;
+    }
+    
+    function axisAsObject(axis){
+      return axis.reduce(function(acc, curr){
+        var id = QueryAxisItem.getIdForQueryAxisItem(curr);
+        acc[id] = curr;
+        return acc;
+      }, {});
+    }
+    
+    var axesChanged = {};
+    var oldAxes = oldState.axes || {};
+    var newAxes = newState.axes || {};
+    var axisIds = getPropertyNames(oldAxes, newAxes);
+    for (var i = 0; i < axisIds.length; i++){
+      var axisChange = {
+        added: [],
+        removed: [],
+        changed: {}
+      };
+      var axisId = axisIds[i];
+      var oldAxisItems = axisAsObject(oldAxes[axisId] || []);
+      var newAxisItems = axisAsObject(newAxes[axisId] || []);
+      var itemIds = getPropertyNames(oldAxisItems, newAxisItems);
+      for (var j = 0; j < itemIds.length; j++){
+        var itemId = itemIds[j];
+        var oldAxisItem = oldAxisItems[itemId];
+        var newAxisItem = newAxisItems[itemId];
+        if (oldAxisItem) {
+          if (newAxisItem){
+            var change = compareObjects(oldAxisItem, newAxisItem);
+            if (change) {
+              axisChange.changed[itemId] = change;
+            }
+          }
+          else {
+            axisChange.removed.push(oldAxisItem);
+          }
+        }
+        else
+        if (newAxisItem) {
+          axisChange.added.push(newAxisItem);
+        }
+      }
+      
+      if (!axisChange.added.length){
+        delete axisChange.added;
+      }
+      if (!axisChange.removed.length){
+        delete axisChange.removed;
+      }
+      if (!Object.keys(axisChange.changed).length){
+        delete axisChange.changed;
+      }
+      if (Object.keys(axisChange).length) {
+        axesChanged[axisId] = axisChange;
+      }
+    }
+    
+    var stateChange = compareObjects(oldState, newState, ['axes']) || {};
+    
+    if (Object.keys(axesChanged)){
+      stateChange.axesChanged = axesChanged;
+    }
+    return stateChange;
   }
 
   getState(){

@@ -89,11 +89,10 @@ class PivotTableUi extends EventEmitter {
   }
 
   #initQueryModelChangeHandler(){
-    this.getQueryModel()
-    .addEventListener(
-      'change',
-      this.#queryModelChangeHandler.bind(this)
-    );
+    var queryModel = this.getQueryModel();
+    queryModel.addEventListener('beforechange', this.#queryModelBeforeChangeHandler.bind(this));
+    bufferEvents(queryModel, 'change', this.#queryModelChangeHandler, this, 1000);
+    //queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
 
   #initScrollHandler(){
@@ -238,7 +237,133 @@ class PivotTableUi extends EventEmitter {
     dom.setAttribute('data-needs-update', String(Boolean(needsUpdate)));
   }
 
-  #queryModelChangeHandler(event){
+  #queryModelStateBeforeChange = undefined;
+  #queryModelFilterConditionBeforeChange = undefined;
+  #queryModelBeforeChangeHandler(event){
+    var queryModelState = this.#queryModel.getState();
+    this.#queryModelStateBeforeChange = JSON.stringify(queryModelState);
+    this.#queryModelFilterConditionBeforeChange = this.#queryModel.getFilterConditionSql(false);
+  }
+  
+  #queryModelChangeHandler(event, count){
+    if (count !== undefined) {
+      return;
+    }
+    var stateBefore = this.#queryModelStateBeforeChange;
+
+    var queryModelStateAfterChange = this.#queryModel.getState();
+    var stateAfter = JSON.stringify(queryModelStateAfterChange);
+    if (stateBefore === stateAfter){
+      return;
+    }
+    var queryModelStateBeforeChange = JSON.parse(stateBefore);
+    
+    var needsClearing = false;
+    var needsUpdate = false;
+
+    var clearRowsTupleSet = false;
+    var clearColumnsTupleSet = false;
+    var clearCellsSet = false;
+    
+    var stateChange = QueryModel.compareStates(queryModelStateBeforeChange, queryModelStateAfterChange);
+    var axesChangedInfo = stateChange.axesChanged;
+    if (axesChangedInfo){
+      
+      if (axesChangedInfo[QueryModel.AXIS_ROWS] !== undefined) {
+        clearCellsSet = clearRowsTupleSet = true;
+      }
+
+      if (axesChangedInfo[QueryModel.AXIS_COLUMNS] !== undefined) {
+        clearCellsSet = clearColumnsTupleSet = true;
+      }
+
+      if (axesChangedInfo[QueryModel.AXIS_CELLS] !== undefined) {
+        needsUpdate = true;
+        if (!clearCellsSet) {
+          // NOOP!
+
+          // This case is special - it means only the cells axis changed
+          // But adding or removing items to only the cellset does not require clearing of the cells,
+          // as we store aggregate items together and separately in the cell data.
+        }
+      }
+      
+      if (axesChangedInfo[QueryModel.AXIS_FILTERS]) {
+        var filterConditionSql = this.#queryModel.getFilterConditionSql(false);
+        if (filterConditionSql !== this.#queryModelFilterConditionBeforeChange) {
+          needsUpdate = true;
+          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+        }
+      }
+    }
+    
+    if (stateChange.propertiesChanged){
+      var propertiesChangedInfo = stateChange.propertiesChanged;
+
+      if (propertiesChangedInfo.datasource) {
+        clearCellsSet = clearRowsTupleSet = clearColumnsTupleSet = true;
+        needsClearing = true;
+      }
+
+      if (propertiesChangedInfo.cellHeadersAxis){
+        // moving cells to another axis does not change the tuples or the cached cells,
+        // it only requires rerendering the table.
+        needsUpdate = true;
+      }
+    }
+    
+    // only clear tuple sets or cellset if the change requires it.
+    if (clearColumnsTupleSet) {
+      var columnsTupleSet = this.#columnsTupleSet;
+      columnsTupleSet.clear();
+      needsUpdate = true;
+    }
+
+    if (clearRowsTupleSet === true) {
+      var rowsTupleSet = this.#rowsTupleSet;
+      rowsTupleSet.clear();
+      needsUpdate = true;
+    }
+
+    if (clearCellsSet === true) {
+      var cellsSet = this.#cellsSet;
+      cellsSet.clear();
+      needsUpdate = true;
+    }
+
+    var countQueryAxisItems = [
+      QueryModel.AXIS_ROWS,
+      QueryModel.AXIS_COLUMNS,
+      QueryModel.AXIS_CELLS
+    ].reduce(function(acc, curr){
+      var queryModel = this.getQueryModel();
+      var queryAxis = queryModel.getQueryAxis(curr);
+      var queryAxisItems = queryAxis.getItems();
+      return acc + queryAxisItems.length;
+    }.bind(this), 0);
+
+    if (countQueryAxisItems === 0) {
+      needsClearing = true;
+    }
+
+    if (needsClearing) {
+      this.clear();
+      needsUpdate = false;
+    }
+
+    this.#setNeedsUpdate(needsUpdate);
+
+    if (!this.#autoUpdate){
+      return;
+    }
+
+    if (needsUpdate){
+      this.updatePivotTableUi();
+    }
+    
+  }
+  
+  #queryModelChangeHandler1(event){
     var needsClearing = false;
     var needsUpdate = false;
 
@@ -272,29 +397,28 @@ class PivotTableUi extends EventEmitter {
 
       var axisChangeInfo = axesChangedInfo[QueryModel.AXIS_FILTERS];
       if (axisChangeInfo !== undefined) {
-        
+        var filterItems = [];
         if (axesChangedInfo[QueryModel.AXIS_FILTERS].added) {
-          needsUpdate = axesChangedInfo[QueryModel.AXIS_FILTERS].added.some(function(item){
-            var changed = item.filter && Object.keys(item.filter.values).length > 0;
-            if (changed) {
-              clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
-            }
-            return changed;
-          });
+          filterItems = filterItems.concat(axesChangedInfo[QueryModel.AXIS_FILTERS].added);
         }
-
-        if (axisChangeInfo.removed) {
-          needsUpdate = true;
-          clearCellsSet = clearColumnsTupleSet = clearRowsTupleSet = true;
+        if (axesChangedInfo[QueryModel.AXIS_FILTERS].removed) {
+          filterItems = filterItems.concat(axesChangedInfo[QueryModel.AXIS_FILTERS].removed);
         }
-
-        if (axisChangeInfo.changed){
-          for (var itemId in axisChangeInfo.changed){
-            var itemChangeInfo = axisChangeInfo.changed[itemId];
-            if (itemChangeInfo.filter){
-              needsUpdate = true;
-            }
-          }
+        if (axesChangedInfo[QueryModel.AXIS_FILTERS].changed) {
+          var allFilterItems = this.#queryModel.getFiltersAxis().getItems();
+          filterItems = filterItems.concat(
+            Object.keys(axesChangedInfo[QueryModel.AXIS_FILTERS].changed).map(function(id){
+              return allFilterItems.find(function(filterItem){
+                var filterItemId = QueryAxisItem.getIdForQueryAxisItem(filterItem);
+                return filterItemId === id;
+              });
+            })
+          );
+        }
+        if (filterItems.length) {
+          needsUpdate = filterItems.some(function(item){
+            return  QueryAxisItem.isFilterItemEffective(item);
+         });
         }
 
         if (needsUpdate === true){
