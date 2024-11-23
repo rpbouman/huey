@@ -360,11 +360,6 @@ class FilterDialog {
       var valueObject2 = valuesList[key2];
       var literal2 = valueObject2.literal;
       
-      if (dataTypeInfo.isNumeric){
-        literal1 = parseInt(literal1, 10);
-        literal2 = parseInt(literal2, 10);
-      }
-      
       if (literal1.startsWith('NULL::')) {
         // nulls sort first
         return literal2.startsWith('NULL::') ? 0 : -1;
@@ -373,7 +368,12 @@ class FilterDialog {
       if (literal2.startsWith('NULL::')){
         return 1;
       }
-      else
+
+      if (dataTypeInfo.isNumeric){
+        literal1 = parseInt(literal1, 10);
+        literal2 = parseInt(literal2, 10);
+      }
+      
       if (literal1 > literal2) {
         return 1;
       }
