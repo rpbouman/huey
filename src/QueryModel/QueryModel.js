@@ -1286,7 +1286,7 @@ class QueryModel extends EventEmitter {
     return stateChange;
   }
 
-  getState(){
+  getState(options){
     var datasource = this.getDatasource();
     if (!datasource) {
       return null;
@@ -1310,7 +1310,7 @@ class QueryModel extends EventEmitter {
       }
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
-        var strippedItem = {column: axisItem.columnName};
+        var strippedItem = {columnName: axisItem.columnName};
         strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
@@ -1321,6 +1321,10 @@ class QueryModel extends EventEmitter {
 
         if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
           strippedItem.filter = axisItem.filter;
+        }
+
+        if (options && options.includeItemIndices){
+          strippedItem.index = axisItem.index;
         }
 
         return strippedItem;
@@ -1385,7 +1389,7 @@ class QueryModel extends EventEmitter {
         }
         for (var i = 0 ; i < items.length; i++){
           var item = items[i];
-          var config = { columnName: item.column };
+          var config = { columnName: item.column || item.columnName };
 
           config.columnType = item.columnType;
           config.derivation = item.derivation;

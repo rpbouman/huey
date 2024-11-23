@@ -240,7 +240,7 @@ class PivotTableUi extends EventEmitter {
   #queryModelStateBeforeChange = undefined;
   #queryModelFilterConditionBeforeChange = undefined;
   #queryModelBeforeChangeHandler(event){
-    var queryModelState = this.#queryModel.getState();
+    var queryModelState = this.#queryModel.getState({includeItemIndices: true});
     this.#queryModelStateBeforeChange = JSON.stringify(queryModelState);
     this.#queryModelFilterConditionBeforeChange = this.#queryModel.getFilterConditionSql(false);
   }
@@ -251,7 +251,7 @@ class PivotTableUi extends EventEmitter {
     }
     var stateBefore = this.#queryModelStateBeforeChange;
 
-    var queryModelStateAfterChange = this.#queryModel.getState();
+    var queryModelStateAfterChange = this.#queryModel.getState({includeItemIndices: true});
     var stateAfter = JSON.stringify(queryModelStateAfterChange);
     if (stateBefore === stateAfter){
       return;
