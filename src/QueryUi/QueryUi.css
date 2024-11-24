@@ -232,7 +232,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
       }
 
       > li[data-derivation="day of week name"] > span:before,
-      > li[data-derivation="day of week"] > span:before {
+      > li[data-derivation="day of week num"] > span:before {
         /* letter-d-small */
         content: "\fcca";
       }
