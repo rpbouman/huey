@@ -231,8 +231,8 @@ class QueryAxisItem {
         dataType = derivationInfo.columnType;
       }
       else
-      if (derivationInfo.preservesColumnType){
-        dataType = columnType;
+      if (!derivationInfo.preservesColumnType){
+        console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
     }
 
