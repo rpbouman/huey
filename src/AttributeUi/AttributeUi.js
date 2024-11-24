@@ -254,7 +254,7 @@ class AttributeUi {
         return dayNumFormatter
       },
     },
-    'day of week': {
+    'day of week num': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
@@ -682,7 +682,7 @@ class AttributeUi {
     var details = summary.parentNode;
     var queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
         
-    var itemId;
+    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
     // if this is an aggregat item, mark that
     if (queryAxisItem.aggregator) {
       data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
@@ -710,7 +710,6 @@ class AttributeUi {
       data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
       queryAxisItem.index = queryModelItem.index;
       data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
-      itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
       data.id = {key: itemId, value: itemId};
     }
     
@@ -723,7 +722,18 @@ class AttributeUi {
         data.id = {key: itemId, value: itemId};
       }
     }
+    var csvData = [['Name', 'Value']];
+    for (var property in queryAxisItem){
+      var value = queryAxisItem[property];
+      if (typeof value === 'object') {
+        continue;
+      }
+      csvData.push([property, value]);
+    }
+    csvData = getCsv(csvData);
     
+    data['text/plain'] = csvData;
+    data['text/csv'] = new File([csvData], `${itemId}.csv`);
     data['application/json'] = queryAxisItem;
     
     DragAndDropHelper.setData(event, data);

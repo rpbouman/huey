@@ -72,6 +72,11 @@ class DragAndDropHelper {
 
       var value = data[property];
       var keys;
+      if (value instanceof File){
+        dataTransfer.setData(property, value);
+        continue;
+      }
+      else
       if (
         typeof value === 'object' && 
         (keys = Object.keys(value)).length === 2 && 
@@ -88,7 +93,16 @@ class DragAndDropHelper {
         value = value['value'];
       }
       
-      dataTransfer.setData(property, JSON.stringify(value));
+      if (property.startsWith('text/')){
+        if (typeof value !== 'string') {
+          throw new Error(`Expected string type data for type ${property}`);
+        }
+        // noop. text types are passed as is.
+      } 
+      else {
+        value = JSON.stringify(value);
+      }
+      dataTransfer.setData(property, value);
     }
     return dataTransfer;
   }
@@ -111,7 +125,18 @@ class DragAndDropHelper {
       switch(event.type){
         case 'dragstart':
         case 'drop':
-          storedValue = JSON.parse(dataTransfer.getData(type));
+          var rawData = dataTransfer.getData(type);
+          if (rawData instanceof File){
+            // noop
+            storedValue = rawData;
+          }
+          else 
+          if (property.startsWith('text') && noKeydata) {
+            storedValue = rawData;
+          }
+          else {
+            storedValue = JSON.parse(rawData);
+          }
           break;
         default:
           storedValue = undefined;
