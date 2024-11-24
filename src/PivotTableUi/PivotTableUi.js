@@ -681,22 +681,25 @@ class PivotTableUi extends EventEmitter {
         if (tuple && j < numMembers) {
           var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, queryAxisItems, queryAxisItem);
           var tupleValue = tuple.values[j];
-
+          var tupleValueField = tupleValueFields[j];
+          this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
           if (isTotalsMember) {
             labelText = getTotalsString(queryAxisItem);
           }
           else
           if (queryAxisItem.formatter) {
-            labelText = queryAxisItem.formatter(tupleValue, tupleValueFields[j]);
+            labelText = queryAxisItem.formatter(tupleValue, tupleValueField);
           }
           else {
             labelText = String(tupleValue);
           }
+          titleText = `{QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
         }
         else
         if (doCellHeaders) {
           var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
           labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
+          titleText = labelText;
         }
 
         if (!labelText || !labelText.length) {
@@ -704,7 +707,7 @@ class PivotTableUi extends EventEmitter {
         }
 
         label.innerText = labelText;
-        label.title = labelText;
+        label.title = titleText;
       }
 
       if (doCellHeaders) {
@@ -778,7 +781,9 @@ class PivotTableUi extends EventEmitter {
       labelText = String(value);
     }
     label.innerText = labelText;
-    label.title = labelText;
+    
+    var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
+    label.title = `${caption}: ${labelText}`;
     return labelText
   }
 
