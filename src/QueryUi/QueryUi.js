@@ -526,7 +526,7 @@ class QueryUi {
             this.#openFilterUiTimeout = setTimeout(function(){
               this.#openFilterUiTimeout = undefined;
               this.openFilterDialogForQueryModelItem(lastFilterItem);
-            }.bind(this), 500);
+            }.bind(this), 250);
           }
         }
       }
