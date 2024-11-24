@@ -224,10 +224,11 @@ class CellSet extends DataSetComponent {
       rows.push(row);
     }
 
-    var relationDefinition = `${getQuotedIdentifier(CellSet.#tupleDataRelationName)}(${columns.map(getQuotedIdentifier).join(', ')})`;
-    var valuesClause = '(VALUES\n  ' + rows.map(function(row){
+    var relationDefinition = `${getQuotedIdentifier(CellSet.#tupleDataRelationName)}(\n ${columns.map(getQuotedIdentifier).join('\n, ')})`;
+    var valuesSql = rows.map(function(row){
       return `( ${row.join(', ')} )`;
-    }).join('\n ,') + ') AS ' + relationDefinition;
+    }).join('\n ,');
+    var valuesClause = `(VALUES\n  ${valuesSql}\n) AS ${relationDefinition}`;
 
     var groupByList = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
     var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + getQuotedIdentifier(CellSet.datasetRelationName);
