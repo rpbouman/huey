@@ -92,6 +92,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QueryUi/QueryUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="FilterUi/FilterUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUi.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUiContextMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PromptUi/PromptUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/SidebarLogic.css"/>
 
@@ -1395,121 +1396,12 @@
       </footer>
     </dialog>
 
-    <menu
-      id="quickQueryMenu"
-      role="menu"
-      aria-labelledby="quickQueryMenuLabel"
-      popover="auto"
-    >
-      <li role="menuitem">
-        <label
-          for="quickQueryClearAllButton"
-          title="Clear the query so you can start a new one."
-        >Clear All
-          <button
-            id="quickQueryClearAllButton"
-            title="Clear the query so you can start a new one."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Clear All</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryFlipAxesButton"
-          title="Flip the rows and columns axes."
-        >Flip Axes
-          <button
-            id="quickQueryFlipAxesButton"
-            title="Flip the rows and columns axes."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Flip Axes</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryCellHeadersOnColumnsButton"
-          title="Place the cell headers on the columns axis."
-        >Cell Headers on Columns
-          <button
-            id="quickQueryCellHeadersOnColumnsButton"
-            title="Place the cell headers on the columns axis."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Cell Headers on Columns</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryCellHeadersOnRowsButton"
-          title="Place the cell headers on the rows axis."
-        >Cell Headers on Rows
-          <button
-            id="quickQueryCellHeadersOnRowsButton"
-            title="Place the cell headers on the rows axis."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Cell Headers on Rows</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryColumnStatisticsButton"
-          title="Get statistics for each column."
-        >Column Statistics
-          <button
-            id="quickQueryColumnStatisticsButton"
-            title="Get statistics for each column."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Column Statistics</button>
-        </labe>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryDataPreviewButton"
-          title="Add all columns to the query so you can preview the data at the detail level."
-        >Data Preview
-          <button
-            id="quickQueryDataPreviewButton"
-            title="Add all columns to the query so you can preview the data at the detail level."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Data Preview</button>
-        </labe>
-      </li>
-      <li role="menuitem">
-        <label
-          for="quickQueryDestructuredDataPreviewButton"
-          title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
-        >Destructured Data Preview
-          <button
-            id="quickQueryDestructuredDataPreviewButton"
-            title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
-            popovertarget="quickQueryMenu"
-            popovertargetaction="hide"
-          >Destructured Data Preview</button>
-        </labe>
-      </li>
-    </menu>
-    
-    <menu role="menu" id="pivotTableContextMenu" popover="auto">
-      <li role="menuitem">
-        <label for="pivotTableContextMenuItem">
-          Test
-          <button id="pivotTableContextMenuItem">Test</button>
-        </label>
-      </li>
-    </menu>
-
     <main
       id="layout"
       class="layout"
       style="display: none"
     >
       <menu role="toolbar">
-
         <label for="uploader" title="Register local data files to explore their contents with Huey">
           <input
             id="uploader"
@@ -1551,6 +1443,104 @@
             popovertarget="quickQueryMenu"
             popovertargetaction="show"
           >Quick Query</button>
+          <menu
+            id="quickQueryMenu"
+            role="menu"
+            aria-labelledby="quickQueryMenuLabel"
+            popover="auto"
+          >
+            <li role="menuitem">
+              <label
+                for="quickQueryClearAllButton"
+                title="Clear the query so you can start a new one."
+              >Clear All
+                <button
+                  id="quickQueryClearAllButton"
+                  title="Clear the query so you can start a new one."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Clear All</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryFlipAxesButton"
+                title="Flip the rows and columns axes."
+              >Flip Axes
+                <button
+                  id="quickQueryFlipAxesButton"
+                  title="Flip the rows and columns axes."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Flip Axes</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryCellHeadersOnColumnsButton"
+                title="Place the cell headers on the columns axis."
+              >Cell Headers on Columns
+                <button
+                  id="quickQueryCellHeadersOnColumnsButton"
+                  title="Place the cell headers on the columns axis."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Cell Headers on Columns</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryCellHeadersOnRowsButton"
+                title="Place the cell headers on the rows axis."
+              >Cell Headers on Rows
+                <button
+                  id="quickQueryCellHeadersOnRowsButton"
+                  title="Place the cell headers on the rows axis."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Cell Headers on Rows</button>
+              </label>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryColumnStatisticsButton"
+                title="Get statistics for each column."
+              >Column Statistics
+                <button
+                  id="quickQueryColumnStatisticsButton"
+                  title="Get statistics for each column."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Column Statistics</button>
+              </labe>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryDataPreviewButton"
+                title="Add all columns to the query so you can preview the data at the detail level."
+              >Data Preview
+                <button
+                  id="quickQueryDataPreviewButton"
+                  title="Add all columns to the query so you can preview the data at the detail level."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Data Preview</button>
+              </labe>
+            </li>
+            <li role="menuitem">
+              <label
+                for="quickQueryDestructuredDataPreviewButton"
+                title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
+              >Destructured Data Preview
+                <button
+                  id="quickQueryDestructuredDataPreviewButton"
+                  title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
+                  popovertarget="quickQueryMenu"
+                  popovertargetaction="hide"
+                >Destructured Data Preview</button>
+              </labe>
+            </li>
+          </menu>          
         </label>
 
         <!-- title in the toolbar identifies the currently selected datasource -->
@@ -1744,6 +1734,37 @@
           </template>
         </div>
 
+        <menu 
+          role="menu" 
+          id="pivotTableContextMenu" 
+          popover="auto"
+        >
+          <li role="menuitem">
+            <label for="pivotTableContextMenuItemCopyCell">
+              Copy Cell
+              <button id="pivotTableContextMenuItemCopyCell">Copy Cell</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label for="pivotTableContextMenuItemCopyColumn">
+              Copy Column
+              <button id="pivotTableContextMenuItemCopyColumn">Copy Column</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label for="pivotTableContextMenuItemCopyRow">
+              Copy Row
+              <button id="pivotTableContextMenuItemCopyRow">Copy Row</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label for="pivotTableContextMenuItemCopyTable">
+              Copy Table
+              <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
+            </label>
+          </li>
+        </menu>
+
         <template id="pivotTableUiTemplate">
           <!-- pivotTableUi: outmost container of the pivot table-->
           <div
@@ -1798,6 +1819,7 @@
 
     <script onload="resourceLoaded(this)" src="util/dom/dom.js"></script>
     <script onload="resourceLoaded(this)" src="util/clipboard/clipboard.js"></script>
+    <script onload="resourceLoaded(this)" src="util/misc/misc.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
