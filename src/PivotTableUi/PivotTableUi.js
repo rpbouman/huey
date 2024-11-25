@@ -1720,8 +1720,104 @@ class PivotTableUi extends EventEmitter {
     return getChildWithClassName(this.#getTableDom(), 'pivotTableUiTableBody');
   }
 
+  #contextMenuContext = null;
+  beforeShowContextMenu(event, contextMenu){
+    var target = event.target;
+    var cell = target;
+    var dom = this.getDom();
+    while (cell !== dom && cell && !hasClass(cell, 'pivotTableUiCell')){
+      cell = cell.parentNode;
+    }
+    if (!cell || cell === dom) {
+      return false;
+    }
+    this.#contextMenuContext = cell;
+  }
+
   contextMenuItemClicked(event) {
-    debugger;
+    var target = event.target;
+    var id = target.id;
+
+    var tableHeader = this.#getTableHeaderDom();
+    var tableBody = this.#getTableBodyDom();
+    var data = [];
+    
+    function copyRows(container, selectedRow, selectedColumn){
+      var rows = container.childNodes;
+      
+      var startRow, endRow;
+      if (selectedRow === undefined ) {
+        startRow = 0;
+        endRow = rows.length;
+        if (container === tableBody){
+          endRow -= 1;
+        }
+      }
+      else {
+        startRow = selectedRow;
+        endRow = selectedRow + 1;
+      }
+
+      var startCell, endCell;
+      if (selectedColumn === undefined ) {
+        startCell = 0;
+        endCell = rows.item(0).childNodes.length - 1;
+      }
+      else {
+        startCell = selectedColumn;
+        endCell = selectedColumn + 1;
+      }
+      
+      for (var i = startRow; i < endRow; i++){
+        var line = [];
+        var row = rows.item(i);
+        
+        var cells = row.childNodes;
+        
+        for (var j = startCell; j < endCell; j++){
+          var cell = cells.item(j);
+          if (hasClass(cell, 'pivotTableUiStufferCell')) {
+            continue;
+          }
+          line.push(cell.textContent);
+        }
+        data.push(line);
+      }
+    }
+    
+    switch (id){
+      case 'pivotTableContextMenuItemCopyCell':
+        data.push([this.#contextMenuContext.textContent]);
+        break;
+      case 'pivotTableContextMenuItemCopyColumn':
+        var columnIndex = 0;
+        var cell = this.#contextMenuContext;
+        while (cell && cell.previousSibling) {
+          columnIndex += 1;
+          cell = cell.previousSibling;
+        }
+        copyRows(tableHeader, undefined, columnIndex);
+        copyRows(tableBody, undefined, columnIndex);
+        break;
+      case 'pivotTableContextMenuItemCopyRow':
+        var row = this.#contextMenuContext.parentNode;
+        var rowIndex = 0;
+        while (row && row.previousSibling) {
+          rowIndex += 1;
+          row = row.previousSibling;
+        }
+        copyRows(tableHeader, undefined, undefined);
+        copyRows(tableBody, rowIndex, undefined);
+        break;
+      case 'pivotTableContextMenuItemCopyTable':
+        copyRows(tableHeader);
+        copyRows(tableBody);
+        break;
+    }
+    var csv = getCsv(data);
+    //copyToClipboard(csv, 'text/csv');
+    copyToClipboard(csv, 'text/plain');
+    this.#contextMenuContext = null;
   }
 }
 
@@ -1734,5 +1830,5 @@ function initPivotTableUi(){
     settings: settings
   });
 
-  //var pivotTableUiContextMenu = new ContextMenu(pivotTableUi, 'pivotTableContextMenu');
+  var pivotTableUiContextMenu = new ContextMenu(pivotTableUi, 'pivotTableContextMenu');
 }

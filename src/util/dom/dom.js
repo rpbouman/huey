@@ -113,8 +113,12 @@ function hasClass(dom, classNames, allOrSome){
     throw new Error(`Invalid classname argument`);
   }
   var domClassNames = getClassNames(dom);
+  if (domClassNames === undefined) {
+    return false;
+  }
+  var noMatch;
   for (var i = 0; i < classNames.length; i++){
-    var noMatch = domClassNames.indexOf(classNames[i]) === -1;
+    noMatch = domClassNames.indexOf(classNames[i]) === -1;
     
     if (allOrSome && noMatch) {
       return false;
@@ -139,12 +143,6 @@ function replaceClass(dom, oldClass, newClass){
   }
   Array.prototype.splice.apply(classNames, args);
   dom.className = classNames.join(' ');
-}
-
-function getClassNames(el){
-  var className = el.className;
-  var classNames = className.split(/\s+/);
-  return classNames;
 }
 
 function getAncestorWithTagName(dom, tagName, includeSelf){
