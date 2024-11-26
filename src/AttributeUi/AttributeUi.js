@@ -453,22 +453,25 @@ class AttributeUi {
   }
 
   #clickHandler(event){
-    var target = event.target;
-    var classNames = getClassNames(target);
     event.stopPropagation();
-
+    var target = event.target;
     var node = getAncestorWithTagName(target, 'details');
     if (!node) {
       return;
     }
 
-    if (classNames.indexOf('attributeUiAxisButton') !== -1){
-      var input = target.getElementsByTagName('input').item(0);
-      var axisId = target.getAttribute('data-axis');
-      setTimeout(function(){
-        this.#axisButtonClicked(node, axisId, input.checked);
-      }.bind(this), 0);
+    var classNames = getClassNames(target);
+    if (!classNames) {
+      return;
     }
+    if (classNames.indexOf('attributeUiAxisButton') === -1){
+      return;
+    }
+    var input = target.getElementsByTagName('input').item(0);
+    var axisId = target.getAttribute('data-axis');
+    setTimeout(function(){
+      this.#axisButtonClicked(node, axisId, input.checked);
+    }.bind(this), 0);
   }
   
   #createQueryAxisItemForAttributeUiNode(node){
