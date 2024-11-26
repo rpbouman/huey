@@ -189,6 +189,7 @@ class TupleSet extends DataSetComponent {
 
     var connection = await this.getManagedConnection();
     console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
+    console.log(axisSql);
     var resultset = await connection.query(axisSql);
     console.log(`Query method returned, connection ${connection.getConnectionId()} in state ${connection.getState()}` );
     var rejects = await this.getQueryModel().getDatasource().getRejects();
