@@ -65,6 +65,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
       count += 1;
       // clear the timeout to kick of the final handler call, as we're not done receiving events.
       clearTimeout(timeoutId);
+      timeoutId = undefined;
     }
     // alwayws call the handler with the event and the event count.
     // This allows the handler to decide after how many events to handle something.
