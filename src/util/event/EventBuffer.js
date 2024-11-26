@@ -38,6 +38,21 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
   if (timeout === undefined) {
     timeout = defaultTimeout;
   }
+  var typeOfTimeout = typeof timeout;
+  var timeoutGetter;
+  switch (typeOfTimeout) {
+    case 'number':
+      var timeoutValue = timeout;
+      timeoutGetter = function(){
+        return timeout;
+      }
+      break;
+    case 'function':
+      timeoutGetter = timeout;
+      break;
+    default:
+      throw new Error(`Invalid value for timeout: should be a number or callback, not "${typeOfTimeout}".`);
+  }
   
   var timeoutId = undefined;
   var count = 0;
@@ -59,7 +74,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
     timeoutId = setTimeout(function(){
       timeoutId = undefined;
       handler.call(scope ? scope : null, event, undefined);
-    }, timeout);
+    }, timeoutGetter.call());
   };
   
   eventEmitter.addEventListener(eventId, listener);
