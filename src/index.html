@@ -779,7 +779,7 @@
           <div role="tabpanel">
             <form id="localeSettings">
               <fieldset>
-                <legend>Labels</legend>
+                <legend><code>NULL</code>-behavior</legend>
                 <label
                   for="nullString"
                   title="The string to use for displaying NULL-values"
@@ -789,13 +789,11 @@
                   type="text"
                 />
                 <label
-                  for="totalsString"
-                  title="The string to use for displaying totals"
-                >Totals label</label>
-                <input
-                  id="totalsString"
-                  type="text"
-                />
+                  for="nullsSortOrder"
+                  title="Sorting order for NULL-values"
+                ><code>NULL</code>-Sort Order</label>
+                <select id="nullsSortOrder">
+                </select>
               </fieldset>
               <fieldset>
                 <legend>Locale</legend>
@@ -898,14 +896,27 @@
           />
           <div role="tabpanel">
             <form id="querySettings">
-              <label
-                for="autoRunQuery"
-                title="When enabled, the pivot table will update automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
-              >Autorun Query</label>
-              <input
-                id="autoRunQuery"
-                type="checkbox"
-              />
+              <fieldset>
+                <legend>Autorun Query</legend>
+                <label
+                  for="autoRunQuery"
+                  title="When enabled, the pivot table will update automatically after modifying the query. When disabled, you have to explicitly hit the execute button."
+                >Enabled</label>
+                <input
+                  id="autoRunQuery"
+                  type="checkbox"
+                />
+                <label
+                  for="autoRunQueryTimeout"
+                  title="The number of milliseconds to wait after a change to the query to auto-run it."
+                >Timeout (ms)</label>
+                <input
+                  id="autoRunQueryTimeout"
+                  type="number"
+                  step="1"
+                  min="0"
+                />
+              </fieldset>
               <fieldset>
                 <legend>Filter</legend>
                 <label
@@ -950,16 +961,41 @@
           />
           <div role="tabpanel">
             <form id="pivotSettings">
-              <label for="maxCellWidth"
-                title="The maximum string length to consider when sizing pivot table cells and headers"
-              >Max cellwidth (ch)</label>
-              <input
-                id="maxCellWidth"
-                type="number"
-                min="1"
-                max="256"
-                value="30"
-              />
+              <fieldset>
+                <label
+                  for="maxCellWidth"
+                  title="The maximum string length to consider when sizing pivot table cells and headers"
+                >Max cellwidth (ch)</label>
+                <input
+                  id="maxCellWidth"
+                  title="The maximum string length to consider when sizing pivot table cells and headers"
+                  type="number"
+                  min="1"
+                  max="256"
+                  value="30"
+                />
+              </fieldset>
+              <fieldset>
+                <legend>Totals</legend>
+                <label
+                  for="totalsString"
+                  title="The string to use for displaying totals"
+                >Totals label</label>
+                <input
+                  id="totalsString"
+                  type="text"
+                  title="The string to use for displaying totals"
+                />
+                <label
+                  for="totalsPosition"
+                  title="Whether Totals are shown before or after the items"
+                >Totals Position</label>
+                <select
+                  id="totalsPosition"
+                  title="Whether Totals are shown before or after the items"
+                >
+                </select>
+              </fieldset>
             </form>
           </div>
         </div>
@@ -1540,7 +1576,7 @@
                 >Destructured Data Preview</button>
               </labe>
             </li>
-          </menu>          
+          </menu>
         </label>
 
         <!-- title in the toolbar identifies the currently selected datasource -->
@@ -1699,8 +1735,8 @@
             <li role="menuitem">
               <label for="">
                 <span></span>
-                <input 
-                  id="" 
+                <input
+                  id=""
                   type="checkbox"
                 />
               </label>
@@ -1734,9 +1770,9 @@
           </template>
         </div>
 
-        <menu 
-          role="menu" 
-          id="pivotTableContextMenu" 
+        <menu
+          role="menu"
+          id="pivotTableContextMenu"
           popover="auto"
         >
           <li role="menuitem">
@@ -1823,7 +1859,7 @@
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
-    
+
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
