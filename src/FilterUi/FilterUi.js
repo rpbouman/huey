@@ -334,13 +334,17 @@ class FilterDialog {
     }
   }
 
-  #sortValueLists(valuesList, toValuesList){
-    var dataTypeInfo;
-    var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
-    if (dataType){
-      var dataTypeInfo = getDataTypeInfo(dataType);
+  #getNullsSortOrder(){
+    var nullsSortOrder = this.#settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
+    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+      console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
+      nullsSortOrder = 'FIRST';
     }
-    var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
+    return nullsSortOrder;
+  }
+
+  #sortValueListKeys(valuesList) {
+    var nullsSortOrder = this.#getNullsSortOrder();
     var keys = Object.keys(valuesList);
     keys.sort(function(key1, key2){
       var valueObject1 = valuesList[key1];
@@ -350,12 +354,27 @@ class FilterDialog {
       var literal2 = valueObject2.literal;
 
       if (literal1.startsWith('NULL::')) {
-        // nulls sort first
-        return literal2.startsWith('NULL::') ? 0 : -1;
+        if (literal2.startsWith('NULL::')){
+          return 0;
+        }
+        else 
+        if (sortNulls === 'FIRST') {
+          return -1;
+        }
+        else 
+        if (sortNulls === 'LAST'){
+          return 1;
+        }
       }
       else
       if (literal2.startsWith('NULL::')){
-        return 1;
+        if (sortNulls === 'FIRST') {
+          return 1;
+        }
+        else 
+        if (sortNulls === 'LAST') {
+          return -1;
+        }
       }
 
       if (dataTypeInfo.isNumeric){
@@ -371,14 +390,25 @@ class FilterDialog {
         return -1;
       }
       return 0;
-    }).forEach(function(key){
+    });
+    return keys;
+  }
+
+  #sortValueLists(valuesList, toValuesList){
+    var dataTypeInfo;
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
+    if (dataType){
+      var dataTypeInfo = getDataTypeInfo(dataType);
+    }
+    var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
+    keys = this.#sortValueListKeys(valuesList);
+    keys.forEach(function(key){
       sortedList[key] = valuesList[key];
       if (!toValuesList) {
         return;
       }
       sortedToList[key] = toValuesList[key];
     });
-
 
     return {
       valuesList: sortedList,
@@ -945,13 +975,14 @@ class FilterDialog {
       filterAxisItems.push(picklistFilterItem);
     }
 
+    var nullsSortOrder = this.#getNullsSortOrder();  
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
       datasource,
       queryAxisItems,
       filterAxisItems,
       offset === 0,
       FilterDialog.#numRowsColumnName,
-      'FIRST'
+      nullsSortOrder
     );
     return sql;
   }
@@ -969,118 +1000,6 @@ class FilterDialog {
     console.time(timeMessage);
     var datasource = this.#queryModel.getDatasource();
     var result = await datasource.query(sql);
-    console.timeEnd(timeMessage);
-    return result;
-  }
-
-  async #getPicklistValuesXX(offset, limit){
-    this.setBusy(true);
-
-    if (offset === 0) {
-      var searchStatus = this.#getSearchStatus();
-      searchStatus.innerHTML = 'Finding values...';
-    }
-
-    var datasource = this.#queryModel.getDatasource();
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(this.#queryAxisItem);
-
-    var fromClause = datasource.getFromClauseSql();
-    var sql;
-    if (offset === 0) {
-      sql = [
-        'SELECT',
-        `${sqlExpression} AS "value"`,
-        `,${sqlExpression} AS "label"`,
-        `,count(*) over () as "${FilterDialog.#numRowsColumnName}"`,
-        fromClause,
-      ];
-    }
-    else {
-      sql = [
-        'SELECT DISTINCT',
-        `${sqlExpression} AS "value"`,
-        `,${sqlExpression} AS "label"`,
-        fromClause
-      ];
-    }
-
-    var condition = '';
-    var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
-    if (filterSearchApplyAll) {
-      var otherFilterAxisItems = this.#getOtherFilterAxisItems(true);
-      if (otherFilterAxisItems.length) {
-        var conditions = otherFilterAxisItems.map(function(filterAxisItem){
-          return QueryAxisItem.getFilterConditionSql(filterAxisItem);
-        });
-        if (conditions && conditions.length){
-          condition = conditions.join('\nAND ');
-        }
-      }
-    }
-
-    var search = this.#getSearch();
-    var searchString = search.value.trim();
-    var parameters = [];
-    var bindValue;
-    if (searchString.length){
-      var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
-      var collation = '';
-      switch (dataType) {
-        case 'VARCHAR':
-          collation = ' COLLATE NOCASE ';
-        default:
-          if (condition && condition.length) {
-            condition += '\nAND ';
-          }
-          // TODO: implement toggle for the collation.
-          // however it's currently not working anyway (see PR: https://github.com/duckdb/duckdb/pull/12359)
-          condition += `${sqlExpression}::VARCHAR${collation} LIKE ?`;
-          bindValue = `${searchString}`;
-          break;
-      }
-    }
-
-    if (condition) {
-      sql.push(`WHERE ${condition}`);
-    }
-
-    if (bindValue){
-      var autoWildcards = this.#getAutoWildChards().checked;
-      if (autoWildcards){
-        bindValue = `%${bindValue}%`;
-      }
-      parameters.push(bindValue);
-    }
-
-    if (offset === 0){
-      sql.push(`GROUP BY ${sqlExpression}`);
-    }
-    // todo:
-    // - make it an option whether NULL value appears first or last
-    // - make the sort direction (ASC|DESC) an option
-    sql.push(`ORDER BY ${sqlExpression} NULLS FIRST`);
-
-    if (limit === undefined) {
-      limit = this.#getValuePicklistPageSize();
-    }
-    parameters.push(limit);
-    sql.push('LIMIT ?');
-
-    if (offset === undefined){
-      offset = 0;
-    }
-    parameters.push(offset);
-    sql.push('OFFSET ?');
-
-    sql = sql.join('\n');
-    console.log(`Preparing sql for filter dialog value picklist:`);
-    console.log(sql);
-    var preparedStatement = await datasource.prepareStatement(sql);
-    console.log(`preparedStatement: ${preparedStatement}`);
-    console.log(`Parameters: ${JSON.stringify(parameters)}`);
-    var timeMessage = `Executing filter dialog picklist query.`;
-    console.time(timeMessage);
-    var result = await preparedStatement.query.apply(preparedStatement, parameters);
     console.timeEnd(timeMessage);
     return result;
   }
