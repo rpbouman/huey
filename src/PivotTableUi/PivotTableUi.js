@@ -91,7 +91,16 @@ class PivotTableUi extends EventEmitter {
   #initQueryModelChangeHandler(){
     var queryModel = this.getQueryModel();
     queryModel.addEventListener('beforechange', this.#queryModelBeforeChangeHandler.bind(this));
-    bufferEvents(queryModel, 'change', this.#queryModelChangeHandler, this, 1000);
+    bufferEvents(
+      queryModel, 
+      'change', 
+      this.#queryModelChangeHandler, 
+      this, 
+      (function(){
+        var timeoutValue = this.#settings.getSettings(['querySettings', 'autoRunQueryTimeout']);
+        return timeoutValue;
+      }.bind(this))
+    );
     //queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
 
