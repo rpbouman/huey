@@ -439,7 +439,7 @@ class SqlQueryGenerator {
       }
       // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
       var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
-      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) AS ${groupingIdAlias}`;
+      var groupingIdExpression = `\n GROUPING_ID(\n   ${groupByExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
       orderByExpressions.push(`${groupingIdAlias} ASC`);
     }
