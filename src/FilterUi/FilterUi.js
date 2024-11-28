@@ -344,42 +344,47 @@ class FilterDialog {
   }
 
   #sortValueListKeys(valuesList) {
+    var dataTypeInfo;
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
+    if (dataType){
+      dataTypeInfo = getDataTypeInfo(dataType);
+    }
     var nullsSortOrder = this.#getNullsSortOrder();
+    var sortNull = ({
+      'FIRST': -1,
+      'LAST': 1
+    })[nullsSortOrder];
+
     var keys = Object.keys(valuesList);
     keys.sort(function(key1, key2){
       var valueObject1 = valuesList[key1];
       var literal1 = valueObject1.literal;
-      var postFix = '::' + dataType;
       var valueObject2 = valuesList[key2];
       var literal2 = valueObject2.literal;
 
       if (literal1.startsWith('NULL::')) {
-        if (literal2.startsWith('NULL::')){
-          return 0;
-        }
-        else 
-        if (sortNulls === 'FIRST') {
-          return -1;
-        }
-        else 
-        if (sortNulls === 'LAST'){
-          return 1;
-        }
+        return literal2.startsWith('NULL::') ? 0 : sortNull
       }
       else
       if (literal2.startsWith('NULL::')){
-        if (sortNulls === 'FIRST') {
-          return 1;
-        }
-        else 
-        if (sortNulls === 'LAST') {
-          return -1;
-        }
+        return -sortNull;
       }
 
-      if (dataTypeInfo.isNumeric){
-        literal1 = parseInt(literal1, 10);
-        literal2 = parseInt(literal2, 10);
+      if (dataTypeInfo && dataTypeInfo.isNumeric){
+        literal1 = literal1.split('::')[0];
+        literal2 = literal2.split('::')[0];
+        switch (this.#queryAxisItem.columnType){
+          case 'HUGEINT':
+          case 'BIGINT':
+          case 'UBIGINT':
+          case 'UHUGEINT':
+            literal1 = BigInt(literal1);
+            literal2 = BigInt(literal2);
+            break;
+          default:
+            literal1 = parseFloat(literal1);
+            literal2 = parseFloat(literal2);
+        }
       }
 
       if (literal1 > literal2) {
@@ -389,19 +394,15 @@ class FilterDialog {
       if ( literal1 < literal2) {
         return -1;
       }
+      
       return 0;
     });
     return keys;
   }
 
   #sortValueLists(valuesList, toValuesList){
-    var dataTypeInfo;
-    var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
-    if (dataType){
-      var dataTypeInfo = getDataTypeInfo(dataType);
-    }
     var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
-    keys = this.#sortValueListKeys(valuesList);
+    var keys = this.#sortValueListKeys(valuesList);
     keys.forEach(function(key){
       sortedList[key] = valuesList[key];
       if (!toValuesList) {
@@ -460,11 +461,11 @@ class FilterDialog {
     if (options === undefined) {
       return;
     }
-    var values = Object.keys(options);
+    var keys = this.#sortValueListKeys(options);
 
-    for (var i = 0; i < values.length; i++){
-      var value = values[i];
-      var valueObject = options[value];
+    for (var i = 0; i < keys.length; i++){
+      var key = keys[i];
+      var valueObject = options[key];
       var optionElement = this.#createOptionElementFromValues(valueObject);
       selectList.appendChild(optionElement);
     }
@@ -627,9 +628,8 @@ class FilterDialog {
 
     // clear the value lists and then update them with the changed set of values
     this.clearFilterValueLists();
-    var sortedValueLists = this.#sortValueLists(currentValues, currentToValues)
-    this.#renderOptionsToSelectList(sortedValueLists.valuesList, filterValuesList);
-    this.#renderOptionsToSelectList(sortedValueLists.toValuesList, toFilterValuesList);
+    this.#renderOptionsToSelectList(currentValues, filterValuesList);
+    this.#renderOptionsToSelectList(currentToValues, toFilterValuesList);
 
     if (valueSelectionStatusText){
       this.#setValueSelectionStatusText(valueSelectionStatusText);
@@ -858,15 +858,12 @@ class FilterDialog {
     if (filter){
       this.#getFilterType().value = filter.filterType;
 
-      var sortedValues, sortedValueArgs = [filter.values];
+      this.#renderOptionsToSelectList(filter.values, this.#getFilterValuesList());
       switch (filter.filterType) {
         case FilterDialog.filterTypes.BETWEEN:
         case FilterDialog.filterTypes.NOTBETWEEN:
-          sortedValueArgs.push(filter.toValues);
+          this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());
       }
-      sortedValues = this.#sortValueLists.apply(this, sortedValueArgs);
-      this.#renderOptionsToSelectList(sortedValues.valuesList, this.#getFilterValuesList());
-      this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());
     }
     else {
 
@@ -875,10 +872,14 @@ class FilterDialog {
   }
 
   #getDialogState(){
+    var filterValuesList = this.#getFilterValuesList();
+    var filterValues = this.#extractOptionsFromSelectList(filterValuesList);
+    var toFilterValuesList = this.#getToFilterValuesList();
+    var toFilterValues = this.#extractOptionsFromSelectList(toFilterValuesList);
     var dialogState = {
       filterType: this.#getFilterType().value,
-      values: this.#extractOptionsFromSelectList(this.#getFilterValuesList()),
-      toValues: this.#extractOptionsFromSelectList(this.#getToFilterValuesList()),
+      values: filterValues,
+      toValues: toFilterValues,
     };
     return dialogState;
   }
@@ -975,7 +976,7 @@ class FilterDialog {
       filterAxisItems.push(picklistFilterItem);
     }
 
-    var nullsSortOrder = this.#getNullsSortOrder();  
+    var nullsSortOrder = this.#getNullsSortOrder();
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
       datasource,
       queryAxisItems,
