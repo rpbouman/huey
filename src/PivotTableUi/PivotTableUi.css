@@ -165,6 +165,7 @@
 }
 
 .pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
+  
   .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
   .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
   .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
@@ -173,13 +174,26 @@
   .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel {
     font-family: var( --huey-mono-font-family );
   }
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
+  
   .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
   .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
   .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel {
     text-align: right;
+  }
+
+  .pivotTableUiCell[data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
+    font-family: unset
+  }
+  
+  .pivotTableUiCell[data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel {
+    text-align: unset;
   }
 }
 

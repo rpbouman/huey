@@ -726,7 +726,7 @@ class PivotTableUi extends EventEmitter {
           var tupleValue = tuple.values[j];
           var tupleValueField = tupleValueFields[j];
           this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
-if (isTotalsMember > j) {
+          if (isTotalsMember > j) {
             if (queryAxisItem.formatter) {
               labelText = queryAxisItem.formatter(tupleValue, tupleValueField);
             }
@@ -737,6 +737,7 @@ if (isTotalsMember > j) {
           else
           if (isTotalsMember === j) {
             labelText = this.#getTotalsString(queryAxisItem);
+            cell.setAttribute('data-totals', true);
           }
           else {
             labelText = '';
