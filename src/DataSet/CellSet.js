@@ -291,27 +291,37 @@ class CellSet extends DataSetComponent {
 
       if (!group){
         // create the group, and add the metadata.
-        var groupQueryAxisItems = [].concat(allQueryAxisItems);
-        var groupFields = [].concat(allFields);
         group = groups[groupingId] = { 
           tuples: {}, 
-          queryAxisItems: groupQueryAxisItems, 
-          fields: groupFields
+          queryAxisItems: [], 
+          fields: []
         };
 
-        groupingId.split('').forEach(function(ch, index){
-          var item, field;
-          if (ch === '1') {
-            var totalsItem = [].concat(totalsItems[0], totalsItems[1])[index];
-            var indexOfTotalsItem = groupQueryAxisItems.findIndex(function(queryAxisItem){
-              return queryAxisItem === totalsItem;
-            });
-            groupQueryAxisItems[indexOfTotalsItem] = undefined;
-            groupFields[indexOfTotalsItem] = undefined;
+        for (var j = 0; j < tuples.length; j++){
+          var tuple = tuples[j];
+          var tupleGroupingId = parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
+          var tupleSet = tupleSets[j];
+          var queryAxisItems = tupleSet.getQueryAxisItems();
+          var tupleSetFields = tuplesFields[j];
+          var tupleTotalsItems = totalsItems[j];
+          var currentTotalsItems = tupleTotalsItems.filter(function(totalsItem, index){
+            var groupingIdBit = 1 << tupleTotalsItems.length - 1 - index;
+            return tupleGroupingId & groupingIdBit;
+          });
+          var currentTotalsItem = currentTotalsItems.shift();
+          var indexOfCurrentTotalsItem = queryAxisItems.indexOf(currentTotalsItem);
+          for (var k = 0; k < queryAxisItems.length; k++){
+            if (!currentTotalsItem || k < indexOfCurrentTotalsItem ){
+              group.queryAxisItems.push(queryAxisItems[k])
+              group.fields.push(tupleSetFields[k]);
+            }
+            else {
+              group.queryAxisItems.push(undefined)
+              group.fields.push(undefined);
+            }
           }
-        });
+        }
       }
-
       group.tuples[cellIndex] = tupleValues;
     }
 
