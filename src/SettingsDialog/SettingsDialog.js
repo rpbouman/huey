@@ -63,10 +63,10 @@ class Settings extends EventEmitter {
       maxCellWidth: 30,
       totalsString: 'Total',
       totalsPosition: {
-        value: 'after',
+        value: 'AFTER',
         options: [
-          { value: 'after', label: 'after', title: 'Totals come after totalled items.'},
-          { value: 'before', label: 'before', title: 'Totals come before totalled items.'}
+          { value: 'AFTER', label: 'after', title: 'Totals come after totalled items.'},
+          { value: 'BEFORE', label: 'before', title: 'Totals come before totalled items.'}
         ]
       }
     },

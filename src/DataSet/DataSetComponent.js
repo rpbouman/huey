@@ -2,9 +2,15 @@ class DataSetComponent {
 
   #queryModel = undefined;
   #managedConnection = undefined;
+  #settings = undefined;
   
-  constructor(queryModel){
+  constructor(queryModel, settings){
     this.#queryModel = queryModel;
+    this.#settings = settings;
+  }
+  
+  getSettings(){
+    return this.#settings;
   }
 
   async #getDatasouceManagedConnection(){

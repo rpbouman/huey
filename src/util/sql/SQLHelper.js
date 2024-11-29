@@ -8,12 +8,6 @@ function getNullString(){
   return nullString;
 }
 
-function getTotalsString(axisItem){
-  var generalSettings = settings.getSettings('localeSettings');
-  var totalsString = generalSettings.totalsString;
-  return totalsString;
-}
-
 function getLocales(){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
@@ -385,7 +379,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('REAL');
-    }    
+    }
   },
   'BIGINT': {
     defaultAnalyticalRole: 'attribute',
@@ -400,7 +394,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('BIGINT');
-    }    
+    }
   },
   'HUGEINT': {
     defaultAnalyticalRole: 'attribute',

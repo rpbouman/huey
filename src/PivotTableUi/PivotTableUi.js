@@ -31,15 +31,18 @@ class PivotTableUi extends EventEmitter {
     var queryModel = config.queryModel;
     this.#queryModel = queryModel;
 
-    var columnsTupleSet = new TupleSet(this.#queryModel, QueryModel.AXIS_COLUMNS);
+    var columnsTupleSet = new TupleSet(this.#queryModel, QueryModel.AXIS_COLUMNS, this.#settings);
     this.#columnsTupleSet = columnsTupleSet;
-    var rowsTupleSet = new TupleSet(this.#queryModel, QueryModel.AXIS_ROWS);
+    var rowsTupleSet = new TupleSet(this.#queryModel, QueryModel.AXIS_ROWS, this.#settings);
     this.#rowsTupleSet = rowsTupleSet;
 
-    this.#cellsSet = new CellSet(this.#queryModel, [
-      rowsTupleSet,
-      columnsTupleSet
-    ]);
+    this.#cellsSet = new CellSet(
+      this.#queryModel, [
+        rowsTupleSet,
+        columnsTupleSet,
+      ],
+      this.#settings
+    );
 
     this.#initQueryModelChangeHandler()
     this.#initScrollHandler();
@@ -65,7 +68,13 @@ class PivotTableUi extends EventEmitter {
 
     container.appendChild(element);
   }
-
+  
+  #getTotalsString(axisItem){
+    var generalSettings = this.#settings.getSettings('pivotSettings');
+    var totalsString = generalSettings.totalsString;
+    return totalsString;
+  }
+  
   getQueryModel(){
     return this.#queryModel;
   }
@@ -498,21 +507,39 @@ class PivotTableUi extends EventEmitter {
     };
   }
 
-  // grouping id is the grouping id of the current tuple
-  // totalsItems are all query axis items having includeTotals
-  // queryAxisItem is the current member
-  static #isTotalsMember(groupingId, queryAxisItems, queryAxisItem){
+  // get the indices of all totals items.
+  // this is a helper for #isTotalsMember
+  static #getTotalsItemsIndices(queryAxisItems){
+    return queryAxisItems && queryAxisItems.length ? queryAxisItems.reduce(function(acc, curr, index){
+      if (curr.includeTotals) {
+        acc.unshift(index);
+      }
+      return acc;
+    }, []) : undefined;
+  }
+  // if the tuple has a grouping id, 
+  // find the most significant bit of the grouping id
+  // find the totals item that corresponds with the MSB of the grouping id
+  // find the index of that totals item
+  // if the index of the current item is equal to or greater than the index of the totals item, then return true
+  // else return false. 
+  
+  static #isTotalsMember(groupingId, totalsItemsIndices, currentItemIndex){
     if (
-      groupingId === undefined ||
-      queryAxisItem === undefined /*||
-      queryAxisItem.includeTotals !== true*/
-    ) {
-      return false;
+      !groupingId ||
+      !totalsItemsIndices ||
+      !totalsItemsIndices.length ||
+      currentItemIndex === undefined
+    ){
+      return Infinity;
     }
-    var index = queryAxisItems.indexOf(queryAxisItem);
-    var totalsMemberBit = groupingId ? 1 << (queryAxisItems.length - index - 1) : undefined;
-    var isTotalsMember = totalsMemberBit ? groupingId & BigInt(totalsMemberBit) : false;
-    return Boolean(isTotalsMember);
+
+    var i = BigInt(totalsItemsIndices.length - 1);
+    while (i >= 0n && !(groupingId & (1n << i)))  {
+      i -= 1n;
+    }
+    
+    return  (i < 0n) ? Infinity : totalsItemsIndices[i];
   }
 
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
@@ -527,6 +554,7 @@ class PivotTableUi extends EventEmitter {
     var queryModel = this.getQueryModel();
     var queryAxis = queryModel.getColumnsAxis();
     var queryAxisItems = queryAxis.getItems();
+    var totalsItemsIndices = PivotTableUi.#getTotalsItemsIndices(queryAxisItems);
 
     var tupleValueFields = tupleSet.getTupleValueFields();
     var tupleValueField;
@@ -571,7 +599,7 @@ class PivotTableUi extends EventEmitter {
         cell.setAttribute('data-columns-tuple-index', tupleIndex);
         cell.setAttribute('data-totals', isTotalsColumn);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
-        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, queryAxisItems, queryAxisItem);
+        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
 
         var labelText = undefined;
         var titleText = undefined;
@@ -581,18 +609,23 @@ class PivotTableUi extends EventEmitter {
           tupleValue = tuple.values[j];
           this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
 
-          if (isTotalsMember) {
-            titleText = getTotalsString();
+          if (isTotalsMember > j) {
+            if (queryAxisItem.formatter) {
+              titleText = queryAxisItem.formatter(tupleValue, tupleValueField);
+            }
+            else {
+              titleText = String(tupleValue);
+            }
+            if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
+              labelText = titleText;
+            }
           }
           else
-          if (queryAxisItem.formatter) {
-            titleText = queryAxisItem.formatter(tupleValue, tupleValueField);
+          if (isTotalsMember === j){
+            labelText = this.#getTotalsString(queryAxisItem);
           }
           else {
-            titleText = String(tupleValue);
-          }
-          if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
-            labelText = titleText;
+            labelText = '';
           }
           titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)} (${tupleIndex + 1}): ${titleText}`;
         }
@@ -650,6 +683,7 @@ class PivotTableUi extends EventEmitter {
     var queryModel = this.getQueryModel();
     var queryAxis = queryModel.getRowsAxis();
     var queryAxisItems = queryAxis.getItems();
+    var totalsItemsIndices = PivotTableUi.#getTotalsItemsIndices(queryAxisItems);
 
     var tupleValueFields = tupleSet.getTupleValueFields();
     var tuples = await tupleSet.getTuples(tupleCount, tupleIndexInfo.tupleIndex || 0);
@@ -688,19 +722,24 @@ class PivotTableUi extends EventEmitter {
         var titleText = undefined;
         var numMembers = tuple ? tuple.values.length : 0;
         if (tuple && j < numMembers) {
-          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, queryAxisItems, queryAxisItem);
+          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
           var tupleValue = tuple.values[j];
           var tupleValueField = tupleValueFields[j];
           this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
-          if (isTotalsMember) {
-            labelText = getTotalsString(queryAxisItem);
+if (isTotalsMember > j) {
+            if (queryAxisItem.formatter) {
+              labelText = queryAxisItem.formatter(tupleValue, tupleValueField);
+            }
+            else {
+              labelText = String(tupleValue);
+            }
           }
           else
-          if (queryAxisItem.formatter) {
-            labelText = queryAxisItem.formatter(tupleValue, tupleValueField);
+          if (isTotalsMember === j) {
+            labelText = this.#getTotalsString(queryAxisItem);
           }
           else {
-            labelText = String(tupleValue);
+            labelText = '';
           }
           titleText = `{QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
         }
@@ -1042,8 +1081,6 @@ class PivotTableUi extends EventEmitter {
     }
 
     firstTableHeaderRow = tableHeaderDom.childNodes.item(0);
-
-
     var stufferCell, stufferRow;
     stufferCell = createEl('div', {
       "class": "pivotTableUiCell pivotTableUiHeaderCell pivotTableUiStufferCell"
@@ -1070,6 +1107,7 @@ class PivotTableUi extends EventEmitter {
     var queryModel = this.getQueryModel();
     var queryAxis = queryModel.getColumnsAxis();
     var queryAxisItems = queryAxis.getItems();
+    var totalsItemsIndices = PivotTableUi.#getTotalsItemsIndices(queryAxisItems);
 
     var tupleValueFields = this.#columnsTupleSet.getTupleValueFields();
     
@@ -1126,7 +1164,7 @@ class PivotTableUi extends EventEmitter {
       for (var k = 0; k < numCellHeaders; k++){
         for (var j = 0; j < headerRows.length; j++){
           var queryAxisItem = queryAxisItems[j];
-          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, queryAxisItems, queryAxisItem);
+          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
 
           var headerRow = headerRows.item(j);
 
@@ -1140,35 +1178,37 @@ class PivotTableUi extends EventEmitter {
             cell.className += ' pivotTableUiCellAxisHeaderCell';
           }
 
-          var labelText;
-          if (isTotalsMember){
-            labelText = getTotalsString();
-          }
-          else
-          if (values && j < values.length) {
-            if (k === 0) {
-              var value = values[j];
-              var tupleValueField = tupleValueFields[j];
-              labelText = queryAxisItem.formatter ? queryAxisItem.formatter(value, tupleValueField) : String(value);
-              this.#setCellValueLiteral(cell, queryAxisItem, value, tupleValueField);
-            }
-            else {
-              labelText = String.fromCharCode(160);
-            }
+          var labelText = undefined;
+          if (isTotalsMember > j){
+            if (values && j < values.length) {
+              if (k === 0) {
+                var value = values[j];
+                var tupleValueField = tupleValueFields[j];
+                labelText = queryAxisItem.formatter ? queryAxisItem.formatter(value, tupleValueField) : String(value);
+                this.#setCellValueLiteral(cell, queryAxisItem, value, tupleValueField);
+              }
+              else {
+                labelText = String.fromCharCode(160);
+              }
 
-            if (labelText.length > valuesMaxWidth){
-              valuesMaxWidth = labelText.length;
-              columnWidth = valuesMaxWidth;
+              if (labelText.length > valuesMaxWidth){
+                valuesMaxWidth = labelText.length;
+                columnWidth = valuesMaxWidth;
+              }
+            }
+            else
+            if (renderCellHeaders && k < cellItems.length) {
+              var cellItem = cellItems[k];
+              labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellItem);
+              columnWidth = labelText.length > valuesMaxWidth ? labelText.length : valuesMaxWidth;
+              this.#setCellItemId(cell, cellItem);
             }
           }
           else
-          if (renderCellHeaders && k < cellItems.length) {
-            var cellItem = cellItems[k];
-            labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellItem);
-            columnWidth = labelText.length > valuesMaxWidth ? labelText.length : valuesMaxWidth;
-            this.#setCellItemId(cell, cellItem);
+          if (isTotalsMember === j) {
+            labelText = this.#getTotalsString(queryAxisItem);
           }
-          else {
+          if (labelText === undefined) {
             labelText = String.fromCharCode(160);
           }
 

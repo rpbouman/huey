@@ -13,8 +13,8 @@ class CellSet extends DataSetComponent {
   static #cellIndexColumnName = '__huey_cellIndex';
   static #countStarExpressionAlias = '__huey_count_star';
 
-  constructor(queryModel, tupleSets){
-    super(queryModel);
+  constructor(queryModel, tupleSets, settings){
+    super(queryModel, settings);
     this.#tupleSets = tupleSets;
   }
 
@@ -252,6 +252,8 @@ class CellSet extends DataSetComponent {
     var groups = {};
     var tupleSets = this.#tupleSets;
     var allQueryAxisItems = [];
+    var totalsItems = [];
+    var allTotalsItems = 0;
     var allFields = [];
 
     var cellIndices = Object.keys(tuplesToQuery);
@@ -267,10 +269,14 @@ class CellSet extends DataSetComponent {
           allQueryAxisItems = allQueryAxisItems.concat(queryAxisItems);
           var fields = tuplesFields[j];
           allFields = allFields.concat(fields);
+          totalsItems[j] = queryAxisItems.filter(function(queryAxisItem){
+            return queryAxisItem.includeTotals;
+          });
+          allTotalsItems += totalsItems[j].length;
         }
 
         if (j){
-          groupingId = groupingId << queryAxisItems.length;
+          groupingId = groupingId << totalsItems[j].length;
         }
         var tuple = tuples[j];
         if (tuple){
@@ -280,27 +286,29 @@ class CellSet extends DataSetComponent {
       }
       groupingId = (groupingId).toString(2);
       // zero padd the grouping id
-      groupingId = (new Array(allQueryAxisItems.length)).fill(0, 0, allQueryAxisItems.length - groupingId.length).join('') + groupingId;
+      groupingId = (new Array(allTotalsItems)).fill(0, 0, allTotalsItems - groupingId.length).join('') + groupingId;
       var group = groups[groupingId];
 
       if (!group){
         // create the group, and add the metadata.
-        group = groups[groupingId] = { tuples: {}, queryAxisItems: [], fields: [] };
-        var groupQueryAxisItems = [];
-        var groupFields = [];
+        var groupQueryAxisItems = [].concat(allQueryAxisItems);
+        var groupFields = [].concat(allFields);
+        group = groups[groupingId] = { 
+          tuples: {}, 
+          queryAxisItems: groupQueryAxisItems, 
+          fields: groupFields
+        };
 
         groupingId.split('').forEach(function(ch, index){
           var item, field;
-          if (ch === '0') {
-            item = allQueryAxisItems[index];
-            field = allFields[index];
+          if (ch === '1') {
+            var totalsItem = [].concat(totalsItems[0], totalsItems[1])[index];
+            var indexOfTotalsItem = groupQueryAxisItems.findIndex(function(queryAxisItem){
+              return queryAxisItem === totalsItem;
+            });
+            groupQueryAxisItems[indexOfTotalsItem] = undefined;
+            groupFields[indexOfTotalsItem] = undefined;
           }
-          else {
-            item = undefined;
-            field = undefined;
-          }
-          group.queryAxisItems.push(item);
-          group.fields.push(field);
         });
       }
 
@@ -329,7 +337,7 @@ class CellSet extends DataSetComponent {
     for (groupingId in groups){
       var group = groups[groupingId];
       var cteForTupleGroup = this.#getCteForTupleGroup(group);
-      var query = `${selectClause}\n${cteForTupleGroup}`;
+      var query = `/* group ${groupingId} */\n${selectClause}\n${cteForTupleGroup}`;
       queries.push(query);
     }
 

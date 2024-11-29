@@ -25,7 +25,7 @@ class TupleSet extends DataSetComponent {
     return selectListExpressions;
   }
 
-  static getSqlSelectStatement(queryModel, axisId, includeCountAll){
+  static getSqlSelectStatement(queryModel, axisId, includeCountAll, nullsSortOrder, totalsPosition){
     var datasource = queryModel.getDatasource();
 
     var queryAxis = queryModel.getQueryAxis(axisId);
@@ -45,7 +45,8 @@ class TupleSet extends DataSetComponent {
       filterAxisItems,
       includeCountAll,
       undefined,
-      'FIRST',
+      nullsSortOrder,
+      totalsPosition,
       sampling
     );
     return sql;
@@ -59,9 +60,29 @@ class TupleSet extends DataSetComponent {
   #tupleCount = undefined;
   #pageSize = 50;
 
-  constructor(queryModel, axisId){
-    super(queryModel);
+  constructor(queryModel, axisId, settings){
+    super(queryModel, settings);
     this.#queryAxisId = axisId;
+  }
+  
+  #getNullsSortOrder(){
+    var settings = this.getSettings();
+    var nullsSortOrder = settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
+    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+      console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
+      nullsSortOrder = 'FIRST';
+    }
+    return nullsSortOrder;
+  }
+  
+  #getTotalsPosition(){
+    var settings = this.getSettings();
+    var totalsPosition = settings.getSettings(['pivotSettings', 'totalsPosition', 'value']) || 'AFTER';
+    if (['AFTER','BEFORE'].indexOf(totalsPosition) === -1) {
+      console.warn(`Wrong value for totalsPosition "${totalsPosition}"`);
+      totalsPosition = 'AFTER';
+    }
+    return totalsPosition;
   }
 
   getTupleValueFields(){
@@ -94,10 +115,14 @@ class TupleSet extends DataSetComponent {
     if (!queryModel) {
       return undefined;
     }
+    var nullsSortOrder = this.#getNullsSortOrder();
+    var totalsPosition = this.#getTotalsPosition();    
     var sql = TupleSet.getSqlSelectStatement(
       queryModel,
       this.#queryAxisId,
-      includeCountAll
+      includeCountAll,
+      nullsSortOrder,
+      totalsPosition
     );
     return sql;
   }

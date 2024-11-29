@@ -367,7 +367,8 @@ class SqlQueryGenerator {
     originalQueryAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls,
+    defaultNullsSortOrder,
+    totalsPosition,
     samplingConfig
   ){
     var sql = '';
@@ -386,7 +387,7 @@ class SqlQueryGenerator {
 
     // the groupingSets are created when we find an axis item that has includeTotals
     var groupingSets = [];
-    
+    var groupingIdExpressions = [];
     var orderByExpressions = [];
     
     var columnIds = Object.keys(columnExpressions);
@@ -407,20 +408,16 @@ class SqlQueryGenerator {
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
       var queryAxisItem = originalQueryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
-      var sortNulls = queryAxisItem.sortNulls || defaultSortNulls
-      sortNulls = sortNulls ? ` NULLS ${sortNulls}` : '';
+      var nullsSortOrder = queryAxisItem.nullsSortOrder || defaultNullsSortOrder
+      nullsSortOrder = nullsSortOrder ? ` NULLS ${nullsSortOrder}` : '';
       
       if (queryAxisItem.includeTotals){
         var groupingSet = [].concat(groupByExpressions);
         groupingSets.push(groupingSet);
-        
-        // if we have an axis item with includeTotals, then we want the super-aggregate rows (the totels) 
-        // to appear directly below the group of rows with a particular column value.
-        // but because the total row has a NULL their, it will sort lower than anything else.
-        // changing the order by expresison to MAX fixes that as it will get the value of the row that sorted last.
-        // (there are still some issues when you have actual NULL values in the column but we'll get to that later).
-        var orderByAggregate = 'MAX';
-        orderByExpression = `${orderByAggregate}( ${orderByExpression} )`;
+        groupingIdExpressions.push(columnExpression);
+        // store a placeholder for the groupingId expression in the order by expressions.
+        // we will replace these later with expressions to sort the totals.
+        orderByExpressions.push(columnExpression);
       }
       
       var originalQueryAxisItem = originalQueryAxisItems[i];
@@ -428,20 +425,8 @@ class SqlQueryGenerator {
         groupByExpressions.push(columnExpression);
       }
       orderByExpression = `${orderByExpression} ${sortDirection}`;
-      orderByExpression += sortNulls;
+      orderByExpression += nullsSortOrder;
       orderByExpressions.push(orderByExpression);
-    }
-    
-    if (groupingSets.length){
-      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
-        // if we have to make grouping sets, then we need to add our "normal" group by clause too
-        groupingSets.push([].concat(groupByExpressions));
-      }
-      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
-      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
-      var groupingIdExpression = `\n GROUPING_ID(\n   ${groupByExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
-      selectListExpressions.unshift(groupingIdExpression);
-      orderByExpressions.push(`${groupingIdAlias} ASC`);
     }
 
     if (includeCountAll) {
@@ -449,42 +434,58 @@ class SqlQueryGenerator {
       countAllAlias = countAllAlias || countExpression;
       selectListExpressions.push(`${countExpression} AS "${countAllAlias}"`);
     }
-
-    var sql = [
-      `SELECT ${selectListExpressions.join('\n,')}`,
-      cte.from + ` AS ${cte.alias}`
-    ];
-    
-    if (samplingConfig){
-      sql.push( getUsingSampleClause(samplingConfig, true) );
-    }
-    
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
     
     var groupByClause = undefined;
-    if (groupingSets.length > 1) {
-      groupByClause = 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
+    if (groupingSets.length){
+      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
+        // if we have to make grouping sets, then we need to add our "normal" group by clause too
+        groupingSets.push([].concat(groupByExpressions));
+      }
+      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
+      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
+      var groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
+      selectListExpressions.unshift(groupingIdExpression);
+      
+      // for each column in the grouping id, 
+      // insert an order by expression to keep the totals together with the items they are totalling
+      sortDirection = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
+      groupingIdExpressions.forEach(function(groupingIdExpression, groupingIdExpressionIndex){
+        var bitshift = groupingIdExpressions.length - groupingIdExpressionIndex - 1;
+        bitshift = bitshift ? `(1 << ${bitshift})` : 1;
+        orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDirection}`;
+        var indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
+        orderByExpressions[indexOfGroupingIdExpression] = `${orderByExpression}`;
+      })
+
+      var groupingSetsSql = groupingSets.map(function(groupingSet){
         return [
           '  (',
           `    ${groupingSet.join('\n  , ')}`,
           '  )'
         ].join('\n');
-      }).join(',') + '\n)';
+      }).join(',');
+      groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
     }
     else
     if (groupByExpressions.length) {
       groupByClause = groupByExpressions.join('\n,');
     }
+
+    var sql = [
+      `SELECT ${selectListExpressions.join('\n,')}`,
+      cte.from + ` AS ${cte.alias}`
+    ];
+    SqlQueryGenerator.#generateWhereClause(cte, sql);
+
     if (groupByClause) {
       groupByClause = `GROUP BY ${groupByClause}`;
       sql.push(groupByClause);
     }
     
-    sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
-
     if (samplingConfig){
-      //sql.push(`LIMIT ${samplingConfig.size}`);
+      sql.push( getUsingSampleClause(samplingConfig, true) );
     }
+    sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
 
     sql = sql.join('\n');
     return sql;
@@ -543,7 +544,8 @@ class SqlQueryGenerator {
     filterAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls,
+    defaultNullsSortOrder,
+    totalsPosition,
     samplingConfig
   ) {
     if (!queryAxisItems.length) {
@@ -563,7 +565,8 @@ class SqlQueryGenerator {
       queryAxisItems, 
       includeCountAll,
       countAllAlias,
-      defaultSortNulls,
+      defaultNullsSortOrder,
+      totalsPosition,
       ctes.length ? undefined : samplingConfig
     ); 
     var sqls = ctes.map(function(cte, index){
