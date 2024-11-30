@@ -977,15 +977,15 @@ class QueryModel extends EventEmitter {
     }
 
     for (var i = 0; i < axisIds.length; i++) {
-      var axisId = axisIds[i];
-      var axis = this.getQueryAxis(axisId);
+      var localAxisId = axisIds[i];
+      var axis = this.getQueryAxis(localAxisId);
       var items = axis.getItems();
 
       if (!items.length) {
         continue;
       }
 
-      axesChangeInfo[axisId] = {
+      axesChangeInfo[localAxisId] = {
         removed: items
       };
     }
