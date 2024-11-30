@@ -782,6 +782,12 @@ class PivotTableUi extends EventEmitter {
   }
 
   #setCellValueLiteral(cellElement, queryAxisItem, tupleValue, tupleValueField){
+    if (!tupleValue && !tupleValueField) {
+      // this really should't happen but sometimes does when the cached tuples are out of sync witht he query model.
+      console.warn(`No tuple value and no tuple value field.`);
+      return;
+    }
+
     cellElement.setAttribute('data-axis', queryAxisItem.axis);
 
     var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
