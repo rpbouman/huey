@@ -213,23 +213,15 @@ class AttributeUi {
     },
     'month num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month num */ ",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return monthNumFormatter
-      },
-      formats: {
-        'long': {
-        },
-        'short': {
-        },
-        'narrow': {
-        }
       }
     },
     'month name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month name */ ",
       columnType: 'UTINYINT',
       createFormatter: createMonthNameFormatter
     },
@@ -256,12 +248,12 @@ class AttributeUi {
     },
     'day of week num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week num */",
       columnType: 'UTINYINT',
     },
     'day of week name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week name */",
       columnType: 'UTINYINT',
       createFormatter: createDayNameFormatter
     }
