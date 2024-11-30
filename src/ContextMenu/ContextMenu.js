@@ -42,11 +42,35 @@ class ContextMenu {
 
   // show the popover at the coordinates of the initiating contextmenu event.
   #showPopover(event){
+    var body = document.body;
     var dom = this.getDom();
         
     dom.showPopover();
-    dom.style.left = event.pageX + 'px';
-    dom.style.top = event.pageY  + 'px';
+
+    var width = dom.clientWidth;
+    var left = event.pageX;
+    var right = left + width;
+    var correctionX = right - body.clientWidth;
+    if (correctionX > 0){
+      left -= correctionX;
+      if (left < 0) {
+        left = 0;
+      }
+    }
+    
+    dom.style.left = left + 'px';
+    
+    var height = dom.clientHeight;
+    var top = event.pageY;
+    var bottom = top + height;
+    var correctionY = bottom - body.clientHeight;
+    if (correctionY > 0){
+      top -= correctionY;
+      if (top < 0){
+        top = 0;
+      }
+    }
+    dom.style.top = top  + 'px';
   }
   
   //

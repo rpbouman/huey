@@ -2,8 +2,6 @@
 menu[role=menu]#pivotTableContextMenu {
   
   > li {
-    border-width: 1px;
-    border-color: var(--huey-light-border-color);
     
     > label[for=pivotTableContextMenuItemCopyCell]:before {
       /* clipboard-copy */

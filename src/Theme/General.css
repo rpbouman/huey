@@ -370,6 +370,8 @@ menu[role=menu] {
 menu[role=menu] > li[role=menuitem] {
   line-height: 24px;
   padding: 2px 4px 2px 4px;
+  border-width: 1px;
+  white-space: nowrap;
 }
 
 dialog,
