@@ -299,6 +299,9 @@ class CellSet extends DataSetComponent {
 
         for (var j = 0; j < tuples.length; j++){
           var tuple = tuples[j];
+          if (!tuple){
+            continue;
+          }
           var tupleGroupingId = parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
           var tupleSet = tupleSets[j];
           var queryAxisItems = tupleSet.getQueryAxisItems();
