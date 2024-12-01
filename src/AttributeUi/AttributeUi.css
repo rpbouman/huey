@@ -429,6 +429,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details > summary:has( > label > input[type=checkbox]:checked ) > span.label:before,
   details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label:before {
     color: var( --huey-icon-color-highlight );
+    font-weight: normal;
   }
   
 }
