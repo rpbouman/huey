@@ -36,7 +36,11 @@ class ContextMenu {
       var menuItem = menuItems.item(i);
       menuItem.setAttribute('popovertarget', this.#menuId);
       menuItem.setAttribute('popoveraction', 'hide');
-      menuItem.addEventListener('click', menuHost.contextMenuItemClicked.bind(menuHost));
+      menuItem.addEventListener('click', function(event){
+        event.preventDefault();
+        dom.hidePopover();
+        menuHost.contextMenuItemClicked.call(menuHost, event);
+      });
     }
   }
 
