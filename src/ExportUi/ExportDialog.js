@@ -109,6 +109,188 @@ class ExportUi {
     });
     return replacedTemplate;
   }
+
+  static async exportData(queryModel, exportSettings, progressCallback){
+    try {
+      if (typeof progressCallback !== 'function'){
+        progressCallback = function(text){
+          console.log(text);
+        };
+      }
+      progressCallback('initSettings');
+
+      var title = exportSettings.exportTitle;
+      var exportType = exportSettings.exportType;
+
+      var mimeType, compression, includeHeaders,
+          dateFormat, timestampFormat, nullValueString,
+          columnDelimiter, quote, escape, rowDelimiter
+      ;
+      var fileExtension, data, copyStatementOptions, sqlOptions;
+      switch (exportType) {
+        case 'exportDelimited':
+          columnDelimiter = exportSettings[exportType + 'ColumnDelimiter'];
+          nullValueString = exportSettings[exportType + 'NullString'];
+          includeHeaders = exportSettings[exportType + 'IncludeHeaders'];
+          quote = exportSettings[exportType + 'Quote'];
+          escape = exportSettings[exportType + 'Escape'];
+          dateFormat = exportSettings[exportType + 'DateFormat'];
+          timestampFormat = exportSettings[exportType + 'TimestampFormat'];
+          compression = exportSettings[exportType + 'Compression'].value;
+
+          copyStatementOptions = {
+            "FORMAT": 'CSV',
+            "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
+            "NULL": `'${nullValueString.replace('\'', "''")}'`,
+            "HEADER": includeHeaders ? 'TRUE' : 'FALSE',
+            "QUOTE": `'${quote.replace('\'', "''")}'`,
+            "ESCAPE": `'${escape.replace('\'', "''")}'`,
+            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
+            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+            "COMPRESSION": compression,
+          };
+          mimeType = 'text/csv';
+          fileExtension = 'csv';
+          break;
+        case 'exportJson':
+          compression = exportSettings[exportType + 'Compression'].value;
+          dateFormat = exportSettings[exportType + 'DateFormat'];
+          timestampFormat = exportSettings[exportType + 'TimestampFormat'];
+          rowDelimiter = exportSettings[exportType + 'RowDelimiter'];
+          copyStatementOptions = {
+            "FORMAT": 'JSON',
+            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
+            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+            "COMPRESSION": compression,
+            "ARRAY": rowDelimiter.toUpperCase()
+          };
+          mimeType = 'application/json';
+          fileExtension = 'json';
+          break;
+        case 'exportParquet':
+          compression = exportSettings[exportType + 'Compression'].value;
+          copyStatementOptions = {
+            "FORMAT": 'PARQUET',
+            "COMPRESSION": compression,
+          };
+          mimeType = 'application/vnd.apache.parquet';
+          fileExtension = 'parquet';
+          break;
+        case 'exportSql':
+          sqlOptions = {
+            keywordLettercase: exportSettings[exportType + 'KeywordLettercase'].value,
+            alwaysQuoteIdentifiers: exportSettings[exportType + 'AlwaysQuoteIdentifiers'],
+            commaStyle: exportSettings[exportType + 'CommaStyle'].value
+          };
+          mimeType = 'text/plain';
+          fileExtension = 'sql';
+          break;
+      }
+
+      var sql, structure;
+      if (exportSettings.exportResultShapePivot){
+        structure = 'pivot';
+        sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
+      }
+      else
+      if (exportSettings.exportResultShapeTable){
+        structure = 'table';
+        sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
+      }
+
+      if (sqlOptions) {
+        data = sql;
+      }
+
+      if (compression && compression !== 'UNCOMPRESSED'){
+        if (exportType === 'exportParquet'){
+          fileExtension = `${compression.toLowerCase()}.${fileExtension}`;
+        }
+        else {
+          switch (compression){
+            case 'GZIP':
+              mimeType = 'application/gzip';
+              break;
+            case 'ZTSD':
+              mimeType = 'application/ztsd';
+              break;
+            default:
+              mimeType = 'application/octet-stream';
+          }
+          fileExtension += `.${compression.toLowerCase()}`;
+        }
+      }
+
+      if (copyStatementOptions){
+        var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
+        progressCallback(`Preparing copy to ${tmpFileName}`);
+        var copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
+        var datasource = queryModel.getDatasource();
+        var connection, result;
+        try {
+          connection = datasource.getManagedConnection();
+          result = await connection.query(copyStatement);
+          progressCallback(`Extracting from ${tmpFileName}`);
+          data = await connection.copyFileToBuffer(tmpFileName);
+        }
+        finally {
+          if (data) {
+            await connection.dropFile(tmpFileName);
+          }
+        }
+      }
+
+      var destination;
+      if (exportSettings.exportDestinationFile){
+        destination = 'file';
+      }
+      else
+      if (exportSettings.exportDestinationClipboard){
+        destination = 'clipboard';
+      }
+
+      switch (destination){
+        case 'file':
+          var fileName = [exportSettings.exportTitle, fileExtension].join('.');
+          fileName = fileName.replace(/\"/g, "'");
+          progressCallback(`Download as ${fileName}`);
+          ExportUi.downloadBlob(data, fileName, mimeType);
+          break;
+        case 'clipboard':
+          var text;
+          if (typeof data === 'string'){
+            text = data;
+          }
+          else {
+            progressCallback(`Copying to clipboard..`);
+            text = new TextDecoder('utf-8').decode(data);
+          }
+          await copyToClipboard(text, 'text/plain');
+          break;
+      }
+      progressCallback(`Success!`);
+    }
+    catch (e){
+      progressCallback(`Error!`);
+      showErrorDialog(e);
+    }
+    finally {
+    }
+  }
+
+  static async exportAxisData(queryModel, axisId, exportSettings, progressCallback){
+    var state = queryModel.getState();
+    var newAxes = {};
+    newAxes[QueryModel.AXIS_FILTERS] = state.axes[QueryModel.AXIS_FILTERS];
+    newAxes[axisId] = state.axes[axisId];
+    state.axes = newAxes;
+    
+    var exportQueryModel = new QueryModel();
+    await exportQueryModel.setState(state);
+
+    await ExportUi.exportData(exportQueryModel, exportSettings, progressCallback);
+  }
+
 }
 
 class ExportDialog {
@@ -180,19 +362,57 @@ class ExportDialog {
   }
 
   async #executeExport(){
-    var dialog = this.#getDialog();
-    dialog.setAttribute('aria-busy', String(true));
-
-    var queryModel = this.#queryModel;
-    var settings = this.#settings;
-
-    var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
-    progressMessageElement.innerText = 'Preparing export...';
     try {
-      var title = byId('exportTitle').innerText;
+      var dialog = this.#getDialog();
+      dialog.setAttribute('aria-busy', String(true));
 
-      var selectedTab = TabUi.getSelectedTab('#exportDialog');
-      var tabName = selectedTab.getAttribute('for');
+      var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
+      var progressCallback = function(text){
+        progressMessageElement.innerText = text;
+      }
+      progressCallback('Preparing export...');
+
+      var settings = this.#settings;
+      var exportSettings = settings.getSettings('exportUi');
+
+      exportSettings.exportTitle = byId('exportTitle').innerText;
+      var tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
+
+      function copyUiSetting(setting, exportTypePrefix){
+        exportTypePrefix = exportTypePrefix || '';
+        var typeOfSetting = typeof setting;
+        switch (typeOfSetting) {
+          case 'string':
+            var id = exportTypePrefix + setting;
+            var control = byId(id);
+            var valueProperty;
+            switch (control.type){
+              case 'radio':
+                valueProperty = 'selected';
+                break;
+              case 'checkbox':
+                valueProperty = 'checked';
+                break;
+              case 'input':
+              default:
+                valueProperty = 'value';
+            }
+            var value = control[valueProperty];
+            exportSettings[id] = value;
+            return;
+          case 'object':
+            if (setting instanceof Array) {
+              break;
+            }
+          default:
+            throw new Error(`Wrong type for setting "${setting}": should be string or array of strings, not "${typeOfSetting}".`);
+        }
+        setting.forEach(function(setting){
+          copyUiSetting(setting, exportTypePrefix);
+        });
+      }
+
+      exportSettings.exportType = tabName;
 
       var mimeType, compression, includeHeaders,
           dateFormat, timestampFormat, nullValueString,
@@ -201,159 +421,60 @@ class ExportDialog {
       var fileExtension, data, copyStatementOptions, sqlOptions;
       switch (tabName) {
         case 'exportDelimited':
-          columnDelimiter = byId(tabName + 'ColumnDelimiter').value;
-          nullValueString = byId(tabName + 'NullString').value;
-          includeHeaders = byId(tabName + 'IncludeHeaders').checked;
-          quote = byId(tabName + 'Quote').value;
-          escape = byId(tabName + 'Escape').value;
-          dateFormat = byId(tabName + 'DateFormat').value;
-          timestampFormat = byId(tabName + 'TimestampFormat').value;
-          compression = byId(tabName + 'Compression').value;
-          copyStatementOptions = {
-            "FORMAT": 'CSV',
-            "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
-            "NULL": `'${nullValueString.replace('\'', "''")}'`,
-            "HEADER": includeHeaders ? 'TRUE' : 'FALSE',
-            "QUOTE": `'${quote.replace('\'', "''")}'`,
-            "ESCAPE": `'${escape.replace('\'', "''")}'`,
-            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
-            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-            "COMPRESSION": compression,
-          };
-          mimeType = 'text/csv';
-          fileExtension = 'csv';
+          copyUiSetting([
+            'ColumnDelimiter',
+            'NullString',
+            'IncludeHeaders',
+            'Quote',
+            'Escape',
+            'DateFormat',
+            'TimestampFormat',
+            'Compression'
+          ], tabName);
           break;
         case 'exportJson':
-          compression = byId(tabName + 'Compression').value;
-          dateFormat = byId(tabName + 'DateFormat').value;
-          timestampFormat = byId(tabName + 'TimestampFormat').value;
-          rowDelimiter = byId(tabName + 'RowDelimiter').value;
-          copyStatementOptions = {
-            "FORMAT": 'JSON',
-            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
-            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-            "COMPRESSION": compression,
-            "ARRAY": rowDelimiter.toUpperCase()
-          };
-          mimeType = 'application/json';
-          fileExtension = 'json';
+          copyUiSetting([
+            'DateFormat',
+            'TimestampFormat',
+            'RowDelimiter',
+            'Compression'
+          ], tabName);
           break;
         case 'exportParquet':
-          compression = byId(tabName + 'Compression').value;
-          copyStatementOptions = {
-            "FORMAT": 'PARQUET',
-            "COMPRESSION": compression,
-          };
-          mimeType = 'application/vnd.apache.parquet';
-          fileExtension = 'parquet';
+          copyUiSetting([
+            'Compression'
+          ], tabName);
           break;
         case 'exportSql':
-          sqlOptions = {};
-          mimeType = 'text/plain';
-          var keywordLetterCase = byId(tabName + 'KeywordLettercase').value;
-          sqlOptions.keywordLetterCase = keywordLetterCase;
-          var alwaysQuoteIdentifiers = byId(tabName + 'AlwaysQuoteIdentifiers').checked;
-          sqlOptions.alwaysQuoteIdentifiers = alwaysQuoteIdentifiers;
-          var commaStyle = byId(tabName + 'CommaStyle').value;
-          sqlOptions.commaStyle = commaStyle;
-          fileExtension = 'sql';
+          copyUiSetting([
+            'KeywordLettercase',
+            'AlwaysQuoteIdentifiers',
+            'CommaStyle'
+          ], tabName);
           break;
       }
+      copyUiSetting([
+        'exportResultShapePivot',
+        'exportResultShapeTable',
+        'exportDestinationFile',
+        'exportDestinationClipboard',
+      ]);
 
-      var sql, structure;
+      var queryModel = this.#queryModel;
+      await ExportUi.exportData(queryModel, exportSettings, progressCallback);
 
-      if (byId('exportResultShapePivot').checked){
-        structure = 'pivot';
-        sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
-      }
-      else
-      if (byId('exportResultShapeTable').checked){
-        structure = 'table';
-        sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
-      }
-
-      if (sqlOptions) {
-        data = sql;
-      }
-
-      if (compression && compression !== 'UNCOMPRESSED'){
-        if (tabName === 'exportParquet'){
-          fileExtension = `${compression.toLowerCase()}.${fileExtension}`;
-        }
-        else {
-          switch (compression){
-            case 'GZIP':
-              mimeType = 'application/gzip';
-              break;
-            case 'ZTSD':
-              mimeType = 'application/ztsd';
-              break;
-            default:
-              mimeType = 'application/octet-stream';
-          }
-          fileExtension += `.${compression.toLowerCase()}`;
-        }
-      }
-
-      if (copyStatementOptions){
-        var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
-        progressMessageElement.innerText = `Preparing copy to ${tmpFileName}`;
-        var copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
-        var datasource = queryModel.getDatasource();
-        var connection, result;
-        try {
-          connection = datasource.getManagedConnection();
-          result = await connection.query(copyStatement);
-          progressMessageElement.innerText = `Extracting from ${tmpFileName}`;
-          data = await connection.copyFileToBuffer(tmpFileName);
-        }
-        finally {
-          if (data) {
-            await connection.dropFile(tmpFileName);
-          }
-        }
-      }
-
-      var destination;
-      if (byId('exportDestinationFile').checked){
-        destination = 'file';
-      }
-      else
-      if (byId('exportDestinationClipboard').checked){
-        destination = 'clipboard';
-      }
-
-      switch (destination){
-        case 'file':
-          var fileName = [title, fileExtension].join('.');
-          progressMessageElement.innerText = `Download as ${fileName}`;
-          ExportUi.downloadBlob(data, fileName, mimeType);
-          break;
-        case 'clipboard':
-          var text;
-          if (typeof data === 'string'){
-            text = data;
-          }
-          else {
-            progressMessageElement.innerText = `Copying to clipboard..`;
-            text = new TextDecoder('utf-8').decode(data);
-          }
-          await copyToClipboard(text, 'text/plain');
-          break;
-      }
-      progressMessageElement.innerText = `Success!`;
-      var exportSettings = settings.getSettings('exportUi');
+      exportSettings = settings.getSettings('exportUi');
       Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
       this.#settings.assignSettings('exportUi', exportSettings);
     }
     catch (e){
-      progressMessageElement.innerText = `Error!`;
       showErrorDialog(e);
     }
     finally {
       dialog.setAttribute('aria-busy', String(false));
     }
   }
+
 }
 
 var exportDialog;
