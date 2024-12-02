@@ -638,14 +638,15 @@ class AttributeUi {
     var head = createEl('summary', {
     });
 
+    var caption = AttributeUi.#getUiNodeCaption(config);
     var title = config.title;
     if (!title){
       switch (config.type) {
         case 'column':
-          title = `"${columnExpression}": ${config.profile.column_type}`;
+          title = `${config.profile.column_type}`;
           break;
         case 'member':
-          title = `${columnExpression}: ${config.columnType}`;
+          title = `${config.columnType} ${columnExpression}`;
           break;
         case 'aggregate':
         case 'derived':
@@ -653,9 +654,9 @@ class AttributeUi {
           title = extrapolateColumnExpression(expressionTemplate, columnExpression);
           break;
       }
+      title = `${caption}: ${title}`;
     }
 
-    var caption = AttributeUi.#getUiNodeCaption(config);
     var label = createEl('span', {
       "class": 'label',
       "title": title,

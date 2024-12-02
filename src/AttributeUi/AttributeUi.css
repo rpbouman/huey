@@ -17,9 +17,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details[role=treeitem] {
     
     > summary {
-
+      white-space: nowrap;
+      
       > span.label  {
         max-width: calc(100% - 166px);
+        width: 100%;
       }
 
       > span.label::before {
