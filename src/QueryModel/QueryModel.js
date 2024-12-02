@@ -67,7 +67,7 @@ class QueryAxisItem {
     }
     return literalWriter;
   }
-  
+
   static getLiteralWriter(axisItem) {
     var literalWriter = axisItem.literalWriter;
     if (literalWriter) {
@@ -86,41 +86,45 @@ class QueryAxisItem {
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
 
     if (axisItem.axis === QueryModel.AXIS_FILTERS) {
-      if (axisItem.filter === undefined || axisItem.filter.values === undefined) {
-        return 'No filter set'
-      }
+      caption = 'No filters set.';
       var filter = axisItem.filter;
-      var values = filter.values;
-      var valueKeys = Object.keys(values);
-      var valueLabels = [];
-      var toValues = filter.toValues;
-      var toValueKeys = toValues? Object.keys(toValues) : undefined;
-      for (var i = 0; i < valueKeys.length; i++){
-        var valueKey = valueKeys[i];
-        var valueObject = values[valueKey];
-        var valueLabel = valueObject.label;
-        if (toValueKeys && i < toValueKeys.length){
-          var toValueKey = toValueKeys[i];
-          var toValueObject = toValues[toValueKey];
-          valueLabel += ' - ' + toValueObject.label;
+      if (filter) {
+        var values = filter.values;
+        if (values) {
+          var valueKeys = Object.keys(values);
+          if (valueKeys.length){
+            var valueLabels = [];
+            var toValues = filter.toValues;
+            var toValueKeys = toValues? Object.keys(toValues) : undefined;
+            for (var i = 0; i < valueKeys.length; i++){
+              var valueKey = valueKeys[i];
+              var valueObject = values[valueKey];
+              var valueLabel = valueObject.label;
+              if (toValueKeys && i < toValueKeys.length){
+                var toValueKey = toValueKeys[i];
+                var toValueObject = toValues[toValueKey];
+                valueLabel += ' - ' + toValueObject.label;
+              }
+              valueLabels.push(valueLabel);
+            }
+            caption = `${filter.filterType} ${valueLabels.join('\n')}`;
+          }
         }
-        valueLabels.push(valueLabel);
       }
-      caption = `${filter.filterType} ${valueLabels.join('\n')}`;
     }
 
     return caption;
   }
-  
+
   static createCaptionForQueryAxisItem(axisItem){
     var caption = axisItem.columnName;
     var postfix = '';
     var prefix = '';
-    
+
     if (axisItem.memberExpressionPath){
       postfix += `.${axisItem.memberExpressionPath.join('.')}`;
     }
-    
+
     if (axisItem.derivation) {
       postfix += ` ${axisItem.derivation}`;
     }
@@ -149,7 +153,7 @@ class QueryAxisItem {
     if (alias){
       sqlExpression.unshift(alias);
     }
-    
+
     sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
 
     if (item.memberExpressionPath) {
@@ -192,7 +196,7 @@ class QueryAxisItem {
     derivationInfo = AttributeUi.getDerivationInfo(derivation);
     var derivationExpressionTemplate = derivationInfo.expressionTemplate;
     columnExpression = extrapolateColumnExpression(derivationExpressionTemplate, columnExpression);
-    
+
     return columnExpression;
   }
 
@@ -227,8 +231,8 @@ class QueryAxisItem {
         dataType = derivationInfo.columnType;
       }
       else
-      if (derivationInfo.preservesColumnType){
-        dataType = columnType;
+      if (!derivationInfo.preservesColumnType){
+        console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
     }
 
@@ -250,14 +254,24 @@ class QueryAxisItem {
     return dataType;
   }
 
-  static #getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem){
+  // includeDisabledItems: if true then return all values, if not true then exclude values that have enabled===false;
+  static #getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem, includeDisabledItems){
     var sql;
     var filter = queryAxisItem.filter;
 
     var values = filter.values;
     var toValues = filter.toValues;
 
-    var valueLiterals = Object.keys(values).map(function(key){
+    var keys = Object.keys(values);
+    
+    if (includeDisabledItems !== true) {
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+    }
+    
+    var valueLiterals = keys.map(function(key){
       var entry = values[key];
       return entry.literal;
     });
@@ -282,26 +296,31 @@ class QueryAxisItem {
       toValueLiterals: toValueLiterals
     };
   }
-  
-  static getFilterConditionSql(queryAxisItem, alias){
+
+  static isFilterItemEffective(queryAxisItem){
     var filter = queryAxisItem.filter;
     if (!filter) {
       return undefined;
     }
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
+    return literalLists.valueLiterals.length !== 0;
+  }
 
-    if (literalLists.valueLiterals.length === 0){
+  static getFilterConditionSql(queryAxisItem, alias){
+    if (!QueryAxisItem.isFilterItemEffective(queryAxisItem)) {
       return undefined;
     }
+    var filter = queryAxisItem.filter;
 
     var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
     var operator = '';
 
     var nullCondition;
+    var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
       return value.startsWith('NULL::');
     });
-    
+
     if (indexOfNull !== -1) {
       operator = 'IS';
       switch (filter.filterType) {
@@ -324,7 +343,7 @@ class QueryAxisItem {
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
 
-        // INCLUDE and EXCLUDE logic        
+        // INCLUDE and EXCLUDE logic
         case FilterDialog.filterTypes.EXCLUDE:
           // in case of exclude, keep NULL values unless NULL is also in the valuelist.
           // https://github.com/rpbouman/huey/issues/90
@@ -345,7 +364,7 @@ class QueryAxisItem {
           sql = `( ${sql} )`;
           break;
 
-        // LIKE and NOT LIKE logic        
+        // LIKE and NOT LIKE logic
         case FilterDialog.filterTypes.NOTLIKE:
           operator = 'NOT ';
         case FilterDialog.filterTypes.LIKE:
@@ -363,9 +382,9 @@ class QueryAxisItem {
             acc += `${columnExpression} ${operator} ${value}`;
             return acc;
           }, '');
-          break;          
+          break;
 
-        // BETWEEN and NOT BETWEEN logic        
+        // BETWEEN and NOT BETWEEN logic
         case FilterDialog.filterTypes.NOTBETWEEN:
           operator = 'NOT ';
           logicalOperator = 'AND';
@@ -400,7 +419,7 @@ class QueryAxisItem {
 class QueryAxis {
 
   #items = [];
-  
+
   static getCaptionForQueryAxis(queryAxis){
     var items = queryAxis.getItems();
     if (items.length === 0){
@@ -414,11 +433,11 @@ class QueryAxis {
     });
     return captions.join(', ');
   }
-  
+
   getCaption(){
     return QueryAxis.getCaptionForQueryAxis(this);
   }
-  
+
   findItem(config){
     var columnName = config.columnName;
     var derivation = config.derivation;
@@ -471,6 +490,9 @@ class QueryAxis {
     }
     var item = items[itemIndex];
     var copyOfItem = Object.assign({}, item);
+    if (item.filter) {
+      copyOfItem.filter = JSON.parse(JSON.stringify(item.filter));
+    }
     copyOfItem.index = itemIndex;
     return copyOfItem;
   }
@@ -510,7 +532,7 @@ class QueryAxis {
   getItems() {
     return [].concat(this.#items);
   }
-  
+
   getTotalsItems(){
     var totalsItems = this.#items.filter(function(axisItem){
       return axisItem.includeTotals === true;
@@ -529,7 +551,7 @@ class QueryModel extends EventEmitter {
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
-  
+
   static #defaultConfig = {};
 
   #axes = {
@@ -542,26 +564,46 @@ class QueryModel extends EventEmitter {
   #cellheadersaxis = QueryModel.AXIS_COLUMNS;
   #settings = undefined;
   #datasource = undefined;
-    
+  #sampling = undefined;
+
   constructor(config){
-    super('change');
+    super(['change', 'beforechange']);
     var config = Object.assign({}, QueryModel.#defaultConfig, config);
     if (config.settings){
       this.#settings = settings;
     }
   }
 
+  getSampling(axisId){
+    var sampling = this.#sampling;
+    if (!sampling){
+      return undefined;
+    }
+    
+    if (axisId === undefined){
+      return sampling;
+    }
+    
+    return sampling[axisId];
+  }
+  
   setCellHeadersAxis(cellheadersaxis) {
     var oldCellHeadersAxis = this.#cellheadersaxis;
-    this.#cellheadersaxis = cellheadersaxis;
-    this.fireEvent('change', {
+    if (cellheadersaxis === oldCellHeadersAxis) {
+      return;
+    }
+    var eventData = {
       propertiesChanged: {
         cellHeadersAxis: {
           previousValue: oldCellHeadersAxis,
           newValue: cellheadersaxis
         }
       }
-    });
+    };
+
+    this.fireEvent('beforechange', eventData);
+    this.#cellheadersaxis = cellheadersaxis;
+    this.fireEvent('change', eventData);
   }
 
   getAxisIds(){
@@ -575,7 +617,7 @@ class QueryModel extends EventEmitter {
   getQueryAxis(axisId){
     return this.#axes[axisId];
   }
-  
+
   getCaptionForQueryAxis(axisId){
     var queryAxis = this.getQueryAxis(axisId);
     var caption = queryAxis = queryAxis.getCaption();
@@ -605,37 +647,45 @@ class QueryModel extends EventEmitter {
     this.setDatasource(undefined);
   }
 
-  setDatasource(datasource){    
-    if (datasource === this.#datasource) {
+  setDatasource(datasource){
+    var oldDatasource = this.#datasource;
+    if (datasource === oldDatasource) {
       return;
     }
-    else
-    if (this.#datasource) {
-      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
-    }
 
-    this.#clear(true);
-    var oldDatasource = this.#datasource;
-    this.#datasource = datasource;
-
-    if (datasource){
-      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
-    }
-
-    this.fireEvent('change', {
+    var eventData = {
       propertiesChanged: {
         datasource: {
           previousValue: oldDatasource,
           newValue: datasource
         }
       }
-    });
+    }
+
+    this.fireEvent('beforechange', eventData);
+
+    if (oldDatasource) {
+      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+    }
+    
+    // TODO: it is not absoltely self-evident that the query model should be cleared when changing the datasource
+    // if the current query could be satisfied by the new datasource, then we could swap the datasource without clearing,
+    // effectively running the current query on the new datasource.
+    // of course, the method should be changed to allow the caller to express the desired behavior
+    this.#clear();
+    this.#datasource = datasource;
+
+    if (datasource){
+      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+    }
+
+    this.fireEvent('change', eventData);
   }
 
   getDatasource(){
     return this.#datasource;
   }
-  
+
   /**
   * finds all columns refs and lists the axes that use the column
   */
@@ -650,7 +700,7 @@ class QueryModel extends EventEmitter {
           columnSpec = {
             columnType: axisItem.columnType,
             axes: []
-          };          
+          };
           referencedColumns[columnName] = columnSpec;
         }
         if (columnSpec.axes.indexOf(axisId) === -1){
@@ -736,77 +786,133 @@ class QueryModel extends EventEmitter {
     if (axis !== QueryModel.AXIS_FILTERS){
       delete copyOfConfig['axis'];
     }
-    var item = this.findItem(copyOfConfig);
-
-    var removedItem;
-    if (item) {
-      // if the item already exits in this model, we first remove it.
-      removedItem = this.#removeItem(item);
-    }
+    var foundItem = this.findItem(copyOfConfig);
 
     if (!config.columnType) {
-      if (removedItem && removedItem.columnType) {
-        config.columnType = removedItem.columnType;
+      if (foundItem && foundItem.columnType) {
+        config.columnType = foundItem.columnType;
       }
-    }
-
-    if (!config.columnType) {
-      var datasource = this.#datasource;
-      var columnMetadata = await datasource.getColumnMetadata();
-      for (var i = 0; i < columnMetadata.numRows; i++){
-        var row = columnMetadata.get(i);
-        if (row.column_name === config.columnName) {
-          config.columnType = row.column_type;
+      else {
+        var datasource = this.#datasource;
+        var columnMetadata = await datasource.getColumnMetadata();
+        for (var i = 0; i < columnMetadata.numRows; i++){
+          var row = columnMetadata.get(i);
+          if (row.column_name === config.columnName) {
+            config.columnType = row.column_type;
+          }
         }
       }
     }
 
-    var addedItem = this.#addItem(config);
-
-    var axesChangeInfo = {};
-    axesChangeInfo[addedItem.axis] = {
-      added: [addedItem]
-    };
-    if (removedItem){
-      axesChangeInfo[removedItem.axis] = {
-        removed: [removedItem]
-      };
+    if (!config.formatter) {
+      if (foundItem && foundItem.formatter) {
+        config.formatter = foundItem.formatter;
+      }
+      else {
+        var formatter = QueryAxisItem.createFormatter(config);
+        if (formatter){
+          config.formatter = formatter;
+        }
+      }
     }
 
-    this.fireEvent('change', {
+    if (!config.literalWriter) {
+      if (foundItem && foundItem.literalWriter) {
+        config.literalWriter = foundItem.literalWriter;
+      }
+      else {
+        var literalWriter = QueryAxisItem.createLiteralWriter(config);
+        if (literalWriter){
+          config.literalWriter = literalWriter;
+        }
+      }
+    }
+    
+    if (axis === QueryModel.AXIS_FILTERS && !config.filter && foundItem && foundItem.filter){
+      config.filter = foundItem.filter;
+    }
+    
+    var axesChangeInfo = {};
+    var eventData = {
       axesChanged: axesChangeInfo
-    });
+    };
+    axesChangeInfo[config.axis] = {
+      added: [config]
+    };
+    if (foundItem){
+      var axisChangeInfo = axesChangeInfo[foundItem.axis];
+      if (!axisChangeInfo) {
+        axisChangeInfo = {};
+        axesChangeInfo[foundItem.axis] = axisChangeInfo;
+      }
+      axisChangeInfo.removed = [foundItem];
+    }
+    this.fireEvent('beforechange', eventData);
 
+    var removedItem;
+    if (foundItem) {
+      // if the item already exits in this model, we first remove it.
+      removedItem = this.#removeItem(foundItem);
+      axesChangeInfo[removedItem.axis].removed = [removedItem];
+    }
+    var addedItem = this.#addItem(config);
+    axesChangeInfo[addedItem.axis].added = [addedItem];
+
+    this.fireEvent('change', eventData);
     return addedItem;
   }
 
   removeItem(config){
     var copyOfConfig = Object.assign({}, config);
 
-    var axisId = copyOfConfig['axis'];
-    if (axisId && axisId !== QueryModel.AXIS_FILTERS) {
-      delete copyOfConfig[axisId];
+    var newAxisId = copyOfConfig.axis;
+    if (newAxisId && newAxisId !== QueryModel.AXIS_FILTERS) {
+      delete copyOfConfig.axis;
     }
 
     var item = this.findItem(copyOfConfig);
     if (!item){
       return undefined;
     }
-    var axisId = item.axis;
-    var axis = this.getQueryAxis(axisId);
-    var removedItem = axis.removeItem(item);
-    removedItem.axis = axisId;
 
     var axesChangeInfo = {};
-    axesChangeInfo[axisId] = {
+    var eventData = {
+      axesChanged: axesChangeInfo
+    };
+    
+    var oldAxisId = item.axis;
+    axesChangeInfo[oldAxisId] = {
+      removed: [item]
+    };
+    this.fireEvent('beforechange', eventData);
+    
+    var axis = this.getQueryAxis(oldAxisId);
+    var removedItem = axis.removeItem(item);
+
+    axesChangeInfo[oldAxisId] = {
       removed: [removedItem]
     };
 
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
-
+    this.fireEvent('change', eventData);
     return removedItem;
+  }
+
+  static #getAxisItemChangeInfo(queryModelItem, propertyName, newValue){
+    var itemChangeInfo = {}, propertyChangeInfo = {};
+    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryModelItem);
+    itemChangeInfo[itemId] = propertyChangeInfo;
+    propertyChangeInfo[propertyName] = {
+      oldValue: queryModelItem[propertyName],
+      newValue: newValue
+    };
+
+    var axesChangeInfo = {};
+    var axisId = queryModelItem.axis;
+    axesChangeInfo[axisId] = {
+      changed: itemChangeInfo
+    };
+    
+    return axesChangeInfo;
   }
 
   toggleTotals(queryItemConfig, value){
@@ -818,24 +924,50 @@ class QueryModel extends EventEmitter {
       return;
     }
 
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    };
+    
     var axisId = queryModelItem.axis;
     var axis = this.getQueryAxis(axisId);
     var items = axis.getItems();
-    items[queryModelItem.index].includeTotals = value;
-
-    var axesChangeInfo = {};
-    axesChangeInfo[axisId] = {
-      changed: [items[queryModelItem.index]]
-    };
-
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
+    var item = items[queryModelItem.index];
+    
+    var propertyName = 'includeTotals';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      item, 
+      propertyName, 
+      value
+    );
+    
+    this.fireEvent('beforechange', eventData);
+    item[propertyName] = value;
+    this.fireEvent('change', eventData);
 
     return queryModelItem;
   }
 
-  #clear(suppressFireEvent, axisId){
+  #clear(axisId){
+    var axisIds;
+    if (axisId) {
+      axisIds = [axisId];
+    }
+    else {
+      axisIds = Object.keys(this.#axes);
+    }
+    for (var i = 0; i < axisIds.length; i++) {
+      var axisId = axisIds[i];
+      var axis = this.getQueryAxis(axisId);
+      axis.clear();
+    }
+  }
+
+  clear(axisId) {
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    }
     var axisIds;
     if (axisId) {
       axisIds = [axisId];
@@ -844,43 +976,43 @@ class QueryModel extends EventEmitter {
       axisIds = Object.keys(this.#axes);
     }
 
-    var axesChangeInfo = {};
     for (var i = 0; i < axisIds.length; i++) {
-      var axisId = axisIds[i];
-      var axis = this.getQueryAxis(axisId);
+      var localAxisId = axisIds[i];
+      var axis = this.getQueryAxis(localAxisId);
       var items = axis.getItems();
 
       if (!items.length) {
         continue;
       }
 
-      axesChangeInfo[axisId] = {
+      axesChangeInfo[localAxisId] = {
         removed: items
       };
-      axis.clear();
     }
 
     if (!Object.keys(axesChangeInfo).length){
       // no change, don't fire event.
       return;
     }
-
-    if (suppressFireEvent) {
-      return;
-    }
-
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
-  }
-
-  clear(axisId) {
-    // clear and send event;
-    this.#clear(false, axisId);
+    this.fireEvent('beforechange', eventData);
+    this.#clear(axisId);
+    this.fireEvent('change', eventData);
   }
 
   flipAxes(axisId1, axisId2) {
-    var axesChangeInfo = {};
+    if (axisId2 === undefined){
+      switch (axisId1) {
+        case QueryModel.AXIS_COLUMNS:
+          axisId2 = QueryModel.AXIS_ROWS;
+          break;
+        case QueryModel.AXIS_ROWS:
+          axisId2 = QueryModel.AXIS_COLUMNS;
+          break;
+        case undefined:
+          axisId1 = QueryModel.AXIS_COLUMNS;
+          axisId2 = QueryModel.AXIS_ROWS;
+      }
+    }
 
     var axis1 = this.getQueryAxis(axisId1);
     var axis1Items = axis1.getItems();
@@ -888,32 +1020,37 @@ class QueryModel extends EventEmitter {
     var axis2 = this.getQueryAxis(axisId2);
     var axis2Items = axis2.getItems();
 
-    axis1.setItems(axis2Items);
-    axis2.setItems(axis1Items);
+    if (!axis1Items.length && !axis2Items.length) {
+      return;
+    }
+
+    var axesChangeInfo = {};
+    var eventData = {
+      axesChanged: axesChangeInfo
+    }
+    
+    axesChangeInfo[axisId1] = {};
+    axesChangeInfo[axisId2] = {};
 
     if (axis1Items.length) {
-      axesChangeInfo[axisId1] = {
-        removed: axis1Items
-      }
-      axesChangeInfo[axisId2] = {
-        added: axis1Items
-      };
+      axesChangeInfo[axisId1].removed = axesChangeInfo[axisId2].added = axis1Items;
     }
     if (axis2Items.length) {
-      axesChangeInfo[axisId2] = {
-        removed: axis2Items
-      };
-      axesChangeInfo[axisId1] = {
-        added: axis2Items
-      };
+      axesChangeInfo[axisId2].removed = axesChangeInfo[axisId1].added = axis2Items;
     }
 
-    this.fireEvent('change', {
-      axesChanged: axesChangeInfo
-    });
+    this.fireEvent('beforechange', eventData);
+    axis1.setItems(axis2Items);
+    axis2.setItems(axis1Items);
+    this.fireEvent('change', eventData);
   }
 
   setQueryAxisItemFilter(queryAxisItem, filter){
+    var axisId = queryAxisItem.axis;
+    if (axisId !== QueryModel.AXIS_FILTERS){
+      throw new Error(`Item is not a filter axis item!`);
+    }
+    
     var queryModelItem = this.findItem(queryAxisItem);
     if (!queryModelItem) {
       throw new Error(`Item is not part of the model!`);
@@ -931,18 +1068,48 @@ class QueryModel extends EventEmitter {
     else {
       filter = undefined;
     }
-    items[queryModelItem.index].filter = filter;
-
-    var axesChangeInfo = {};
-    axesChangeInfo[queryAxisItem.axis] = {
-      changed: {
-        changed: [queryAxisItem]
-      }
-    };
-
-    this.fireEvent('change', {
+    var queryAxisItem = items[queryModelItem.index];
+    
+    var propertyName = 'filter';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      queryAxisItem, 
+      propertyName, 
+      filter
+    );
+    var eventData = {
       axesChanged: axesChangeInfo
-    });
+    }
+    this.fireEvent('beforechange', eventData);
+    queryAxisItem[propertyName] = filter;
+    this.fireEvent('change', eventData);
+  }
+  
+  setQueryAxisItemFilterToggleState(queryAxisItem, toggleState){
+    if (queryAxisItem.axis !== QueryModel.AXIS_FILTERS){
+      throw new Error(`Item is not a filter axis item!`);
+    }
+    
+    var queryModelItem = this.findItem(queryAxisItem);
+    if (!queryModelItem) {
+      throw new Error(`Item is not part of the model!`);
+    }
+
+    var axis = this.getQueryAxis(queryModelItem.axis);
+    var items = axis.getItems();
+    var item = items[queryModelItem.index];
+
+    var propertyName = 'toggleState';
+    var axesChangeInfo = QueryModel.#getAxisItemChangeInfo(
+      item, 
+      propertyName, 
+      toggleState
+    );
+    var eventData = {
+      axesChanged: axesChangeInfo
+    }
+    this.fireEvent('beforechange', eventData);
+    item.filter[propertyName] = toggleState;
+    this.fireEvent('change', eventData);
   }
 
   /**
@@ -976,34 +1143,163 @@ class QueryModel extends EventEmitter {
       });
     }
 
-    var conditions = items.filter(function(item){
-      if (!item.filter) {
-        return false;
-      }
-      if (Object.keys(item.filter.values) === 0) {
-        return false;
-      }
-      return true;
-    }).map(function(item){
-      return QueryAxisItem.getFilterConditionSql(item, alias);
+    // Only keep items that can contribute to the filter.
+    // This means less work for the next steps and easier debugging.
+    items = items.filter(function(item){
+      return QueryAxisItem.isFilterItemEffective(item);
     });
+
+    // Sort the items.
+    // The implied SQL condition is independent of the order of the items
+    // and by sorting, we make it easy to see if a change in the filter axis 
+    // could actually affect the result.
+    items = items.sort(function(filterItem1, filterItem2){
+      var id1 = QueryAxisItem.getIdForQueryAxisItem(filterItem1);
+      var id2 = QueryAxisItem.getIdForQueryAxisItem(filterItem2);
+      if (id1 > id2) {
+        return 1;
+      }
+      else
+      if (id1 < id2) {
+        return -1;
+      }
+      return 0;
+    });
+    
+    // Generate the SQL for each item.
+    var conditions = items.map(function(item){
+      var itemCondition = QueryAxisItem.getFilterConditionSql(item, alias);
+      return itemCondition;
+    });
+    
+    if (!conditions.length) {
+      return undefined;
+    }
+    // Combine the individual item conditions
     var condition = conditions.join('\nAND ');
     return condition;
   }
-  
-  getState(){
+
+  static compareStates(oldState, newState){
+    oldState = oldState || {};
+    newState = newState || {};
+    
+    function getPropertyNames(){
+      var propertyNames = {};
+      for (var i = 0; i < arguments.length; i++){
+        var object = arguments[i];
+        if (!object) {
+          continue;
+        }
+        Object.keys(arguments[i]).forEach(function(propertyName){
+          propertyNames[propertyName] = propertyName;
+        });
+      }
+      return Object.keys(propertyNames);
+    }
+    
+    function compareObjects(oldState, newState, ignoreProperties){
+      var propertiesChanged = {};
+      var propertyNames = getPropertyNames(oldState, newState);
+      for (var i = 0; i < propertyNames.length; i++){
+        var propertyName = propertyNames[i];
+        if (ignoreProperties && ignoreProperties.indexOf(propertyName) !== -1){
+          continue;
+        }
+        var oldValue = oldState[propertyName];
+        var newValue = newState[propertyName];
+        
+        if (JSON.stringify(oldValue) === JSON.stringify(newValue)) {
+          continue;
+        }
+        
+        propertiesChanged[propertyName] = {
+          oldValue: oldValue,
+          newValue: newValue
+        };
+      }
+      return Object.keys(propertiesChanged).length ? propertiesChanged : undefined;
+    }
+    
+    function axisAsObject(axis){
+      return axis.reduce(function(acc, curr){
+        var id = QueryAxisItem.getIdForQueryAxisItem(curr);
+        acc[id] = curr;
+        return acc;
+      }, {});
+    }
+    
+    var axesChanged = {};
+    var oldAxes = oldState.axes || {};
+    var newAxes = newState.axes || {};
+    var axisIds = getPropertyNames(oldAxes, newAxes);
+    for (var i = 0; i < axisIds.length; i++){
+      var axisChange = {
+        added: [],
+        removed: [],
+        changed: {}
+      };
+      var axisId = axisIds[i];
+      var oldAxisItems = axisAsObject(oldAxes[axisId] || []);
+      var newAxisItems = axisAsObject(newAxes[axisId] || []);
+      var itemIds = getPropertyNames(oldAxisItems, newAxisItems);
+      for (var j = 0; j < itemIds.length; j++){
+        var itemId = itemIds[j];
+        var oldAxisItem = oldAxisItems[itemId];
+        var newAxisItem = newAxisItems[itemId];
+        if (oldAxisItem) {
+          if (newAxisItem){
+            var change = compareObjects(oldAxisItem, newAxisItem);
+            if (change) {
+              axisChange.changed[itemId] = change;
+            }
+          }
+          else {
+            axisChange.removed.push(oldAxisItem);
+          }
+        }
+        else
+        if (newAxisItem) {
+          axisChange.added.push(newAxisItem);
+        }
+      }
+      
+      if (!axisChange.added.length){
+        delete axisChange.added;
+      }
+      if (!axisChange.removed.length){
+        delete axisChange.removed;
+      }
+      if (!Object.keys(axisChange.changed).length){
+        delete axisChange.changed;
+      }
+      if (Object.keys(axisChange).length) {
+        axesChanged[axisId] = axisChange;
+      }
+    }
+    
+    var stateChange = compareObjects(oldState, newState, ['axes']) || {};
+    
+    if (Object.keys(axesChanged)){
+      stateChange.axesChanged = axesChanged;
+    }
+    return stateChange;
+  }
+
+  getState(options){
     var datasource = this.getDatasource();
     if (!datasource) {
       return null;
     }
     var datasourceId = datasource.getId();
-    
+
     var queryModelObject = {
       datasourceId: datasourceId,
       cellsHeaders: this.getCellHeadersAxis(),
-      axes: {}
+      axes: {},
+      sampling: this.#sampling
     };
-    
+
     var axisIds = this.getAxisIds().sort();
     var hasItems = false;
     axisIds.forEach(function(axisId){
@@ -1014,19 +1310,23 @@ class QueryModel extends EventEmitter {
       }
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
-        var strippedItem = {column: axisItem.columnName};
-        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;  
+        var strippedItem = {columnName: axisItem.columnName};
+        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
         strippedItem.columnType = axisItem.columnType;
         strippedItem.derivation = axisItem.derivation;
         strippedItem.aggregator = axisItem.aggregator;
         if (axisItem.includeTotals === true) {
           strippedItem.includeTotals = true;
         }
-        
+
         if (axisId === QueryModel.AXIS_FILTERS && axisItem.filter){
           strippedItem.filter = axisItem.filter;
         }
-        
+
+        if (options && options.includeItemIndices){
+          strippedItem.index = axisItem.index;
+        }
+
         return strippedItem;
       });
     }.bind(this));
@@ -1035,7 +1335,7 @@ class QueryModel extends EventEmitter {
     }
     return queryModelObject;
   }
-  
+
   get #autoUpdate(){
     var autoUpdate;
     var settings = this.#settings || {};
@@ -1050,12 +1350,12 @@ class QueryModel extends EventEmitter {
     }
     return autoUpdate;
   }
-  
+
   async setState(queryModelState){
 
     var autoRunQuery = this.#autoUpdate;
     var canAssignSettings = this.#settings && typeof this.#settings.assignSettings === 'function';
-    
+
     if (canAssignSettings){
       settings.assignSettings(['querySettings', 'autoRunQuery'], false);
     }
@@ -1066,24 +1366,30 @@ class QueryModel extends EventEmitter {
       if (datasourceId){
         datasource = datasourcesUi.getDatasource(datasourceId);
       }
-      else 
+      else
       if(queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource){
         datasource = queryModelState.datasource;
       }
-       
+
       if (this.getDatasource() === datasource) {
         this.clear();
       }
       else {
         this.setDatasource(datasource);
       }
-      
-      var axes = queryModelState.axes;
+
+      var cellsHeaders = queryModelState.cellsHeaders || QueryModel.AXIS_COLUMNS;
+      this.setCellHeadersAxis(cellsHeaders);
+
+      var axes = queryModelState.axes || {};
       for (var axisId in axes){
         var items = axes[axisId];
+        if(!items) {
+          continue;
+        }
         for (var i = 0 ; i < items.length; i++){
           var item = items[i];
-          var config = { columnName: item.column };
+          var config = { columnName: item.column || item.columnName };
 
           config.columnType = item.columnType;
           config.derivation = item.derivation;
@@ -1093,17 +1399,8 @@ class QueryModel extends EventEmitter {
           if (item.includeTotals === true){
             config.includeTotals = true;
           }
-          
-          var formatter = QueryAxisItem.createFormatter(config);
-          if (formatter){
-            config.formatter = formatter;
-          }
-          
-          var literalWriter = QueryAxisItem.createLiteralWriter(config);
-          if (literalWriter){
-            config.literalWriter = literalWriter;
-          }
-          
+
+
           if (axisId === QueryModel.AXIS_FILTERS) {
             var filter = item.filter;
             if (filter) {
@@ -1114,23 +1411,26 @@ class QueryModel extends EventEmitter {
           await this.addItem(config);
         }
       }
+      
+      var sampling = queryModelState.sampling || undefined;
+      this.#sampling = sampling;
     }
     catch(e){
-      debugger;
+      showErrorDialog(e);
     }
     finally {
       if (canAssignSettings){
         this.#settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       }
-      
-      if (autoRunQuery){
-        setTimeout(function(){
-          pivotTableUi.updatePivotTableUi();
-        }, 1000);
-      }
+
+//      if (autoRunQuery){
+//        setTimeout(function(){
+//          pivotTableUi.updatePivotTableUi();
+//        }, 1000);
+//      }
     }
   }
-  
+
 }
 
 var queryModel;

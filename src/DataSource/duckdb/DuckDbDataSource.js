@@ -482,6 +482,9 @@ class DuckDbDataSource extends EventEmitter {
       case DuckDbDataSource.types.FILES:
         postFix = JSON.stringify(this.#fileNames);
         break;
+      case DuckDbDataSource.types.SQLQUERY:
+        postFix = this.#sqlQuery;
+        break;
       default:
         postFix = this.getQualifiedObjectName();
     }

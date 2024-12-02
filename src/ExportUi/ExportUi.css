@@ -2,27 +2,43 @@ dialog#exportDialog {
   width: 700px;
   height: 460px;
   resize: both;
-}
-
-dialog#exportDialog > header > form > input#exportTitleTemplate {
-  width: calc( 100% - 14px);
-}
-
-dialog#exportDialog > header > h3 {
-  position: relative;
+  
+  > header {
+    > form {
+      > input#exportTitleTemplate {
+        width: calc( 100% - 14px);
+      }
+    }
+    
+    > h3 {
+      position: relative;
+    }
+  }
+  
+  > dialog[role=progressbar] {
+    z-index: 1;
+    width: 200px;
+    
+    > header > h3[role=status] {
+      font-size: smaller;
+    }
+  }
+  
+  #exportDelimitedDateFormat,
+  #exportDelimitedTimestampFormat,
+  #exportDelimitedNullString,
+  #exportDelimitedColumnDelimiter,
+  #exportDelimitedQuote,
+  #exportDelimitedEscape,
+  #exportJsonDateFormat,
+  #exportJsonTimestampFormat {
+    font-family: var( --huey-mono-font-family );
+  }
+  
 }
 
 form > fieldset {
   grid-column: span 1;
-}
-
-dialog#exportDialog > dialog[role=progressbar] {
-  z-index: 1;
-  width: 200px;
-}
-
-dialog#exportDialog > dialog[role=progressbar] > header > h3[role=status] {
-  font-size: smaller;
 }
 
 dialog#exportDialog[aria-busy=true] > dialog[role=progressbar] {
@@ -34,6 +50,7 @@ dialog#exportDialog[aria-busy=false] > dialog[role=progressbar] {
   display: none;
 }
 
+
 menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
   float: right;
 }
@@ -42,14 +59,15 @@ menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::befor
   content: "\ea96";
 }
 
-dialog#exportDialog #exportDelimitedDateFormat,
-dialog#exportDialog #exportDelimitedTimestampFormat,
-dialog#exportDialog #exportDelimitedNullString,
-dialog#exportDialog #exportDelimitedColumnDelimiter,
-dialog#exportDialog #exportDelimitedQuote,
-dialog#exportDialog #exportDelimitedEscape,
-dialog#exportDialog #exportJsonDateFormat,
-dialog#exportDialog #exportJsonTimestampFormat {
-  font-family: var( --huey-mono-font-family );
+/* export is not available by default, ...  */
+menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
+  display: none;
 }
 
+/* ...but one when either the columns, rows or cells axis has at least one item, the export button is available. */
+body > main:has( > #workarea > #queryUi > section[data-axis=columns] > ol > li ) > menu[role=toolbar] > label[for=exportButton],
+body > main:has( > #workarea > #queryUi > section[data-axis=rows] > ol > li ) > menu[role=toolbar] > label[for=exportButton],
+body > main:has( > #workarea > #queryUi > section[data-axis=cells] > ol > li ) > menu[role=toolbar] > label[for=exportButton]
+{
+  display: block;
+}

@@ -31,8 +31,16 @@ class Settings extends EventEmitter {
       }
     },
     localeSettings: {
-      nullString: '␀',
-      totalsString: 'Total',
+      // https://en.wikipedia.org/wiki/Null_character#:~:text=In%20documentation%2C%20the%20null%20character,2400%20%E2%90%80%20SYMBOL%20FOR%20NULL.
+      nullString: String.fromCharCode(Number('0x2400')),
+      // for use in ORDER BY NULLS FIRST|LAST 
+      nullsSortOrder: {
+        value: 'FIRST',
+        options: [
+          { value: 'FIRST', label: 'first', title: 'Sort NULL-values before other values.'},
+          { value: 'LAST', label: 'last', title: 'Sort NULL-values after other values.'}
+        ]
+      },
       useDefaultLocale: true,
       locale: navigator.languages,
       minimumIntegerDigits: 1,
@@ -47,11 +55,20 @@ class Settings extends EventEmitter {
     },
     querySettings: {
       autoRunQuery: false,
+      autoRunQueryTimeout: 1000,
       filterValuePicklistPageSize: 100,
-      filterSearchAutoQueryTimeoutInMilliseconds: 1000
+      filterSearchAutoQueryTimeoutInMilliseconds: 1000,
     },
     pivotSettings: {
-      maxCellWidth: 30
+      maxCellWidth: 30,
+      totalsString: 'Total',
+      totalsPosition: {
+        value: 'AFTER',
+        options: [
+          { value: 'AFTER', label: 'after', title: 'Totals come after totalled items.'},
+          { value: 'BEFORE', label: 'before', title: 'Totals come before totalled items.'}
+        ]
+      }
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',

@@ -1,329 +1,3 @@
-.attributeUi {
-  user-select: none;
-}
-
-.attributeUi details[role=treeitem][data-nodetype='aggregate'] > summary, 
-.attributeUi details[data-nodetype='derived']:not( [data-derivation='elements'] ) > summary
-{
-  list-style: none;
-  margin-left: 16px;
-}
-
-.attributeUi details[role=treeitem] {
-  
-  summary > .label  {
-    max-width: calc(100% - 166px);
-  }
-  
-  /**
-  * folder icons
-  */
-  [data-nodetype=folder] > summary > .icon::before {
-    /* folder */
-    content: "\eaad";
-  }
-  
-  [data-nodetype=folder][open] > summary > .icon::before {
-    /* folder-open */
-    content: "\faf7";
-  }
-
-}
-
-/**
-*
-* Data type icons
-*
-*/
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=VARCHAR] > summary > .icon::before {
-  /* txt */
-  content: "\f3b1";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=BOOLEAN] > summary > .icon::before {
-  /* square check */
-  content: "\eb28";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > .icon::before,
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type$=INT] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type$=INT] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=INTEGER] > summary > .icon::before
-{
-  /* 123 */
-  content: "\f554";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type^=STRUCT] > summary > .icon::before
-{
-  /* code-dots */
-  content: "\f61a";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type^=MAP] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type^=MAP] > summary > .icon::before
-{
-  /* list-letters */
-  content: "\fc47";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type$='[]'] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type$='[]'] > summary > .icon::before
-{
-  /* code-dots */
-  content: "\f1e5";
-}
-
-.attributeUi details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > .icon::before,
-.attributeUi details[data-nodetype=member][data-member_expression_type=REAL] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type^=DECIMAL] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=DOUBLE] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=REAL] > summary > .icon::before {
-  /* decimal */
-  content: "\fa26";
-}
-
-.attributeUi details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > .icon::before {
-  /* calendar-clock */
-  content: "\fd2e";
-}
-
-.attributeUi details[data-nodetype=member][data-member_expression_type=DATE] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=DATE] > summary > .icon::before {
-  /* calendar */
-  content: "\ea53";
-}
-
-.attributeUi details[data-nodetype=member][data-member_expression_type=TIME] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=TIME] > summary > .icon::before {
-  /* clock */
-  content: "\ea70";
-}
-
-.attributeUi details[data-nodetype=member][data-member_expression_type=JSON] > summary > .icon::before,
-.attributeUi details[data-nodetype=column][data-column_type=JSON] > summary > .icon::before {
-  /* JSON */
-  content: "\f7b2";
-}
-
-/**
-*
-* Derivation icons
-*
-*/
-.attributeUi details[data-nodetype=derived][data-derivation=iso-date] > summary > .icon::before,
-.attributeUi details[data-nodetype=derived][data-derivation=local-date] > summary > .icon::before {
-  /* calendar */
-  content: "\ea53";
-}
-.attributeUi details[data-nodetype=derived][data-derivation=year] > summary > .icon::before {
-  /* letter-y */
-  content: "\ec68";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=quarter] > summary > .icon::before {
-  /* letter q */
-  content: "\ec60";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation="month name"] > summary > .icon::before,
-.attributeUi details[data-nodetype=derived][data-derivation="month num"] > summary > .icon::before {
-  /* letter m */
-  content: "\ec5c";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation="week num"] > summary > .icon::before {
-  /* calendar-week */
-  content: "\fd30";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation="day of year"] > summary > .icon::before {
-  /* letter-d */
-  content: "\ec53";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation="day of month"] > summary > .icon::before {
-  /* calendar-month */
-  content: "\fd2f";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation="day of week name"] > summary > .icon::before,
-.attributeUi details[data-nodetype=derived][data-derivation="day of week"] > summary > .icon::before {
-  /* letter-d-small */
-  content: "\fcca";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=iso-time] > summary > .icon::before {
-  /* clock */
-  content: "\ea70";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=hour] > summary > .icon::before {
-  /* letter-h */
-  content: "\ec57";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=minute] > summary > .icon::before {
-  /* letter-m-small */
-  content: "\fcd3";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=second] > summary > .icon::before {
-  /* letter-s */
-  content: "\ec62";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=lowercase] > summary > .icon::before {
-  /* letter-case-lower */
-  content: "\eea2";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=uppercase] > summary > .icon::before {
-  /* letter-case-upper */
-  content: "\eea4";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=NOACCENT] > summary > .icon::before {
-  /* letter-case */
-  content: "\eea5";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation=NOCASE] > summary > .icon::before {
-  /* letter-case */
-  content: "\eea5";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='first letter'] > summary > .icon::before {
-  /* sort-a-z */
-  content: "\f54f";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='length'] > summary > .icon::before {
-  /* ruler-3 */
-  content: "\f290";
-}
-
-.attributeUi details[data-nodetype=derived][data-derivation='element indices'] > summary > .icon::before {
-  /* list-numbers */
-  content: "\ef11";
-}
-
-/**
-*
-* Aggregator icons
-*
-*/
-.attributeUi details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > .icon::before,
-.attributeUi details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > .icon::before,
-.attributeUi details[data-nodetype=aggregate][data-aggregator=count] > summary > .icon::before {
-  /* tallymarks */
-  content: "\ec4a";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > .icon::before {
-  /* tallymark-4 */
-  content: "\ec49";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=max] > summary > .icon::before {
-  /* math-max */
-  content: "\f0f5";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=min] > summary > .icon::before {
-  /* math-min */
-  content: "\f0f6";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=list] > summary > .icon::before {
-  /* list */
-  content: "\eb6b";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > .icon::before {
-  /* list details */
-  content: "\ef40";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=histogram] > summary > .icon::before {
-  /* chart-bar */
-  content: "\ea59";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=sum] > summary > .icon::before {
-  /* sum */
-  content: "\eb73";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=geomean] > summary > .icon::before,
-.attributeUi details[data-nodetype=aggregate][data-aggregator=avg] > summary > .icon::before {
-  /* math-avg */
-  content: "\f0f4";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=mad] > summary > .icon::before,
-.attributeUi details[data-nodetype=aggregate][data-aggregator=median] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=mode] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=stdev] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=variance] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=entropy] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=skewness] > summary > .icon::before {
-  /* calculator */
-  content: "\eb80";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
-  /* logical-and */
-  content: "\f240";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=or] > summary > .icon::before {
-  /* logical-or */
-  content: "\f245";
-}
-
-.attributeUi details[data-nodetype=aggregate][data-aggregator=and] > summary > .icon::before {
-  /* logical-and */
-  content: "\f240";
-}
-
 /**
 * Prevent the Attribute UI events when the pivot table is busy:
 */
@@ -331,82 +5,431 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   pointer-events: none;
 }
 
-/**
-*
-* Axis Buttons
-*
-*/
-.attributeUi details > summary > span.attributeUiAxisButton,
-.attributeUi details > summary > label.attributeUiAxisButton:has( > input[type=checkbox] ) 
-{
-  display: block;
-  float: inline-end;
-  width: 24px;
-  padding: 4px 3px 0px 3px;
-  font-family: var( --huey-icon-font-family ) !important;
-  font-size: var( --huey-icon-medium );
-  color: var( --huey-icon-color-subtle );
-}
+.attributeUi {
+  user-select: none;
+  
+  details[role=treeitem][data-nodetype='aggregate'] > summary, 
+  details[data-nodetype='derived']:not( [data-derivation='elements'] ) > summary {
+    list-style: none;
+    margin-left: 16px;
+  }
+  
+  details[role=treeitem] {
+    
+    > summary {
 
-.attributeUi details > summary > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
-  color: var( --huey-icon-color-highlight );
-}
+      > span.label  {
+        max-width: calc(100% - 166px);
+      }
 
-.attributeUi details > summary > .attributeUiAxisButton > input[type=checkbox] {
-  display: none;
-}
+      > span.label::before {
+        display: inline-block;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color-subtle );
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        text-align: center;
+        
+      }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=rows]::before {
-  /* table-column */
-  /* 
-    It may seem backward that we're using the table-column icon for the rows axis, 
-    but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+      /**
+      *
+      * Axis Buttons
+      *
+      */
+      > span.attributeUiAxisButton,
+      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+        display: block;
+        float: inline-end;
+        width: 24px;
+        padding: 6px 3px 0px 3px;
+        font-family: var( --huey-icon-font-family ) !important;
+        font-size: var( --huey-icon-medium );
+        color: var( --huey-icon-color-subtle );
+      }
+
+      > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
+        color: var( --huey-icon-color-highlight );
+      }
+
+      .attributeUiAxisButton > input[type=checkbox] {
+        display: none;
+      }
+      
+      > .attributeUiAxisButton[data-axis=rows]::before {
+        /* table-column */
+        /* 
+          It may seem backward that we're using the table-column icon for the rows axis, 
+          but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+        */
+        content: "\faff";
+      }
+      
+      > .attributeUiAxisButton[data-axis=columns]::before {
+        /* table-row */
+        /* 
+          It may seem backward that we're using the table-row icon for the columns axis, 
+          but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+        */
+        content: "\fb00";
+      }
+
+      > .attributeUiAxisButton[data-axis=cells]::before {
+        /* layout grid */
+        content: "\edba";
+      }
+
+      > span.attributeUiAxisButton {
+        visibility:hidden;
+      }
+      
+      > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
+        color: var( --huey-icon-color-highlight );
+      }
+
+      > .attributeUiAxisButton[data-axis=filters]::before {
+        /* filter-plus */
+        /* content: "\fa02"; */
+        /* filter */
+        content: "\eaa5";
+      }
+      
+      > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
+        /* filter-x */
+        /* content: "\fa04"; */
+        /* filter-off */
+        content: "\ed2c";
+      }
+      
+    }
+        
+    > summary:hover  > span.label::before {
+      color: var( --huey-icon-color-highlight );
+    }
+        
+    /**
+    * folder icons
+    */
+    [data-nodetype=folder] > summary > span.label::before {
+      /* folder */
+      content: "\eaad";
+    }
+    
+    [data-nodetype=folder][open] > summary > span.label::before {
+      /* folder-open */
+      content: "\faf7";
+    }
+  }
+
+  /**
+  *
+  * Data type icons
+  *
   */
-  content: "\faff";
-}
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=VARCHAR] > summary > span.label::before {
+    /* txt */
+    content: "\f3b1";
+  }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=columns]::before {
-  /* table-row */
-  /* 
-    It may seem backward that we're using the table-row icon for the columns axis, 
-    but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=BOOLEAN] > summary > span.label::before {
+    /* square check */
+    content: "\eb28";
+  }
+
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type$=INT] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type$=INT] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=INTEGER] > summary > span.label::before
+  {
+    /* 123 */
+    content: "\f554";
+  }
+
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=STRUCT] > summary > span.label::before
+  {
+    /* code-dots */
+    content: "\f61a";
+  }
+
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type^=MAP] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=MAP] > summary > span.label::before
+  {
+    /* list-letters */
+    content: "\fc47";
+  }
+
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type$='[]'] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type$='[]'] > summary > span.label::before
+  {
+    /* code-dots */
+    content: "\f1e5";
+  }
+
+  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=REAL] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=DECIMAL] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=REAL] > summary > span.label::before {
+    /* decimal */
+    content: "\fa26";
+  }
+
+  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > span.label::before {
+    /* calendar-clock */
+    content: "\fd2e";
+  }
+
+  details[data-nodetype=member][data-member_expression_type=DATE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=DATE] > summary > span.label::before {
+    /* calendar */
+    content: "\ea53";
+  }
+
+  details[data-nodetype=member][data-member_expression_type=TIME] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=TIME] > summary > span.label::before {
+    /* clock */
+    content: "\ea70";
+  }
+
+  details[data-nodetype=member][data-member_expression_type=JSON] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=JSON] > summary > span.label::before {
+    /* JSON */
+    content: "\f7b2";
+  }
+
+  /**
+  *
+  * Derivation icons
+  *
   */
-  content: "\fb00";
-}
+  details[data-nodetype=derived][data-derivation=iso-date] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation=local-date] > summary > span.label::before {
+    /* calendar */
+    content: "\ea53";
+  }
+  details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
+    /* letter-y */
+    content: "\ec68";
+  }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=cells]::before {
-  /* layout grid */
-  content: "\edba";
-}
+  details[data-nodetype=derived][data-derivation=quarter] > summary > span.label::before {
+    /* letter q */
+    content: "\ec60";
+  }
 
-.attributeUi details > summary > span.attributeUiAxisButton {
-  visibility:hidden;
-}
+  details[data-nodetype=derived][data-derivation="month name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="month num"] > summary > span.label::before {
+    /* letter m */
+    content: "\ec5c";
+  }
 
-.attributeUi details > summary > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
-  color: var( --huey-icon-color-highlight );
-}
+  details[data-nodetype=derived][data-derivation="week num"] > summary > span.label::before {
+    /* calendar-week */
+    content: "\fd30";
+  }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]::before {
-  /* filter-plus */
-  /* content: "\fa02"; */
-  /* filter */
-  content: "\eaa5";
-}
+  details[data-nodetype=derived][data-derivation="day of year"] > summary > span.label::before {
+    /* letter-d */
+    content: "\ec53";
+  }
 
-.attributeUi details > summary > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
-  /* filter-x */
-  /* content: "\fa04"; */
-  /* filter-off */
-  content: "\ed2c";
-}
+  details[data-nodetype=derived][data-derivation="day of month"] > summary > span.label::before {
+    /* calendar-month */
+    content: "\fd2f";
+  }
 
-/**
-*
-* https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
-* 
-*/
-.attributeUi details > summary:has( > label > input[type=checkbox]:checked ) > span.label,
-.attributeUi details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
-  font-weight: bold;
+  details[data-nodetype=derived][data-derivation="day of week name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="day of week num"] > summary > span.label::before {
+    /* letter-d-small */
+    content: "\fcca";
+  }
+
+  details[data-nodetype=derived][data-derivation=iso-time] > summary > span.label::before {
+    /* clock */
+    content: "\ea70";
+  }
+
+  details[data-nodetype=derived][data-derivation=hour] > summary > span.label::before {
+    /* letter-h */
+    content: "\ec57";
+  }
+
+  details[data-nodetype=derived][data-derivation=minute] > summary > span.label::before {
+    /* letter-m-small */
+    content: "\fcd3";
+  }
+
+  details[data-nodetype=derived][data-derivation=second] > summary > span.label::before {
+    /* letter-s */
+    content: "\ec62";
+  }
+
+  details[data-nodetype=derived][data-derivation=lowercase] > summary > span.label::before {
+    /* letter-case-lower */
+    content: "\eea2";
+  }
+
+  details[data-nodetype=derived][data-derivation=uppercase] > summary > span.label::before {
+    /* letter-case-upper */
+    content: "\eea4";
+  }
+
+  details[data-nodetype=derived][data-derivation=NOACCENT] > summary > span.label::before {
+    /* letter-case */
+    content: "\eea5";
+  }
+
+  details[data-nodetype=derived][data-derivation=NOCASE] > summary > span.label::before {
+    /* letter-case */
+    content: "\eea5";
+  }
+
+  details[data-nodetype=derived][data-derivation='first letter'] > summary > span.label::before {
+    /* sort-a-z */
+    content: "\f54f";
+  }
+
+  details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
+    /* ruler-3 */
+    content: "\f290";
+  }
+
+  details[data-nodetype=derived][data-derivation='element indices'] > summary > span.label::before {
+    /* list-numbers */
+    content: "\ef11";
+  }
+
+  /**
+  *
+  * Aggregator icons
+  *
+  */
+  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=count] > summary > span.label::before {
+    /* tallymarks */
+    content: "\ec4a";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > span.label::before {
+    /* tallymark-4 */
+    content: "\ec49";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=max] > summary > span.label::before {
+    /* math-max */
+    content: "\f0f5";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=min] > summary > span.label::before {
+    /* math-min */
+    content: "\f0f6";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=list] > summary > span.label::before {
+    /* list */
+    content: "\eb6b";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > span.label::before {
+    /* list details */
+    content: "\ef40";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=histogram] > summary > span.label::before {
+    /* chart-bar */
+    content: "\ea59";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=sum] > summary > span.label::before {
+    /* sum */
+    content: "\eb73";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=geomean] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=avg] > summary > span.label::before {
+    /* math-avg */
+    content: "\f0f4";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=mad] > summary > span.label::before,
+  details[data-nodetype=aggregate][data-aggregator=median] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=mode] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=stdev] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=variance] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=entropy] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=skewness] > summary > span.label::before {
+    /* calculator */
+    content: "\eb80";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
+    /* logical-and */
+    content: "\f240";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=or] > summary > span.label::before {
+    /* logical-or */
+    content: "\f245";
+  }
+
+  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
+    /* logical-and */
+    content: "\f240";
+  }
+
+  /**
+  *
+  * https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
+  * 
+  */
+  details > summary:has( > label > input[type=checkbox]:checked ) > span.label,
+  details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
+    font-weight: bold;
+  }
+
+  details > summary:has( > label > input[type=checkbox]:checked ) > span.label:before,
+  details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label:before {
+    color: var( --huey-icon-color-highlight );
+    font-weight: normal;
+  }
+  
 }

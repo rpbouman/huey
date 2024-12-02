@@ -58,7 +58,12 @@ class SqlQueryGenerator {
       if (!values){
         return false;
       }
-      if (!Object.keys(values).length){
+      var keys = Object.keys(values);
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+      if (!keys.length){
         return false;
       }
       return true;
@@ -93,7 +98,25 @@ class SqlQueryGenerator {
   static #getConditionForFilterItems(filterItems, tableAlias){
     return filterItems
     .filter(function(filterItem){
-      return filterItem.filter && Object.keys(filterItem.filter.values).length
+      var filter = filterItem.filter;
+      if (!filter) {
+        return false;
+      }
+      
+      var values = filter.values;
+      if (!values){
+        return false;
+      }
+      
+      var keys = Object.keys(values);
+      keys = keys.filter(function(key){
+        var valueObject = values[key];
+        return valueObject.enabled !== false;
+      });
+      if (keys.length === 0) {
+        return false;
+      }
+      return true;
     })
     .map(function(filterItem){
       return QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
@@ -173,7 +196,7 @@ class SqlQueryGenerator {
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
     var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
     var dataFoundationAlias = '__huey_data_foundation';
-    var fromClause = datasource.getFromClauseSql(dataFoundationAlias);
+    var fromClause = datasource.getFromClauseSql();
     
     var filterAxisItems = filterAxisItemsByNestingStage[''];
     delete filterAxisItemsByNestingStage[''];
@@ -344,7 +367,9 @@ class SqlQueryGenerator {
     originalQueryAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls
+    defaultNullsSortOrder,
+    totalsPosition,
+    samplingConfig
   ){
     var sql = '';
     var columnExpressions = {};
@@ -362,7 +387,7 @@ class SqlQueryGenerator {
 
     // the groupingSets are created when we find an axis item that has includeTotals
     var groupingSets = [];
-    
+    var groupingIdExpressions = [];
     var orderByExpressions = [];
     
     var columnIds = Object.keys(columnExpressions);
@@ -383,38 +408,25 @@ class SqlQueryGenerator {
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
       var queryAxisItem = originalQueryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
-      var sortNulls = queryAxisItem.sortNulls || defaultSortNulls
-      sortNulls = sortNulls ? ` NULLS ${sortNulls}` : '';
+      var nullsSortOrder = queryAxisItem.nullsSortOrder || defaultNullsSortOrder
+      nullsSortOrder = nullsSortOrder ? ` NULLS ${nullsSortOrder}` : '';
       
       if (queryAxisItem.includeTotals){
-        var groupingSet = [].concat(groupByExpressions, [columnExpression]);
+        var groupingSet = [].concat(groupByExpressions);
         groupingSets.push(groupingSet);
-        
-        // if we have an axis item with includeTotals, then we want the super-aggregate rows (the totels) 
-        // to appear directly below the group of rows with a particular column value.
-        // but because the total row has a NULL their, it will sort lower than anything else.
-        // changing the order by expresison to MAX fixes that as it will get the value of the row that sorted last.
-        // (there are still some issues when you have actual NULL values in the column but we'll get to that later).
-        var orderByAggregate = 'MAX';
-        orderByExpression = `${orderByAggregate}( ${orderByExpression} )`;
+        groupingIdExpressions.push(columnExpression);
+        // store a placeholder for the groupingId expression in the order by expressions.
+        // we will replace these later with expressions to sort the totals.
+        orderByExpressions.push(columnExpression);
       }
       
-      groupByExpressions.push(columnExpression);
-      orderByExpression = `${orderByExpression} ${sortDirection}`;
-      orderByExpression += sortNulls;
-      orderByExpressions.push(orderByExpression);
-    }
-    
-    if (groupingSets.length){
-      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
-        // if we have to make grouping sets, then we need to add our "normal" group by clause too
-        groupingSets.push([].concat(groupByExpressions));
+      var originalQueryAxisItem = originalQueryAxisItems[i];
+      if (originalQueryAxisItem.derivation !== 'rownumber'){
+        groupByExpressions.push(columnExpression);
       }
-      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
-      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
-      var groupingIdExpression = `GROUPING_ID( ${groupByExpressions.join(',')} ) AS ${groupingIdAlias}`;
-      selectListExpressions.unshift(groupingIdExpression);
-      orderByExpressions.push(`${groupingIdAlias} ASC`);
+      orderByExpression = `${orderByExpression} ${sortDirection}`;
+      orderByExpression += nullsSortOrder;
+      orderByExpressions.push(orderByExpression);
     }
 
     if (includeCountAll) {
@@ -422,29 +434,59 @@ class SqlQueryGenerator {
       countAllAlias = countAllAlias || countExpression;
       selectListExpressions.push(`${countExpression} AS "${countAllAlias}"`);
     }
+    
+    var groupByClause = undefined;
+    if (groupingSets.length){
+      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
+        // if we have to make grouping sets, then we need to add our "normal" group by clause too
+        groupingSets.push([].concat(groupByExpressions));
+      }
+      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
+      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
+      var groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
+      selectListExpressions.unshift(groupingIdExpression);
+      
+      // for each column in the grouping id, 
+      // insert an order by expression to keep the totals together with the items they are totalling
+      sortDirection = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
+      groupingIdExpressions.forEach(function(groupingIdExpression, groupingIdExpressionIndex){
+        var bitshift = groupingIdExpressions.length - groupingIdExpressionIndex - 1;
+        bitshift = bitshift ? `(1 << ${bitshift})` : 1;
+        orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDirection}`;
+        var indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
+        orderByExpressions[indexOfGroupingIdExpression] = `${orderByExpression}`;
+      })
 
-    var sql = [
-      `SELECT ${selectListExpressions.join('\n,')}`,
-      cte.from
-    ];
-    
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
-    
-    var groupByClause = `GROUP BY `;
-    if (groupingSets.length > 1) {
-      groupByClause += 'GROUPING SETS(\n' + groupingSets.map(function(groupingSet){
+      var groupingSetsSql = groupingSets.map(function(groupingSet){
         return [
           '  (',
           `    ${groupingSet.join('\n  , ')}`,
           '  )'
         ].join('\n');
-      }).join(',') + '\n)';
+      }).join(',');
+      groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
     }
-    else {
-      groupByClause += groupByExpressions.join('\n,');
+    else
+    if (groupByExpressions.length) {
+      groupByClause = groupByExpressions.join('\n,');
     }
-    sql.push(groupByClause);
+
+    var sql = [
+      `SELECT ${selectListExpressions.join('\n,')}`,
+      cte.from + ` AS ${cte.alias}`
+    ];
+    SqlQueryGenerator.#generateWhereClause(cte, sql);
+
+    if (groupByClause) {
+      groupByClause = `GROUP BY ${groupByClause}`;
+      sql.push(groupByClause);
+    }
+    
+    if (samplingConfig){
+      sql.push( getUsingSampleClause(samplingConfig, true) );
+    }
     sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+
     sql = sql.join('\n');
     return sql;
   }
@@ -502,7 +544,9 @@ class SqlQueryGenerator {
     filterAxisItems, 
     includeCountAll,
     countAllAlias,
-    defaultSortNulls
+    defaultNullsSortOrder,
+    totalsPosition,
+    samplingConfig
   ) {
     if (!queryAxisItems.length) {
       return undefined;
@@ -521,10 +565,15 @@ class SqlQueryGenerator {
       queryAxisItems, 
       includeCountAll,
       countAllAlias,
-      defaultSortNulls
+      defaultNullsSortOrder,
+      totalsPosition,
+      ctes.length ? undefined : samplingConfig
     ); 
-    var sqls = ctes.map(function(cte){
-      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
+    var sqls = ctes.map(function(cte, index){
+      if (index !== 0){
+        samplingConfig = undefined;
+      }
+      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions, samplingConfig);
       return sql;
     });
     if (sqls.length) {

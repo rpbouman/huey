@@ -18,8 +18,10 @@ function getDataFromError(error){
   }
     
   return {
+    type: error.name || 'Unknown Error',
     title: messageLines ? messageLines[0] : 'Error',
-    description: stackLines ? `<pre>${stackLines.join('\n')}</pre>` : ''
+    description: messageLines ? messageLines.slice(1) : ['Unexpected error.'],
+    details: stackLines ? stackLines.join('\n') : ''
   };
 }
 
@@ -34,17 +36,28 @@ function showErrorDialog(config){
   if (!title) {
     title = 'Unexpected Error';
   }
+  if (config.type) {
+    title = `${config.type}: ${title}`;
+  }
   var errorDialogTitle = byId('errorDialogTitle');
-  errorDialogTitle.innerHTML = title;
+  errorDialogTitle.innerText = title;
   
   var description = config.description;
   if (!description){
-    description = title;
+    description = [title];
   }
   var errorDialogDescription = byId('errorDialogDescription');
-  errorDialogDescription.innerHTML = description;
+  errorDialogDescription.innerHTML = description.map(escapeHtmlText).join('<br/>');
+
+  var errorDialogDetails = byId('errorDialogDetails');
+  errorDialogDetails.removeAttribute('open');
+  
+  var errorDialogStack = byId('errorDialogStack');
+  var details = config.details || '';
+  errorDialogStack.textContent = details;
 
   var errorDialog = byId('errorDialog');
+  errorDialog.getElements
   errorDialog.showModal();
 }
 

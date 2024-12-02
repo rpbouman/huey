@@ -1,13 +1,13 @@
 class DataSourcesUi {
-  
+
   #id = undefined;
   #datasources = {};
-  
+
   constructor(id){
     this.#id = id;
 
     var dom = this.getDom();
-    
+
     dom.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
     dom.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
     dom.addEventListener('dragover', this.#dragOverHandler.bind(this));
@@ -16,15 +16,15 @@ class DataSourcesUi {
 
   #dragEnterHandler(event) {
     var valid = true;
-    
+
     var dataTransfer = event.dataTransfer;
     dataTransfer.dropEffect = 'copy';
     return;
-    
+
     // unfortunately, we see that the files list is always emtpy.
     // instead, when dragging files, we see a list of items of type file, but for some reason we do not see the names of the files.
     // so this is pretty much useless, we cannot figure out in advance if the dragged items could be successfully loaded.
-    
+
     var files = dataTransfer.files;
     valid = Boolean(files.length);
     var fileTypes = DuckDbDataSource.fileTypes;
@@ -40,33 +40,33 @@ class DataSourcesUi {
       }
     }
     this.getDom().setAttribute('data-drop-allowed', valid);
-    event.stopPropagation(); 
+    event.stopPropagation();
     event.preventDefault();
   }
 
   #dragLeaveHandler(event) {
-    event.stopPropagation(); 
+    event.stopPropagation();
     event.preventDefault();
     this.getDom().setAttribute('data-drop-allowed', '');
   }
 
   #dragOverHandler(event) {
-    event.stopPropagation(); 
+    event.stopPropagation();
     event.preventDefault();
-    
+
     var dataTransfer = event.dataTransfer;
   }
 
   #dropHandler(event) {
     event.preventDefault();
-    event.stopPropagation(); 
+    event.stopPropagation();
     var dataTransfer = event.dataTransfer;
     var files = dataTransfer.files;
     var items = dataTransfer.items;
     if (files.length) {
       uploadUi.uploadFiles(files);
     }
-    else 
+    else
     if (items.length){
       for (var i = 0 ; i < items.length; i++) {
         var item = items[i];
@@ -76,29 +76,29 @@ class DataSourcesUi {
         if (item.type !== 'text/uri-list'){
           continue;
         }
-        
+
         // TODO: we should do something here to makr these data sources as URLs, not "files"
         item.getAsString(function(uri){
           uploadUi.uploadFiles([uri]);
         });
-        
+
         // support only 1 url at a time.
         return;
       }
     }
   }
-    
+
   getDom(){
     return byId(this.#id);
   }
-  
+
   clear(content){
     if (!content){
       content = '';
     }
     this.getDom().innerHTML = content;
   }
-  
+
   #renderDatasourceActionButton(config){
     var actionButton = createEl('label', {
       "class": (config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
@@ -110,8 +110,8 @@ class DataSourcesUi {
       id: config.id
     });
     actionButton.appendChild(button);
-    
-    var events = config.events; 
+
+    var events = config.events;
     if (events) {
       for (var eventName in events) {
         var handler = events[eventName];
@@ -120,7 +120,7 @@ class DataSourcesUi {
     }
     return actionButton;
   }
-  
+
   #getLooseColumnType(columnType){
     var datasourceSettings = settings.getSettings('datasourceSettings');
     var looseColumnTypes = datasourceSettings.looseColumnTypes;
@@ -137,7 +137,7 @@ class DataSourcesUi {
     }
     return comparisonColumnType;
   }
-  
+
   async #getTabularDatasourceTypeSignature(datasource){
     var typeSignature;
     var type  = datasource.getType();
@@ -149,25 +149,25 @@ class DataSourcesUi {
     var looseColumnTypes = datasourceSettings.looseColumnTypes;
     for (var i = 0; i < columnMetadata.numRows; i++){
       var row = columnMetadata.get(i);
-      
+
       var columnType = row.column_type;
       var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
       columnMetadataSerialized[row.column_name] = comparisonColumnType;
     }
     var columnMetadataSerializedJSON = JSON.stringify(columnMetadataSerialized);
-    typeSignature = `${type}:${fileType}:${columnMetadataSerializedJSON}`; 
+    typeSignature = `${type}:${fileType}:${columnMetadataSerializedJSON}`;
     return typeSignature;
   }
-  
+
   async #renderDatasources(){
-    this.clear();    
+    this.clear();
     var node, group, potentialGroups = {};
     var datasources = this.#datasources;
 
     var groupingPromises = Object.keys(datasources).map(async function(datasourceId){
       var datasource = datasources[datasourceId];
       var type = datasource.getType();
-      
+
       var group = undefined;
       switch (type){
         case DuckDbDataSource.types.FILE:
@@ -201,13 +201,13 @@ class DataSourcesUi {
       return true;
     }.bind(this));
     await Promise.all(groupingPromises);
-    
+
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
     delete potentialGroups[DuckDbDataSource.types.DUCKDB];
-    
+
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
     delete potentialGroups[DuckDbDataSource.types.SQLITE];
-    
+
     for (var groupId in potentialGroups){
       var group = potentialGroups[groupId];
       var datasources = group.datasources;
@@ -233,25 +233,25 @@ class DataSourcesUi {
 
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
-    
+
   }
-  
+
   static getCaptionForDatasource(datasource){
     var type = datasource.getType();
-    switch (type){ 
+    switch (type){
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
         return datasource.getFileNameWithoutExtension();
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.TABLEFUNCTION:
-      case DuckDbDataSource.types.VIEW:      
+      case DuckDbDataSource.types.VIEW:
         return datasource.getObjectName();
       default:
         return datasource.getId();
     }
   }
-  
+
   #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
     var analyzeActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
@@ -283,13 +283,13 @@ class DataSourcesUi {
     });
     summaryElement.appendChild(editActionButton);
   }
-  
+
   async #loadDatabaseDatasource(databaseDatasource){
     var catalogName = databaseDatasource.getFileNameWithoutExtension();
     var connection = window.hueyDb.connection;
     var sql = `
-      SELECT table_schema, table_name, table_type 
-      FROM information_schema.tables 
+      SELECT table_schema, table_name, table_type
+      FROM information_schema.tables
       WHERE table_catalog = ?
       AND   table_schema NOT IN ('information_schema', 'pg_catalog')
       ORDER BY table_schema, table_name
@@ -297,14 +297,14 @@ class DataSourcesUi {
     var statement = await connection.prepare(sql);
     var result = await statement.query(catalogName);
     statement.close();
-    
+
     var datasourceId = databaseDatasource.getId();
     var datasourceTreeNode = byId(datasourceId);
-    
+
     var schemaNodes = {};
     for (var i = 0; i < result.numRows; i++){
-      var summary, icon, label;
-      
+      var summary, label;
+
       var row = result.get(i);
       var schemaName = row.table_schema;
       var schemaNode = schemaNodes[schemaName];
@@ -319,11 +319,6 @@ class DataSourcesUi {
         });
         summary = createEl('summary', {
         });
-        icon = createEl('span', {
-          class: 'icon',
-          role: 'img'
-        });
-        summary.appendChild(icon);
         label = createEl('span', {
           class: 'label'
         }, schemaName);
@@ -343,7 +338,7 @@ class DataSourcesUi {
           datasourcetype = DuckDbDataSource.types.VIEW;
           break;
       }
-      
+
       var tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
       var datasource = this.getDatasource(tableDatasourceId);
       if (!datasource) {
@@ -361,7 +356,7 @@ class DataSourcesUi {
       schemaNode.appendChild(tableNode);
     }
   }
-  
+
   async #loadDatasource(datasource) {
     switch (datasource.getType()){
       case DuckDbDataSource.types.FILE:
@@ -375,21 +370,21 @@ class DataSourcesUi {
         console.error(`Don't know how to load datasource ${datasource.getId()} of type ${datasource.getType()}`);
     }
   }
-  
+
   #toggleDataSource(event){
     var target = event.target;
-   
+
     var oldState = event.oldState;
     var newState = event.newState;
 
     if (oldState !== 'closed' || newState !== 'open' || target.childNodes.length !== 1) {
       return;
     }
-    
+
     var datasource = this.#getDatasourceForTreeNode(target);
     this.#loadDatasource(datasource);
   }
-  
+
   #createDatasourceNode(datasource, attributes){
     var caption = DataSourcesUi.getCaptionForDatasource(datasource);
 
@@ -403,13 +398,13 @@ class DataSourcesUi {
       "title": caption,
       "open": true
     });
-    
+
     if (attributes){
-      for (var attributeName in attributes){ 
-        datasourceNode.setAttribute(attributeName, attributes[attributeName]); 
+      for (var attributeName in attributes){
+        datasourceNode.setAttribute(attributeName, attributes[attributeName]);
       }
     }
-    
+
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
@@ -424,22 +419,17 @@ class DataSourcesUi {
       extension = datasource.getFileExtension();
       datasourceNode.setAttribute('data-filetype', extension);
     }
-    
+
     var summary = createEl('summary', {
     });
-    var icon = createEl('span', {
-      'class': 'icon',
-      'role': 'img'
-    });
-    summary.appendChild(icon);
-    
+
     datasourceNode.appendChild(summary);
-    
+
     var label = createEl('span', {
       class: 'label'
     }, caption);
     summary.appendChild(label);
-    
+
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
         var removeButton = this.#renderDatasourceActionButton({
@@ -449,7 +439,7 @@ class DataSourcesUi {
           events: {
             click: this.#removeDatasourceClicked.bind(this)
           }
-        });      
+        });
         summary.appendChild(removeButton);
         break;
       case DuckDbDataSource.types.TABLE:
@@ -470,7 +460,7 @@ class DataSourcesUi {
 
     return datasourceNode;
   }
-  
+
   #getTreeNodeFromClickEvent(event){
     var button = event.target;
     var label = button.parentNode;
@@ -484,7 +474,7 @@ class DataSourcesUi {
     var datasource = this.getDatasource(dataSourceId);
     return datasource;
   }
-  
+
   #rejectsDetectedHandler(event){
     var eventData = event.eventData;
     var datasource = event.currentTarget;
@@ -525,14 +515,14 @@ class DataSourcesUi {
       });
     }
   }
-  
+
   #attachRejectsDetection(duckdbDataSource) {
     if(!duckdbDataSource.supportsRejectsDetection()) {
       return;
     }
     duckdbDataSource.addEventListener('rejectsdetected', this.#rejectsDetectedHandler.bind(this));
   }
-  
+
   #getDatasourceFromClickEvent(event){
     var node = this.#getTreeNodeFromClickEvent(event);
     var nodeType = node.getAttribute('data-nodetype');
@@ -572,16 +562,16 @@ class DataSourcesUi {
         break;
       default:
         throw new Error(`Don't know how to get a datasource for node of type ${nodeType}.`);
-    }    
+    }
     return datasource;
   }
 
-  #analyzeDatasourceClicked(event){    
+  #analyzeDatasourceClicked(event){
     var datasource = this.#getDatasourceFromClickEvent(event);
     // todo: replace direct call to global analyze with fireEvent
     analyzeDatasource(datasource);
   }
-  
+
   #removeDatasourceClicked(event){
     var node = this.#getTreeNodeFromClickEvent(event);
     var nodeType = node.getAttribute('data-nodetype');
@@ -602,15 +592,15 @@ class DataSourcesUi {
             throw new Error(`Don't know how to get a datasource from a datasourcegroup of type ${groupType}`);
         }
         break;
-    }    
+    }
     this.destroyDatasources(datasourceIdsList);
   }
-  
+
   #configureDatasourceClicked(event){
     var datasource = this.#getDatasourceFromClickEvent(event);
     datasourceSettingsDialog.open(datasource);
   }
-  
+
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
     switch (datasourceGroup.type) {
       case DuckDbDataSource.types.DUCKDB:
@@ -628,9 +618,9 @@ class DataSourcesUi {
         }).join(', ');
     }
   }
-  
+
   #createDataSourceGroupNode(datasourceGroup, miscGroup){
-    if (datasourceGroup === undefined){ 
+    if (datasourceGroup === undefined){
       return;
     }
 
@@ -651,7 +641,7 @@ class DataSourcesUi {
         else {
           groupNode.setAttribute('data-filetype', datasourceGroup.fileType);
         }
-        
+
         if (datasourceGroup.typeSignature) {
           groupTitle = 'Bucket of similarly typed files.';
         }
@@ -660,26 +650,21 @@ class DataSourcesUi {
         groupTitle = `${groupType}`;
     }
     groupNode.setAttribute('title', groupTitle);
-    
+
     var summary = createEl('summary', {
     });
     groupNode.appendChild(summary);
-    
-    var icon = createEl('span', {
-      "class": 'icon'
-    });
-    summary.appendChild(icon);
-    
+
     var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
     var label = createEl('span', {
       class: 'label'
     }, caption);
     summary.appendChild(label);
-    
+
     if (datasourceGroup.typeSignature) {
       this.#createDatasourceNodeActionButtons(datasourceGroup.typeSignature, summary);
     }
-    
+
     var datasources = datasourceGroup.datasources;
     var datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
@@ -688,29 +673,29 @@ class DataSourcesUi {
       var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
     }.bind(this));
-    
+
     var dom = this.getDom();
     dom.appendChild(groupNode);
     return groupNode;
   }
-  
+
   #addDatasource(datasource) {
     var id = datasource.getId();
     this.#attachRejectsDetection(datasource);
     this.#datasources[id] = datasource;
   }
-  
+
   async addDatasources(datasources){
     datasources.forEach(function(datasource){
       this.#addDatasource(datasource);
     }.bind(this));
     await this.#renderDatasources();
   }
-  
+
   addDatasource(datasource){
     this.addDatasources([datasource]);
   }
-  
+
   async destroyDatasources(datasourceIds) {
     for (var i = 0; i < datasourceIds.length; i++){
       var datasourceId = datasourceIds[i];
@@ -723,21 +708,21 @@ class DataSourcesUi {
     }
     await this.#renderDatasources();
   }
-  
+
   getDatasource(id) {
     return this.#datasources[id];
   }
-  
+
   getDatasourceIds(){
     return Object.keys(this.#datasources);
   }
-  
+
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
     var columnNames = Object.keys(columnsSpec);
     if (columnNames.length === 0){
       return true;
     }
-    
+
     var columnName, columnSpec, columnType, searchColumnsSpec;
     if (useLooseColumnComparisonType) {
       searchColumnsSpec = {};
@@ -752,14 +737,14 @@ class DataSourcesUi {
     else {
       searchColumnsSpec = columnsSpec;
     }
-    
+
     var datasources = this.#datasources;
     var datasource = datasources[datasourceId];
     if (!datasource){
       return false;
     }
 
-    var columnMetadata;    
+    var columnMetadata;
     var datasourceType = datasource.getType();
     switch (datasourceType) {
       case DuckDbDataSource.types.FILE:
@@ -771,7 +756,7 @@ class DataSourcesUi {
         break;
       default:
     }
-  
+
     if (!columnMetadata){
       return false;
     }
@@ -783,7 +768,7 @@ class DataSourcesUi {
       if (!columnSpec) {
         continue _columns;
       }
-      
+
       columnType = row.column_type;
       var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
       if (columnSpec.columnType !== comparisonColumnType) {
@@ -796,19 +781,19 @@ class DataSourcesUi {
     }
     return false;
   }
-  
+
   async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType){
     var foundDatasources = {};
-        
+
     var datasources = this.#datasources;
     _datasources: for (var datasourceId in datasources){
       var datasource = datasources[datasourceId];
       var isCompatible = await this.isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType);
       if(isCompatible){
         foundDatasources[datasourceId] = datasource;
-      }        
+      }
     }
-    
+
     if (Object.keys(foundDatasources).length) {
       return foundDatasources;
     }

@@ -1,15 +1,15 @@
 class TupleSet extends DataSetComponent {
 
   static groupingIdAlias = '__huey_grouping_id';
-  
-  //  
+
+  //
   static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
     var queryAxis = queryModel.getQueryAxis(axisId);
     var queryAxisItems = queryAxis.getItems();
     if (!queryAxisItems.length) {
       return undefined;
     }
-    
+
     var selectListExpressions = {};
     for (var i = 0; i < queryAxisItems.length; i++) {
       var queryAxisItem = queryAxisItems[i];
@@ -17,15 +17,15 @@ class TupleSet extends DataSetComponent {
       var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
       selectListExpressions[caption] = selectListExpression;
     }
-    
+
     if (includeCountAll) {
       var countExpression = 'COUNT(*) OVER ()';
       selectListExpressions[countExpression] = countExpression;
     }
     return selectListExpressions;
-  }       
-       
-  static getSqlSelectStatement(queryModel, axisId, includeCountAll){
+  }
+
+  static getSqlSelectStatement(queryModel, axisId, includeCountAll, nullsSortOrder, totalsPosition){
     var datasource = queryModel.getDatasource();
 
     var queryAxis = queryModel.getQueryAxis(axisId);
@@ -34,32 +34,81 @@ class TupleSet extends DataSetComponent {
     var filterAxis = queryModel.getFiltersAxis();
     var filterAxisItems = filterAxis.getItems();
 
+    var sampling;
+    if (includeCountAll) {
+      sampling = queryModel.getSampling(axisId);
+    }
+
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
-      datasource, 
-      queryAxisItems, 
-      filterAxisItems, 
-      includeCountAll
-    );    
+      datasource,
+      queryAxisItems,
+      filterAxisItems,
+      includeCountAll,
+      undefined,
+      nullsSortOrder,
+      totalsPosition,
+      sampling
+    );
     return sql;
   }
-         
+
   #queryAxisId = undefined;
 
   #tuples = [];
   #tupleValueFields = [];
-  
+
   #tupleCount = undefined;
   #pageSize = 50;
+
+  constructor(queryModel, axisId, settings){
+    super(queryModel, settings);
+    this.#queryAxisId = axisId;
+  }
   
-  constructor(queryModel, axisId){
-    super(queryModel);
-    this.#queryAxisId = axisId;  
+  #getNullsSortOrder(){
+    var settings = this.getSettings();
+    var nullsSortOrder;
+    if (typeof settings.getSettings === 'function'){
+      nullsSortOrder = settings.getSettings([
+        'localeSettings', 
+        'nullsSortOrder', 
+        'value'
+      ]);
+    };
+    if (!nullsSortOrder) {
+      nullsSortOrder = 'FIRST';
+    }
+    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+      console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
+      nullsSortOrder = 'FIRST';
+    }
+    return nullsSortOrder;
+  }
+  
+  #getTotalsPosition(){
+    var settings = this.getSettings();
+    var totalsPosition;
+    if (typeof settings.getSettings === 'function'){
+      totalsPosition = settings.getSettings([
+        'pivotSettings', 
+        'totalsPosition', 
+        'value'
+      ]);
+    }
+    if (!totalsPosition){
+      totalsPosition = 'AFTER';
+    }
+    if (['AFTER','BEFORE'].indexOf(totalsPosition) === -1) {
+      console.warn(`Wrong value for totalsPosition "${totalsPosition}"`);
+      totalsPosition = 'AFTER';
+    }
+    return totalsPosition;
   }
 
   getTupleValueFields(){
     return this.#tupleValueFields;
   }
-  
+
   getPageSize(){
     return this.#pageSize;
   }
@@ -67,7 +116,7 @@ class TupleSet extends DataSetComponent {
   setPageSize(pageSize){
     this.#pageSize = pageSize;
   }
-  
+
   getQueryAxisId(){
     return this.#queryAxisId;
   }
@@ -75,43 +124,46 @@ class TupleSet extends DataSetComponent {
   getQueryAxisItems(){
     var queryModel = this.getQueryModel();
     var axisId = this.#queryAxisId;
-    
+
     var queryAxis = queryModel.getQueryAxis(axisId);
     var items = queryAxis.getItems();
     return items;
   }
 
-  #getSqlSelectStatement(includeCountAll, values){
+  #getSqlSelectStatement(includeCountAll){
     var queryModel = this.getQueryModel();
     if (!queryModel) {
       return undefined;
     }
+    var nullsSortOrder = this.#getNullsSortOrder();
+    var totalsPosition = this.#getTotalsPosition();    
     var sql = TupleSet.getSqlSelectStatement(
-      queryModel, 
-      this.#queryAxisId, 
-      includeCountAll, 
-      values
+      queryModel,
+      this.#queryAxisId,
+      includeCountAll,
+      nullsSortOrder,
+      totalsPosition
     );
     return sql;
   }
-  
+
   clear(){
     this.#tuples = [];
     this.#tupleCount = undefined;
   }
-  
+
   getTupleCountSync() {
     return this.#tupleCount;
   }
-  
+
   getTuplesSync(from, to){
     return this.#tuples.slice(from, to);
   }
-  
+
   getTupleSync(index){
     return this.#tuples[index];
   }
-    
+
   async getTupleCount(){
     return new Promise(function(resolve, reject){
       resolve(this.#tupleCount);
@@ -120,9 +172,9 @@ class TupleSet extends DataSetComponent {
 
   #loadTuples(resultSet, offset) {
     var numRows = resultSet.numRows;
-    
+
     var fields = resultSet.schema.fields;
-    
+
     var items = this.getQueryAxisItems();
     var hasGroupingId = false, fieldOffset = 0, fieldCount = items.length;
     if (fields[0].name === TupleSet.groupingIdAlias) {
@@ -146,7 +198,7 @@ class TupleSet extends DataSetComponent {
       }
     }
     this.#tupleValueFields = fields.slice(fieldOffset, fieldCount);
-        
+
     for (var i = 0; i < numRows; i++){
 
       var row = resultSet.get(i);
@@ -167,7 +219,7 @@ class TupleSet extends DataSetComponent {
         values[j - fieldOffset] = value;
       }
 
-      tuples[offset + i] = tuple;      
+      tuples[offset + i] = tuple;
     }
   }
 
@@ -182,6 +234,7 @@ class TupleSet extends DataSetComponent {
 
     var connection = await this.getManagedConnection();
     console.log(`SQL to fetch tuples for ${this.#queryAxisId} axis:`);
+    console.log(axisSql);
     var resultset = await connection.query(axisSql);
     console.log(`Query method returned, connection ${connection.getConnectionId()} in state ${connection.getState()}` );
     var rejects = await this.getQueryModel().getDatasource().getRejects();
@@ -207,7 +260,7 @@ class TupleSet extends DataSetComponent {
   }
 
   async getTuples(count, offset){
-    
+
     var data = this.#tuples;
     var tuples = [];
 
@@ -217,7 +270,7 @@ class TupleSet extends DataSetComponent {
     if (this.#tupleCount !== undefined && offset + count > this.#tupleCount) {
       count = this.#tupleCount - offset;
     }
-    
+
     while (i < count) {
       var tupleIndex = offset + i;
       var tuple = data[tupleIndex];
@@ -226,7 +279,7 @@ class TupleSet extends DataSetComponent {
           firstIndexToFetch = tupleIndex;
           lastIndexToFetch = tupleIndex;
         }
-        else 
+        else
         if (tupleIndex > lastIndexToFetch) {
           lastIndexToFetch = tupleIndex;
         }
@@ -236,20 +289,20 @@ class TupleSet extends DataSetComponent {
       }
       i += 1;
     }
-    
+
     if (firstIndexToFetch === undefined) {
       return tuples;
     }
-    
+
     lastIndexToFetch += 1;
     var newCount = (lastIndexToFetch - firstIndexToFetch);
     if (newCount < this.#pageSize && (offset + count === lastIndexToFetch) && lastIndexToFetch < this.#tupleCount) {
       newCount = this.#pageSize;
     }
-    
+
     var numRows = await this.#executeAxisQuery(newCount, firstIndexToFetch);
     tuples = data.slice(offset, offset + count);
     return tuples;
-  }    
-  
+  }
+
 }

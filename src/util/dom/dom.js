@@ -18,6 +18,20 @@ function createEl(tagName, attributes, content){
   return el;
 }
 
+function instantiateTemplate(templateId, instanceId) {
+  var template = byId(templateId);
+  var clone = template.content.cloneNode(true);
+  var index = 0, node;
+  do {
+    node = clone.childNodes.item(index++);
+  } while (node && node.nodeType !== node.ELEMENT_NODE);
+  
+  if (instanceId !== undefined) {
+    node.setAttribute('id', instanceId);
+  }
+  return node;
+}
+
 function setAttribute(dom, attName, attValue){
   switch (attName) {
     case 'style':
@@ -99,8 +113,12 @@ function hasClass(dom, classNames, allOrSome){
     throw new Error(`Invalid classname argument`);
   }
   var domClassNames = getClassNames(dom);
+  if (domClassNames === undefined) {
+    return false;
+  }
+  var noMatch;
   for (var i = 0; i < classNames.length; i++){
-    var noMatch = domClassNames.indexOf(classNames[i]) === -1;
+    noMatch = domClassNames.indexOf(classNames[i]) === -1;
     
     if (allOrSome && noMatch) {
       return false;
@@ -125,12 +143,6 @@ function replaceClass(dom, oldClass, newClass){
   }
   Array.prototype.splice.apply(classNames, args);
   dom.className = classNames.join(' ');
-}
-
-function getClassNames(el){
-  var className = el.className;
-  var classNames = className.split(/\s+/);
-  return classNames;
 }
 
 function getAncestorWithTagName(dom, tagName, includeSelf){
@@ -208,4 +220,19 @@ function getChildWithClassName(dom, className){
     }
   }
   throw new Error(`Couldn't find element with classname ${className}`);
+}
+
+function escapeHtmlText(text){
+  return text.replace(/[&<>]/g, function(match){
+    switch(match) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;'
+      default:
+        return match;
+    }
+  });
 }

@@ -1,0 +1,37 @@
+
+menu[role=menu]#pivotTableContextMenu {
+  
+  > li {
+    
+    > label[for=pivotTableContextMenuItemCopyCell]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyColumn]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyColumnTuples]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyRow]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyRowTuples]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyTable]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+  }
+
+}

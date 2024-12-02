@@ -2,92 +2,93 @@
   display: flex;
   flex-direction: row;
   position: relative;
-}
+  
+  > * {
+    flex-grow: 0;
+    
+    > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ):hover {
+      background-color: var( --huey-light-background-color );
+      border-color: var( --huey-light-border-color );
+    }
+    
+    > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ) {
+      border-style: solid;
+      border-color: var( --huey-light-border-color );
+      border-width: 2px;
+      border-radius: 18px 8px 0px 0px;
+      padding: 2px 4px 2px 4px;
+      background-color: var( --huey-dark-background-color );
+      white-space: nowrap;
+      text-overflow: 'ellipsis';
+      color: var( --huey-foreground-color );
+    }    
+    
+    > *[role=tabpanel] {
+      position: absolute;
+      top: 24px;
+      left: 0px;
+      right: 0px;
+      height: calc( 100% - 24px );
+      display: none;
+      overflow: auto;  
+    }
+  }
+  
+  > *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > label[role=tab] {
+    border-bottom-color: var( --huey-medium-background-color );
+    background-color: var( --huey-medium-background-color );
+    /* make the tab 'pop' */
+    vertical-align: middle;
+  }  
+  
+   > *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > *[role=tabpanel] {
+    display: block;
+  }
+  
+  > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ) > input[type=radio] {
+    appearance: none;
+    display: none;
+  }
+  
+  /*
+    first and last are filler elements.
+  */
 
-*[role=tablist]> * {
-  flex-grow: 0;
-}
+  > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child {
+    flex-grow: 1;
+  }
 
-*[role=tablist]> * > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ):hover {
-  background-color: var( --huey-light-background-color );
-  border-color: var( --huey-light-border-color );
-}
+  > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):first-child::before {
+    content: ' ';
+    width: 10px;
+    border-bottom-style: solid;
+    border-color: var( --huey-light-border-color );
+    border-width: 2px;
+    display: block;
+    position: absolute;
+    margin-left: -10px;
+    margin-top: 19px;
+  }
 
-*[role=tablist]> * > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ) {
-  border-style: solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
-  border-radius: 18px 8px 0px 0px;
-  padding: 2px 4px 2px 4px;
-  background-color: var( --huey-dark-background-color );
-  white-space: nowrap;
-  text-overflow: 'ellipsis';
-  color: var( --huey-foreground-color );
+  > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child::after {
+    content: ' ';
+    width: 100%;
+    border-bottom-style: solid;
+    border-color: var( --huey-light-border-color );
+    border-width: 2px;
+    display: block;
+    margin-top: 2px;
+  }
+
+  > *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ):last-child::after {
+    margin-top: 0px;
+  }
+  
 }
   
-*[role=tablist]> *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > label[role=tab] {
-  border-bottom-color: var( --huey-medium-background-color );
-  background-color: var( --huey-medium-background-color );
-  /* make the tab 'pop' */
-  vertical-align: middle;
-}
-
-*[role=tablist]> * > *[role=tabpanel] {
-  position: absolute;
-  top: 24px;
-  left: 0px;
-  right: 0px;
-  height: calc( 100% - 24px );
-  display: none;
-  overflow: auto;  
-}
-
 /* see rule above. This is an extra rule to ensure there is room for the resizer */
 *.resizeHorizontal[role=tablist]> * > *[role=tabpanel] {
   height: calc( 100% - 40px );
-}
-
-
-*[role=tablist]> *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) > *[role=tabpanel] {
-  display: block;
-}
-
-*[role=tablist]> *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ) > input[type=radio] {
-  appearance: none;
-  display: none;
-}
-
-/*
-  first and last are filler elements.
-*/
-
-*[role=tablist]> *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child {
-  flex-grow: 1;
-}
-*[role=tablist] > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):first-child::before {
-  content: ' ';
-  width: 10px;
-  border-bottom-style: solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
-  display: block;
-  position: absolute;
-  margin-left: -10px;
-  margin-top: 19px;
-}
-
-*[role=tablist] > *:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ):last-child::after {
-  content: ' ';
-  width: 100%;
-  border-bottom-style: solid;
-  border-color: var( --huey-light-border-color );
-  border-width: 2px;
-  display: block;
-  margin-top: 2px;
-}
-
-*[role=tablist] > *:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ):last-child::after {
-  margin-top: 0px;
 }
 
 

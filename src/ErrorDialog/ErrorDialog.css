@@ -1,3 +1,42 @@
-#errorDialog {
+dialog#errorDialog {
   resize: both;
+  width: 300px;
+  height: 400px;
+}
+
+dialog#errorDialog > header > #errorDialogTitle::before {
+  font-family: var( --huey-icon-font-family );
+  font-size: var( --huey-icon-large );
+  margin-right: .2em;
+  position:relative;
+  top:.2em;
+  color: red;
+  /* IconExclamationCircle */
+  content: '\f634';
+}
+
+
+dialog#errorDialog > header > #errorDialogTitle {
+}
+
+dialog#errorDialog > section#errorDialogDescription {
+}
+
+dialog#errorDialog > details#errorDialogDetails {
+}
+
+dialog#errorDialog > details#errorDialogDetails > summary {
+}
+
+dialog#errorDialog > details#errorDialogDetails > summary:after {
+  content: 'Details...'
+}
+
+dialog#errorDialog > details#errorDialogDetails > pre {
+  overflow: scroll;
+}
+
+
+dialog#errorDialog > details#errorDialogDetails:has( > pre:empty ) {
+  display: none;
 }

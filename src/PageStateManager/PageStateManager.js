@@ -4,11 +4,11 @@ class PageStateManager {
     this.#initPopStateHandler();
     //this.#initHashChangeHandler();
   }
-  
+
   #initPopStateHandler(){
     window.addEventListener('popstate', this.#popStateHandler.bind(this));
   }
-  
+
   #initHashChangeHandler(){
     window.addEventListener('hashchange', this.#hashChangeHandler.bind(this));
   }
@@ -17,19 +17,19 @@ class PageStateManager {
   #hashChangeHandler(event){
     var currentRoute = Routing.getCurrentRoute();
     // TODO: check if the current state already matches the route, if it does we're done.
-    this.setPageState(currentRoute);    
+    this.setPageState(currentRoute);
   }
-  
+
   // this basically means: load the query
   #popStateHandler(event){
     var newRoute = event.state;
     // TODO: check if the current state already matches the route, if it does we're done.
-    this.setPageState(newRoute);    
+    this.setPageState(newRoute);
   }
-  
+
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
     return new Promise(async function(resolve, reject){
-      
+
       // do we have the referenced datasource?
       var desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
       if (desiredDataSource){
@@ -37,18 +37,18 @@ class PageStateManager {
         resolve(desiredDataSource);
         return;
       }
-      
+
       // figure out what kind of datasource is referenced
       var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
-      
+
       if (desiredDatasourceIdParts.isUrl) {
         var url = desiredDatasourceIdParts.resource;
         await uploadUi.uploadFiles([url]);
         desiredDataSource = datasourcesUi.getDatasource(desiredDatasourceId);
         if (desiredDataSource) {
           var isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
-            desiredDatasourceId, 
-            referencedColumns, 
+            desiredDatasourceId,
+            referencedColumns,
             true
           );
           if (isCompatible) {
@@ -58,7 +58,7 @@ class PageStateManager {
           }
         }
       }
-            
+
       var title;
       var message = `The requested ${desiredDatasourceIdParts.type} ${desiredDatasourceIdParts.localId}`;
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
@@ -75,7 +75,7 @@ class PageStateManager {
         message += ' isn\'t compatible with your query.';
         // TODO: show why it's not compatible
       }
-      else {        
+      else {
         openNewDatasourceItem = [
           `<li id="datasourceMenu" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
             `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
@@ -86,7 +86,7 @@ class PageStateManager {
         title = 'Datasource not found';
         message += ' doesn\'t exist.';
       }
-      
+
       var list = '<menu class="dataSources">';
       var datasourceType;
       var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
@@ -114,16 +114,16 @@ class PageStateManager {
           ].join('\n');
         }).join('');
       }
-      
+
       list += openNewDatasourceItem;
       list += "</menu>";
       message += list;
-      
+
       var choice = PromptUi.show({
         title: title,
         contents: message
       });
-      
+
       choice
       .then(function(choice){
         switch (choice) {
@@ -153,29 +153,29 @@ class PageStateManager {
   }
 
   async setPageState(newRoute){
-        
+
     if (!newRoute){
       // TODO: maybe throw an error?
       return;
     }
-    
+
     var currentRoute = Routing.getRouteForQueryModel(queryModel);
     if (newRoute === currentRoute) {
       return;
     }
-    
+
     var state = Routing.getQueryModelStateFromRoute(newRoute);
     if (!state) {
       // TODO: maybe throw an error?
       return;
     }
-    
+
     var queryModelState = state.queryModel;
     var axes = queryModelState.axes;
     var referencedColumns = Object.keys(axes).reduce(function(acc, curr){
       var items = axes[curr];
       items.forEach(function(item, index){
-        var columnName = item.column;
+        var columnName = item.column || item.columnName;
         if (columnName === '*'){
           return;
         }
@@ -185,7 +185,7 @@ class PageStateManager {
       });
       return acc;
     },{});
-    
+
     var datasourceId = queryModelState.datasourceId;
     var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
 
@@ -193,8 +193,8 @@ class PageStateManager {
     if (!compatibleDatasources || !compatibleDatasources[datasourceId]) {
       try {
         datasource = await this.chooseDataSourceForPageStateChangeDialog(
-          referencedColumns, 
-          datasourceId, 
+          referencedColumns,
+          datasourceId,
           compatibleDatasources
         );
       }

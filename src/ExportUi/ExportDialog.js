@@ -1,5 +1,5 @@
 class ExportUi {
-  
+
   static downloadURL(url, fileName) {
     var a;
     a = document.createElement('a');
@@ -10,7 +10,7 @@ class ExportUi {
     a.click();
     a.remove();
   }
-  
+
   static downloadBlob(data, fileName, mimeType, timeout) {
     var blob, url;
     blob = new Blob(
@@ -70,16 +70,16 @@ class ExportUi {
     },
     'timestamp': function(queryModel){
       var date = new Date();
-      
+
       function padDigit(digit) {
         return digit < 10 ? '0' + digit : digit;
       }
-      
+
       return [
         date.getFullYear()
       , padDigit(date.getMonth() + 1)
       , padDigit(date.getDate())
-      ].join('-') + 
+      ].join('-') +
       'T'+ [
         padDigit(date.getHours())
       , padDigit(date.getMinutes())
@@ -87,7 +87,7 @@ class ExportUi {
       ].join(':')
     }
   }
-  
+
   static generateExportTitle(queryModel, titleTemplate){
     if (queryModel === undefined) {
       queryModel = window.queryModel;
@@ -101,7 +101,7 @@ class ExportUi {
       var fieldName = fieldRef.slice(2, -1);
       var func = ExportUi.#exportTitleFields[fieldName];
       if (typeof func === 'function'){
-        return func(queryModel); 
+        return func(queryModel);
       }
       else {
         return fieldRef;
@@ -109,106 +109,35 @@ class ExportUi {
     });
     return replacedTemplate;
   }
-}
 
-class ExportDialog {
-  
-  static #id = 'exportDialog';
-  
-  #queryModel = undefined;
-  #settings = undefined;
-  
-  constructor(){
-    this.#initExportDialog();
-  }
-  
-  #initExportDialog(){
-    byId('exportDialogCloseButton')
-    .addEventListener('click', this.close.bind(this));
-    
-    byId('exportDialogExecuteButton')
-    .addEventListener('click', this.#executeExport.bind(this));
-    
-    var exportTitleTemplate = byId('exportTitleTemplate');
-    exportTitleTemplate.addEventListener('change', this.#titleTemplateChangedHandler.bind(this));
-    exportTitleTemplate.addEventListener('input', this.#titleTemplateChangedHandler.bind(this));
-    
-  }
-  
-  #titleTemplateChangedHandler(event){
-    var exportTitleTemplate = byId('exportTitleTemplate');
-    this.#settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
-    this.#updateExportTitle();
-  }
-
-  #updateExportTitle(){
-    var queryModel = this.#queryModel;
-    var exportTemplate = byId('exportTitleTemplate')
-    var titleTemplate = exportTemplate.value;
-    
-    var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
-    byId('exportTitle').innerText = title;
-  }
-  
-  #updateDialog(){
-    var dialog = this.#getDialog();
-    var settings = this.#settings;
-    
-    Settings.synchronize(
-      dialog, 
-      {"_": settings.getSettings('exportUi')}, 
-      'dialog'
-    );
-    this.#updateExportTitle();    
-  }
-
-  #getDialog(){
-    return byId(ExportDialog.#id);
-  }
-  
-  open(config){
-    this.#queryModel = config.queryModel || queryModel;
-    this.#settings = config.settings || settings;
-    this.#updateDialog();
-    var dialog = this.#getDialog();
-    dialog.showModal();
-  }
-  
-  close(){
-    var dialog = this.#getDialog();
-    dialog.close();
-  }
-  
-  async #executeExport(){
-    var dialog = this.#getDialog();
-    dialog.setAttribute('aria-busy', String(true));
-
-    var queryModel = this.#queryModel;
-    var settings = this.#settings;
-
-    var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
-    progressMessageElement.innerText = 'Preparing export...';
+  static async exportData(queryModel, exportSettings, progressCallback){
     try {
-      var title = byId('exportTitle').innerText;
-            
-      var selectedTab = TabUi.getSelectedTab('#exportDialog');
-      var tabName = selectedTab.getAttribute('for');
-      
+      if (typeof progressCallback !== 'function'){
+        progressCallback = function(text){
+          console.log(text);
+        };
+      }
+      progressCallback('initSettings');
+
+      var title = exportSettings.exportTitle;
+      var exportType = exportSettings.exportType;
+
       var mimeType, compression, includeHeaders,
           dateFormat, timestampFormat, nullValueString,
           columnDelimiter, quote, escape, rowDelimiter
       ;
       var fileExtension, data, copyStatementOptions, sqlOptions;
-      switch (tabName) {
+      switch (exportType) {
         case 'exportDelimited':
-          columnDelimiter = byId(tabName + 'ColumnDelimiter').value;
-          nullValueString = byId(tabName + 'NullString').value;
-          includeHeaders = byId(tabName + 'IncludeHeaders').checked;
-          quote = byId(tabName + 'Quote').value;
-          escape = byId(tabName + 'Escape').value;
-          dateFormat = byId(tabName + 'DateFormat').value;
-          timestampFormat = byId(tabName + 'TimestampFormat').value;
-          compression = byId(tabName + 'Compression').value;
+          columnDelimiter = exportSettings[exportType + 'ColumnDelimiter'];
+          nullValueString = exportSettings[exportType + 'NullString'];
+          includeHeaders = exportSettings[exportType + 'IncludeHeaders'];
+          quote = exportSettings[exportType + 'Quote'];
+          escape = exportSettings[exportType + 'Escape'];
+          dateFormat = exportSettings[exportType + 'DateFormat'];
+          timestampFormat = exportSettings[exportType + 'TimestampFormat'];
+          compression = exportSettings[exportType + 'Compression'].value;
+
           copyStatementOptions = {
             "FORMAT": 'CSV',
             "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
@@ -224,10 +153,10 @@ class ExportDialog {
           fileExtension = 'csv';
           break;
         case 'exportJson':
-          compression = byId(tabName + 'Compression').value;
-          dateFormat = byId(tabName + 'DateFormat').value;
-          timestampFormat = byId(tabName + 'TimestampFormat').value;
-          rowDelimiter = byId(tabName + 'RowDelimiter').value;
+          compression = exportSettings[exportType + 'Compression'].value;
+          dateFormat = exportSettings[exportType + 'DateFormat'];
+          timestampFormat = exportSettings[exportType + 'TimestampFormat'];
+          rowDelimiter = exportSettings[exportType + 'RowDelimiter'];
           copyStatementOptions = {
             "FORMAT": 'JSON',
             "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
@@ -239,7 +168,7 @@ class ExportDialog {
           fileExtension = 'json';
           break;
         case 'exportParquet':
-          compression = byId(tabName + 'Compression').value;
+          compression = exportSettings[exportType + 'Compression'].value;
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
             "COMPRESSION": compression,
@@ -248,44 +177,41 @@ class ExportDialog {
           fileExtension = 'parquet';
           break;
         case 'exportSql':
-          sqlOptions = {};
+          sqlOptions = {
+            keywordLettercase: exportSettings[exportType + 'KeywordLettercase'].value,
+            alwaysQuoteIdentifiers: exportSettings[exportType + 'AlwaysQuoteIdentifiers'],
+            commaStyle: exportSettings[exportType + 'CommaStyle'].value
+          };
           mimeType = 'text/plain';
-          var keywordLetterCase = byId(tabName + 'KeywordLettercase').value;
-          sqlOptions.keywordLetterCase = keywordLetterCase;
-          var alwaysQuoteIdentifiers = byId(tabName + 'AlwaysQuoteIdentifiers').checked;
-          sqlOptions.alwaysQuoteIdentifiers = alwaysQuoteIdentifiers;
-          var commaStyle = byId(tabName + 'CommaStyle').value;
-          sqlOptions.commaStyle = commaStyle;
-          fileExtension = 'sql';        
+          fileExtension = 'sql';
           break;
       }
 
       var sql, structure;
-      
-      if (byId('exportResultShapePivot').checked){
+      if (exportSettings.exportResultShapePivot){
         structure = 'pivot';
         sql = getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions);
       }
       else
-      if (byId('exportResultShapeTable').checked){
+      if (exportSettings.exportResultShapeTable){
         structure = 'table';
         sql = getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions);
       }
-            
+
       if (sqlOptions) {
         data = sql;
       }
 
       if (compression && compression !== 'UNCOMPRESSED'){
-        if (tabName === 'exportParquet'){
+        if (exportType === 'exportParquet'){
           fileExtension = `${compression.toLowerCase()}.${fileExtension}`;
         }
         else {
           switch (compression){
-            case 'GZIP':  
+            case 'GZIP':
               mimeType = 'application/gzip';
               break;
-            case 'ZTSD':  
+            case 'ZTSD':
               mimeType = 'application/ztsd';
               break;
             default:
@@ -294,17 +220,17 @@ class ExportDialog {
           fileExtension += `.${compression.toLowerCase()}`;
         }
       }
-      
+
       if (copyStatementOptions){
         var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
-        progressMessageElement.innerText = `Preparing copy to ${tmpFileName}`;
+        progressCallback(`Preparing copy to ${tmpFileName}`);
         var copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
         var datasource = queryModel.getDatasource();
         var connection, result;
         try {
           connection = datasource.getManagedConnection();
           result = await connection.query(copyStatement);
-          progressMessageElement.innerText = `Extracting from ${tmpFileName}`;
+          progressCallback(`Extracting from ${tmpFileName}`);
           data = await connection.copyFileToBuffer(tmpFileName);
         }
         finally {
@@ -313,20 +239,21 @@ class ExportDialog {
           }
         }
       }
-      
+
       var destination;
-      if (byId('exportDestinationFile').checked){
+      if (exportSettings.exportDestinationFile){
         destination = 'file';
       }
       else
-      if (byId('exportDestinationClipboard').checked){
+      if (exportSettings.exportDestinationClipboard){
         destination = 'clipboard';
       }
-      
+
       switch (destination){
         case 'file':
-          var fileName = [title, fileExtension].join('.');      
-          progressMessageElement.innerText = `Download as ${fileName}`;
+          var fileName = [exportSettings.exportTitle, fileExtension].join('.');
+          fileName = fileName.replace(/\"/g, "'");
+          progressCallback(`Download as ${fileName}`);
           ExportUi.downloadBlob(data, fileName, mimeType);
           break;
         case 'clipboard':
@@ -335,33 +262,227 @@ class ExportDialog {
             text = data;
           }
           else {
-            progressMessageElement.innerText = `Copying to clipboard..`;
+            progressCallback(`Copying to clipboard..`);
             text = new TextDecoder('utf-8').decode(data);
           }
           await copyToClipboard(text, 'text/plain');
           break;
       }
-      progressMessageElement.innerText = `Success!`;
+      progressCallback(`Success!`);
+    }
+    catch (e){
+      progressCallback(`Error!`);
+      showErrorDialog(e);
+    }
+    finally {
+    }
+  }
+
+  static async exportAxisData(queryModel, axisId, exportSettings, progressCallback){
+    var state = queryModel.getState();
+    var newAxes = {};
+    newAxes[QueryModel.AXIS_FILTERS] = state.axes[QueryModel.AXIS_FILTERS];
+    newAxes[axisId] = state.axes[axisId];
+    state.axes = newAxes;
+    
+    var exportQueryModel = new QueryModel();
+    await exportQueryModel.setState(state);
+
+    await ExportUi.exportData(exportQueryModel, exportSettings, progressCallback);
+  }
+
+}
+
+class ExportDialog {
+
+  static #id = 'exportDialog';
+
+  #queryModel = undefined;
+  #settings = undefined;
+
+  constructor(){
+    this.#initExportDialog();
+  }
+
+  #initExportDialog(){
+    byId('exportDialogCloseButton')
+    .addEventListener('click', this.close.bind(this));
+
+    byId('exportDialogExecuteButton')
+    .addEventListener('click', this.#executeExport.bind(this));
+
+    var exportTitleTemplate = byId('exportTitleTemplate');
+    exportTitleTemplate.addEventListener('change', this.#titleTemplateChangedHandler.bind(this));
+    exportTitleTemplate.addEventListener('input', this.#titleTemplateChangedHandler.bind(this));
+
+  }
+
+  #titleTemplateChangedHandler(event){
+    var exportTitleTemplate = byId('exportTitleTemplate');
+    this.#settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
+    this.#updateExportTitle();
+  }
+
+  #updateExportTitle(){
+    var queryModel = this.#queryModel;
+    var exportTemplate = byId('exportTitleTemplate')
+    var titleTemplate = exportTemplate.value;
+
+    var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
+    byId('exportTitle').innerText = title;
+  }
+
+  #updateDialog(){
+    var dialog = this.#getDialog();
+    var settings = this.#settings;
+
+    Settings.synchronize(
+      dialog,
+      {"_": settings.getSettings('exportUi')},
+      'dialog'
+    );
+    this.#updateExportTitle();
+  }
+
+  #getDialog(){
+    return byId(ExportDialog.#id);
+  }
+
+  open(config){
+    this.#queryModel = config.queryModel || queryModel;
+    this.#settings = config.settings || settings;
+    this.#updateDialog();
+    var dialog = this.#getDialog();
+    dialog.showModal();
+  }
+
+  close(){
+    var dialog = this.#getDialog();
+    dialog.close();
+  }
+
+  async #executeExport(){
+    try {
+      var dialog = this.#getDialog();
+      dialog.setAttribute('aria-busy', String(true));
+
+      var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
+      var progressCallback = function(text){
+        progressMessageElement.innerText = text;
+      }
+      progressCallback('Preparing export...');
+
+      var settings = this.#settings;
       var exportSettings = settings.getSettings('exportUi');
+
+      exportSettings.exportTitle = byId('exportTitle').innerText;
+      var tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
+
+      function copyUiSetting(setting, exportTypePrefix){
+        exportTypePrefix = exportTypePrefix || '';
+        var typeOfSetting = typeof setting;
+        switch (typeOfSetting) {
+          case 'string':
+            var id = exportTypePrefix + setting;
+            var control = byId(id);
+            var valueProperty;
+            switch (control.type){
+              case 'radio':
+                valueProperty = 'selected';
+                break;
+              case 'checkbox':
+                valueProperty = 'checked';
+                break;
+              case 'input':
+              default:
+                valueProperty = 'value';
+            }
+            var value = control[valueProperty];
+            exportSettings[id] = value;
+            return;
+          case 'object':
+            if (setting instanceof Array) {
+              break;
+            }
+          default:
+            throw new Error(`Wrong type for setting "${setting}": should be string or array of strings, not "${typeOfSetting}".`);
+        }
+        setting.forEach(function(setting){
+          copyUiSetting(setting, exportTypePrefix);
+        });
+      }
+
+      exportSettings.exportType = tabName;
+
+      var mimeType, compression, includeHeaders,
+          dateFormat, timestampFormat, nullValueString,
+          columnDelimiter, quote, escape, rowDelimiter
+      ;
+      var fileExtension, data, copyStatementOptions, sqlOptions;
+      switch (tabName) {
+        case 'exportDelimited':
+          copyUiSetting([
+            'ColumnDelimiter',
+            'NullString',
+            'IncludeHeaders',
+            'Quote',
+            'Escape',
+            'DateFormat',
+            'TimestampFormat',
+            'Compression'
+          ], tabName);
+          break;
+        case 'exportJson':
+          copyUiSetting([
+            'DateFormat',
+            'TimestampFormat',
+            'RowDelimiter',
+            'Compression'
+          ], tabName);
+          break;
+        case 'exportParquet':
+          copyUiSetting([
+            'Compression'
+          ], tabName);
+          break;
+        case 'exportSql':
+          copyUiSetting([
+            'KeywordLettercase',
+            'AlwaysQuoteIdentifiers',
+            'CommaStyle'
+          ], tabName);
+          break;
+      }
+      copyUiSetting([
+        'exportResultShapePivot',
+        'exportResultShapeTable',
+        'exportDestinationFile',
+        'exportDestinationClipboard',
+      ]);
+
+      var queryModel = this.#queryModel;
+      await ExportUi.exportData(queryModel, exportSettings, progressCallback);
+
+      exportSettings = settings.getSettings('exportUi');
       Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
       this.#settings.assignSettings('exportUi', exportSettings);
     }
     catch (e){
-      progressMessageElement.innerText = `Error!`;
       showErrorDialog(e);
     }
     finally {
       dialog.setAttribute('aria-busy', String(false));
     }
-  }  
+  }
+
 }
 
 var exportDialog;
 function initExportDialog(){
   exportDialog = new ExportDialog();
-  
+
   var exportButton = byId('exportButton');
-  
+
   exportButton.addEventListener('click', function(event){
     exportDialog.open({
       queryModel: queryModel,
@@ -374,25 +495,4 @@ function initExportDialog(){
     settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
     updateExportTitle();
   }
-    
-  queryModel.addEventListener('change', function(event){
-
-    var exportUiActive;
-    if (
-      queryModel.getColumnsAxis().getItems().length === 0 &&
-      queryModel.getRowsAxis().getItems().length === 0 &&
-      queryModel.getCellsAxis().getItems().length === 0
-    ){
-      exportUiActive = false;
-    }
-    else {
-      exportUiActive = true;
-    }
-    var exportButtonParent = exportButton.parentNode;
-    exportButtonParent.style.visibility = exportUiActive ? '' : 'hidden';
-    if (!exportUiActive){
-      exportDialog.close();
-    }
-  });
-  
 }

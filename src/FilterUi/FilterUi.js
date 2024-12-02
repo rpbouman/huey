@@ -1,7 +1,7 @@
 class FilterDialog {
 
   static MULTIPLE_VALUES_SEPARATOR = ';';
-  
+
   static #numRowsColumnName = '__huey_numrows';
   static filterTypes = {
     INCLUDE: 'in',
@@ -18,9 +18,7 @@ class FilterDialog {
 
   #defaultValuePicklistPageSize = 100;
   #defaultSearchAutoQueryTimeout = 1000;
-  #currentSearchAutoQueryTimeout = undefined;
-  #searchQueryHandler = undefined;
-  
+
   #settings = undefined;
 
   #getValuePicklistPageSize(){
@@ -31,8 +29,8 @@ class FilterDialog {
     var valuePicklistPageSize = settings.getSettings(['querySettings', 'filterValuePicklistPageSize']);
     return valuePicklistPageSize;
   }
-  
-  #getSearchAutoQueryTimeout(){  
+
+  #getSearchAutoQueryTimeout(){
     var settings = this.#settings;
     if (!settings){
       return this.#defaultSearchAutoQueryTimeout;
@@ -45,7 +43,7 @@ class FilterDialog {
     this.#id = config.id;
     this.#queryModel = config.queryModel;
     this.#settings = config.settings || settings;
-    this.#initEvents();    
+    this.#initEvents();
   }
 
   #initEvents(){
@@ -129,7 +127,7 @@ class FilterDialog {
       this.#updatePicklist();
     }.bind(this));
 
-    this.#initSearchQueryHandlerOnce();
+    this.#initSearchQueryHandler();
     this.#initAddFilterValueButton();
   }
 
@@ -146,10 +144,10 @@ class FilterDialog {
 
   #initToFilterValuesList(){
     var toFilterValuesList = this.#getToFilterValuesList();
-    
+
     toFilterValuesList.addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
     toFilterValuesList.addEventListener('keydown', this.#handleFilterValuesListKeyDown.bind(this));
-    
+
     // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
     // this handler ensures the scrolbar moves both lists.
     toFilterValuesList.addEventListener('scroll', function(event){
@@ -157,7 +155,7 @@ class FilterDialog {
       this.#getFilterValuesList().scrollTop = target.scrollTop;
     }.bind(this));
   }
-  
+
   #handleFilterValuesListKeyDown(event){
     if (event.key !== 'Delete'){
       return;
@@ -165,7 +163,7 @@ class FilterDialog {
     this.#clearHighlightedValues();
   }
 
-  #initSearchQueryHandlerOnce(){
+  #initSearchQueryHandler(){
     var search = this.#getSearch();
     search.addEventListener('keydown', function(event){
       if (event.key === 'Enter'){
@@ -173,45 +171,36 @@ class FilterDialog {
         event.target.value = '';
       }
     }.bind(this));
+
     search.addEventListener('paste', function(event){
       event.preventDefault();
       var pastedText = getPastedText(event);
       pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
-      search.value = pastedText;  
-      this.#updatePicklist();      
+      search.value = pastedText;
+      this.#updatePicklist();
     }.bind(this));
-    this.#initSearchQueryHandler();
+
+    bufferEvents(
+      search,
+      'input',
+      function(event, count){
+        if (count === undefined) {
+          this.#updatePicklist();
+        }
+      },
+      this,
+      this.#getSearchAutoQueryTimeout.bind(this)
+    )
   }
 
-  // this adds the event handler that fires on search to update the values list
-  // we need to check everytime if the timeout has changed, because then we have to update the handler.
-  #initSearchQueryHandler(){
-    var searchAutoQueryTimeout = this.#getSearchAutoQueryTimeout();
-    if (this.#currentSearchAutoQueryTimeout === searchAutoQueryTimeout){
-      return;
-    }
-    
-    var search = this.#getSearch();
-    if (this.#searchQueryHandler){
-      search.removeEventListener('input', this.#searchQueryHandler);
-    }
 
-    this.#searchQueryHandler = bufferEvents(search, 'input', function(event, count){
-      if (count === undefined) {
-        this.#updatePicklist();
-      }
-    }, this, searchAutoQueryTimeout);
-    
-    this.#currentSearchAutoQueryTimeout = searchAutoQueryTimeout;
-  }
-  
   #initAddFilterValueButton(){
     var addFilterValueButton = this.#getAddFilterValueButton();
     addFilterValueButton.addEventListener('click', function(event){
       this.#addValueToFilterValues(event);
     }.bind(this));
   }
-  
+
   static #addWildcards(searchString){
     var wildcard = '%';
     if (!searchString.startsWith('%')) {
@@ -222,10 +211,10 @@ class FilterDialog {
     }
     return searchString;
   }
-  
+
   #addValueToFilterValues(){
     // grab the value from the search input
-    var search = this.#getSearch(); 
+    var search = this.#getSearch();
     var searchString = search.value;
     searchString = searchString.trim();
     // if there is no value (or empty string), do nothing
@@ -233,12 +222,12 @@ class FilterDialog {
     if (!searchString.length){
       return;
     }
-    
+
     var searchStrings = FilterDialog.#splitSearchString(searchString);
     if (!searchStrings.length){
       return;
     }
-    
+
     // check the filter type (opearator)
     var filterType = this.#getFilterType().value;
     var isRangeFilterType = false, isPatternFilterType = false;
@@ -264,7 +253,7 @@ class FilterDialog {
       }
       var label = searchString ;
       var literal = literalWriter ? literalWriter(searchString) : searchString;
-      
+
       var options, option;
 
       if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
@@ -292,7 +281,7 @@ class FilterDialog {
           sameValueOptions.push(option);
         }
       }
-      
+
       if(valueAdded === true){
         if (sameValueOptions.length) {
           for (var i = 0; i < sameValueOptions.length; i++){
@@ -300,8 +289,8 @@ class FilterDialog {
             option.parentNode.removeChild(option);
           }
         }
-      } 
-      else 
+      }
+      else
       if (sameValueOptions.length) {
         for (var i = 1; i < sameValueOptions.length; i++){
           option = sameValueOptions[i];
@@ -325,7 +314,7 @@ class FilterDialog {
           toFilterValuesList.appendChild(option);
           toFilterValuesList.selectedIndex = selectedIndex;
         }
-      }      
+      }
     }.bind(this));
     search.value = '';
     search.focus();
@@ -345,47 +334,86 @@ class FilterDialog {
     }
   }
 
-  #sortValues(values){
+  #getNullsSortOrder(){
+    var nullsSortOrder = this.#settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
+    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+      console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
+      nullsSortOrder = 'FIRST';
+    }
+    return nullsSortOrder;
+  }
+
+  #sortValueListKeys(valuesList) {
+    var dataTypeInfo;
     var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
-      var dataTypeInfo = getDataTypeInfo(dataType);
-      if (dataTypeInfo.isNumeric){
-        return values.sort(function(a, b){
-          a = parseFloat(a);
-          b = parseFloat(b);
-          if (a > b) {
-            return 1;
-          }
-          if (a < b) {
-            return -1;
-          }
-          return 0;
-        });
-      }
+      dataTypeInfo = getDataTypeInfo(dataType);
     }
-    return values.sort();
+    var nullsSortOrder = this.#getNullsSortOrder();
+    var sortNull = ({
+      'FIRST': -1,
+      'LAST': 1
+    })[nullsSortOrder];
+
+    var keys = Object.keys(valuesList);
+    keys.sort(function(key1, key2){
+      var valueObject1 = valuesList[key1];
+      var literal1 = valueObject1.literal;
+      var valueObject2 = valuesList[key2];
+      var literal2 = valueObject2.literal;
+
+      if (literal1.startsWith('NULL::')) {
+        return literal2.startsWith('NULL::') ? 0 : sortNull
+      }
+      else
+      if (literal2.startsWith('NULL::')){
+        return -sortNull;
+      }
+
+      if (dataTypeInfo && dataTypeInfo.isNumeric){
+        literal1 = literal1.split('::')[0];
+        literal2 = literal2.split('::')[0];
+        switch (this.#queryAxisItem.columnType){
+          case 'HUGEINT':
+          case 'BIGINT':
+          case 'UBIGINT':
+          case 'UHUGEINT':
+            literal1 = BigInt(literal1);
+            literal2 = BigInt(literal2);
+            break;
+          default:
+            literal1 = parseFloat(literal1);
+            literal2 = parseFloat(literal2);
+        }
+      }
+
+      if (literal1 > literal2) {
+        return 1;
+      }
+      else
+      if ( literal1 < literal2) {
+        return -1;
+      }
+      
+      return 0;
+    });
+    return keys;
   }
 
   #sortValueLists(valuesList, toValuesList){
-    var sortedValuesList = {}, sortedToValuesList, toKeys;
-    var keys = Object.keys(valuesList);
-    var sortedKeys = this.#sortValues([].concat(keys));
-    if (toValuesList) {
-      sortedToValuesList = {};
-      toKeys = Object.keys(toValuesList);
-    }
-
-    sortedKeys.forEach(function(key){
-      sortedValuesList[key] = valuesList[key];
-      if (toValuesList) {
-        var toKey = toKeys[keys.indexOf(key)];
-        sortedToValuesList[toKey] = toValuesList[toKey];
+    var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
+    var keys = this.#sortValueListKeys(valuesList);
+    keys.forEach(function(key){
+      sortedList[key] = valuesList[key];
+      if (!toValuesList) {
+        return;
       }
+      sortedToList[key] = toValuesList[key];
     });
 
     return {
-      valuesList: sortedValuesList,
-      toValuesList: sortedToValuesList
+      valuesList: sortedList,
+      toValuesList: sortedToList
     };
   }
 
@@ -400,7 +428,7 @@ class FilterDialog {
     }
     return valueObject;
   }
-  
+
   #extractValuesFromOptions(options){
     var optionObjects = {};
     for (var i = 0; i < options.length; i++){
@@ -433,11 +461,11 @@ class FilterDialog {
     if (options === undefined) {
       return;
     }
-    var values = Object.keys(options);
+    var keys = this.#sortValueListKeys(options);
 
-    for (var i = 0; i < values.length; i++){
-      var value = values[i];
-      var valueObject = options[value];
+    for (var i = 0; i < keys.length; i++){
+      var key = keys[i];
+      var valueObject = options[key];
       var optionElement = this.#createOptionElementFromValues(valueObject);
       selectList.appendChild(optionElement);
     }
@@ -600,9 +628,8 @@ class FilterDialog {
 
     // clear the value lists and then update them with the changed set of values
     this.clearFilterValueLists();
-    var sortedValueLists = this.#sortValueLists(currentValues, currentToValues)
-    this.#renderOptionsToSelectList(sortedValueLists.valuesList, filterValuesList);
-    this.#renderOptionsToSelectList(sortedValueLists.toValuesList, toFilterValuesList);
+    this.#renderOptionsToSelectList(currentValues, filterValuesList);
+    this.#renderOptionsToSelectList(currentToValues, toFilterValuesList);
 
     if (valueSelectionStatusText){
       this.#setValueSelectionStatusText(valueSelectionStatusText);
@@ -760,7 +787,7 @@ class FilterDialog {
   #getIncludeAllFilters(){
     return byId('filterSearchApplyAll');
   }
-  
+
   #getAutoWildChards(){
     return byId('filterSearchAutoWildcards');
   }
@@ -812,7 +839,6 @@ class FilterDialog {
   }
 
   async openFilterDialog(queryModel, queryModelItem, queryAxisItemUi){
-    this.#initSearchQueryHandler();
     this.#clearDialog();
 
     this.#queryAxisItem = queryModelItem;
@@ -824,7 +850,6 @@ class FilterDialog {
     var filterDialog = this.getDom();
     filterDialog.showModal();
     this.#updatePicklist();
-    this.#getSearch().focus();
   }
 
   #updateDialogState(){
@@ -833,15 +858,12 @@ class FilterDialog {
     if (filter){
       this.#getFilterType().value = filter.filterType;
 
-      var sortedValues, sortedValueArgs = [filter.values];
+      this.#renderOptionsToSelectList(filter.values, this.#getFilterValuesList());
       switch (filter.filterType) {
         case FilterDialog.filterTypes.BETWEEN:
         case FilterDialog.filterTypes.NOTBETWEEN:
-          sortedValueArgs.push(filter.toValues);
+          this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());
       }
-      sortedValues = this.#sortValueLists.apply(this, sortedValueArgs);
-      this.#renderOptionsToSelectList(sortedValues.valuesList, this.#getFilterValuesList());
-      this.#renderOptionsToSelectList(sortedValues.toValuesList, this.#getToFilterValuesList());
     }
     else {
 
@@ -850,10 +872,14 @@ class FilterDialog {
   }
 
   #getDialogState(){
+    var filterValuesList = this.#getFilterValuesList();
+    var filterValues = this.#extractOptionsFromSelectList(filterValuesList);
+    var toFilterValuesList = this.#getToFilterValuesList();
+    var toFilterValues = this.#extractOptionsFromSelectList(toFilterValuesList);
     var dialogState = {
       filterType: this.#getFilterType().value,
-      values: this.#extractOptionsFromSelectList(this.#getFilterValuesList()),
-      toValues: this.#extractOptionsFromSelectList(this.#getToFilterValuesList()),
+      values: filterValues,
+      toValues: toFilterValues,
     };
     return dialogState;
   }
@@ -900,7 +926,7 @@ class FilterDialog {
     }.bind(this));
     return otherFilterAxisItems;
   }
-  
+
   static #splitSearchString(searchString){
     return searchString.split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
     .map(function(searchString){
@@ -910,11 +936,11 @@ class FilterDialog {
       return Boolean(searchString.length);
     });
   }
-  
+
   #getSqlSelectStatementForPickList(offset, limit){
     var datasource = this.#queryModel.getDatasource();
     var queryAxisItem = this.#queryAxisItem;
-    
+
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value'}),
       Object.assign({}, queryAxisItem, {caption: 'label'})
@@ -925,7 +951,7 @@ class FilterDialog {
     if (filterSearchApplyAll) {
       filterAxisItems = filterAxisItems.concat(this.#getOtherFilterAxisItems(true));
     }
-    
+
     var search = this.#getSearch();
     var searchStrings = FilterDialog.#splitSearchString(search.value);
 
@@ -941,7 +967,7 @@ class FilterDialog {
           value: searchString,
           label: searchString,
           literal: quoteStringLiteral(searchString)
-        }; 
+        };
       });
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
@@ -949,15 +975,16 @@ class FilterDialog {
       }
       filterAxisItems.push(picklistFilterItem);
     }
-    
+
+    var nullsSortOrder = this.#getNullsSortOrder();
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
-      datasource, 
+      datasource,
       queryAxisItems,
-      filterAxisItems, 
+      filterAxisItems,
       offset === 0,
       FilterDialog.#numRowsColumnName,
-      'FIRST'
-    );    
+      nullsSortOrder
+    );
     return sql;
   }
 
@@ -965,127 +992,15 @@ class FilterDialog {
     var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
-      if (offset === undefined){
-        offset = 0;
-      }
-      sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     }
+    if (offset === undefined){
+      offset = 0;
+    }
+    sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     var timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
     var datasource = this.#queryModel.getDatasource();
     var result = await datasource.query(sql);
-    console.timeEnd(timeMessage);
-    return result;
-  }
-
-  async #getPicklistValuesXX(offset, limit){
-    this.setBusy(true);
-
-    if (offset === 0) {
-      var searchStatus = this.#getSearchStatus();
-      searchStatus.innerHTML = 'Finding values...';
-    }
-
-    var datasource = this.#queryModel.getDatasource();
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(this.#queryAxisItem);
-
-    var fromClause = datasource.getFromClauseSql();
-    var sql;
-    if (offset === 0) {
-      sql = [
-        'SELECT',
-        `${sqlExpression} AS "value"`,
-        `,${sqlExpression} AS "label"`,
-        `,count(*) over () as "${FilterDialog.#numRowsColumnName}"`,
-        fromClause,
-      ];
-    }
-    else {
-      sql = [
-        'SELECT DISTINCT',
-        `${sqlExpression} AS "value"`,
-        `,${sqlExpression} AS "label"`,
-        fromClause
-      ];
-    }
-
-    var condition = '';
-    var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
-    if (filterSearchApplyAll) {
-      var otherFilterAxisItems = this.#getOtherFilterAxisItems(true);
-      if (otherFilterAxisItems.length) {
-        var conditions = otherFilterAxisItems.map(function(filterAxisItem){
-          return QueryAxisItem.getFilterConditionSql(filterAxisItem);
-        });
-        if (conditions && conditions.length){
-          condition = conditions.join('\nAND ');
-        }
-      }
-    }
-
-    var search = this.#getSearch();
-    var searchString = search.value.trim();
-    var parameters = [];
-    var bindValue;
-    if (searchString.length){
-      var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
-      var collation = '';
-      switch (dataType) {
-        case 'VARCHAR':
-          collation = ' COLLATE NOCASE ';
-        default:
-          if (condition && condition.length) {
-            condition += '\nAND ';
-          }
-          // TODO: implement toggle for the collation.
-          // however it's currently not working anyway (see PR: https://github.com/duckdb/duckdb/pull/12359)
-          condition += `${sqlExpression}::VARCHAR${collation} LIKE ?`;
-          bindValue = `${searchString}`;
-          break;
-      }
-    }
-
-    if (condition) {
-      sql.push(`WHERE ${condition}`);
-    }
-
-    if (bindValue){
-      var autoWildcards = this.#getAutoWildChards().checked;
-      if (autoWildcards){
-        bindValue = `%${bindValue}%`;
-      }
-      parameters.push(bindValue);
-    }
-
-    if (offset === 0){
-      sql.push(`GROUP BY ${sqlExpression}`);
-    }
-    // todo: 
-    // - make it an option whether NULL value appears first or last
-    // - make the sort direction (ASC|DESC) an option
-    sql.push(`ORDER BY ${sqlExpression} NULLS FIRST`);
-
-    if (limit === undefined) {
-      limit = this.#getValuePicklistPageSize();
-    }
-    parameters.push(limit);
-    sql.push('LIMIT ?');
-
-    if (offset === undefined){
-      offset = 0;
-    }
-    parameters.push(offset);
-    sql.push('OFFSET ?');
-
-    sql = sql.join('\n');
-    console.log(`Preparing sql for filter dialog value picklist:`);
-    console.log(sql);
-    var preparedStatement = await datasource.prepareStatement(sql);
-    console.log(`preparedStatement: ${preparedStatement}`);
-    console.log(`Parameters: ${JSON.stringify(parameters)}`);
-    var timeMessage = `Executing filter dialog picklist query.`;
-    console.time(timeMessage);
-    var result = await preparedStatement.query.apply(preparedStatement, parameters);
     console.timeEnd(timeMessage);
     return result;
   }

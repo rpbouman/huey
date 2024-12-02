@@ -157,6 +157,11 @@ dialog {
   color: var( --huey-foreground-color );
 }
 
+dialog::-webkit-scrollbar-corner,
+dialog *::-webkit-scrollbar-corner {
+  background-color: var( --huey-medium-background-color );
+}
+
 dialog:popover-open,
 dialog[open] {
   display: flex;
@@ -295,23 +300,70 @@ menu[role=menu] > li[role=menuitem] > label > button {
   display: none;
 }
 
+menu[role=menu] > li[role=menuitem] {
+  line-height: 24px;
+  padding: 2px 4px 2px 4px;
+  border-width: 1px;
+  white-space: nowrap;
+}
+
+/**
+* make the labels take the entire width of the menu.
+* this is to ensure that if the user clicks somewhere on the item, it will register as a click on the button inside the label.
+* if you don't do this, user has to click inside the label.
+*/
+menu[role=menu] > li[role=menuitem] > label:has( > button ),
+menu[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] ),
+ol[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
+{
+  display: block;
+  width: 100%;
+}
+
 header[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > button )::before,
-menu[role=toolbar] > label:has( > input[type=file] )::before 
+menu[role=toolbar] > label:has( > input[type=file] )::before,
+menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
+*[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox])::before 
 {  
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
-  vertical-align:middle;
+  vertical-align: bottom;
   color: var( --huey-icon-color-subtle );
-  margin: 4px 4px 0px 4px;
+  margin: 0px 4px 0px 0px;
+  display: inline-block;
 }
 
 header[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > button )::before,
-menu[role=toolbar] > label:hover:has( > input[type=file] )::before {
+menu[role=toolbar] > label:hover:has( > input[type=file] )::before,
+menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before,
+*[role=menu] > li[role=menuitem]:hover > label:has( > input[type=checkbox])::before
+{
   color: var( --huey-icon-color-highlight );
 }
 
+code, pre {
+  font-family: var( --huey-mono-font-family );
+}
+
+*[role=separator][aria-orientation=vertical] {
+  display: inline-block;
+  border-width: 1px;
+  height: 28px;
+  border-left-style: solid;
+  border-left-color: var(--huey-light-border-color);
+  border-right-color: var(--huey-dark-border-color);
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+*[role=toolbar] > button:hover ,
+label[role=menuitem]:hover,
+menu[role=menu] > li[role=menuitem]:hover {
+  background-color: var( --huey-light-background-color );
+  border-color: var( --huey-light-border-color );
+}
 
 menu[role=menu] {
   list-style-type: none;
@@ -321,23 +373,36 @@ menu[role=menu] {
   border-collapse: collapse;
 }
 
-menu[role=menu] > li[role=menuitem] {
-  line-height: 24px;
-  background-color: var( --huey-dark-background-color );
-  border-color: var( --huey-dark-border-color );
+dialog,
+menu[role=menu][popover] {
+  box-shadow: 8px 8px 8px var( --huey-dark-background-color );
+}
+
+menu[role=menu][popover] {
+  position:absolute;
+  margin: 0px;
   border-width: 1px;
   border-style: solid;
-  padding: 2px 4px 2px 10px;
-  border-radius: 14px;
+  border-color: 
+    var( --huey-light-border-color ) 
+    var( --huey-dark-border-color ) 
+    var( --huey-dark-border-color ) 
+    var( --huey-light-border-color )
+  ;
+  background-color: var( --huey-medium-background-color );
 }
 
-*[role=toolbar] > button:hover ,
-menu[role=menu] > li[role=menuitem]:hover {
-  background-color: var( --huey-light-background-color );
-  border-color: var( --huey-light-border-color );
+menu > li[role=separator] {
+  border-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--huey-light-border-color);
+  margin-left: 4px;
 }
 
-
-code, pre {
-  font-family: var( --huey-mono-font-family );
+/**
+* menu items with a popovertarget get ... to indicate there is an action that requires user interaction.
+**/
+menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popovertargetaction] )::after {
+  content: '...';
 }
+

@@ -8,12 +8,6 @@ function getNullString(){
   return nullString;
 }
 
-function getTotalsString(axisItem){
-  var generalSettings = settings.getSettings('localeSettings');
-  var totalsString = generalSettings.totalsString;
-  return totalsString;
-}
-
 function getLocales(){
   var localeSettings = settings.getSettings('localeSettings');
   var locales = localeSettings.locale;
@@ -385,7 +379,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('REAL');
-    }    
+    }
   },
   'BIGINT': {
     defaultAnalyticalRole: 'attribute',
@@ -400,7 +394,7 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('BIGINT');
-    }    
+    }
   },
   'HUGEINT': {
     defaultAnalyticalRole: 'attribute',
@@ -574,9 +568,13 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
-        var monthNum = monthNumFormatter(1 + value.getUTCMonth())
-        var dayNum = dayNumFormatter(value.getUTCDate());
-        return value === null ? 'NULL::DATE' : `DATE'${value.getUTCFullYear()}-${monthNum}-${dayNum}'`;
+        if (value === null) {
+          return 'NULL::DATE';
+        }
+        var dateValue = new Date(value);
+        var monthNum = monthNumFormatter(1 + dateValue.getUTCMonth())
+        var dayNum = dayNumFormatter(dateValue.getUTCDate());
+        return `DATE'${dateValue.getUTCFullYear()}-${monthNum}-${dayNum}'`;
       };
     }
   },
@@ -759,6 +757,9 @@ function quoteIdentifierWhenRequired(identifier){
 }
 
 function getQuotedIdentifier(identifier){
+  if (typeof identifier !== 'string'){
+    identifier = String(identifier);
+  }
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
@@ -1210,4 +1211,13 @@ function getMemberExpressionType(type, memberExpressionPath){
 
 function extrapolateColumnExpression(expressionTemplate, columnExpression){
   return expressionTemplate.replace(/\$\{columnExpression\}/g, `${columnExpression}`);
+}
+
+function getUsingSampleClause(samplingConfig, useTableSample){
+  var size = samplingConfig.size || 100;
+  var unit = samplingConfig.unit || 'ROWS';
+  var method = samplingConfig.method || 'SYSTEM';
+  var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
+  var sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  return sampleClause;
 }

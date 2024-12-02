@@ -455,7 +455,18 @@ function initUploadUi(){
       //   - we can always offer to do nothing
       
       if (!currentRoute || !currentRoute.length) {
-        analyzeDatasource(uploadResults.datasources[0]);
+        var datasources = uploadResults.datasources;
+        for (var i = 0; i < datasources.length; i++){
+          var datasource = datasources[i];
+          switch (datasource.getType()){
+            case DuckDbDataSource.types.FILE:
+            case DuckDbDataSource.types.FILES:
+            case DuckDbDataSource.types.URL:
+              analyzeDatasource(datasource);
+              return;
+            default:
+          }
+        }
       }
     }
   }
