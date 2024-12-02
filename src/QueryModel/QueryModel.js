@@ -1423,11 +1423,11 @@ class QueryModel extends EventEmitter {
         this.#settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       }
 
-      if (autoRunQuery){
-        setTimeout(function(){
-          pivotTableUi.updatePivotTableUi();
-        }, 1000);
-      }
+//      if (autoRunQuery){
+//        setTimeout(function(){
+//          pivotTableUi.updatePivotTableUi();
+//        }, 1000);
+//      }
     }
   }
 

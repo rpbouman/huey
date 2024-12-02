@@ -67,7 +67,17 @@ class TupleSet extends DataSetComponent {
   
   #getNullsSortOrder(){
     var settings = this.getSettings();
-    var nullsSortOrder = settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
+    var nullsSortOrder;
+    if (typeof settings.getSettings === 'function'){
+      nullsSortOrder = settings.getSettings([
+        'localeSettings', 
+        'nullsSortOrder', 
+        'value'
+      ]);
+    };
+    if (!nullsSortOrder) {
+      nullsSortOrder = 'FIRST';
+    }
     if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
       console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
       nullsSortOrder = 'FIRST';
@@ -77,7 +87,17 @@ class TupleSet extends DataSetComponent {
   
   #getTotalsPosition(){
     var settings = this.getSettings();
-    var totalsPosition = settings.getSettings(['pivotSettings', 'totalsPosition', 'value']) || 'AFTER';
+    var totalsPosition;
+    if (typeof settings.getSettings === 'function'){
+      totalsPosition = settings.getSettings([
+        'pivotSettings', 
+        'totalsPosition', 
+        'value'
+      ]);
+    }
+    if (!totalsPosition){
+      totalsPosition = 'AFTER';
+    }
     if (['AFTER','BEFORE'].indexOf(totalsPosition) === -1) {
       console.warn(`Wrong value for totalsPosition "${totalsPosition}"`);
       totalsPosition = 'AFTER';

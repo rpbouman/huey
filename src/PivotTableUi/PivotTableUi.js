@@ -99,16 +99,35 @@ class PivotTableUi extends EventEmitter {
 
   #initQueryModelChangeHandler(){
     var queryModel = this.getQueryModel();
-    queryModel.addEventListener('beforechange', this.#queryModelBeforeChangeHandler.bind(this));
+    var timeoutCallback = function(){
+      var timeoutValue;
+      if (this.#settings){
+        if (typeof this.#settings.getSettings === 'function'){
+          timeoutValue = this.#settings.getSettings(['querySettings', 'autoRunQueryTimeout']);
+        }
+        else {
+          timeoutValue = this.#settings.autoRunQueryTimeout || 1000;
+        }
+        if (typeof timeoutValue === 'function'){
+          timeoutValue = timeoutValue();
+        }
+      };
+      return timeoutValue;
+    }.bind(this);
+    
+    bufferEvents(
+      queryModel, 
+      'beforechange', 
+      this.#queryModelBeforeChangeHandler, 
+      this, 
+      timeoutCallback
+    );
     bufferEvents(
       queryModel, 
       'change', 
       this.#queryModelChangeHandler, 
       this, 
-      (function(){
-        var timeoutValue = this.#settings.getSettings(['querySettings', 'autoRunQueryTimeout']);
-        return timeoutValue;
-      }.bind(this))
+      timeoutCallback
     );
     //queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
@@ -257,7 +276,10 @@ class PivotTableUi extends EventEmitter {
 
   #queryModelStateBeforeChange = undefined;
   #queryModelFilterConditionBeforeChange = undefined;
-  #queryModelBeforeChangeHandler(event){
+  #queryModelBeforeChangeHandler(event, count){
+    if (count !== 0) {
+      return;
+    }
     var queryModelState = this.#queryModel.getState({includeItemIndices: true});
     this.#queryModelStateBeforeChange = JSON.stringify(queryModelState);
     this.#queryModelFilterConditionBeforeChange = this.#queryModel.getFilterConditionSql(false);
@@ -543,6 +565,9 @@ class PivotTableUi extends EventEmitter {
   }
 
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
+    if (isNaN(physicalColumnsAxisTupleIndex)) {
+      return;
+    }
     var axisId = QueryModel.AXIS_COLUMNS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
@@ -630,12 +655,10 @@ class PivotTableUi extends EventEmitter {
           titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)} (${tupleIndex + 1}): ${titleText}`;
         }
         else
-        if (doCellHeaders) {
-          if (cellsAxisItems.length) {
-            var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
-            this.#setCellItemId(cell, cellsAxisItem);
-            titleText = labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
-          }
+        if (doCellHeaders && cellsAxisItems.length) {
+          var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
+          this.#setCellItemId(cell, cellsAxisItem);
+          titleText = labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
         }
 
         if (!labelText || !labelText.length) {
@@ -1560,6 +1583,7 @@ class PivotTableUi extends EventEmitter {
       this.#fireUpdatedSuccess();
     }
     catch(e){
+      console.error(e);
       var eventData = {
         status: 'error',
         error: e
@@ -1790,90 +1814,229 @@ class PivotTableUi extends EventEmitter {
     this.#contextMenuContext = cell;
   }
 
-  contextMenuItemClicked(event) {
+  async contextMenuItemClicked(event) {
     var target = event.target;
     var id = target.id;
 
-    var tableHeader = this.#getTableHeaderDom();
-    var tableBody = this.#getTableBodyDom();
-    var data = [];
+    var contextMenuContext = this.#contextMenuContext;
+    this.#contextMenuContext = null;
     
-    function copyRows(container, selectedRow, selectedColumn){
-      var rows = container.childNodes;
-      
-      var startRow, endRow;
-      if (selectedRow === undefined ) {
-        startRow = 0;
-        endRow = rows.length;
-        if (container === tableBody){
-          endRow -= 1;
-        }
-      }
-      else {
-        startRow = selectedRow;
-        endRow = selectedRow + 1;
-      }
+    if (id === 'pivotTableContextMenuItemCopyCell'){
+      copyToClipboard(contextMenuContext.textContent, 'text/plain');
+      return;
+    }
 
-      var startCell, endCell;
-      if (selectedColumn === undefined ) {
-        startCell = 0;
-        endCell = rows.item(0).childNodes.length - 1;
-      }
-      else {
-        startCell = selectedColumn;
-        endCell = selectedColumn + 1;
-      }
-      
-      for (var i = startRow; i < endRow; i++){
-        var line = [];
-        var row = rows.item(i);
+    var exportSettings = this.#settings.getSettings('exportUi');
+    exportSettings.exportType = 'exportDelimited';
+    exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = true);
+
+    exportSettings.exportDestinationClipboard = true;
+    exportSettings.exportDestinationFile = false;
+    
+    var queryAxisItem, cellsAxisItem, filter, filterAxisItem, itemId;
+    var queryModel = this.#queryModel;
+    var cellHeadersAxis = queryModel.getCellHeadersAxis();
         
-        var cells = row.childNodes;
-        
-        for (var j = startCell; j < endCell; j++){
-          var cell = cells.item(j);
-          if (hasClass(cell, 'pivotTableUiStufferCell')) {
-            continue;
-          }
-          line.push(cell.textContent);
-        }
-        data.push(line);
+    var queryModelState = queryModel.getState();
+    var queryModelAxes = queryModelState.axes;
+    var filterAxisItems = queryModelAxes[QueryModel.AXIS_FILTERS];
+    var cellsAxisItems = queryModelAxes[QueryModel.AXIS_CELLS];
+    var rowsAxisItems = queryModelAxes[QueryModel.AXIS_ROWS];
+    var columnsAxisItems = queryModelAxes[QueryModel.AXIS_COLUMNS];
+
+    var tableHeaderDom = this.#getTableHeaderDom();
+    var tableHeaderRows = tableHeaderDom.childNodes;
+    var tableBodyDom = this.#getTableBodyDom();
+    var tableBodyRows = tableBodyDom.childNodes;
+    var tableHeaderRow, tableBodyRow, cells;
+    
+    // calculate the number of row headers
+    var numRowHeaders = rowsAxisItems.length;
+    var numColumnHeaders = columnsAxisItems.length;
+    if (cellsAxisItems.length) {
+      switch (cellHeadersAxis){
+        case QueryModel.AXIS_COLUMNS:
+          numColumnHeaders += 1;
+          break;
+        case QueryModel.AXIS_ROWS:
+          numRowHeaders += 1;
+          break;
       }
     }
     
+    var busyDialog = byId('visualizationProgressDialog');
+    busyDialog.showModal();
     switch (id){
-      case 'pivotTableContextMenuItemCopyCell':
-        data.push([this.#contextMenuContext.textContent]);
+      case 'pivotTableContextMenuItemCopyColumnTuples':
+        delete queryModelAxes[QueryModel.AXIS_ROWS];
+        delete queryModelAxes[QueryModel.AXIS_CELLS];
+        break;
+      case 'pivotTableContextMenuItemCopyRowTuples':
+        delete queryModelAxes[QueryModel.AXIS_COLUMNS];
+        delete queryModelAxes[QueryModel.AXIS_CELLS];
+        break;
+      case 'pivotTableContextMenuItemCopyTable':
+        exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = false);
         break;
       case 'pivotTableContextMenuItemCopyColumn':
+        // find the physical column index
         var columnIndex = 0;
-        var cell = this.#contextMenuContext;
+        var cell = contextMenuContext;
         while (cell && cell.previousSibling) {
           columnIndex += 1;
           cell = cell.previousSibling;
         }
-        copyRows(tableHeader, undefined, columnIndex);
-        copyRows(tableBody, undefined, columnIndex);
+
+        if (columnIndex < rowsAxisItems.length) {
+          // the column is in the range of the row headers, this is a simple axis query on 1 row axis item
+          delete queryModelAxes[QueryModel.AXIS_COLUMNS];
+          delete queryModelAxes[QueryModel.AXIS_CELLS];
+          queryAxisItem = rowsAxisItems[columnIndex];
+          queryModelAxes[QueryModel.AXIS_ROWS].length = 0;
+          queryModelAxes[QueryModel.AXIS_ROWS].push(queryAxisItem);
+        }
+        else
+        if (columnIndex < numRowHeaders){
+          // the column is in the range of the row headers, but this is not a row axis item - it must be a cells axis header.
+          
+        }
+        else {
+          exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = false);
+          // the column is a table column; 
+          // to export it, we set up a transformed query model that applies a filter to select only this column.
+          if (!filterAxisItems){
+            queryModelAxes[QueryModel.AXIS_FILTERS] = filterAxisItems = [];
+          }
+          
+          for (var i = 0; i < tableHeaderRows.length; i++){
+            tableHeaderRow = tableHeaderRows.item(i);
+            cells = tableHeaderRow.childNodes;
+            cell = cells.item(columnIndex);
+            if (i < columnsAxisItems.length){
+              queryAxisItem = columnsAxisItems[i];
+              itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+              filterAxisItem = filterAxisItems.find(function(filterAxisItem){
+                var id = QueryAxisItem.getIdForQueryAxisItem(filterAxisItem);
+                return id === itemId;
+              });
+              if (filterAxisItem){
+                filter = filterAxisItem.filter;
+              }
+              else{
+                filterAxisItem = Object.assign({}, queryAxisItem);
+                filter = filterAxisItem.filter = {};
+                filterAxisItems.push(filterAxisItem);
+              }
+              filter.filterType = FilterDialog.filterTypes.INCLUDE;
+              filter.values = {};
+              filter.values[cell.textContent] = {
+                value: cell.textContent,
+                label: cell.textContent,
+                literal: cell.getAttribute('data-value-literal')
+              };
+            }
+            else 
+            if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
+              itemId = cell.getAttribute('data-axis-item');
+              cellsAxisItem = cellsAxisItems.find(function(cellsAxisItem){
+                var id = QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem);
+                return id === itemId;
+              });
+              cellsAxisItems.length = 0;
+              cellsAxisItems.push(cellsAxisItem);
+            }
+          }
+        }
         break;
       case 'pivotTableContextMenuItemCopyRow':
-        var row = this.#contextMenuContext.parentNode;
+      
+        // find the physical row index
+        var row = contextMenuContext.parentNode;
         var rowIndex = 0;
         while (row && row.previousSibling) {
           rowIndex += 1;
           row = row.previousSibling;
         }
-        copyRows(tableHeader, undefined, undefined);
-        copyRows(tableBody, rowIndex, undefined);
-        break;
-      case 'pivotTableContextMenuItemCopyTable':
-        copyRows(tableHeader);
-        copyRows(tableBody);
+        
+        row = contextMenuContext.parentNode;
+        if (row.parentNode === tableHeaderDom) {
+          if (rowIndex < columnsAxisItems.length){
+            // this is a simple axis query on 1 column axis item.
+            delete queryModelAxes[QueryModel.AXIS_ROWS];
+            delete queryModelAxes[QueryModel.AXIS_CELLS];
+            queryAxisItem = columnsAxisItems[rowIndex];
+            queryModelAxes[QueryModel.AXIS_COLUMNS].length = 0;
+            queryModelAxes[QueryModel.AXIS_COLUMNS].push(queryAxisItem);
+            
+          }
+          else 
+          if (rowIndex < numColumnHeaders) {
+            // this must be the cells header
+          }
+        }
+        else 
+        if (row.parentNode === tableBodyDom){
+          var cells = row.childNodes;
+          exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = false);
+          // the column is a table column; 
+          // to export it, we set up a transformed query model that applies a filter to select only this column.
+          if (!filterAxisItems){
+            queryModelAxes[QueryModel.AXIS_FILTERS] = filterAxisItems = [];
+          }
+          
+          for (var i = 0; i < numRowHeaders; i++){
+            cell = cells.item(i);
+            if (i < rowsAxisItems.length){
+              queryAxisItem = rowsAxisItems[i];
+              itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+              filterAxisItem = filterAxisItems.find(function(filterAxisItem){
+                var id = QueryAxisItem.getIdForQueryAxisItem(filterAxisItem);
+                return id === itemId;
+              });
+              if (filterAxisItem){
+                filter = filterAxisItem.filter;
+              }
+              else{
+                filterAxisItem = Object.assign({}, queryAxisItem);
+                filter = filterAxisItem.filter = {};
+                filterAxisItems.push(filterAxisItem);
+              }
+              filter.filterType = FilterDialog.filterTypes.INCLUDE;
+              filter.values = {};
+              filter.values[cell.textContent] = {
+                value: cell.textContent,
+                label: cell.textContent,
+                literal: cell.getAttribute('data-value-literal')
+              };
+            }
+            else 
+            if (cellHeadersAxis === QueryModel.AXIS_ROWS){
+              itemId = cell.getAttribute('data-axis-item');
+              cellsAxisItem = cellsAxisItems.find(function(cellsAxisItem){
+                var id = QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem);
+                return id === itemId;
+              });
+              cellsAxisItems.length = 0;
+              cellsAxisItems.push(cellsAxisItem);
+            }
+          }
+        }
+        else {
+        }
         break;
     }
-    var csv = getCsv(data);
-    //copyToClipboard(csv, 'text/csv');
-    copyToClipboard(csv, 'text/plain');
-    this.#contextMenuContext = null;
+    
+    try {
+      var exportQueryModel = new QueryModel();
+      await exportQueryModel.setState(queryModelState);
+      await ExportUi.exportData(exportQueryModel, exportSettings);
+    }
+    catch(error) {
+      showErrorDialog(error);
+    }
+    finally {
+    }
+    busyDialog.close();
   }
 }
 

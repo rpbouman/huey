@@ -13,7 +13,17 @@ menu[role=menu]#pivotTableContextMenu {
       content: '\f299';
     }
 
+    > label[for=pivotTableContextMenuItemCopyColumnTuples]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
     > label[for=pivotTableContextMenuItemCopyRow]:before {
+      /* clipboard-copy */
+      content: '\f299';
+    }
+
+    > label[for=pivotTableContextMenuItemCopyRowTuples]:before {
       /* clipboard-copy */
       content: '\f299';
     }
