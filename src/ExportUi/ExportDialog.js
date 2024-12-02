@@ -136,7 +136,7 @@ class ExportUi {
           escape = exportSettings[exportType + 'Escape'];
           dateFormat = exportSettings[exportType + 'DateFormat'];
           timestampFormat = exportSettings[exportType + 'TimestampFormat'];
-          compression = exportSettings[exportType + 'Compression'].value;
+          compression = exportSettings[exportType + 'Compression'];
 
           copyStatementOptions = {
             "FORMAT": 'CSV',
@@ -153,7 +153,7 @@ class ExportUi {
           fileExtension = 'csv';
           break;
         case 'exportJson':
-          compression = exportSettings[exportType + 'Compression'].value;
+          compression = exportSettings[exportType + 'Compression'];
           dateFormat = exportSettings[exportType + 'DateFormat'];
           timestampFormat = exportSettings[exportType + 'TimestampFormat'];
           rowDelimiter = exportSettings[exportType + 'RowDelimiter'];
@@ -168,7 +168,7 @@ class ExportUi {
           fileExtension = 'json';
           break;
         case 'exportParquet':
-          compression = exportSettings[exportType + 'Compression'].value;
+          compression = exportSettings[exportType + 'Compression'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
             "COMPRESSION": compression,
@@ -178,9 +178,9 @@ class ExportUi {
           break;
         case 'exportSql':
           sqlOptions = {
-            keywordLettercase: exportSettings[exportType + 'KeywordLettercase'].value,
+            keywordLettercase: exportSettings[exportType + 'KeywordLettercase'],
             alwaysQuoteIdentifiers: exportSettings[exportType + 'AlwaysQuoteIdentifiers'],
-            commaStyle: exportSettings[exportType + 'CommaStyle'].value
+            commaStyle: exportSettings[exportType + 'CommaStyle']
           };
           mimeType = 'text/plain';
           fileExtension = 'sql';
@@ -388,8 +388,6 @@ class ExportDialog {
             var valueProperty;
             switch (control.type){
               case 'radio':
-                valueProperty = 'selected';
-                break;
               case 'checkbox':
                 valueProperty = 'checked';
                 break;
