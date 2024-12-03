@@ -57,11 +57,11 @@ menu[role=toolbar]:has( #currentDatasource:empty ) > label#quickQueryMenuLabel {
 
 
 /* "Clear All" quick query is not availabel by default */
-body > menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
+menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
   display: none;
 }
 /* if the query ui has at least one item somewhere, then the "Clear All" quick query is available */
-body:has( > main > #workarea > #queryUi > section > ol > li) > menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
+body:has( > main > #workarea > #queryUi > section > ol > li) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
   display: list-item;
 }
 
@@ -70,35 +70,35 @@ menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton]
   display: none;
 }
 /* if the attribute ui has at least one item of the STRUCT, MAP, or Array type, then display the destructured data preview item */
-body:has( #attributeUi > details[data-column_type^=STRUCT] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
-body:has( #attributeUi > details[data-column_type^=MAP] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
-body:has( #attributeUi > details[data-column_type$="[]"] ) > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ) {
+body:has( #attributeUi > details[data-column_type^=STRUCT] ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
+body:has( #attributeUi > details[data-column_type^=MAP] ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ),
+body:has( #attributeUi > details[data-column_type$="[]"] ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryDestructuredDataPreviewButton] ) {
   display: list-item;
 }
 
 /* if there are no cells, then the options to place the cells headers on the rows or columns axis are hidden*/
-body:has( #queryUi > section[data-axis=cells] > ol:empty ) > menu#quickQueryMenu {
+body:has( #queryUi > section[data-axis=cells] > ol:empty ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu {
   li:has( label[for=quickQueryCellHeadersOnColumnsButton] ),
   li:has( label[for=quickQueryCellHeadersOnRowsButton] ) {
     display: none;
   }
 }
 /* if the query ui has the cell headers on the columns, then quick query menu option to place the cell headers on the columns is hidden */
-body:has( #queryUi[data-cellheadersaxis=columns] ) > menu#quickQueryMenu > li:has( label[for=quickQueryCellHeadersOnColumnsButton] ) {
+body:has( #queryUi[data-cellheadersaxis=columns] ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryCellHeadersOnColumnsButton] ) {
   display: none
 }
 /* if the query ui has the cell headers on the rows, then quick query menu option to place the cell headers on the rows is hidden */
-body:has( #queryUi[data-cellheadersaxis=rows] ) > menu#quickQueryMenu > li:has( label[for=quickQueryCellHeadersOnRowsButton] ) {
+body:has( #queryUi[data-cellheadersaxis=rows] ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryCellHeadersOnRowsButton] ) {
   display: none;
 }
 
 /* by default, the flip axes quick query option is hidden*/
-body > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ) {
+body > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ) {
   display: none;
 }
 /* if there are items on either the rows and/or the columns axes, then the flip axes query query option is displayed */
-body:has( #queryUi > section[data-axis=rows] > ol > li ) > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ),
-body:has( #queryUi > section[data-axis=columns] > ol > li ) > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ){
+body:has( #queryUi > section[data-axis=rows] > ol > li ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ),
+body:has( #queryUi > section[data-axis=columns] > ol > li ) > main > menu[role=toolbar] > label[role=menuitem][for="quickQueryMenuButton" ] > menu#quickQueryMenu > li:has( label[for=quickQueryFlipAxesButton] ){
   display: list-item;
 }
 
