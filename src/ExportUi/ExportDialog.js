@@ -147,7 +147,7 @@ class ExportUi {
             "ESCAPE": `'${escape.replace('\'', "''")}'`,
             "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
             "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-            "COMPRESSION": compression,
+            "COMPRESSION": compression.value,
           };
           mimeType = 'text/csv';
           fileExtension = 'csv';
@@ -161,7 +161,7 @@ class ExportUi {
             "FORMAT": 'JSON',
             "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
             "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
-            "COMPRESSION": compression,
+            "COMPRESSION": compression.value,
             "ARRAY": rowDelimiter.toUpperCase()
           };
           mimeType = 'application/json';
@@ -171,7 +171,7 @@ class ExportUi {
           compression = exportSettings[exportType + 'Compression'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
-            "COMPRESSION": compression,
+            "COMPRESSION": compression.value,
           };
           mimeType = 'application/vnd.apache.parquet';
           fileExtension = 'parquet';
@@ -202,12 +202,12 @@ class ExportUi {
         data = sql;
       }
 
-      if (compression && compression !== 'UNCOMPRESSED'){
+      if (compression && compression.value !== 'UNCOMPRESSED'){
         if (exportType === 'exportParquet'){
-          fileExtension = `${compression.toLowerCase()}.${fileExtension}`;
+          fileExtension = `${compression.value.toLowerCase()}.${fileExtension}`;
         }
         else {
-          switch (compression){
+          switch (compression.value){
             case 'GZIP':
               mimeType = 'application/gzip';
               break;
@@ -217,7 +217,7 @@ class ExportUi {
             default:
               mimeType = 'application/octet-stream';
           }
-          fileExtension += `.${compression.toLowerCase()}`;
+          fileExtension += `.${compression.value.toLowerCase()}`;
         }
       }
 
@@ -396,7 +396,7 @@ class ExportDialog {
                 valueProperty = 'value';
             }
             var value = control[valueProperty];
-            exportSettings[id] = value;
+            exportSettings[id] = control.tagName === 'SELECT' ? {value: value} : value;
             return;
           case 'object':
             if (setting instanceof Array) {

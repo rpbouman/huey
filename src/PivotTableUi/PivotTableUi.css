@@ -181,20 +181,21 @@
     text-align: right;
   }
 
-  .pivotTableUiCell[data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
+  .pivotTableUiCell[data-axis=rows][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
+  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
     font-family: unset
   }
   
-  .pivotTableUiCell[data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel {
-    text-align: unset;
-  }
 }
 
 
