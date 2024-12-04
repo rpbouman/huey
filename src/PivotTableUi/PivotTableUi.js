@@ -647,7 +647,10 @@ class PivotTableUi extends EventEmitter {
           }
           else
           if (isTotalsMember === j){
-            labelText = this.#getTotalsString(queryAxisItem);
+            titleText = this.#getTotalsString(queryAxisItem);
+            if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount){
+              labelText = titleText;
+            }
           }
           else {
             labelText = '';
