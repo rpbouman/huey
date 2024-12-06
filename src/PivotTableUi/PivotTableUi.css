@@ -1,5 +1,6 @@
 .pivotTableUiContainer {
   overflow: hidden;
+  background-color: var( --huey-light-background-color );
 
   > .pivotTableUiInnerContainer {
     overflow: scroll;
@@ -13,7 +14,6 @@
     left: 0px;
     border-style: none;
     border-width: 0px;
-    background-color: var( --huey-light-background-color );
     
     > .pivotTableUiSizer {
       position: absolute;
@@ -34,13 +34,12 @@
       table-layout: fixed;
       border-collapse: collapse;
       border-style: none;
-      border-width: none;
+      border-width: 0px;
       position: sticky;
       top: 0px;
       left: 0px;
       bottom: 0px;
       right: 0px;
-      background-color: var( --huey-light-background-color );
       
       .pivotTableUiRow {
         display: table-row;
@@ -222,7 +221,7 @@
 }
 
 .pivotTableUiContainer[aria-busy=true] {
-  > .pivotTableUiInnerContainer > {
+  > .pivotTableUiInnerContainer {
 
     > .pivotTableUiTable {
 
@@ -253,6 +252,7 @@
     }
   }
 }
+
 
 
 
