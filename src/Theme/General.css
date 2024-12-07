@@ -57,6 +57,10 @@ We keep this one around here for reference, but
   scrollbar-color: var( --huey-medium-background-color );
 }
 
+*[aria-busy=true] {
+  cursor: wait;
+}
+
 /**
 *
 * Default Element Appearance
