@@ -7,18 +7,18 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
 .attributeUi {
   user-select: none;
-  
-  details[role=treeitem][data-nodetype='aggregate'] > summary, 
+
+  details[role=treeitem][data-nodetype='aggregate'] > summary,
   details[data-nodetype='derived']:not( [data-derivation='elements'] ) > summary {
     list-style: none;
     margin-left: 16px;
   }
-  
+
   details[role=treeitem] {
-    
+
     > summary {
       white-space: nowrap;
-      
+
       > span.label  {
         max-width: calc(100% - 166px);
         width: 100%;
@@ -32,7 +32,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         width: 24px;
         padding: 6px 3px 0px 3px;
         text-align: center;
-        
+
       }
 
       /**
@@ -58,20 +58,21 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       .attributeUiAxisButton > input[type=checkbox] {
         display: none;
       }
-      
+
+
       > .attributeUiAxisButton[data-axis=rows]::before {
         /* table-column */
-        /* 
-          It may seem backward that we're using the table-column icon for the rows axis, 
+        /*
+          It may seem backward that we're using the table-column icon for the rows axis,
           but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
         */
         content: "\faff";
       }
-      
+
       > .attributeUiAxisButton[data-axis=columns]::before {
         /* table-row */
-        /* 
-          It may seem backward that we're using the table-row icon for the columns axis, 
+        /*
+          It may seem backward that we're using the table-row icon for the columns axis,
           but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
         */
         content: "\fb00";
@@ -85,7 +86,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       > span.attributeUiAxisButton {
         visibility:hidden;
       }
-      
+
       > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
         color: var( --huey-icon-color-highlight );
       }
@@ -96,20 +97,20 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         /* filter */
         content: "\eaa5";
       }
-      
+
       > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
         /* filter-x */
         /* content: "\fa04"; */
         /* filter-off */
         content: "\ed2c";
       }
-      
+
     }
-        
+
     > summary:hover  > span.label::before {
       color: var( --huey-icon-color-highlight );
     }
-        
+
     /**
     * folder icons
     */
@@ -117,7 +118,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       /* folder */
       content: "\eaad";
     }
-    
+
     [data-nodetype=folder][open] > summary > span.label::before {
       /* folder-open */
       content: "\faf7";
@@ -421,7 +422,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   /**
   *
   * https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
-  * 
+  *
   */
   details > summary:has( > label > input[type=checkbox]:checked ) > span.label,
   details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
@@ -433,5 +434,5 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     color: var( --huey-icon-color-highlight );
     font-weight: normal;
   }
-  
+
 }
