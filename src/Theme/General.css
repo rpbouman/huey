@@ -124,6 +124,15 @@ input:active {
   color: var( --huey-foreground-color );
 }
 
+button:focus, 
+button:focus-visible {
+  outline-style: solid;
+  outline-width: 1px;
+  outline-color: var( --huey-dark-border-color );
+  box-shadow: 0 0 3px var( --huey-dark-border-color );
+  background-color: var( --huey-light-background-color );
+}
+
 input[type=file]::file-selector-button {
 }
 
