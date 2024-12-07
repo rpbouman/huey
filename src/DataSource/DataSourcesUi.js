@@ -256,6 +256,8 @@ class DataSourcesUi {
     var analyzeActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
+      popovertarget: 'uploadUi',
+      popovertargetaction: 'hide',
       title: 'Open the this datasource in the Query editor',
       events: {
         click: this.#analyzeDatasourceClicked.bind(this)
@@ -266,6 +268,8 @@ class DataSourcesUi {
     var removeActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_remove',
       "className": "removeActionButton",
+      popovertarget: 'uploadUi',
+      popovertargetaction: 'hide',
       title: 'Remove this datasource',
       events: {
         click: this.#removeDatasourceClicked.bind(this)
@@ -276,6 +280,8 @@ class DataSourcesUi {
     var editActionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_edit',
       "className": "editActionButton",
+      popovertarget: 'uploadUi',
+      popovertargetaction: 'hide',
       title: 'Configure datasource details',
       events: {
         click: this.#configureDatasourceClicked.bind(this)
