@@ -158,6 +158,7 @@
 
     <dialog
       id="uploadUi"
+      popover="manual"
       aria-labelledby="uploadUiTitle"
       aria-describedby="uploadUiDescription"
     >
@@ -171,8 +172,20 @@
           <span class="digit"></span>
         </div>
       </header>
+      <template id="uploadItemTemplate">
+        <details id="filename">
+          <summary>
+            <span></span>
+            <menu></menu>
+            <progress 
+              max="100"
+              value="0"
+            />
+          </summary>
+          <p></p>
+        </details>
+      </template>
       <section id="uploadProgressList">
-
       </section>
       <footer role="toolbar">
         <button

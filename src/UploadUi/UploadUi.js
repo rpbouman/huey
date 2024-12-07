@@ -12,6 +12,7 @@ class UploadUi {
   #id = undefined;
   #pendingUploads = undefined;
   #cancelPendingUploads = false;
+  static #uploadItemTemplateId = 'uploadItemTemplate';
 
   constructor(id){
     this.#id = id;
@@ -85,83 +86,45 @@ class UploadUi {
     }
   }
 
-  #createUploadItem(file){
-    var fileName
+  #createLoadExtensionItem(extensionId){
+    var loadExtensionItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, extensionId);
+    loadExtensionItem.getElementsByTagName('p').item(0).setAttribute('id', extensionId + '_message');
+    return loadExtensionItem;
+  }
 
+  #createUploadItem(file){
+    var fileName, fileSize;
     if (typeof file === 'string'){
       fileName = file;
     }
     else
     if (file instanceof File) {
       fileName = file.name;
+      fileSize = UploadUi.#fileSizeFormatter.format(file.size);
+      if (fileSize.endsWith('BB')){
+        fileSize = fileSize.replace(/BB/, 'GB');
+      }
     }
     else {
       throw new Error(`Don't know how to handle item of type ${typeof file}`);
     }
 
-    var uploadItem = createEl('details', {
-      id: fileName
-    });
-
-    var summary = createEl('summary', {
-    });
-    uploadItem.appendChild(summary);
-
-    var label = createEl('span', {
-    }, fileName);
-    summary.appendChild(label);
-
-    var datasourceId = DuckDbDataSource.getDatasourceIdForFileName(fileName);
-    if (datasourceId) {
-      var analyzeButton = createEl('label', {
-        "class": 'analyzeActionButton',
-        "for": `${datasourceId}_analyze`,
-        "title": `Start exploring data from ${fileName}`,
-        "onclick": `byId("${this.#id}").close()`
-      });
-      summary.appendChild(analyzeButton);
-
-      var settingsButton = createEl('label', {
-        "class": 'editActionButton',
-        "for": `${datasourceId}_edit`,
-        "title": `Configure ${fileName}`,
-        "onclick": `byId("${this.#id}").close()`
-      });
-      summary.appendChild(settingsButton);
+    var uploadItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, fileName);
+    uploadItem.getElementsByTagName('p').item(0).setAttribute('id', fileName + '_message');
+    var labelSpan = uploadItem.getElementsByTagName('span').item(0);
+    labelSpan.textContent = fileName;
+    if (fileSize){
+      labelSpan.setAttribute('data-file-size', fileSize);
     }
-
-    var progressBar = createEl('progress', {
-      id: fileName,
-      max: 100,
-      value: 10
-    })
-    summary.appendChild(progressBar)
+    
     return uploadItem;
   }
 
   #createInstallExtensionItem(extensionName){
     var extensionItemId = `duckdb_extension:${extensionName}`;
-    var uploadItem = createEl('details', {
-      id: extensionItemId
-    });
-
-    var summary = createEl('summary', {
-    });
-    uploadItem.appendChild(summary);
-
-    var label = createEl('span', {
-      // label should technicall have a for attribute, but there is nothing to point it to.
-      //"for": extensionItemId
-    }, `Extension: ${extensionName}`);
-    summary.appendChild(label);
-    var progressBar = createEl('progress', {
-      id: extensionItemId,
-      max: 100,
-      value: 10
-    })
-    summary.appendChild(progressBar);
-    var message = createEl('p');
-    uploadItem.appendChild(message);
+    var uploadItem = this.#createLoadExtensionItem(extensionItemId);
+    var label = uploadItem.getElementsByTagName('span').item(0);
+    label.textContent = `Extension: ${extensionName}`;
     return uploadItem;
   }
 
@@ -241,7 +204,7 @@ class UploadUi {
         message.innerHTML += `Extension ${extensionName} not installed<br/>`;
 
         message.innerHTML += `Installing extension ${extensionName}<br/>`;
-        await connection.query(`INSTALL ${extensionName}`);
+        var result = await connection.query(`INSTALL ${extensionName}`);
         message.innerHTML += `Extension ${extensionName} installed<br/>`;
         progressbar.value = parseInt(progressbar.value, 10) + 20;
       }
@@ -282,6 +245,48 @@ class UploadUi {
     return extensionInstallationItems;
   }
 
+  #updateUploadItem(uploadItem, uploadResult){
+    var summary = uploadItem.getElementsByTagName('summary').item(0);
+
+    var messageText;
+    var message = uploadItem.getElementsByTagName('p').item(0);
+    if (uploadResult instanceof DuckDbDataSource) {
+      var datasourceId = uploadResult.getId();
+      var type = uploadResult.getType();
+      switch (type){
+        case DuckDbDataSource.types.FILE:
+        case DuckDbDataSource.types.URL:
+          var menu = summary.getElementsByTagName('menu').item(0);
+          var objectName = uploadResult.getObjectName();
+          var analyzeButton = createEl('label', {
+            "class": 'analyzeActionButton',
+            "for": `${datasourceId}_analyze`,
+            "title": `Start exploring data from ${objectName}`
+          });
+          menu.appendChild(analyzeButton);
+
+          var settingsButton = createEl('label', {
+            "class": 'editActionButton',
+            "for": `${datasourceId}_edit`,
+            "title": `Configure ${objectName}`
+          });
+          menu.appendChild(settingsButton);
+          break;
+      }
+      
+      uploadItem.setAttribute('aria-invalid', String(false));
+      messageText = 'Succesfully loaded.';
+    }
+    else {
+      messageText = uploadResult.message;
+      uploadItem.setAttribute('open', true);
+      uploadItem.setAttribute('aria-invalid', String(true));
+      uploadItem.setAttribute('aria-errormessage', message.id);
+    }
+    message.innerText = messageText;
+
+  }
+
   async uploadFiles(files){
     this.#cancelPendingUploads = false;
     var dom = this.getDialog();
@@ -313,37 +318,25 @@ class UploadUi {
     var uploadResults = await Promise.all(this.#pendingUploads);
 
     var countFail = 0;
+    var datasourceTypes = {}
     var datasources = [];
     for (var i = 0; i < uploadResults.length; i++){
       var uploadResult = uploadResults[i];
-      var messageText;
-
-      var message = createEl('p', {
-        id: uploadItem.id + '_message'
-      });
-
       var uploadItem = body.childNodes.item(i + requiredDuckDbExtensions.length);
-      uploadItem.appendChild(message);
-
-      if (uploadResult instanceof DuckDbDataSource) {
-        uploadItem.setAttribute('aria-invalid', String(false));
-        messageText = 'Succesfully loaded.';
+      this.#updateUploadItem(uploadItem, uploadResult);
+      if (uploadResult instanceof DuckDbDataSource ) {
         datasources.push(uploadResult);
+        var type = uploadResult.getType();
+        var ofTypeCount = datasourceTypes[type];
+        if (ofTypeCount === undefined) {
+          ofTypeCount = 0;
+        }
+        ofTypeCount += 1;
+        datasourceTypes[type] = ofTypeCount;
       }
       else {
         countFail += 1;
-        messageText = uploadResult.message;
-        uploadItem.setAttribute('open', true);
-        uploadItem.setAttribute('aria-invalid', String(true));
-        uploadItem.setAttribute('aria-errormessage', message.id);
       }
-      message.innerText = messageText;
-
-      uploadItem
-      .getElementsByTagName('summary').item(0)
-      .getElementsByTagName('*').item(0)
-      .innerHTML += ' ' + UploadUi.#fileSizeFormatter.format(files[i].size)
-      ;
     }
 
     dom.setAttribute('aria-busy', false);
@@ -368,12 +361,22 @@ class UploadUi {
     }
 
     if (countSuccess !== 0){
-      description = [
-        description,
-        '<br/>',
-        '<br/>Click the <span class="editActionButton"></span> button to configure the datasource.',
-       '<br/>Click the <span class="analyzeActionButton"></span> button to start exploring.'
-      ].join('\n');
+      if (datasourceTypes[DuckDbDataSource.types.FILE]) {
+        description = [
+          description,
+          '<br/>',
+          '<br/>Click the <span class="editActionButton"></span> button to configure the datasource.',
+         '<br/>Click the <span class="analyzeActionButton"></span> button to start exploring.'
+        ].join('\n');
+      }
+      
+      if (datasourceTypes[DuckDbDataSource.types.DUCKDB] || datasourceTypes[DuckDbDataSource.types.SQLITE]){
+        description = [
+          description,
+          '<br/>',
+          '<br/>For database files, use the datasources tab to browse the database for tables or views to analyze.'
+        ].join('\n');
+      }
     }
 
     this.#getHeader().innerText = message;
