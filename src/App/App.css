@@ -11,6 +11,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) {
   cursor: wait;
 }
 
+html > body[aria-busy=true] > main#layout {
+  display: none;
+}
+
+html > body[aria-busy=false] > #spinner {
+  display: none;
+}
 
 nav#sidebar {
   width: 350px;
