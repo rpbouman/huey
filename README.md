@@ -81,7 +81,8 @@ The Datasources have an explore button ![explore button](https://github.com/rpbo
 After clicking it, the left sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 
 ### Attributes, Derived Attributes, and Aggregates
-You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table. 
+You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
+
 ![image](https://github.com/user-attachments/assets/d4caf74b-64ce-4722-ad55-d31cf192bff6)
 
 The pivot table has two axes for placing attribute values:
