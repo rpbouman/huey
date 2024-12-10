@@ -90,7 +90,8 @@ The pivot table has two axes for placing attribute values:
 2) attributes appearing on the vertical axis are used to generate row headers. For this reason the vertical axis is also known as the 'rows'-axis.
 
 The selection of attributes and their placement on the axis is represented by the Query Builder. 
-The following screenshot may help to explain: 
+The following screenshot may help to explain:
+
 ![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
 
 In the screenshot, the Attribute Sidebar is at the left side. The workarea is to the right of the Attribute Sidebar. 
@@ -123,6 +124,7 @@ Clicking on the axis icon of the Cells axis will affect the placement of the cel
 Items that are placed inside the Query builder have buttons to manipulate them: At the left and right side of the query items, there are buttons to move the item a single position to the left or right within the axis.
 Items on the rows and columns axes also have a button to move the item from one axis to the other.
 Items also have a button to remove it from the query.
+
 ![image](https://github.com/user-attachments/assets/021f72ba-0551-441e-ba86-106ef3ef6808)
 
 #### Drag and Drop
@@ -135,6 +137,7 @@ Drag and Drop also works for items that are already placed inside the Query Buil
 After changing the Query, it must be executed so the pivot table may be updated. 
 If the "Autorun query" checkbox on the toolbar is checked, this will happen automatically.
 If the "Autorun query" checkbox is not checked, then you can execute the query by clicking the "play" button that appears just in front of the checkbox label:
+
 ![image](https://github.com/user-attachments/assets/0d32ac87-25fa-49d2-8d1b-31e615e8378c)
 
 ### Derived Attributes
@@ -160,6 +163,7 @@ Attributes can have any kind of datatype, including composite or "nested" data t
 #### Members of Structured Types
 
 Attributes with a Structured type (STRUCT) have a "structure" folder that gives access to the member attributes that make up the parent attribute.
+
 ![image](https://github.com/user-attachments/assets/8687b270-6298-4434-8f52-5b32d7d39a53)
 
 Members are also just attributes, and may have their own derivations and aggregates. 
@@ -168,6 +172,7 @@ Of course, members that are themselves of a structured type have their own struc
 #### Unnesting Arrays
 
 Attributes with an array type have a set of "array operation" derivations, allowing the array to be unfolded or unnested into its individual elements or their indices:
+
 ![image](https://github.com/user-attachments/assets/5f2acd6e-3ac1-4702-b204-7737fbc9a8f0)
 
 ### Filtering
