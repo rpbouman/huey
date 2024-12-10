@@ -15,3 +15,6 @@ dialog#datasourceSettingsDialog {
   font-family: var( --huey-mono-font-family );
 }
 
+output#datasourceFileSize:not(:empty):after {
+  content: ' bytes';
+}
