@@ -57,6 +57,10 @@ We keep this one around here for reference, but
   scrollbar-color: var( --huey-medium-background-color );
 }
 
+*[aria-busy=true] {
+  cursor: wait;
+}
+
 /**
 *
 * Default Element Appearance
@@ -122,6 +126,15 @@ input:active {
   outline-width: 0px;
   outline-color: var( --huey-dark-border-color );
   color: var( --huey-foreground-color );
+}
+
+button:focus, 
+button:focus-visible {
+  outline-style: solid;
+  outline-width: 1px;
+  outline-color: var( --huey-dark-border-color );
+  box-shadow: 0 0 3px var( --huey-dark-border-color );
+  background-color: var( --huey-light-background-color );
 }
 
 input[type=file]::file-selector-button {

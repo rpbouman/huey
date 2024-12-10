@@ -1,233 +1,259 @@
 .pivotTableUiContainer {
   overflow: hidden;
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer {
-  overflow: scroll;
-  position: relative;
-  width: 100%;
-  height: calc( 100% - 3px );
-  margin: 1px;
-  top: 0px;
-  bottom: 0px;
-  right: 0px;
-  left: 0px;
-  border-style: none;
-  border-width: 0px;
   background-color: var( --huey-light-background-color );
-}
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiSizer {
-  position: absolute;
-  background-color: transparent;
-  z-index: 0;
-}
+  > .pivotTableUiInnerContainer {
+    overflow: scroll;
+    position: relative;
+    width: 100%;
+    height: calc( 100% - 3px );
+    margin: 1px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    border-style: none;
+    border-width: 0px;
+    
+    > .pivotTableUiSizer {
+      position: absolute;
+      background-color: transparent;
+      z-index: 0;
+    }
+    
+    > .pivotTableUiSizer.pivotTableUiHorizontalSizer {
+      height: 1px;
+    }
+    
+    > .pivotTableUiSizer.pivotTableUiVerticalSizer {
+      width: 1px;
+    }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiSizer.pivotTableUiHorizontalSizer {
-  height: 1px;
-}
+    > .pivotTableUiTable {
+      display: table;
+      table-layout: fixed;
+      border-collapse: collapse;
+      border-style: none;
+      border-width: 0px;
+      position: sticky;
+      top: 0px;
+      left: 0px;
+      bottom: 0px;
+      right: 0px;
+      
+      .pivotTableUiRow {
+        display: table-row;
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiSizer.pivotTableUiVerticalSizer {
-  width: 1px;
-}
+        > .pivotTableUiCell {
+          display: table-cell;
+          border-style:solid;
+          border-width: 1px;
+          border-color: var( --huey-light-border-color );
+          
+          > .pivotTableUiCellLabel {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+            margin: 0px;
+            padding: 0px 2px 0px 2px;
+            border: 0px;
+            display: block;
+          }
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable {
-  display: table;
-  table-layout: fixed;
-  border-collapse: collapse;
-  border-style: none;
-  border-width: none;
-  position: sticky;
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-  right: 0px;
-  background-color: var( --huey-light-background-color );
-}
+        > .pivotTableUiCell::-webkit-resizer {
+          display: none;
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader {
-  display: table-header-group;
-}
+        > .pivotTableUiHeaderCell {
+          background-color: var( --huey-medium-background-color );
+        }
+        
+        > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
+        > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
+          font-weight: bold;
+          padding: 0px 2px 0px 4px;
+        }
+        
+        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel {
+          font-family: var( --huey-mono-font-family );
+        }
+        
+        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel {
+          text-align: right;
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody {
-  display: table-row-group;
-}
+        > .pivotTableUiCell[data-axis=columns][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
+          font-family: unset;
+          text-align: unset;
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
-  display: table-row;
-}
+        > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
+          border-right-color: var( --huey-dark-border-color );
+        }
 
-/**/
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell.pivotTableUiStufferCell {
-  width: 100%;
-  resize: none;
-  background: none;
-  border: none;
-}
+        > .pivotTableUiCell[data-totals=true] {
+          background-color: var( --huey-medium-background-color );
+          border-right-color: var( --huey-dark-border-color );
+          font-weight: bold;
+        }
+      }
+      
+      .pivotTableUiRow[data-totals=true] {
+        font-weight: bold;
+        background-color: var( --huey-medium-background-color );
+      }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiCell.pivotTableUiStufferCell {
-  height: 100%;
-  resize: none;
-  background: none;
-  border: none;
-}
+      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
+      .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
+        border-bottom-color: var( --huey-dark-border-color );
+      }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell {
-  display: table-cell;
-  border-style:solid;
-  border-width: 1px;
-  border-color: var( --huey-light-border-color );
-}
+      > .pivotTableUiTableHeader {
+        display: table-header-group;
+        
+        > .pivotTableUiRow:first-child {
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell {
-  resize: horizontal;
-  overflow: hidden;
-}
+          > .pivotTableUiCell {
+            resize: horizontal;
+            overflow: hidden;
+          }
 
-/* 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell::-moz-resizer,
-*/
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell::-webkit-resizer {
-  display: none;
-}
+          > .pivotTableUiCell.pivotTableUiStufferCell {
+            width: 100%;
+            resize: none;
+            background: none;
+            border: none;
+          }
 
-/*
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell::-moz-resizer,
-*/
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:first-child > .pivotTableUiCell::-webkit-resizer {
-  border-right-style: dotted;
-  border-right-width: 2px;
-  border-color: var( --huey-dark-border-color );
-}
+          > .pivotTableUiCell::-webkit-resizer {
+            border-right-style: dotted;
+            border-right-width: 2px;
+            border-color: var( --huey-dark-border-color );
+          }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiHeaderCell {
-  background-color: var( --huey-medium-background-color );
-}
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
-  border-right-color: var( --huey-dark-border-color );
-}
+        > .pivotTableUiRow:last-child {
 
-.pivotTableUiContainer[aria-busy=false] > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
-  color: inherit;
-}
+          > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
+            border-bottom-color: var( --huey-dark-border-color );
+          }
 
-.pivotTableUiContainer[aria-busy=true] > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell {
-  border-color: transparent;
-  box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
-}
+          > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell[data-totals] ) {
+            border-right-color: var( --huey-dark-border-color );
+          }
 
-.pivotTableUiContainer[aria-busy=true] > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel {
-  color: transparent;
-  text-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
+          > .pivotTableUiRowsAxisHeaderCell {
+            border-bottom-color: var( --huey-dark-border-color );
+          }
+          
+          > .pivotTableUiCell.pivotTableUiRowsAxisHeaderCell {
+            border-top-color: var( --huey-dark-border-color );
+          }
+          
+          > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
-  border-bottom-color: var( --huey-dark-border-color );
-}
+        > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
+          border-bottom-color: var( --huey-dark-border-color );
+        }
+      }
+      
+      > .pivotTableUiTableBody {
+        display: table-row-group;
+        
+        > .pivotTableUiRow {
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
-  border-bottom-color: var( --huey-dark-border-color );
-}
+          > .pivotTableUiCell.pivotTableUiStufferCell {
+            height: 100%;
+            resize: none;
+            background: none;
+            border: none;
+          }
 
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell[data-totals] ) {
-  border-right-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiRowsAxisHeaderCell {
-  border-bottom-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: relative;
-  margin: 0px;
-  padding: 0px 2px 0px 2px;
-  border: 0px;
-  display: block;
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
-  font-weight: bold;
-  padding: 0px 2px 0px 4px;
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow:last-child > .pivotTableUiCell.pivotTableUiRowsAxisHeaderCell {
-  border-top-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiTableHeader > .pivotTableUiRow > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
-  border-right-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow {
-  
-  .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel {
-    font-family: var( --huey-mono-font-family );
+          > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
+      }
+    }
   }
-  
-  .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel {
-    text-align: right;
+}
+
+.pivotTableUiContainer[aria-busy=false] {
+
+  > .pivotTableUiInnerContainer {
+
+    > .pivotTableUiTable {
+      .pivotTableUiRow {
+
+        > .pivotTableUiHeaderCell {
+          > .pivotTableUiCellLabel {
+            color: inherit;
+          }
+        }
+
+      }
+    }
   }
+}
 
-  .pivotTableUiCell[data-axis=rows][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
-  .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
-    font-family: unset
+.pivotTableUiContainer[aria-busy=true] {
+  > .pivotTableUiInnerContainer {
+
+    > .pivotTableUiTable {
+
+      /* 
+        This is here for https://github.com/rpbouman/huey/issues/70
+        basically, we need to suprress display of the label text while we're still busy (rendering the table)
+        If we don't, the cells will not have yet assumed the assigned cell width 
+        and this messes up our calculation of how much columns we should render.
+      */
+      > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
+        width: 1ch;
+        visibility: hidden;
+      }
+
+      .pivotTableUiRow {
+
+        > .pivotTableUiCell {
+          border-color: transparent;
+          box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
+
+          > .pivotTableUiCellLabel {
+            color: transparent;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+          }
+
+        }
+      }
+    }
   }
-  
 }
 
 
-/* Totals */
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
-  border-bottom-color: var( --huey-dark-border-color );
-}
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow[data-totals=true] {
-  font-weight: bold;
-  background-color: var( --huey-medium-background-color );
-}
 
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
-  border-right-color: var( --huey-dark-border-color );
-}
-
-.pivotTableUiContainer > .pivotTableUiInnerContainer > .pivotTableUiTable .pivotTableUiRow > .pivotTableUiCell[data-totals=true] {
-  background-color: var( --huey-medium-background-color );
-  border-right-color: var( --huey-dark-border-color );
-  font-weight: bold;
-}
-
-/* 
-  This is here for https://github.com/rpbouman/huey/issues/70
-  basically, we need to suprress display of the label text while we're still busy (rendering the table)
-  If we don't, the cells will not have yet assumed the assigned cell width 
-  and this messes up our calculation of how much columns we should render.
-*/
-.pivotTableUiContainer[aria-busy=true] > .pivotTableUiInnerContainer > .pivotTableUiTable > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
-  width: 1ch;
-  visibility: hidden;
-}
 

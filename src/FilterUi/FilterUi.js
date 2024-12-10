@@ -942,8 +942,8 @@ class FilterDialog {
     var queryAxisItem = this.#queryAxisItem;
 
     var queryAxisItems = [
-      Object.assign({}, queryAxisItem, {caption: 'value'}),
-      Object.assign({}, queryAxisItem, {caption: 'label'})
+      Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
+      Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
     ];
 
     var filterAxisItems = [];
@@ -977,14 +977,14 @@ class FilterDialog {
     }
 
     var nullsSortOrder = this.#getNullsSortOrder();
-    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
-      datasource,
-      queryAxisItems,
-      filterAxisItems,
-      offset === 0,
-      FilterDialog.#numRowsColumnName,
-      nullsSortOrder
-    );
+    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
+      datasource: datasource,
+      queryAxisItems: queryAxisItems,
+      filterAxisItems: filterAxisItems,
+      includeCountAll:offset === 0,
+      countAllAlias: FilterDialog.#numRowsColumnName,
+      nullsSortOrder: nullsSortOrder
+    });
     return sql;
   }
 

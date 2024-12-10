@@ -150,7 +150,7 @@
       <option data-auto="true" value="NULL">NULL</option>
     </datalist>
   </head>
-  <body>
+  <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
@@ -158,6 +158,7 @@
 
     <dialog
       id="uploadUi"
+      popover="manual"
       aria-labelledby="uploadUiTitle"
       aria-describedby="uploadUiDescription"
     >
@@ -171,12 +172,25 @@
           <span class="digit"></span>
         </div>
       </header>
+      <template id="uploadItemTemplate">
+        <details id="filename">
+          <summary>
+            <span></span>
+            <menu></menu>
+            <progress 
+              max="100"
+              value="0"
+            />
+          </summary>
+          <p></p>
+        </details>
+      </template>
       <section id="uploadProgressList">
-
       </section>
       <footer role="toolbar">
         <button
           id="uploadDialogOkButton"
+          autofocus="true"
         >Ok</button>
         <button
           id="uploadDialogCancelButton"
@@ -560,13 +574,14 @@
       </section>
       <footer role="toolbar">
         <button
+          id="exportDialogExecuteButton"
+          autofocus="true"
+        >Export</button>
+        <button
           id="exportDialogCloseButton"
           popovertarget="exportDialog"
           popovertargetaction="hide"
         >Close</button>
-        <button
-          id="exportDialogExecuteButton"
-        >Export</button>
       </footer>
     </dialog>
 
@@ -714,6 +729,7 @@
       <footer role="toolbar">
         <button
           id="errorDialogOkButton"
+          autofocus="true"
           popovertarget="errorDialog"
           popovertargetaction="hide"
         >Ok</button>
@@ -1032,6 +1048,7 @@
       <footer role="toolbar">
         <button
           id="settingsDialogOkButton"
+          autofocus="true"
           popovertarget="settingsDialog"
           popovertargetaction="hide"
         >Ok</button>
@@ -1062,6 +1079,7 @@
         <button
           id="promptDialogAcceptButton"
           form="promptUiForm"
+          autofocus="true" 
           popovertarget="promptUi"
           popovertargetaction="hide"
         >Yes</button>
@@ -1094,6 +1112,7 @@
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
+          <li><a href="https://github.com/sponsors/rpbouman?o=nsm&sc=t" target="_github_sponsor">Become a sponsor...</a></li>
         </ul>
         <p style="font-size: smaller">Created and maintained by Roland.Bouman@gmail.com</p>
         <p><a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_donate">Donations help to keep Huey in good shape!</a></p>
@@ -1101,6 +1120,7 @@
       <footer role="toolbar">
         <button
           id="aboutDialogOkButton"
+          autofocus="true"
           popovertarget="aboutDialog"
           popovertargetaction="hide"
         >Ok</button>
@@ -1419,6 +1439,7 @@
       <footer role="toolbar">
         <button
           id="datasourceSettingsDialogOkButton"
+          autofocus="true"
           popovertarget="datasourceSettingsDialog"
           popovertargetaction="hide"
           value="Ok"
@@ -1435,7 +1456,6 @@
     <main
       id="layout"
       class="layout"
-      style="display: none"
     >
       <menu role="toolbar">
         <label for="uploader" title="Register local data files to explore their contents with Huey">

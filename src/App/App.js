@@ -31,20 +31,14 @@ function initDuckdbVersion(){
     return `${key} AS ${getQuotedIdentifier(columns[key])}`;
   }).join('\n,');
   var sql = `SELECT ${selectListSql}`
-  connection.query(sql)
+  var result = connection.query(sql)
   .then(function(resultset){
     var duckdbVersionLabel = byId('duckdbVersionLabel');
     var row = resultset.get(0);
     var version = row[versionColumn];
     var api = row[apiColumn];
     duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
-
-    var spinner = byId('spinner');
-    if (spinner){
-      spinner.style.display = 'none';
-    }
-    var layout = byId('layout');
-    layout.style.display = '';
+    document.body.setAttribute('aria-busy', false);
   })
   .catch(function(){
     console.error(`Error fetching duckdb version info.`);

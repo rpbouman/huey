@@ -2,73 +2,93 @@ dialog#uploadUi {
   resize: both;
   width: 600px;
   height: 400px;
-}
+  
+  > section#uploadProgressList {
+    
+    > details {
+      
+      > summary {
+        width: 100%;
+        
+        > span {
+        }
+        
+        > span[data-file-size]::after {
+          content: ' (' attr(data-file-size) ')';
+        }
+        
+        > menu {
+          display: block;
+          position: absolute;
+          right: 20px;
+          margin-top: -16px;
+          
+          > label[for] > button {
+            display: none;
+          }
+          
+          > label.editActionButton[for]:before,
+          > label.analyzeActionButton[for]:before {
+            color: var( --huey-icon-color-subtle );
+          }
 
-dialog#uploadUi > section > details > summary > label {
-}
+          > label.editActionButton[for]:hover::before,
+          > label.analyzeActionButton[for]:hover::before {
+            color: var( --huey-icon-color-highlight );
+          }
+          
+        }
+        
+        > progress {
+          display: block;
+          width: 100%;
+          margin-top: 2px;
+        }
+      }
+      
+      > p {
+        overflow: auto;
+        max-height: 6em;
+      }
+      
+    }
+    
+    > details[aria-invalid=true] {
+      > summary {
+        > progress {
+          accent-color: red;
+        }
+      }
+    }
 
-dialog#uploadUi > section > details > summary > progress {
-  display: block;
-  width: 100%;
-  margin-top: 2px;
-}
+    > details[aria-invalid=false] {
+      > summary {
+        > progress {
+          accent-color: green;
+        }
+      }
+    }
+  }
 
-dialog#uploadUi > section > details[aria-invalid=true] > summary > progress {
-  accent-color: red;
-}
+  header > p#uploadUiDescription > span::after,
+  section#uploadProgressList > details[aria-invalid=false] > summary > menu > label[for]::before {
+    font-family: var( --huey-icon-font-family );
+    font-size: var( --huey-icon-normal );
+    margin: 1px 3px 2px 3px;
+  }
 
-dialog#uploadUi > section > details[aria-invalid=false] > summary > progress {
-  accent-color: green;
-}
+  > header > p#uploadUiDescription > span.editActionButton::after,
+  > section#uploadProgressList > details[aria-invalid=false] > summary > menu > label.editActionButton[for]::before {
+    /* settings */
+    content: '\eb20';
+  }
 
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label[for] {
-  float: right;
-}
-
-dialog#uploadUi > section > details > summary > label[for] > button {
-  display: none;
-}
-
-dialog#uploadUi > header > p#uploadUiDescription > span::after,
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label[for]::after {
-  font-family: var( --huey-icon-font-family );
-  font-size: var( --huey-icon-normal );
-  margin: 1px 3px 2px 3px;
-}
-
-
-dialog#uploadUi > header > p#uploadUiDescription > span.editActionButton::after,
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]::after {
-  /* settings */
-  content: '\eb20';
-}
-
-dialog#uploadUi > header > p#uploadUiDescription > span.analyzeActionButton::after,
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]::after {
-  /* analyze */
-  content: '\f3a3';  
-}
-
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]:after,
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]:after {
-  color: var( --huey-icon-color-subtle );
-}
-
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.editActionButton[for]:hover::after,
-dialog#uploadUi > section > details[aria-invalid=false] > summary > label.analyzeActionButton[for]:hover::after {
-  color: var( --huey-icon-color-highlight );
-}
-
-dialog#uploadUi > section > details > summary {
-  width: 100%;
-}
-
-dialog#uploadUi > section > details > summary::marker {
-}
-
-dialog#uploadUi > section > details > p {
-  overflow: auto;
-  max-height: 6em;
+  > header > p#uploadUiDescription > span.analyzeActionButton::after,
+  > section#uploadProgressList > details[aria-invalid=false] > summary > menu > label.analyzeActionButton[for]::before {
+    /* analyze */
+    content: '\f3a3';  
+  }
+  
 }
 
 dialog#uploadUi[aria-busy=true] #uploadDialogOkButton {
