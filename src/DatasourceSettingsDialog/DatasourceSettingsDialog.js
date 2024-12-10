@@ -49,6 +49,12 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   #rejectsTabQueryModel = undefined;
   #rejectsTabPivotTableUi = undefined;
 
+  static #fileSizeFormatter = new Intl.NumberFormat();
+  
+  static #formatFileSize(fileSize){
+    return DatasourceSettingsDialog.#fileSizeFormatter.format(fileSize);
+  }
+
   constructor(){
     super({
       id: DatasourceSettingsDialog.#id
@@ -265,9 +271,8 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     var fileType, fileSize;
     switch(datasourceType){
       case DuckDbDataSource.types.FILE:
-        //stats look pretty useless.
-        //var fileStatistics = await datasource.getFileStatistics();
         fileSize = datasource.isUrl ? '' : datasource.getFileSize();
+        fileSize = DatasourceSettingsDialog.#formatFileSize(fileSize);
       case DuckDbDataSource.types.FILES:
         fileType = datasource.getFileType();
         break;
