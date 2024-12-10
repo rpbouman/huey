@@ -54,7 +54,7 @@ dialog#uploadUi {
     }
     
     > details[aria-invalid=true] {
-      > summary > {
+      > summary {
         > progress {
           accent-color: red;
         }
@@ -62,7 +62,7 @@ dialog#uploadUi {
     }
 
     > details[aria-invalid=false] {
-      > summary > {
+      > summary {
         > progress {
           accent-color: green;
         }
