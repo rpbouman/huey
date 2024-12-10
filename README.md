@@ -120,6 +120,7 @@ Clicking on the axis icon of the Cells axis will affect the placement of the cel
 Items that are placed inside the Query builder have buttons to manipulate them: At the left and right side of the query items, there are buttons to move the item a single position to the left or right within the axis.
 Items on the rows and columns axes also have a button to move the item from one axis to the other.
 Items also have a button to remove it from the query.
+![image](https://github.com/user-attachments/assets/021f72ba-0551-441e-ba86-106ef3ef6808)
 
 #### Drag and Drop
 
