@@ -559,6 +559,10 @@ class SqlQueryGenerator {
           selectListExpressions[alias] = unnestingExpression;
         });
       }
+      else 
+      if (item.aggregator === 'count' && item.columnName === '*'){
+        return;
+      }
       else {
         var column = item.alias || item.columnName;
         if (selectListExpressions[column] === undefined) {

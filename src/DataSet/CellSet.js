@@ -507,6 +507,8 @@ class CellSet extends DataSetComponent {
     
     sql += `\nSELECT ${select.join('\n, ')}`;
     sql += `\n${from}`;
+
+/*
     console.log('experimental');
     console.log(sql);
     
@@ -524,7 +526,7 @@ class CellSet extends DataSetComponent {
     ].join('\n');
     console.log('oldSql:');
     console.log(oldSql);
-    
+*/    
     return sql;
     
   }
