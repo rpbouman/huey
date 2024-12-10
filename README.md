@@ -107,7 +107,7 @@ The aggregated value are placed in the cells at the intersection of the correspo
 
 By default, the cell headers appear on the Columns axis, below the last Column Axis item (if any).
 The cell headers can also by placed on the Rows axis, in which case they appear right to the values of the last row axis item:
-![image](https://github.com/user-attachments/assets/e66b033a-e345-4ec5-ad03-9b353f97f5d5)
+![image](https://github.com/user-attachments/assets/a79a8abf-ed67-41a8-bfb2-13c6772997f9)
 (Note that for this particular example, which has only one aggregator on the cells-axis, its placement on either cells or rows doesn't make much difference.)
 
 ### Placing Attributes
