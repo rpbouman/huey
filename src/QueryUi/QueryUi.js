@@ -256,10 +256,9 @@ class QueryUi {
     if (axisItem.caption) {
       return axisItem.caption;
     }
-    
     var expression = axisItem.columnName;
     if (axisItem.memberExpressionPath) {
-      return `${expression}.${axisItem.memberExpressionPath.join('.')}`;
+      expression = `${expression}.${axisItem.memberExpressionPath.join('.')}`;
     }
     
     if (axisItem.derivation) {

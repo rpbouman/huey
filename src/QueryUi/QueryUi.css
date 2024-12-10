@@ -257,6 +257,41 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\ec62";
       }
 
+      > li[data-derivation=lowercase] > span:before {
+        /* letter-case-lower */
+        content: "\eea2";
+      }
+
+      > li[data-derivation=uppercase] > span:before {
+        /* letter-case-upper */
+        content: "\eea4";
+      }
+
+      > li[data-derivation=NOACCENT] > span:before {
+        /* letter-case */
+        content: "\eea5";
+      }
+
+      > li[data-derivation=NOCASE] > span:before {
+        /* letter-case */
+        content: "\eea5";
+      }
+
+      > li[data-derivation='first letter'] > span:before {
+        /* sort-a-z */
+        content: "\f54f";
+      }
+
+      > li[data-derivation='length'] > span:before {
+        /* ruler-3 */
+        content: "\f290";
+      }
+
+      > li[data-derivation='element indices'] > span:before {
+        /* list-numbers */
+        content: "\ef11";
+      }
+
       /**
       *
       * Aggregator icons
