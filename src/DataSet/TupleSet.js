@@ -39,16 +39,16 @@ class TupleSet extends DataSetComponent {
       sampling = queryModel.getSampling(axisId);
     }
 
-    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(
-      datasource,
-      queryAxisItems,
-      filterAxisItems,
-      includeCountAll,
-      undefined,
-      nullsSortOrder,
-      totalsPosition,
-      sampling
-    );
+    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
+      datasource: datasource,
+      queryAxisItems: queryAxisItems,
+      filterAxisItems: filterAxisItems,
+      includeCountAll: includeCountAll,
+      countAllAlias: undefined,
+      nullsSortOrder: nullsSortOrder,
+      totalsPosition: totalsPosition,
+      sampling: sampling
+    });
     return sql;
   }
 

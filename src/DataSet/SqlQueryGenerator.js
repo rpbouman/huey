@@ -205,7 +205,7 @@ class SqlQueryGenerator {
     var currentItems = queryAxisItems;
     var cte, ctes = [{
       items: currentItems,
-      from: fromClause,
+      from: `${fromClause} AS "${dataFoundationAlias}"`,
       filters: filterAxisItems,
       alias: dataFoundationAlias,
     }];
@@ -326,12 +326,12 @@ class SqlQueryGenerator {
         unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] += 1;
         
         unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
+        
+        var newColumn = [].concat(unnestingItemMemberExpressionPathPrefix);
+        newColumn.unshift(unnestingItem.columnName);
+        newColumn.push(memberPathExpressionElement);
         var newItem = Object.assign({}, currentItem, {
-          columnName: [
-            unnestingItem.columnName,
-            unnestingItemMemberExpressionPathPrefix.join('.'), 
-            memberPathExpressionElement
-          ].join('.'),
+          columnName: newColumn.join('.'),
           columnType: unnestingDerivation.columnType || unnestingOperationItem.elementType,
           memberExpressionPath: unnestingItemMemberExpressionPathPostfix
         });
@@ -361,20 +361,20 @@ class SqlQueryGenerator {
     } while(unnestingItem);
     return ctes;
   }
-  
-  static #getSqlSelectStatementForFinalStage(
-    cte, 
-    originalQueryAxisItems, 
-    includeCountAll,
-    countAllAlias,
-    defaultNullsSortOrder,
-    totalsPosition,
-    samplingConfig
-  ){
+
+  static #getSqlSelectStatementForFinalStage(cte, options){
+    var queryAxisItems = options.queryAxisItems; 
+    var includeCountAll = options.includeCountAll;
+    var countAllAlias = options.countAllAlias;
+    var nullsSortOrder = options.nullsSortOrder;
+    var totalsPosition = options.totalsPosition;
+    var samplingConfig = options.samplingConfig;
+    var includeOrderBy = options.includeOrderBy === false ? false : true;
+    
     var sql = '';
     var columnExpressions = {};
     cte.items.forEach(function(item, index){
-      var originalItem = originalQueryAxisItems[index];
+      var originalItem = queryAxisItems[index];
       var caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
       var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
       columnExpressions[caption] = selectListExpression;
@@ -383,10 +383,14 @@ class SqlQueryGenerator {
     var selectListExpressions = [];
 
     // the group by expression includes expressons for all axis items.
-    var groupByExpressions = [];
-
+    var axisGroupByExpressions, groupByExpressions = {};
+    groupByExpressions[QueryModel.AXIS_ROWS] = [];
+    groupByExpressions[QueryModel.AXIS_COLUMNS] = [];
     // the groupingSets are created when we find an axis item that has includeTotals
-    var groupingSets = [];
+    var axisGroupingSets, groupingSets = {};
+    groupingSets[QueryModel.AXIS_ROWS] = [];
+    groupingSets[QueryModel.AXIS_COLUMNS] = [];
+    
     var groupingIdExpressions = [];
     var orderByExpressions = [];
     
@@ -397,7 +401,7 @@ class SqlQueryGenerator {
       var columnExpression = columnExpressions[columnId];
       var orderByExpression = columnExpression;
       
-      if (includeCountAll && i >= originalQueryAxisItems.length) {
+      if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
         // we need that count all to figure out how many tuples there are on the axis in total
         selectListExpressions.push(columnExpression);
@@ -406,26 +410,29 @@ class SqlQueryGenerator {
       }
       
       selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
-      var queryAxisItem = originalQueryAxisItems[i];
+      var queryAxisItem = queryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
-      var nullsSortOrder = queryAxisItem.nullsSortOrder || defaultNullsSortOrder
-      nullsSortOrder = nullsSortOrder ? ` NULLS ${nullsSortOrder}` : '';
+      var itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
+      itemNullsSortOrder = itemNullsSortOrder ? ` NULLS ${itemNullsSortOrder}` : '';
+      
+      var axisId = queryAxisItem.axis;
+      axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
-        var groupingSet = [].concat(groupByExpressions);
-        groupingSets.push(groupingSet);
+        axisGroupingSets = groupingSets[axisId];
+        var groupingSet = [].concat(axisGroupByExpressions);
+        axisGroupingSets.push(groupingSet);
         groupingIdExpressions.push(columnExpression);
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
         orderByExpressions.push(columnExpression);
       }
       
-      var originalQueryAxisItem = originalQueryAxisItems[i];
-      if (originalQueryAxisItem.derivation !== 'rownumber'){
-        groupByExpressions.push(columnExpression);
+      if (axisId !== QueryModel.AXIS_CELLS && queryAxisItem.derivation !== 'rownumber'){
+        axisGroupByExpressions.push(columnExpression);
       }
       orderByExpression = `${orderByExpression} ${sortDirection}`;
-      orderByExpression += nullsSortOrder;
+      orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
     }
 
@@ -436,16 +443,65 @@ class SqlQueryGenerator {
     }
     
     var groupByClause = undefined;
-    if (groupingSets.length){
-      if (groupingSets[groupingSets.length - 1].length < groupByExpressions.length){
-        // if we have to make grouping sets, then we need to add our "normal" group by clause too
-        groupingSets.push([].concat(groupByExpressions));
+    if (groupingSets[QueryModel.AXIS_ROWS].length || groupingSets[QueryModel.AXIS_COLUMNS].length){
+      axisGroupingSets = [];
+
+      var rowsAxisGroupingSets = groupingSets[QueryModel.AXIS_ROWS];
+      axisGroupByExpressions = groupByExpressions[QueryModel.AXIS_ROWS];
+      if (rowsAxisGroupingSets.length) {
+        if (rowsAxisGroupingSets[rowsAxisGroupingSets.length - 1].length < axisGroupByExpressions.length){
+          // if we have to make grouping sets, then we need to add our "normal" group by clause too
+          rowsAxisGroupingSets.push([].concat(axisGroupByExpressions));
+        }
       }
-      // if we have grouping sets, we need to add a GROUPING_ID expression with the largest grouping set so we can identify which rows are super-aggregate rows
+      else
+      if (axisGroupByExpressions.length) {
+        rowsAxisGroupingSets = [axisGroupByExpressions];
+      }
+
+      var columnsAxisGroupingSets = groupingSets[QueryModel.AXIS_COLUMNS];
+      axisGroupByExpressions = groupByExpressions[QueryModel.AXIS_COLUMNS];
+      if (columnsAxisGroupingSets.length){
+        if (columnsAxisGroupingSets[columnsAxisGroupingSets.length - 1].length < axisGroupByExpressions.length){
+          // if we have to make grouping sets, then we need to add our "normal" group by clause too
+          columnsAxisGroupingSets.push([].concat(axisGroupByExpressions));
+        }
+      }
+      else
+      if (axisGroupByExpressions.length) {
+        columnsAxisGroupingSets = [axisGroupByExpressions];
+      }
+
+      axisGroupingSets = [].concat(rowsAxisGroupingSets, columnsAxisGroupingSets);
+      rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
+        columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
+          axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
+        });
+      });
+      
+      var groupingSetsSql = axisGroupingSets
+      .map(function(groupingSet){                     // generate SQL for grouping set
+        return [
+          '  (',
+          `    ${groupingSet.join('\n  , ')}`,
+          '  )'
+        ].join('\n');
+      })
+      .reduce(function(groupingSetsSql, groupingSql){ // deduplicate grouping sets
+        if (groupingSetsSql.indexOf(groupingSql) === -1){
+          groupingSetsSql.push(groupingSql);
+        }
+        return groupingSetsSql;
+      }, [])                                          // join groups
+      .join(',');
+      groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
+
+      // if we have grouping sets, we need to add a GROUPING_ID expression 
+      // over all grouping exprssions so we can identify which rows are super-aggregate rows
       var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
       var groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
-      
+
       // for each column in the grouping id, 
       // insert an order by expression to keep the totals together with the items they are totalling
       sortDirection = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
@@ -455,25 +511,19 @@ class SqlQueryGenerator {
         orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDirection}`;
         var indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
         orderByExpressions[indexOfGroupingIdExpression] = `${orderByExpression}`;
-      })
-
-      var groupingSetsSql = groupingSets.map(function(groupingSet){
-        return [
-          '  (',
-          `    ${groupingSet.join('\n  , ')}`,
-          '  )'
-        ].join('\n');
-      }).join(',');
-      groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
+      });
     }
     else
-    if (groupByExpressions.length) {
-      groupByClause = groupByExpressions.join('\n,');
+    if (groupByExpressions[QueryModel.AXIS_ROWS].length || groupByExpressions[QueryModel.AXIS_COLUMNS].length) {
+      groupByClause = [].concat(
+        groupByExpressions[QueryModel.AXIS_ROWS], 
+        groupByExpressions[QueryModel.AXIS_COLUMNS]
+      ).join('\n,');
     }
 
     var sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
-      cte.from + ` AS ${cte.alias}`
+      cte.from
     ];
     SqlQueryGenerator.#generateWhereClause(cte, sql);
 
@@ -485,7 +535,9 @@ class SqlQueryGenerator {
     if (samplingConfig){
       sql.push( getUsingSampleClause(samplingConfig, true) );
     }
-    sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+    if (includeOrderBy !== false) {
+      sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
+    }
 
     sql = sql.join('\n');
     return sql;
@@ -538,48 +590,43 @@ class SqlQueryGenerator {
     }
   }
 
-  static getSqlSelectStatementForAxisItems(
-    datasource, 
-    queryAxisItems, 
-    filterAxisItems, 
-    includeCountAll,
-    countAllAlias,
-    defaultNullsSortOrder,
-    totalsPosition,
-    samplingConfig
-  ) {
+  static getSqlSelectStatementForAxisItems(options){
+    var queryAxisItems = options.queryAxisItems;
+
     if (!queryAxisItems.length) {
       return undefined;
     }
+
+    var datasource = options.datasource; 
+    var filterAxisItems = options.filterAxisItems;
+    var samplingConfig = options.samplingConfig
+
     var sqlOptions = normalizeSqlOptions();
 
-    var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);    
+    var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
     var ctes = SqlQueryGenerator.#getUnnestingStages(
       datasource,
       queryAxisItems, 
       filterAxisItemsByNestingStage
     );
+
+    var cte = ctes.pop();
+    options.samplingConfig = ctes.length ? undefined : samplingConfig;
+    var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
-    var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(
-      ctes.pop(), 
-      queryAxisItems, 
-      includeCountAll,
-      countAllAlias,
-      defaultNullsSortOrder,
-      totalsPosition,
-      ctes.length ? undefined : samplingConfig
-    ); 
     var sqls = ctes.map(function(cte, index){
-      if (index !== 0){
-        samplingConfig = undefined;
-      }
-      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions, samplingConfig);
+      options.samplingConfig = index === 0 ? samplingConfig : undefined;
+      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
       return sql;
     });
-    if (sqls.length) {
-      sql = `WITH ${sqls.join('\n,')}\n${sql}`;
-    }
     
+    if (options.finalStateAsCte === true) {
+      sql = sql.replace(/\n/g, '\n  ');
+      sqls.push(`${getQuotedIdentifier(options.cteName)} AS (\n  ${sql}\n)`);
+      sql = '';
+    }
+    var withSql = sqls.length ? `WITH ${sqls.join('\n,')}` : '';
+    sql = withSql + sql;
     return sql;
   }
 
