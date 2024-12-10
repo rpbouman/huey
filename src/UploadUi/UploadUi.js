@@ -298,10 +298,10 @@ class UploadUi {
     var description = this.#getDescription();
     description.innerText = 'Upload in progress. This will take a few moments...';
 
-    dom.showModal();
-
     var body = this.#getBody();
     body.innerHTML = '';
+
+    dom.showModal();
 
     var requiredDuckDbExtensions = this.getRequiredDuckDbExtensions(files);
     var loadExtensionsPromises = this.loadRequiredDuckDbExtensions(requiredDuckDbExtensions);
