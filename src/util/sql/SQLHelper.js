@@ -157,9 +157,9 @@ function createLocalDateFormatter(){
   }
 }
 
-function createMonthNameFormatter(){
+function createMonthNameFormatter(modifier){
   var dateFormatter = createDateFormatter({
-    month: 'long'
+    month: modifier || 'long'
   });
   var monthNames = [null];
   var date;
@@ -182,9 +182,17 @@ function createMonthNameFormatter(){
   }
 }
 
-function createDayNameFormatter(){
+function createMonthShortNameFormatter(){
+  return createMonthNameFormatter('short');
+}
+
+function createMonthFullNameFormatter(){
+  return createMonthNameFormatter('long');
+}
+
+function createDayNameFormatter(modifier){
   var dateFormatter = createDateFormatter({
-    weekday: 'long'
+    weekday: modifier || 'long'
   });
   var dayNames = [];
   var date;
@@ -206,6 +214,14 @@ function createDayNameFormatter(){
     }
     return dayNames[value];
   }
+}
+
+function createDayShortNameFormatter(){
+  return createDayNameFormatter('short');
+}
+
+function createDayFullNameFormatter(){
+  return createDayNameFormatter('long');
 }
 
 function monthNumFormatter(monthNum){
@@ -1193,13 +1209,13 @@ function getStructTypeDescriptor(structColumnType){
 
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
-    var typeDescriptor = getStructTypeDescriptor(type);
     var memberExpression = memberExpressionPath[0];
     var memberExpressionType;
     if (memberExpression === 'unnest()'){
       memberExpressionType = type.slice(0, -2);
     }
     else {
+      var typeDescriptor = getStructTypeDescriptor(type);
       memberExpressionType = typeDescriptor[memberExpression];
     }
     return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
