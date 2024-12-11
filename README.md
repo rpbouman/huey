@@ -92,7 +92,7 @@ The pivot table has two axes for placing attribute values:
 The selection of attributes and their placement on the axis is represented by the Query Builder. 
 The following screenshot may help to explain:
 
-![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
+![image](https://github.com/user-attachments/assets/87da26a0-5c0d-4a42-8fad-74369f00b0a7)
 
 In the screenshot, the Attribute Sidebar is at the left side. The workarea is to the right of the Attribute Sidebar. 
 The Query Builder is at the top right of the workarea. The pivot table is at the bottom right.
@@ -101,6 +101,8 @@ The Query Builder is at the top right of the workarea. The pivot table is at the
 
 The screenshot shows a simple query, with one attribute "hvfhs_license_num" placed on the columns axis of the Query Builder. 
 Placing the attribute on the Columns axis causes its values to be shown as column headings of the pivot table.
+
+![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
 
 Likewise, the attribute "dispatching_base_num" is placed on the Rows axis, and this causes its values to show as row headings in the pivot table.
 
