@@ -326,6 +326,9 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Aggregator icons
   *
   */
+  details[data-nodetype=derived][data-derivation=count] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="count if true"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="count if false"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=count] > summary > span.label::before {
@@ -333,6 +336,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ec4a";
   }
 
+  details[data-nodetype=derived][data-derivation="distinct count"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > span.label::before {
     /* tallymark-4 */
     content: "\ec49";
@@ -355,9 +359,9 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\eb6b";
   }
 
-  details[data-nodetype=aggregate][data-aggregator="distinct list"] > summary > span.label::before {
-    /* list details */
-    content: "\ef40";
+  details[data-nodetype=aggregate][data-aggregator="unique values"] > summary > span.label::before {
+    /* letter-u-small*/
+    content: "\fcdb";
   }
 
   details[data-nodetype=aggregate][data-aggregator=histogram] > summary > span.label::before {
@@ -365,14 +369,20 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ea59";
   }
 
+  details[data-nodetype=derived][data-derivation=sum] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=sum] > summary > span.label::before {
     /* sum */
     content: "\eb73";
   }
 
-  details[data-nodetype=derived][data-derivation="distinct values"] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="unique values"] > summary > span.label::before {
     /* letter-u-small*/
     content: "\fcdb";
+  }
+
+  details[data-nodetype=derived][data-derivation="sort values"] > summary > span.label::before {
+    /* sort-ascending-letters*/
+    content: "\ef18";
   }
 
   details[data-nodetype=derived][data-derivation=avg] > summary > span.label::before,
@@ -382,55 +392,60 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f0f4";
   }
 
+  details[data-nodetype=derived][data-derivation=mad] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation=median] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=mad] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=median] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=mode] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=mode] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=stdev] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=stdev] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=variance] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=variance] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=entropy] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=entropy] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=kurtosis] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=skewness] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=skewness] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details[data-nodetype=derived][data-derivation=and] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
     /* logical-and */
     content: "\f240";
   }
 
+  details[data-nodetype=derived][data-derivation=or] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=or] > summary > span.label::before {
     /* logical-or */
     content: "\f245";
-  }
-
-  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
-    /* logical-and */
-    content: "\f240";
   }
 
   /**

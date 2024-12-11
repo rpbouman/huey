@@ -289,6 +289,16 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\f290";
       }
 
+      > li[data-derivation='unique values'] > span:before {
+        /* letter-u-small*/
+        content: "\fcdb";
+      }
+
+      > li[data-derivation='sort values'] > span:before {
+        /* sort-ascending-letters*/
+        content: "\ef18";
+      }
+
       > li[data-derivation='element indices'] > span:before {
         /* list-numbers */
         content: "\ef11";
@@ -299,6 +309,9 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
       * Aggregator icons
       *
       */
+      > li[data-derivation="count if true"] > span:before,
+      > li[data-derivation="count if false"] > span:before,
+      > li[data-derivation=count] > span:before,
       > li[data-aggregator="count if true"] > span:before,
       > li[data-aggregator="count if false"] > span:before,
       > li[data-aggregator=count] > span:before {
@@ -306,16 +319,19 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\ec4a";
       }
 
+      > li[data-derivation="distinct count"] > span:before,
       > li[data-aggregator="distinct count"] > span:before {
         /* tallymark-4 */
         content: "\ec49";
       }
 
+      > li[data-derivation=max] > span:before,
       > li[data-aggregator=max] > span:before {
         /* math-max */
         content: "\f0f5";
       }
 
+      > li[data-derivation=min] > span:before,
       > li[data-aggregator=min] > span:before {
         /* math-min */
         content: "\f0f6";
@@ -326,63 +342,77 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\eb6b";
       }
 
-      > li[data-aggregator="distinct list"] > span:before {
-        /* list details */
-        content: "\ef40";
+      > li[data-derivation="unique values"] > span:before,
+      > li[data-aggregator="unique values"] > span:before {
+        /* letter-u-small*/
+        content: "\fcdb";
       }
 
+      > li[data-derivation=sum] > span:before,
       > li[data-aggregator=sum] > span:before {
         /* sum */
         content: "\eb73";
       }
 
+      > li[data-derivation=geomean] > span:before,
+      > li[data-derivation=avg] > span:before,
       > li[data-aggregator=geomean] > span:before,
       > li[data-aggregator=avg] > span:before {
         /* math-avg */
         content: "\f0f4";
       }
 
+      > li[data-derivation=mad] > span:before,
+      > li[data-derivation=median] > span:before,
       > li[data-aggregator=mad] > span:before,
       > li[data-aggregator=median] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=mode] > span:before,
       > li[data-aggregator=mode] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=stdev] > span:before,
       > li[data-aggregator=stdev] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=variance] > span:before,
       > li[data-aggregator=variance] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=entropy] > span:before,
       > li[data-aggregator=entropy] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=kurtosis] > span:before,
       > li[data-aggregator=kurtosis] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=skewness] > span:before,
       > li[data-aggregator=skewness] > span:before {
         /* calculator */
         content: "\eb80";
       }
 
+      > li[data-derivation=or] > span:before,
       > li[data-aggregator=or] > span:before {
         /* logical-or */
         content: "\f245";
       }
 
+      > li[data-derivation=and] > span:before,
       > li[data-aggregator=and] > span:before {
         /* logical-and*/
         content: "\f240";
