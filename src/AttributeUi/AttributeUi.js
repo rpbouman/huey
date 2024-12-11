@@ -44,11 +44,6 @@ class AttributeUi {
       expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
       columnType: 'HUGEINT'
     },
-    'distinct list': {
-      folder: "list aggregators",
-      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
-      isArray: true
-    },
     'entropy': {
       folder: "statistics",
       isNumeric: true,
@@ -85,6 +80,11 @@ class AttributeUi {
     'list': {
       folder: "list aggregators",
       expressionTemplate: 'LIST( ${columnExpression} )',
+      isArray: true
+    },
+    'unique values': {
+      folder: "list aggregators",
+      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
       isArray: true
     },
     'mad': {
@@ -173,6 +173,30 @@ class AttributeUi {
       columnType: 'DOUBLE'
     }
   };
+  
+  static arrayStatisticsDerivations = Object
+  .keys(AttributeUi.aggregators)
+  .filter(function(aggregator){
+    var aggregatorInfo = AttributeUi.aggregators[aggregator];
+    return aggregatorInfo.folder !== 'list aggregators';
+  })
+  .reduce(function(arrayStatisticsDerivations, aggregator){
+    var aggregatorInfo = AttributeUi.aggregators[aggregator];
+    var aggregateFunction = aggregatorInfo.expressionTemplate.split('(')[0];
+    var derivationInfo = Object.assign({}, aggregatorInfo);
+    derivationInfo.folder = `array statistics`;
+    var expressionTemplate;
+    switch (aggregator) {
+      case 'distinct count':
+        expressionTemplate = 'list_unique( ${columnExpression} )';
+        break;
+      default:
+        expressionTemplate = `list_aggregate( \${columnExpression}, '${aggregateFunction}' )`;
+    }
+    derivationInfo.expressionTemplate = expressionTemplate;
+    arrayStatisticsDerivations[aggregator] = derivationInfo;
+    return arrayStatisticsDerivations;
+  }, {});
   
   static tupleNumberDerivations = {
     rownumber: {
@@ -334,30 +358,10 @@ class AttributeUi {
   }
 
   static arrayDerivations = {
-    "avg": {
-      folder: 'array operations',
-      expressionTemplate: "list_min( ${columnExpression} )",
-      useElementType: true
-    },
-    "distinct values":{
-      folder: 'array operations',
-      expressionTemplate: "list_distinct( ${columnExpression} )",
-      preservesColumnType: true
-    },
     "length": {
       folder: 'array operations',
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
-    },
-    "min": {
-      folder: 'array operations',
-      expressionTemplate: "list_min( ${columnExpression} )",
-      useElementType: true
-    },
-    "max": {
-      folder: 'array operations',
-      expressionTemplate: "list_max( ${columnExpression} )",
-      useElementType: true
     },
     "element indices": {
       folder: 'array operations',
@@ -370,9 +374,19 @@ class AttributeUi {
       hasElementDataType: true,
       expressionTemplate: "unnest( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end )",
       unnestingFunction: 'unnest'
+    },
+    "sort values": {
+      folder: 'array operations',
+      expressionTemplate: "list_sort( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    "unique values":{
+      folder: 'array operations',
+      expressionTemplate: "list_sort( list_distinct( ${columnExpression} ) )",
+      preservesColumnType: true
     }
   }
-
+  
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
 
@@ -394,7 +408,8 @@ class AttributeUi {
       AttributeUi.dateFields,
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
-      AttributeUi.arrayDerivations
+      AttributeUi.arrayDerivations,
+      AttributeUi.arrayStatisticsDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -426,7 +441,17 @@ class AttributeUi {
   }
 
   static getArrayDerivations(typeName){
-    return AttributeUi.arrayDerivations;
+    var arrayDerivations = Object.assign(AttributeUi.arrayDerivations);
+    var arrayStatisticsDerivations = AttributeUi.arrayStatisticsDerivations;
+    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    Object.keys(applicableAggregators).forEach(function(aggregator){
+      var arrayStatisticsDerivation = arrayStatisticsDerivations[aggregator];
+      if (!arrayStatisticsDerivation) {
+        return;
+      }
+      arrayDerivations[aggregator] = arrayStatisticsDerivations[aggregator];
+    });
+    return arrayDerivations;
   }
 
   static #getUiNodeCaption(config){
