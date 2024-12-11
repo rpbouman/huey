@@ -4,57 +4,10 @@ class AttributeUi {
   #queryModel = undefined;
 
   static aggregators = {
-    'count': {
-      isNumeric: true,
-      isInteger: true,
-      expressionTemplate: 'COUNT( ${columnExpression} )',
-      columnType: 'HUGEINT'
-    },
-    'distinct count': {
-      isNumeric: true,
-      isInteger: true,
-      expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
-      columnType: 'HUGEINT'
-    },
-    'min': {
-      folder: "statistics",
-      preservesColumnType: true,
-      expressionTemplate: 'MIN( ${columnExpression} )'
-    },
-    'max': {
-      folder: "statistics",
-      preservesColumnType: true,
-      expressionTemplate: 'MAX( ${columnExpression} )'
-    },
-    'list': {
-      folder: "list aggregators",
-      expressionTemplate: 'LIST( ${columnExpression} )',
-      isArray: true
-    },
-    'distinct list': {
-      folder: "list aggregators",
-      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
-      isArray: true
-    },
-    'histogram': {
-      folder: "list aggregators",
-      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
-      isStruct: true,
-    },
-    'sum': {
-      isNumeric: true,
-      forNumeric: true,
-      expressionTemplate: 'SUM( ${columnExpression} )',
-      createFormatter: function(axisItem){
-        var columnType = axisItem.columnType;
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var isInteger = dataTypeInfo.isInteger;
-        var formatter = createNumberFormatter(isInteger !== true);
-
-        return function(value, field){
-          return formatter.format(value, field);
-        };
-      }
+    'and': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
+      columnType: 'BOOLEAN'
     },
     'avg': {
       folder: "statistics",
@@ -69,6 +22,40 @@ class AttributeUi {
         };
       }
     },
+    'count': {
+      isNumeric: true,
+      isInteger: true,
+      expressionTemplate: 'COUNT( ${columnExpression} )',
+      columnType: 'HUGEINT'
+    },
+    'count if false': {
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
+      columnType: 'HUGEINT'
+    },
+    'count if true': {
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
+      columnType: 'HUGEINT'
+    },
+    'distinct count': {
+      isNumeric: true,
+      isInteger: true,
+      expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
+      columnType: 'HUGEINT'
+    },
+    'distinct list': {
+      folder: "list aggregators",
+      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
+      isArray: true
+    },
+    'entropy': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      expressionTemplate: 'ENTROPY( ${columnExpression} )',
+      columnType: 'DOUBLE'
+    },
     'geomean': {
       folder: "statistics",
       isNumeric: true,
@@ -82,11 +69,34 @@ class AttributeUi {
         };
       }
     },
+    'histogram': {
+      folder: "list aggregators",
+      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
+      isStruct: true,
+    },
+    'kurtosis': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
+      columnType: 'DOUBLE'
+    },
+    'list': {
+      folder: "list aggregators",
+      expressionTemplate: 'LIST( ${columnExpression} )',
+      isArray: true
+    },
     'mad': {
       folder: "statistics",
       columnType: 'INTERVAL',
       forNumeric: true,
       expressionTemplate: 'MAD( ${columnExpression} )'
+    },
+    'max': {
+      folder: "statistics",
+      preservesColumnType: true,
+      expressionTemplate: 'MAX( ${columnExpression} )'
     },
     'median': {
       folder: "statistics",
@@ -108,41 +118,20 @@ class AttributeUi {
         }
       }
     },
+    'min': {
+      folder: "statistics",
+      preservesColumnType: true,
+      expressionTemplate: 'MIN( ${columnExpression} )'
+    },
     'mode': {
       folder: "statistics",
       preservesColumnType: true,
       expressionTemplate: 'MODE( ${columnExpression} )'
     },
-    'stdev': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'variance': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'VAR_SAMP( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'entropy': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      expressionTemplate: 'ENTROPY( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'kurtosis': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
-      columnType: 'DOUBLE'
+    'or': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
+      columnType: 'BOOLEAN'
     },
     'skewness': {
       folder: "statistics",
@@ -152,25 +141,36 @@ class AttributeUi {
       expressionTemplate: 'SKEWNESS( ${columnExpression} )',
       columnType: 'DOUBLE'
     },
-    'and': {
-      forBoolean: true,
-      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
-      columnType: 'BOOLEAN'
+    'stdev': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
+      columnType: 'DOUBLE'
     },
-    'or': {
-      forBoolean: true,
-      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
-      columnType: 'BOOLEAN'
+    'sum': {
+      isNumeric: true,
+      forNumeric: true,
+      expressionTemplate: 'SUM( ${columnExpression} )',
+      createFormatter: function(axisItem){
+        var columnType = axisItem.columnType;
+        var dataTypeInfo = getDataTypeInfo(columnType);
+        var isInteger = dataTypeInfo.isInteger;
+        var formatter = createNumberFormatter(isInteger !== true);
+
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
     },
-    'count if true': {
-      forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
-      columnType: 'HUGEINT'
-    },
-    'count if false': {
-      forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
-      columnType: 'HUGEINT'
+    'variance': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'VAR_SAMP( ${columnExpression} )',
+      columnType: 'DOUBLE'
     }
   };
   
@@ -213,7 +213,7 @@ class AttributeUi {
     },
     'month num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month num */ ",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return monthNumFormatter
@@ -221,9 +221,15 @@ class AttributeUi {
     },
     'month name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month name */ ",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createMonthNameFormatter
+      createFormatter: createMonthFullNameFormatter
+    },
+    'month shortname': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createMonthShortNameFormatter
     },
     'week num': {
       folder: 'date fields',
@@ -248,14 +254,20 @@ class AttributeUi {
     },
     'day of week num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week num */",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
     },
     'day of week name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week name */",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createDayNameFormatter
+      createFormatter: createDayFullNameFormatter
+    },
+    'day of week shortname': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createDayShortNameFormatter
     }
   };
 
@@ -289,6 +301,21 @@ class AttributeUi {
   };
 
   static textDerivations = {
+    "first letter": {
+      folder: 'string operations',
+      expressionTemplate: "upper( ${columnExpression}[1] )",
+      preservesColumnType: true
+    },
+    "length": {
+      folder: 'string operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    'lowercase': {
+      folder: 'string operations',
+      expressionTemplate: "LOWER( ${columnExpression} )",
+      preservesColumnType: true
+    },
     'NOACCENT': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOACCENT",
@@ -299,33 +326,38 @@ class AttributeUi {
       expressionTemplate: "${columnExpression} COLLATE NOCASE",
       preservesColumnType: true
     },
-    'lowercase': {
-      folder: 'string operations',
-      expressionTemplate: "LOWER( ${columnExpression} )",
-      preservesColumnType: true
-    },
     'uppercase': {
       folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
       preservesColumnType: true
-    },
-    "first letter": {
-      folder: 'string operations',
-      expressionTemplate: "upper( ${columnExpression}[1] )",
-      preservesColumnType: true
-    },
-    "length": {
-      folder: 'string operations',
-      expressionTemplate: "length( ${columnExpression} )",
-      columnType: 'BIGINT'
     }
   }
 
   static arrayDerivations = {
+    "avg": {
+      folder: 'array operations',
+      expressionTemplate: "list_min( ${columnExpression} )",
+      useElementType: true
+    },
+    "distinct values":{
+      folder: 'array operations',
+      expressionTemplate: "list_distinct( ${columnExpression} )",
+      preservesColumnType: true
+    },
     "length": {
       folder: 'array operations',
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
+    },
+    "min": {
+      folder: 'array operations',
+      expressionTemplate: "list_min( ${columnExpression} )",
+      useElementType: true
+    },
+    "max": {
+      folder: 'array operations',
+      expressionTemplate: "list_max( ${columnExpression} )",
+      useElementType: true
     },
     "element indices": {
       folder: 'array operations',

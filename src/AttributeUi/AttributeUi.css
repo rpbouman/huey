@@ -8,8 +8,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 .attributeUi {
   user-select: none;
 
-  details[role=treeitem][data-nodetype='aggregate'] > summary,
-  details[data-nodetype='derived']:not( [data-derivation='elements'] ) > summary {
+  /**
+  * hide the expand/collapse widget for these attribute nodes.
+  */
+  details[role=treeitem][data-nodetype=aggregate] > summary,
+  details[data-nodetype=derived]:not( [data-derivation=elements] ) > summary,
+  details[data-nodetype=derived][data-derivation=elements]:not( [data-member_expression_type^=STRUCT] ) > summary  {
     list-style: none;
     margin-left: 16px;
   }
@@ -144,8 +148,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\eb28";
   }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INT] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$=INT] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$=INTEGER] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type$=INT] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > span.label::before,
   details[data-nodetype=column][data-column_type$=INT] > summary > span.label::before,
@@ -234,6 +238,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   }
 
   details[data-nodetype=derived][data-derivation="month name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="month shortname"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="month num"] > summary > span.label::before {
     /* letter m */
     content: "\ec5c";
@@ -254,6 +259,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\fd2f";
   }
 
+  details[data-nodetype=derived][data-derivation="day of week shortname"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="day of week name"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="day of week num"] > summary > span.label::before {
     /* letter-d-small */
@@ -332,11 +338,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ec49";
   }
 
+  details[data-nodetype=derived][data-derivation=max] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=max] > summary > span.label::before {
     /* math-max */
     content: "\f0f5";
   }
 
+  details[data-nodetype=derived][data-derivation=min] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=min] > summary > span.label::before {
     /* math-min */
     content: "\f0f6";
@@ -362,6 +370,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\eb73";
   }
 
+  details[data-nodetype=derived][data-derivation="distinct values"] > summary > span.label::before {
+    /* letter-u-small*/
+    content: "\fcdb";
+  }
+
+  details[data-nodetype=derived][data-derivation=avg] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=geomean] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=avg] > summary > span.label::before {
     /* math-avg */

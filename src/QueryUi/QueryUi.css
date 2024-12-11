@@ -210,6 +210,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         /* letter q */
         content: "\ec60";
       }
+      > li[data-derivation="month shortname"] > span:before,
       > li[data-derivation="month name"] > span:before,
       > li[data-derivation="month num"] > span:before {
         /* letter m */
@@ -231,6 +232,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\fd2f";
       }
 
+      > li[data-derivation="day of week shortname"] > span:before,
       > li[data-derivation="day of week name"] > span:before,
       > li[data-derivation="day of week num"] > span:before {
         /* letter-d-small */
