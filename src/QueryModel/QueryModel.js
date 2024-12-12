@@ -231,6 +231,22 @@ class QueryAxisItem {
         dataType = derivationInfo.columnType;
       }
       else
+      if (derivationInfo.hasElementDataType){
+        // get the array element type by removing the trailing '[]';
+        dataType = dataType.slice(0, -2);
+      }
+      else 
+      if (derivation === 'median'){
+        dataType = dataType.slice(0, -2);
+        var dataTypeInfo = getDataTypeInfo(dataType);
+        if (dataTypeInfo.isNumeric){
+          return 'DOUBLE';
+        }
+        else {
+          return 'VARCHAR';
+        }
+      }
+      else
       if (!derivationInfo.preservesColumnType){
         console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }

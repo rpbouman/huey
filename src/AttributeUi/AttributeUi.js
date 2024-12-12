@@ -102,7 +102,7 @@ class AttributeUi {
       folder: "statistics",
       expressionTemplate: 'MEDIAN( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var columnType = axisItem.columnType;
+        var columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
         var dataTypeInfo = getDataTypeInfo(columnType);
         var formatter;
         if (dataTypeInfo.isNumeric) {
@@ -184,6 +184,10 @@ class AttributeUi {
     var aggregatorInfo = AttributeUi.aggregators[aggregator];
     var aggregateFunction = aggregatorInfo.expressionTemplate.split('(')[0];
     var derivationInfo = Object.assign({}, aggregatorInfo);
+    if (derivationInfo.preservesColumnType){
+      derivationInfo.hasElementDataType = true; 
+      delete derivationInfo.preservesColumnType;
+    }
     derivationInfo.folder = `array statistics`;
     var expressionTemplate;
     switch (aggregator) {
@@ -821,12 +825,6 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', config.derivation);
-        //if (derivation === 'elements') {
-        //  var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
-          // remove the trailing '[]' to get the element type.
-        //  elementType = elementType.slice(0, -2);
-        //  node.setAttribute('data-element_type', elementType);
-        //}
         break;
     }
 
