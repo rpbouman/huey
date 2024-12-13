@@ -251,13 +251,15 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createMonthFullNameFormatter
+      createFormatter: createMonthFullNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     },
     'month shortname': {
       folder: 'date fields',
       expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createMonthShortNameFormatter
+      createFormatter: createMonthShortNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     },
     'week num': {
       folder: 'date fields',
@@ -289,13 +291,15 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createDayFullNameFormatter
+      createFormatter: createDayFullNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     },
     'day of week shortname': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createDayShortNameFormatter
+      createFormatter: createDayShortNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     }
   };
 
