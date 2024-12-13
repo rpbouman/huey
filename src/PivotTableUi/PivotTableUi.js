@@ -830,6 +830,12 @@ class PivotTableUi extends EventEmitter {
     cellElement.setAttribute('data-value-literal', valueLiteral);
     
     var cellValueType = String(tupleValueField.type);
+    if (queryAxisItem.derivation) {
+      var derivationInfo = AttributeUi.getDerivationInfo(queryAxisItem.derivation);
+      if (derivationInfo.dataValueTypeOverride) {
+        cellValueType = derivationInfo.dataValueTypeOverride;
+      }
+    }
     cellElement.setAttribute('data-value-type', cellValueType);
   }
 
