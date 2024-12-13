@@ -216,6 +216,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f7b2";
   }
 
+  details[data-nodetype=member][data-member_expression_type=UUID] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=UUID] > summary > span.label::before {
+    /* binary */
+    content: "\ee08";
+  }
+
   /**
   *
   * Derivation icons
