@@ -315,11 +315,10 @@ function getDuckDbLiteralForValue(value, type){
         var entryName = entry.name;
         var entryValue = value[entryName];
         var entryType = entry.type;
-        var entryValueType = entryValue.type;
         var entryValueLiteral = getDuckDbLiteralForValue(entryValue, entryType);
         var entryLiteral = `${quoteStringLiteral(entryName)}: ${entryValueLiteral}`;
         return entryLiteral;
-      }).join(',');            
+      }).join(',');
       literal = `{${literal}}`;
       break;
     case 0:   // None
