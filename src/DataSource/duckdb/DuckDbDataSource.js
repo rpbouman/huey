@@ -79,6 +79,9 @@ class DuckDbDataSource extends EventEmitter {
     },
     sniff_csv: {
       "sample_size": 20480
+    },
+    read_json_auto: {
+      "ignore_errors": true
     }
   };
 
