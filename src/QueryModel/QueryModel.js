@@ -219,10 +219,6 @@ class QueryAxisItem {
   static getQueryAxisItemDataType(queryAxisItem){
     var columnType = queryAxisItem.columnType;
     var dataType = columnType;
-    if (queryAxisItem.memberExpressionPath) {
-      var memberExpressionPath = queryAxisItem.memberExpressionPath;
-      dataType = getMemberExpressionType(columnType, memberExpressionPath);
-    }
 
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
@@ -250,6 +246,11 @@ class QueryAxisItem {
       if (!derivationInfo.preservesColumnType){
         console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
+    }
+    else
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
     }
 
     var aggregatorInfo, aggregator = queryAxisItem.aggregator;
