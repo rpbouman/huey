@@ -17,7 +17,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     margin-left: 16px;
   }
 
-
   details[role=treeitem] {
 
     > summary {
