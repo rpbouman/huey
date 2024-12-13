@@ -12,11 +12,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * hide the expand/collapse widget for these attribute nodes.
   */
   details[role=treeitem][data-nodetype=aggregate] > summary,
-  details[data-nodetype=derived]:not( [data-derivation=elements] ) > summary,
-  details[data-nodetype=derived][data-derivation=elements]:not( [data-member_expression_type^=STRUCT] ) > summary  {
+  details[data-nodetype=derived]:not( [data-derivation=elements] ) > summary {
     list-style: none;
     margin-left: 16px;
   }
+
 
   details[role=treeitem] {
 
