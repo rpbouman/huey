@@ -1854,9 +1854,9 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderRow, tableBodyRow, cells;
     
     // calculate the number of row headers
-    var numRowHeaders = rowsAxisItems.length;
-    var numColumnHeaders = columnsAxisItems.length;
-    if (cellsAxisItems.length) {
+    var numRowHeaders = rowsAxisItems ? rowsAxisItems.length : 0;
+    var numColumnHeaders = columnsAxisItems ? columnsAxisItems.length : 0;
+    if (cellsAxisItems && cellsAxisItems.length) {
       switch (cellHeadersAxis){
         case QueryModel.AXIS_COLUMNS:
           numColumnHeaders += 1;
