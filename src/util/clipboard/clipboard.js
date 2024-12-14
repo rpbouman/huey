@@ -19,7 +19,25 @@ async function copyToClipboard(data, mimeType) {
     method = clipboard.write;
     arg = [createClipboardItem(data, mimeType)];
   }
-  return method.call(clipboard, arg);
+  var result;
+  try {
+    result = await method.call(clipboard, arg);
+  }
+  catch(e){
+    switch (e.name) {
+      case 'NotAllowedError':
+        // this is probably https://github.com/rpbouman/huey/issues/305,
+        // which happens on chrome when we try to write to the clipboard but the document is not focused.
+        console.warn(e);
+        console.warn('Attempting to focus the document and retrying');
+        document.defaultView.focus();
+        result = await method.call(clipboard, arg);
+        break;
+      default:
+        throw e;
+    }
+  }
+  return result;
 }
 
 function getPastedText(domClipboardEvent){
