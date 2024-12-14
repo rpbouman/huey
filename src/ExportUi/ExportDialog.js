@@ -162,7 +162,7 @@ class ExportUi {
             "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
             "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
             "COMPRESSION": compression.value,
-            "ARRAY": rowDelimiter.toUpperCase()
+            "ARRAY": rowDelimiter.value
           };
           mimeType = 'application/json';
           fileExtension = 'json';
