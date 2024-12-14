@@ -90,8 +90,7 @@ input, select:not([multiple]), button {
 }
 
 input[type=radio] {
-  height: 13px;
-  width: 13px;
+  width: 12px;
 }
 
 select[multiple] {

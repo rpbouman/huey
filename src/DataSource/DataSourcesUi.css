@@ -189,6 +189,7 @@ menu.dataSources {
 
     > label {
       white-space: nowrap;
+      vertical-align: super;
     }
     
     > label::before {
