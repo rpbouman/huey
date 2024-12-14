@@ -99,7 +99,7 @@ class PageStateManager {
       var openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
-          index: 1,
+          index: 0,
           value: -1,
           checked: true,
           labelText: 'Browse for a new Datasource'
@@ -111,7 +111,7 @@ class PageStateManager {
       else {
         openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
           datasourceType: desiredDatasourceIdParts.type,
-          index: 1,
+          index: 0,
           value: -1,
           checked: true,
           labelText: `Browse to open ${desiredDatasourceIdParts.localId}`
