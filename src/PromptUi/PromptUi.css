@@ -1,3 +1,4 @@
 dialog#promptUi {
-  width: 300px;
+  resize: both;
 }
+
