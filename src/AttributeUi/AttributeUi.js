@@ -392,6 +392,11 @@ class AttributeUi {
       folder: 'array operations',
       expressionTemplate: "list_sort( list_distinct( ${columnExpression} ) )",
       preservesColumnType: true
+    },
+    "unique values length":{
+      folder: 'array operations',
+      expressionTemplate: "length( list_distinct( ${columnExpression} ) )",
+      columnType: 'BIGINT'
     }
   }
   

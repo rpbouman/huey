@@ -316,6 +316,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f54f";
   }
 
+  details[data-nodetype=derived][data-derivation='unique values length'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
     /* ruler-3 */
     content: "\f290";

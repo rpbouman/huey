@@ -284,6 +284,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\f54f";
       }
 
+      > li[data-derivation='unique values length'] > span:before,
       > li[data-derivation='length'] > span:before {
         /* ruler-3 */
         content: "\f290";
