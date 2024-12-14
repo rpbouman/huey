@@ -33,9 +33,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         font-size: var( --huey-icon-medium );
         color: var( --huey-icon-color-subtle );
         width: 24px;
-        padding: 6px 3px 0px 3px;
+        padding: 2px 3px 0px 3px;
         text-align: center;
-
+        position: relative;
+        top: 4px;
       }
 
       /**
