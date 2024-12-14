@@ -44,7 +44,7 @@ class PageStateManager {
     }
     item.setAttribute('title', config.labelText);
     
-    var id = 'datasourceMenu-' + config.index;
+    var id = 'datasourceMenu' + (typeof config.index === 'number' ? config.index : '');
     var label = item.getElementsByTagName('LABEL').item(0);
     label.setAttribute('for', id);
     label.textContent = config.labelText;
@@ -99,7 +99,6 @@ class PageStateManager {
       var openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
-          index: 0,
           value: -1,
           checked: true,
           labelText: 'Browse for a new Datasource'
@@ -111,7 +110,6 @@ class PageStateManager {
       else {
         openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
           datasourceType: desiredDatasourceIdParts.type,
-          index: 0,
           value: -1,
           checked: true,
           labelText: `Browse to open ${desiredDatasourceIdParts.localId}`
