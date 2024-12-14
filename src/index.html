@@ -49,6 +49,9 @@
     }
     </script>
 
+    <!-- 
+      Markup for resource loading
+    -->
     <style type="text/css">
       ul#resources > li::marker {
         font-family: "tabler-icons";
@@ -150,6 +153,7 @@
       <option data-auto="true" value="NULL">NULL</option>
     </datalist>
   </head>
+
   <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
@@ -1132,6 +1136,13 @@
       </footer>
     </dialog>
 
+    <!-- this template is to present datasources in a prompt dialog and is used by the PageStateManager -->
+    <template id="datasource-menu-item">
+      <li role="menuitem" data-nodetype="datasource" data-datasourcetype="">
+        <input id="datasourceMenu-${index}" type="radio" name="compatibleDatasources"/>
+        <label for="datasourceMenu-${index}"></label>
+      </li>
+    </template>
     <dialog
       id="datasourceSettingsDialog"
       aria-labelledby="datasourceSettingsDialogTitle"
@@ -1409,7 +1420,8 @@
           />
           <div role="tabpanel">
             <!-- https://duckdb.org/docs/data/json/loading_json -->
-            JSON reader options
+            <form>
+            </form>
           </div>
         </div>
 

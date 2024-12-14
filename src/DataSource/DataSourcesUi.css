@@ -185,15 +185,18 @@ menu.dataSources {
 
   > li {
     list-style-type: none;
+    white-space: nowrap;
 
-    .icon {
+    > label {
+      white-space: nowrap;
+    }
+    
+    > label::before {
       display: inline-block;
       font-family: var( --huey-icon-font-family ) !important;
       font-size: var( --huey-icon-medium );
       color: var( --huey-icon-color );
       width: 24px;
-      padding: 6px 3px 0px 3px;
-      text-align: center;
     }
 
   }
@@ -201,19 +204,25 @@ menu.dataSources {
 
 /**/
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > .icon::before,
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > span.label::before {
   /* file-type-csv */
   content: '\fb09';
 }
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > .icon::before,
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > summary > span.label::before {
+  /* file-type-csv */
+  content: '\fb09';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > span.label::before {
   /* file-type-txt */
   content: '\fb19';
 }
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > .icon::before,
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > span.label::before {
   /* file-type-js */
   content: '\fb0e';
@@ -224,13 +233,13 @@ menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-f
   content: '\fb0e';
 }
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > .icon::before,
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > span.label::before {
   /* file-stack */
   content: '\f503';
 }
 
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > .icon::before,
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > span.label::before {
   /* file-type-xls */
   content: '\fb1b';
