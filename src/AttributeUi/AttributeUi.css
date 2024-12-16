@@ -35,8 +35,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         width: 24px;
         padding: 2px 3px 0px 3px;
         text-align: center;
-        position: relative;
-        top: 4px;
       }
 
       /**
@@ -159,6 +157,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f554";
   }
 
+  details[data-nodetype=derived][data-derivation='keys'] > summary > span.label::before {
+    /* key */
+    content: "\eac7";
+  }
+
+  details[data-nodetype=derived][data-derivation='entries'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > span.label::before,
   details[data-nodetype=column][data-column_type^=STRUCT] > summary > span.label::before
@@ -317,12 +321,14 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f54f";
   }
 
+  details[data-nodetype=derived][data-derivation='cardinality'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='unique values length'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
     /* ruler-3 */
     content: "\f290";
   }
 
+  details[data-nodetype=derived][data-derivation='entry indices'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='element indices'] > summary > span.label::before {
     /* list-numbers */
     content: "\ef11";
