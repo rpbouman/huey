@@ -23,8 +23,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       white-space: nowrap;
 
       > span.label  {
-        max-width: calc(100% - 166px);
-        width: 100%;
+        width: calc( 100% - 130px );
       }
 
       > span.label::before {
@@ -44,8 +43,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       */
       > span.attributeUiAxisButton,
       > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
-        display: block;
-        float: inline-end;
+        display: inline-block;
+        position: absolute;
         width: 24px;
         padding: 6px 3px 0px 3px;
         font-family: var( --huey-icon-font-family ) !important;
@@ -61,7 +60,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         display: none;
       }
 
-
+      > .attributeUiAxisButton[data-axis=rows] {
+        right: 90px;
+      }
+      
       > .attributeUiAxisButton[data-axis=rows]::before {
         /* table-column */
         /*
@@ -71,6 +73,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         content: "\faff";
       }
 
+      > .attributeUiAxisButton[data-axis=columns] {
+        right: 60px;
+      }
+      
       > .attributeUiAxisButton[data-axis=columns]::before {
         /* table-row */
         /*
@@ -80,6 +86,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         content: "\fb00";
       }
 
+      > .attributeUiAxisButton[data-axis=cells] {
+        right: 30px;
+      }
+      
       > .attributeUiAxisButton[data-axis=cells]::before {
         /* layout grid */
         content: "\edba";
@@ -93,6 +103,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         color: var( --huey-icon-color-highlight );
       }
 
+      > .attributeUiAxisButton[data-axis=filters] {
+        right: 0px;
+      }
+      
       > .attributeUiAxisButton[data-axis=filters]::before {
         /* filter-plus */
         /* content: "\fa02"; */
