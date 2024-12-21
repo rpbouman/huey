@@ -5,6 +5,8 @@
   background-color: var( --huey-medium-background-color );
   height: 62px;
   padding-top: 1px;
+  /* need this else the attribute axis icons will bleed through.*/
+  z-index: 1;
 }
 
 .search > fieldset > input[type=search]{
