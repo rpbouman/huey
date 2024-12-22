@@ -517,25 +517,33 @@ class AttributeUi {
   }
 
   async #queryModelChangeHandler(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var searchAttributeUiDisplay;
-        if (eventData.propertiesChanged.datasource.newValue) {
-          this.clear(true);
-          var datasource = eventData.propertiesChanged.datasource.newValue;
-          var columnMetadata = await datasource.getColumnMetadata();
-          this.render(columnMetadata);
-          searchAttributeUiDisplay = '';
+    try {
+      var eventData = event.eventData;
+      if (eventData.propertiesChanged) {
+        if (eventData.propertiesChanged.datasource) {
+          var searchAttributeUiDisplay;
+          if (eventData.propertiesChanged.datasource.newValue) {
+            this.clear(true);
+            var datasource = eventData.propertiesChanged.datasource.newValue;
+            var columnMetadata = await datasource.getColumnMetadata();
+            this.render(columnMetadata);
+            searchAttributeUiDisplay = '';
+          }
+          else {
+            this.clear(false);
+            searchAttributeUiDisplay = 'none';
+          }
+          byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
         }
-        else {
-          this.clear(false);
-          searchAttributeUiDisplay = 'none';
-        }
-        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
       }
     }
-    this.#updateState();
+    catch(e){
+      showErrorDialog(e);
+    }
+    finally {
+      this.clear(false);
+      this.#updateState();
+    }
   }
 
   #clickHandler(event){
