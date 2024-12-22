@@ -160,24 +160,52 @@ Aggregates cannot be placed on the horizontal or vertical axes of the pivot tabl
 
 ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
 
-### Structured types and Arrays
+## Structured types, Arrays, and Maps
 
-Attributes can have any kind of datatype, including composite or "nested" data types - that is, types whose values are not scalar, but which consist of multiple elements
+Attributes can have any kind of datatype, including composite or "nested" data types - that is, types whose values are not scalar, but which consist of multiple elements.
+Especially when exploring JSON files one is likely to encounter attributes having these types.
 
-#### Members of Structured Types
+### Structured Types
 
-Attributes with a Structured type (STRUCT) have a "structure" folder that gives access to the member attributes that make up the parent attribute.
+Values with a Structured type (STRUCT) are in the end just values, and can be projected on the query axis as such.
+Attributes of this type also have a "structure" folder that gives access to its members.
 
 ![image](https://github.com/user-attachments/assets/8687b270-6298-4434-8f52-5b32d7d39a53)
 
-Members are also just attributes, and may have their own derivations and aggregates. 
+Members are also just attributes, and will have their own derivations and aggregates, in accordance with the member type. 
 Of course, members that are themselves of a structured type have their own structure folder that gives access to its members.
 
-#### Unnesting Arrays
+### Arrays
 
-Attributes with an array type have a set of "array operation" derivations, allowing the array to be unfolded or unnested into its individual elements or their indices:
+Arrays are also just values and can be treated as such.
+
+Attributes of an array type have a set of "array operations" derivations:
+- elements: unnests the array and projects the element value on a separate tuple. Just like with members of structured types, array elements are just like attributes and may have derivations and aggregates in accordance with their type.
+- element indices: unnests the array, and projects the element index. If both elements and element indices appear together on the same axis, then they are unrolled at the same level, so that the indices and the element values refer to the same element.
+- length: returns the length of the array.
+- sort values: array value after sorting the elements
+- unique values: (sorted) array value after removing the duplicate elements 
+- unique values length: length of the deduplicated array.
 
 ![image](https://github.com/user-attachments/assets/5f2acd6e-3ac1-4702-b204-7737fbc9a8f0)
+
+When the elements or element indices derivations are applied to multiple, independent attributes, then they are unrolled independently, in order of appearance on the axis.
+
+Arrays also support a collection of "array statistics":
+![image](https://github.com/user-attachments/assets/f9230a17-339d-4598-b8e5-3b92f851b395)
+
+Array statistics are special derivations that calculate an aggregate value over the array's elements. 
+
+### Maps
+
+Maps are structured types that are somewhat similar to Arrays. While arrays have an ordered collection of elements with an associated integer index, Maps are an unordered collections of entries. Map entries are values (which can be of any type) which are uniquely identified by a key, which also may have any type.
+
+Maps have a folder with map operations:
+![image](https://github.com/user-attachments/assets/0fbaf936-2e4d-40b3-a57d-fa4ad330b795)
+
+- entries gives access to the key and value derivations. These will unnest the map and project the key and/or value. Like array elements and element indices, the key and value derivations of the same map attribute are not independent but unrolled together.
+- entry count: the number of entries in the map
+- keyset: the (sorted) list of keys.
 
 ### Filtering
 
