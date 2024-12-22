@@ -192,6 +192,7 @@ Attributes of an array type have a set of "array operations" derivations:
 When the elements or element indices derivations are applied to multiple, independent attributes, then they are unrolled independently, in order of appearance on the axis.
 
 Arrays also support a collection of "array statistics":
+
 ![image](https://github.com/user-attachments/assets/f9230a17-339d-4598-b8e5-3b92f851b395)
 
 Array statistics are special derivations that calculate an aggregate value over the array's elements. 
@@ -201,6 +202,7 @@ Array statistics are special derivations that calculate an aggregate value over 
 Maps are structured types that are somewhat similar to Arrays. While arrays have an ordered collection of elements with an associated integer index, Maps are an unordered collections of entries. Map entries are values (which can be of any type) which are uniquely identified by a key, which also may have any type.
 
 Maps have a folder with map operations:
+
 ![image](https://github.com/user-attachments/assets/0fbaf936-2e4d-40b3-a57d-fa4ad330b795)
 
 - entries gives access to the key and value derivations. These will unnest the map and project the key and/or value. Like array elements and element indices, the key and value derivations of the same map attribute are not independent but unrolled together.
