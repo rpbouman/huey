@@ -18,7 +18,7 @@ class SqlQueryGenerator {
     var pathExpression = memberExpressionPath.map(function(memberExpressionPathElement){
       return `[${quoteStringLiteral( memberExpressionPathElement ) }]`
     }).join('');
-    return `${columnExpression}${pathExpression}`;    
+    return `${columnExpression}${pathExpression}`;
   }
 
   static #getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem){
@@ -138,8 +138,16 @@ class SqlQueryGenerator {
     var filterPaths = Object.keys(filterAxisItemsByNestingStage);
     for (var i = 0; i < filterPaths.length; i++){
       var filterPath = filterPaths[i];
-      if (!filterPath.startsWith(unnestingItemMemberExpressionPathPrefixString)){
+      //if (!filterPath.startsWith(unnestingItemMemberExpressionPathPrefixString)){
         // filter path prefix does not match this path prefix, so leave it
+      //  continue;
+      //}
+      var originalFilterAxisItem = filterAxisItemsByNestingStage[filterPath];
+      var itemPrefix = SqlQueryGenerator.#getExpressionString(
+        originalFilterAxisItem.columnName,
+        originalFilterAxisItem.memberExpressionPath
+      );
+      if (!itemPrefix.startsWith(unnestingItemMemberExpressionPathPrefixString)){
         continue;
       }
       
@@ -147,7 +155,7 @@ class SqlQueryGenerator {
       for (var j = 0; j < unnestingFunctionNames.length; j++){
         var unnestingFunctionName = unnestingFunctionNames[j];
         var unnestingExpression = unnestingItemMemberExpressionPathPrefixString + `['${unnestingFunctionName}']`;
-        if (!filterPath.startsWith(unnestingExpression)){
+        if (!itemPrefix.startsWith(unnestingExpression)){
           // filter path does not match this unnesting function, so try the next
           continue;
         }
@@ -160,7 +168,6 @@ class SqlQueryGenerator {
         
         // since these filter items are part of this unnesting stage, 
         // we need replace them with new filter items that reference the column of the unnested item
-        var originalFilterAxisItem = filterAxisItemsByNestingStage[filterPath];
         var substituteMemberExpressionPath = originalFilterAxisItem.memberExpressionPath.slice(unnestingOperationItem.memberExpressionPath.length + 1);
         var columnExpression = [unnestingOperationItem.columnName].concat(unnestingOperationItem.memberExpressionPath);
         columnExpression.push(unnestingFunctionName);
