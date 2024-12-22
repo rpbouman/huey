@@ -171,9 +171,24 @@ class SqlQueryGenerator {
         var substituteMemberExpressionPath = originalFilterAxisItem.memberExpressionPath.slice(unnestingOperationItem.memberExpressionPath.length + 1);
         var columnExpression = [unnestingOperationItem.columnName].concat(unnestingOperationItem.memberExpressionPath);
         columnExpression.push(unnestingFunctionName);
+
+        // we also need to substittue the column data type to reflect the column change.
+        var substituteColumnType;
+        var unnestingFunction = unnestingFunctions[unnestingFunctionName];
+        if (unnestingFunction.columnType){
+          substituteColumnType = unnestingFunction.columnType;
+        }
+        else
+        if (unnestingFunction.hasElementDataType){
+          substituteColumnType = getMemberExpressionType(originalFilterAxisItem.columnType, unnestingOperationItem.memberExpressionPath);
+          substituteColumnType = getArrayElementType(substituteColumnType);
+        }
+        
         var filterAxisItem = Object.assign({}, originalFilterAxisItem, {
-          columnName: columnExpression.join('.')
+          columnName: columnExpression.join('.'),
+          columnType: substituteColumnType
         });
+        
         
         if (substituteMemberExpressionPath.length){
           filterAxisItem.memberExpressionPath = substituteMemberExpressionPath;
