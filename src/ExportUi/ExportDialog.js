@@ -97,8 +97,7 @@ class ExportUi {
       titleTemplate = exportTemplate.value;
     }
     var replacedTemplate = titleTemplate.replace(/\$\{[^\}]+\}/g, function(fieldRef){
-      // fieldnames are denoted as ${fieldName}, slice(2, -1) gets onlye the name
-      var fieldName = fieldRef.slice(2, -1);
+      var fieldName = unQuote(fieldRef, '${', '}');
       var func = ExportUi.#exportTitleFields[fieldName];
       if (typeof func === 'function'){
         return func(queryModel);

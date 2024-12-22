@@ -161,7 +161,14 @@ class QueryAxisItem {
       var memberExpression = memberExpressionPath
       .map(function(memberExpressionPathElement){
         // todo: escape single quote in memberExpressionPathElement
-        return `['${memberExpressionPathElement}']`;
+        var expression;
+        if (memberExpressionPathElement.endsWith('()')){
+          expression = '.' + memberExpressionPathElement;
+        }
+        else {
+          expression = `['${memberExpressionPathElement}']`;
+        }
+        return expression;
       })
       .join('');
       sqlExpression += memberExpression;
@@ -228,12 +235,21 @@ class QueryAxisItem {
       }
       else
       if (derivationInfo.hasElementDataType){
-        // get the array element type by removing the trailing '[]';
-        dataType = dataType.slice(0, -2);
+        dataType = getArrayElementType(dataType);
+      }
+      else
+      if (derivationInfo.hasKeyDataType){
+        dataType = getArrayElementType(dataType);
+        dataType = getMemberExpressionType(dataType, 'key');
+      }
+      else
+      if (derivationInfo.hasValueDataType){
+        dataType = getArrayElementType(dataType);
+        dataType = getMemberExpressionType(dataType, 'value');
       }
       else 
       if (derivation === 'median'){
-        dataType = dataType.slice(0, -2);
+        dataType = getArrayElementType(dataType);
         var dataTypeInfo = getDataTypeInfo(dataType);
         if (dataTypeInfo.isNumeric){
           return 'DOUBLE';

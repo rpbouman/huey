@@ -813,6 +813,12 @@ class PivotTableUi extends EventEmitter {
       console.warn(`No tuple value and no tuple value field.`);
       return;
     }
+    switch (tupleValueField.type.typeId){
+      case 12:  // variable size list
+        console.warn(`Tuple value is a variable length list. Refuse to write out its literal value.`);
+        return;
+      default:
+    }
 
     cellElement.setAttribute('data-axis', queryAxisItem.axis);
 
