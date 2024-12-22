@@ -498,12 +498,12 @@ class DuckDbDataSource extends EventEmitter {
     var parts = datasourceId.split(':');
     var type = parts.shift();
     var localId = parts.join(':');
-    var unquoted;
+    var unQuoted;
     var isUrl = false;
-    if (localId.startsWith('"') && localId.endsWith('"')){
-      unquoted = localId.slice(1, -1);
+    if (isQuotedIdentifier(localId)){
+      unQuoted = unQuoteIdentifier(localId);
       try {
-        var url = new URL(unquoted);
+        var url = new URL(unQuoted);
         isUrl = true;
       }
       catch(e){
@@ -513,7 +513,7 @@ class DuckDbDataSource extends EventEmitter {
       type: type,
       localId: localId,
       isUrl: isUrl,
-      resource: unquoted
+      resource: unQuoted
     };
   }
   

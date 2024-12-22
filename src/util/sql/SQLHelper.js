@@ -310,7 +310,6 @@ function getDuckDbLiteralForValue(value, type){
       literal = `[${literal}]`;
       break;
     case 13:  // Struct
-    case 17:  // Map
       literal = type.children.map(function(entry){
         var entryName = entry.name;
         var entryValue = value[entryName];
@@ -320,6 +319,17 @@ function getDuckDbLiteralForValue(value, type){
         return entryLiteral;
       }).join(',');
       literal = `{${literal}}`;
+      break;
+    case 17:  // Map
+      var mapEntryType = type.children[0].type;
+      var keyType = mapEntryType.children[0].type;
+      var valueType = mapEntryType.children[1].type;
+      var entries = Object.entries(value);
+      literal = 'MAP{' + entries.map(function(entry){
+        var keyLiteral = getDuckDbLiteralForValue(entry[0], keyType);
+        var valueLiteral = getDuckDbLiteralForValue(entry[1], valueType);
+        return `${keyLiteral}: ${valueLiteral}`;
+      }).join(',') + '}';
       break;
     case 0:   // None
     case 4:   // Binary
@@ -754,6 +764,41 @@ function getDataTypeInfo(columnType){
 
 function quoteStringLiteral(str){
   return typeof str === 'string'  ? `'${str.replace(/'/g, "''")}'` : str; 
+}
+
+function isQuoted(str, startQuote, endQuote){
+  if (!str.startsWith(startQuote)){
+    return false;
+  }
+  if (!endQuote) {
+    endQuote = startQuote;
+  }
+  return str.endsWith(endQuote);
+}
+
+function isQuotedIdentifier(str){
+  return isQuoted(str, '"');
+}
+
+function unQuote(str, startQuote, endQuote){
+  if (!endQuote) {
+    endQuote = startQuote;
+  }
+  if (!str.startsWith(startQuote)){
+    throw new Error(`Cannot unquote value: ${str}`);
+  }
+  if (!str.endsWith(endQuote)){
+    throw new Error(`Cannot unquote value: ${str} must end with ${endQuote}`);
+  }
+  return str.slice(startQuote.length, -endQuote.length);
+}
+
+function unQuoteStringLiteral(str){
+  return unQuote(str, '\'');
+}
+
+function unQuoteIdentifier(str){
+  return unQuote(str, '"');
 }
 
 function identifierRequiresQuoting(identifier){
@@ -1206,22 +1251,112 @@ function getStructTypeDescriptor(structColumnType){
   return structure;
 }
 
+function getMapKeyValueType(mapType){
+  if (!mapType.startsWith('MAP(') || !mapType.endsWith(')')){
+    throw new Error(`Expected a MAP type`)
+  }
+  var level = 0;
+  var i;
+  var elementTypes = unQuote(mapType, 'MAP(', ')');
+  _loop: for (i = 0; i < elementTypes.length; i++){
+    var ch = elementTypes.charAt(i);
+    switch (ch){
+      case '(':
+        level += 1;
+        break;
+      case ')':
+        level -= 1;
+        break;
+      case ',':
+        if (level === 0) {
+          break _loop;
+        }
+    }
+  }
+  var keyType = elementTypes.slice(0, i).trim();
+  var valueType = elementTypes.slice(i + 1).trim();
+  return {
+    keyType: keyType,
+    valueType: valueType
+  };
+}
+
+function getMapKeyType(mapType){
+  var keyValueType = getMapKeyValueType(mapType);
+  return keyValueType.keyType;
+}
+
+function getMapValueType(mapType){
+  var keyValueType = getMapKeyValueType(mapType);
+  return keyValueType.valueType;
+}
+
+function getArrayElementType(arrayType){
+  if (!arrayType.endsWith('[]')){
+    throw new Error(`Expected an array type`);
+  }
+  return arrayType.slice(0, -'[]'.length);
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
-    var memberExpression = memberExpressionPath[0];
-    var memberExpressionType;
-    if (memberExpression === 'unnest()'){
-      memberExpressionType = type.slice(0, -2);
+    var typeOfMemberExpressionPath = typeof memberExpressionPath;
+    switch (typeOfMemberExpressionPath) {
+      case 'object':
+        var memberExpression = memberExpressionPath[0];
+        var memberExpressionType;
+        switch (memberExpression) {
+          case 'unnest()':
+            memberExpressionType = getArrayElementType(type);
+            break;
+          case 'map_entries()':
+            memberExpressionType = getMapEntriesType(type);
+            break;
+          case 'map_keys()':
+            memberExpressionType = getArrayElementType(type);
+            memberExpressionType = getMapKeyType(memberExpressionType);
+            memberExpressionType += '[];'
+            break;
+          case 'map_values()':
+            memberExpressionType = getArrayElementType(type);
+            memberExpressionType = getMapValueType(memberExpressionType);
+            memberExpressionType += '[]';
+            break;
+          default:
+            var typeDescriptor = getStructTypeDescriptor(type);
+            memberExpressionType = typeDescriptor[memberExpression];
+        }
+        return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
+        break;
+      case 'string':
+        if (!type.startsWith('MAP')){
+          throw new Error(`Expected a MAP type`);
+        }
+        switch (memberExpressionPath){
+          case 'key':
+            return getMapKeyType(type);
+          case 'value':
+            return getMapValueType(type);
+          default:
+            throw new Error(`Don't know how to handle memerExpressionPath "${memberExpressionPath}"`);
+        }
+        break;
+      default:
+        throw new Error(`Don't know how to handle memerExpressionPath of type "${typeOfMemberExpressionPath}"`);
     }
-    else {
-      var typeDescriptor = getStructTypeDescriptor(type);
-      memberExpressionType = typeDescriptor[memberExpression];
-    }
-    return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
   }
   else {
     return type;
   }
+}
+
+// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
+// this function will return the type that results from calling map_entries(<map>),
+// which would be: STRUCT(key <keyType>, value <valueType>)[]
+function getMapEntriesType(mapType){
+  var keyType = getMemberExpressionType(mapType, 'key');
+  var valueType = getMemberExpressionType(mapType, 'value');
+  return `STRUCT(key ${keyType}, value ${valueType})[]`;
 }
 
 function extrapolateColumnExpression(expressionTemplate, columnExpression){

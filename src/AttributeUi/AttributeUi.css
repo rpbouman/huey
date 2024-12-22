@@ -12,10 +12,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * hide the expand/collapse widget for these attribute nodes.
   */
   details[role=treeitem][data-nodetype=aggregate] > summary,
-  details[data-nodetype=derived]:not( [data-derivation=elements] ) > summary {
+  details[role=treeitem][data-nodetype=derived]:not( [data-derivation=elements], [data-derivation=entries] ) > summary {
     list-style: none;
-    margin-left: 16px;
+    margin-left: 14px;
   }
+
 
   details[role=treeitem] {
 
@@ -146,7 +147,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Data type icons
   *
   */
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=VARCHAR] > summary > span.label::before,
+  details[data-nodetype=derived][data-member_expression_type=VARCHAR]:has( 
+    [data-derivation='entry keys'], 
+    [data-derivation='entry values'], 
+    [data-derivation='elements'] 
+  ) > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=VARCHAR] > summary > span.label::before {
     /* txt */
@@ -171,7 +176,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f554";
   }
 
-  details[data-nodetype=derived][data-derivation='keys'] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation='keyset'] > summary > span.label::before {
     /* key */
     content: "\eac7";
   }
@@ -193,6 +198,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\fc47";
   }
 
+  details[data-nodetype=derived][data-derivation='entries'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type$='[]'] > summary > span.label::before,
   details[data-nodetype=column][data-column_type$='[]'] > summary > span.label::before
@@ -335,7 +341,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f54f";
   }
 
-  details[data-nodetype=derived][data-derivation='cardinality'] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='entry count'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='unique values length'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
     /* ruler-3 */

@@ -366,22 +366,22 @@ class AttributeUi {
   }
 
   static arrayDerivations = {
-    "length": {
-      folder: 'array operations',
-      expressionTemplate: "length( ${columnExpression} )",
-      columnType: 'BIGINT'
-    },
-    "element indices": {
-      folder: 'array operations',
-      columnType: 'BIGINT',
-      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1 )",
-      unnestingFunction: 'generate_subscripts'
-    },
     "elements": {
       folder: 'array operations',
       hasElementDataType: true,
       expressionTemplate: "unnest( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end )",
       unnestingFunction: 'unnest'
+    },
+    "element indices": {
+      folder: 'array operations',
+      columnType: 'BIGINT',
+      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1)",
+      unnestingFunction: 'generate_subscripts'
+    },
+    "length": {
+      folder: 'array operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
     },
     "sort values": {
       folder: 'array operations',
@@ -399,7 +399,25 @@ class AttributeUi {
       columnType: 'BIGINT'
     }
   }
-  
+
+  static mapDerivations = {
+    "entries": {
+      folder: 'map operations',
+      expressionTemplate: "unnest( map_entries( ${columnExpression} ) )",
+      unnestingFunction: 'unnest',
+      hasEntryDataType: true
+    },
+    "entry count": {
+      folder: 'map operations',
+      expressionTemplate: "cardinality( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    "keyset": {
+      folder: 'map operations',
+      expressionTemplate: "list_sort( map_keys( ${columnExpression} ) )"
+    }
+  };
+    
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
 
@@ -422,7 +440,8 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
       AttributeUi.arrayDerivations,
-      AttributeUi.arrayStatisticsDerivations
+      AttributeUi.arrayStatisticsDerivations,
+      AttributeUi.mapDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -465,6 +484,11 @@ class AttributeUi {
       arrayDerivations[aggregator] = arrayStatisticsDerivations[aggregator];
     });
     return arrayDerivations;
+  }
+  
+  static getMapDerivations(typeName){
+    var mapDerivations = Object.assign(AttributeUi.mapDerivations);
+    return mapDerivations;
   }
 
   static #getUiNodeCaption(config){
@@ -685,17 +709,17 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeAxisButtons(config, head){
-    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
-    head.appendChild(filterButton);
-
-    var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
-    head.appendChild(cellsButton);
+    var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
+    head.appendChild(rowButton);
 
     var columnButton = this.#renderAttributeUiNodeAxisButton(config, head, 'columns');
     head.appendChild(columnButton);
 
-    var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
-    head.appendChild(rowButton);
+    var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
+    head.appendChild(cellsButton);
+
+    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
+    head.appendChild(filterButton);
   }
 
   #renderAttributeUiNodeHead(config) {
@@ -845,12 +869,12 @@ class AttributeUi {
     // with lazy load it would only find whatever happens to be visited/browsed already.
     switch (config.type){
       case 'derived':
-        if (derivation !== 'elements') {
+        if (['elements'].indexOf(derivation) === -1) {
           break;
         }
       case 'column':
       case 'member':
-        if (columnType.startsWith('STRUCT')) {
+        if (columnType.startsWith('STRUCT') || columnType.startsWith('MAP') ) {
           this.#loadChildNodes(node);
         }
         break;
@@ -952,8 +976,8 @@ class AttributeUi {
     return folders;
   }
 
-  #loadMemberChildNodes(node, typeName, profile){
-    var folderNode = this.#renderFolderNode({caption: 'structure'});
+  #loadMemberChildNodes(node, typeName, profile, noFolder){
+    var folderNode = noFolder ? undefined : this.#renderFolderNode({caption: 'structure'});
     var columnType = profile.memberExpressionType || profile.column_type;
     var memberExpressionPath = profile.memberExpressionPath || [];
     var structure = getStructTypeDescriptor(columnType);
@@ -971,9 +995,11 @@ class AttributeUi {
         }
       }
       var memberNode = this.#renderAttributeUiNode(config);
-      folderNode.appendChild(memberNode);
+      (folderNode || node).appendChild(memberNode);
     }
-    node.appendChild(folderNode);
+    if (folderNode) {
+      node.appendChild(folderNode);
+    }
   }
 
   #loadDerivationChildNodes(node, typeName, profile){
@@ -1013,7 +1039,7 @@ class AttributeUi {
         var memberExpressionType = derivation.columnType;
         if (!memberExpressionType){
           memberExpressionType = profile.memberExpressionType || profile.column_type;
-          memberExpressionType = memberExpressionType.slice(0, -2);
+          memberExpressionType = getArrayElementType(memberExpressionType);
         }
         nodeProfile.column_type = profile.column_type;
         nodeProfile.memberExpressionType = memberExpressionType;
@@ -1035,6 +1061,69 @@ class AttributeUi {
       else {
         node.appendChild(childNode);
       }
+    }
+  }
+
+  #loadMapChildNodes(node, typeName, profile){
+    var mapDerivations = AttributeUi.getMapDerivations(typeName);
+    var folders = this.#createFolders(mapDerivations, node);
+    for (var derivationName in mapDerivations) {
+      var derivation = mapDerivations[derivationName];
+      var nodeProfile; 
+      var memberExpressionType = profile.memberExpressionType || profile.column_type;
+      var memberExpressionPath;
+      switch (derivationName) {
+        case 'entries':
+        case 'entry keys':
+        case 'keyset':
+        case 'entry values':
+          nodeProfile = JSON.parse(JSON.stringify(profile));
+          if (!nodeProfile.memberExpressionPath) {
+            nodeProfile.memberExpressionPath = [];
+          }
+          break;
+        default:
+          nodeProfile = profile;
+      }
+
+      switch (derivationName) {
+        case 'entries':
+          nodeProfile.memberExpressionType = getArrayElementType(getMapEntriesType(memberExpressionType));
+          nodeProfile.memberExpressionPath.push('map_entries()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction + '()');
+          break;
+        case 'entry keys':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'key');
+          nodeProfile.memberExpressionPath.push('map_keys()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction + '()');
+          break;
+        case 'entry values':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'value');
+          nodeProfile.memberExpressionPath.push('map_values()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction  + '()');
+          break;
+        case 'keyset':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'key') + '[]';
+      }
+
+      var config = {
+        type: 'derived',
+        derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
+        profile: nodeProfile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (derivationName === 'entries'){
+        this.#loadMemberChildNodes(childNode, nodeProfile.memberExpressionType, nodeProfile, true);
+      }
+      if (derivation.folder) {
+        folders[derivation.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);
+      }
+      
     }
   }
 
@@ -1085,6 +1174,10 @@ class AttributeUi {
 
     if (expressionType.endsWith('[]')){
       this.#loadArrayChildNodes(node, typeName, profile);
+    }
+    else
+    if (expressionType.startsWith('MAP')){ 
+      this.#loadMapChildNodes(node, typeName, profile);
     }
     else
     if (expressionType.startsWith('STRUCT')){

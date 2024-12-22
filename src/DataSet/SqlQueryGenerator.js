@@ -232,6 +232,7 @@ class SqlQueryGenerator {
       for (var i = 0; i < currentItems.length; i++){
 
         var currentItem = currentItems[i];
+        var derivationInfo = currentItem.derivation ? AttributeUi.getDerivationInfo(currentItem.derivation) : undefined;
         var currentItemMemberExpressionPath = currentItem.memberExpressionPath;
     
         // if there's no member expression path, this is a "normal" item (and certainly not an unnesting operation)
@@ -267,7 +268,11 @@ class SqlQueryGenerator {
               unnestingItemMemberExpressionPathPrefix
             );
             // to get the element type, remove the trailing []
-            unnestingItemMemberExpressionType = unnestingItemMemberExpressionType.slice(0, -2);
+            if (derivationInfo && (derivationInfo.hasKeyDataType || derivationInfo.hasValueDataType)) {
+            }
+            else {
+              unnestingItemMemberExpressionType = getArrayElementType(unnestingItemMemberExpressionType);
+            }
             
             // add an unnesting operation to the current cte.
             unnestingOperationItem = {
@@ -341,7 +346,12 @@ class SqlQueryGenerator {
           // then the new item should be made terminal as well.
           // the unnesting operation itself is a derivation, and since that was unnested in the previous cte,
           // it must not be unnested again at a later level, so we remove that info here.
-          delete newItem.derivation;
+          if (newItem.derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(newItem.derivation);
+            if (derivationInfo.unnestingFunction) {
+              delete newItem.derivation;
+            }
+          }
           delete newItem.memberExpressionPath;
         }
         newItems.push(newItem);
@@ -629,7 +639,7 @@ class SqlQueryGenerator {
       sqls.push(`${getQuotedIdentifier(options.cteName)} AS (\n  ${sql}\n)`);
       sql = '';
     }
-    var withSql = sqls.length ? `WITH ${sqls.join('\n,')}` : '';
+    var withSql = sqls.length ? `WITH ${sqls.join('\n,')}\n` : '';
     sql = withSql + sql;
     return sql;
   }
