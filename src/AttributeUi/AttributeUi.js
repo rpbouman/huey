@@ -527,18 +527,16 @@ class AttributeUi {
             var datasource = eventData.propertiesChanged.datasource.newValue;
             var columnMetadata = await datasource.getColumnMetadata();
             this.render(columnMetadata);
-            searchAttributeUiDisplay = '';
           }
           else {
             this.clear(false);
-            searchAttributeUiDisplay = 'none';
           }
-          byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
         }
       }
     }
     catch(e){
       showErrorDialog(e);
+      this.clear();
     }
     finally {
       this.#updateState();
