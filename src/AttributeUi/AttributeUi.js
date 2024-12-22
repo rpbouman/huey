@@ -541,7 +541,6 @@ class AttributeUi {
       showErrorDialog(e);
     }
     finally {
-      this.clear(false);
       this.#updateState();
     }
   }
