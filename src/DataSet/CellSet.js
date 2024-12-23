@@ -155,14 +155,14 @@ class CellSet extends DataSetComponent {
       rows.push(row);
     }
 
-    var relationDefinition = `${getQuotedIdentifier(CellSet.#tupleDataRelationName)}(\n ${columns.map(getQuotedIdentifier).join('\n, ')})`;
+    var relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n ${columns.map(quoteIdentifierWhenRequired).join('\n, ')})`;
     var valuesSql = rows.map(function(row){
       return `( ${row.join(', ')} )`;
     }).join('\n ,');
     var valuesClause = `(VALUES\n  ${valuesSql}\n) AS ${relationDefinition}`;
 
     var groupByList = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
-    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + getQuotedIdentifier(CellSet.datasetRelationName);
+    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + quoteIdentifierWhenRequired(CellSet.datasetRelationName);
     if (joinConditions.length){
       joinClause += `\nON ${joinConditions.join('\n  AND ')}`;
     }
@@ -225,13 +225,13 @@ class CellSet extends DataSetComponent {
     }).join('\n  , ');
     
     var relationDefinition = allQueryAxisItems.map(function(queryAxisItem){
-      return getQuotedIdentifier( QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem) );
+      return quoteIdentifierWhenRequired( QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem) );
     });
-    relationDefinition.unshift(getQuotedIdentifier(CellSet.#cellIndexColumnName));
+    relationDefinition.unshift(quoteIdentifierWhenRequired(CellSet.#cellIndexColumnName));
     if (includeGroupingId) {
-      relationDefinition.push(getQuotedIdentifier(TupleSet.groupingIdAlias));
+      relationDefinition.push(quoteIdentifierWhenRequired(TupleSet.groupingIdAlias));
     }
-    relationDefinition = `${getQuotedIdentifier(CellSet.#tupleDataRelationName)}(\n  ${relationDefinition.join('\n, ')}\n)`;
+    relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n  ${relationDefinition.join('\n, ')}\n)`;
     tuplesSql = `${relationDefinition} AS (\n  FROM (VALUES\n    ${tuplesSql}\n  )\n)`;
     return tuplesSql;
   }
@@ -272,7 +272,7 @@ class CellSet extends DataSetComponent {
       var expression = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
       var qualifiedIdentifier = getQualifiedIdentifier('__huey_cells', expression);
       var alias = QueryAxisItem.getSqlForQueryAxisItem(axisItem, CellSet.datasetRelationName);
-      return `${qualifiedIdentifier} AS ${getQuotedIdentifier(alias)}`;
+      return `${qualifiedIdentifier} AS ${quoteIdentifierWhenRequired(alias)}`;
     });
     select.unshift(
       getQualifiedIdentifier(
@@ -280,7 +280,7 @@ class CellSet extends DataSetComponent {
         CellSet.#cellIndexColumnName
       )
     );
-    var from = `FROM ${getQuotedIdentifier(CellSet.#tupleDataRelationName)}`;
+    var from = `FROM ${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}`;
     var joinSql, onCondition;
     if (axisItems.length) {
       joinSql = `LEFT JOIN`;
@@ -295,7 +295,7 @@ class CellSet extends DataSetComponent {
       joinSql = `CROSS JOIN`;
       onCondition = '';
     }
-    joinSql += ` ${getQuotedIdentifier('__huey_cells')}`;
+    joinSql += ` ${quoteIdentifierWhenRequired('__huey_cells')}`;
     from += `\n${joinSql}`;
 
     if (hasTotalsItems) {

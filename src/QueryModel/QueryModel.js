@@ -181,7 +181,7 @@ class QueryAxisItem {
 
     if (columnExpression === '*') {
       if (alias) {
-        columnExpression = `${getQuotedIdentifier(alias)}.*`;
+        columnExpression = `${quoteIdentifierWhenRequired(alias)}.*`;
       }
     }
     else {

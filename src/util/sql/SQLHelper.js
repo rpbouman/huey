@@ -802,7 +802,9 @@ function unQuoteIdentifier(str){
 }
 
 function identifierRequiresQuoting(identifier){
-  return /[\s"]/.test(identifier);
+  // TODO: check if the identifier is a reserved word, see https://duckdb.org/docs/sql/meta/duckdb_table_functions#duckdb_keywords
+  // https://duckdb.org/docs/sql/dialect/keywords_and_identifiers.html
+  return /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier);
 }
 
 function quoteIdentifierWhenRequired(identifier){
@@ -1103,7 +1105,7 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
         // the COUNT(*) expression is special, we don't need to have a column for it
       }
       else {
-        cellColumnExpressions[cellsAxisItem.columnName] = getQuotedIdentifier(cellsAxisItem.columnName);
+        cellColumnExpressions[cellsAxisItem.columnName] = quoteIdentifierWhenRequired(cellsAxisItem.columnName);
       }
       
       var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
@@ -1115,21 +1117,21 @@ function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
   var columns = [].concat(
     Object.keys(columnsExpressions).map(function(expressionId){
       var expression = columnsExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${quoteIdentifierWhenRequired(expressionId)}`;
     }),
     Object.keys(rowsExpressions).map(function(expressionId){
       var expression = rowsExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${quoteIdentifierWhenRequired(expressionId)}`;
     }),
     Object.keys(cellColumnExpressions).map(function(expressionId){
       var expression = cellColumnExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
+      return `${expression} ${asKeyword} ${quoteIdentifierWhenRequired(expressionId)}`;
     })
   );
   
   var aggregates = Object.keys(aggregateExpressions).map(function(expressionId){
     var aggregateExpression = aggregateExpressions[expressionId];
-    return `${aggregateExpression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
+    return `${aggregateExpression} ${asKeyword} ${quoteIdentifierWhenRequired(expressionId)}`;
   });
 
   var datasource = queryModel.getDatasource();

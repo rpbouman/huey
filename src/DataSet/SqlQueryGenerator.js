@@ -14,7 +14,7 @@ class SqlQueryGenerator {
   }
   
   static #getExpressionString(columnName, memberExpressionPath){
-    var columnExpression = getQuotedIdentifier(columnName);
+    var columnExpression = quoteIdentifierWhenRequired(columnName);
     var pathExpression = memberExpressionPath.map(function(memberExpressionPathElement){
       return `[${quoteStringLiteral( memberExpressionPathElement ) }]`
     }).join('');
@@ -432,7 +432,7 @@ class SqlQueryGenerator {
     for (var i = 0; i < columnIds.length; i++) {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
-      var columnAlias = getQuotedIdentifier(columnId);
+      var columnAlias = quoteIdentifierWhenRequired(columnId);
       var columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
@@ -532,7 +532,7 @@ class SqlQueryGenerator {
 
       // if we have grouping sets, we need to add a GROUPING_ID expression 
       // over all grouping exprssions so we can identify which rows are super-aggregate rows
-      var groupingIdAlias = getQuotedIdentifier(TupleSet.groupingIdAlias);
+      var groupingIdAlias = quoteIdentifierWhenRequired(TupleSet.groupingIdAlias);
       var groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
 
@@ -605,7 +605,7 @@ class SqlQueryGenerator {
       }
     });
     var sqlSelectList = Object.keys(selectListExpressions).map(function(columnId){
-      return `${selectListExpressions[columnId]} AS ${getQuotedIdentifier(columnId)}`
+      return `${selectListExpressions[columnId]} AS ${quoteIdentifierWhenRequired(columnId)}`
     });
     sql = [
       `SELECT ${sqlSelectList.join('\n,')}`,
@@ -660,7 +660,7 @@ class SqlQueryGenerator {
     
     if (options.finalStateAsCte === true) {
       sql = sql.replace(/\n/g, '\n  ');
-      sqls.push(`${getQuotedIdentifier(options.cteName)} AS (\n  ${sql}\n)`);
+      sqls.push(`${quoteIdentifierWhenRequired(options.cteName)} AS (\n  ${sql}\n)`);
       sql = '';
     }
     var withSql = sqls.length ? `WITH ${sqls.join('\n,')}\n` : '';
