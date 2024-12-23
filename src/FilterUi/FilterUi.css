@@ -1,13 +1,3 @@
-dialog#filterDialog {
-  margin: 0px;
-  position:absolute;
-  resize: both;
-  padding: 2px 0px 0px 2px;
-  min-height: 280px;
-  min-width: 300px;
-  width: 300px;
-}
-
 #filterDialogSpinner {
   position:absolute;
   left: 50%;
@@ -21,211 +11,244 @@ dialog#filterDialog[aria-busy=false] #filterDialogSpinner {
 
 dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
   display: block;
+
+  > section > header > section {
+
+    > header > search#filterSearch  {
+      color: transparent;
+      text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+    
+    > section > select#filterPicklist {
+      color: transparent;
+      text-shadow: 0 0 5px rgba(0,0,0,0.5);
+      overflow: auto;
+    }
+
+  }
 }
 
-dialog#filterDialog[aria-busy=true] > section > header > section > header > search#filterSearch  {
-  color: transparent;
-  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+dialog#filterDialog {
+  margin: 0px;
+  position:absolute;
+  resize: both;
+  padding: 2px 0px 0px 2px;
+  min-height: 280px;
+  min-width: 300px;
+  width: 300px;
+  
+  > header[role=toolbar] {
+    padding-left: .5em;
+  }
+
+  section {
+    display:flex;
+    flex-direction: column;
+
+    > section {
+      flex-grow: 1;
+    }
+
+    > header {
+      flex-grow: 0;
+    }
+    
+    > footer {
+      flex-grow: 0;
+      padding-top: 4px;
+      padding-bottom: 2px;
+    }
+
+    > footer[role=toolbar]:has( > button ){
+      text-align: center;
+    }
+
+    > footer[role=status] {
+      font-size: smaller;
+    }
+    
+  }
+  
+  > section {
+    flex-grow: .75;
+    padding: 2px;
+    
+    > header {
+      white-space: nowrap;
+
+      > menu[role=toolbar] {
+        padding: unset;
+        height: unset;
+        margin-bottom: 4px;
+
+        > label > input[type=checkbox] {
+          visibility: hidden;
+          display: none;
+        }
+
+        > label:has( > input[type=checkbox] )::after {
+          font-family: var( --huey-icon-font-family );
+          color: var(--huey-icon-color-subtle);  
+          /* square */
+          content: "\eb2c";
+        }
+
+        > label:has( > input[type=checkbox]:checked )::after {
+          /* checkbox */
+          content: "\eba6";
+          color: var( --huey-icon-color-highlight );
+        }    
+
+        > label:has( > input[type=checkbox] ):hover::after {
+          color: var( --huey-icon-color-highlight );
+        }
+      }
+
+      > section {
+
+        > header { 
+
+          > input[type=search]#filterSearch {
+            border-color: var( --huey-light-border-color ); 
+            width: calc( 100% - 40px );
+            position:relative;
+            height: 24px;
+            top: -3px;
+            padding-left: .5em;
+          }
+
+          > button#addFilterValueButton::before {
+            font-family: var( --huey-icon-font-family );
+            font-size: var( --huey-icon-medium );
+            content: "\fa02"
+          }
+
+        }
+
+        > section {
+          > select#filterPicklist {
+            box-shadow: 0px 0px 0px transparent;
+            width: calc( 100% - 10px );
+            height: 100%;
+            overflow-x: auto;
+            resize: vertical;
+
+            > optgroup > option[data-next-page-loader=true] {
+              color: var( --huey-placeholder-color );
+              font-style: italic;
+            }
+          }
+
+        }
+      }
+
+    }
+
+    > section {
+      flex-grow: 1.25;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: row;
+      
+      > label > select {
+        width: 100%;
+        height: calc( 100% - 20px);
+      }
+      
+      > div {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+        > label {
+          flex-grow: 0;
+        }
+
+        > select {
+          flex-grow: 1;
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      > div:has( > label[for=toFilterValueList] ) {
+        display: none;
+      }
+
+    }
+
+    > footer {
+
+      > button#filterDialogClearSelectedButton,
+      > button#filterDialogClearButton {
+        width: 9em;
+      }
+
+    }
+
+  }
+
+  > section:not( section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
+    pointer-events: none;
+    color: var( --huey-placeholder-color );
+    background-color: var( --huey-medium-background-color );
+  }
+  
+  > section:has( > section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
+    pointer-events: auto;
+    color: var( --huey-foreground-color );
+    background-color: var( --huey-dark-background-color );
+  }
+  
+  > section:not( section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
+    pointer-events: none;
+    color: var( --huey-placeholder-color );
+    background-color: var( --huey-medium-background-color );
+  }  
+  
+  > section:has( > section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
+    pointer-events: auto;
+    color: var( --huey-foreground-color );
+    background-color: var( --huey-dark-background-color );
+  }
+
+  > footer {
+    
+    margin-top: 2px;
+    margin-bottom: 0px;
+    padding: 4px 4px 0px 4px;
+    height: 30px;
+    
+    > button {
+      width: 5.5em;
+    }  
+  }
+
 }
 
-dialog#filterDialog[aria-busy=true] > section > header > section > section > select#filterPicklist {
-  color: transparent;
-  text-shadow: 0 0 5px rgba(0,0,0,0.5);
-  overflow: auto;
-}
-
-dialog#filterDialog > header[role=toolbar] {
-  padding-left: .5em;
-}
-
-dialog#filterDialog > section > header > menu[role=toolbar] {
-  padding: unset;
-  height: unset;
-  margin-bottom: 4px;
-}
-
-dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] )::after {
-  font-family: var( --huey-icon-font-family );
-  color: var(--huey-icon-color-subtle);  
-  /* square */
-  content: "\eb2c";
-}
-
-dialog#filterDialog > section > header > menu[role=toolbar] > label:has( > input[type=checkbox] ):hover::after {
-  color: var( --huey-icon-color-highlight );
-}
-
-dialog#filterDialog > section >  header > menu[role=toolbar] > label:has( > input[type=checkbox]:checked )::after {
-  /* checkbox */
-  content: "\eba6";
-  color: var( --huey-icon-color-highlight );
-}
-
-dialog#filterDialog > section >  header > menu[role=toolbar] > label > input[type=checkbox] {
-  visibility: hidden;
-  display: none;
-}
-
-dialog#filterDialog > footer > button {
-  width: 5.5em;
-}
-
-/* clear selected/highlighted button */
-dialog#filterDialog > section > footer > button#filterDialogClearSelectedButton {
-  width: 9em;
-}
-
-dialog#filterDialog > section:not( section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
-  pointer-events: none;
-  color: var( --huey-placeholder-color );
-  background-color: var( --huey-medium-background-color );
-}
-
-dialog#filterDialog > section:has( > section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
-  pointer-events: auto;
-  color: var( --huey-foreground-color );
-  background-color: var( --huey-dark-background-color );
-}
-
-/* clear all button */
-dialog#filterDialog > section > footer > button#filterDialogClearButton{
-  width: 9em;
-}
-
-dialog#filterDialog > section:not( section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
-  pointer-events: none;
-  color: var( --huey-placeholder-color );
-  background-color: var( --huey-medium-background-color );
-}
-
-dialog#filterDialog > section:has( > section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
-  pointer-events: auto;
-  color: var( --huey-foreground-color );
-  background-color: var( --huey-dark-background-color );
-}
-
-dialog#filterDialog section > header {
-  flex-grow: 0;
-}
-
-dialog#filterDialog > section > header {
-  flex-grow: .75
-}
-
-dialog#filterDialog section > section {
-  flex-grow: 1;
-}
-
-dialog#filterDialog > section > section {
-  flex-grow: 1.25;
-  margin-top: 4px;
-}
-
-dialog#filterDialog > section > header > section > section > select#filterPicklist > optgroup > option[data-next-page-loader=true] {
-  color: var( --huey-placeholder-color );
-  font-style: italic;
-}
-
-dialog#filterDialog > footer {
-  margin-top: 2px;
-  margin-bottom: 0px;
-  padding: 4px 4px 0px 4px;
-  height: 30px;
-}
-
-dialog#filterDialog > section {
-  padding: 2px;
-}
-
-dialog#filterDialog section {
-  display:flex;
-  flex-direction: column;
-}
-
-dialog#filterDialog section > footer {
-  flex-grow: 0;
-  padding-top: 4px;
-  padding-bottom: 2px;
-}
-
-dialog#filterDialog section > footer[role=toolbar]:has( > button ){
-  text-align: center;
-}
-
-dialog#filterDialog > section > header {
-  white-space: nowrap;
-}
-
-dialog#filterDialog > section > header > section > header > input[type=search]#filterSearch {
-  border-color: var( --huey-light-border-color ); 
-  width: calc( 100% - 40px );
-  position:relative;
-  height: 24px;
-  top: -3px;
-  padding-left: .5em;
-}
-
-dialog#filterDialog > section > header > section > header > button#addFilterValueButton::before {
-  font-family: var( --huey-icon-font-family );
-  font-size: var( --huey-icon-medium );
-  content: "\fa02"
-}
-
-dialog#filterDialog > section > header > section > section > select#filterPicklist {
-  box-shadow: 0px 0px 0px transparent;
-  width: 100%;
-  height: 100%;
-  overflow-x: auto;
-  resize: vertical;
-}
-
-dialog#filterDialog section > footer[role=status] {
-  font-size: smaller;
-}
-
-dialog#filterDialog select[multiple=true] > option {
-}
-
-dialog#filterDialog > section > section > label > select {
-  width: 100%;
-  height: calc( 100% - 20px);
-}
-
-dialog#filterDialog > section > section {
-  display: flex;
-  flex-direction: row;
-}
-
-dialog#filterDialog > section > section > div {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-dialog#filterDialog > section > section > div > label{
-  flex-grow: 0;
-}
-
-dialog#filterDialog > section > section > div > select{
-  flex-grow: 1;
-  width: 100%;
-  height: 100%;
-}
-
-dialog#filterDialog > section > section > div:has( > label[for=toFilterValueList] ) {
-  display: none;
-}
-
+/* panel with the toFilterValueList is hidden by default, but visible for between/notbetween operators. */
 dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ), 
 dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) {
   display: flex;
   flex-grow: 1;
 }
 
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ) > select#toFilterValueList, 
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) > select#toFilterValueList {
+  width: calc(100% - 10px);
+  min-width: 75px;
+}
+
 dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ),
 dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ){
   flex-grow: 0;
 }
+
+dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ) > #filterValueList,
+dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ) > #filterValueList {
+  min-width: 130px;
+}
+
 
 dialog#filterDialog #filterValueList,
 dialog#filterDialog #toFilterValueList {
