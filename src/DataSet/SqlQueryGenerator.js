@@ -402,6 +402,7 @@ class SqlQueryGenerator {
     var totalsPosition = options.totalsPosition;
     var samplingConfig = options.samplingConfig;
     var includeOrderBy = options.includeOrderBy === false ? false : true;
+    var useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
     
     var sql = '';
     var columnExpressions = {};
@@ -431,7 +432,8 @@ class SqlQueryGenerator {
     for (var i = 0; i < columnIds.length; i++) {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
-      var orderByExpression = columnExpression;
+      var columnAlias = getQuotedIdentifier(columnId);
+      var columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
@@ -441,7 +443,7 @@ class SqlQueryGenerator {
         break;
       }
       
-      selectListExpressions.push(`${columnExpression} AS ${getQuotedIdentifier(columnId)}`);
+      selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
       var queryAxisItem = queryAxisItems[i];
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
       var itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
@@ -454,16 +456,16 @@ class SqlQueryGenerator {
         axisGroupingSets = groupingSets[axisId];
         var groupingSet = [].concat(axisGroupByExpressions);
         axisGroupingSets.push(groupingSet);
-        groupingIdExpressions.push(columnExpression);
+        groupingIdExpressions.push(columnExpressionReference);
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
-        orderByExpressions.push(columnExpression);
+        orderByExpressions.push(columnExpressionReference);
       }
       
       if (axisId !== QueryModel.AXIS_CELLS && queryAxisItem.derivation !== 'rownumber'){
-        axisGroupByExpressions.push(columnExpression);
+        axisGroupByExpressions.push(columnExpressionReference);
       }
-      orderByExpression = `${orderByExpression} ${sortDirection}`;
+      var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
     }
