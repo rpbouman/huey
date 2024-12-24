@@ -639,7 +639,7 @@ class SqlQueryGenerator {
     var filterAxisItems = options.filterAxisItems;
     var samplingConfig = options.samplingConfig
 
-    var sqlOptions = normalizeSqlOptions();
+    var sqlOptions = normalizeSqlOptions(options.sqlOptions);
 
     var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
     var ctes = SqlQueryGenerator.#getUnnestingStages(
