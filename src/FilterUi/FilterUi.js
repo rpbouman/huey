@@ -176,6 +176,15 @@ class FilterDialog {
       event.preventDefault();
       var pastedText = getPastedText(event);
       pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+      pastedText = pastedText
+      .split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
+      .reduce(function(arr, value){
+        if (arr.indexOf(value) === -1){
+          arr.push(value);
+        }
+        return arr;
+      }, [])
+      .join(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
       search.value = pastedText;
       this.#updatePicklist();
     }.bind(this));
