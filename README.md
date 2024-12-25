@@ -246,8 +246,11 @@ Right above the input, there appear two checkboxes:
 #### Adding/Deleting Filter Values
 
 Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them.
-Alternatively, values in the input may be applied explicitly by clicking the button next to the input, or by hitting the Enter button on the keyboard.
+Alternatively, values may be entered manually and added by clicking the button next to the input, or by hitting the Enter key on the keyboard.
+
 Applying a value in this way while an already applied value is selected will overwrite the applied value with the new one.
+To enter multiple filter values at once, separate them with a semi-colon and then hit the button or the Enter key.
+When pasting multiple values from outside Huey, for example from Excel or a text editor, separators like newline and tab are automatically replaced with the semi-colon for ease of use.
 
 Applied values may be removed by selecting them and then hitting the Clear Highlighted dialog button, or the Delete key on the keyboard.
 Hitting the Clear All button will remove all applied values. 
@@ -257,6 +260,17 @@ Hitting the Clear All button will remove all applied values.
 - The Apply button will actually apply the chosen values to the filter and close the Filter Dialog.
 - The Remove button will remove the filter item entirely from the Filter axis and close the Filter Dialog
 - The Cancel button will close the Filter Dialag without changing the state of the filter item.
+
+#### Hiding, Revealing and Toggling applied Filter Values
+Once the filter values are applied, the Filter Item will show the number of values as well as a collapser/expander.
+
+![image](https://github.com/user-attachments/assets/8f042450-8320-4b52-b097-4787031618c9)
+
+By default, the filter item is collapsed. Clicking the expander will reveal the filter items:
+
+![image](https://github.com/user-attachments/assets/edb058d6-c523-4b37-804c-804fcf11ae58)
+
+The filter values have a checkbox that allows you to enable or disable that value. 
 
 ### (Sub)totals
 
