@@ -1,5 +1,5 @@
 # 🦆 Huey
-Huey is a browser-based application that lets you explore tabular datasets.
+Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
@@ -7,12 +7,17 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 ![image](https://github.com/rpbouman/huey/assets/647315/b2e45002-409c-4a98-8d38-f5a6bfc6b7e9)
 
 ## Key features
-- An intuitive and responsive pivot table that supports filtering and (sub)totals
-- Supports many different aggregate functions for reporting and data exploration
-- Automatic breakdown of date/time columns into separate parts (year, month, quarter etc) for reporting
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
+- A comprehensive Attribute menu for exploring the structure of your dataset
+- An intuitive query builder that supports projection, aggregation, filtering, and (sub)totals
+- A pivot table to present analysis results
+- Many different aggregate functions for reporting and data exploration
+- Automatic breakdown of date/time columns into separate parts (year, month, quarter etc) for reporting
+- Support for array and STRUCT data types
 - Export of results and/or SQL queries to file or clipboard
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
+- Truly light-weight. Huey depends on DuckDb-WASM, and Tabler Icons, but nothing more. If it makes sense, dependencies might be added, but up till now we get along fine with what the browser gives us. And that's enough.
+- Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
 - Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
 - It's free! Huey is released under the MIT license, just like DuckDB.
 
@@ -74,22 +79,32 @@ Note: We ran into a limitation - when the duckdb file itself refers to external 
 But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
 
 ## Exploring Datasources
-The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1)
- . After clicking it, the sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
+The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). 
+After clicking it, the left sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
 
 ### Attributes, Derived Attributes, and Aggregates
-You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table. 
+You can think of Attributes as a list of values (a column) that can be extracted from the Datasource and presented along the axes of the pivot table.
+
 ![image](https://github.com/user-attachments/assets/d4caf74b-64ce-4722-ad55-d31cf192bff6)
 
 The pivot table has two axes for placing attribute values:
 1) Attributes appearing on the horizontal axis are used to generate column headers. For this reason the horizontal axis is also known as the 'columns'-axis.
 2) attributes appearing on the vertical axis are used to generate row headers. For this reason the vertical axis is also known as the 'rows'-axis.
 
-The selection of attributes and their placement on the axis is represented by the Query interface. The following screenshot showing the Attribute Sidebar (left), the Query Interface (top right), and the pivot table (bottom right) may help to explain:
-![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
+The selection of attributes and their placement on the axis is represented by the Query Builder. 
+The following screenshot may help to explain:
 
-The screenshot shows a simple query, with one attribute "hvfhs_license_num" placed on the columns axis of the Query interface. 
+![image](https://github.com/user-attachments/assets/87da26a0-5c0d-4a42-8fad-74369f00b0a7)
+
+In the screenshot, the Attribute Sidebar is at the left side. The workarea is to the right of the Attribute Sidebar. 
+The Query Builder is at the top right of the workarea. The pivot table is at the bottom right.
+
+### Query Builder
+
+The screenshot shows a simple query, with one attribute "hvfhs_license_num" placed on the columns axis of the Query Builder. 
 Placing the attribute on the Columns axis causes its values to be shown as column headings of the pivot table.
+
+![image](https://github.com/user-attachments/assets/81aa9386-fba6-4f99-ad2f-f8ce0e25afb0)
 
 Likewise, the attribute "dispatching_base_num" is placed on the Rows axis, and this causes its values to show as row headings in the pivot table.
 
@@ -98,21 +113,35 @@ The aggregated value are placed in the cells at the intersection of the correspo
 
 By default, the cell headers appear on the Columns axis, below the last Column Axis item (if any).
 The cell headers can also by placed on the Rows axis, in which case they appear right to the values of the last row axis item:
-![image](https://github.com/user-attachments/assets/e66b033a-e345-4ec5-ad03-9b353f97f5d5)
+
+![image](https://github.com/user-attachments/assets/a79a8abf-ed67-41a8-bfb2-13c6772997f9)
 
 (Note that for this particular example, which has only one aggregator on the cells-axis, its placement on either cells or rows doesn't make much difference.)
 
 ### Placing Attributes
-Attributes can be placed either by clicking one of the desired axis-placement buttons, which appear to the left of the attribute name.
-Alternatively, you can drag attributes form the Attributes sidebar to the desired position on the axis in the Query interface.
+
+Attributes can be placed by clicking one of the desired axis-placement buttons, which appear to the left of the attribute name.
 
 Once the items are placed in the rows and column axes, you can move and flip the axes by clicking on the axis icon that appears right before the "Rows" and "Columns" axis header text.
 Clicking on the axis icon of the Cells axis will affect the placement of the cell headers on either of the Rows- and Columns- axes. 
 
+Items that are placed inside the Query builder have buttons to manipulate them: At the left and right side of the query items, there are buttons to move the item a single position to the left or right within the axis.
+Items on the rows and columns axes also have a button to move the item from one axis to the other.
+Items also have a button to remove it from the query.
+
+![image](https://github.com/user-attachments/assets/021f72ba-0551-441e-ba86-106ef3ef6808)
+
+#### Drag and Drop
+
+Instead of using the buttons in the Attribute sidebar, you can also drag Attributes from the sidebar and drop them at the desired position in the Query Builder.
+Drag and Drop also works for items that are already placed inside the Query Builder.
+
 ### Query Execution
+
 After changing the Query, it must be executed so the pivot table may be updated. 
 If the "Autorun query" checkbox on the toolbar is checked, this will happen automatically.
 If the "Autorun query" checkbox is not checked, then you can execute the query by clicking the "play" button that appears just in front of the checkbox label:
+
 ![image](https://github.com/user-attachments/assets/0d32ac87-25fa-49d2-8d1b-31e615e8378c)
 
 ### Derived Attributes
@@ -120,7 +149,7 @@ Right before the attribute item, there is a widget to expand the Attribute so it
 
 ![image](https://github.com/user-attachments/assets/db9e89c5-e7c3-44af-956b-9393dad6723c)
 
-You can think of a derived attribute as an expression (formulae) that calculates some aspect from a single value from the attribute upon which it is based.
+You can think of a derived attribute as an expression (formula) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
 The values that are thus derived from the original attribute values can be thought of as a 'virtual' column and can appear on wither of the pivot table axes.
 
@@ -130,6 +159,55 @@ Aggregates are special expressions that calculate a result on a group of attribu
 Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
 
 ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
+
+## Structured types, Arrays, and Maps
+
+Attributes can have any kind of datatype, including composite or "nested" data types - that is, types whose values are not scalar, but which consist of multiple elements.
+Especially when exploring JSON files one is likely to encounter attributes having these types.
+
+### Structured Types
+
+Values with a Structured type (STRUCT) are in the end just values, and can be projected on the query axis as such.
+Attributes of this type also have a "structure" folder that gives access to its members.
+
+![image](https://github.com/user-attachments/assets/8687b270-6298-4434-8f52-5b32d7d39a53)
+
+Members are also just attributes, and will have their own derivations and aggregates, in accordance with the member type. 
+Of course, members that are themselves of a structured type have their own structure folder that gives access to its members.
+
+### Arrays
+
+Arrays are also just values and can be treated as such.
+
+Attributes of an array type have a set of "array operations" derivations:
+- elements: unnests the array and projects the element value on a separate tuple. Just like with members of structured types, array elements are just like attributes and may have derivations and aggregates in accordance with their type.
+- element indices: unnests the array, and projects the element index. If both elements and element indices appear together on the same axis, then they are unrolled at the same level, so that the indices and the element values refer to the same element.
+- length: returns the length of the array.
+- sort values: array value after sorting the elements
+- unique values: (sorted) array value after removing the duplicate elements 
+- unique values length: length of the deduplicated array.
+
+![image](https://github.com/user-attachments/assets/5f2acd6e-3ac1-4702-b204-7737fbc9a8f0)
+
+When the elements or element indices derivations are applied to multiple, independent attributes, then they are unrolled independently, in order of appearance on the axis.
+
+Arrays also support a collection of "array statistics":
+
+![image](https://github.com/user-attachments/assets/f9230a17-339d-4598-b8e5-3b92f851b395)
+
+Array statistics are special derivations that calculate an aggregate value over the array's elements. 
+
+### Maps
+
+Maps are structured types that are somewhat similar to Arrays. While arrays have an ordered collection of elements with an associated integer index, Maps are an unordered collections of entries. Map entries are values (which can be of any type) which are uniquely identified by a key, which also may have any type.
+
+Maps have a folder with map operations:
+
+![image](https://github.com/user-attachments/assets/0fbaf936-2e4d-40b3-a57d-fa4ad330b795)
+
+- entries gives access to the key and value derivations. These will unnest the map and project the key and/or value. Like array elements and element indices, the key and value derivations of the same map attribute are not independent but unrolled together.
+- entry count: the number of entries in the map
+- keyset: the (sorted) list of keys.
 
 ### Filtering
 

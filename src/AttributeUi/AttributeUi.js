@@ -4,10 +4,38 @@ class AttributeUi {
   #queryModel = undefined;
 
   static aggregators = {
+    'and': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
+      columnType: 'BOOLEAN'
+    },
+    'avg': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'AVG( ${columnExpression} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
     'count': {
       isNumeric: true,
       isInteger: true,
       expressionTemplate: 'COUNT( ${columnExpression} )',
+      columnType: 'HUGEINT'
+    },
+    'count if false': {
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
+      columnType: 'HUGEINT'
+    },
+    'count if true': {
+      forBoolean: true,
+      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
       columnType: 'HUGEINT'
     },
     'distinct count': {
@@ -16,30 +44,110 @@ class AttributeUi {
       expressionTemplate: 'COUNT( DISTINCT ${columnExpression} )',
       columnType: 'HUGEINT'
     },
-    'min': {
+    'entropy': {
       folder: "statistics",
-      preservesColumnType: true,
-      expressionTemplate: 'MIN( ${columnExpression} )'
+      isNumeric: true,
+      isInteger: false,
+      expressionTemplate: 'ENTROPY( ${columnExpression} )',
+      columnType: 'DOUBLE'
     },
-    'max': {
+    'geomean': {
       folder: "statistics",
-      preservesColumnType: true,
-      expressionTemplate: 'MAX( ${columnExpression} )'
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'GEOMEAN( ${columnExpression} )',
+      createFormatter: function(axisItem){
+        var formatter = createNumberFormatter(true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
+    'histogram': {
+      folder: "list aggregators",
+      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
+      isStruct: true,
+    },
+    'kurtosis': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
+      columnType: 'DOUBLE'
     },
     'list': {
       folder: "list aggregators",
       expressionTemplate: 'LIST( ${columnExpression} )',
       isArray: true
     },
-    'distinct list': {
+    'unique values': {
       folder: "list aggregators",
       expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
       isArray: true
     },
-    'histogram': {
-      folder: "list aggregators",
-      expressionTemplate: 'HISTOGRAM( ${columnExpression} )',
-      isStruct: true,
+    'mad': {
+      folder: "statistics",
+      columnType: 'INTERVAL',
+      forNumeric: true,
+      expressionTemplate: 'MAD( ${columnExpression} )'
+    },
+    'max': {
+      folder: "statistics",
+      preservesColumnType: true,
+      expressionTemplate: 'MAX( ${columnExpression} )'
+    },
+    'median': {
+      folder: "statistics",
+      expressionTemplate: 'MEDIAN( ${columnExpression} )',
+      createFormatter: function(axisItem){
+        var columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+        var dataTypeInfo = getDataTypeInfo(columnType);
+        var formatter;
+        if (dataTypeInfo.isNumeric) {
+          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+          return function(value, field){
+            return formatter.format(value, field);
+          };
+        }
+        else {
+          return function(value, field){
+            return fallbackFormatter(value);
+          };
+        }
+      }
+    },
+    'min': {
+      folder: "statistics",
+      preservesColumnType: true,
+      expressionTemplate: 'MIN( ${columnExpression} )'
+    },
+    'mode': {
+      folder: "statistics",
+      preservesColumnType: true,
+      expressionTemplate: 'MODE( ${columnExpression} )'
+    },
+    'or': {
+      forBoolean: true,
+      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
+      columnType: 'BOOLEAN'
+    },
+    'skewness': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'SKEWNESS( ${columnExpression} )',
+      columnType: 'DOUBLE'
+    },
+    'stdev': {
+      folder: "statistics",
+      isNumeric: true,
+      isInteger: false,
+      forNumeric: true,
+      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
+      columnType: 'DOUBLE'
     },
     'sum': {
       isNumeric: true,
@@ -56,71 +164,6 @@ class AttributeUi {
         };
       }
     },
-    'avg': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'AVG( ${columnExpression} )',
-      createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
-        return function(value, field){
-          return formatter.format(value, field);
-        };
-      }
-    },
-    'geomean': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'GEOMEAN( ${columnExpression} )',
-      createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
-        return function(value, field){
-          return formatter.format(value, field);
-        };
-      }
-    },
-    'mad': {
-      folder: "statistics",
-      columnType: 'INTERVAL',
-      forNumeric: true,
-      expressionTemplate: 'MAD( ${columnExpression} )'
-    },
-    'median': {
-      folder: "statistics",
-      expressionTemplate: 'MEDIAN( ${columnExpression} )',
-      createFormatter: function(axisItem){
-        var columnType = axisItem.columnType;
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var formatter;
-        if (dataTypeInfo.isNumeric) {
-          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
-          return function(value, field){
-            return formatter.format(value, field);
-          };
-        }
-        else {
-          return function(value, field){
-            return fallbackFormatter(value);
-          };
-        }
-      }
-    },
-    'mode': {
-      folder: "statistics",
-      preservesColumnType: true,
-      expressionTemplate: 'MODE( ${columnExpression} )'
-    },
-    'stdev': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'STDDEV_SAMP( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
     'variance': {
       folder: "statistics",
       isNumeric: true,
@@ -128,51 +171,36 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'VAR_SAMP( ${columnExpression} )',
       columnType: 'DOUBLE'
-    },
-    'entropy': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      expressionTemplate: 'ENTROPY( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'kurtosis': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'KURTOSIS( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'skewness': {
-      folder: "statistics",
-      isNumeric: true,
-      isInteger: false,
-      forNumeric: true,
-      expressionTemplate: 'SKEWNESS( ${columnExpression} )',
-      columnType: 'DOUBLE'
-    },
-    'and': {
-      forBoolean: true,
-      expressionTemplate: 'BOOL_AND( ${columnExpression} )',
-      columnType: 'BOOLEAN'
-    },
-    'or': {
-      forBoolean: true,
-      expressionTemplate: 'BOOL_OR( ${columnExpression} )',
-      columnType: 'BOOLEAN'
-    },
-    'count if true': {
-      forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( ${columnExpression} )',
-      columnType: 'HUGEINT'
-    },
-    'count if false': {
-      forBoolean: true,
-      expressionTemplate: 'COUNT( ${columnExpression} ) FILTER( NOT( ${columnExpression} ) )',
-      columnType: 'HUGEINT'
     }
   };
+  
+  static arrayStatisticsDerivations = Object
+  .keys(AttributeUi.aggregators)
+  .filter(function(aggregator){
+    var aggregatorInfo = AttributeUi.aggregators[aggregator];
+    return aggregatorInfo.folder !== 'list aggregators';
+  })
+  .reduce(function(arrayStatisticsDerivations, aggregator){
+    var aggregatorInfo = AttributeUi.aggregators[aggregator];
+    var aggregateFunction = aggregatorInfo.expressionTemplate.split('(')[0];
+    var derivationInfo = Object.assign({}, aggregatorInfo);
+    if (derivationInfo.preservesColumnType){
+      derivationInfo.hasElementDataType = true; 
+      delete derivationInfo.preservesColumnType;
+    }
+    derivationInfo.folder = `array statistics`;
+    var expressionTemplate;
+    switch (aggregator) {
+      case 'distinct count':
+        expressionTemplate = 'list_unique( ${columnExpression} )';
+        break;
+      default:
+        expressionTemplate = `list_aggregate( \${columnExpression}, '${aggregateFunction}' )`;
+    }
+    derivationInfo.expressionTemplate = expressionTemplate;
+    arrayStatisticsDerivations[aggregator] = derivationInfo;
+    return arrayStatisticsDerivations;
+  }, {});
   
   static tupleNumberDerivations = {
     rownumber: {
@@ -213,7 +241,7 @@ class AttributeUi {
     },
     'month num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month num */ ",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: function(){
         return monthNumFormatter
@@ -221,9 +249,17 @@ class AttributeUi {
     },
     'month name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT) /* month name */ ",
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createMonthNameFormatter
+      createFormatter: createMonthFullNameFormatter,
+      dataValueTypeOverride: 'Utf8'
+    },
+    'month shortname': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createMonthShortNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     },
     'week num': {
       folder: 'date fields',
@@ -248,14 +284,22 @@ class AttributeUi {
     },
     'day of week num': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week num */",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
     },
     'day of week name': {
       folder: 'date fields',
-      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT) /* day of week name */",
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
-      createFormatter: createDayNameFormatter
+      createFormatter: createDayFullNameFormatter,
+      dataValueTypeOverride: 'Utf8'
+    },
+    'day of week shortname': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
+      columnType: 'UTINYINT',
+      createFormatter: createDayShortNameFormatter,
+      dataValueTypeOverride: 'Utf8'
     }
   };
 
@@ -289,6 +333,21 @@ class AttributeUi {
   };
 
   static textDerivations = {
+    "first letter": {
+      folder: 'string operations',
+      expressionTemplate: "upper( ${columnExpression}[1] )",
+      preservesColumnType: true
+    },
+    "length": {
+      folder: 'string operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    'lowercase': {
+      folder: 'string operations',
+      expressionTemplate: "LOWER( ${columnExpression} )",
+      preservesColumnType: true
+    },
     'NOACCENT': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOACCENT",
@@ -299,48 +358,66 @@ class AttributeUi {
       expressionTemplate: "${columnExpression} COLLATE NOCASE",
       preservesColumnType: true
     },
-    'lowercase': {
-      folder: 'string operations',
-      expressionTemplate: "LOWER( ${columnExpression} )",
-      preservesColumnType: true
-    },
     'uppercase': {
       folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
       preservesColumnType: true
-    },
-    "first letter": {
-      folder: 'string operations',
-      expressionTemplate: "upper( ${columnExpression}[1] )",
-      preservesColumnType: true
-    },
-    "length": {
-      folder: 'string operations',
-      expressionTemplate: "length( ${columnExpression} )",
-      columnType: 'BIGINT'
     }
   }
 
   static arrayDerivations = {
-    "length": {
-      folder: 'array operations',
-      expressionTemplate: "length( ${columnExpression} )",
-      columnType: 'BIGINT'
-    },
-    "element indices": {
-      folder: 'array operations',
-      columnType: 'BIGINT',
-      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1 )",
-      unnestingFunction: 'generate_subscripts'
-    },
     "elements": {
       folder: 'array operations',
       hasElementDataType: true,
       expressionTemplate: "unnest( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end )",
       unnestingFunction: 'unnest'
+    },
+    "element indices": {
+      folder: 'array operations',
+      columnType: 'BIGINT',
+      expressionTemplate: "generate_subscripts( case len( coalesce( ${columnExpression}, []) ) when 0 then [ NULL ] else ${columnExpression} end, 1)",
+      unnestingFunction: 'generate_subscripts'
+    },
+    "length": {
+      folder: 'array operations',
+      expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    "sort values": {
+      folder: 'array operations',
+      expressionTemplate: "list_sort( ${columnExpression} )",
+      preservesColumnType: true
+    },
+    "unique values":{
+      folder: 'array operations',
+      expressionTemplate: "list_sort( list_distinct( ${columnExpression} ) )",
+      preservesColumnType: true
+    },
+    "unique values length":{
+      folder: 'array operations',
+      expressionTemplate: "length( list_distinct( ${columnExpression} ) )",
+      columnType: 'BIGINT'
     }
   }
 
+  static mapDerivations = {
+    "entries": {
+      folder: 'map operations',
+      expressionTemplate: "unnest( map_entries( ${columnExpression} ) )",
+      unnestingFunction: 'unnest',
+      hasEntryDataType: true
+    },
+    "entry count": {
+      folder: 'map operations',
+      expressionTemplate: "cardinality( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    "keyset": {
+      folder: 'map operations',
+      expressionTemplate: "list_sort( map_keys( ${columnExpression} ) )"
+    }
+  };
+    
   static getApplicableDerivations(typeName){
     var typeInfo = getDataTypeInfo(typeName);
 
@@ -362,7 +439,9 @@ class AttributeUi {
       AttributeUi.dateFields,
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
-      AttributeUi.arrayDerivations
+      AttributeUi.arrayDerivations,
+      AttributeUi.arrayStatisticsDerivations,
+      AttributeUi.mapDerivations
     );
     var derivationInfo = derivations[derivationName];
     return derivationInfo;
@@ -394,7 +473,22 @@ class AttributeUi {
   }
 
   static getArrayDerivations(typeName){
-    return AttributeUi.arrayDerivations;
+    var arrayDerivations = Object.assign(AttributeUi.arrayDerivations);
+    var arrayStatisticsDerivations = AttributeUi.arrayStatisticsDerivations;
+    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    Object.keys(applicableAggregators).forEach(function(aggregator){
+      var arrayStatisticsDerivation = arrayStatisticsDerivations[aggregator];
+      if (!arrayStatisticsDerivation) {
+        return;
+      }
+      arrayDerivations[aggregator] = arrayStatisticsDerivations[aggregator];
+    });
+    return arrayDerivations;
+  }
+  
+  static getMapDerivations(typeName){
+    var mapDerivations = Object.assign(AttributeUi.mapDerivations);
+    return mapDerivations;
   }
 
   static #getUiNodeCaption(config){
@@ -423,25 +517,30 @@ class AttributeUi {
   }
 
   async #queryModelChangeHandler(event){
-    var eventData = event.eventData;
-    if (eventData.propertiesChanged) {
-      if (eventData.propertiesChanged.datasource) {
-        var searchAttributeUiDisplay;
-        if (eventData.propertiesChanged.datasource.newValue) {
-          this.clear(true);
-          var datasource = eventData.propertiesChanged.datasource.newValue;
-          var columnMetadata = await datasource.getColumnMetadata();
-          this.render(columnMetadata);
-          searchAttributeUiDisplay = '';
+    try {
+      var eventData = event.eventData;
+      if (eventData.propertiesChanged) {
+        if (eventData.propertiesChanged.datasource) {
+          var searchAttributeUiDisplay;
+          if (eventData.propertiesChanged.datasource.newValue) {
+            this.clear(true);
+            var datasource = eventData.propertiesChanged.datasource.newValue;
+            var columnMetadata = await datasource.getColumnMetadata();
+            this.render(columnMetadata);
+          }
+          else {
+            this.clear(false);
+          }
         }
-        else {
-          this.clear(false);
-          searchAttributeUiDisplay = 'none';
-        }
-        byId('searchAttributeUi').style.display = searchAttributeUiDisplay;
       }
     }
-    this.#updateState();
+    catch(e){
+      showErrorDialog(e);
+      this.clear();
+    }
+    finally {
+      this.#updateState();
+    }
   }
 
   #clickHandler(event){
@@ -615,17 +714,17 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeAxisButtons(config, head){
-    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
-    head.appendChild(filterButton);
-
-    var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
-    head.appendChild(cellsButton);
+    var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
+    head.appendChild(rowButton);
 
     var columnButton = this.#renderAttributeUiNodeAxisButton(config, head, 'columns');
     head.appendChild(columnButton);
 
-    var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
-    head.appendChild(rowButton);
+    var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
+    head.appendChild(cellsButton);
+
+    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
+    head.appendChild(filterButton);
   }
 
   #renderAttributeUiNodeHead(config) {
@@ -764,12 +863,6 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', config.derivation);
-        //if (derivation === 'elements') {
-        //  var elementType = memberExpressionPath ? config.profile.memberExpressionType : columnType;
-          // remove the trailing '[]' to get the element type.
-        //  elementType = elementType.slice(0, -2);
-        //  node.setAttribute('data-element_type', elementType);
-        //}
         break;
     }
 
@@ -781,12 +874,12 @@ class AttributeUi {
     // with lazy load it would only find whatever happens to be visited/browsed already.
     switch (config.type){
       case 'derived':
-        if (derivation !== 'elements') {
+        if (['elements'].indexOf(derivation) === -1) {
           break;
         }
       case 'column':
       case 'member':
-        if (columnType.startsWith('STRUCT')) {
+        if (columnType.startsWith('STRUCT') || columnType.startsWith('MAP') ) {
           this.#loadChildNodes(node);
         }
         break;
@@ -888,8 +981,8 @@ class AttributeUi {
     return folders;
   }
 
-  #loadMemberChildNodes(node, typeName, profile){
-    var folderNode = this.#renderFolderNode({caption: 'structure'});
+  #loadMemberChildNodes(node, typeName, profile, noFolder){
+    var folderNode = noFolder ? undefined : this.#renderFolderNode({caption: 'structure'});
     var columnType = profile.memberExpressionType || profile.column_type;
     var memberExpressionPath = profile.memberExpressionPath || [];
     var structure = getStructTypeDescriptor(columnType);
@@ -907,9 +1000,11 @@ class AttributeUi {
         }
       }
       var memberNode = this.#renderAttributeUiNode(config);
-      folderNode.appendChild(memberNode);
+      (folderNode || node).appendChild(memberNode);
     }
-    node.appendChild(folderNode);
+    if (folderNode) {
+      node.appendChild(folderNode);
+    }
   }
 
   #loadDerivationChildNodes(node, typeName, profile){
@@ -949,7 +1044,7 @@ class AttributeUi {
         var memberExpressionType = derivation.columnType;
         if (!memberExpressionType){
           memberExpressionType = profile.memberExpressionType || profile.column_type;
-          memberExpressionType = memberExpressionType.slice(0, -2);
+          memberExpressionType = getArrayElementType(memberExpressionType);
         }
         nodeProfile.column_type = profile.column_type;
         nodeProfile.memberExpressionType = memberExpressionType;
@@ -971,6 +1066,69 @@ class AttributeUi {
       else {
         node.appendChild(childNode);
       }
+    }
+  }
+
+  #loadMapChildNodes(node, typeName, profile){
+    var mapDerivations = AttributeUi.getMapDerivations(typeName);
+    var folders = this.#createFolders(mapDerivations, node);
+    for (var derivationName in mapDerivations) {
+      var derivation = mapDerivations[derivationName];
+      var nodeProfile; 
+      var memberExpressionType = profile.memberExpressionType || profile.column_type;
+      var memberExpressionPath;
+      switch (derivationName) {
+        case 'entries':
+        case 'entry keys':
+        case 'keyset':
+        case 'entry values':
+          nodeProfile = JSON.parse(JSON.stringify(profile));
+          if (!nodeProfile.memberExpressionPath) {
+            nodeProfile.memberExpressionPath = [];
+          }
+          break;
+        default:
+          nodeProfile = profile;
+      }
+
+      switch (derivationName) {
+        case 'entries':
+          nodeProfile.memberExpressionType = getArrayElementType(getMapEntriesType(memberExpressionType));
+          nodeProfile.memberExpressionPath.push('map_entries()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction + '()');
+          break;
+        case 'entry keys':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'key');
+          nodeProfile.memberExpressionPath.push('map_keys()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction + '()');
+          break;
+        case 'entry values':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'value');
+          nodeProfile.memberExpressionPath.push('map_values()');
+          nodeProfile.memberExpressionPath.push(derivation.unnestingFunction  + '()');
+          break;
+        case 'keyset':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'key') + '[]';
+      }
+
+      var config = {
+        type: 'derived',
+        derivation: derivationName,
+        title: derivation.title,
+        expressionTemplate: derivation.expressionTemplate,
+        profile: nodeProfile
+      };
+      var childNode = this.#renderAttributeUiNode(config);
+      if (derivationName === 'entries'){
+        this.#loadMemberChildNodes(childNode, nodeProfile.memberExpressionType, nodeProfile, true);
+      }
+      if (derivation.folder) {
+        folders[derivation.folder].appendChild(childNode);
+      }
+      else {
+        node.appendChild(childNode);
+      }
+      
     }
   }
 
@@ -1021,6 +1179,10 @@ class AttributeUi {
 
     if (expressionType.endsWith('[]')){
       this.#loadArrayChildNodes(node, typeName, profile);
+    }
+    else
+    if (expressionType.startsWith('MAP')){ 
+      this.#loadMapChildNodes(node, typeName, profile);
     }
     else
     if (expressionType.startsWith('STRUCT')){

@@ -813,6 +813,12 @@ class PivotTableUi extends EventEmitter {
       console.warn(`No tuple value and no tuple value field.`);
       return;
     }
+    switch (tupleValueField.type.typeId){
+      case 12:  // variable size list
+        console.warn(`Tuple value is a variable length list. Refuse to write out its literal value.`);
+        return;
+      default:
+    }
 
     cellElement.setAttribute('data-axis', queryAxisItem.axis);
 
@@ -830,6 +836,12 @@ class PivotTableUi extends EventEmitter {
     cellElement.setAttribute('data-value-literal', valueLiteral);
     
     var cellValueType = String(tupleValueField.type);
+    if (queryAxisItem.derivation) {
+      var derivationInfo = AttributeUi.getDerivationInfo(queryAxisItem.derivation);
+      if (derivationInfo.dataValueTypeOverride) {
+        cellValueType = derivationInfo.dataValueTypeOverride;
+      }
+    }
     cellElement.setAttribute('data-value-type', cellValueType);
   }
 
@@ -1854,9 +1866,9 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderRow, tableBodyRow, cells;
     
     // calculate the number of row headers
-    var numRowHeaders = rowsAxisItems.length;
-    var numColumnHeaders = columnsAxisItems.length;
-    if (cellsAxisItems.length) {
+    var numRowHeaders = rowsAxisItems ? rowsAxisItems.length : 0;
+    var numColumnHeaders = columnsAxisItems ? columnsAxisItems.length : 0;
+    if (cellsAxisItems && cellsAxisItems.length) {
       switch (cellHeadersAxis){
         case QueryModel.AXIS_COLUMNS:
           numColumnHeaders += 1;

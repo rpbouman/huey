@@ -27,6 +27,40 @@ class PageStateManager {
     this.setPageState(newRoute);
   }
 
+  #getDatasourceMenuItemHTML(config){
+    var datasourceMenuItemTemplate = byId('datasource-menu-item');
+    var item = datasourceMenuItemTemplate.content.children.item(0);
+    if (config.datasourceType) {
+      item.setAttribute('data-datasourcetype', config.datasourceType);
+    }
+    else {
+      item.removeAttribute('data-datasourcetype');
+    }
+    if (config.fileType) {
+      item.setAttribute('data-filetype', config.fileType);
+    }
+    else {
+      item.removeAttribute('data-filetype');
+    }
+    item.setAttribute('title', config.labelText);
+    
+    var id = 'datasourceMenu' + (typeof config.index === 'number' ? config.index : '');
+    var label = item.getElementsByTagName('LABEL').item(0);
+    label.setAttribute('for', id);
+    label.textContent = config.labelText;
+    var radio = item.getElementsByTagName('INPUT').item(0);
+    radio.setAttribute('id', id);
+    radio.setAttribute('value', config.value);
+    var checked = Boolean(config.checked);
+    if (checked) {
+      radio.setAttribute('checked', checked);
+    }
+    else {
+      radio.removeAttribute('checked');
+    }
+    return item.outerHTML;
+  }
+
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
     return new Promise(async function(resolve, reject){
 
@@ -64,25 +98,22 @@ class PageStateManager {
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
       var openNewDatasourceItem;
       if (existingDatasource) {
-        openNewDatasourceItem = [
-          `<li id="datasourceMenu" data-nodetype="datasource">`,
-            `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
-            '<span class="icon" role="img"></span>',
-            `<label for="datasourceMenu-1" class="label">Browse for a new Datasource</span>`,
-          `</li>`
-        ].join('\n')
+        openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
+          value: -1,
+          checked: true,
+          labelText: 'Browse for a new Datasource'
+        });
         title = 'Incompatible Datasource';
         message += ' isn\'t compatible with your query.';
         // TODO: show why it's not compatible
       }
       else {
-        openNewDatasourceItem = [
-          `<li id="datasourceMenu" data-nodetype="datasource" data-datasourcetype="${desiredDatasourceIdParts.type}">`,
-            `<input id="datasourceMenu-1" type="radio" name="compatibleDatasources" value="-1" checked="true"/>`,
-            '<span class="icon" role="img"></span>',
-            `<label for="datasourceMenu-1" class="label">Browse to open ${desiredDatasourceIdParts.localId}</label>`,
-          `</li>`
-        ].join('\n');
+        openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
+          datasourceType: desiredDatasourceIdParts.type,
+          value: -1,
+          checked: true,
+          labelText: `Browse to open ${desiredDatasourceIdParts.localId}`
+        });        
         title = 'Datasource not found';
         message += ' doesn\'t exist.';
       }
@@ -91,7 +122,7 @@ class PageStateManager {
       var datasourceType;
       var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
       if (compatibleDatasourceIds.length) {
-        message += '<br/>You can choose any of the compatible datasources instead, or browse to open a new one:';
+        message += '<br/>Choose any of the compatible datasources instead, or browse for a new one:';
         list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
           var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
           datasourceType = compatibleDatasource.getType();
@@ -105,14 +136,15 @@ class PageStateManager {
             default:
           }
           var caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
-          return [
-            `<li data-nodetype="datasource" data-datasourcetype="${datasourceType}" ${extraAtts}>`,
-              `<input id="datasourceMenu${index}" type="radio" name="compatibleDatasources" value="${index}"/>`,
-              '<span class="icon" role="img"></span>',
-              `<label for="datasourceMenu${index}" class="label">${caption}</label>`,
-            `</li>`
-          ].join('\n');
-        }).join('');
+          var datasourceItem = this.#getDatasourceMenuItemHTML({
+            datasourceType: datasourceType,
+            fileType: fileNameParts ? fileNameParts.lowerCaseExtension : undefined,
+            index: index,
+            value: index,
+            labelText: caption
+          });
+          return datasourceItem;
+        }.bind(this)).join('\n');
       }
 
       list += openNewDatasourceItem;
@@ -149,7 +181,7 @@ class PageStateManager {
       .catch(function(error){
         reject();
       });
-    });
+    }.bind(this));
   }
 
   async setPageState(newRoute){

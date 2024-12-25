@@ -79,15 +79,18 @@
         > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel {
+        > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Uint>"] > .pivotTableUiCellLabel {
           font-family: var( --huey-mono-font-family );
         }
         
         > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel {
+        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel {
           text-align: right;
         }
 
@@ -97,12 +100,15 @@
         > .pivotTableUiCell[data-axis=rows][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=rows][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^=Uint][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel {
+        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Uint>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Uint>"][data-totals=true] > .pivotTableUiCellLabel {
           font-family: unset;
           text-align: unset;
         }

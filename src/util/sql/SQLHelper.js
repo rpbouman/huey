@@ -157,9 +157,9 @@ function createLocalDateFormatter(){
   }
 }
 
-function createMonthNameFormatter(){
+function createMonthNameFormatter(modifier){
   var dateFormatter = createDateFormatter({
-    month: 'long'
+    month: modifier || 'long'
   });
   var monthNames = [null];
   var date;
@@ -182,9 +182,17 @@ function createMonthNameFormatter(){
   }
 }
 
-function createDayNameFormatter(){
+function createMonthShortNameFormatter(){
+  return createMonthNameFormatter('short');
+}
+
+function createMonthFullNameFormatter(){
+  return createMonthNameFormatter('long');
+}
+
+function createDayNameFormatter(modifier){
   var dateFormatter = createDateFormatter({
-    weekday: 'long'
+    weekday: modifier || 'long'
   });
   var dayNames = [];
   var date;
@@ -206,6 +214,14 @@ function createDayNameFormatter(){
     }
     return dayNames[value];
   }
+}
+
+function createDayShortNameFormatter(){
+  return createDayNameFormatter('short');
+}
+
+function createDayFullNameFormatter(){
+  return createDayNameFormatter('long');
 }
 
 function monthNumFormatter(monthNum){
@@ -294,17 +310,26 @@ function getDuckDbLiteralForValue(value, type){
       literal = `[${literal}]`;
       break;
     case 13:  // Struct
-    case 17:  // Map
       literal = type.children.map(function(entry){
         var entryName = entry.name;
         var entryValue = value[entryName];
         var entryType = entry.type;
-        var entryValueType = entryValue.type;
         var entryValueLiteral = getDuckDbLiteralForValue(entryValue, entryType);
         var entryLiteral = `${quoteStringLiteral(entryName)}: ${entryValueLiteral}`;
         return entryLiteral;
-      }).join(',');            
+      }).join(',');
       literal = `{${literal}}`;
+      break;
+    case 17:  // Map
+      var mapEntryType = type.children[0].type;
+      var keyType = mapEntryType.children[0].type;
+      var valueType = mapEntryType.children[1].type;
+      var entries = Object.entries(value);
+      literal = 'MAP{' + entries.map(function(entry){
+        var keyLiteral = getDuckDbLiteralForValue(entry[0], keyType);
+        var valueLiteral = getDuckDbLiteralForValue(entry[1], valueType);
+        return `${keyLiteral}: ${valueLiteral}`;
+      }).join(',') + '}';
       break;
     case 0:   // None
     case 4:   // Binary
@@ -741,8 +766,45 @@ function quoteStringLiteral(str){
   return typeof str === 'string'  ? `'${str.replace(/'/g, "''")}'` : str; 
 }
 
+function isQuoted(str, startQuote, endQuote){
+  if (!str.startsWith(startQuote)){
+    return false;
+  }
+  if (!endQuote) {
+    endQuote = startQuote;
+  }
+  return str.endsWith(endQuote);
+}
+
+function isQuotedIdentifier(str){
+  return isQuoted(str, '"');
+}
+
+function unQuote(str, startQuote, endQuote){
+  if (!endQuote) {
+    endQuote = startQuote;
+  }
+  if (!str.startsWith(startQuote)){
+    throw new Error(`Cannot unquote value: ${str}`);
+  }
+  if (!str.endsWith(endQuote)){
+    throw new Error(`Cannot unquote value: ${str} must end with ${endQuote}`);
+  }
+  return str.slice(startQuote.length, -endQuote.length);
+}
+
+function unQuoteStringLiteral(str){
+  return unQuote(str, '\'');
+}
+
+function unQuoteIdentifier(str){
+  return unQuote(str, '"');
+}
+
 function identifierRequiresQuoting(identifier){
-  return /[\s"]/.test(identifier);
+  // TODO: check if the identifier is a reserved word, see https://duckdb.org/docs/sql/meta/duckdb_table_functions#duckdb_keywords
+  // https://duckdb.org/docs/sql/dialect/keywords_and_identifiers.html
+  return /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier);
 }
 
 function quoteIdentifierWhenRequired(identifier){
@@ -917,187 +979,6 @@ function normalizeSqlOptions(sqlOptions){
   return Object.assign({}, defaultSqlSettings, sqlOptions);
 }
 
-function getDuckDbTableSqlStatementForQueryModel(queryModel, sqlOptions){
-  sqlOptions = normalizeSqlOptions(sqlOptions);
-  var comma = getComma(sqlOptions.commaStyle);
-  function keywordFormatter(keyword){
-    return formatKeyword(keyword, sqlOptions.keywordLetterCase);
-  }
-
-  var datasource = queryModel.getDatasource();
-
-  var rowsAxisItems = queryModel.getRowsAxis().getItems();
-  var columnsAxisItems = queryModel.getColumnsAxis().getItems();
-  var cellsAxisItems = queryModel.getCellsAxis().getItems();
-  var queryAxisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
-  
-  var selectList = {}, groupBy = [], orderBy = [];
-  var rowsGroupingSets = [[]], columnsGroupingSets = [[]];
-  
-  for (var i = 0; i < queryAxisItems.length; i++){
-    var queryAxisItem = queryAxisItems[i];
-    var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
-    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, undefined, sqlOptions);
-    selectList[caption] = sqlExpression;
-    
-    if (queryAxisItem.axis !== QueryModel.AXIS_CELLS) {
-      if (i == rowsAxisItems.length) {
-        perAxisGroupBy = [];
-      }
-      var groupingSets = (i < rowsAxisItems.length) ? rowsGroupingSets : columnsGroupingSets;
-      if (queryAxisItem.includeTotals) {
-        groupingSets.push( [].concat(groupingSets[0]) );
-      }
-      groupingSets[0].push(sqlExpression);
-      
-      groupBy.push(sqlExpression);
-      orderBy.push(sqlExpression);
-    }
-  }
-  
-  var groupingSets = []
-  if (rowsGroupingSets.length > 1 || columnsGroupingSets > 1) {
-    for (var i = 0; i < rowsGroupingSets.length; i++){
-      var rowsGroupingSet = rowsGroupingSets[i];
-      for (var j = 0; j < columnsGroupingSets.length; j++){
-        var columnsGroupingSet = columnsGroupingSets[j];
-        var groupingSet = [].concat(rowsGroupingSet, columnsGroupingSet);
-        groupingSets.push(groupingSet);
-      }
-    }
-  }    
-    
-  var selectList = Object.keys(selectList).map(function(caption){
-    var sqlExpression = selectList[caption];
-    var asKeyword = keywordFormatter('as');
-    var columnAlias = getIdentifier(caption, sqlOptions.alwaysQuoteIdentifiers);
-    return `${sqlExpression} ${asKeyword} ${columnAlias}`;
-  });
-    
-  var sql =  [
-    getSqlHeader(),
-    `${keywordFormatter('select')} ${selectList.join(comma)}`,
-    datasource.getFromClauseSql(undefined, sqlOptions),
-  ];
-  var filterSql = queryModel.getFilterConditionSql();
-  if (filterSql) {
-    sql.push(`${keywordFormatter('where')} ${filterSql}`);
-  }
-  var byKeyword = keywordFormatter('by');
-  
-  if (groupingSets.length) {
-    sql.push(`${keywordFormatter('group')} ${byKeyword} ${keywordFormatter('grouping')} ${keywordFormatter('sets')} (`);
-    sql.push(
-      '  ' + groupingSets.map(function(groupingSet){
-        return `( ${groupingSet.join(', ')} )`;
-      }).join('\n, ')
-    );
-    sql.push(')');
-  }
-  else
-  if (groupBy.length) {
-    sql.push(`${keywordFormatter('group')} ${byKeyword} ${groupBy.join(comma)}`);
-  }
-  
-  if (orderBy.length) {
-    sql.push(`${keywordFormatter('order')} ${byKeyword} ${orderBy.join(comma)}`);
-  }
-  sql = sql.join('\n');
-  return sql;
-}
-
-function getDuckDbPivotSqlStatementForQueryModel(queryModel, sqlOptions){
-  sqlOptions = normalizeSqlOptions(sqlOptions);  
-  var comma = getComma(sqlOptions.commaStyle);
-  var identifierQuoter = function(identifier){
-    return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
-  }  
-  function keywordFormatter(keyword){
-    return formatKeyword(keyword, sqlOptions.keywordLetterCase);
-  }
-  
-  var asKeyword = keywordFormatter('as');
-  
-  var columnsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_COLUMNS);
-  if (columnsExpressions === undefined) {
-    columnsExpressions = {"columns":  `''`};
-  }
-
-  var rowsExpressions = TupleSet.getSqlSelectExpressions(queryModel, QueryModel.AXIS_ROWS);
-  if (rowsExpressions === undefined) {
-    rowsExpressions = {"rows":  `''`};
-  }
-
-  var cellsAxis = queryModel.getCellsAxis();
-  var cellsAxisItems = cellsAxis.getItems();
-
-  var cellColumnExpressions = {};
-  var aggregateExpressions = {};
-  
-  if (cellsAxisItems.length === 0){
-    aggregateExpressions[' '] = `${keywordFormatter('any_value')}( ${keywordFormatter('null')} )`;
-  }
-  else {
-    cellsAxisItems.forEach(function(cellsAxisItem){
-      if (cellsAxisItem.columnName === '*') {
-        // the COUNT(*) expression is special, we don't need to have a column for it
-      }
-      else {
-        cellColumnExpressions[cellsAxisItem.columnName] = getQuotedIdentifier(cellsAxisItem.columnName);
-      }
-      
-      var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
-      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(cellsAxisItem);
-      aggregateExpressions[caption] = selectListExpression;
-    });
-  }
-  
-  var columns = [].concat(
-    Object.keys(columnsExpressions).map(function(expressionId){
-      var expression = columnsExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
-    }),
-    Object.keys(rowsExpressions).map(function(expressionId){
-      var expression = rowsExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
-    }),
-    Object.keys(cellColumnExpressions).map(function(expressionId){
-      var expression = cellColumnExpressions[expressionId];
-      return `${expression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
-    })
-  );
-  
-  var aggregates = Object.keys(aggregateExpressions).map(function(expressionId){
-    var aggregateExpression = aggregateExpressions[expressionId];
-    return `${aggregateExpression} ${asKeyword} ${getQuotedIdentifier(expressionId)}`;
-  });
-
-  var datasource = queryModel.getDatasource();
-    
-  var cteName = identifierQuoter('data');
-  var sql = [
-    getSqlHeader(),
-    `${keywordFormatter('with')} ${cteName} ${asKeyword} (`,
-    `${keywordFormatter('select')} ${columns.join(comma)}`,
-    `${datasource.getFromClauseSql(undefined, sqlOptions)}`
-  ];
-
-  var filterSql = queryModel.getFilterConditionSql();
-  if (filterSql) {
-    sql.push(`${formatKeyword('where', sqlOptions.keywordLetterCase)} ${filterSql}`);
-  }
-  
-  sql = [].concat(sql, [
-    `)`,
-    `${keywordFormatter('pivot')} ${cteName}`,
-    `${keywordFormatter('on')} ${Object.keys(columnsExpressions).map(identifierQuoter).join(comma)}`,
-    `${keywordFormatter('using')} ${aggregates.join(comma)}`,
-    `${keywordFormatter('group')} ${keywordFormatter('by')} ${Object.keys(rowsExpressions).map(identifierQuoter).join(comma)}`,
-    `${keywordFormatter('order')} ${keywordFormatter('by')} ${Object.keys(rowsExpressions).map(identifierQuoter).join(comma)}`
-  ]).join('\n');
-  return sql;
-}
-
 function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
   var valuesClause = `(VALUES (${valueLiterals.join('),(')}) )`;
   if (tableAlias){
@@ -1191,22 +1072,112 @@ function getStructTypeDescriptor(structColumnType){
   return structure;
 }
 
+function getMapKeyValueType(mapType){
+  if (!mapType.startsWith('MAP(') || !mapType.endsWith(')')){
+    throw new Error(`Expected a MAP type`)
+  }
+  var level = 0;
+  var i;
+  var elementTypes = unQuote(mapType, 'MAP(', ')');
+  _loop: for (i = 0; i < elementTypes.length; i++){
+    var ch = elementTypes.charAt(i);
+    switch (ch){
+      case '(':
+        level += 1;
+        break;
+      case ')':
+        level -= 1;
+        break;
+      case ',':
+        if (level === 0) {
+          break _loop;
+        }
+    }
+  }
+  var keyType = elementTypes.slice(0, i).trim();
+  var valueType = elementTypes.slice(i + 1).trim();
+  return {
+    keyType: keyType,
+    valueType: valueType
+  };
+}
+
+function getMapKeyType(mapType){
+  var keyValueType = getMapKeyValueType(mapType);
+  return keyValueType.keyType;
+}
+
+function getMapValueType(mapType){
+  var keyValueType = getMapKeyValueType(mapType);
+  return keyValueType.valueType;
+}
+
+function getArrayElementType(arrayType){
+  if (!arrayType.endsWith('[]')){
+    throw new Error(`Expected an array type`);
+  }
+  return arrayType.slice(0, -'[]'.length);
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
-    var typeDescriptor = getStructTypeDescriptor(type);
-    var memberExpression = memberExpressionPath[0];
-    var memberExpressionType;
-    if (memberExpression === 'unnest()'){
-      memberExpressionType = type.slice(0, -2);
+    var typeOfMemberExpressionPath = typeof memberExpressionPath;
+    switch (typeOfMemberExpressionPath) {
+      case 'object':
+        var memberExpression = memberExpressionPath[0];
+        var memberExpressionType;
+        switch (memberExpression) {
+          case 'unnest()':
+            memberExpressionType = getArrayElementType(type);
+            break;
+          case 'map_entries()':
+            memberExpressionType = getMapEntriesType(type);
+            break;
+          case 'map_keys()':
+            memberExpressionType = getArrayElementType(type);
+            memberExpressionType = getMapKeyType(memberExpressionType);
+            memberExpressionType += '[];'
+            break;
+          case 'map_values()':
+            memberExpressionType = getArrayElementType(type);
+            memberExpressionType = getMapValueType(memberExpressionType);
+            memberExpressionType += '[]';
+            break;
+          default:
+            var typeDescriptor = getStructTypeDescriptor(type);
+            memberExpressionType = typeDescriptor[memberExpression];
+        }
+        return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
+        break;
+      case 'string':
+        if (!type.startsWith('MAP')){
+          throw new Error(`Expected a MAP type`);
+        }
+        switch (memberExpressionPath){
+          case 'key':
+            return getMapKeyType(type);
+          case 'value':
+            return getMapValueType(type);
+          default:
+            throw new Error(`Don't know how to handle memerExpressionPath "${memberExpressionPath}"`);
+        }
+        break;
+      default:
+        throw new Error(`Don't know how to handle memerExpressionPath of type "${typeOfMemberExpressionPath}"`);
     }
-    else {
-      memberExpressionType = typeDescriptor[memberExpression];
-    }
-    return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
   }
   else {
     return type;
   }
+}
+
+// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
+// this function will return the type that results from calling map_entries(<map>),
+// which would be: STRUCT(key <keyType>, value <valueType>)[]
+function getMapEntriesType(mapType){
+  var keyType = getMemberExpressionType(mapType, 'key');
+  var valueType = getMemberExpressionType(mapType, 'value');
+  return `STRUCT(key ${keyType}, value ${valueType})[]`;
 }
 
 function extrapolateColumnExpression(expressionTemplate, columnExpression){

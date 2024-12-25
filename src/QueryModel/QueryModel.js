@@ -161,7 +161,14 @@ class QueryAxisItem {
       var memberExpression = memberExpressionPath
       .map(function(memberExpressionPathElement){
         // todo: escape single quote in memberExpressionPathElement
-        return `['${memberExpressionPathElement}']`;
+        var expression;
+        if (memberExpressionPathElement.endsWith('()')){
+          expression = '.' + memberExpressionPathElement;
+        }
+        else {
+          expression = `['${memberExpressionPathElement}']`;
+        }
+        return expression;
       })
       .join('');
       sqlExpression += memberExpression;
@@ -174,7 +181,7 @@ class QueryAxisItem {
 
     if (columnExpression === '*') {
       if (alias) {
-        columnExpression = `${getQuotedIdentifier(alias)}.*`;
+        columnExpression = `${quoteIdentifierWhenRequired(alias)}.*`;
       }
     }
     else {
@@ -219,10 +226,6 @@ class QueryAxisItem {
   static getQueryAxisItemDataType(queryAxisItem){
     var columnType = queryAxisItem.columnType;
     var dataType = columnType;
-    if (queryAxisItem.memberExpressionPath) {
-      var memberExpressionPath = queryAxisItem.memberExpressionPath;
-      dataType = getMemberExpressionType(columnType, memberExpressionPath);
-    }
 
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
@@ -231,9 +234,39 @@ class QueryAxisItem {
         dataType = derivationInfo.columnType;
       }
       else
+      if (derivationInfo.hasElementDataType){
+        dataType = getArrayElementType(dataType);
+      }
+      else
+      if (derivationInfo.hasKeyDataType){
+        dataType = getArrayElementType(dataType);
+        dataType = getMemberExpressionType(dataType, 'key');
+      }
+      else
+      if (derivationInfo.hasValueDataType){
+        dataType = getArrayElementType(dataType);
+        dataType = getMemberExpressionType(dataType, 'value');
+      }
+      else 
+      if (derivation === 'median'){
+        dataType = getArrayElementType(dataType);
+        var dataTypeInfo = getDataTypeInfo(dataType);
+        if (dataTypeInfo.isNumeric){
+          return 'DOUBLE';
+        }
+        else {
+          return 'VARCHAR';
+        }
+      }
+      else
       if (!derivationInfo.preservesColumnType){
         console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
+    }
+    else
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
     }
 
     var aggregatorInfo, aggregator = queryAxisItem.aggregator;

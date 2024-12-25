@@ -1,16 +1,28 @@
-.search {
+search#searchAttributeUi {
   position: sticky;
   flex-grow: 0;
   top: 0px;
   background-color: var( --huey-medium-background-color );
   height: 62px;
   padding-top: 1px;
+  
+  /* by default, the search panel is hidden */
+  display: none;
+  
+  /* need this else the attribute axis icons will bleed through.*/
+  z-index: 1;
+
+  > fieldset > input[type=search]{
+    width: 100%;
+  }
 }
 
-.search > fieldset > input[type=search]{
-  width: 100%;
+/* if there are attributes in the attribute ui, then the search panel is visible */
+main > nav#sidebar > div:has( > label[role=tab][for=attributesTab] ) > div[role=tabpanel]:has( > #attributeUi[role=tree] > details[role=treeitem] ) > search#searchAttributeUi {
+  display: block;
 }
 
-.attributeUi details[data-matches-searchstring=false] {
+/* Hide attributes that don't match the search string */
+#attributeUi details[data-matches-searchstring=false] {
   display: none;
 }
