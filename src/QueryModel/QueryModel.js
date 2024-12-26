@@ -1311,8 +1311,11 @@ class QueryModel extends EventEmitter {
       }
     }
     
-    var stateChange = compareObjects(oldState, newState, ['axes']) || {};
-    
+    var stateChange = {};
+    var propertiesChanged = compareObjects(oldState, newState, ['axes']) || {};
+    if (Object.keys(propertiesChanged)){
+      stateChange.propertiesChanged = Object.assign({}, propertiesChanged);
+    }
     if (Object.keys(axesChanged)){
       stateChange.axesChanged = axesChanged;
     }

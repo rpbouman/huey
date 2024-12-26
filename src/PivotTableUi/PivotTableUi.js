@@ -345,7 +345,7 @@ class PivotTableUi extends EventEmitter {
         needsClearing = true;
       }
 
-      if (propertiesChangedInfo.cellHeadersAxis){
+      if (propertiesChangedInfo.cellsHeaders){
         // moving cells to another axis does not change the tuples or the cached cells,
         // it only requires rerendering the table.
         needsUpdate = true;
