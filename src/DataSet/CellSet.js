@@ -301,7 +301,7 @@ class CellSet extends DataSetComponent {
     var hasTotalsItems = Boolean(totalsItems.length);
     var tuples = this.#getTuplesCte(tuplesToQuery, tuplesFields, hasTotalsItems);
     
-    sql += `\n, ${tuples}`;
+    sql += `, ${tuples}`;
     
     var select = cellsAxisItemsToFetch.map(function(axisItem){
       var expression = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
