@@ -235,6 +235,32 @@ class CellSet extends DataSetComponent {
     tuplesSql = `${relationDefinition} AS (\n  FROM (VALUES\n    ${tuplesSql}\n  )\n)`;
     return tuplesSql;
   }
+  
+  // this method is here to implement
+  // https://github.com/rpbouman/huey/issues/134
+  // idea is to use the tuples to come up with a more clever/optimized query condition 
+  // to be pushed down to the lowest level of the cellset.
+  #getFilterAxisItemsForCells(
+    // object keyed by cellindex, with an array of tuples as value.
+    tuplesToQuery,
+    // fields describing the values of the tuples.
+    tuplesFields,
+    // the cell axis items for which to generate aggregates
+    cellsAxisItemsToFetch
+  ){
+    var tupleSets = this.#tupleSets;
+    var queryModel = this.getQueryModel();
+    var filterAxis = queryModel.getFiltersAxis();
+    var originalFilterAxisItems = filterAxis.getItems();
+    
+    for (var i = 0; i < tupleSets.length; i++){
+      var tupleSet = tupleSets[i];
+      var axisId;
+      
+    }
+    
+    return originalFilterAxisItems;
+  }
 
   #getSqlQueryForCells(
     // object keyed by cellindex, with an array of tuples as value.
@@ -251,13 +277,22 @@ class CellSet extends DataSetComponent {
     var columnsAxisItems = queryModel.getColumnsAxis().getItems();
     var axisItems = [].concat(rowsAxisItems, columnsAxisItems);
     var allItems = [].concat(axisItems, cellsAxisItemsToFetch || []);
+    var filterAxisItems = this.#getFilterAxisItemsForCells(
+      tuplesToQuery,
+      tuplesFields,
+      cellsAxisItemsToFetch
+    );
+    
+    var samplingConfig = queryModel.getSampling(QueryModel.AXIS_CELLS);
+    var datasource = queryModel.getDatasource();
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
-      datasource: queryModel.getDatasource(), 
+      datasource: datasource, 
       queryAxisItems: allItems, 
-      filterAxisItems: queryModel.getFiltersAxis().getItems(),
+      filterAxisItems: filterAxisItems,
       includeOrderBy: false,
       finalStateAsCte: true,
-      cteName: '__huey_cells'
+      cteName: '__huey_cells',
+      samplingConfig: samplingConfig
     });
 
     var totalsItems = allItems.filter(function(queryAxisItem){

@@ -217,25 +217,47 @@ class SqlQueryGenerator {
   
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
     var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    var dataFoundationAlias = '__huey_data_foundation';
+    var alias = '__huey_data_foundation';
     var fromClause = datasource.getFromClauseSql();
     
     var filterAxisItems = filterAxisItemsByNestingStage[''];
     delete filterAxisItemsByNestingStage[''];
     
-    var cteIndex = 0;
     var currentItems = queryAxisItems;
-    var cte, ctes = [{
+    var newItems;
+    
+    var cte = {
       items: currentItems,
-      from: `${fromClause} AS "${dataFoundationAlias}"`,
+      from: `${fromClause} AS "${alias}"`,
       filters: filterAxisItems,
-      alias: dataFoundationAlias,
-    }];
+      alias: alias
+    };
+    var ctes = [cte];
+    
+    var indexOfRownumberItem = currentItems.findIndex(function(queryAxisItem){
+      return queryAxisItem.derivation === 'rownumber';
+    });
+    
+    if (indexOfRownumberItem !== -1){
+      newItems = Object.assign([], currentItems);
+      var rowNumberItem = newItems[indexOfRownumberItem];
+      var newRowNumberItem = Object.assign({}, rowNumberItem);
+      newRowNumberItem.columnName = QueryAxisItem.getSqlForQueryAxisItem(rowNumberItem);
+      delete newRowNumberItem.derivation;
+      newItems[indexOfRownumberItem] = newRowNumberItem;
+      alias = 'cte' + (ctes.length + 1);
+      ctes.push({
+        items: newItems,
+        alias: alias,
+        from: `FROM ${cte.alias} AS "${alias}"`,
+        filters: filters
+      });
+    }
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
     do {
-      cte = ctes[cteIndex++];
+      cte = ctes[ctes.length - 1];
       // at the start of a new stage, initialize
       var unnestingDerivation = undefined;
       var unnestingItem = undefined;
@@ -246,7 +268,7 @@ class SqlQueryGenerator {
       var unnestingItemMemberExpressionPathPrefixString = undefined;
       var unnestingItemMemberExpression = undefined;
       var unnestingItemMemberExpressionType = undefined;
-      var newItems = [];
+      newItems = [];
       var filters;
       var currentItems = cte.items;
       cte.items = [];
@@ -381,7 +403,7 @@ class SqlQueryGenerator {
       } // end items loop
       
       if (unnestingItem) {
-        var alias = 'cte' + cteIndex;
+        alias = 'cte' + (ctes.length + 1);
         ctes.push({
           items: newItems,
           alias: alias,
@@ -400,7 +422,6 @@ class SqlQueryGenerator {
     var countAllAlias = options.countAllAlias;
     var nullsSortOrder = options.nullsSortOrder;
     var totalsPosition = options.totalsPosition;
-    var samplingConfig = options.samplingConfig;
     var includeOrderBy = options.includeOrderBy === false ? false : true;
     var useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
     
@@ -462,7 +483,7 @@ class SqlQueryGenerator {
         orderByExpressions.push(columnExpressionReference);
       }
       
-      if (axisId !== QueryModel.AXIS_CELLS && queryAxisItem.derivation !== 'rownumber'){
+      if (axisId !== QueryModel.AXIS_CELLS){
         axisGroupByExpressions.push(columnExpressionReference);
       }
       var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
@@ -565,10 +586,7 @@ class SqlQueryGenerator {
       groupByClause = `GROUP BY ${groupByClause}`;
       sql.push(groupByClause);
     }
-    
-    if (samplingConfig){
-      sql.push( getUsingSampleClause(samplingConfig, true) );
-    }
+        
     if (includeOrderBy !== false) {
       sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
     }
@@ -594,6 +612,11 @@ class SqlQueryGenerator {
         });
       }
       else 
+      if (item.derivation === 'rownumber') {
+        var rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
+        selectListExpressions[rowNumberSql] = rowNumberSql;
+      }
+      else
       if (item.aggregator === 'count' && item.columnName === '*'){
         return;
       }
@@ -614,6 +637,11 @@ class SqlQueryGenerator {
     
     SqlQueryGenerator.#generateWhereClause(cte, sql);
     
+    var samplingConfig = sqlOptions.samplingConfig;
+    if (samplingConfig){
+      sql.push( getUsingSampleClause(samplingConfig, true) );
+    }
+
     sql.unshift(`"${cte.alias}" AS (`)
     sql.push(')');
     sql = sql.join('\n');
@@ -653,7 +681,7 @@ class SqlQueryGenerator {
     var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
     var sqls = ctes.map(function(cte, index){
-      options.samplingConfig = index === 0 ? samplingConfig : undefined;
+      sqlOptions.samplingConfig = index === 0 ? samplingConfig : undefined;
       var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
       return sql;
     });
