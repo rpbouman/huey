@@ -196,6 +196,11 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
       * Derivation icons
       *
       */
+      > li[data-derivation='row number'] > span:before {
+        /* hash */
+        content: "\eabc";
+      }
+
       > li[data-derivation=iso-date] > span:before {
         /* calendar */
         content: "\ea53";

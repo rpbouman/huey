@@ -144,9 +144,14 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   /**
   *
-  * Data type icons
+  * Data type icons & derivations
   *
   */
+  details[data-nodetype=derived][data-derivation='row number'] > summary > span.label::before {
+    /* hash */
+    content: "\eabc";
+  }
+
   details[data-nodetype=derived][data-member_expression_type=VARCHAR]:has( 
     [data-derivation='entry keys'], 
     [data-derivation='entry values'], 

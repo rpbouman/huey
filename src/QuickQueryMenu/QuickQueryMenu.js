@@ -123,7 +123,7 @@ class QuickQueryMenu {
     
     var rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
     rowsAxisItems.push({
-      derivation: 'rownumber',
+      derivation: 'row number',
       caption: '#'
     });
     

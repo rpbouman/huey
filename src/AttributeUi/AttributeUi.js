@@ -203,7 +203,7 @@ class AttributeUi {
   }, {});
   
   static tupleNumberDerivations = {
-    rownumber: {
+    "row number": {
       expressionTemplate: "ROW_NUMBER() OVER ()::INTEGER",
       columnType: 'INTEGER',
       isWindowFunction: true
@@ -864,6 +864,8 @@ class AttributeUi {
       case 'derived':
         node.setAttribute('data-derivation', config.derivation);
         break;
+      default:
+        throw new Error(`Invalid node type "${config.type}".`);
     }
 
     var head = this.#renderAttributeUiNodeHead(config);
@@ -915,6 +917,18 @@ class AttributeUi {
       }
     });
     attributesUi.appendChild(countAllNode);
+    
+    // generic rownum
+    var rownumNode = this.#renderAttributeUiNode({
+      type: 'derived',
+      title: 'Row number',
+      derivation: 'row number',
+      profile: {
+        column_name: '',
+        column_type: 'INTEGER'
+      }
+    });
+    attributesUi.appendChild(rownumNode);
     
     // nodes for each column
     for (var i = 0; i < columnSummary.numRows; i++){
