@@ -235,7 +235,7 @@ class SqlQueryGenerator {
     var ctes = [cte];
     
     var indexOfRownumberItem = currentItems.findIndex(function(queryAxisItem){
-      return queryAxisItem.derivation === 'rownumber';
+      return queryAxisItem.derivation === 'row number';
     });
     
     if (indexOfRownumberItem !== -1){
@@ -612,7 +612,7 @@ class SqlQueryGenerator {
         });
       }
       else 
-      if (item.derivation === 'rownumber') {
+      if (item.derivation === 'row number') {
         var rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
         selectListExpressions[rowNumberSql] = rowNumberSql;
       }
