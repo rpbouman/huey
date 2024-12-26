@@ -144,7 +144,7 @@ class QuickQueryMenu {
     var samplingConfig = {
       size: 100,
       unit: 'ROWS',
-      method: 'RESERVOIR',
+      method: 'LIMIT',
       seed: 100
     };
     queryModelState.sampling = {};

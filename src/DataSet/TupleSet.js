@@ -34,9 +34,9 @@ class TupleSet extends DataSetComponent {
     var filterAxis = queryModel.getFiltersAxis();
     var filterAxisItems = filterAxis.getItems();
 
-    var sampling;
+    var samplingConfig;
     if (includeCountAll) {
-      sampling = queryModel.getSampling(axisId);
+      samplingConfig = queryModel.getSampling(axisId);
     }
 
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
@@ -47,7 +47,7 @@ class TupleSet extends DataSetComponent {
       countAllAlias: undefined,
       nullsSortOrder: nullsSortOrder,
       totalsPosition: totalsPosition,
-      sampling: sampling
+      samplingConfig: samplingConfig
     });
     return sql;
   }

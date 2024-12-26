@@ -1188,7 +1188,13 @@ function getUsingSampleClause(samplingConfig, useTableSample){
   var size = samplingConfig.size || 100;
   var unit = samplingConfig.unit || 'ROWS';
   var method = samplingConfig.method || 'SYSTEM';
-  var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
-  var sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  var sampleClause;
+  if (method === 'LIMIT'){
+    sampleClause = `LIMIT ${size}`;
+  }
+  else {
+    var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
+    sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  }
   return sampleClause;
 }
