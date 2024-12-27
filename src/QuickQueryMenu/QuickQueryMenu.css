@@ -2,12 +2,10 @@
 menu[role=menu]#quickQueryMenu {
   left: 235px;
   top: 30px;
-    
-  
+
+
   > li {
-    border-width: 1px;
-    border-color: var(--huey-light-border-color);
-    
+
     > label[for=quickQueryClearAllButton]:before {
       /* trash */
       content: '\eb41';

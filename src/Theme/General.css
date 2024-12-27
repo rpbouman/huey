@@ -418,3 +418,10 @@ menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popoverta
   content: '...';
 }
 
+menu[role="menu"] {
+  
+  > li[role=menuitem] {
+      border-width: 1px;
+      border-color: var(--huey-light-border-color);
+  }
+}
