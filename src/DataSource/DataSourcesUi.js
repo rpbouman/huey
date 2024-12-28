@@ -674,7 +674,20 @@ class DataSourcesUi {
     var datasources = datasourceGroup.datasources;
     var datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
-    datasourceKeys.forEach(function(datasourceId){
+    datasourceKeys
+    .sort(function(a, b){
+      var datasourceA = DataSourcesUi.getCaptionForDatasource( datasources[a] );
+      var datasourceB = DataSourcesUi.getCaptionForDatasource( datasources[b] );
+      if (datasourceA > datasourceB) {
+        return 1;
+      }
+      else
+      if (datasourceA < datasourceB) {
+        return -1;
+      }
+      return 0;
+    })
+    .forEach(function(datasourceId){
       var datasource = datasources[datasourceId];
       var datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
