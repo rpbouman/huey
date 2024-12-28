@@ -253,11 +253,75 @@ class CellSet extends DataSetComponent {
     var filterAxis = queryModel.getFiltersAxis();
     var originalFilterAxisItems = filterAxis.getItems();
     
-    for (var i = 0; i < tupleSets.length; i++){
-      var tupleSet = tupleSets[i];
-      var axisId;
+    /*
+    // most basic optimization: IN clause for all non-derived items (=columns)
+    // we will make a special tuple filter item for this:
+    // - a filter item that combines multiple axis items, and a array of tuple value arrays
+    var first = true;
+    var columnItems = [];
+    var fields = [];
+    var tupleValues = [];
+    var tuplesFilterItem;
+    for (var tupleIndex in tuplesToQuery){
+      var filterTupleValues = [];
+      var tupleToQuery = tuplesToQuery[tupleIndex];
+      for (var i = 0; i < tupleSets.length; i++){
+        var tuple = tupleToQuery[i];
+        if (!tuple) {
+          continue;
+        }
+        var tupleFields = tuplesFields[i];
+        var tupleValues = tuple.values;
+
+        var tupleSet = tupleSets[i];
+        var queryAxisItems = tupleSet.getQueryAxisItems();
+        
+        for (var j = 0; j < queryAxisItems.length; j++){
+          var queryAxisItem = queryAxisItems[j];
+          if (queryAxisItem.derivation) {
+            continue;
+          }
+          // check if this tuple item appears in the filters axis
+          var sqlForQueryAxisItem = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          var originalFilterAxisItemIndex = originalFilterAxisItems.findIndex(function(filterAxisItem){
+            return QueryAxisItem.getSqlForQueryAxisItem(filterAxisItem) === sqlForQueryAxisItem;
+          });
+          // If it exists as fitler axis item, we can now remove it since the condition we're generating is stronger
+          if (originalFilterAxisItemIndex !== -1) {
+            originalFilterAxisItems.splice(originalFilterAxisItemIndex, 1);
+          }
+            
+          if (first){
+            columnItems.push(queryAxisItem);
+            var tupleField = tupleFields[j];
+            fields.push(tupleField);
+          }
+          var tupleValue = tupleValues[j];
+          filterTupleValues.push(tupleValue);
+        }
+      }
       
+      if (first) {
+        first = false;
+        if (!columnItems.length) {
+          break;
+        }
+        tuplesFilterItem = {
+          queryAxisItems: columnItems,
+          fields: fields,
+          filter: {
+            filterType: FilterDialog.filterTypes.INCLUDE,
+            values: []
+          }
+        }
+      }
+      tuplesFilterItem.filter.values.push(filterTupleValues)
     }
+    
+    if (tuplesFilterItem) {
+      originalFilterAxisItems.unshift(tuplesFilterItem);
+    }
+    */
     
     return originalFilterAxisItems;
   }

@@ -119,7 +119,29 @@ class SqlQueryGenerator {
       return true;
     })
     .map(function(filterItem){
-      return QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
+      var conditionSql;
+      var queryAxisItems = filterItem.queryAxisItems;
+      if (queryAxisItems) {
+        var fields = filterItem.fields;
+        var columns = queryAxisItems.map(function(queryAxisItem){
+          var columnSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          return columnSql;
+        }).join('\n, ');
+        var values = filterItem.filter.values.map(function(tupleValues){
+          var valueList = queryAxisItems.map(function(queryAxisItem, index){
+            var literalWriter = queryAxisItem.literalWriter;
+            var value = tupleValues[index];
+            var field = fields[index];
+            return literalWriter(value, field);
+          }).join(',');
+          return `(${valueList})`;
+        }).join('\n,');
+        conditionSql = `(${columns}) IN (${values})`;
+      }
+      else {
+        conditionSql = QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
+      }
+      return conditionSql;
     })
     .join('\nAND ');
   }
