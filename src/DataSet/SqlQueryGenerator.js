@@ -96,31 +96,18 @@ class SqlQueryGenerator {
   }
   
   static #getConditionForFilterItems(filterItems, tableAlias){
-    return filterItems
-    .filter(function(filterItem){
-      var filter = filterItem.filter;
-      if (!filter) {
-        return false;
-      }
-      
-      var values = filter.values;
-      if (!values){
-        return false;
-      }
-      
-      var keys = Object.keys(values);
-      keys = keys.filter(function(key){
-        var valueObject = values[key];
-        return valueObject.enabled !== false;
-      });
-      if (keys.length === 0) {
-        return false;
-      }
-      return true;
-    })
-    .map(function(filterItem){
+    // cull filter items that have incomplete filters
+    // and filters without any enabled filter values.
+    filterItems = filterItems.filter(function(filterItem){
+      return QueryAxisItem.isFilterItemEffective(filterItem);
+    });
+    
+    // create SQL conditions for filter items
+    var filterConditions = filterItems.map(function(filterItem){
       var conditionSql;
       var queryAxisItems = filterItem.queryAxisItems;
+      // this happens when the cellset generates a filter item to push down tuples, 
+      // see https://github.com/rpbouman/huey/issues/134
       if (queryAxisItems) {
         var fields = filterItem.fields;
         var columns = queryAxisItems.map(function(queryAxisItem){
@@ -142,8 +129,13 @@ class SqlQueryGenerator {
         conditionSql = QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
       }
       return conditionSql;
-    })
-    .join('\nAND ');
+    });
+    
+    // combine SQL conditions
+    var filterCondition = filterConditions.join('\nAND ');
+    
+    // done.
+    return filterCondition;
   }
   
   static #transformFilterItems(
@@ -217,7 +209,12 @@ class SqlQueryGenerator {
         }
         else {
           delete filterAxisItem.memberExpressionPath;
-          delete filterAxisItem.derivation;
+          if (filterAxisItem.derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(filterAxisItem.derivation);
+            if (derivationInfo.unnestingFunction) {
+              delete filterAxisItem.derivation;
+            }
+          }
         }
         
         // now we have to check whether the remaining expressionpath of the filter item still contains unnesting expressions.
@@ -672,10 +669,14 @@ class SqlQueryGenerator {
   
   static #generateWhereClause(cte, sql){
     var filterAxisItems = cte.filters;
-    if (filterAxisItems && filterAxisItems.length){
-      var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
-      sql.push(`WHERE ${whereCondition}`);
+    if (!filterAxisItems) {
+      return;
     }
+    if (!filterAxisItems.length){
+      return;
+    }
+    var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
+    sql.push(`WHERE ${whereCondition}`);
   }
 
   static getSqlSelectStatementForAxisItems(options){

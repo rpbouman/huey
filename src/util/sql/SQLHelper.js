@@ -1112,11 +1112,29 @@ function getMapValueType(mapType){
   return keyValueType.valueType;
 }
 
+// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
+// this function will return the type that results from calling map_entries(<map>),
+// which would be: STRUCT(key <keyType>, value <valueType>)[]
+function getMapEntriesType(mapType){
+  var entryType = getMapEntryType(mapType)
+  return getArrayType(entryType);
+}
+
+function getMapEntryType(mapType){
+  var keyType = getMemberExpressionType(mapType, 'key');
+  var valueType = getMemberExpressionType(mapType, 'value');
+  return `STRUCT(key ${keyType}, value ${valueType})`;
+}
+
 function getArrayElementType(arrayType){
   if (!arrayType.endsWith('[]')){
     throw new Error(`Expected an array type`);
   }
   return arrayType.slice(0, -'[]'.length);
+}
+
+function getArrayType(elementType){
+  return elementType + '[]';
 }
 
 function getMemberExpressionType(type, memberExpressionPath){
@@ -1134,14 +1152,16 @@ function getMemberExpressionType(type, memberExpressionPath){
             memberExpressionType = getMapEntriesType(type);
             break;
           case 'map_keys()':
-            memberExpressionType = getArrayElementType(type);
-            memberExpressionType = getMapKeyType(memberExpressionType);
-            memberExpressionType += '[];'
+            //memberExpressionType = getArrayElementType(type);
+            //memberExpressionType = getMapKeyType(memberExpressionType);
+            memberExpressionType = getMapKeyType(type);
+            memberExpressionType = getArrayType(memberExpressionType);
             break;
           case 'map_values()':
-            memberExpressionType = getArrayElementType(type);
-            memberExpressionType = getMapValueType(memberExpressionType);
-            memberExpressionType += '[]';
+            //memberExpressionType = getArrayElementType(type);
+            //memberExpressionType = getMapValueType(memberExpressionType);
+            memberExpressionType = getMapValueType(type);
+            memberExpressionType = getArrayType(memberExpressionType);
             break;
           default:
             var typeDescriptor = getStructTypeDescriptor(type);
@@ -1169,15 +1189,6 @@ function getMemberExpressionType(type, memberExpressionPath){
   else {
     return type;
   }
-}
-
-// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
-// this function will return the type that results from calling map_entries(<map>),
-// which would be: STRUCT(key <keyType>, value <valueType>)[]
-function getMapEntriesType(mapType){
-  var keyType = getMemberExpressionType(mapType, 'key');
-  var valueType = getMemberExpressionType(mapType, 'value');
-  return `STRUCT(key ${keyType}, value ${valueType})[]`;
 }
 
 function extrapolateColumnExpression(expressionTemplate, columnExpression){
