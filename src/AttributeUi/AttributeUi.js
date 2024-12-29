@@ -405,7 +405,7 @@ class AttributeUi {
       folder: 'map operations',
       expressionTemplate: "unnest( map_entries( ${columnExpression} ) )",
       unnestingFunction: 'unnest',
-      hasEntryDataType: true
+      hasEntryArrayDataType: true
     },
     "entry count": {
       folder: 'map operations',
@@ -414,7 +414,8 @@ class AttributeUi {
     },
     "keyset": {
       folder: 'map operations',
-      expressionTemplate: "list_sort( map_keys( ${columnExpression} ) )"
+      expressionTemplate: "list_sort( map_keys( ${columnExpression} ) )",
+      hasKeyArrayDataType: true
     }
   };
     

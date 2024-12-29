@@ -238,14 +238,27 @@ class QueryAxisItem {
         dataType = getArrayElementType(dataType);
       }
       else
-      if (derivationInfo.hasKeyDataType){
+      if (derivationInfo.hasKeyDataType || derivationInfo.hasKeyArrayDataType){
         dataType = getArrayElementType(dataType);
         dataType = getMemberExpressionType(dataType, 'key');
+        if (derivationInfo.hasKeyArrayDataType){
+          dataType = getArrayType(dataType);
+        }
       }
       else
-      if (derivationInfo.hasValueDataType){
+      if (derivationInfo.hasValueDataType || derivationInfo.hasValueArrayDataType){
         dataType = getArrayElementType(dataType);
         dataType = getMemberExpressionType(dataType, 'value');
+        if (derivationInfo.hasValueArrayDataType) {
+          dataType = getArrayType(dataType);
+        }
+      }
+      else
+      if (derivationInfo.hasEntryDataType || derivationInfo.hasEntryArrayDataType){
+        dataType = getMapEntryType(dataType);
+        if (derivationInfo.hasEntryArrayDataType) {
+          dataType = getArrayType(dataType);
+        }
       }
       else 
       if (derivation === 'median'){
@@ -309,16 +322,7 @@ class QueryAxisItem {
       return entry.literal;
     });
     var toValueLiterals;
-    var isRangeFilterType;
-    switch (filter.filterType) {
-      case FilterDialog.filterTypes.BETWEEN:
-      case FilterDialog.filterTypes.NOTBETWEEN:
-        isRangeFilterType = true;
-        break;
-      default:
-        isRangeFilterType = false;
-    }
-    if (isRangeFilterType) {
+    if (FilterDialog.isRangeFilterType(filter.filterType)) {
       toValueLiterals = Object.keys(toValues).map(function(key){
         var entry = toValues[key];
         return entry.literal;
@@ -356,17 +360,12 @@ class QueryAxisItem {
 
     if (indexOfNull !== -1) {
       operator = 'IS';
-      switch (filter.filterType) {
-        case FilterDialog.filterTypes.EXCLUDE:
-        case FilterDialog.filterTypes.NOTLIKE:
-        case FilterDialog.filterTypes.NOTBETWEEN:
-          operator += ' NOT';
+      if (FilterDialog.isExclusiveFilterType(filter.filterType)){
+        operator += ' NOT';
       }
       literalLists.valueLiterals.splice(indexOfNull, 1);
-      switch (filter.filterType) {
-        case FilterDialog.filterTypes.NOTBETWEEN:
-        case FilterDialog.filterTypes.BETWEEN:
-          literalLists.toValueLiterals.splice(indexOfNull, 1);
+      if (FilterDialog.isRangeFilterType(filter.filterType)){
+        literalLists.toValueLiterals.splice(indexOfNull, 1);
       }
       nullCondition = `${columnExpression} ${operator} NULL`;
       operator = '';
@@ -440,6 +439,34 @@ class QueryAxisItem {
           if (!logicalOperator && nullCondition || literalLists.valueLiterals.length > 1) {
             sql = `( ${sql} )`;
           }
+          break;
+        
+        case FilterDialog.filterTypes.HASANY:
+        case FilterDialog.filterTypes.HASALL:
+        case FilterDialog.filterTypes.NOTHASANY:
+        case FilterDialog.filterTypes.NOTHASALL:
+          var arrayFunction;
+          switch (filter.filterType){
+            case FilterDialog.filterTypes.HASANY:
+            case FilterDialog.filterTypes.NOTHASANY:
+              arrayFunction = 'list_has_any';
+              break;
+            case FilterDialog.filterTypes.HASALL:
+            case FilterDialog.filterTypes.NOTHASALL:
+              arrayFunction = 'list_has_all';
+              break;
+          }
+          var valueList = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
+            var valueLiteral = literalLists.valueLiterals[currIndex];
+            acc.push(valueLiteral);
+            return acc;
+          }, []);
+          valueList = `[ ${valueList.join(',')} ]`;
+          sql = `${arrayFunction}( ${columnExpression}, ${valueList} )`;
+          if (FilterDialog.isExclusiveFilterType(filter.filterType)){
+            sql = `NOT ${sql}`;
+          }
+          break;
       }
     }
     else {
