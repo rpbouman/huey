@@ -104,6 +104,14 @@ function createNumberFormatter(fractionDigits){
                 }
                 fractionalPart = String(fractionalPart).split('.')[1];
               }
+              else
+              if (fractionalPart.length < options.maximumFractionDigits){
+                var spacePadding = options.maximumFractionDigits - fractionalPart.length;
+                if (fractionalPart.length === 0) {
+                  spacePadding += 1;
+                }
+                fractionalPart.padEnd(spacePadding, ' ');
+              }
               
               if (decimalSeparator === undefined) {
                 decimalSeparator = '.';
