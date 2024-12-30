@@ -997,6 +997,12 @@ class FilterDialog {
             queryAxisItem.memberExpressionPath.push('map_keys()');
             queryAxisItem.memberExpressionPath.push('unnest()');
             queryAxisItem.derivation = 'elements';
+            break;
+          case 'valuelist':
+            queryAxisItem.memberExpressionPath.push('map_values()');
+            queryAxisItem.memberExpressionPath.push('unnest()');
+            queryAxisItem.derivation = 'elements';
+            break;
         }
       }
       else {

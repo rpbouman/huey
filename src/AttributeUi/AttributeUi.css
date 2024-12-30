@@ -186,6 +186,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\eac7";
   }
 
+  details[data-nodetype=derived][data-derivation='valuelist'] > summary > span.label::before {
+    /* shopping cart */
+    content: "\eb25";
+  }
+
   details[data-nodetype=derived][data-derivation='entries'] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > span.label::before,
