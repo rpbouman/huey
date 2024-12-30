@@ -416,6 +416,11 @@ class AttributeUi {
       folder: 'map operations',
       expressionTemplate: "list_sort( map_keys( ${columnExpression} ) )",
       hasKeyArrayDataType: true
+    },
+    "valuelist": {
+      folder: 'map operations',
+      expressionTemplate: "list_sort( map_values( ${columnExpression} ) )",
+      hasValueArrayDataType: true
     }
   };
     
@@ -1124,6 +1129,10 @@ class AttributeUi {
           break;
         case 'keyset':
           nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'key') + '[]';
+          break;
+        case 'valuelist':
+          nodeProfile.memberExpressionType = getMemberExpressionType(memberExpressionType, 'value') + '[]';
+          break;
       }
 
       var config = {
