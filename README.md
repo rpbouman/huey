@@ -33,7 +33,9 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 ### Registering Files
 Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to read and analyze data files. 
-Due to general security policy, the web browser can not simply read files from your local computer: you need to explicitly select and register files in DuckDB WASM's virtual file system. 
+General browser security policies prevent web applications from autonomously accessing files on the local file system. 
+Web application users need to explicitly select the files they want to analyze. 
+Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
 
 To register one or more files, you can either 
 - Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
