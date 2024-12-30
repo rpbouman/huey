@@ -122,6 +122,15 @@
           border-right-color: var( --huey-dark-border-color );
           font-weight: bold;
         }
+        
+        /* 
+          ditto marks are text and should not be aligned according to data type. 
+          Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.
+        */
+        > .pivotTableUiHeaderCell[data-is-repeating-value=true] > .pivotTableUiCellLabel {
+          text-align: center;
+        }
+
       }
       
       .pivotTableUiRow[data-totals=true] {
@@ -136,6 +145,18 @@
 
       > .pivotTableUiTableHeader {
         display: table-header-group;
+        
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value] {
+          border-right-style: none;
+        }
+
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value]:last-child {
+          border-right-style: solid;
+        }
+
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
+          border-left-style: none;
+        }
         
         > .pivotTableUiRow:first-child {
 
@@ -185,6 +206,7 @@
         > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
           border-bottom-color: var( --huey-dark-border-color );
         }
+
       }
       
       > .pivotTableUiTableBody {
@@ -202,7 +224,23 @@
           > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
             border-right-color: var( --huey-dark-border-color );
           }
+          
+          > .pivotTableUiHeaderCell[data-is-repeating-value]{
+            border-bottom-style: none;
+          }
+          
+          > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
+            border-top-style: none;
+          }
+
         }
+
+        > .pivotTableUiRow:nth-last-child(2) {
+          > .pivotTableUiHeaderCell[data-is-repeating-value] {
+            border-bottom-style: solid;
+          }
+        }
+
       }
     }
   }
