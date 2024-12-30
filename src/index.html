@@ -986,6 +986,7 @@
           <div role="tabpanel">
             <form id="pivotSettings">
               <fieldset>
+                <legend>Appearance</legend>
                 <label
                   for="maxCellWidth"
                   title="The maximum string length to consider when sizing pivot table cells and headers"
@@ -997,6 +998,14 @@
                   min="1"
                   max="256"
                   value="30"
+                />
+                <label
+                  for="hideRepeatingAxisValues"
+                  title="Uncheck to always show all axis values; check to hide repeated values."
+                >Hide repeating axis values</label>
+                <input 
+                  id="hideRepeatingAxisValues"
+                  type="checkbox"
                 />
               </fieldset>
               <fieldset>
