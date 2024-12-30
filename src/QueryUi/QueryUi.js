@@ -258,7 +258,13 @@ class QueryUi {
     }
     var expression = axisItem.columnName;
     if (axisItem.memberExpressionPath) {
-      expression = `${expression}.${axisItem.memberExpressionPath.join('.')}`;
+      var path = Object.assign([], axisItem.memberExpressionPath);
+      switch (axisItem.derivation) {
+        case 'elements':
+        case 'element indices':
+          path.pop();
+      }
+      expression = `${expression}.${path.join('.')}`;
     }
     
     if (axisItem.derivation) {
