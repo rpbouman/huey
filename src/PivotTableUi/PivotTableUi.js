@@ -683,7 +683,7 @@ class PivotTableUi extends EventEmitter {
             else {
               isRepeatingValue = false;
             }
-            cell.removeAttribute('data-is-repeating-value', isRepeatingValue);
+            cell.setAttribute('data-is-repeating-value', isRepeatingValue);
           }
           else {
             cell.removeAttribute('data-is-repeating-value');
@@ -829,7 +829,7 @@ class PivotTableUi extends EventEmitter {
             else {
               isRepeatingValue = false;
             }
-            cell.removeAttribute('data-is-repeating-value', isRepeatingValue);
+            cell.setAttribute('data-is-repeating-value', isRepeatingValue);
           }
           else {
             cell.removeAttribute('data-is-repeating-value');

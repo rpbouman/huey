@@ -70,6 +70,12 @@
           background-color: var( --huey-medium-background-color );
         }
         
+
+        > .pivotTableUiCell[data-is-repeating-value=true] > .pivotTableUiCellLabel::after {
+          /* https://en.wikipedia.org/wiki/Ditto_mark */
+          content: "\3003";
+        }
+
         > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
         > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
           font-weight: bold;
