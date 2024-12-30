@@ -152,6 +152,22 @@
       <option data-auto="true" value="empty">(empty)</option>
       <option data-auto="true" value="NULL">NULL</option>
     </datalist>
+    
+    <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
+    <datalist id="commonDittoMarks">
+      <!-- non breaking space -->
+      <option value="&nbsp;">&nbsp;</option>
+      <!-- one single quote (apostrophe) -->
+      <option value="&apos;">'</option>
+      <!-- two single quotes (apostrophes) -->
+      <option value="&apos;&apos;">''</option>
+      <!-- double quote -->
+      <option value="&quot;">"</option>
+      <!-- right double quotation mark: ” -->
+      <option value="&#x201D;">&#x201D;</option>
+      <!-- ditto mark: 〃-->
+      <option value="&#x3003;">&#x3003;</option>
+    </datalist>
   </head>
 
   <body aria-busy="true">
@@ -1006,6 +1022,14 @@
                 <input 
                   id="hideRepeatingAxisValues"
                   type="checkbox"
+                />
+                <label
+                  for="dittoMark"
+                >Ditto mark</label>
+                <input 
+                  id="dittoMark"
+                  list="commonDittoMarks"
+                  type="text"
                 />
               </fieldset>
               <fieldset>

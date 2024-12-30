@@ -69,7 +69,8 @@ class Settings extends EventEmitter {
           { value: 'BEFORE', label: 'before', title: 'Totals come before totalled items.'}
         ]
       },
-      hideRepeatingAxisValues: true
+      hideRepeatingAxisValues: true,
+      dittoMark: '〃'
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',

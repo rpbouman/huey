@@ -570,6 +570,7 @@ class PivotTableUi extends EventEmitter {
     }
     var repeatingValuesIndex;
     var hideRepeatingAxisValues = this.#getHideRepeatingAxisValues();
+    var dittoMark = hideRepeatingAxisValues ? this.#getDittoMark() : '';
 
     var axisId = QueryModel.AXIS_COLUMNS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
@@ -677,7 +678,7 @@ class PivotTableUi extends EventEmitter {
           if (hideRepeatingAxisValues){
             var isRepeatingValue;
             if (repeatingValuesIndex === j){
-              labelText = '';
+              labelText = dittoMark;
               isRepeatingValue = true;
             }
             else {
@@ -733,6 +734,8 @@ class PivotTableUi extends EventEmitter {
   async #updateRowsAxisTupleData(physicalRowsAxisTupleIndex){
     var repeatingValuesIndex;
     var hideRepeatingAxisValues = this.#getHideRepeatingAxisValues();
+    var dittoMark = hideRepeatingAxisValues ? this.#getDittoMark() : '';
+    
     var axisId = QueryModel.AXIS_ROWS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalRowsAxisTupleIndex);
     var rowsAxisSizeInfo = this.#getRowsAxisSizeInfo();
@@ -823,7 +826,7 @@ class PivotTableUi extends EventEmitter {
           if (hideRepeatingAxisValues){
             var isRepeatingValue;
             if (repeatingValuesIndex === j){
-              labelText = '';
+              labelText = dittoMark;
               isRepeatingValue = true;
             }
             else {
@@ -1583,6 +1586,21 @@ class PivotTableUi extends EventEmitter {
     return 100;
   }
 
+  #getDittoMark(){
+    var dittoMark;
+    var settings = this.#settings;
+    if (settings && typeof settings.getSettings === 'function') {
+      settings = settings.getSettings('pivotSettings');
+    }
+    if (settings){
+      dittoMark = settings.dittoMark;
+    }
+    if ( dittoMark === undefined) {
+      dittoMark = '〃';
+    }
+    return dittoMark;
+  }
+  
   #getHideRepeatingAxisValues(){
     var hideRepeatingAxisValues;
     var settings = this.#settings;
