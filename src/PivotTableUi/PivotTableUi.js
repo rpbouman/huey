@@ -68,13 +68,13 @@ class PivotTableUi extends EventEmitter {
 
     container.appendChild(element);
   }
-  
+
   #getTotalsString(axisItem){
     var generalSettings = this.#settings.getSettings('pivotSettings');
     var totalsString = generalSettings.totalsString;
     return totalsString;
   }
-  
+
   getQueryModel(){
     return this.#queryModel;
   }
@@ -114,19 +114,19 @@ class PivotTableUi extends EventEmitter {
       };
       return timeoutValue;
     }.bind(this);
-    
+
     bufferEvents(
-      queryModel, 
-      'beforechange', 
-      this.#queryModelBeforeChangeHandler, 
-      this, 
+      queryModel,
+      'beforechange',
+      this.#queryModelBeforeChangeHandler,
+      this,
       timeoutCallback
     );
     bufferEvents(
-      queryModel, 
-      'change', 
-      this.#queryModelChangeHandler, 
-      this, 
+      queryModel,
+      'change',
+      this.#queryModelChangeHandler,
+      this,
       timeoutCallback
     );
     //queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
@@ -539,13 +539,13 @@ class PivotTableUi extends EventEmitter {
       return acc;
     }, []) : undefined;
   }
-  // if the tuple has a grouping id, 
+  // if the tuple has a grouping id,
   // find the most significant bit of the grouping id
   // find the totals item that corresponds with the MSB of the grouping id
   // find the index of that totals item
   // if the index of the current item is equal to or greater than the index of the totals item, then return true
-  // else return false. 
-  
+  // else return false.
+
   static #isTotalsMember(groupingId, totalsItemsIndices, currentItemIndex){
     if (
       !groupingId ||
@@ -560,7 +560,7 @@ class PivotTableUi extends EventEmitter {
     while (i >= 0n && !(groupingId & (1n << i)))  {
       i -= 1n;
     }
-    
+
     return  (i < 0n) ? Infinity : totalsItemsIndices[i];
   }
 
@@ -568,6 +568,10 @@ class PivotTableUi extends EventEmitter {
     if (isNaN(physicalColumnsAxisTupleIndex)) {
       return;
     }
+    var repeatingValuesIndex;
+    var hideRepeatingAxisValues = this.#getHideRepeatingAxisValues();
+    var dittoMark = hideRepeatingAxisValues ? this.#getDittoMark() : '';
+
     var axisId = QueryModel.AXIS_COLUMNS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalColumnsAxisTupleIndex);
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
@@ -611,6 +615,9 @@ class PivotTableUi extends EventEmitter {
     // for each tuple
     for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
+      var prevTuple = tuples[tupleIndex - 1];
+      repeatingValuesIndex = undefined;
+
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
       var isTotalsColumn = Boolean(groupingId);
 
@@ -632,6 +639,17 @@ class PivotTableUi extends EventEmitter {
         if (tuple && j < tuple.values.length){
           tupleValueField = tupleValueFields[j];
           tupleValue = tuple.values[j];
+          if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
+            var prevTupleValue = prevTuple.values[j];
+            if (tupleValue === prevTupleValue) {
+              repeatingValuesIndex = j;
+            }
+            else
+            if (repeatingValuesIndex === undefined){
+              repeatingValuesIndex = j - 1;
+            }
+          }
+
           this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
 
           if (isTotalsMember > j) {
@@ -656,6 +674,22 @@ class PivotTableUi extends EventEmitter {
             labelText = '';
           }
           titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)} (${tupleIndex + 1}): ${titleText}`;
+
+          if (hideRepeatingAxisValues){
+            var isRepeatingValue;
+            if (repeatingValuesIndex === j){
+              labelText = dittoMark;
+              isRepeatingValue = true;
+            }
+            else {
+              isRepeatingValue = false;
+            }
+            cell.setAttribute('data-is-repeating-value', isRepeatingValue);
+          }
+          else {
+            cell.removeAttribute('data-is-repeating-value');
+          }
+
         }
         else
         if (doCellHeaders && cellsAxisItems.length) {
@@ -698,6 +732,10 @@ class PivotTableUi extends EventEmitter {
   }
 
   async #updateRowsAxisTupleData(physicalRowsAxisTupleIndex){
+    var repeatingValuesIndex;
+    var hideRepeatingAxisValues = this.#getHideRepeatingAxisValues();
+    var dittoMark = hideRepeatingAxisValues ? this.#getDittoMark() : '';
+    
     var axisId = QueryModel.AXIS_ROWS;
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(axisId, physicalRowsAxisTupleIndex);
     var rowsAxisSizeInfo = this.#getRowsAxisSizeInfo();
@@ -733,6 +771,9 @@ class PivotTableUi extends EventEmitter {
       var cells = row.childNodes;
 
       var tuple = tuples[tupleIndex];
+      var prevTuple = tuples[tupleIndex - 1];
+      repeatingValuesIndex = undefined;
+
       row.setAttribute('data-rows-tuple-index', tupleIndex);
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
 
@@ -750,6 +791,18 @@ class PivotTableUi extends EventEmitter {
         if (tuple && j < numMembers) {
           var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
           var tupleValue = tuple.values[j];
+
+          if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
+            var prevTupleValue = prevTuple.values[j];
+            if (tupleValue === prevTupleValue) {
+              repeatingValuesIndex = j;
+            }
+            else
+            if (repeatingValuesIndex === undefined){
+              repeatingValuesIndex = j - 1;
+            }
+          }
+
           var tupleValueField = tupleValueFields[j];
           this.#setCellValueLiteral(cell, queryAxisItem, tupleValue, tupleValueField);
           if (isTotalsMember > j) {
@@ -768,7 +821,22 @@ class PivotTableUi extends EventEmitter {
           else {
             labelText = '';
           }
-          titleText = `{QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
+          titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
+
+          if (hideRepeatingAxisValues){
+            var isRepeatingValue;
+            if (repeatingValuesIndex === j){
+              labelText = dittoMark;
+              isRepeatingValue = true;
+            }
+            else {
+              isRepeatingValue = false;
+            }
+            cell.setAttribute('data-is-repeating-value', isRepeatingValue);
+          }
+          else {
+            cell.removeAttribute('data-is-repeating-value');
+          }
         }
         else
         if (doCellHeaders) {
@@ -797,7 +865,7 @@ class PivotTableUi extends EventEmitter {
       }
     }
   }
-  
+
   #setCellItemId(cellElement, queryAxisItem){
     if (!queryAxisItem){
       return;
@@ -834,7 +902,7 @@ class PivotTableUi extends EventEmitter {
       valueLiteral = String(tupleValue);
     }
     cellElement.setAttribute('data-value-literal', valueLiteral);
-    
+
     var cellValueType = String(tupleValueField.type);
     if (queryAxisItem.derivation) {
       var derivationInfo = AttributeUi.getDerivationInfo(queryAxisItem.derivation);
@@ -874,7 +942,7 @@ class PivotTableUi extends EventEmitter {
       labelText = String(value);
     }
     label.innerText = labelText;
-    
+
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
     label.title = `${caption}: ${labelText}`;
     return labelText
@@ -1155,7 +1223,7 @@ class PivotTableUi extends EventEmitter {
     var totalsItemsIndices = PivotTableUi.#getTotalsItemsIndices(queryAxisItems);
 
     var tupleValueFields = this.#columnsTupleSet.getTupleValueFields();
-    
+
     var numCellHeaders = 0;
     var numTuples = tuples.length;
     var numColumns = numTuples;
@@ -1518,6 +1586,36 @@ class PivotTableUi extends EventEmitter {
     return 100;
   }
 
+  #getDittoMark(){
+    var dittoMark;
+    var settings = this.#settings;
+    if (settings && typeof settings.getSettings === 'function') {
+      settings = settings.getSettings('pivotSettings');
+    }
+    if (settings){
+      dittoMark = settings.dittoMark;
+    }
+    if ( dittoMark === undefined) {
+      dittoMark = '〃';
+    }
+    return dittoMark;
+  }
+  
+  #getHideRepeatingAxisValues(){
+    var hideRepeatingAxisValues;
+    var settings = this.#settings;
+    if (settings && typeof settings.getSettings === 'function') {
+      settings = settings.getSettings('pivotSettings');
+    }
+    if (settings){
+      hideRepeatingAxisValues = settings.hideRepeatingAxisValues;
+    }
+    if ( hideRepeatingAxisValues === undefined) {
+      hideRepeatingAxisValues = true;
+    }
+    return hideRepeatingAxisValues;
+  }
+
   #getMaxCellWidth(){
     var maxCellWidth;
     var settings = this.#settings;
@@ -1835,7 +1933,7 @@ class PivotTableUi extends EventEmitter {
 
     var contextMenuContext = this.#contextMenuContext;
     this.#contextMenuContext = null;
-    
+
     if (id === 'pivotTableContextMenuItemCopyCell'){
       copyToClipboard(contextMenuContext.textContent, 'text/plain');
       return;
@@ -1847,11 +1945,11 @@ class PivotTableUi extends EventEmitter {
 
     exportSettings.exportDestinationClipboard = true;
     exportSettings.exportDestinationFile = false;
-    
+
     var queryAxisItem, cellsAxisItem, filter, filterAxisItem, itemId;
     var queryModel = this.#queryModel;
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
-        
+
     var queryModelState = queryModel.getState();
     var queryModelAxes = queryModelState.axes;
     var filterAxisItems = queryModelAxes[QueryModel.AXIS_FILTERS];
@@ -1864,7 +1962,7 @@ class PivotTableUi extends EventEmitter {
     var tableBodyDom = this.#getTableBodyDom();
     var tableBodyRows = tableBodyDom.childNodes;
     var tableHeaderRow, tableBodyRow, cells;
-    
+
     // calculate the number of row headers
     var numRowHeaders = rowsAxisItems ? rowsAxisItems.length : 0;
     var numColumnHeaders = columnsAxisItems ? columnsAxisItems.length : 0;
@@ -1878,7 +1976,7 @@ class PivotTableUi extends EventEmitter {
           break;
       }
     }
-    
+
     var busyDialog = byId('visualizationProgressDialog');
     busyDialog.showModal();
     switch (id){
@@ -1913,16 +2011,16 @@ class PivotTableUi extends EventEmitter {
         else
         if (columnIndex < numRowHeaders){
           // the column is in the range of the row headers, but this is not a row axis item - it must be a cells axis header.
-          
+
         }
         else {
           exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = false);
-          // the column is a table column; 
+          // the column is a table column;
           // to export it, we set up a transformed query model that applies a filter to select only this column.
           if (!filterAxisItems){
             queryModelAxes[QueryModel.AXIS_FILTERS] = filterAxisItems = [];
           }
-          
+
           for (var i = 0; i < tableHeaderRows.length; i++){
             tableHeaderRow = tableHeaderRows.item(i);
             cells = tableHeaderRow.childNodes;
@@ -1950,7 +2048,7 @@ class PivotTableUi extends EventEmitter {
                 literal: cell.getAttribute('data-value-literal')
               };
             }
-            else 
+            else
             if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
               itemId = cell.getAttribute('data-axis-item');
               cellsAxisItem = cellsAxisItems.find(function(cellsAxisItem){
@@ -1964,7 +2062,7 @@ class PivotTableUi extends EventEmitter {
         }
         break;
       case 'pivotTableContextMenuItemCopyRow':
-      
+
         // find the physical row index
         var row = contextMenuContext.parentNode;
         var rowIndex = 0;
@@ -1972,7 +2070,7 @@ class PivotTableUi extends EventEmitter {
           rowIndex += 1;
           row = row.previousSibling;
         }
-        
+
         row = contextMenuContext.parentNode;
         if (row.parentNode === tableHeaderDom) {
           if (rowIndex < columnsAxisItems.length){
@@ -1982,23 +2080,23 @@ class PivotTableUi extends EventEmitter {
             queryAxisItem = columnsAxisItems[rowIndex];
             queryModelAxes[QueryModel.AXIS_COLUMNS].length = 0;
             queryModelAxes[QueryModel.AXIS_COLUMNS].push(queryAxisItem);
-            
+
           }
-          else 
+          else
           if (rowIndex < numColumnHeaders) {
             // this must be the cells header
           }
         }
-        else 
+        else
         if (row.parentNode === tableBodyDom){
           var cells = row.childNodes;
           exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = false);
-          // the column is a table column; 
+          // the column is a table column;
           // to export it, we set up a transformed query model that applies a filter to select only this column.
           if (!filterAxisItems){
             queryModelAxes[QueryModel.AXIS_FILTERS] = filterAxisItems = [];
           }
-          
+
           for (var i = 0; i < numRowHeaders; i++){
             cell = cells.item(i);
             if (i < rowsAxisItems.length){
@@ -2024,7 +2122,7 @@ class PivotTableUi extends EventEmitter {
                 literal: cell.getAttribute('data-value-literal')
               };
             }
-            else 
+            else
             if (cellHeadersAxis === QueryModel.AXIS_ROWS){
               itemId = cell.getAttribute('data-axis-item');
               cellsAxisItem = cellsAxisItems.find(function(cellsAxisItem){
@@ -2040,7 +2138,7 @@ class PivotTableUi extends EventEmitter {
         }
         break;
     }
-    
+
     try {
       var exportQueryModel = new QueryModel();
       await exportQueryModel.setState(queryModelState);

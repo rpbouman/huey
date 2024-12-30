@@ -6,7 +6,7 @@ class Settings extends EventEmitter {
   
   static #settingsTemplate = {
     datasourceSettings: {
-      useLooseColumnTypeComparison: false,
+      useLooseColumnTypeComparison: true,
       looseColumnTypes: {
         // loosest numeric class.
         number: [],
@@ -68,7 +68,9 @@ class Settings extends EventEmitter {
           { value: 'AFTER', label: 'after', title: 'Totals come after totalled items.'},
           { value: 'BEFORE', label: 'before', title: 'Totals come before totalled items.'}
         ]
-      }
+      },
+      hideRepeatingAxisValues: true,
+      dittoMark: '〃'
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',

@@ -152,6 +152,22 @@
       <option data-auto="true" value="empty">(empty)</option>
       <option data-auto="true" value="NULL">NULL</option>
     </datalist>
+    
+    <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
+    <datalist id="commonDittoMarks">
+      <!-- non breaking space -->
+      <option value="&nbsp;">&nbsp;</option>
+      <!-- one single quote (apostrophe) -->
+      <option value="&apos;">'</option>
+      <!-- two single quotes (apostrophes) -->
+      <option value="&apos;&apos;">''</option>
+      <!-- double quote -->
+      <option value="&quot;">"</option>
+      <!-- right double quotation mark: ” -->
+      <option value="&#x201D;">&#x201D;</option>
+      <!-- ditto mark: 〃-->
+      <option value="&#x3003;">&#x3003;</option>
+    </datalist>
   </head>
 
   <body aria-busy="true">
@@ -986,6 +1002,7 @@
           <div role="tabpanel">
             <form id="pivotSettings">
               <fieldset>
+                <legend>Appearance</legend>
                 <label
                   for="maxCellWidth"
                   title="The maximum string length to consider when sizing pivot table cells and headers"
@@ -997,6 +1014,22 @@
                   min="1"
                   max="256"
                   value="30"
+                />
+                <label
+                  for="hideRepeatingAxisValues"
+                  title="Uncheck to always show all axis values; check to hide repeated values."
+                >Hide repeating axis values</label>
+                <input 
+                  id="hideRepeatingAxisValues"
+                  type="checkbox"
+                />
+                <label
+                  for="dittoMark"
+                >Ditto mark</label>
+                <input 
+                  id="dittoMark"
+                  list="commonDittoMarks"
+                  type="text"
                 />
               </fieldset>
               <fieldset>

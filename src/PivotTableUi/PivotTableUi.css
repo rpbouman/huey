@@ -1,3 +1,54 @@
+.pivotTableUiContainer[aria-busy=false] {
+
+  > .pivotTableUiInnerContainer {
+
+    > .pivotTableUiTable {
+      .pivotTableUiRow {
+
+        > .pivotTableUiHeaderCell {
+          > .pivotTableUiCellLabel {
+            color: inherit;
+          }
+        }
+
+      }
+    }
+  }
+}
+
+.pivotTableUiContainer[aria-busy=true] {
+  > .pivotTableUiInnerContainer {
+
+    > .pivotTableUiTable {
+
+      /* 
+        This is here for https://github.com/rpbouman/huey/issues/70
+        basically, we need to suprress display of the label text while we're still busy (rendering the table)
+        If we don't, the cells will not have yet assumed the assigned cell width 
+        and this messes up our calculation of how much columns we should render.
+      */
+      > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
+        width: 1ch;
+        visibility: hidden;
+      }
+
+      .pivotTableUiRow {
+
+        > .pivotTableUiCell {
+          border-color: transparent;
+          box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
+
+          > .pivotTableUiCellLabel {
+            color: transparent;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+          }
+
+        }
+      }
+    }
+  }
+}
+
 .pivotTableUiContainer {
   overflow: hidden;
   background-color: var( --huey-light-background-color );
@@ -122,6 +173,16 @@
           border-right-color: var( --huey-dark-border-color );
           font-weight: bold;
         }
+        
+        /* 
+          ditto marks are text and should not be aligned according to data type. 
+          Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.
+        */
+        > .pivotTableUiHeaderCell[data-is-repeating-value=true] > .pivotTableUiCellLabel {
+          text-align: center;
+          color: var( --huey-placeholder-color );
+        }
+
       }
       
       .pivotTableUiRow[data-totals=true] {
@@ -136,6 +197,18 @@
 
       > .pivotTableUiTableHeader {
         display: table-header-group;
+        
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value] {
+          border-right-style: none;
+        }
+
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value]:last-child {
+          border-right-style: solid;
+        }
+
+        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
+          border-left-style: none;
+        }
         
         > .pivotTableUiRow:first-child {
 
@@ -185,6 +258,7 @@
         > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
           border-bottom-color: var( --huey-dark-border-color );
         }
+
       }
       
       > .pivotTableUiTableBody {
@@ -202,58 +276,23 @@
           > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
             border-right-color: var( --huey-dark-border-color );
           }
-        }
-      }
-    }
-  }
-}
-
-.pivotTableUiContainer[aria-busy=false] {
-
-  > .pivotTableUiInnerContainer {
-
-    > .pivotTableUiTable {
-      .pivotTableUiRow {
-
-        > .pivotTableUiHeaderCell {
-          > .pivotTableUiCellLabel {
-            color: inherit;
+          
+          > .pivotTableUiHeaderCell[data-is-repeating-value]{
+            border-bottom-style: none;
           }
-        }
-
-      }
-    }
-  }
-}
-
-.pivotTableUiContainer[aria-busy=true] {
-  > .pivotTableUiInnerContainer {
-
-    > .pivotTableUiTable {
-
-      /* 
-        This is here for https://github.com/rpbouman/huey/issues/70
-        basically, we need to suprress display of the label text while we're still busy (rendering the table)
-        If we don't, the cells will not have yet assumed the assigned cell width 
-        and this messes up our calculation of how much columns we should render.
-      */
-      > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
-        width: 1ch;
-        visibility: hidden;
-      }
-
-      .pivotTableUiRow {
-
-        > .pivotTableUiCell {
-          border-color: transparent;
-          box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
-
-          > .pivotTableUiCellLabel {
-            color: transparent;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+          
+          > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
+            border-top-style: none;
           }
 
         }
+
+        > .pivotTableUiRow:nth-last-child(2) {
+          > .pivotTableUiHeaderCell[data-is-repeating-value] {
+            border-bottom-style: solid;
+          }
+        }
+
       }
     }
   }
