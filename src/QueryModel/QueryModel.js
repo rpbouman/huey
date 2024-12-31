@@ -603,6 +603,7 @@ class QueryAxis {
   setItems(items) {
     this.#items = items;
   }
+
 }
 
 class QueryModel extends EventEmitter {
@@ -1093,15 +1094,25 @@ class QueryModel extends EventEmitter {
     axesChangeInfo[axisId2] = {};
 
     if (axis1Items.length) {
-      axesChangeInfo[axisId1].removed = axesChangeInfo[axisId2].added = axis1Items;
+      axesChangeInfo[axisId1].removed = axis1Items;
+      axesChangeInfo[axisId2].added = axis1Items.map(function(axisItem){
+        return Object.assign({}, axisItem, {
+          axis: axisId2
+        });
+      });
     }
     if (axis2Items.length) {
-      axesChangeInfo[axisId2].removed = axesChangeInfo[axisId1].added = axis2Items;
+      axesChangeInfo[axisId2].removed = axis2Items;
+      axesChangeInfo[axisId1].added = axis2Items.map(function(axisItem){
+        return Object.assign({}, axisItem, {
+          axis: axisId1
+        });
+      });
     }
 
     this.fireEvent('beforechange', eventData);
-    axis1.setItems(axis2Items);
-    axis2.setItems(axis1Items);
+    axis1.setItems(axesChangeInfo[axisId1].added);
+    axis2.setItems(axesChangeInfo[axisId2].added);
     this.fireEvent('change', eventData);
   }
 
