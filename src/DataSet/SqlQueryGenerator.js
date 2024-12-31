@@ -456,11 +456,16 @@ class SqlQueryGenerator {
     var selectListExpressions = [];
 
     // the group by expression includes expressons for all axis items.
-    var axisGroupByExpressions, groupByExpressions = {};
+    var axisGroupByExpressions;
+    
+    var groupByExpressions = {};
     groupByExpressions[QueryModel.AXIS_ROWS] = [];
     groupByExpressions[QueryModel.AXIS_COLUMNS] = [];
+    
     // the groupingSets are created when we find an axis item that has includeTotals
-    var axisGroupingSets, groupingSets = {};
+    var axisGroupingSets;
+    
+    var groupingSets = {};
     groupingSets[QueryModel.AXIS_ROWS] = [];
     groupingSets[QueryModel.AXIS_COLUMNS] = [];
     
@@ -485,26 +490,33 @@ class SqlQueryGenerator {
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
       var queryAxisItem = queryAxisItems[i];
+      var axisId = queryAxisItem.axis;
+      if (axisId === QueryModel.AXIS_CELLS){
+        continue;
+      }
+      
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
       var itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
       itemNullsSortOrder = itemNullsSortOrder ? ` NULLS ${itemNullsSortOrder}` : '';
       
-      var axisId = queryAxisItem.axis;
       axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
-        axisGroupingSets = groupingSets[axisId];
+        // make a grouping set for the group by expression up to this point
         var groupingSet = [].concat(axisGroupByExpressions);
+        axisGroupingSets = groupingSets[axisId];
         axisGroupingSets.push(groupingSet);
+        
+        // each totals column needs to be included in a grouping id expression
+        // so we can figure out which result rows are totals (and for what group).
         groupingIdExpressions.push(columnExpressionReference);
+        
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
         orderByExpressions.push(columnExpressionReference);
       }
       
-      if (axisId !== QueryModel.AXIS_CELLS){
-        axisGroupByExpressions.push(columnExpressionReference);
-      }
+      axisGroupByExpressions.push(columnExpressionReference);
       var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
@@ -530,7 +542,7 @@ class SqlQueryGenerator {
       }
       else
       if (axisGroupByExpressions.length) {
-        rowsAxisGroupingSets = [axisGroupByExpressions];
+        rowsAxisGroupingSets.push(axisGroupByExpressions);
       }
 
       var columnsAxisGroupingSets = groupingSets[QueryModel.AXIS_COLUMNS];
@@ -543,15 +555,25 @@ class SqlQueryGenerator {
       }
       else
       if (axisGroupByExpressions.length) {
-        columnsAxisGroupingSets = [axisGroupByExpressions];
+        columnsAxisGroupingSets.push(axisGroupByExpressions);
       }
 
-      axisGroupingSets = [].concat(rowsAxisGroupingSets, columnsAxisGroupingSets);
-      rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
-        columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
-          axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
+      if (rowsAxisGroupingSets.length && columnsAxisGroupingSets.length) {
+        axisGroupingSets = [];
+        rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
+          columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
+            axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
+          });
         });
-      });
+      }
+      else 
+      if (rowsAxisGroupingSets.length){
+        axisGroupingSets = rowsAxisGroupingSets;
+      }
+      else
+      if (columnsAxisGroupingSets.length){
+        axisGroupingSets = columnsAxisGroupingSets;
+      }
       
       var groupingSetsSql = axisGroupingSets
       .map(function(groupingSet){                     // generate SQL for grouping set
@@ -561,12 +583,6 @@ class SqlQueryGenerator {
           '  )'
         ].join('\n');
       })
-      .reduce(function(groupingSetsSql, groupingSql){ // deduplicate grouping sets
-        if (groupingSetsSql.indexOf(groupingSql) === -1){
-          groupingSetsSql.push(groupingSql);
-        }
-        return groupingSetsSql;
-      }, [])                                          // join groups
       .join(',');
       groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
 
