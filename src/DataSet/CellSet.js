@@ -106,75 +106,6 @@ class CellSet extends DataSetComponent {
     return allRanges;
   }
 
-  #getCteForTupleGroup(tupleGroup){
-    var queryAxisItems = tupleGroup.queryAxisItems;
-    var fields = tupleGroup.fields;
-    var tuples = tupleGroup.tuples;
-    var cellIndices = Object.keys(tuples);
-
-    var columns = [CellSet.#cellIndexColumnName];
-    var joinConditions = [];
-    var rows = [];
-    var value;
-    var hasNulls = new Array(queryAxisItems.length).fill(false);
-    var lastIndex = cellIndices.length - 1;
-    for (var i = 0; i < cellIndices.length; i++){
-      var cellIndex = cellIndices[i];
-      var tuple = tuples[cellIndex];
-      var row = [cellIndex];
-      for (var j = 0; j < queryAxisItems.length; j++){
-        var queryAxisItem = queryAxisItems[j];
-        if (queryAxisItem === undefined) {
-          continue;
-        }
-        var literalWriter = queryAxisItem.literalWriter;
-        var value = tuple[j];
-        if (value === null){
-          hasNulls[j] = true;
-        }
-        var field = fields[j];
-        var literal = literalWriter(value, field);
-        row.push(literal);
-
-        if (i === lastIndex) {
-          var itemSql;
-          if (queryAxisItem.memberExpressionPath || queryAxisItem.derivation) {
-            itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-          }
-          else {
-            itemSql = queryAxisItem.columnName;
-          }
-          columns.push(itemSql);
-          var leftJoinColumn = getQualifiedIdentifier(CellSet.#tupleDataRelationName, itemSql);
-          var rightJoinColumn = getQualifiedIdentifier(CellSet.datasetRelationName, itemSql);
-          var joinOperator = hasNulls[j] ? 'IS NOT DISTINCT FROM' : '=';
-          joinConditions.push(`${leftJoinColumn} ${joinOperator} ${rightJoinColumn}`);
-        }
-
-      }
-      rows.push(row);
-    }
-
-    var relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n ${columns.map(quoteIdentifierWhenRequired).join('\n, ')})`;
-    var valuesSql = rows.map(function(row){
-      return `( ${row.join(', ')} )`;
-    }).join('\n ,');
-    var valuesClause = `(VALUES\n  ${valuesSql}\n) AS ${relationDefinition}`;
-
-    var groupByList = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
-    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + quoteIdentifierWhenRequired(CellSet.datasetRelationName);
-    if (joinConditions.length){
-      joinClause += `\nON ${joinConditions.join('\n  AND ')}`;
-    }
-
-    var sql = [
-      `FROM ${valuesClause}`,
-      joinClause,
-      `GROUP BY ${groupByList}`
-    ];
-    return sql.join('\n');
-  }
-
   #getTuplesCte(tuplesToQuery, tuplesFields, includeGroupingId){
     var tupleSets = this.#tupleSets;
     var totalsItems = [];
@@ -195,7 +126,7 @@ class CellSet extends DataSetComponent {
             return queryAxisItem.includeTotals;
           });
         }
-        if (j){
+        if (j && totalsItems[j] && totalsItems[j].length){
           groupingId <<= totalsItems[j-1].length;
         }
         var tuple = tuples[j];
