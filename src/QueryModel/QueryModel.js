@@ -1111,8 +1111,8 @@ class QueryModel extends EventEmitter {
     }
 
     this.fireEvent('beforechange', eventData);
-    axis1.setItems(axesChangeInfo[axisId1].added);
-    axis2.setItems(axesChangeInfo[axisId2].added);
+    axis1.setItems(axesChangeInfo[axisId1].added || []);
+    axis2.setItems(axesChangeInfo[axisId2].added || []);
     this.fireEvent('change', eventData);
   }
 
