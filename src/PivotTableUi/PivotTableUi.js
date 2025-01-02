@@ -608,12 +608,13 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderDom = this.#getTableHeaderDom();
     var rows = tableHeaderDom.childNodes;
     var numRows = rows.length;
-    if (!doCellHeaders){
-      numRows -= 1;
-    }
+    //if (!doCellHeaders){
+    //  numRows -= 1;
+    //}
 
     // for each tuple
-    for (var i = columnsAxisSizeInfo.headers.columnCount; i < maxColumnIndex; i++){
+    var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
+    for (var i = columnsOffset; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
       var prevTuple = tuples[tupleIndex - 1];
       repeatingValuesIndex = undefined;
@@ -659,14 +660,14 @@ class PivotTableUi extends EventEmitter {
             else {
               titleText = String(tupleValue);
             }
-            if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount) {
+            if (cellsAxisItemIndex === 0 || i === columnsOffset) {
               labelText = titleText;
             }
           }
           else
           if (isTotalsMember === j){
             titleText = this.#getTotalsString(queryAxisItem);
-            if (cellsAxisItemIndex === 0 || i === columnsAxisSizeInfo.headers.columnCount){
+            if (cellsAxisItemIndex === 0 || i === columnsOffset){
               labelText = titleText;
             }
           }
@@ -677,7 +678,10 @@ class PivotTableUi extends EventEmitter {
 
           if (hideRepeatingAxisValues){
             var isRepeatingValue;
-            if (repeatingValuesIndex === j){
+            if (
+              repeatingValuesIndex === j || 
+              doCellHeaders && cellsAxisItems.length && (cellsAxisItemIndex > 0 && i !== columnsOffset)
+            ){
               labelText = dittoMark;
               isRepeatingValue = true;
             }
@@ -689,7 +693,6 @@ class PivotTableUi extends EventEmitter {
           else {
             cell.removeAttribute('data-is-repeating-value');
           }
-
         }
         else
         if (doCellHeaders && cellsAxisItems.length) {
@@ -780,7 +783,8 @@ class PivotTableUi extends EventEmitter {
       var isTotalsRow = Boolean(groupingId);
       row.setAttribute("data-totals", isTotalsRow);
 
-      for (var j = 0; j < columnsAxisSizeInfo.headers.columnCount; j++){
+      var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
+      for (var j = 0; j < columnsOffset; j++){
         var queryAxisItem = queryAxisItems[j];
         var cell = cells.item(j);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
@@ -812,6 +816,7 @@ class PivotTableUi extends EventEmitter {
             else {
               labelText = String(tupleValue);
             }
+            cell.setAttribute('data-totals', false);
           }
           else
           if (isTotalsMember === j) {
@@ -820,13 +825,18 @@ class PivotTableUi extends EventEmitter {
           }
           else {
             labelText = '';
+            cell.setAttribute('data-totals', false);
           }
           titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
 
           if (hideRepeatingAxisValues){
             var isRepeatingValue;
-            if (repeatingValuesIndex === j){
-              labelText = dittoMark;
+            if (
+              repeatingValuesIndex === j ||
+              doCellHeaders && cellsAxisItems.length && (cellsAxisItemIndex > 0 && i !== 0)
+            ){
+              // add ditto marks, unless this is a totals cell
+              labelText = isTotalsMember <= j ? undefined : dittoMark;
               isRepeatingValue = true;
             }
             else {
@@ -883,7 +893,9 @@ class PivotTableUi extends EventEmitter {
     }
     switch (tupleValueField.type.typeId){
       case 12:  // variable size list
-        console.warn(`Tuple value is a variable length list. Refuse to write out its literal value.`);
+        if (tupleValue !== null){
+          console.warn(`Tuple value is a variable length list. Refuse to write out its literal value.`);
+        }
         return;
       default:
     }
@@ -899,7 +911,7 @@ class PivotTableUi extends EventEmitter {
       valueLiteral = literalWriter(tupleValue, tupleValueField);
     }
     else {
-      valueLiteral = String(tupleValue);
+      valueLiteral = getDuckDbLiteralForValue(tupleValue, tupleValueField.type);
     }
     cellElement.setAttribute('data-value-literal', valueLiteral);
 
@@ -984,12 +996,28 @@ class PivotTableUi extends EventEmitter {
     var rowsTupleRange = [];
     switch (cellHeadersAxis){
       case QueryModel.AXIS_COLUMNS:
-        numColumnsAxisTuples = columnsAxisItems.length ? Math.ceil(columnCount / columnTupleIndexInfo.factor) : 0;
+        if (columnsAxisItems.length){
+          numColumnsAxisTuples = Math.ceil(columnCount / columnTupleIndexInfo.factor);
+          if (columnTupleIndexInfo.cellsAxisItemIndex) {
+            numColumnsAxisTuples += 1;
+          }
+        }
+        else {
+          numColumnsAxisTuples = 0;
+        }
         numRowsAxisTuples = rowsAxisItems.length ? rowCount : 0;
         break;
       case QueryModel.AXIS_ROWS:
         numColumnsAxisTuples = columnsAxisItems.length ? columnCount : 0;
-        numRowsAxisTuples = rowsAxisItems.length ? Math.ceil(rowCount / rowTupleIndexInfo.factor) : 0;
+        if (rowsAxisItems.length){
+          numRowsAxisTuples = Math.ceil(rowCount / rowTupleIndexInfo.factor);
+          if (rowTupleIndexInfo.cellsAxisItemIndex){
+            numRowsAxisTuples += 1;
+          }
+        }
+        else {
+          numRowsAxisTuples = 0;
+        }
         break;
     }
     columnsTupleRange = [columnsAxisTupleIndex, columnsAxisTupleIndex + numColumnsAxisTuples];
@@ -1004,6 +1032,9 @@ class PivotTableUi extends EventEmitter {
 
     for (var i = 0; i < rowCount; i++){
       var tableRow = tableBodyRows.item(i);
+      if (!tableRow){
+        continue;
+      }
       var cellElements = tableRow.childNodes;
 
       if (cellHeadersAxis === QueryModel.AXIS_ROWS && i === 0){
@@ -1025,29 +1056,34 @@ class PivotTableUi extends EventEmitter {
           console.error(`Warning: no DOM found for cell ${i},${j}`);
           continue;
         }
-        var headerCell = firstTableHeaderRowCells.item(j);
-        cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
-
+        
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
-        var cell;
+        var cell = undefined;
         if (cells) {
           cell = cells[cellIndex];
         }
         var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
         var labelText = this.#renderCellValue(cell, cellsAxisItem, cellElement);
 
-        // adjust the column width if necessary.
-        var width = headerCell.style.width;
-        if (width.endsWith('ch')){
-          var newWidth = labelText.length + 1;
+        var headerCell = firstTableHeaderRowCells.item(j);
+        if (headerCell) {
+          cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
+          // adjust the column width if necessary.
+          var width = headerCell.style.width;
+          if (width.endsWith('ch')){
+            var newWidth = labelText.length + 1;
 
-          if (newWidth > PivotTableUi.#maximumCellWidth) {
-            newWidth = PivotTableUi.#maximumCellWidth;
-          }
+            if (newWidth > PivotTableUi.#maximumCellWidth) {
+              newWidth = PivotTableUi.#maximumCellWidth;
+            }
 
-          if (newWidth > parseInt(width, 10)) {
-            headerCell.style.width = newWidth + 'ch';
+            if (newWidth > parseInt(width, 10)) {
+              headerCell.style.width = newWidth + 'ch';
+            }
           }
+        }
+        else {
+          console.error(`Warning: no header cell at position ${j}`);
         }
 
         if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
