@@ -697,7 +697,7 @@ class PivotTableUi extends EventEmitter {
         else
         if (doCellHeaders && cellsAxisItems.length) {
           var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
-          this.#setCellItemId(cell, cellsAxisItem);
+          this.#setCellItemId(cell, cellsAxisItem, cellsAxisItemIndex);
           titleText = labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
         }
 
@@ -745,6 +745,9 @@ class PivotTableUi extends EventEmitter {
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = rowsAxisSizeInfo.rows.rowCount;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
+    if (tupleIndexInfo.cellsAxisItemIndex > 0) {
+      tupleCount += 1;
+    }      
     var tupleSet = this.#rowsTupleSet;
 
     var queryModel = this.getQueryModel();
@@ -849,7 +852,7 @@ class PivotTableUi extends EventEmitter {
           }
         }
         else
-        if (doCellHeaders) {
+        if (doCellHeaders && j === columnsOffset - 1) {
           var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
           labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
           titleText = labelText;
@@ -876,13 +879,14 @@ class PivotTableUi extends EventEmitter {
     }
   }
 
-  #setCellItemId(cellElement, queryAxisItem){
+  #setCellItemId(cellElement, queryAxisItem, queryAxisItemIndex){
     if (!queryAxisItem){
       return;
     }
     cellElement.setAttribute('data-axis', queryAxisItem.axis);
     var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
     cellElement.setAttribute('data-axis-item', itemId);
+    cellElement.setAttribute('data-axis-item-index', queryAxisItemIndex);
   }
 
   #setCellValueLiteral(cellElement, queryAxisItem, tupleValue, tupleValueField){
@@ -1167,7 +1171,7 @@ class PivotTableUi extends EventEmitter {
           if (j < rowsAxisItems.length){
             tableCell.className += ' pivotTableUiRowsAxisHeaderCell';
             var rowsAxisItem = rowsAxisItems[j];
-            this.#setCellItemId(tableCell, rowsAxisItem);
+            this.#setCellItemId(tableCell, rowsAxisItem, j);
             labelText = QueryAxisItem.getCaptionForQueryAxisItem(rowsAxisItem);
             columnWidth = (labelText.length + 2);
 
@@ -1211,7 +1215,7 @@ class PivotTableUi extends EventEmitter {
       if (i < columnsAxisItems.length) {
         tableCell.className += ' pivotTableUiColumnsAxisHeaderCell';
         var columnsAxisItem = columnsAxisItems[i];
-        this.#setCellItemId(tableCell, columnsAxisItem);
+        this.#setCellItemId(tableCell, columnsAxisItem, i);
         labelText = QueryAxisItem.getCaptionForQueryAxisItem(columnsAxisItem);
         label = createEl('span', {
           "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
@@ -1321,7 +1325,7 @@ class PivotTableUi extends EventEmitter {
             "class": "pivotTableUiCell pivotTableUiHeaderCell",
             "data-totals": groupingId > 0
           });
-          this.#setCellItemId(cell, queryAxisItem);
+          this.#setCellItemId(cell, queryAxisItem, j);
 
           if (j === headerRows.length - 1 && renderCellHeaders && cellItems.length){
             cell.className += ' pivotTableUiCellAxisHeaderCell';
@@ -1350,7 +1354,7 @@ class PivotTableUi extends EventEmitter {
               var cellItem = cellItems[k];
               labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellItem);
               columnWidth = labelText.length > valuesMaxWidth ? labelText.length : valuesMaxWidth;
-              this.#setCellItemId(cell, cellItem);
+              this.#setCellItemId(cell, cellItem, k);
             }
           }
           else
@@ -1537,7 +1541,7 @@ class PivotTableUi extends EventEmitter {
             if (k === 0 && tuple) {
               var value = tuple.values[j];
               var rowAxisItem = rowAxisItems[j];
-              this.#setCellItemId(cell, rowAxisItem);
+              this.#setCellItemId(cell, rowAxisItem, j);
 
               var tupleValueField = tupleValueFields[j];
               labelText = rowAxisItem.formatter ? rowAxisItem.formatter(value, tupleValueField) : String(value);
@@ -1550,7 +1554,7 @@ class PivotTableUi extends EventEmitter {
             if (k < cellAxisItems.length && renderCellHeaders) {
               var cellsAxisItem = cellAxisItems[k];
               labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
-              this.#setCellItemId(cell, cellsAxisItem);
+              this.#setCellItemId(cell, cellsAxisItem, k);
             }
           }
 
