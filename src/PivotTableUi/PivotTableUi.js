@@ -464,7 +464,7 @@ class PivotTableUi extends EventEmitter {
     var headersWidth = columnsAxisSizeInfo ? columnsAxisSizeInfo.headers.width : 0;
     var horizontallyScrolledFraction = left / (scrollWidth - headersWidth);
     var numberOfPhysicalColumnsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_COLUMNS);
-    var physicalColumnsAxisTupleIndex = Math.round((columnsAxisSizeInfo.headers.columnCount + numberOfPhysicalColumnsAxisTuples) * horizontallyScrolledFraction);
+    var physicalColumnsAxisTupleIndex = Math.ceil((columnsAxisSizeInfo.headers.columnCount + numberOfPhysicalColumnsAxisTuples) * horizontallyScrolledFraction);
 
     //
     var scrollHeight = innerContainer.scrollHeight;
@@ -474,7 +474,7 @@ class PivotTableUi extends EventEmitter {
     var headersHeight = rowsAxisSizeInfo.headers.height;
     var verticallyScrolledFraction = top / (scrollHeight - headersHeight);
     var numberOfPhysicalRowsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_ROWS);
-    var physicalRowsAxisTupleIndex = Math.round(numberOfPhysicalRowsAxisTuples * verticallyScrolledFraction);
+    var physicalRowsAxisTupleIndex = Math.ceil(numberOfPhysicalRowsAxisTuples * verticallyScrolledFraction);
 
     return {
       columnsAxisSizeInfo: columnsAxisSizeInfo,
@@ -1005,12 +1005,12 @@ class PivotTableUi extends EventEmitter {
         else {
           numColumnsAxisTuples = 0;
         }
-        numRowsAxisTuples = rowsAxisItems.length ? rowCount : 0;
+        numRowsAxisTuples = rowsAxisItems.length ? tableBodyRows.length - 1 : 0;
         break;
       case QueryModel.AXIS_ROWS:
         numColumnsAxisTuples = columnsAxisItems.length ? columnCount : 0;
         if (rowsAxisItems.length){
-          numRowsAxisTuples = Math.ceil(rowCount / rowTupleIndexInfo.factor);
+          numRowsAxisTuples = Math.ceil((tableBodyRows.length - 1) / rowTupleIndexInfo.factor);
           if (rowTupleIndexInfo.cellsAxisItemIndex){
             numRowsAxisTuples += 1;
           }
@@ -1030,7 +1030,7 @@ class PivotTableUi extends EventEmitter {
 
     var cellIndex;
 
-    for (var i = 0; i < rowCount; i++){
+    for (var i = 0; i < tableBodyRows.length - 1; i++){
       var tableRow = tableBodyRows.item(i);
       if (!tableRow){
         continue;
@@ -1415,7 +1415,11 @@ class PivotTableUi extends EventEmitter {
       for (var j = lastHeaderRowIndex; j >=0; j--){
         var headerRow = headerRows.item(j);
         var cells = headerRow.childNodes;
-        var lastCell = cells.item(firstHeaderRowCells.length - 2);
+        var lastCellIndex = firstHeaderRowCells.length - 2;
+        if (lastCellIndex < 0 || lastCellIndex >= cells.length) {
+          return;
+        }
+        var lastCell = cells.item(lastCellIndex);
         if (j === lastHeaderRowIndex && (tableDom.clientWidth - lastCell.clientWidth) < innerContainerWidth) {
           return;
         }
@@ -1853,7 +1857,9 @@ class PivotTableUi extends EventEmitter {
       }
     };
 
-    for (var i = 0; i < cells.length - 1; i++){
+    // we have to subtract 1 for the stuffer cell.
+    var numCells = cells.length - 1;
+    for (var i = 0; i < numCells; i++){
       var cell = cells.item(i);
       if (i < numHeaderItems) {
         sizeInfo.headers.width += cell.clientWidth;
@@ -1919,7 +1925,8 @@ class PivotTableUi extends EventEmitter {
       },
       rows: {
         height: tableBodyDom.clientHeight,
-        rowCount: tableBodyDom.childNodes.length
+        // we have to subtract 1 from the number of childnodes because we always have one empty row for the stuffer cell.
+        rowCount: tableBodyDom.childNodes.length - 1
       }
     };
   }
