@@ -35,7 +35,7 @@
       .pivotTableUiRow {
 
         > .pivotTableUiCell {
-          border-color: transparent;
+          border-color: transparent !important;
           box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
 
           > .pivotTableUiCellLabel {
@@ -78,6 +78,39 @@
     
     > .pivotTableUiSizer.pivotTableUiVerticalSizer {
       width: 1px;
+    }
+
+    /**
+    * The cells in the first row of the table have a resizer and they have a dotted right border to indicate so
+    * But when the setting is to hide repeating values, we will want to hide these 
+    * In this case we will reveal them when the user hover overs the first row
+    */
+    > .pivotTableUiTable:has( .pivotTableUiCell[data-is-repeating-value] ) {
+      
+      > .pivotTableUiTableHeader {
+        
+        > .pivotTableUiRow:first-child:hover {
+          > .pivotTableUiCell {
+            border-right-style: dotted;
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
+      }
+    }
+
+    /**
+    * If the setting is not to hide repeating values we will not have cells with both data-value-literal and data-is-repeating-value attributes
+    * In this case we will always render the borders in the top row indicating the columns can be resized.
+    */
+    .pivotTableUiTable {
+      > .pivotTableUiTableHeader {
+        > .pivotTableUiRow:first-child:has( > .pivotTableUiCell[data-value-literal]:not([data-is-repeating-value]) ){
+          > .pivotTableUiCell {
+            border-right-style: dotted;
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
+      }
     }
 
     > .pivotTableUiTable {
@@ -187,17 +220,6 @@
         background-color: var( --huey-medium-background-color );
       }
 
-      /*
-      .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] )  > .pivotTableUiCell,
-      .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
-        border-bottom-color: var( --huey-dark-border-color );
-      }
-      */
-
-      .pivotTableUiRow[data-totals=false]:has( + .pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
-        border-bottom-color: var( --huey-dark-border-color );
-      }
-
       > .pivotTableUiTableHeader {
         display: table-header-group;
 
@@ -256,12 +278,6 @@
           
         }
 
-        > .pivotTableUiRow:hover:first-child {
-          > .pivotTableUiCell {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
         
         > .pivotTableUiRow:first-child {
           > .pivotTableUiCell[data-is-repeating-value=true]:has( + .pivotTableUiCell[data-is-repeating-value=false] ),
@@ -359,6 +375,25 @@
           }
         }
         
+        > .pivotTableUiRow[data-totals=true]:has( [data-rows-tuple-index=0], > .pivotTableUiCellAxisHeaderCell[data-axis-cells][data-axis-item-index=0] ) > .pivotTableUiCell {
+          border-top-color: var( --huey-dark-border-color ) ;
+        }
+        
+        > .pivotTableUiRow[data-totals=true] {
+                    
+          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
+            border-bottom-color: var( --huey-light-border-color );
+            border-top-color: var( --huey-light-border-color );
+          }
+        }
+
+        /* 
+        * this is to suppress the bottom border of rows that preced a totals row so they can have a dark top border color 
+        * without this rule the border collapse property causes the bottom border of the previous row to suppress the top border of the next row.
+        */
+        > .pivotTableUiRow[data-totals=false]:has( +.pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
+          border-bottom-style: none;
+        }
         
         > .pivotTableUiRow[data-totals=true]:has( +.pivotTableUiRow[data-totals=false], +.pivotTableUiRow:last-child ) {
           > .pivotTableUiHeaderCell,
@@ -386,7 +421,7 @@
         /* regardless of repeating values, the last row of the table should always have bottom border */
         > .pivotTableUiRow:nth-last-child(2) {
           > .pivotTableUiHeaderCell {
-            border-bottom-style: solid;
+            border-bottom-style: solid !important;
           }
         }
 
