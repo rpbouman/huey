@@ -163,8 +163,21 @@
       <option value="&apos;&apos;">''</option>
       <!-- double quote -->
       <option value="&quot;">"</option>
+      <!-- Right-Pointing Double Angle Quotation Mark » -->
+      <option value="&#xBB;">&#xBB;</option>
+      <!-- Horizontal bar ― -->
+      <option value="&#x2015;">&#x2015;</option>
+      <!-- left double quotation mark: “ -->
+      <option value="&#x201C;">&#x201C;</option>
       <!-- right double quotation mark: ” -->
       <option value="&#x201D;">&#x201D;</option>
+      <!-- double low-9 quotation mark: ” -->
+      <option value="&#x201E;">&#x201E;</option>
+      <!-- double high-9 quotation mark: ” -->
+      <option value="&#x201F;">&#x201E;</option>
+      <!--  DOUBLE PRIME -->
+      <option value="&#x2033;">&#x2033;</option>
+      — „ — 
       <!-- ditto mark: 〃-->
       <option value="&#x3003;">&#x3003;</option>
     </datalist>
@@ -1002,7 +1015,7 @@
           <div role="tabpanel">
             <form id="pivotSettings">
               <fieldset>
-                <legend>Appearance</legend>
+                <legend>Columns</legend>
                 <label
                   for="maxCellWidth"
                   title="The maximum string length to consider when sizing pivot table cells and headers"
@@ -1015,21 +1028,28 @@
                   max="256"
                   value="30"
                 />
+              </fieldset>
+              <fieldset>
+                <legend>Repeating Values</legend>
                 <label
                   for="hideRepeatingAxisValues"
                   title="Uncheck to always show all axis values; check to hide repeated values."
                 >Hide repeating axis values</label>
                 <input 
                   id="hideRepeatingAxisValues"
+                  title="Uncheck to always show all axis values; check to hide repeated values."
                   type="checkbox"
                 />
                 <label
                   for="dittoMark"
+                  title="A symbol to indicate a repeated value."
                 >Ditto mark</label>
                 <input 
                   id="dittoMark"
                   list="commonDittoMarks"
+                  size="6"
                   type="text"
+                  title="A symbol to indicate a repeated value."
                 />
               </fieldset>
               <fieldset>
