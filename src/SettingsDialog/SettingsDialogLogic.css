@@ -7,9 +7,9 @@ form#localeSettings {
     user-select: none;
     pointer-events: none;
     background-color: var( --huey-medium-background-color );
-    color: var( --huey-placeholder-color ); 
-  }    
-  
+    color: var( --huey-placeholder-color );
+  }
+
   > fieldset:has(> input#useDefaultLocale:checked) > label[for=locale] {
     --webkit-touch-callout: none;
     --webkit-user-select: none;
@@ -18,29 +18,45 @@ form#localeSettings {
     pointer-events: none;
     color: var( --huey-placeholder-color );
   }
-  
-  > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > label[for=maximumFractionDigits],
-  > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > input#maximumFractionDigits {  
-    display: none
-  }  
-  
+
+  /* if min and max decimals are linked, then the maximum fraction digits labels & input are hidden */
+  > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) {
+
+    > label[for=maximumFractionDigits],
+    > input#maximumFractionDigits {
+      display: none;
+    }
+
+  }
+
+  /* if min and max decimals are not linked, then the label for minimum decimal digits is written out in full */
   > fieldset:has(> input#linkMinimumAndMaximumDecimals:not(:checked)) > label[for=minimumFractionDigits]::before {
     content: "Minimum Decimals"
-  }  
-  
+  }
+
+  /* if min and max decimals are linked, then the label for minimum decimal digits is written in short as "decimals" */
   > fieldset:has(> input#linkMinimumAndMaximumDecimals:checked) > label[for=minimumFractionDigits]::before {
     content: "Decimals"
-  }  
+  }
 }
-
 
 form#querySettings > fieldset:has( > input#autoRunQuery:not(:checked) ) > input#autoRunQueryTimeout {
   user-select: none;
   --webkit-touch-callout: none;
   --webkit-user-select: none;
   --moz-user-select: none;
-  pointer-events: none; 
+  pointer-events: none;
   background-color: var( --huey-medium-background-color );
-  color: var( --huey-placeholder-color );   
+  color: var( --huey-placeholder-color );
 }
 
+form#pivotSettings {
+  
+  /* only show the ditto mark inoput of repeated values are to be hidden  */
+  > fieldset:has( > input#hideRepeatingAxisValues:not(:checked) ) {
+    > label[for=dittoMark],
+    > input#dittoMark {
+      display:none;
+    }
+  }
+}

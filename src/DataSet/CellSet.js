@@ -127,11 +127,11 @@ class CellSet extends DataSetComponent {
           });
         }
         if (j && totalsItems[j] && totalsItems[j].length){
-          groupingId <<= totalsItems[j-1].length;
+          groupingId <<= totalsItems[j].length;
         }
         var tuple = tuples[j];
         if (tuple){
-          groupingId += parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
+          groupingId |= parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
           var tupleValues = tuple.values;
           var fields = tuplesFields[j];
           _fields: for (var k = 0; k < queryAxisItems.length; k++){

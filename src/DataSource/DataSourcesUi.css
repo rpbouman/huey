@@ -3,7 +3,8 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) >
   left: 1em;
   top: 1em;
   width: calc( 100% - 1em );
-  display: inline-block
+  display: inline-block;
+  white-space: normal;
 }
 
 nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader]::after {

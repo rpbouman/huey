@@ -272,6 +272,7 @@ form > label {
 
 label {
   color: var( --huey-foreground-color );
+  white-space: nowrap;
 }
 
 form > label::after, form > fieldset > label::after {
