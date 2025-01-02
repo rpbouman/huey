@@ -194,7 +194,6 @@
       }
       */
 
-      .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false], + .pivotTableUiRow:last-child ) > .pivotTableUiCell,
       .pivotTableUiRow[data-totals=false]:has( + .pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
         border-bottom-color: var( --huey-dark-border-color );
       }
@@ -358,17 +357,36 @@
           > .pivotTableUiHeaderCell[data-totals=true] {
             border-left-style: solid;
           }
+        }
+        
+        
+        > .pivotTableUiRow[data-totals=true]:has( +.pivotTableUiRow[data-totals=false], +.pivotTableUiRow:last-child ) {
+          > .pivotTableUiHeaderCell,
+          > .pivotTableUiValueCell {
+            
+            border-bottom-style: solid;
+            border-bottom-color: var( --huey-dark-border-color );
+          }
+          
+          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
+            border-bottom-color: var( --huey-light-border-color );
+          }
 
+          > .pivotTableUiHeaderCell[data-is-repeating-value=true]:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
+            border-bottom-style:none;
+          }
+          
         }
 
-        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false], + .pivotTableUiRow > .pivotTableUiHeaderCell[data-totals=true][data-is-repeating-value=false] ) > .pivotTableUiHeaderCell {
-          border-bottom-style: solid;
+        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-totals=true] ) > .pivotTableUiValueCell {
+          border-top-style: solid;
+          border-top-color: var( --huey-dark-border-color );
         }
 
         /* regardless of repeating values, the last row of the table should always have bottom border */
         > .pivotTableUiRow:nth-last-child(2) {
           > .pivotTableUiHeaderCell {
-            border-bottom-style: solid !important;
+            border-bottom-style: solid;
           }
         }
 

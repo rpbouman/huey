@@ -608,9 +608,9 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderDom = this.#getTableHeaderDom();
     var rows = tableHeaderDom.childNodes;
     var numRows = rows.length;
-    if (!doCellHeaders){
-      numRows -= 1;
-    }
+    //if (!doCellHeaders){
+    //  numRows -= 1;
+    //}
 
     // for each tuple
     var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
@@ -996,12 +996,28 @@ class PivotTableUi extends EventEmitter {
     var rowsTupleRange = [];
     switch (cellHeadersAxis){
       case QueryModel.AXIS_COLUMNS:
-        numColumnsAxisTuples = columnsAxisItems.length ? Math.ceil(columnCount / columnTupleIndexInfo.factor) : 0;
+        if (columnsAxisItems.length){
+          numColumnsAxisTuples = Math.ceil(columnCount / columnTupleIndexInfo.factor);
+          if (columnTupleIndexInfo.cellsAxisItemIndex) {
+            numColumnsAxisTuples += 1;
+          }
+        }
+        else {
+          numColumnsAxisTuples = 0;
+        }
         numRowsAxisTuples = rowsAxisItems.length ? rowCount : 0;
         break;
       case QueryModel.AXIS_ROWS:
         numColumnsAxisTuples = columnsAxisItems.length ? columnCount : 0;
-        numRowsAxisTuples = rowsAxisItems.length ? Math.ceil(rowCount / rowTupleIndexInfo.factor) : 0;
+        if (rowsAxisItems.length){
+          numRowsAxisTuples = Math.ceil(rowCount / rowTupleIndexInfo.factor);
+          if (rowTupleIndexInfo.cellsAxisItemIndex){
+            numRowsAxisTuples += 1;
+          }
+        }
+        else {
+          numRowsAxisTuples = 0;
+        }
         break;
     }
     columnsTupleRange = [columnsAxisTupleIndex, columnsAxisTupleIndex + numColumnsAxisTuples];
@@ -1042,7 +1058,7 @@ class PivotTableUi extends EventEmitter {
         }
         
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
-        var cell;
+        var cell = undefined;
         if (cells) {
           cell = cells[cellIndex];
         }
