@@ -181,7 +181,7 @@
 
         /*
           ditto marks are text and should not be aligned according to data type.
-          Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.
+          (Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.)
         */
         > .pivotTableUiHeaderCell[data-is-repeating-value=true] > .pivotTableUiCellLabel {
           text-align: center;
