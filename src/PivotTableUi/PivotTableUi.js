@@ -464,7 +464,7 @@ class PivotTableUi extends EventEmitter {
     var headersWidth = columnsAxisSizeInfo ? columnsAxisSizeInfo.headers.width : 0;
     var horizontallyScrolledFraction = left / (scrollWidth - headersWidth);
     var numberOfPhysicalColumnsAxisTuples = this.#getNumberOfPhysicalTuplesForAxis(QueryModel.AXIS_COLUMNS);
-    var physicalColumnsAxisTupleIndex = Math.ceil((columnsAxisSizeInfo.headers.columnCount + numberOfPhysicalColumnsAxisTuples) * horizontallyScrolledFraction);
+    var physicalColumnsAxisTupleIndex = Math.ceil(numberOfPhysicalColumnsAxisTuples * horizontallyScrolledFraction);
 
     //
     var scrollHeight = innerContainer.scrollHeight;
@@ -488,6 +488,11 @@ class PivotTableUi extends EventEmitter {
     var physicalTupleIndices = this.#getPhysicalTupleIndices();
 
     var physicalColumnsAxisTupleIndex = physicalTupleIndices.physicalColumnsAxisTupleIndex;
+    //var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
+    //var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    //var count = columnsAxisSizeInfo.columns.columnCount;
+    //var tupleCount = Math.ceil(count / (tupleIndexInfo.factor - tupleIndexInfo.cellsAxisItemIndex));
+    
     var physicalRowsAxisTupleIndex = physicalTupleIndices.physicalRowsAxisTupleIndex;
 
     var columnAxisPromise = this.#updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex);
@@ -577,7 +582,10 @@ class PivotTableUi extends EventEmitter {
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
     var count = columnsAxisSizeInfo.columns.columnCount;
     var maxColumnIndex = columnsAxisSizeInfo.headers.columnCount + count;
-    var tupleCount = Math.ceil(count / (tupleIndexInfo.factor - tupleIndexInfo.cellsAxisItemIndex));
+    var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
+    if (tupleIndexInfo.cellsAxisItemIndex) {
+      tupleCount += 1;
+    }
     var tupleSet = this.#columnsTupleSet;
 
     var queryModel = this.getQueryModel();
