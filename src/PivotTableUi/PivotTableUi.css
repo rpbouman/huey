@@ -138,7 +138,7 @@
         > .pivotTableUiHeaderCell {
           background-color: var( --huey-medium-background-color );
         }
-        
+                
         > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
         > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
           font-weight: bold;
@@ -187,6 +187,11 @@
           font-weight: bold;
         }
         
+        > .pivotTableUiCell[data-totals=true]:last-child,
+        > .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=false] ) {
+          border-right-color: var( --huey-dark-border-color );
+        }
+
         /* 
           ditto marks are text and should not be aligned according to data type. 
           Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.
@@ -196,6 +201,7 @@
           font-family: var( --huey-text-font-family );
           color: var( --huey-placeholder-color );
         }
+
       }
 
       .pivotTableUiRow[data-totals=true] > .pivotTableUiValueCell {
@@ -203,12 +209,6 @@
         background-color: var( --huey-medium-background-color );
       }
 
-      .pivotTableUiRow { 
-        > .pivotTableUiCell[data-totals=true]:last-child,
-        > .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=false] ) {
-          border-right-color: var( --huey-dark-border-color );
-        }
-      }
       
       > .pivotTableUiTableHeader {
         display: table-header-group;
@@ -224,32 +224,44 @@
           }
         }
 
-        /* 
-          these are top left "filler" cells - no headings or values 
-          we don't want these to have inner borders at all
-        */
-        > .pivotTableUiRow > .pivotTableUiHeaderCell:not( [data-axis] ) {
-          border-bottom-style: none;
-          border-top-style: none;
-          border-left-style: none;
-          border-right-style: none;
+        > .pivotTableUiRow {
+          
+          .pivotTableUiColumnsAxisHeaderCell {
+            border-right-color: var( --huey-dark-border-color );
+          }
+          
+          /* 
+            these are top left "filler" cells - no headings or values 
+            we don't want these to have inner borders at all
+          */
+          > .pivotTableUiHeaderCell:not( [data-axis] ) {
+            border-bottom-style: none;
+            border-top-style: none;
+            border-left-style: none;
+            border-right-style: none;
+          }
+          
+          > .pivotTableUiHeaderCell:first-child {
+            border-left-style: solid;
+          }
+          
+          .pivotTableUiHeaderCell[data-is-repeating-value] {
+            border-right-style: none;
+          }
+          
+          .pivotTableUiHeaderCell[data-is-repeating-value]:last-child {
+            border-right-style: solid;
+          }
+          
+          .pivotTableUiHeaderCell[data-is-repeating-value=true] {
+            border-left-style: none;
+          }
+          
+          .pivotTableUiHeaderCell[data-totals=true]:has( + .pivotTableUiHeaderCell[data-totals=false] ){
+            border-right-style: solid;
+          }
         }
         
-        > .pivotTableUiRow > .pivotTableUiHeaderCell:first-child {
-          border-left-style: solid;
-        }
-
-        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value] {
-          border-right-style: none;
-        }
-
-        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value]:last-child {
-          border-right-style: solid;
-        }
-
-        > .pivotTableUiRow > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
-          border-left-style: none;
-        }
         
         > .pivotTableUiRow:first-child {
 
@@ -277,10 +289,6 @@
             border-right-color: var( --huey-dark-border-color );
           }
           
-        }
-
-        
-        > .pivotTableUiRow:first-child {
           > .pivotTableUiCell[data-is-repeating-value=true]:has( + .pivotTableUiCell[data-is-repeating-value=false] ),
           > .pivotTableUiCell:not( .pivotTableUiColumnsAxisHeaderCell ):has( + .pivotTableUiColumnsAxisHeaderCell ),
           > .pivotTableUiColumnsAxisHeaderCell {
@@ -288,7 +296,7 @@
             border-right-color: var( --huey-dark-border-color );
           }
         }
-        
+
         > .pivotTableUiRow:last-child {
 
           > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
@@ -466,7 +474,7 @@
       .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
         border-right-style: none;
       }
-
+      
       .pivotTableUiCell[data-totals=true][data-cells-axis-item-index='0'] {
         border-left-color: var( --huey-dark-border-color );
       }
