@@ -219,14 +219,24 @@ Immediately after placing a new item on the Filters axis, the Filter Dialog pops
 
 ![image](https://github.com/user-attachments/assets/beae75ae-b158-4e26-b30b-958bffd4f222)
 
-#### Filter Type
+#### Filter Types
+
 The Filter type dropdown appears in the top of the Filter Dialog. Here you choose the operator that should be used to filter the data. The options are:
-- Include: the values in the data must match any of the filter values exactly
-- Exclude: rows from the data appear only when the value from the respective item does not match any of the filter values.
-- Like: the values in the data must match the pattern of one or more filter values
-- Not Like: the values in the data must not match the pattern of any of the filter values
-- Between: the values of the data must be between the filter value-ranges
-- Not Between: the values of the data must not be between any of the filter value-ranges
+- __Include__: the values in the data must match any of the filter values exactly
+- __Exclude__: rows from the data appear only when the value from the respective item does not match any of the filter values. (Negated include)
+- __Like__: the values in the data must match the pattern of one or more filter values. The pattern is a simple [SQL LIKE pattern](https://duckdb.org/docs/sql/functions/pattern_matching.html#like) which supports % (percent sign) as wildcard for zero or more arbitrary characters, and _ (underscore) as wildcard for a single arbitrary character. 
+- __Not Like__: the values in the data must not match the pattern of any of the filter values. (Negated Like)
+- __Between__: the values of the data must be between the filter value-ranges.
+- __Not Between__: the values of the data must not be between any of the filter value-ranges (Negated Between)
+
+#### Array Filter Type 
+
+Array-valued attributes support filtering using the regular Include/Exclude and Between/Not Between filter types. In addition, 4 array-specific filter types are supported: 
+
+- __Include Has Any__: Include the rows if the array contains any of the selected filter values.
+- __Exclude Has Any__: Exclude the rows if the array contains any of the selected filter values. (Negated Has Any)
+- __Include Has All__: Include the rows only if the array contains all of the selected filter values.
+- __Exclude Has All__: Exclude the rows only if the array contains all of the selected filter values. (Negated Has All)
 
 #### Finding Filter Values
 In the top of the Filter Dialog there is an input where you can type a value that will be used as a pattern for retrieving values from the respective item.
@@ -247,7 +257,19 @@ Right above the input, there appear two checkboxes:
 
 #### Adding/Deleting Filter Values
 
-Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them.
+Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them. 
+
+The Range filter types Between and Not Between require two values, and the Filter dialog will reveal two value lists when choosing these filter types. 
+When picking a new value, a new range is added using that value as both lower and upper bound of the range: 
+
+![image](https://github.com/user-attachments/assets/4937056f-bf7a-4032-a8d3-a3d7fc54384f)
+
+The upper bound value is automatically selected, and picking another value from the picklist will overwrite the selected value:
+
+![image](https://github.com/user-attachments/assets/03d2fa78-a0b3-4c2e-b1c9-95a3b8ddd425)
+
+You can always manually select a value in either value list to overwrite it with a new value.
+
 Alternatively, values may be entered manually and added by clicking the button next to the input, or by hitting the Enter key on the keyboard.
 
 Applying a value in this way while an already applied value is selected will overwrite the applied value with the new one.
