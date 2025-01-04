@@ -143,7 +143,16 @@ class QueryAxisItem {
   }
 
   static getIdForQueryAxisItem(axisItem){
-    var id = QueryAxisItem.getSqlForQueryAxisItem(axisItem);
+    // see issue https://github.com/rpbouman/huey/issues/352
+    // only the sql expression is not enough to identify an Item
+    // some items may have identical SQL, but a different formatter
+    // the caption should be unique but to be on the safe side 
+    // we'll take the combination of sql expression and caption
+    // and we'll stylize it as an aliased SQL expression
+    var sqlExpression = QueryAxisItem.getSqlForQueryAxisItem(axisItem);
+    var caption = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+    var alias = quoteIdentifierWhenRequired(caption);
+    var id = `${sqlExpression} AS ${alias}`;
     return id;
   }
 
