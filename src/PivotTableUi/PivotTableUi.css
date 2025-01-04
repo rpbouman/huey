@@ -98,21 +98,6 @@
       }
     }
 
-    /**
-    * If the setting is not to hide repeating values we will not have cells with both data-value-literal and data-is-repeating-value attributes
-    * In this case we will always render the borders in the top row indicating the columns can be resized.
-    */
-    .pivotTableUiTable {
-      > .pivotTableUiTableHeader {
-        > .pivotTableUiRow:first-child:has( > .pivotTableUiCell[data-value-literal]:not([data-is-repeating-value]) ){
-          > .pivotTableUiCell {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
-      }
-    }
-
     > .pivotTableUiTable {
       display: table;
       table-layout: fixed;
@@ -199,7 +184,6 @@
 
         > .pivotTableUiCell[data-totals=true] {
           background-color: var( --huey-medium-background-color );
-          border-right-color: var( --huey-dark-border-color );
           font-weight: bold;
         }
         
@@ -212,7 +196,6 @@
           font-family: var( --huey-text-font-family );
           color: var( --huey-placeholder-color );
         }
-
       }
 
       .pivotTableUiRow[data-totals=true] > .pivotTableUiValueCell {
@@ -220,8 +203,26 @@
         background-color: var( --huey-medium-background-color );
       }
 
+      .pivotTableUiRow { 
+        > .pivotTableUiCell[data-totals=true]:last-child,
+        > .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=false] ) {
+          border-right-color: var( --huey-dark-border-color );
+        }
+      }
+      
       > .pivotTableUiTableHeader {
         display: table-header-group;
+
+        /**
+        * If the setting is not to hide repeating values we will not have cells with both data-value-literal and data-is-repeating-value attributes
+        * In this case we will always render the borders in the top row indicating the columns can be resized.
+        */
+        > .pivotTableUiRow:first-child:has( > .pivotTableUiCell[data-value-literal]:not([data-is-repeating-value]) ){
+          > .pivotTableUiCell {
+            border-right-style: dotted;
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
 
         /* 
           these are top left "filler" cells - no headings or values 
@@ -309,6 +310,13 @@
           > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
             border-right-color: var( --huey-dark-border-color );
           }
+          
+          /*
+          Styling totals columns headers
+          */
+          > .pivotTableUiHeaderCell[data-totals=true] {
+            border-bottom-color: var( --huey-light-border-color );
+          }
         }
 
         > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
@@ -347,6 +355,11 @@
             color: var( --huey-placeholder-color );
           }
 
+          /* styling totals columns */
+          > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
+            border-right-color: var( --huey-dark-border-color );
+          }
+
         }
 
         > .pivotTableUiRow[data-totals=true] {
@@ -375,7 +388,10 @@
           }
         }
         
-        > .pivotTableUiRow[data-totals=true]:has( [data-rows-tuple-index=0], > .pivotTableUiCellAxisHeaderCell[data-axis-cells][data-axis-item-index=0] ) > .pivotTableUiCell {
+        > .pivotTableUiRow[data-totals=true]:has( 
+          [data-rows-tuple-index=0], 
+          > .pivotTableUiCellAxisHeaderCell[data-axis-cells][data-axis-item-index=0] 
+        ) > .pivotTableUiCell {
           border-top-color: var( --huey-dark-border-color ) ;
         }
         
@@ -391,9 +407,11 @@
         * this is to suppress the bottom border of rows that preced a totals row so they can have a dark top border color 
         * without this rule the border collapse property causes the bottom border of the previous row to suppress the top border of the next row.
         */
+        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=true] > .pivotTableUiCell[data-axis=cells][data-axis-item-index='0'] ) > .pivotTableUiCell,
         > .pivotTableUiRow[data-totals=false]:has( +.pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
           border-bottom-style: none;
         }
+        
         
         > .pivotTableUiRow[data-totals=true]:has( +.pivotTableUiRow[data-totals=false], +.pivotTableUiRow:last-child ) {
           > .pivotTableUiHeaderCell,
@@ -412,7 +430,7 @@
           }
           
         }
-
+        
         > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-totals=true] ) > .pivotTableUiValueCell {
           border-top-style: solid;
           border-top-color: var( --huey-dark-border-color );
@@ -425,6 +443,43 @@
           }
         }
 
+      }
+    }
+
+    > .pivotTableUiTable[data-cellheadersaxis=rows]{
+
+      .pivotTableUiCell[data-totals=true] {
+        border-left-color: var( --huey-dark-border-color );
+        border-right-color: var( --huey-dark-border-color );
+      }
+
+      .pivotTableUiCell[data-totals=true]:has( +.pivotTableUiCell[data-totals=true] ) {
+        border-right-style: none;
+      }
+
+    }
+
+    
+    > .pivotTableUiTable[data-cellheadersaxis=columns]{
+
+      .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=true][data-cells-axis-item-index='0'] ),
+      .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
+        border-right-style: none;
+      }
+
+      .pivotTableUiCell[data-totals=true][data-cells-axis-item-index='0'] {
+        border-left-color: var( --huey-dark-border-color );
+      }
+            
+      
+      > .pivotTableUiTableBody { 
+        /* 
+        * this is to suppress the bottom border of rows that preced a totals row so they can have a dark top border color 
+        * without this rule the border collapse property causes the bottom border of the previous row to suppress the top border of the next row.
+        */
+        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
+          border-bottom-style: none;
+        }
       }
     }
   }

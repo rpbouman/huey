@@ -608,9 +608,6 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderDom = this.#getTableHeaderDom();
     var rows = tableHeaderDom.childNodes;
     var numRows = rows.length;
-    //if (!doCellHeaders){
-    //  numRows -= 1;
-    //}
 
     // for each tuple
     var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
@@ -620,7 +617,6 @@ class PivotTableUi extends EventEmitter {
       repeatingValuesIndex = undefined;
 
       var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
-      var isTotalsColumn = Boolean(groupingId);
 
       //for each header row
       for (var j = 0; j < numRows; j++){
@@ -630,9 +626,12 @@ class PivotTableUi extends EventEmitter {
         var cells = row.childNodes;
         var cell = cells.item(i);
         cell.setAttribute('data-columns-tuple-index', tupleIndex);
-        cell.setAttribute('data-totals', isTotalsColumn);
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
-        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
+        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : numRows - 1);
+        cell.setAttribute('data-totals', isTotalsMember <= j);
+        if (doCellHeaders){
+          cell.setAttribute('data-cells-axis-item-index', cellsAxisItemIndex);
+        }
 
         var labelText = undefined;
         var titleText = undefined;
@@ -973,6 +972,9 @@ class PivotTableUi extends EventEmitter {
     var firstTableHeaderRow = tableHeaderRows.item(0);
     var firstTableHeaderRowCells = firstTableHeaderRow.childNodes;
 
+    var lastTableHeaderRow = tableHeaderRows.item(tableHeaderRows.length - 1);
+    var lastTableHeaderRowCells = lastTableHeaderRow.childNodes;
+
     var queryModel = this.getQueryModel();
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
 
@@ -1071,7 +1073,8 @@ class PivotTableUi extends EventEmitter {
 
         var headerCell = firstTableHeaderRowCells.item(j);
         if (headerCell) {
-          cellElement.setAttribute('data-totals', headerCell.getAttribute('data-totals'));
+          var lastTableHeaderRowCell = lastTableHeaderRowCells.item(j);
+          cellElement.setAttribute('data-totals', lastTableHeaderRowCell ? lastTableHeaderRowCell.getAttribute('data-totals') : false);
           // adjust the column width if necessary.
           var width = headerCell.style.width;
           if (width.endsWith('ch')){
@@ -1091,6 +1094,7 @@ class PivotTableUi extends EventEmitter {
         }
 
         if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
+          cellElement.setAttribute('data-cells-axis-item-index', cellsAxisItemIndex);
           cellsAxisItemIndex += 1;
           if (cellsAxisItemIndex >= cellsAxisItems.length) {
             cellsAxisItemIndex = 0;
@@ -1098,6 +1102,7 @@ class PivotTableUi extends EventEmitter {
           }
         }
         else {
+          cellElement.removeAttribute('data-cells-axis-item-index');
           columnsAxisTupleIndex += 1;
         }
       }
@@ -1688,6 +1693,12 @@ class PivotTableUi extends EventEmitter {
 
     var tableDom = this.#getTableDom();
     try {
+
+      var cellHeadersAxis = this.getQueryModel().getCellHeadersAxis();
+      var currCellHeadersAxis = tableDom.getAttribute('data-cellheadersaxis');
+      if (cellHeadersAxis !== currCellHeadersAxis) {
+        tableDom.setAttribute('data-cellheadersaxis', cellHeadersAxis);
+      }
 
       this.#setBusy(true);
       this.clear();
