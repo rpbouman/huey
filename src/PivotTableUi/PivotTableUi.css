@@ -354,6 +354,15 @@
 
       > .pivotTableUiTableBody {
         display: table-row-group;
+        
+        > .pivotTableUiRow:first-child {
+          
+          > .pivotTableUiValueCell[data-totals=false] {
+            border-top-style: solid;
+            border-top-color: var( --huey-dark-border-color );
+          }
+          
+        }
 
         > .pivotTableUiRow {
 
