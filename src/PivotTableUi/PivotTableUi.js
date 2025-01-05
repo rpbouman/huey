@@ -1145,7 +1145,7 @@ class PivotTableUi extends EventEmitter {
     var cellsAxisItems = cellsAxis.getItems();
 
     var numColumnAxisRows = columnsAxisItems.length;
-    if (cellHeadersAxis === QueryModel.AXIS_COLUMNS) {
+    if (cellHeadersAxis === QueryModel.AXIS_COLUMNS && cellsAxisItems.length) {
       numColumnAxisRows += 1;
     }
     if (numColumnAxisRows === 0) {
