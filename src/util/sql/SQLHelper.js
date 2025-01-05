@@ -165,7 +165,7 @@ function createLocalDateFormatter(){
   }
 }
 
-function createMonthNameFormatter(modifier){
+function createMonthNameList(modifier){
   var dateFormatter = createDateFormatter({
     month: modifier || 'long'
   });
@@ -182,6 +182,11 @@ function createMonthNameFormatter(modifier){
     var monthName = dateString.replace(/[^\d\w]/g, '');
     monthNames.push(monthName);
   }
+  return monthNames;
+}
+
+function createMonthNameFormatter(modifier){
+  var monthNames = createMonthNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -190,15 +195,39 @@ function createMonthNameFormatter(modifier){
   }
 }
 
+function createMonthNameParser(modifier){
+  var monthNames = createMonthNameList(modifier);
+  return function(monthNameValue){
+    if (!monthNameValue) {
+      return null;
+    }
+    var upperMonthNameValue = monthNameValue.toUpperCase();
+    return monthNames.findIndex(function(listedName){
+      if (listedName === null) {
+        return false;
+      }
+      return listedName.toUpperCase() === upperMonthNameValue;
+    });
+  };
+}
+
 function createMonthShortNameFormatter(){
   return createMonthNameFormatter('short');
+}
+
+function createMonthShortNameParser(){
+  return createMonthNameParser('short');
 }
 
 function createMonthFullNameFormatter(){
   return createMonthNameFormatter('long');
 }
 
-function createDayNameFormatter(modifier){
+function createMonthFullNameParser(){
+  return createMonthNameParser('long');
+}
+
+function createDayNameList(modifier){
   var dateFormatter = createDateFormatter({
     weekday: modifier || 'long'
   });
@@ -216,6 +245,11 @@ function createDayNameFormatter(modifier){
     var dayName = dateString.replace(/[^\d\w]/g, '');
     dayNames.push(dayName);
   }
+  return dayNames;
+}
+
+function createDayNameFormatter(modifier){
+  var dayNames = createDayNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -224,12 +258,36 @@ function createDayNameFormatter(modifier){
   }
 }
 
+function createDayNameParser(modifier){
+  var dayNames = createDayNameList(modifier);
+  return function(dayNameValue){
+    if (!dayNameValue) {
+      return null;
+    }
+    var upperDayNameValue = dayNameValue.toUpperCase();
+    return dayNames.findIndex(function(listedName){
+      if (listedName === null) {
+        return false;
+      }
+      return listedName.toUpperCase() === upperDayNameValue;
+    });
+  };
+}
+
 function createDayShortNameFormatter(){
   return createDayNameFormatter('short');
 }
 
+function createDayShortNameParser(){
+  return createDayNameParser('short');
+}
+
 function createDayFullNameFormatter(){
   return createDayNameFormatter('long');
+}
+
+function createDayFullNameParser(){
+  return createDayNameParser('long');
 }
 
 function monthNumFormatter(monthNum){

@@ -175,7 +175,10 @@
         }
 
         > .pivotTableUiCell[data-totals=true]:last-child,
-        > .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=false] ) {
+        > .pivotTableUiCell[data-totals=true]:has( 
+          + .pivotTableUiCell[data-totals=false], 
+          + .pivotTableUiStufferCell 
+        ) {
           border-right-color: var( --huey-dark-border-color );
         }
 
@@ -266,9 +269,20 @@
           }
 
           > .pivotTableUiCell {
+            /* 
+              the borders of the cells in the top row double as resizer grippes. 
+              to make that work, we give them a dotted style 2px wide.
+              The complicated thing is that we don't always want to show these grippes: 
+              they need to be hidden when the they are between repeating values and the user has chosen to hide repeating values.
+              So in that case, they need to get a solid appearance with the same background color as the header cell
+            */
             border-right-style: solid;
             border-right-width: 2px;
             border-right-color: var( --huey-medium-background-color );
+          }
+          
+          > .pivotTableUiCell:has( + .pivotTableUiStufferCell ) {
+            border-right-style: dotted;
           }
 
           > .pivotTableUiCell:has( + .pivotTableUiCell[data-is-repeating-value=false] ) {

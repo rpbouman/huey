@@ -304,11 +304,21 @@ class FilterDialog {
     var filterValuesList = this.#getFilterValuesList();
     var autoWildcards = this.#getAutoWildChards().checked;
     var literalWriter = this.#queryAxisItem.literalWriter;
+    var parser = this.#queryAxisItem.parser;
     searchStrings.forEach(function(searchString){
       if (isPatternFilterType && autoWildcards) {
         searchString = FilterDialog.#addWildcards(searchString);
       }
       var label = searchString ;
+      if (parser) {
+        try {
+          searchString = parser(searchString);
+        }
+        catch(e){
+          showErrorDialog(e);
+          return;
+        }
+      }
       var literal = literalWriter ? literalWriter(searchString) : searchString;
 
       var options, option;
@@ -527,6 +537,23 @@ class FilterDialog {
       selectList.appendChild(optionElement);
     }
   }
+  
+  #compareValues(value1, value2){
+    var parser = this.#queryAxisItem.parser;
+    if (parser) {
+      value1 = parser(value1);
+      value2 = parser(value2);
+    }
+    
+    if (value1 > value2) {
+      return 1;
+    }
+    else
+    if (value1 < value2) {
+      return -1;
+    }
+    return 0;
+  }
 
   #handleValuePicklistChange(event){
     var isSqlNull;
@@ -597,12 +624,12 @@ class FilterDialog {
           valueSelectionStatusText = `Existing range collision.`;
         }
         else
-        if ( values === currentValues &&  selectedOption.value > correspondingValue) {
+        if ( values === currentValues &&  this.#compareValues(selectedOption.value, correspondingValue) === 1) {
           // noop, fromValue can't be bigger than toValue
           valueSelectionStatusText = `From Value exceeds to Value.`;
         }
         else
-        if ( values === currentToValues && selectedOption.value < correspondingValue) {
+        if ( values === currentToValues && this.#compareValues(selectedOption.value, correspondingValue) === -1) {
           // noop, toValue can't be smaller than fromValue
           valueSelectionStatusText = `To Value smaller than from Value.`;
         }

@@ -252,6 +252,7 @@ class AttributeUi {
       expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createMonthFullNameFormatter,
+      createParser: createMonthFullNameParser,
       dataValueTypeOverride: 'Utf8'
     },
     'month shortname': {
@@ -259,6 +260,7 @@ class AttributeUi {
       expressionTemplate: "CAST( MONTH( ${columnExpression} ) AS UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createMonthShortNameFormatter,
+      createParser: createMonthShortNameParser,
       dataValueTypeOverride: 'Utf8'
     },
     'week num': {
@@ -292,6 +294,7 @@ class AttributeUi {
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createDayFullNameFormatter,
+      createParser: createDayFullNameParser,
       dataValueTypeOverride: 'Utf8'
     },
     'day of week shortname': {
@@ -299,6 +302,7 @@ class AttributeUi {
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
       createFormatter: createDayShortNameFormatter,
+      createParser: createDayShortNameParser,
       dataValueTypeOverride: 'Utf8'
     }
   };
