@@ -637,6 +637,7 @@ class PivotTableUi extends EventEmitter {
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : numRows - 1);
         cell.setAttribute('data-totals', isTotalsMember <= j);
+        cell.setAttribute('data-totals-origin', isTotalsMember === j);
         if (doCellHeaders){
           cell.setAttribute('data-cells-axis-item-index', cellsAxisItemIndex);
         }
@@ -689,7 +690,7 @@ class PivotTableUi extends EventEmitter {
               repeatingValuesIndex === j || 
               doCellHeaders && cellsAxisItems.length && (cellsAxisItemIndex > 0 && i !== columnsOffset)
             ){
-              labelText = dittoMark;
+              labelText = isTotalsMember <= j ? undefined : dittoMark;
               isRepeatingValue = true;
             }
             else {
