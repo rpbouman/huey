@@ -282,6 +282,7 @@
           }
           
           > .pivotTableUiCell:has( + .pivotTableUiStufferCell ) {
+            border-right-color: var( --huey-dark-background-color );
             border-right-style: dotted;
           }
 
