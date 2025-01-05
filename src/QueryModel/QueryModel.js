@@ -49,6 +49,15 @@ class QueryAxisItem {
     console.warn(`Using fallback formatter for axisItem ${QueryAxisItem.getCaptionForQueryAxisItem(axisItem)}`);
     return fallbackFormatter;
   }
+  
+  static createParser(axisItem){
+    if (axisItem.derivation){
+      var derivationInfo = AttributeUi.getDerivationInfo(axisItem.derivation);
+      if (derivationInfo.createParser) {
+        return derivationInfo.createParser(axisItem);
+      }
+    }
+  }
 
   static createLiteralWriter(axisItem){
     var dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
@@ -894,6 +903,18 @@ class QueryModel extends EventEmitter {
         var literalWriter = QueryAxisItem.createLiteralWriter(config);
         if (literalWriter){
           config.literalWriter = literalWriter;
+        }
+      }
+    }
+    
+    if (!config.parser) {
+      if (foundItem && foundItem.parser) {
+        config.parser = foundItem.parser;
+      }
+      else {
+        var parser = QueryAxisItem.createParser(config);
+        if (parser){
+          config.parser = parser;
         }
       }
     }
