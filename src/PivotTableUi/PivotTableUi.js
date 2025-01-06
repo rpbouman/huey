@@ -582,6 +582,7 @@ class PivotTableUi extends EventEmitter {
   #getTupleGroupingId(tuple){
     return tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
   }
+  
 
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
     if (isNaN(physicalColumnsAxisTupleIndex)) {
@@ -669,8 +670,13 @@ class PivotTableUi extends EventEmitter {
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
             if ( 
-              tupleValue === null && prevTupleValue === null && (groupingId === this.#getTupleGroupingId(prevTupleValue)) ||
-              tupleValue !== null && tupleValue === prevTupleValue 
+              tupleValue !== null && tupleValue === prevTupleValue ||
+              tupleValue === null && prevTupleValue === null && 
+              isTotalsMember ===  PivotTableUi.#isTotalsMember(
+                this.#getTupleGroupingId(prevTupleValue), 
+                totalsItemsIndices, 
+                queryAxisItem ? j : numRows - 1
+              ) 
             ){
               repeatingValuesIndex = j;
             }
@@ -838,8 +844,13 @@ class PivotTableUi extends EventEmitter {
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
             if ( 
-              tupleValue === null && prevTupleValue === null && (groupingId === this.#getTupleGroupingId(prevTupleValue)) || 
-              tupleValue !== null && tupleValue === prevTupleValue 
+              tupleValue !== null && tupleValue === prevTupleValue ||
+              tupleValue === null && prevTupleValue === null &&  
+              isTotalsMember ===  PivotTableUi.#isTotalsMember(
+                this.#getTupleGroupingId(prevTupleValue), 
+                totalsItemsIndices, 
+                queryAxisItem ? j : numRows - 1
+              ) 
             ){
               repeatingValuesIndex = j;
             }
