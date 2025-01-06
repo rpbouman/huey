@@ -35,6 +35,7 @@ We keep this one around here for reference, but
   */
   --huey-light-border-color: rgb(222,222,222);
   --huey-dark-border-color: rgb(175,175,175);
+  --huey-darkest-border-color: rgb(100,100,100);
   
   /**
   * Huey icon font
