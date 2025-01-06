@@ -668,7 +668,10 @@ class PivotTableUi extends EventEmitter {
           tupleValue = tuple.values[j];
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
-            if (tupleValue === prevTupleValue && groupingId === this.#getTupleGroupingId(prevTupleValue)) {
+            if ( 
+              tupleValue === null && prevTupleValue === null && (groupingId === this.#getTupleGroupingId(prevTupleValue)) ||
+              tupleValue !== null && tupleValue === prevTupleValue 
+            ){
               repeatingValuesIndex = j;
             }
             else
@@ -834,7 +837,10 @@ class PivotTableUi extends EventEmitter {
 
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
-            if (tupleValue === prevTupleValue && groupingId === this.#getTupleGroupingId(prevTuple)) {
+            if ( 
+              tupleValue === null && prevTupleValue === null && (groupingId === this.#getTupleGroupingId(prevTupleValue)) || 
+              tupleValue !== null && tupleValue === prevTupleValue 
+            ){
               repeatingValuesIndex = j;
             }
             else
