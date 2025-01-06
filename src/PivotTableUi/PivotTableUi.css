@@ -80,24 +80,6 @@
       width: 1px;
     }
 
-    /**
-    * The cells in the first row of the table have a resizer and they have a dotted right border to indicate so
-    * But when the setting is to hide repeating values, we will want to hide these
-    * In this case we will reveal them when the user hover overs the first row
-    */
-    > .pivotTableUiTable:has( .pivotTableUiCell[data-is-repeating-value] ) {
-
-      > .pivotTableUiTableHeader {
-
-        > .pivotTableUiRow:first-child:hover {
-          > .pivotTableUiCell {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
-      }
-    }
-
     > .pivotTableUiTable {
       display: table;
       table-layout: fixed;
@@ -110,14 +92,29 @@
       bottom: 0px;
       right: 0px;
 
+      .pivotTableUiCell[data-totals=true],
+      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell {
+        background-color: var( --huey-medium-background-color );
+      }
+
+      .pivotTableUiCell[data-totals=true] > .pivotTableUiCellLabel {
+        font-weight: bold;
+      }
+
       .pivotTableUiRow {
         display: table-row;
 
         > .pivotTableUiCell {
           display: table-cell;
-          border-style:solid;
+
           border-width: 1px;
           border-color: var( --huey-light-border-color );
+
+          border-top-style: solid; 
+          border-top-color: var( --huey-light-border-color );
+
+          border-right-style: solid;
+          border-right-color: var( --huey-light-border-color );
 
           > .pivotTableUiCellLabel {
             overflow: hidden;
@@ -163,23 +160,21 @@
           text-align: right;
         }
 
-
-        > .pivotTableUiHeaderCell[data-totals=true] > .pivotTableUiCellLabel {
-          font-family: var( --huey-text-font-family );
-          text-align: left;
+        > .pivotTableUiHeaderCell[data-axis=rows][data-is-repeating-value=true] {
+          border-top-style: none;
+          border-bottom-style: none;
         }
 
-        > .pivotTableUiCell[data-totals=true] {
-          background-color: var( --huey-medium-background-color );
-          font-weight: bold;
+        > .pivotTableUiHeaderCell[data-axis=columns][data-is-repeating-value=true] {
+          border-left-style: none;
+          border-right-style: none;
         }
 
-        > .pivotTableUiCell[data-totals=true]:last-child,
-        > .pivotTableUiCell[data-totals=true]:has( 
-          + .pivotTableUiCell[data-totals=false], 
-          + .pivotTableUiStufferCell 
+        > .pivotTableUiHeaderCell[data-axis=columns][data-is-repeating-value=false]:has(
+          +.pivotTableUiHeaderCell[data-is-repeating-value=true]
         ) {
-          border-right-color: var( --huey-dark-border-color );
+          border-left-style: solid;
+          border-right-color: var( --huey-medium-background-color );
         }
 
         /*
@@ -192,88 +187,37 @@
           color: var( --huey-placeholder-color );
         }
 
-      }
+        /**
+        * These are the "Total" labels.
+        */
+        > .pivotTableUiHeaderCell[data-totals=true] > .pivotTableUiCellLabel {
+          font-family: var( --huey-text-font-family );
+          text-align: left;
+        }
 
-      .pivotTableUiRow[data-totals=true] > .pivotTableUiValueCell {
-        font-weight: bold;
-        background-color: var( --huey-medium-background-color );
       }
-
 
       > .pivotTableUiTableHeader {
         display: table-header-group;
 
-        /**
-        * If the setting is not to hide repeating values we will not have cells with both data-value-literal and data-is-repeating-value attributes
-        * In this case we will always render the borders in the top row indicating the columns can be resized.
-        */
-        > .pivotTableUiRow:first-child:has( > .pivotTableUiCell[data-value-literal]:not([data-is-repeating-value]) ){
-          > .pivotTableUiCell {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
-
-        > .pivotTableUiRow {
-
-          > .pivotTableUiHeaderCell {
-            border-bottom-style: none;
-          }
-          
-          .pivotTableUiColumnsAxisHeaderCell {
-            border-right-color: var( --huey-dark-border-color );
-          }
-
-          /*
-            these are top left "filler" cells - no headings or values
-            we don't want these to have inner borders at all
-          */
-          > .pivotTableUiHeaderCell:not( [data-axis] ) {
-            border-bottom-style: none;
-            border-top-style: none;
-            border-left-style: none;
-            border-right-style: none;
-          }
-
-          > .pivotTableUiHeaderCell:first-child {
-            border-left-style: solid;
-          }
-
-          > .pivotTableUiHeaderCell[data-is-repeating-value] {
-            border-right-style: none;
-          }
-
-          > .pivotTableUiHeaderCell[data-is-repeating-value]:last-child {
-            border-right-style: solid;
-          }
-
-          > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
-            border-left-style: none;
-          }
-
-          .pivotTableUiHeaderCell[data-totals=true]:has( + .pivotTableUiHeaderCell[data-totals=false] ){
-            border-right-style: solid;
-          }
-          
-          > .pivotTableUiHeaderCell[data-totals=true][data-axis=columns][data-totals-origin=false] {
-            border-top-style: none;
-            border-bottom-style: none;
-          }
-          
-          > .pivotTableUiHeaderCell[data-totals-origin=true] {
-            border-top-style: solid;
-            border-top-color: var( --huey-dark-border-color );
-          }
-          
-        }
-
-
         > .pivotTableUiRow:first-child {
 
-          > .pivotTableUiCell {
+          > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
             resize: horizontal;
             overflow: hidden;
-            border-top-style:solid;
+            border-right-style: solid;
+          }
+
+          > .pivotTableUiHeaderCell:not( [data-axis] ):has(
+            + .pivotTableUiHeaderCell[data-axis]
+          ),
+          > .pivotTableUiHeaderCell[data-totals-origin=false]:has(
+            + .pivotTableUiHeaderCell[data-totals-origin=true]
+          ),
+          > .pivotTableUiHeaderCell:has(
+            + .pivotTableUiHeaderCell[data-is-repeating-value=false]
+          ) {
+            border-right-color: var( --huey-light-border-color );
           }
 
           > .pivotTableUiCell.pivotTableUiStufferCell {
@@ -282,87 +226,63 @@
             background: none;
             border: none;
           }
-
-          > .pivotTableUiCell {
-            /* 
-              the borders of the cells in the top row double as resizer grippes. 
-              to make that work, we give them a dotted style 2px wide.
-              The complicated thing is that we don't always want to show these grippes: 
-              they need to be hidden when the they are between repeating values and the user has chosen to hide repeating values.
-              So in that case, they need to get a solid appearance with the same background color as the header cell
-            */
-            border-right-style: solid;
-            border-right-width: 2px;
+          
+          > .pivotTableUiCell:not( [data-axis] ):has(
+            + .pivotTableUiCell:not( [data-axis] )
+          ) { 
             border-right-color: var( --huey-medium-background-color );
           }
           
-          > .pivotTableUiCellAxisHeaderCell:has( +.pivotTableUiCellAxisHeaderCell ),
-          > .pivotTableUiRowsAxisHeaderCell:has( +.pivotTableUiRowsAxisHeaderCell ),
-          > .pivotTableUiCell:has( + .pivotTableUiStufferCell ) {
-            border-right-color: var( --huey-dark-border-color );
-            border-right-style: dotted;
-          }
+        }
 
-          > .pivotTableUiCell:has( + .pivotTableUiCell[data-is-repeating-value=false] ) {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
+        > .pivotTableUiRow:first-child:has( 
+          > .pivotTableUiCell[data-is-repeating-value]
+        ) {
+          > .pivotTableUiCell:has(
+            + .pivotTableUiCell[data-is-repeating-value=true]
+          ) { 
+            border-right-color: var( --huey-medium-background-color );
           }
+        }
+        
+        > .pivotTableUiRow:first-child:hover {
+          > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+            border-right-color: var( --huey-darkest-border-color ) !important;
+            border-right-style: solid;
+          }
+        }
 
-          > .pivotTableUiCell[data-is-repeating-value=true]:has( + .pivotTableUiCell[data-is-repeating-value=false] ),
-          > .pivotTableUiCell:not( .pivotTableUiColumnsAxisHeaderCell ):has( + .pivotTableUiColumnsAxisHeaderCell ),
+        > .pivotTableUiRow:not( :first-child ) {
+          > .pivotTableUiHeaderCell:not( [data-axis] ) {
+            border-top-style:none;
+            border-right-style:none;
+          }
+        }
+
+        > .pivotTableUiRow {
+
+
           > .pivotTableUiColumnsAxisHeaderCell {
-            border-right-style: dotted;
-            border-right-color: var( --huey-dark-border-color );
+            border-left-style: solid;
           }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:not( .pivotTableUiCellAxisHeaderCell, [data-totals-origin=true] ) {
+            border-top-style: none;
+          }
+
         }
 
         > .pivotTableUiRow:last-child {
-
-          > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
-            border-bottom-color: var( --huey-dark-border-color );
+          > .pivotTableUiHeaderCell {
+            border-bottom-style: solid;
+            border-bottom-color: var( --huey-darkest-border-color );
           }
-
-          > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell[data-totals] ) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiRowsAxisHeaderCell {
-            border-bottom-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiCell.pivotTableUiRowsAxisHeaderCell {
-            border-top-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-
-          /*
-          Styling totals columns headers
-          */
-          > .pivotTableUiHeaderCell[data-totals=true] {
-            border-bottom-color: var( --huey-light-border-color );
-          }
-        }
-
-        > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
-          border-bottom-color: var( --huey-dark-border-color );
         }
 
       }
 
       > .pivotTableUiTableBody {
         display: table-row-group;
-        
-        > .pivotTableUiRow:first-child {
-          
-          > .pivotTableUiValueCell[data-totals=false] {
-            border-top-style: solid;
-            border-top-color: var( --huey-dark-border-color );
-          }
-          
-        }
 
         > .pivotTableUiRow {
 
@@ -373,16 +293,17 @@
             border: none;
           }
 
-          > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
-            border-right-color: var( --huey-dark-border-color );
+          > .pivotTableUiHeaderCell[data-totals=true] {
+            border-right-style: none;
           }
 
-          > .pivotTableUiHeaderCell[data-is-repeating-value]{
-            border-bottom-style: none;
+          > .pivotTableUiHeaderCell[data-totals=true]:not( :first-child, [data-axis=cells] ){
+            border-left-style: none;
           }
 
-          > .pivotTableUiHeaderCell[data-is-repeating-value=true] {
-            border-top-style: none;
+          > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell ) {
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color );
           }
 
           /* NULL values in the cells are displayed in a less prominent color */
@@ -391,133 +312,137 @@
             color: var( --huey-placeholder-color );
           }
 
-          /* styling totals columns */
-          > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-
-        }
-
-        > .pivotTableUiRow[data-totals=true] {
-
-          /* by default, cells in the totals row are merged and don't have left and right borders */
-          > .pivotTableUiHeaderCell {
-            border-left-style: none;
-            border-right-style: none;
-            border-top-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiCell[data-totals=true] {
-            border-left-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ){
-            border-bottom-style: none;
-          }
-
-          /* but, we redo the left borders for these cells  */
-          > .pivotTableUiHeaderCell[data-axis=cells],
-          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ),
-          > .pivotTableUiHeaderCell:nth-child(1),
-          > .pivotTableUiHeaderCell[data-totals=true] {
+          > .pivotTableUiCellAxisHeaderCell {
             border-left-style: solid;
           }
         }
 
-        > .pivotTableUiRow[data-totals=true]:has(
-          [data-rows-tuple-index=0],
-          > .pivotTableUiCellAxisHeaderCell[data-axis-cells][data-axis-item-index=0]
-        ) > .pivotTableUiCell {
-          border-top-color: var( --huey-dark-border-color ) ;
-        }
-
-        > .pivotTableUiRow[data-totals=true] {
-
-          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
-            border-bottom-color: var( --huey-light-border-color );
-            border-top-color: var( --huey-light-border-color );
+        > .pivotTableUiRow[data-is-last-row-tuple=false]:nth-last-child(2) {
+          > .pivotTableUiCell {
+            border-bottom-style: dotted;
+            border-bottom-width: 2px;
           }
         }
-
-        /*
-        * this is to suppress the bottom border of rows that preced a totals row so they can have a dark top border color
-        * without this rule the border collapse property causes the bottom border of the previous row to suppress the top border of the next row.
-        */
-        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=true] > .pivotTableUiCell[data-axis=cells][data-axis-item-index='0'] ) > .pivotTableUiCell,
-        > .pivotTableUiRow[data-totals=false]:has( +.pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
-          border-bottom-style: none;
-        }
-
-
-        > .pivotTableUiRow[data-totals=true]:has( +.pivotTableUiRow[data-totals=false], +.pivotTableUiRow:last-child ) {
-          > .pivotTableUiHeaderCell,
-          > .pivotTableUiValueCell {
-
+        > .pivotTableUiRow[data-is-last-row-tuple=true]:nth-last-child(2) {
+          > .pivotTableUiCell {
             border-bottom-style: solid;
-            border-bottom-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiHeaderCell:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
-            border-bottom-color: var( --huey-light-border-color );
-          }
-
-          > .pivotTableUiHeaderCell[data-is-repeating-value=true]:has( ~ .pivotTableUiHeaderCell[data-totals=true] ) {
-            border-bottom-style:none;
-          }
-
-        }
-
-        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-totals=true] ) > .pivotTableUiValueCell {
-          border-top-style: solid;
-          border-top-color: var( --huey-dark-border-color );
-        }
-
-        /* regardless of repeating values, the last row of the table should always have bottom border */
-        > .pivotTableUiRow:nth-last-child(2) {
-          > .pivotTableUiHeaderCell {
-            border-bottom-style: solid !important;
           }
         }
-
+        
       }
-    }
-
-    > .pivotTableUiTable[data-cellheadersaxis=rows]{
-
-      .pivotTableUiCell[data-totals=true] {
-        border-left-color: var( --huey-dark-border-color );
+      
+      /* BORDERS FOR TOTALS COLUMNS CELLS */
+      .pivotTableUiValueCell[data-totals=true]:last-child,
+      .pivotTableUiValueCell[data-totals=true]:has( + .pivotTableUiValueCell[data-totals=false] ),
+      .pivotTableUiValueCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ):has( + .pivotTableUiValueCell[data-totals=true][data-cells-axis-item-index='0'] ),
+      .pivotTableUiValueCell[data-totals=false]:has( + .pivotTableUiValueCell[data-totals=true] ){
         border-right-color: var( --huey-dark-border-color );
       }
 
-      .pivotTableUiCell[data-totals=true]:has( +.pivotTableUiCell[data-totals=true] ) {
-        border-right-style: none;
+      .pivotTableUiRow[data-totals=true]:nth-last-child(2) > .pivotTableUiValueCell,
+      .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ) > .pivotTableUiValueCell {
+        border-bottom-color: var( --huey-dark-border-color );
+        border-bottom-style: solid;
       }
 
     }
-
-
-    > .pivotTableUiTable[data-cellheadersaxis=columns]{
-
-      .pivotTableUiCell[data-totals=true]:has( + .pivotTableUiCell[data-totals=true][data-cells-axis-item-index='0'] ),
-      .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
-        border-right-style: none;
-      }
-
-      .pivotTableUiCell[data-totals=true][data-cells-axis-item-index='0'] {
-        border-left-color: var( --huey-dark-border-color );
-      }
-
-
+    
+    > .pivotTableUiTable {
       > .pivotTableUiTableBody {
-        /*
-        * this is to suppress the bottom border of rows that preced a totals row so they can have a dark top border color
-        * without this rule the border collapse property causes the bottom border of the previous row to suppress the top border of the next row.
-        */
-        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=true] ) > .pivotTableUiCell {
-          border-bottom-style: none;
+        > .pivotTableUiRow[data-totals=true] {
+          > .pivotTableUiHeaderCell:has( + .pivotTableUiHeaderCell[data-totals-origin=true] ) {
+            border-right-style: solid;
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
+      }
+      
+      > .pivotTableUiTableHeader {
+        
+        > .pivotTableUiRow {
+
+          > .pivotTableUiHeaderCell[data-totals-origin=true] {
+            border-top-style: solid;
+            border-top-color: var( --huey-dark-border-color );
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:not([data-axis=cells]):has( + .pivotTableUiHeaderCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ) ) {
+            border-right-style: none;
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:last-child,
+          > .pivotTableUiHeaderCell[data-totals=true]:has( + .pivotTableUiHeaderCell[data-totals=false] ),
+          > .pivotTableUiHeaderCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ):has( + .pivotTableUiHeaderCell[data-totals=true][data-cells-axis-item-index='0'] ),
+          > .pivotTableUiHeaderCell[data-totals=false]:has( + .pivotTableUiHeaderCell[data-totals=true] ){
+            border-right-style: solid;
+            border-right-color: var( --huey-dark-border-color );
+          }
+
+          > .pivotTableUiColumnsAxisHeaderCell:has( + .pivotTableUiHeaderCell:not( .pivotTableUiColumnsAxisHeaderCell ) ){
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color ) !important;
+          }
         }
       }
     }
+
+    > .pivotTableUiTable[data-cellheadersaxis=columns] {
+
+      > .pivotTableUiTableHeader {
+        > .pivotTableUiRow {
+          > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell:not( .pivotTableUiRowsAxisHeaderCell ) ){
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color ) !important;
+          }
+        }
+      }
+
+      > .pivotTableUiTableBody {
+
+        >.pivotTableUiRow[data-totals=true] {
+          
+          > .pivotTableUiHeaderCell[data-totals=true],
+          > .pivotTableUiValueCell {
+            border-top-color: var( --huey-dark-border-color );
+            border-bottom-color: var( --huey-dark-border-color );
+            border-bottom-style: solid;
+          }
+        }
+      }
+    }
+    
+    > .pivotTableUiTable[data-cellheadersaxis='rows'] {
+
+      > .pivotTableUiTableBody {
+
+        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-axis=cells][data-axis-item-index='0'] ) {
+
+          > .pivotTableUiHeaderCell[data-totals=true], 
+          > .pivotTableUiValueCell {
+            border-top-color: var( --huey-dark-border-color );
+          }
+        }
+
+        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-axis=cells]:not([data-axis-item-index='0']) ) {
+
+          > .pivotTableUiHeaderCell[data-totals=true][data-axis=rows] {
+            border-top-style: none;
+          }
+        }
+        
+        > .pivotTableUiRow[data-totals=true]:nth-last-child(2),
+        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ){
+          > .pivotTableUiHeaderCell[data-totals=true], 
+          > .pivotTableUiValueCell {
+            border-bottom-color: var( --huey-dark-border-color );
+            border-bottom-style: solid;
+          }
+        }
+
+      }
+      
+    }
+    
   }
 }
 

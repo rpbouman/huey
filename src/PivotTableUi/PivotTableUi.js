@@ -488,10 +488,20 @@ class PivotTableUi extends EventEmitter {
     var physicalTupleIndices = this.#getPhysicalTupleIndices();
 
     var physicalColumnsAxisTupleIndex = physicalTupleIndices.physicalColumnsAxisTupleIndex;
-    //var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
-    //var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
-    //var count = columnsAxisSizeInfo.columns.columnCount;
-    //var tupleCount = Math.ceil(count / (tupleIndexInfo.factor - tupleIndexInfo.cellsAxisItemIndex));
+    
+    // ensure we don't overshoot 
+    var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
+    var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    var count = columnsAxisSizeInfo.columns.columnCount;
+    var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
+    if (tupleIndexInfo.cellsAxisItemIndex){
+      tupleCount += 1;
+    }
+    var allTupleCount = this.#columnsTupleSet.getTupleCountSync();
+    if (tupleIndexInfo.tupleIndex + tupleCount >= allTupleCount) {
+      var maxPhysicalColumn = allTupleCount * tupleIndexInfo.factor;
+      physicalColumnsAxisTupleIndex = maxPhysicalColumn - count;
+    }
     
     var physicalRowsAxisTupleIndex = physicalTupleIndices.physicalRowsAxisTupleIndex;
 
@@ -569,6 +579,10 @@ class PivotTableUi extends EventEmitter {
     return  (i < 0n) ? Infinity : totalsItemsIndices[i];
   }
 
+  #getTupleGroupingId(tuple){
+    return tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
+  }
+
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
     if (isNaN(physicalColumnsAxisTupleIndex)) {
       return;
@@ -587,6 +601,7 @@ class PivotTableUi extends EventEmitter {
       tupleCount += 1;
     }
     var tupleSet = this.#columnsTupleSet;
+    var lastTupleIndex = tupleSet.getTupleCountSync() - 1;
 
     var queryModel = this.getQueryModel();
     var queryAxis = queryModel.getColumnsAxis();
@@ -624,7 +639,7 @@ class PivotTableUi extends EventEmitter {
       var prevTuple = tuples[tupleIndex - 1];
       repeatingValuesIndex = undefined;
 
-      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
+      var groupingId = this.#getTupleGroupingId(tuple);
 
       //for each header row
       for (var j = 0; j < numRows; j++){
@@ -633,7 +648,10 @@ class PivotTableUi extends EventEmitter {
         var row = rows.item(j);
         var cells = row.childNodes;
         var cell = cells.item(i);
-        cell.setAttribute('data-columns-tuple-index', tupleIndex);
+        cell.setAttribute('data-column-index', tupleIndex);
+        cell.setAttribute('data-column-tuple-index', tupleIndexInfo.tupleIndex + tupleIndex);
+        cell.setAttribute('data-is-last-column-tuple', (tupleIndexInfo.tupleIndex + tupleIndex) === lastTupleIndex);
+        
         var label = getChildWithClassName(cell, 'pivotTableUiCellLabel');
         var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : numRows - 1);
         cell.setAttribute('data-totals', isTotalsMember <= j);
@@ -650,7 +668,7 @@ class PivotTableUi extends EventEmitter {
           tupleValue = tuple.values[j];
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
-            if (tupleValue === prevTupleValue) {
+            if (tupleValue === prevTupleValue && groupingId === this.#getTupleGroupingId(prevTupleValue)) {
               repeatingValuesIndex = j;
             }
             else
@@ -757,6 +775,7 @@ class PivotTableUi extends EventEmitter {
       tupleCount += 1;
     }      
     var tupleSet = this.#rowsTupleSet;
+    var lastTupleIndex = tupleSet.getTupleCountSync() - 1;
 
     var queryModel = this.getQueryModel();
     var queryAxis = queryModel.getRowsAxis();
@@ -788,8 +807,11 @@ class PivotTableUi extends EventEmitter {
       var prevTuple = tuples[tupleIndex - 1];
       repeatingValuesIndex = undefined;
 
-      row.setAttribute('data-rows-tuple-index', tupleIndex);
-      var groupingId = tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
+      row.setAttribute('data-row-index', tupleIndex);
+      row.setAttribute('data-row-tuple-index', tupleIndexInfo.tupleIndex + tupleIndex);
+      row.setAttribute('data-is-last-row-tuple', (tupleIndexInfo.tupleIndex + tupleIndex) === lastTupleIndex);
+      
+      var groupingId = this.#getTupleGroupingId(tuple);
 
       var isTotalsRow = Boolean(groupingId);
       row.setAttribute("data-totals", isTotalsRow);
@@ -803,13 +825,16 @@ class PivotTableUi extends EventEmitter {
         var labelText = undefined;
         var titleText = undefined;
         var numMembers = tuple ? tuple.values.length : 0;
+        var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
+        var isTotals = false;
+        var isTotalsOrigin = false;
+        
         if (tuple && j < numMembers) {
-          var isTotalsMember = PivotTableUi.#isTotalsMember(groupingId, totalsItemsIndices, queryAxisItem ? j : undefined);
           var tupleValue = tuple.values[j];
 
           if (hideRepeatingAxisValues && prevTuple && (repeatingValuesIndex === undefined || repeatingValuesIndex === j - 1)){
             var prevTupleValue = prevTuple.values[j];
-            if (tupleValue === prevTupleValue) {
+            if (tupleValue === prevTupleValue && groupingId === this.#getTupleGroupingId(prevTuple)) {
               repeatingValuesIndex = j;
             }
             else
@@ -827,16 +852,25 @@ class PivotTableUi extends EventEmitter {
             else {
               labelText = String(tupleValue);
             }
-            cell.setAttribute('data-totals', false);
           }
           else
           if (isTotalsMember === j) {
-            labelText = this.#getTotalsString(queryAxisItem);
-            cell.setAttribute('data-totals', true);
+            isTotals = isTotalsOrigin = true;
+            if (doCellHeaders){
+              if (i === 0 || cellsAxisItemIndex === 0){
+                labelText = this.#getTotalsString(queryAxisItem);
+              }
+              else {
+                labelText = undefined;
+              }
+            }
+            else {
+              labelText = this.#getTotalsString(queryAxisItem);
+            }
           }
           else {
             labelText = '';
-            cell.setAttribute('data-totals', false);
+            isTotals = true;
           }
           titleText = `${QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem)}: ${labelText}`;
 
@@ -864,6 +898,9 @@ class PivotTableUi extends EventEmitter {
           var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
           labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
           titleText = labelText;
+          isTotals = isTotalsRow;
+          cell.setAttribute('data-axis-item', QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem));
+          cell.setAttribute('data-axis-item-index', cellsAxisItemIndex);
         }
 
         if (!labelText || !labelText.length) {
@@ -872,6 +909,20 @@ class PivotTableUi extends EventEmitter {
 
         label.innerText = labelText;
         label.title = titleText;
+        
+        if (isTotals){
+          cell.setAttribute('data-totals', isTotals);
+        }
+        else {
+          cell.removeAttribute('data-totals');
+        }
+        if (isTotalsOrigin) {
+          cell.setAttribute('data-totals-origin', isTotalsOrigin);
+        }
+        else {
+          cell.removeAttribute('data-totals-origin');
+        }
+        
       }
 
       if (doCellHeaders) {
@@ -1068,7 +1119,7 @@ class PivotTableUi extends EventEmitter {
 
         var cellElement = cellElements.item(j);
         if (!cellElement){
-          console.error(`Warning: no DOM found for cell ${i},${j}`);
+          console.warn(`Warning: no DOM found for cell ${i},${j}`);
           continue;
         }
         
@@ -1099,7 +1150,7 @@ class PivotTableUi extends EventEmitter {
           }
         }
         else {
-          console.error(`Warning: no header cell at position ${j}`);
+          console.warn(`Warning: no header cell at position ${j}`);
         }
 
         if (cellHeadersAxis === QueryModel.AXIS_COLUMNS){
@@ -1732,7 +1783,9 @@ class PivotTableUi extends EventEmitter {
         rowsTupleSet.getTuples(rowsTupleSet.getPageSize(), 0)
       ];
 
-      var renderAxisPromisesResults = await Promise.all(renderAxisPromises)
+      var renderAxisPromisesResults = await Promise.all(renderAxisPromises);
+      //tableDom.setAttribute('data-max-row-tuple-index', rowsTupleSet.getTupleCountSync()-1);
+      //tableDom.setAttribute('data-max-column-tuple-index', columnsTupleSet.getTupleCountSync()-1);
 
       var columnTuples = renderAxisPromisesResults[0];
       this.#setHorizontalSize(0);
