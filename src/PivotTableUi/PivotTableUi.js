@@ -818,7 +818,7 @@ class PivotTableUi extends EventEmitter {
 
       row.setAttribute('data-row-index', tupleIndex);
       row.setAttribute('data-row-tuple-index', tupleIndexInfo.tupleIndex + tupleIndex);
-      row.setAttribute('data-is-last-row-tuple', (tupleIndexInfo.tupleIndex + tupleIndex) === lastTupleIndex);
+      row.setAttribute('data-is-last-row-tuple', (tupleIndexInfo.tupleIndex + tupleIndex) === lastTupleIndex || isNaN(lastTupleIndex) );
       
       var groupingId = this.#getTupleGroupingId(tuple);
 
