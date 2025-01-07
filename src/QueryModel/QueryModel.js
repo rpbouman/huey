@@ -373,7 +373,7 @@ class QueryAxisItem {
     var nullCondition;
     var literalLists = QueryAxisItem.#getFilterAxisItemValuesListAsSqlLiterals(queryAxisItem);
     var indexOfNull = literalLists.valueLiterals.findIndex(function(value){
-      return value.startsWith('NULL::');
+      return value === 'NULL' || value.startsWith('NULL::');
     });
 
     if (indexOfNull !== -1) {
