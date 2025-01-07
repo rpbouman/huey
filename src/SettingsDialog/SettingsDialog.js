@@ -1,9 +1,9 @@
 class Settings extends EventEmitter {
 
   static localStorageKey = 'settings';
-  
+
   #id = undefined;
-  
+
   static #settingsTemplate = {
     datasourceSettings: {
       useLooseColumnTypeComparison: true,
@@ -20,7 +20,7 @@ class Settings extends EventEmitter {
         fractional: [],
         // loosest approximat (fractional) number
         approximate: ['DOUBLE', 'REAL'],
-        // loosest fixed fractional number. 
+        // loosest fixed fractional number.
         fixed: [],
         // loosest date time temporal
         dateTime: [],
@@ -33,7 +33,7 @@ class Settings extends EventEmitter {
     localeSettings: {
       // https://en.wikipedia.org/wiki/Null_character#:~:text=In%20documentation%2C%20the%20null%20character,2400%20%E2%90%80%20SYMBOL%20FOR%20NULL.
       nullString: String.fromCharCode(Number('0x2400')),
-      // for use in ORDER BY NULLS FIRST|LAST 
+      // for use in ORDER BY NULLS FIRST|LAST
       nullsSortOrder: {
         value: 'FIRST',
         options: [
@@ -205,7 +205,7 @@ class Settings extends EventEmitter {
               "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
               "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
               "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
-              "--huey-darkest-border-color": "rgb(70,130,180)", 
+              "--huey-darkest-border-color": "rgb(70,130,180)",
               "--huey-icon-color-subtle": "rgb(176,196,222)", // Light Steel Blue
               "--huey-icon-color": "rgb(70,130,180)", // Steel Blue
               "--huey-icon-color-highlight": "rgb(65,105,225)" // Royal Blue
@@ -217,16 +217,16 @@ class Settings extends EventEmitter {
               "--huey-text-font-family": "system-ui",
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
-              "--huey-foreground-color": "#000000", 
+              "--huey-foreground-color": "#000000",
               "--huey-placeholder-color": "#A9A9A9",
-              "--huey-light-background-color": "#F0E68C", 
-              "--huey-medium-background-color": "#A7D3A4", 
-              "--huey-dark-background-color": "#5B8266", 
-              "--huey-light-border-color": "#A5B479", 
-              "--huey-dark-border-color": "#334D56", 
-              "--huey-darkest-border-color": "#000000", 
-              "--huey-icon-color-subtle": "#B4AA50", 
-              "--huey-icon-color": "#8B4513", 
+              "--huey-light-background-color": "#F0E68C",
+              "--huey-medium-background-color": "#A7D3A4",
+              "--huey-dark-background-color": "#5B8266",
+              "--huey-light-border-color": "#A5B479",
+              "--huey-dark-border-color": "#334D56",
+              "--huey-darkest-border-color": "#000000",
+              "--huey-icon-color-subtle": "#B4AA50",
+              "--huey-icon-color": "#8B4513",
               "--huey-icon-color-highlight": "#FFFFFF"
             },
             label: "Mallard"
@@ -237,16 +237,16 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "black",
-              "--huey-placeholder-color": "#A9A9A9", 
-              "--huey-light-background-color": "#D5D5D5", 
-              "--huey-medium-background-color": "#D2B48C", 
-              "--huey-dark-background-color": "#008080", 
-              "--huey-light-border-color": "#8B4513", 
-              "--huey-dark-border-color": "#2F4F4F", 
-              "--huey-darkest-border-color": "black", 
-              "--huey-icon-color-subtle": "##50AEbA", 
-              "--huey-icon-color": "#FFFFFF", 
-              "--huey-icon-color-highlight": "#8B4513" 
+              "--huey-placeholder-color": "#A9A9A9",
+              "--huey-light-background-color": "#D5D5D5",
+              "--huey-medium-background-color": "#D2B48C",
+              "--huey-dark-background-color": "#008080",
+              "--huey-light-border-color": "#8B4513",
+              "--huey-dark-border-color": "#2F4F4F",
+              "--huey-darkest-border-color": "black",
+              "--huey-icon-color-subtle": "##50AEbA",
+              "--huey-icon-color": "#FFFFFF",
+              "--huey-icon-color-highlight": "#8B4513"
             },
             label: "Teal"
           },
@@ -308,20 +308,20 @@ class Settings extends EventEmitter {
       }
     }
   };
-  
+
   #settings = undefined;
-  
+
   constructor(id){
     super('change');
     this.#id = id;
     this.#loadFromLocalStorage();
     this.#initDialog();
-    
+
     window.addEventListener('beforeunload', function(){
       this.#storeToLocalStorage();
     }.bind(this));
   }
-  
+
   #getSettings(path){
     var settings = this.#settings;
     if (typeof path === 'string'){
@@ -340,7 +340,7 @@ class Settings extends EventEmitter {
     }
     return value;
   }
-  
+
   // return a safe copy of a setting (one that can be abused by the receiver without messing up the actual settings)
   getSettings(path){
     var value = this.#getSettings(path);
@@ -349,8 +349,8 @@ class Settings extends EventEmitter {
     }
     return value;
   }
-  
-  assignSettings(path, value){ 
+
+  assignSettings(path, value){
     function deepAssign(target, source){
       for (var property in source){
         var sourceValue = source[property];
@@ -369,10 +369,10 @@ class Settings extends EventEmitter {
     if (!(path instanceof Array)) {
       throw new Error('Invalid path');
     }
-  
+
     var property = path.pop();
     var settings = this.#getSettings(path);
-    
+
     if (value === null || value === undefined){
       settings[property] = value;
     }
@@ -396,17 +396,17 @@ class Settings extends EventEmitter {
       }
     }
 
-    this.#storeToLocalStorage();    
+    this.#storeToLocalStorage();
   }
-  
+
   #getDialog(){
     var settingsDialog = byId(this.#id);
     return settingsDialog;
   }
-  
+
   #initDialog(){
     var settingsDialog = this.#getDialog();
-    
+
     byId('settingsDialogOkButton').addEventListener('click', function(event){
       event.cancelBubble = true;
       this.#updateSettingsFromDialog();
@@ -424,23 +424,23 @@ class Settings extends EventEmitter {
 
     byId('settingsButton').addEventListener('click', function(){
       this.#updateDialogFromSettings();
-    }.bind(this));    
+    }.bind(this));
   }
-  
+
   #resetSettings(){
     this.#settings = Settings.#settingsTemplate;
     this.#storeToLocalStorage();
     this.#updateDialogFromSettings();
   }
-  
+
   #updateSettingsFromDialog(){
     this.#synchronize('settings');
   }
-  
+
   #updateDialogFromSettings(){
     this.#synchronize('dialog');
   }
-  
+
   #synchronize(settingsOrDialog){
     var dialog = this.#getDialog();
     var settings = this.#settings;
@@ -450,7 +450,7 @@ class Settings extends EventEmitter {
       this.#examineChangesAndSendEvent(settingsCopy);
     }
   }
-  
+
   static synchronize(dialog, settings, settingsOrDialog){
     var settingsCopy = Object.assign({}, settings);
     for (var sectionName in settings) {
@@ -477,15 +477,15 @@ class Settings extends EventEmitter {
       }
     }
   }
-  
+
   #examineChangesAndSendEvent(oldSettings){
-    // TODO: 
+    // TODO:
     // figure out exactly what changed and prepare a change reccord
     // send the change record along with the change event.
-    
+
     this.fireEvent('change', this);
   }
-  
+
   static #synchronizeInput(settingsOrDialog, settings, property, control){
     var valueProperty = 'value';
     var defaultValueGetter, defaultValueSetter;
@@ -503,7 +503,7 @@ class Settings extends EventEmitter {
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
         break;
     }
-    
+
     var value;
     switch (settingsOrDialog){
       case 'settings':
@@ -515,7 +515,7 @@ class Settings extends EventEmitter {
           valueGetter = eval(valueGetter);
           value = valueGetter.call(null, control, this);
         }
-        else 
+        else
         if (defaultValueGetter) {
           value = defaultValueGetter.call(null, control, this);
         }
@@ -531,7 +531,7 @@ class Settings extends EventEmitter {
           valueSetter = eval(valueSetter);
           valueSetter.call(null, control, value, this);
         }
-        else 
+        else
         if (defaultValueSetter) {
           value = defaultValueSetter.call(null, control, value, this);
         }
@@ -547,12 +547,12 @@ class Settings extends EventEmitter {
       case 'settings':
         var optionsFromSettings = [];
         var optionsFromControl = control.options;
-        
+
         var valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
         }
-        
+
         for (var i = 0; i < optionsFromControl.length; i++){
           var optionFromControl = optionsFromControl[i];
           var value = optionFromControl.value;
@@ -560,7 +560,7 @@ class Settings extends EventEmitter {
           if (valueGetter){
             value = valueGetter.call(null, optionFromControl, this);
           }
-          optionsFromSettings.push({value: value, label: label}); 
+          optionsFromSettings.push({value: value, label: label});
         }
         settings[property].options = optionsFromSettings;
         if (valueGetter) {
@@ -576,9 +576,9 @@ class Settings extends EventEmitter {
 
         var valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
-          valueSetter = eval(valueSetter);          
+          valueSetter = eval(valueSetter);
         }
-        
+
         control.options.length = 0;
         for (var i = 0; i < optionsFromSettings.length; i++){
           var optionFromSettings = optionsFromSettings[i];
@@ -589,7 +589,7 @@ class Settings extends EventEmitter {
             label: label,
             title: title
           }, label);
-          
+
           if (valueSetter) {
             valueSetter.call(null, option, value, this);
           }
@@ -598,55 +598,56 @@ class Settings extends EventEmitter {
           }
           control.appendChild(option);
         }
-        
+
         if (valueSetter) {
           valueSetter.call(null, control, valueFromSettings, this);
         }
         else {
           control.value = valueFromSettings;
         }
-        
+
         break;
     }
   }
-  
+
   #init(settings){
     if (settings.localeSettings.useDefaultLocale) {
       settings.localeSettings.locale = navigator.languages;
     }
     this.#settings = settings;
   }
-  
+
   #updateDataFromTemplate(data, template){
     //harmonize data retrieved from storage with the template.
     //goal is "upgrade" the data so that all new features in the template are added,
-    //but without destroying any of the data, ever.      
+    //but without destroying any of the data, ever.
     if (data === null) {
       data = {};
     }
     if (template === null) {
       template = {};
     }
-    
+
     //make some copies to work on so we don't mess up the originals in case something goes wrong in this method.
     data = Object.assign({}, data);
     template = Object.assign({}, template);
-    
+
     //now, copy stuff from data to the template
-    
+
     function copyData(source, target){
       var keys = Object.keys(source);
       keys.forEach(function(propertyName){
         var sourceValue = source[propertyName];
-        var targetValue = target[propertyName];          
-        if (targetValue === undefined || targetValue === null || targetValue === '') {
+        var targetValue = target[propertyName];
+        //if (targetValue === undefined || targetValue === null || targetValue === '') {
+        if (targetValue === undefined){
           //target either does not have this key at all, or it is null or the empty string (which we deem safe to overwrite)
           //so we create it and simply assign the value.
-          if (typeof sourceValue === "object" && sourceValue !== null) {              
-            // object is non-null reference type, we can use Object.assign. 
+          if (typeof sourceValue === "object" && sourceValue !== null) {
+            // object is non-null reference type, we can use Object.assign.
             // first, instantiate a new value of the right reference type
             targetValue = sourceValue instanceof Array ? [] : {};
-            
+
             // then, do the deep assignment
             Object.assign(targetValue, sourceValue);
           }
@@ -654,7 +655,7 @@ class Settings extends EventEmitter {
             //value is either null or not a reference type - safe to simply assign.
             targetValue = sourceValue;
           }
-          
+
           //do the actual assignment to the missing key.
           target[propertyName] = targetValue;
         }
@@ -673,10 +674,10 @@ class Settings extends EventEmitter {
         }
       });
     }
-    copyData(template, data);      
+    copyData(template, data);
     return data;
   }
-  
+
   #loadFromLocalStorage(){
     var settingsTemplate = Settings.#settingsTemplate;
     var storedSettingsJSON = localStorage.getItem(Settings.localStorageKey);
