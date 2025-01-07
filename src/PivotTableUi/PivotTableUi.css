@@ -110,7 +110,7 @@
           border-width: 1px;
           border-color: var( --huey-light-border-color );
 
-          border-top-style: solid; 
+          border-top-style: solid;
           border-top-color: var( --huey-light-border-color );
 
           border-right-style: solid;
@@ -202,7 +202,7 @@
 
         > .pivotTableUiRow:first-child {
 
-          > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+          > .pivotTableUiCell {
             resize: horizontal;
             overflow: hidden;
             border-right-style: solid;
@@ -211,13 +211,19 @@
           > .pivotTableUiHeaderCell:not( [data-axis] ):has(
             + .pivotTableUiHeaderCell[data-axis]
           ),
-          > .pivotTableUiHeaderCell[data-totals-origin=false]:has(
-            + .pivotTableUiHeaderCell[data-totals-origin=true]
-          ),
           > .pivotTableUiHeaderCell:has(
             + .pivotTableUiHeaderCell[data-is-repeating-value=false]
           ) {
             border-right-color: var( --huey-light-border-color );
+          }
+          
+          > .pivotTableUiHeaderCell[data-totals-origin=true]:has(
+            + .pivotTableUiHeaderCell[data-totals-origin=false]
+          ),
+          > .pivotTableUiHeaderCell[data-totals-origin=false]:has(
+            + .pivotTableUiHeaderCell[data-totals-origin=true]
+          ){
+            border-right-color: var( --huey-dark-border-color);
           }
 
           > .pivotTableUiCell.pivotTableUiStufferCell {
@@ -226,25 +232,26 @@
             background: none;
             border: none;
           }
-          
+
           > .pivotTableUiCell:not( [data-axis] ):has(
             + .pivotTableUiCell:not( [data-axis] )
-          ) { 
+          ) {
             border-right-color: var( --huey-medium-background-color );
           }
-          
+
         }
 
-        > .pivotTableUiRow:first-child:has( 
+        > .pivotTableUiRow:first-child:has(
           > .pivotTableUiCell[data-is-repeating-value]
         ) {
           > .pivotTableUiCell:has(
             + .pivotTableUiCell[data-is-repeating-value=true]
-          ) { 
+          ) {
             border-right-color: var( --huey-medium-background-color );
           }
+                    
         }
-        
+
         > .pivotTableUiRow:first-child:hover {
           > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
             border-right-color: var( --huey-darkest-border-color ) !important;
@@ -262,7 +269,7 @@
         > .pivotTableUiRow {
 
 
-          > .pivotTableUiColumnsAxisHeaderCell {
+          > .pivotTableUiCell:first-child {
             border-left-style: solid;
           }
 
@@ -317,20 +324,23 @@
           }
         }
 
+        /* last row of the table has a dotted bottom border if its not the last tuple to suggest the table is "broken" */
         > .pivotTableUiRow[data-is-last-row-tuple=false]:nth-last-child(2) {
           > .pivotTableUiCell {
             border-bottom-style: dotted;
             border-bottom-width: 2px;
           }
         }
+        
+        /*if the last row is also the last tuple, then the bottom border is solid to indicate the table is complete. */
         > .pivotTableUiRow[data-is-last-row-tuple=true]:nth-last-child(2) {
           > .pivotTableUiCell {
             border-bottom-style: solid;
           }
         }
-        
+
       }
-      
+
       /* BORDERS FOR TOTALS COLUMNS CELLS */
       .pivotTableUiValueCell[data-totals=true]:last-child,
       .pivotTableUiValueCell[data-totals=true]:has( + .pivotTableUiValueCell[data-totals=false] ),
@@ -346,7 +356,7 @@
       }
 
     }
-    
+
     > .pivotTableUiTable {
       > .pivotTableUiTableBody {
         > .pivotTableUiRow[data-totals=true] {
@@ -356,9 +366,9 @@
           }
         }
       }
-      
+
       > .pivotTableUiTableHeader {
-        
+
         > .pivotTableUiRow {
 
           > .pivotTableUiHeaderCell[data-totals-origin=true] {
@@ -366,7 +376,13 @@
             border-top-color: var( --huey-dark-border-color );
           }
 
-          > .pivotTableUiHeaderCell[data-totals=true]:not([data-axis=cells]):has( + .pivotTableUiHeaderCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ) ) {
+          > .pivotTableUiHeaderCell[data-totals=true]:not(
+            [data-axis=cells]
+          ):has( 
+            + .pivotTableUiHeaderCell[data-totals=true]:not( 
+                [data-cells-axis-item-index='0'] 
+              ) 
+          ) {
             border-right-style: none;
           }
 
@@ -378,7 +394,9 @@
             border-right-color: var( --huey-dark-border-color );
           }
 
-          > .pivotTableUiColumnsAxisHeaderCell:has( + .pivotTableUiHeaderCell:not( .pivotTableUiColumnsAxisHeaderCell ) ){
+          > .pivotTableUiColumnsAxisHeaderCell:has( 
+            + .pivotTableUiHeaderCell:not( .pivotTableUiColumnsAxisHeaderCell ) 
+          ){
             border-right-style: solid;
             border-right-color: var( --huey-darkest-border-color ) !important;
           }
@@ -390,17 +408,24 @@
 
       > .pivotTableUiTableHeader {
         > .pivotTableUiRow {
-          > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell:not( .pivotTableUiRowsAxisHeaderCell ) ){
+    
+          > .pivotTableUiHeaderCell:not( [data-axis=cells] ):has(
+            + .pivotTableUiHeaderCell[data-axis=cells]
+          ),
+          > .pivotTableUiRowsAxisHeaderCell:has( 
+            +.pivotTableUiHeaderCell:not( .pivotTableUiRowsAxisHeaderCell ) 
+          ){
             border-right-style: solid;
             border-right-color: var( --huey-darkest-border-color ) !important;
           }
+
         }
       }
 
       > .pivotTableUiTableBody {
 
         >.pivotTableUiRow[data-totals=true] {
-          
+
           > .pivotTableUiHeaderCell[data-totals=true],
           > .pivotTableUiValueCell {
             border-top-color: var( --huey-dark-border-color );
@@ -410,14 +435,14 @@
         }
       }
     }
-    
+
     > .pivotTableUiTable[data-cellheadersaxis='rows'] {
 
       > .pivotTableUiTableBody {
 
         > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-axis=cells][data-axis-item-index='0'] ) {
 
-          > .pivotTableUiHeaderCell[data-totals=true], 
+          > .pivotTableUiHeaderCell[data-totals=true],
           > .pivotTableUiValueCell {
             border-top-color: var( --huey-dark-border-color );
           }
@@ -429,10 +454,10 @@
             border-top-style: none;
           }
         }
-        
+
         > .pivotTableUiRow[data-totals=true]:nth-last-child(2),
         > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ){
-          > .pivotTableUiHeaderCell[data-totals=true], 
+          > .pivotTableUiHeaderCell[data-totals=true],
           > .pivotTableUiValueCell {
             border-bottom-color: var( --huey-dark-border-color );
             border-bottom-style: solid;
@@ -440,9 +465,9 @@
         }
 
       }
-      
+
     }
-    
+
   }
 }
 
