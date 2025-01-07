@@ -417,6 +417,7 @@ class QueryAxisItem {
         // LIKE and NOT LIKE logic
         case FilterDialog.filterTypes.NOTLIKE:
           operator = 'NOT ';
+          logicalOperator = 'AND';
         case FilterDialog.filterTypes.LIKE:
           var dataType = QueryAxisItem.getQueryAxisItemDataType(queryAxisItem);
           if (dataType !== 'VARCHAR'){
@@ -459,10 +460,10 @@ class QueryAxisItem {
           }
           break;
         
-        case FilterDialog.filterTypes.HASANY:
-        case FilterDialog.filterTypes.HASALL:
         case FilterDialog.filterTypes.NOTHASANY:
         case FilterDialog.filterTypes.NOTHASALL:
+        case FilterDialog.filterTypes.HASANY:
+        case FilterDialog.filterTypes.HASALL:
           var arrayFunction;
           switch (filter.filterType){
             case FilterDialog.filterTypes.HASANY:
