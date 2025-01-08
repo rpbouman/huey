@@ -743,7 +743,7 @@ class QueryUi {
       
       var info = DragAndDropHelper.getData(event);
       var queryAxisItem = info['application/json'];
-
+      
       if (axisId === QueryModel.AXIS_CELLS && !Boolean(queryAxisItem.aggregator)) {
         var defaultAggregator = info.defaultaggregator.value;
         queryAxisItem.aggregator = defaultAggregator;
@@ -752,10 +752,21 @@ class QueryUi {
       queryAxisItem.axis = axisId;
       
       var item = queryUiElements.item; //prevElements ? prevElements.item : undefined;
+      
+      // assign the dropped item an index to position it on the axis.
       if (item) {
+        // if dragging over an existing item, then we need to update to index to that item's index
+        // (the drag over code already figured out that this new item comes behind this one)
         var queryModelItem = this.#getQueryModelItem(item);
         var index = queryModelItem.index;
         queryAxisItem.index = index;
+      }
+      else {
+        // https://github.com/rpbouman/huey/issues/368
+        // if we're dropping the item at the end of the axis, 
+        // then it must appear at the end. The item's original index (if any) must be deleted, 
+        // so that the query model will add it to the end.
+        delete queryAxisItem.index;
       }
       cleanupPrevElements();
       
