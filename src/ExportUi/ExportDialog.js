@@ -19,10 +19,10 @@ class ExportUi {
     );
     url = window.URL.createObjectURL(blob);
     ExportUi.downloadURL(url, fileName);
-    timeout = timeout === undefined ? 100 : timeout;
+    timeout = timeout === undefined ? 1000 : timeout;
     setTimeout(function() {
       return window.URL.revokeObjectURL(url);
-    }, 1000);
+    }, timeout);
   }
 
   static #exportTitleFields = {
