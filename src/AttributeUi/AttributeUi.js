@@ -212,14 +212,12 @@ class AttributeUi {
 
   static dateFields = {
     'iso-date': {
-      folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
       expressionTemplate: "strftime( ${columnExpression}, '%x' )",
       columnType: 'VARCHAR'
     },
     'local-date': {
-      folder: 'date fields',
       // %x is isodate,
       // see: https://duckdb.org/docs/sql/functions/dateformat.html
       expressionTemplate: "${columnExpression}::DATE",
@@ -983,23 +981,13 @@ class AttributeUi {
       var folderNode = this.#renderFolderNode({caption: folder});
       acc[folder] = folderNode;
 
-      var childNodes = node.childNodes;
-      if (childNodes.length) {
-        // folders got before any other child,
-        for (var i = 0; i < childNodes.length ; i++){
-          var childNode = childNodes.item(i);
-          if (childNode.nodeType !== 1) {
-            continue;
-          }
-          if (childNode.getAttribute('data-nodetype') === 'folder'){
-            continue;
-          }
-          node.appendChild(folderNode);
-          return acc;
-        }
+      var afterLastFolder = node.querySelector('[data-nodetype=folder] + *:not( [data-nodetype=folder] )');
+      if (afterLastFolder){
+        node.insertBefore(folderNode, afterLastFolder);
       }
-
-      node.appendChild(folderNode);
+      else {
+        node.appendChild(folderNode);
+      }
       return acc;
     }.bind(this), {});
     return folders;
