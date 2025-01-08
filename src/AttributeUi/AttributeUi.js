@@ -232,6 +232,14 @@ class AttributeUi {
         return fallbackFormatter;
       }
     },
+    'iso-year': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( ISOYEAR( ${columnExpression} ) AS INT)",
+      columnType: 'INTEGER',
+      createFormatter: function(){
+        return fallbackFormatter;
+      }
+    },
     'quarter': {
       folder: 'date fields',
       expressionTemplate: "'Q' || QUARTER( ${columnExpression} )",
@@ -285,6 +293,11 @@ class AttributeUi {
     'day of week num': {
       folder: 'date fields',
       expressionTemplate: "CAST( DAYOFWEEK( ${columnExpression} ) as UTINYINT)",
+      columnType: 'UTINYINT',
+    },
+    'iso-day of week': {
+      folder: 'date fields',
+      expressionTemplate: "CAST( ISODOW( ${columnExpression} ) as UTINYINT)",
       columnType: 'UTINYINT',
     },
     'day of week name': {
