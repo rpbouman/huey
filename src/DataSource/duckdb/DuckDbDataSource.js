@@ -226,7 +226,28 @@ class DuckDbDataSource extends EventEmitter {
     return new Promise(function(resolve, reject){
       try {
         var xhr = new XMLHttpRequest();
-        xhr.addEventListener("error", function(error){
+        xhr.addEventListener("error", function(progressEvent){
+          // note: the error event is still an event, not an Error object.
+          // The problem here is that some errors will actually leave some useful information in the status and response,
+          // (e.g, HTTP status in the 400 and 500 ranges)
+          // but there are also errors where the response is useless.
+          // Unfortunately, failure to load doc due to CORS headers is one such case.
+          var status = xhr.status;
+          var message = 'XHR emitted error event.' 
+          if (status === 0){
+            message += [
+              '',
+              'The server may not be available, or the request may have failed due to same origin policy / missing CORS header.',
+              'The network tab in your browser\'s development tools may reveal additional information.'
+            ].join(' ')
+            ;
+          }
+          else {
+            message += ` HTTP ${xhr.status} - ${xhr.statusText}`;
+          }
+          var error = new Error(message, {
+            cause: progressEvent
+          });
           reject(error);
         });
         
