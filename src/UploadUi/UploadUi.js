@@ -72,7 +72,6 @@ class UploadUi {
       if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
         var columnMetadata = await duckDbDataSource.getColumnMetadata();
       }
-      progressBar.value = 100;
       return duckDbDataSource;
     }
     catch (error){
@@ -80,6 +79,7 @@ class UploadUi {
       return error;
     }
     finally {
+      progressBar.value = 100;
       if (destroyDatasource && (duckDbDataSource instanceof DuckDbDataSource)){
         duckDbDataSource.destroy();
       }
