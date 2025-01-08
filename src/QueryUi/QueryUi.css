@@ -206,6 +206,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\ea53";
       }
 
+      > li[data-derivation=iso-year] > span:before,
       > li[data-derivation=year] > span:before {
         /* letter-y */
         content: "\ec68";
@@ -239,6 +240,7 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
 
       > li[data-derivation="day of week shortname"] > span:before,
       > li[data-derivation="day of week name"] > span:before,
+      > li[data-derivation="iso-day of week"] > span:before,
       > li[data-derivation="day of week num"] > span:before {
         /* letter-d-small */
         content: "\fcca";

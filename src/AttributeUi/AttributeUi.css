@@ -267,6 +267,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     /* calendar */
     content: "\ea53";
   }
+  details[data-nodetype=derived][data-derivation=iso-year] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
     /* letter-y */
     content: "\ec68";
@@ -301,6 +302,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   details[data-nodetype=derived][data-derivation="day of week shortname"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="day of week name"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="iso-day of week"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="day of week num"] > summary > span.label::before {
     /* letter-d-small */
     content: "\fcca";
