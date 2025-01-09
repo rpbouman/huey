@@ -139,6 +139,56 @@ function fallbackFormatter(value){
   return String(value);
 }
 
+function createDecimalLiteralWriter(precision, scale){
+  var typeDef = 'DECIMAL';
+  if (precision !== undefined) {
+    var typeOfPrecision = typeof precision;
+    if (typeOfPrecision !== 'number') {
+      throw new Error('Precision must be a number, not "${typeOfPrecision}"');
+    }
+    if (precision !== parseInt(precision, 10)){
+      throw new Error(`Precision must be an integer value, got ${precision}`)
+    }
+    
+    if (scale === undefined) {
+      scale = 0;
+    }
+    else {
+      var typeOfScale = typeof scale;
+      if ( typeOfScale !== 'number') {
+        throw new Error('Scale must be a number, not "${typeOfScale}"');
+      }
+      if (scale !== parseInt(scale, 10)){
+        throw new Error(`Scale must be an integer value, got ${scale}`);
+      }
+    }
+    if (scale > precision){
+      throw new Error(`Scale must not exceed precision.`);
+    }
+    typeDef += '(' + precision;
+    if (scale !== undefined){
+      typeDef += ',' +  scale;
+    }
+    typeDef += ')';
+  }
+  else 
+  if (scale){
+    throw new Error(`Cannot specify scale without specifying precision`);
+  }
+  return function(value, valueField){
+    var type = valueField.type;
+    var typeId = type.typeId;
+    if (typeId !== 7){
+      throw new Error(`Expected typeId 7 (Arrow Decimal), got ${type.typeId}`);
+    }
+    var stringValue = String(value);
+    if (type.scale){
+      stringValue = `${stringValue.slice(0, stringValue.length - type.scale)}.${stringValue.slice(-type.scale)}`
+    }
+    return `${stringValue}::${typeDef}`;
+  }
+}
+
 function createDefaultLiteralWriter(type){
   return function(value, field){
     return `${value === null ? 'NULL' : String(value)}::${type}`;
@@ -336,10 +386,16 @@ function getDuckDbLiteralForValue(value, type){
     case 1:   // Null
       literal = 'NULL';
       break;
+    case 7:   // Decimal
+      var stringValue = String(value);
+      if (type.scale){
+        stringValue = `${stringValue.slice(0, stringValue.length - type.scale)}.${stringValue.slice(-type.scale)}`;
+      }
+      literal = `${stringValue}::DECIMAL`;
+      break;
     case 2:   // Int
     case 3:   // float
     case 6:   // Bool
-    case 7:   // Decimal
     case -2:  // Int8
     case -3:  // Int16
     case -4:  // Int32
@@ -442,7 +498,19 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
-      return createDefaultLiteralWriter('DECIMAL');
+      var typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
+      if (!typeParts){
+        throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
+      }
+      var precision, scale;
+      if (typeParts[1]){
+        precision = parseInt(typeParts[1], 10);
+        
+        if(typeParts[3]){
+          scale = parseInt(typeParts[3], 10);
+        }
+      }
+      return createDecimalLiteralWriter(precision, scale);
     }
   },
   'DOUBLE': {
