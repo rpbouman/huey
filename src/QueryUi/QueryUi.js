@@ -744,9 +744,17 @@ class QueryUi {
       var info = DragAndDropHelper.getData(event);
       var queryAxisItem = info['application/json'];
       
-      if (axisId === QueryModel.AXIS_CELLS && !Boolean(queryAxisItem.aggregator)) {
-        var defaultAggregator = info.defaultaggregator.value;
-        queryAxisItem.aggregator = defaultAggregator;
+      switch (axisId) {
+        case QueryModel.AXIS_CELLS:
+          if (!Boolean(queryAxisItem.aggregator)) {
+            var defaultAggregator = info.defaultaggregator.value;
+            queryAxisItem.aggregator = defaultAggregator;
+          }
+          break;
+        case QueryModel.AXIS_FILTERS:
+          queryAxisItem.includeTotals = false;
+          break;
+        default:
       }
       
       queryAxisItem.axis = axisId;
