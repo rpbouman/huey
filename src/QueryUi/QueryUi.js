@@ -750,9 +750,15 @@ class QueryUi {
             var defaultAggregator = info.defaultaggregator.value;
             queryAxisItem.aggregator = defaultAggregator;
           }
+          delete queryAxisItem.includeTotals;
+          delete queryAxisItem.filter;
           break;
         case QueryModel.AXIS_FILTERS:
-          queryAxisItem.includeTotals = false;
+          delete queryAxisItem.includeTotals;
+          break;
+        case QueryModel.AXIS_ROWS:
+        case QueryModel.AXIS_COLUMNS:
+          delete queryAxisItem.filter;
           break;
         default:
       }
