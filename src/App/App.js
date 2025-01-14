@@ -87,6 +87,7 @@ function initExecuteQuery(){
 }
 
 function initApplication(){
+  initDraggableDialogs();
   initErrorDialog();
   initDuckdbVersion();
   initDataSourcesUi();
