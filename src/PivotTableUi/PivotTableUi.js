@@ -492,7 +492,7 @@ class PivotTableUi extends EventEmitter {
     // ensure we don't overshoot 
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
-    var count = columnsAxisSizeInfo.columns.columnCount;
+    var count = columnsAxisSizeInfo.columns ? columnsAxisSizeInfo.columns.columnCount : 0;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     if (tupleIndexInfo.cellsAxisItemIndex){
       tupleCount += 1;
