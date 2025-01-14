@@ -1053,6 +1053,7 @@ class FilterDialog {
     var searchStrings = FilterDialog.#splitSearchString(search.value);
 
     if (searchStrings.length) {
+      
       var filterValues = {};
       var autoWildcards = this.#getAutoWildChards().checked;
       var picklistFilterItem = Object.assign({}, queryAxisItem);
@@ -1066,6 +1067,7 @@ class FilterDialog {
           literal: quoteStringLiteral(searchString)
         };
       });
+      
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
         values: filterValues
