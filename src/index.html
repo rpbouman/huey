@@ -47,6 +47,7 @@
       item.innerText = url;
       list.appendChild(item);
     }
+    
     </script>
 
     <!-- 
@@ -620,6 +621,7 @@
 
     <dialog
       id="filterDialog"
+      draggable="true"
       aria-busy="false"
       popover="auto"
     >
@@ -1200,6 +1202,7 @@
         <label for="datasourceMenu-${index}"></label>
       </li>
     </template>
+    
     <dialog
       id="datasourceSettingsDialog"
       aria-labelledby="datasourceSettingsDialogTitle"
@@ -1961,6 +1964,7 @@
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
 
+    <script onload="resourceLoaded(this)" src="DragAndDrop/DraggableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
