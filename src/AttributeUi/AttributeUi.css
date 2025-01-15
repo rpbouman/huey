@@ -51,6 +51,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
         color: var( --huey-icon-color-subtle );
+        /* set the background to fix https://github.com/rpbouman/huey/issues/397 */
+        background-color: var( --huey-medium-background-color );
       }
 
       > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
@@ -96,7 +98,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         content: "\edba";
       }
 
-      > span.attributeUiAxisButton {
+      /* if the .attributeUiAxisButton is a SPAN (and not a LABEL) then it's not functional and the icon should be hidden */
+      > span.attributeUiAxisButton::before {
         visibility:hidden;
       }
 
@@ -140,6 +143,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       /* folder-open */
       content: "\faf7";
     }
+    
   }
 
   /**
