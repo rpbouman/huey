@@ -106,6 +106,7 @@ class QueryUi {
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
     var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+    this.#filterDialogStateChanged();
   }
 
   openFilterDialogForQueryModelItem(queryModelItem){
@@ -119,7 +120,8 @@ class QueryUi {
       }.bind(this), 100);
     }
     else {
-      this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+      //this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+      this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
     }
   }
 
@@ -545,6 +547,29 @@ class QueryUi {
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
     
     this.#initDragAndDrop();
+    
+    this.#initFilterUiEvents();
+  }
+  
+  #initFilterUiEvents(){
+    var filterUi = this.#filterDialog;
+    var filterDialog = filterUi.getDom();
+    filterDialog.addEventListener('close', this.#filterDialogStateChanged.bind(this));
+  }
+  
+  #filterDialogStateChanged(){
+    var filterUi = this.#filterDialog;
+    var filterDialog = filterUi.getDom();
+    var queryAxisItem = filterUi.getQueryAxisItem();
+    var queryAxisItemUi = this.#getQueryAxisItemUi(queryAxisItem);
+    var opened = filterDialog.hasAttribute('open');
+    var attribute = 'data-is-being-edited-by-filter-dialog';
+    if (opened) {
+      queryAxisItemUi.setAttribute(attribute, true);
+    }
+    else {
+      queryAxisItemUi.removeAttribute(attribute);
+    }
   }
   
   #initDragAndDrop(){
