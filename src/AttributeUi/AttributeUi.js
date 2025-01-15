@@ -994,7 +994,7 @@ class AttributeUi {
       var folderNode = this.#renderFolderNode({caption: folder});
       acc[folder] = folderNode;
 
-      var afterLastFolder = node.querySelector('[data-nodetype=folder] + *:not( [data-nodetype=folder] )');
+      var afterLastFolder = node.querySelector(':scope > [data-nodetype=folder] + *:not( [data-nodetype=folder] )');
       if (afterLastFolder){
         node.insertBefore(folderNode, afterLastFolder);
       }
