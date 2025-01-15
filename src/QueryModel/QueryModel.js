@@ -433,6 +433,10 @@ class QueryAxisItem {
             acc += `${columnExpression} ${operator} ${value}`;
             return acc;
           }, '');
+
+          if (indexOfNull !== -1) {
+            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+          }
           break;
 
         // BETWEEN and NOT BETWEEN logic
