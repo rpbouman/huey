@@ -50,7 +50,7 @@ class DraggableDialogs {
     var dom = this.getDom();
     dom.appendChild(this.#dragImgEl);
   }
-  
+    
   #handleDragStart(event){
     var dialog = event.srcElement;
     if (dialog.tagName !== 'DIALOG'){
@@ -67,6 +67,7 @@ class DraggableDialogs {
     dialog.style.top = boundingRect.top + 'px';
     
     var dataTransfer = event.dataTransfer;
+    dataTransfer.setData('text', dialog.id);
     dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
     dataTransfer.setDragImage(this.#dragImgEl, 0, 0);
     
@@ -79,7 +80,6 @@ class DraggableDialogs {
     }
     dialog.style.left = (event.clientX - this.#dx) + 'px';
     dialog.style.top = (event.clientY - this.#dy) + 'px';
-    
   }
   
   #handleDragEnd(event){
@@ -87,10 +87,8 @@ class DraggableDialogs {
     if (!dialog){
       return;
     }
-    //dialog.close();
     dialog.style.left = (event.clientX - this.#dx) + 'px';
     dialog.style.top = (event.clientY - this.#dy) + 'px';
-    //dialog.showModal();
 
     this.#dialog = undefined;
   }
