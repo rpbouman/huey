@@ -430,11 +430,11 @@ class FilterDialog {
       var valueObject2 = valuesList[key2];
       var literal2 = valueObject2.literal;
 
-      if (literal1.startsWith('NULL::')) {
+      if (literal1 === 'NULL' || literal1.startsWith('NULL::')) {
         return literal2.startsWith('NULL::') ? 0 : sortNull
       }
       else
-      if (literal2.startsWith('NULL::')){
+      if (literal2 === 'NULL' || literal2.startsWith('NULL::')){
         return -sortNull;
       }
 
