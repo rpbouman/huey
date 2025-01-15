@@ -432,6 +432,16 @@ body > main:has( > menu[role=toolbar] > #currentDatasource:empty ) > #workarea >
         content: "\f240";
       }
 
+      > li[data-is-being-edited-by-filter-dialog=true] {
+        background-color: var( --huey-dark-background-color );
+        border-color: var( --huey-dark-border-color );
+        > details {
+          > summary {
+            font-weight: bold;
+          }
+        }
+      }
+
     }
   }
   

@@ -73,6 +73,10 @@ class FilterDialog {
 
   #settings = undefined;
 
+  getQueryAxisItem(){
+    return this.#queryAxisItem;
+  }
+
   #getValuePicklistPageSize(){
     var settings = this.#settings;
     if (!settings){
