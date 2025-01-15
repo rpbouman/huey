@@ -74,6 +74,7 @@ class DraggableDialogs {
     if (!dialog){
       return;
     }
+    event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
     dialog.style.left = `${event.clientX - this.#dx}px`;
     dialog.style.top = `${event.clientY - this.#dy}px`;
