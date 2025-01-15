@@ -1,7 +1,12 @@
 dialog#uploadUi {
-  resize: both;
+  /* center the dialog */
+  left: calc( 50vw - 300px );
+  top: calc( 50vh - 200px );
+
   width: 600px;
   height: 400px;
+
+  resize: both;
   
   > section#uploadProgressList {
     
