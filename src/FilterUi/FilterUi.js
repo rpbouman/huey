@@ -423,6 +423,7 @@ class FilterDialog {
     })[nullsSortOrder];
 
     var keys = Object.keys(valuesList);
+    var thisColumnType = this.#queryAxisItem.columnType;
     keys.sort(function(key1, key2){
       var valueObject1 = valuesList[key1];
       var literal1 = valueObject1.literal;
@@ -440,7 +441,7 @@ class FilterDialog {
       if (dataTypeInfo && dataTypeInfo.isNumeric){
         literal1 = literal1.split('::')[0];
         literal2 = literal2.split('::')[0];
-        switch (this.#queryAxisItem.columnType){
+        switch (thisColumnType){
           case 'HUGEINT':
           case 'BIGINT':
           case 'UBIGINT':

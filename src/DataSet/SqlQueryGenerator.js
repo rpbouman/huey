@@ -253,17 +253,21 @@ class SqlQueryGenerator {
     };
     var ctes = [cte];
     
-    var indexOfRownumberItem = currentItems.findIndex(function(queryAxisItem){
+    var findIndexOfRowNumberItem = function(queryAxisItem){
       return queryAxisItem.derivation === 'row number';
-    });
+    };
+    var indexOfRownumberItem = currentItems.findIndex(findIndexOfRowNumberItem);
     
     if (indexOfRownumberItem !== -1){
       newItems = Object.assign([], currentItems);
-      var rowNumberItem = newItems[indexOfRownumberItem];
-      var newRowNumberItem = Object.assign({}, rowNumberItem);
-      newRowNumberItem.columnName = QueryAxisItem.getSqlForQueryAxisItem(rowNumberItem);
-      delete newRowNumberItem.derivation;
-      newItems[indexOfRownumberItem] = newRowNumberItem;
+      do {
+        var rowNumberItem = newItems[indexOfRownumberItem];
+        var newRowNumberItem = Object.assign({}, rowNumberItem);
+        newRowNumberItem.columnName = QueryAxisItem.getSqlForQueryAxisItem(rowNumberItem);
+        delete newRowNumberItem.derivation;
+        newItems[indexOfRownumberItem] = newRowNumberItem;
+        indexOfRownumberItem = newItems.findIndex(findIndexOfRowNumberItem);
+      } while (indexOfRownumberItem !== -1);
       alias = 'cte' + (ctes.length + 1);
       ctes.push({
         items: newItems,
