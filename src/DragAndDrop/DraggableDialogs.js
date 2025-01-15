@@ -34,7 +34,7 @@ class DraggableDialogs {
     var dom = this.getDom();
 
     dom.addEventListener('dragstart', this.#handleDragStart.bind(this));
-    dom.addEventListener('drag', this.#handleDrag.bind(this));
+    dom.addEventListener('dragover', this.#handleDrag.bind(this));
     dom.addEventListener('dragend', this.#handleDragEnd.bind(this));
   }
   
@@ -62,15 +62,11 @@ class DraggableDialogs {
     var boundingRect = dialog.getBoundingClientRect();
     this.#dx = event.clientX - boundingRect.x;
     this.#dy = event.clientY - boundingRect.y;
-
-    dialog.style.left = boundingRect.left + 'px';
-    dialog.style.top = boundingRect.top + 'px';
     
     var dataTransfer = event.dataTransfer;
     dataTransfer.setData('text', dialog.id);
     dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
     dataTransfer.setDragImage(this.#dragImgEl, 0, 0);
-    
   }
 
   #handleDrag(event){
@@ -78,8 +74,9 @@ class DraggableDialogs {
     if (!dialog){
       return;
     }
-    dialog.style.left = (event.clientX - this.#dx) + 'px';
-    dialog.style.top = (event.clientY - this.#dy) + 'px';
+    event.dataTransfer.dropEffect = 'move';
+    dialog.style.left = `${event.clientX - this.#dx}px`;
+    dialog.style.top = `${event.clientY - this.#dy}px`;
   }
   
   #handleDragEnd(event){
@@ -87,8 +84,8 @@ class DraggableDialogs {
     if (!dialog){
       return;
     }
-    dialog.style.left = (event.clientX - this.#dx) + 'px';
-    dialog.style.top = (event.clientY - this.#dy) + 'px';
+    dialog.style.left = `${event.clientX - this.#dx}px`;
+    dialog.style.top = `${event.clientY - this.#dy}px`;
 
     this.#dialog = undefined;
   }
