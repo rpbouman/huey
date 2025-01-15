@@ -29,8 +29,6 @@ dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
 }
 
 dialog#filterDialog {
-  margin: 0px;
-  position:absolute;
   resize: both;
   padding: 2px 0px 0px 2px;
   min-height: 280px;

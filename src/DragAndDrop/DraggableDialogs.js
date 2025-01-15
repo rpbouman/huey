@@ -59,18 +59,17 @@ class DraggableDialogs {
     
     this.#dialog = dialog;
 
-    dialog.close();
-    //dialog.style.display = 'none';
-    dialog.style.zIndex = 10;
-    //dialog.style.position = 'absolute';
-    dialog.setAttribute('open', true);
+    var boundingRect = dialog.getBoundingClientRect();
+    this.#dx = event.clientX - boundingRect.x;
+    this.#dy = event.clientY - boundingRect.y;
+
+    dialog.style.left = boundingRect.left + 'px';
+    dialog.style.top = boundingRect.top + 'px';
     
     var dataTransfer = event.dataTransfer;
     dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
     dataTransfer.setDragImage(this.#dragImgEl, 0, 0);
     
-    this.#dx = event.clientX - dialog.getBoundingClientRect().x;
-    this.#dy = event.clientY - dialog.getBoundingClientRect().y;
   }
 
   #handleDrag(event){
@@ -88,10 +87,10 @@ class DraggableDialogs {
     if (!dialog){
       return;
     }
-    dialog.close();
+    //dialog.close();
     dialog.style.left = (event.clientX - this.#dx) + 'px';
     dialog.style.top = (event.clientY - this.#dy) + 'px';
-    dialog.showModal();
+    //dialog.showModal();
 
     this.#dialog = undefined;
   }

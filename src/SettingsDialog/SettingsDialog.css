@@ -1,8 +1,14 @@
-#settingsDialog {
-  width: 640px;
-  min-width: 640px;
-  height: 372px;
+#settingsDialog {  
+  /* center the dialog */
+  left: calc( 50vw - 320px );
+  top: calc( 50vh - 186px );
   resize: both;
+  padding: 0px .5em .25em 1em;
+  min-height: 372px;
+  min-width: 372px;
+  width: 650px;
+  height: 372px;
+  
 }
 
 menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {

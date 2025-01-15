@@ -78,6 +78,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DraggableDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
@@ -195,6 +196,7 @@
       popover="manual"
       aria-labelledby="uploadUiTitle"
       aria-describedby="uploadUiDescription"
+      draggable="true"
     >
       <header>
         <h3 id="uploadUiTitle"></h3>
@@ -234,6 +236,7 @@
 
     <dialog
       id="exportDialog"
+      draggable="true"
       popover="auto"
       aria-labelledby="uploadUiTitle"
       aria-busy="false"
@@ -623,7 +626,7 @@
       id="filterDialog"
       draggable="true"
       aria-busy="false"
-      popover="auto"
+      popover="manual"
     >
       <header role="toolbar">
         <label
@@ -752,6 +755,7 @@
 
     <dialog
       id="errorDialog"
+      draggable="true"
       popover="auto"
       aria-labelledby="errorDialogTitle"
       aria-describedby="errorDialogDescription"
@@ -777,6 +781,7 @@
 
     <dialog
       id="settingsDialog"
+      draggable="true"
       aria-labelledby="settingsDialogTitle"
       popover="auto"
     >
@@ -1128,6 +1133,7 @@
 
     <dialog
       id="promptUi"
+      draggable="true"
       aria-labelledby="promptDialogTitle"
       popover="manual"
     >
@@ -1157,7 +1163,8 @@
 
     <dialog
       id="aboutDialog"
-      aria-labelledby="aboutDialogTitle"
+      draggable="true"
+      aria-labelledby"aboutDialogTitle"
       popover="auto"
     >
       <header>
@@ -1205,6 +1212,7 @@
     
     <dialog
       id="datasourceSettingsDialog"
+      draggable="true"      
       aria-labelledby="datasourceSettingsDialogTitle"
       popover="auto"
     >

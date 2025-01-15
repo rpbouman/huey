@@ -919,6 +919,7 @@ class FilterDialog {
     filterDialog.setAttribute('data-query-model-item-datatype', dataType);
     
     filterDialog.showModal();
+    //filterDialog.show();
     this.#updatePicklist();
   }
 

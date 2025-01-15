@@ -5,3 +5,10 @@ menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton ) {
 menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton )::before {
   content: '\eac5';
 }
+
+#aboutDialog {
+  /* center the dialog */
+  left: calc( 50vw - 160px );
+  top: calc( 50vh - 160px );
+  width: 320px;
+}

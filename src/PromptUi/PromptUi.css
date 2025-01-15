@@ -1,4 +1,10 @@
 dialog#promptUi {
+  /* center the dialog */
+  left: calc( 50vw - 200px );
+  top: calc( 50vh - 150px );
+  width: 400px;
+  height: 300px;
+
   resize: both;
 }
 

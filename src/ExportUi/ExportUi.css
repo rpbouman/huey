@@ -1,4 +1,8 @@
 dialog#exportDialog {
+  /* center the dialog */
+  left: calc( 50vw - 350px );
+  top: calc( 50vh - 230px );
+    
   width: 700px;
   height: 460px;
   resize: both;
