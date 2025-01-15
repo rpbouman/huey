@@ -127,8 +127,15 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
     }
 
-    > summary:hover  > span.label::before {
-      color: var( --huey-icon-color-highlight );
+    > summary:hover {
+      > span.attributeUiAxisButton,
+      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+        background-color: var( --huey-light-background-color );
+      }
+
+      > span.label::before {
+        color: var( --huey-icon-color-highlight );
+      }
     }
 
     /**
