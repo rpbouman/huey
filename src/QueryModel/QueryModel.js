@@ -434,7 +434,22 @@ class QueryAxisItem {
             return acc;
           }, '');
 
-          if (indexOfNull !== -1) {
+          if (indexOfNull === -1) {
+            // https://github.com/rpbouman/huey/issues/391
+            // This is essentially the same as 
+            // https://github.com/rpbouman/huey/issues/90
+            // but for NOT LIKE
+            if (filter.filterType === FilterDialog.filterTypes.NOTLIKE) {
+              nullCondition = `${columnExpression} IS NULL`;
+              if (literalLists.valueLiterals.length) {
+                sql = `(${sql}) OR ${nullCondition}`;
+              }
+              else {
+                sql = nullCondition;
+              }
+            }
+          }
+          else{
             sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
           }
           break;
