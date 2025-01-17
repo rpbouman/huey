@@ -52,11 +52,28 @@ class DraggableDialogs {
   }
     
   #handleDragStart(event){
+    if (event.eventPhase !== Event.BUBBLING_PHASE){
+      return;
+    }
     var dialog = event.srcElement;
     if (dialog.tagName !== 'DIALOG'){
       return;
     }
     
+    var header = dialog.querySelector('header');
+    if (header){
+      var headerBoundingRect = header.getBoundingClientRect();
+      if (
+        event.x < headerBoundingRect.left || 
+        event.x > headerBoundingRect.right || 
+        event.y < headerBoundingRect.top || 
+        event.y > headerBoundingRect.bottom
+      ){
+        event.preventDefault();
+        return;
+      }
+    }
+
     this.#dialog = dialog;
 
     var boundingRect = dialog.getBoundingClientRect();
@@ -72,6 +89,7 @@ class DraggableDialogs {
   #handleDrag(event){
     var dialog = this.#dialog;
     if (!dialog){
+      event.preventDefault();
       return;
     }
     event.preventDefault();
@@ -83,6 +101,7 @@ class DraggableDialogs {
   #handleDragEnd(event){
     var dialog = this.#dialog;
     if (!dialog){
+      event.preventDefault();
       return;
     }
     dialog.style.left = `${event.clientX - this.#dx}px`;
