@@ -482,6 +482,10 @@ class SqlQueryGenerator {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
       var columnAlias = quoteIdentifierWhenRequired(columnId);
+      
+      // TODO: see https://github.com/rpbouman/huey/issues/401
+      // we should check if it's safe to use a column alias. 
+      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
       var columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
@@ -513,14 +517,18 @@ class SqlQueryGenerator {
         
         // each totals column needs to be included in a grouping id expression
         // so we can figure out which result rows are totals (and for what group).
-        groupingIdExpressions.push(columnExpressionReference);
+        
+        // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
+        groupingIdExpressions.push(columnExpression);
         
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
         orderByExpressions.push(columnExpressionReference);
       }
       
-      axisGroupByExpressions.push(columnExpressionReference);
+      // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
+      axisGroupByExpressions.push(columnExpression);
+      
       var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
