@@ -95,7 +95,7 @@ class QueryAxisItem {
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
 
     if (axisItem.axis === QueryModel.AXIS_FILTERS) {
-      caption = 'No filters set.';
+      var filterItemCaption = `: No filters set.`;
       var filter = axisItem.filter;
       if (filter) {
         var values = filter.values;
@@ -116,10 +116,12 @@ class QueryAxisItem {
               }
               valueLabels.push(valueLabel);
             }
-            caption = `${filter.filterType} ${valueLabels.join('\n')}`;
+            filterItemCaption = ` ${filter.filterType} ${valueLabels.join('\n')}`;
           }
         }
       }
+      
+      caption = `${caption}${filterItemCaption}` 
     }
 
     return caption;
