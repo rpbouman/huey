@@ -1214,9 +1214,13 @@ class PivotTableUi extends EventEmitter {
     var cellsAxisItems = cellsAxis.getItems();
 
     var numColumnAxisRows = columnsAxisItems.length;
-    if (cellHeadersAxis === QueryModel.AXIS_COLUMNS && cellsAxisItems.length) {
+    if (
+      cellHeadersAxis === QueryModel.AXIS_COLUMNS && cellsAxisItems.length ||
+      rowsAxisItems.length && columnsAxisItems.length && !cellsAxisItems.length
+    ) {
       numColumnAxisRows += 1;
     }
+    
     if (numColumnAxisRows === 0) {
       numColumnAxisRows = 1;
     }
@@ -1248,7 +1252,7 @@ class PivotTableUi extends EventEmitter {
         tableRow.appendChild(tableCell);
 
         var columnWidth;
-        // headers for the  row axis columns
+        // last row in the header section: headers for the  row axis columns
         if (i === (numColumnAxisRows - 1)) {
           if (j < rowsAxisItems.length){
             tableCell.className += ' pivotTableUiRowsAxisHeaderCell';
@@ -1409,8 +1413,9 @@ class PivotTableUi extends EventEmitter {
           });
           this.#setCellItemId(cell, queryAxisItem, j);
 
-          if (j === headerRows.length - 1 && renderCellHeaders && cellItems.length){
+          if (j === headerRows.length - 1 && renderCellHeaders ){
             cell.className += ' pivotTableUiCellAxisHeaderCell';
+            cell.setAttribute('data-axis', QueryModel.AXIS_CELLS);
           }
 
           var labelText = undefined;
