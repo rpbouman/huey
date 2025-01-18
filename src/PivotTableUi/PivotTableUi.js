@@ -420,7 +420,13 @@ class PivotTableUi extends EventEmitter {
     var tupleCounts = {};
     tupleCounts[QueryModel.AXIS_ROWS] = this.#rowsTupleSet.getTupleCountSync();
     tupleCounts[QueryModel.AXIS_COLUMNS] = this.#columnsTupleSet.getTupleCountSync();
-
+    
+    var queryModel = this.getQueryModel();
+    tupleCounts[QueryModel.AXIS_CELLS] = {
+      axis: queryModel.getCellHeadersAxis(),
+      count: queryModel.getCellsAxis().getItems().length
+    };
+    
     var status = {
       status: 'success',
       tupleCounts: tupleCounts

@@ -148,13 +148,21 @@ function initApplication(){
         break;
       case 'success':
         var tupleCounts = eventData.tupleCounts;
-        
+
+        var cellsInfo = tupleCounts[QueryModel.AXIS_CELLS];
+
         var numRowsTuples = tupleCounts[QueryModel.AXIS_ROWS];
         numRowsTuples = typeof numRowsTuples === 'number' ? tupleNumberFormatter(numRowsTuples) : '';
+        if (cellsInfo.count > 1 && cellsInfo.axis === QueryModel.AXIS_ROWS) {
+          numRowsTuples += ` × ${cellsInfo.count}`;
+        }
         
         var numColumnsTuples = tupleCounts[QueryModel.AXIS_COLUMNS];
         numColumnsTuples = typeof numColumnsTuples === 'number' ? tupleNumberFormatter(numColumnsTuples) : '';
-        
+        if (cellsInfo.count > 1 && cellsInfo.axis === QueryModel.AXIS_COLUMNS) {
+          numColumnsTuples += ` × ${cellsInfo.count}`;
+        }
+
         break;
     }
     byId('queryResultRowsInfo').innerText = numRowsTuples;
