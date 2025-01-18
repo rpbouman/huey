@@ -603,6 +603,7 @@ class QueryUi {
       }
 
       data['application/json'] = queryAxisItem;
+      DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
 
       DragAndDropHelper.setData(event, data);
       var dataTransfer = event.dataTransfer;

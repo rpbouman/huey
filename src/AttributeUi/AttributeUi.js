@@ -838,19 +838,8 @@ class AttributeUi {
         data.id = {key: itemId, value: itemId};
       }
     }
-    var csvData = [['Name', 'Value']];
-    for (var property in queryAxisItem){
-      var value = queryAxisItem[property];
-      if (typeof value === 'object') {
-        continue;
-      }
-      csvData.push([property, value]);
-    }
-    csvData = getCsv(csvData);
-    
-    data['text/plain'] = csvData;
-    data['text/csv'] = new File([csvData], `${itemId}.csv`);
     data['application/json'] = queryAxisItem;
+    DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
     
     DragAndDropHelper.setData(event, data);
     dataTransfer.dropEffect = dataTransfer.effectAllowed = queryModelItem ? 'move' : 'all';
