@@ -1,9 +1,10 @@
-class DataSourcesUi {
+class DataSourcesUi extends EventEmitter {
 
   #id = undefined;
   #datasources = {};
 
   constructor(id){
+    super(['change']);
     this.#id = id;
 
     var dom = this.getDom();
@@ -233,7 +234,9 @@ class DataSourcesUi {
 
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
     delete potentialGroups[DuckDbDataSource.types.FILE];
-
+    
+    // TODO: pass some data that tells listeners why we rerendered
+    this.fireEvent('change', {});
   }
 
   static getCaptionForDatasource(datasource){
@@ -672,8 +675,23 @@ class DataSourcesUi {
     }
 
     var datasources = datasourceGroup.datasources;
+    datasources = DataSourcesUi.sortDatasources(datasources);
     var datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
+
+    datasourceKeys.forEach(function(datasourceId){
+      var datasource = datasources[datasourceId];
+      var datasourceNode = this.#createDatasourceNode(datasource);
+      groupNode.appendChild(datasourceNode);
+    }.bind(this));
+
+    var dom = this.getDom();
+    dom.appendChild(groupNode);
+    return groupNode;
+  }
+  
+  static sortDatasources(datasources){
+    var datasourceKeys = Object.keys(datasources);
     datasourceKeys
     .sort(function(a, b){
       var datasourceA = DataSourcesUi.getCaptionForDatasource( datasources[a] );
@@ -686,16 +704,11 @@ class DataSourcesUi {
         return -1;
       }
       return 0;
-    })
-    .forEach(function(datasourceId){
-      var datasource = datasources[datasourceId];
-      var datasourceNode = this.#createDatasourceNode(datasource);
-      groupNode.appendChild(datasourceNode);
-    }.bind(this));
-
-    var dom = this.getDom();
-    dom.appendChild(groupNode);
-    return groupNode;
+    });
+    return datasourceKeys.reduce(function(sortedDatasources, datasourceKey){
+      sortedDatasources[datasourceKey] = datasources[datasourceKey];
+      return sortedDatasources;
+    }, {});
   }
 
   #addDatasource(datasource) {
@@ -737,7 +750,7 @@ class DataSourcesUi {
   }
 
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
-    var columnNames = Object.keys(columnsSpec);
+    var columnNames = Object.keys(columnsSpec || {});
     if (columnNames.length === 0){
       return true;
     }
@@ -814,6 +827,7 @@ class DataSourcesUi {
     }
 
     if (Object.keys(foundDatasources).length) {
+      foundDatasources = DataSourcesUi.sortDatasources(foundDatasources);
       return foundDatasources;
     }
     return undefined;

@@ -340,7 +340,7 @@ class PivotTableUi extends EventEmitter {
     if (stateChange.propertiesChanged){
       var propertiesChangedInfo = stateChange.propertiesChanged;
 
-      if (propertiesChangedInfo.datasource) {
+      if (propertiesChangedInfo.datasource || propertiesChangedInfo.datasourceId) {
         clearCellsSet = clearRowsTupleSet = clearColumnsTupleSet = true;
         needsClearing = true;
       }
@@ -388,7 +388,6 @@ class PivotTableUi extends EventEmitter {
 
     if (needsClearing) {
       this.clear();
-      needsUpdate = false;
     }
 
     this.#setNeedsUpdate(needsUpdate);

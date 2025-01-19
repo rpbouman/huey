@@ -104,6 +104,7 @@ function initApplication(){
   initDatasourceSettingsDialog();
   initSessionCloner();
   initQuickQueryMenu();
+  initDataSourceMenu();
 
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
@@ -126,7 +127,8 @@ function initApplication(){
     else {
       currentDatasourceCaption = '';
     }
-    byId('currentDatasource').innerHTML = currentDatasourceCaption;
+    byId('currentDatasource').setAttribute('data-current-datasource', currentDatasourceCaption);
+    byId('currentDatasource').firstChild.data = currentDatasourceCaption;
 
     var title = ExportUi.generateExportTitle(queryModel);
     document.title = 'Huey - ' + title;

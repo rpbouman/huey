@@ -91,6 +91,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceSettingsDialog/DatasourceSettingsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceSettingsDialog/DatasourceSettingsDialogLogic.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceMenu/DatasourceMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
@@ -1204,8 +1205,19 @@
 
     <!-- this template is to present datasources in a prompt dialog and is used by the PageStateManager -->
     <template id="datasource-menu-item">
-      <li role="menuitem" data-nodetype="datasource" data-datasourcetype="">
-        <input id="datasourceMenu-${index}" type="radio" name="compatibleDatasources"/>
+      <li 
+        role="menuitem" 
+        data-nodetype="datasource" 
+        data-datasourcetype=""
+        data-datasource-id=""
+      >
+        <input 
+          type="radio" 
+          name="compatibleDatasources"
+        />
+        <button
+          popovertarget="dataSourceMenu"
+        ></button>
         <label for="datasourceMenu-${index}"></label>
       </li>
     </template>
@@ -1683,7 +1695,26 @@
         </label>
 
         <!-- title in the toolbar identifies the currently selected datasource -->
-        <h1 id="currentDatasource"></h1>
+        <label 
+          role="menuitem"
+          id="currentDatasource"
+          for="currentDatasourceMenuButton"
+          data-current-datasource=""
+        >
+          <button 
+            id="currentDatasourceMenuButton" 
+            popovertarget="dataSourceMenu"
+          ></button>
+          <menu
+            id="dataSourceMenu"
+            class="dataSources"
+            role="menu"
+            aria-labelledby="currentDatasourceLabel"
+            popover="auto"
+          >
+            
+          </menu>
+        </label>
 
         <!-- info about the last executed query -->
         <label for="queryResultRowsInfo" title="The total number of tuples on the rows axis.">
@@ -2002,6 +2033,7 @@
     <script onload="resourceLoaded(this)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>
+    <script onload="resourceLoaded(this)" src="DatasourceMenu/DatasourceMenu.js"></script>
     <script onload="resourceLoaded(this)" src="QueryUi/QueryUi.js"></script>
     <script onload="resourceLoaded(this)" src="FilterUi/FilterUi.js"></script>
     <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>
