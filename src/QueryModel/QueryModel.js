@@ -748,7 +748,7 @@ class QueryModel extends EventEmitter {
     this.setDatasource(undefined);
   }
 
-  setDatasource(datasource){
+  setDatasource(datasource, dontClear){
     var oldDatasource = this.#datasource;
     if (datasource === oldDatasource) {
       return;
@@ -769,11 +769,10 @@ class QueryModel extends EventEmitter {
       this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
     }
     
-    // TODO: it is not absoltely self-evident that the query model should be cleared when changing the datasource
-    // if the current query could be satisfied by the new datasource, then we could swap the datasource without clearing,
-    // effectively running the current query on the new datasource.
-    // of course, the method should be changed to allow the caller to express the desired behavior
-    this.#clear();
+    if (dontClear !== true) {
+      this.#clear();
+    }
+    
     this.#datasource = datasource;
 
     if (datasource){
@@ -1549,6 +1548,27 @@ class QueryModel extends EventEmitter {
         this.#settings.assignSettings(['querySettings', 'autoRunQuery'], autoRunQuery);
       }
     }
+  }
+  
+  static getReferencedColumns(queryModelState){
+    if (!queryModelState){
+      return null;
+    }
+    var axes = queryModelState.axes;
+    var referencedColumns = Object.keys(axes).reduce(function(acc, curr){
+      var items = axes[curr];
+      items.forEach(function(item, index){
+        var columnName = item.column || item.columnName;
+        if (columnName === '*'){
+          return;
+        }
+        acc[columnName] = {
+          columnType: item.columnType
+        };
+      });
+      return acc;
+    },{});
+    return referencedColumns;
   }
 
 }

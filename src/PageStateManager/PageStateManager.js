@@ -27,40 +27,6 @@ class PageStateManager {
     this.setPageState(newRoute);
   }
 
-  #getDatasourceMenuItemHTML(config){
-    var datasourceMenuItemTemplate = byId('datasource-menu-item');
-    var item = datasourceMenuItemTemplate.content.children.item(0);
-    if (config.datasourceType) {
-      item.setAttribute('data-datasourcetype', config.datasourceType);
-    }
-    else {
-      item.removeAttribute('data-datasourcetype');
-    }
-    if (config.fileType) {
-      item.setAttribute('data-filetype', config.fileType);
-    }
-    else {
-      item.removeAttribute('data-filetype');
-    }
-    item.setAttribute('title', config.labelText);
-    
-    var id = 'datasourceMenu' + (typeof config.index === 'number' ? config.index : '');
-    var label = item.getElementsByTagName('LABEL').item(0);
-    label.setAttribute('for', id);
-    label.textContent = config.labelText;
-    var radio = item.getElementsByTagName('INPUT').item(0);
-    radio.setAttribute('id', id);
-    radio.setAttribute('value', config.value);
-    var checked = Boolean(config.checked);
-    if (checked) {
-      radio.setAttribute('checked', checked);
-    }
-    else {
-      radio.removeAttribute('checked');
-    }
-    return item.outerHTML;
-  }
-
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
     return new Promise(async function(resolve, reject){
 
@@ -98,7 +64,7 @@ class PageStateManager {
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
       var openNewDatasourceItem;
       if (existingDatasource) {
-        openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
+        openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
           value: -1,
           checked: true,
           labelText: 'Browse for a new Datasource'
@@ -108,7 +74,7 @@ class PageStateManager {
         // TODO: show why it's not compatible
       }
       else {
-        openNewDatasourceItem = this.#getDatasourceMenuItemHTML({
+        openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
           datasourceType: desiredDatasourceIdParts.type,
           value: -1,
           checked: true,
@@ -126,17 +92,15 @@ class PageStateManager {
         list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
           var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
           datasourceType = compatibleDatasource.getType();
-          var extraAtts = '';
           switch (datasourceType) {
             case DuckDbDataSource.types.FILE:
               var fileName = compatibleDatasource.getFileName();
               var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
-              extraAtts = ` data-filetype="${fileNameParts.lowerCaseExtension}"`;
               break;
             default:
           }
           var caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
-          var datasourceItem = this.#getDatasourceMenuItemHTML({
+          var datasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
             datasourceType: datasourceType,
             fileType: fileNameParts ? fileNameParts.lowerCaseExtension : undefined,
             index: index,
@@ -203,20 +167,7 @@ class PageStateManager {
     }
 
     var queryModelState = state.queryModel;
-    var axes = queryModelState.axes;
-    var referencedColumns = Object.keys(axes).reduce(function(acc, curr){
-      var items = axes[curr];
-      items.forEach(function(item, index){
-        var columnName = item.column || item.columnName;
-        if (columnName === '*'){
-          return;
-        }
-        acc[columnName] = {
-          columnType: item.columnType
-        };
-      });
-      return acc;
-    },{});
+    var referencedColumns = QueryModel.getReferencedColumns(queryModelState);
 
     var datasourceId = queryModelState.datasourceId;
     var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
