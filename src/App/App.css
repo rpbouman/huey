@@ -132,13 +132,26 @@ body {
         border-left-color: var(--huey-light-border-color);
       }
 
-      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty ),
       > label[for=quickQueryMenuButton]:has( +label[for=currentDatasourceMenuButton][data-current-datasource=''] ) {
         display: none;
       }
-      
-      > label[for=currentDatasourceMenuButton]::after {
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty ){
+        pointer-events: none;
+      }
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) ){
+        pointer-events: auto;
+      }
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty )::after {
         content: ' ';
+      }
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) )::after {
+        font-family: var( --huey-icon-font-family );
+        /* caret-down */
+        content: '\fb2a';
       }
       
       > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
