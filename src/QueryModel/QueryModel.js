@@ -1436,10 +1436,16 @@ class QueryModel extends EventEmitter {
       hasItems = true;
       queryModelObject.axes[axisId] = items.map(function(axisItem){
         var strippedItem = {columnName: axisItem.columnName};
-        strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
         strippedItem.columnType = axisItem.columnType;
-        strippedItem.derivation = axisItem.derivation;
-        strippedItem.aggregator = axisItem.aggregator;
+        if (axisItem.memberExpressionPath){
+          strippedItem.memberExpressionPath = axisItem.memberExpressionPath;
+        }
+        if (axisItem.derivation) {
+          strippedItem.derivation = axisItem.derivation;
+        }
+        if (axisItem.aggregator){
+          strippedItem.aggregator = axisItem.aggregator;
+        }
         if (axisItem.includeTotals === true) {
           strippedItem.includeTotals = true;
         }
