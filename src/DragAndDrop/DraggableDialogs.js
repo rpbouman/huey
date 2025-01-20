@@ -60,7 +60,7 @@ class DraggableDialogs {
       return;
     }
     
-    var header = dialog.querySelector('header');
+    var header = dialog.querySelector(':scope > header');
     if (header){
       var headerBoundingRect = header.getBoundingClientRect();
       if (
