@@ -244,24 +244,6 @@
       aria-labelledby="uploadUiTitle"
       aria-busy="false"
     >
-      <dialog role="progressbar">
-        <header>
-          <h3 role="status"></h3>
-        </header>
-        <section>
-          <div class="loader loader-medium">Exporting...</div>
-          <div class="timer">
-            <span class="digit"></span>
-            <span class="digit"></span>
-            <span class="digit"></span>
-            <span class="digit"></span>
-          </div>
-        </section>
-        <footer>
-          <!-- TODO: implement cancel of pending export -->
-          <button id="cancelExportButton">Cancel</button>
-        </footer>
-      </dialog>
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
         <form id="exportGeneralSettings">
@@ -613,6 +595,7 @@
         </div>
       </section>
       <footer role="toolbar">
+      
         <button
           id="exportDialogExecuteButton"
           autofocus="true"
@@ -623,6 +606,24 @@
           popovertargetaction="hide"
         >Close</button>
       </footer>
+      <dialog role="progressbar">
+        <header>
+          <h3 role="status"></h3>
+        </header>
+        <section>
+          <div class="loader loader-medium">Exporting...</div>
+          <div class="timer">
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+          </div>
+        </section>
+        <footer>
+          <!-- TODO: implement cancel of pending export -->
+          <button id="cancelExportButton">Cancel</button>
+        </footer>
+      </dialog>
     </dialog>
 
     <dialog
