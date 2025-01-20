@@ -1418,7 +1418,7 @@ class PivotTableUi extends EventEmitter {
           });
           this.#setCellItemId(cell, queryAxisItem, j);
 
-          if (j === headerRows.length - 1 && renderCellHeaders ){
+          if (j >= queryAxisItems.length && renderCellHeaders ){
             cell.className += ' pivotTableUiCellAxisHeaderCell';
             cell.setAttribute('data-axis', QueryModel.AXIS_CELLS);
           }
