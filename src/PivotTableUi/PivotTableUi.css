@@ -22,6 +22,8 @@
       this is to prevent scroll events from being generated while the pivot table is updating 
       https://github.com/rpbouman/huey/issues/360
     */
+    pointer-events: none;
+
     > .pivotTableUiTable {
 
       /*
