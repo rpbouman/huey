@@ -129,7 +129,6 @@ class PivotTableUi extends EventEmitter {
       this,
       timeoutCallback
     );
-    //queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
   }
 
   #initScrollHandler(){
@@ -294,6 +293,7 @@ class PivotTableUi extends EventEmitter {
     var queryModelStateAfterChange = this.#queryModel.getState({includeItemIndices: true});
     var stateAfter = JSON.stringify(queryModelStateAfterChange);
     if (stateBefore === stateAfter){
+      this.#queryModelStateBeforeChange = undefined;
       return;
     }
     var queryModelStateBeforeChange = JSON.parse(stateBefore);
@@ -393,13 +393,14 @@ class PivotTableUi extends EventEmitter {
     this.#setNeedsUpdate(needsUpdate);
 
     if (!this.#autoUpdate){
+      this.#queryModelStateBeforeChange = undefined;
       return;
     }
 
     if (needsUpdate){
       await this.updatePivotTableUi();
     }
-
+    this.#queryModelStateBeforeChange = undefined;
   }
 
   #setBusy(busy){
@@ -436,6 +437,11 @@ class PivotTableUi extends EventEmitter {
   async #handleInnerContainerScrolled(event, count){
     if (count === undefined){
       // this is the last scroll event, update the table contents.
+      if (this.#queryModelStateBeforeChange){
+        // if the table is scrolled while it is being changed, don't entertain the scroll request.
+        // https://github.com/rpbouman/huey/issues/360
+        return;
+      }
       try {
         this.#setBusy(true);
         await this.#updateDataToScrollPosition();
@@ -448,14 +454,14 @@ class PivotTableUi extends EventEmitter {
           error: error
         });
       }
-      setTimeout(this.#setBusy.bind(this), 1);
+      finally {
+        setTimeout(this.#setBusy.bind(this), 1);
+      }
     }
     else
     if (count !== 0) {
       return;
     }
-    // this is the first scroll event, set the busy indicator
-    this.getDom().setAttribute('aria-busy', String(true));
   }
 
   #getPhysicalTupleIndices(){
