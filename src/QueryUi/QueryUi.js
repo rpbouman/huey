@@ -795,10 +795,15 @@ class QueryUi {
       
       // assign the dropped item an index to position it on the axis.
       if (item) {
+        var dragOverSide = item.getAttribute('data-dragoverside');
         // if dragging over an existing item, then we need to update to index to that item's index
         // (the drag over code already figured out that this new item comes behind this one)
         var queryModelItem = this.#getQueryModelItem(item);
         var index = queryModelItem.index;
+        if (dragOverSide  === 'right'){
+          if (queryAxisItem.axis === axisId && (queryAxisItem.index > index || queryAxisItem.index === undefined)) 
+          index += 1;
+        }
         queryAxisItem.index = index;
       }
       else {
