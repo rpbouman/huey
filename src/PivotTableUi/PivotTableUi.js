@@ -194,9 +194,9 @@ class PivotTableUi extends EventEmitter {
       clearTimeout(this.#resizeTimeoutId);
       this.#resizeTimeoutId = undefined;
     }
-    this.#resizeTimeoutId = setTimeout(function(){
+    this.#resizeTimeoutId = setTimeout(async function(){
       if (this.#autoUpdate && !this.#getBusy()) {
-        this.updatePivotTableUi();
+        await this.updatePivotTableUi();
       }
       else {
         //this.#setNeedsUpdate(true);
@@ -285,7 +285,7 @@ class PivotTableUi extends EventEmitter {
     this.#queryModelFilterConditionBeforeChange = this.#queryModel.getFilterConditionSql(false);
   }
 
-  #queryModelChangeHandler(event, count){
+  async #queryModelChangeHandler(event, count){
     if (count !== undefined) {
       return;
     }
@@ -397,7 +397,7 @@ class PivotTableUi extends EventEmitter {
     }
 
     if (needsUpdate){
-      this.updatePivotTableUi();
+      await this.updatePivotTableUi();
     }
 
   }

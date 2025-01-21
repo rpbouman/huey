@@ -148,6 +148,7 @@ class CellSet extends DataSetComponent {
       }
       combinationTuples.push(combinationTuple);
     }
+    
     if (cellIndices.length === 0){
       combinationTuples.push([0]);
     }
@@ -162,6 +163,14 @@ class CellSet extends DataSetComponent {
     if (includeGroupingId) {
       relationDefinition.push(quoteIdentifierWhenRequired(TupleSet.groupingIdAlias));
     }
+    
+    if (combinationTuples[0].length !== relationDefinition.length){
+      // this is https://github.com/rpbouman/huey/issues/360
+      // I think this shouldn't happen anymore but we keep this in for now.
+      // 
+      debugger;
+    }
+    
     relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n  ${relationDefinition.join('\n, ')}\n)`;
     tuplesSql = `${relationDefinition} AS (\n  FROM (VALUES\n    ${tuplesSql}\n  )\n)`;
     return tuplesSql;
