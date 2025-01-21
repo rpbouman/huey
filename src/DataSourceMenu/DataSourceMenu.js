@@ -171,7 +171,12 @@ class DataSourceMenu {
     }
     var currentDatasourceId = queryModelState.datasourceId;
     var referencedColumns = QueryModel.getReferencedColumns(queryModelState);
+    
     var compatibleDatasources = await this.#datasourcesUi.findDataSourcesWithColumns(referencedColumns);
+    if (!compatibleDatasources) {
+      return
+    }
+    
     Object.keys(compatibleDatasources).forEach(function(datasourceKey, index){
       var datasource = compatibleDatasources[datasourceKey];
       var datasourceId = datasource.getId();
