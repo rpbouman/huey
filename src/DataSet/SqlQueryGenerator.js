@@ -523,7 +523,7 @@ class SqlQueryGenerator {
         
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
-        orderByExpressions.push(columnExpressionReference);
+        orderByExpressions.push(columnExpression);
       }
       
       // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
