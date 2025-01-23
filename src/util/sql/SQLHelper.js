@@ -47,38 +47,13 @@ function createNumberFormatter(fractionDigits){
     console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
     formatter = new Intl.NumberFormat(locales, options);
   }
-  var numberParts = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(-123.456);
   
   function formatArrowDecimal(value, type){
     var strValue = String(value);
-    var isNegative = strValue.startsWith('-');
-    if (isNegative){
-      strValue = strValue.slice(1);
-    }
-    var scale = type.scale;
-    if (strValue === '0'){
-      strValue += new Array(scale).fill('0').join('');
-    }
-    var fractionalPart = strValue.slice(strValue.length - scale);
-    var formattedValue = numberParts.map(function(part){
-      switch (part.type){
-        case 'minusSign':
-          return isNegative ? part.value : '';
-        case 'integer':
-          var intPart = strValue.slice(0, -scale);
-          var intVal = BigInt(intPart);
-          return intFormatter.format(intVal);
-        case 'decimal':
-          return part.value;
-        case 'fraction':
-          return fractionalPart;
-          break;
-        default:
-          console.warn(`Warning: unrecognized number part of type "${part.type}".`);
-          return part.value;
-      }
-    }).join('');
-    return formattedValue;
+    var decimalPlace = strValue.length - type.scale;
+    var fractionalPart = strValue.slice(decimalPlace);
+    var integerPart = strValue.slice(0, decimalPlace);
+    return formatter.format(`${integerPart}.${fractionalPart}`);
   }    
   
   return {
@@ -88,14 +63,14 @@ function createNumberFormatter(fractionDigits){
           return getNullString();
       }
       
+      switch (typeof value){
+        case 'bigint':
+        case 'number':
+          return formatter.format(value);
+      }
+      
       var strValue;
       if (field) {
-        switch (typeof value){
-          case 'bigint':
-          case 'number':
-            return formatter.format(value);
-        }
-                
         var fieldType = field.type;
         var fieldTypeId = fieldType.typeId;
         switch (fieldTypeId){
