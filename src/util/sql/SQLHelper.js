@@ -47,87 +47,71 @@ function createNumberFormatter(fractionDigits){
     console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
     formatter = new Intl.NumberFormat(locales, options);
   }
-  if (fractionDigits){
-    decimalSeparator = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(123.456).find(function(part){
-      return part.type === 'decimal';
-    })['value'];
-  }
+  var numberParts = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(-123.456);
+  
+  function formatArrowDecimal(value, type){
+    var strValue = String(value);
+    var isNegative = strValue.startsWith('-');
+    if (isNegative){
+      strValue = strValue.slice(1);
+    }
+    var scale = type.scale;
+    if (strValue === '0'){
+      strValue += new Array(scale).fill('0').join('');
+    }
+    var fractionalPart = strValue.slice(strValue.length - scale);
+    var formattedValue = numberParts.map(function(part){
+      switch (part.type){
+        case 'minusSign':
+          return isNegative ? part.value : '';
+        case 'integer':
+          var intPart = strValue.slice(0, -scale);
+          var intVal = BigInt(intPart);
+          return intFormatter.format(intVal);
+        case 'decimal':
+          return part.value;
+        case 'fraction':
+          return fractionalPart;
+          break;
+        default:
+          console.warn(`Warning: unrecognized number part of type "${part.type}".`);
+          return part.value;
+      }
+    }).join('');
+    return formattedValue;
+  }    
+  
   return {
     format: function(value, field){
-      if (value === null) {
-        return getNullString();
+      switch (value) {
+        case null:
+          return getNullString();
       }
       
+      var strValue;
       if (field) {
         switch (typeof value){
           case 'bigint':
           case 'number':
-            break;
-          default:
-            var stringValue = String(value);
-            var fieldType = field.type;
-            var fieldTypeId, fieldTypeScale;
-            
-            if(fieldType) {
-              fieldTypeId = fieldType.typeId;
-              fieldTypeScale = fieldType.scale;
-            }
-            
-            var integerPart, fractionalPart;
-            // arrow decimal
-            if (fieldTypeScale === 0) {
-              integerPart = stringValue;
-            }
-            else {
-              var parts = stringValue.split('.');
-              integerPart = parts[0];
-              if (parts.length === 2){
-                fractionalPart = parts[1];
-              }
-              else {
-                var fractionalPartIndex = integerPart.length - fieldTypeScale;
-                fractionalPart = integerPart.slice(fractionalPartIndex);
-                integerPart = integerPart.slice(0, fractionalPartIndex);
-                if (integerPart === '-') {
-                  integerPart = '-0';
-                }
-              }
-            }
-
-            var integerPart = BigInt(integerPart);
-
-            if (fractionalPart) {
-              if (fractionalPart.length > options.maximumFractionDigits) {
-                fractionalPart = parseFloat('0.' + fractionalPart).toFixed(options.maximumFractionDigits);
-                if (parseFloat(fractionalPart) >= 1) {
-                  integerPart += (integerPart >= 0n ? 1n : -1n);
-                }
-                fractionalPart = String(fractionalPart).split('.')[1];
-              }
-              else
-              if (fractionalPart.length < options.maximumFractionDigits){
-                var spacePadding = options.maximumFractionDigits - fractionalPart.length;
-                if (fractionalPart.length === 0) {
-                  spacePadding += 1;
-                }
-                fractionalPart.padEnd(spacePadding, ' ');
-              }
-              
-              if (decimalSeparator === undefined) {
-                decimalSeparator = '.';
-              }
-            }
-            
-            stringValue = intFormatter.format(integerPart);
-            if (fractionalPart) {
-              stringValue = `${stringValue}${decimalSeparator}${fractionalPart}`;
-            }
-            
-            return stringValue;
+            return formatter.format(value);
         }
+                
+        var fieldType = field.type;
+        var fieldTypeId = fieldType.typeId;
+        switch (fieldTypeId){
+          case 7: // arrrow decimal
+            return formatArrowDecimal(value, fieldType);
+          default:
+        }
+        var fieldTypeScale;
+      }
+      else {
+        strValue = String(value);
       }
       
-      return formatter.format(value);
+      // fallback
+      console.warn(`Using fallback formatter for number "${strValue}" (${typeof value}; ${field ? field.type.typeId : ''}).`);
+      return strValue;
     }
   };
 }
