@@ -22,6 +22,12 @@
     // see: https://github.com/tabler/tabler-icons/issues/1310
     var tablerIconsFontVersion = '3.25.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
+    var preloadLink = document.createElement('link');
+    preloadLink.setAttribute('rel', 'preload');
+    preloadLink.setAttribute('as', 'font');
+    preloadLink.setAttribute('href', tablerIconsFontUrl);
+    preloadLink.setAttribute('crossorigin', 'true');
+    document.head.insertBefore(preloadLink, document.getElementById('tabler-font'));
     var tablerFontStyleSheet = document.getElementById('tabler-font');
     document.styleSheets[0].insertRule(`
       @font-face {
