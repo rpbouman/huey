@@ -14,6 +14,17 @@ function getLocales(){
   return locales;
 }
 
+function getArrowDecimalAsString(value, type){
+    var strValue = String(value);
+    var isNegative = strValue.startsWith('-') ;
+    var absValue = isNegative ? strValue.substr(1) : strValue;
+    absValue = new Array(type.scale).fill('0').join('') + absValue;
+    var decimalPlace = absValue.length - type.scale;
+    var fractionalPart = absValue.slice(decimalPlace);
+    var integerPart = absValue.slice(0, decimalPlace);
+    return `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+}
+
 function createNumberFormatter(fractionDigits){
   var localeSettings = settings.getSettings('localeSettings');
   var options = {
@@ -49,11 +60,8 @@ function createNumberFormatter(fractionDigits){
   }
   
   function formatArrowDecimal(value, type){
-    var strValue = String(value);
-    var decimalPlace = strValue.length - type.scale;
-    var fractionalPart = strValue.slice(decimalPlace);
-    var integerPart = strValue.slice(0, decimalPlace);
-    return formatter.format(`${integerPart}.${fractionalPart}`);
+    var decimalString = getArrowDecimalAsString(value, type);
+    return formatter.format(decimalString);
   }    
   
   return {
@@ -121,30 +129,36 @@ function createDecimalLiteralWriter(precision, scale){
         throw new Error(`Scale must be an integer value, got ${scale}`);
       }
     }
+    
     if (scale > precision){
       throw new Error(`Scale must not exceed precision.`);
     }
+    
     typeDef += '(' + precision;
     if (scale !== undefined){
       typeDef += ',' +  scale;
     }
     typeDef += ')';
+    
   }
   else 
   if (scale){
     throw new Error(`Cannot specify scale without specifying precision`);
   }
+  
+  var formatter = new Intl.NumberFormat(undefined, {
+    useGrouping: false,
+    signDisplay: 'negative',
+    minimumIntegerDigits: 1,
+    maximumFractionDigits: scale || 0,
+    minimumSignificantDigits: 1
+  });
+  
   return function(value, valueField){
-    var type = valueField.type;
-    var typeId = type.typeId;
-    if (typeId !== 7){
-      throw new Error(`Expected typeId 7 (Arrow Decimal), got ${type.typeId}`);
-    }
-    var stringValue = String(value);
-    if (type.scale){
-      stringValue = `${stringValue.slice(0, stringValue.length - type.scale)}.${stringValue.slice(-type.scale)}`
-    }
-    return `${stringValue}::${typeDef}`;
+    var decimalString = getArrowDecimalAsString(value, valueField.type);
+    // this is mostly to lose the leading zeroes
+    var formattedDecimalString = formatter.format(decimalString)
+    return `${formattedDecimalString}::${typeDef}`;
   }
 }
 
@@ -346,11 +360,8 @@ function getDuckDbLiteralForValue(value, type){
       literal = 'NULL';
       break;
     case 7:   // Decimal
-      var stringValue = String(value);
-      if (type.scale){
-        stringValue = `${stringValue.slice(0, stringValue.length - type.scale)}.${stringValue.slice(-type.scale)}`;
-      }
-      literal = `${stringValue}::DECIMAL`;
+      var decimalString = getArrowDecimalAsString(value, type);
+      literal = `${decimalString}::DECIMAL`;
       break;
     case 2:   // Int
     case 3:   // float
