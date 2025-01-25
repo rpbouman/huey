@@ -194,7 +194,16 @@ class PivotTableUi extends EventEmitter {
       this.#resizeTimeoutId = undefined;
     }
     this.#resizeTimeoutId = setTimeout(async function(){
-      if (this.#autoUpdate && !this.#getBusy()) {
+      // we have to check whether it's safe and appropriate to update
+      // - if we're already busy, then it's not safe and we shouldn't
+      var isSafe = !this.#getBusy();
+      // - if autoUpdate is true, it's appropriate
+      // - if autoUpdate is not true, and the request was due to a model change then update is not appropriate
+      var isAppropriate;
+      if (isSafe) {
+        isAppropriate = this.#autoUpdate || !this.#queryModelStateBeforeChange;
+      }
+      if (isSafe && isAppropriate) {
         await this.updatePivotTableUi();
       }
       else {
@@ -437,7 +446,7 @@ class PivotTableUi extends EventEmitter {
   async #handleInnerContainerScrolled(event, count){
     if (count === undefined){
       // this is the last scroll event, update the table contents.
-      if (this.#queryModelStateBeforeChange){
+      if (this.#queryModelStateBeforeChange || this.#getBusy()){
         // if the table is scrolled while it is being changed, don't entertain the scroll request.
         // https://github.com/rpbouman/huey/issues/360
         return;
