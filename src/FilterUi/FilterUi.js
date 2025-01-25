@@ -903,6 +903,8 @@ class FilterDialog {
   }
 
   #clearDialog(){
+    // https://github.com/rpbouman/huey/issues/421: reset the filter type to default position
+    this.#getFilterType().selectedIndex = 0;
     this.#getValuePicklist().innerHTML = '';
     this.clearFilterValueLists();
     this.#getSearch().value = '';
