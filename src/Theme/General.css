@@ -376,11 +376,13 @@ label[role=menuitem]:has( > menu[role=menu] ) {
   border-width: 1px;
   border-style: solid;
   border-color: var( --huey-medium-background-color );
+  padding: 0px 2px 2px 0px;
 }
 
 label[role=menuitem]:has( > menu[role=menu][popover]:popover-open ){
   background-color: var( --huey-dark-background-color );
   border-color: var( --huey-dark-border-color ) var( --huey-light-border-color ) var( --huey-light-border-color ) var( --huey-dark-border-color );
+  padding: 2px 0px 0px 2px;
 }
 
 *[role=toolbar] > button:hover ,
