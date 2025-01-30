@@ -136,6 +136,14 @@ body {
         display: none;
       }
 
+      > label[for=currentDatasourceMenuButton] {
+        display: inline-block;
+        max-width: calc( 100vw - 650px );
+        vertical-align: bottom;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty ){
         pointer-events: none;
       }
