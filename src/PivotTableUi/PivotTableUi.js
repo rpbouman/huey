@@ -201,7 +201,8 @@ class PivotTableUi extends EventEmitter {
       // - if autoUpdate is not true, and the request was due to a model change then update is not appropriate
       var isAppropriate;
       if (isSafe) {
-        isAppropriate = this.#autoUpdate || !this.#queryModelStateBeforeChange;
+        //isAppropriate = this.#autoUpdate || !this.#queryModelStateBeforeChange;
+        isAppropriate = this.#autoUpdate;
       }
       if (isSafe && isAppropriate) {
         await this.updatePivotTableUi();
