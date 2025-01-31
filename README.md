@@ -153,12 +153,14 @@ Right before the attribute item, there is a widget to expand the Attribute so it
 
 You can think of a derived attribute as an expression (formula) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
-The values that are thus derived from the original attribute values can be thought of as a 'virtual' column and can appear on wither of the pivot table axes.
+The values that are thus derived from the original attribute values can be thought of as a 'virtual' column. Derived attributes may be placed on either the rows or the columns pivot table axis. 
+Derived attributes may be used as filter too.
 
 ### Aggregates
 
 Aggregates are special expressions that calculate a result on a group of attribute values. 
-Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
+Aggregates cannot be placed on the rows or columns axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
+Currently, aggregates can also not be used on the filters axis. (Support for filtering on aggregated values is currently under consideration.)
 
 ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
 
@@ -372,3 +374,46 @@ Settings that control the appearance and behavior of the Pivot Table
 
 You can embed huey inside a frame on your own webpage and control the application by sending it commands using the [`postMessage()`-method](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
+
+# Development, Releases, and contributions 
+
+## Branches
+The Huey repository has two important branches - [dev](https://github.com/rpbouman/huey/tree/dev) and [main](https://github.com/rpbouman/huey/tree/main). 
+Active development is done on the dev branch. 
+
+## (Pre-)Release
+Once every while, typically every few weeks, ongoing developments are captured in a (pre-)release, which gets its own version number and a nickname.
+You can checkout prior releases here: [https://github.com/rpbouman/huey/releases](https://github.com/rpbouman/huey/releases)
+
+A new (pre-)release is triggered whenever a dependency is updated (currently, Huey has two dependencies - DuckDB WASM and Tabler Icons).
+Other events that trigger a (pre-)release is when ongoing development of new features and bugfixes is deemed stable - or at least stable enough to focus on new developments.
+
+When a couple of pre-releases have been found stable enough for production usage, a release is made and the work from the dev branch is merged into the main branch.
+The live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html) is a github page that is created right on top of the main branch.
+So, a merge to the main branch is what updates the version of the live demo.
+
+If you just want to enjoy use of a stable version of Huey, you can either use the live demo, or checkout or download the main branch.
+If you want to enjoy the latest developments, then you should use the dev branch.
+
+## Checking your Huey version
+
+You can verify the current Huey version in the about dialog:
+
+![image](https://github.com/user-attachments/assets/7a0b8690-4986-4189-8e8c-be3abd9580e6)
+
+Note that this also gives info on the versions of Huey's dependencies.
+
+## Contributions
+
+Your contributions are welcome! 
+You can contribute in many ways:
+- filing an issue: If something isn't working, or not working the way it's supposed to, please [file an issue](https://github.com/rpbouman/huey/issues/new/choose)!
+  To ensure maximum effectivity, clearly describe the component that is having an issue, describe the observed behavior, describe the expected behavior, and describe how this issue may be reproduced. Please include your browserversion and operating system too. If your issue relies on a dataset, and you are at liberty to share that, then please include that too. Please label your issue as "bug".
+- suggest a feature. You may also file issues to request or suggest features. If you're looking for a feature you know from other tools which Huey doesn't have, then its typically helpful if you name the product and its feature name.
+- Become an advocate. If you like Huey, spread the word! Share it with your friends and colleagues, and help them get set up. If Huey was of some help to you in your daily work, consider writing a blog about it, or maybe present your use case at a meeting.
+- Become a sponsor. Just click the "Sponsor" button at the top of the huey github project page:
+
+ ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
+
+ Alternatively, you can sponsor Huey by [making a donation](https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84). 
+ - Commission a feature or consultation: if need help using, installing or deploying Huey, you can always ask for help. Same if you need custom developments. Contact me with such a request and we'll negotiate the details.
