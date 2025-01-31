@@ -18,7 +18,7 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
 - Truly light-weight. Huey depends on DuckDb-WASM, and Tabler Icons, but nothing more. If it makes sense, dependencies might be added, but up till now we get along fine with what the browser gives us. And that's enough.
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
-- Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
+- Zero install. Huey is a static webapp so you can simply download or checkout the source tree, and open src/index.html in your browser - no server required. Alternatively, [use the Live demo site](https://rpbouman.github.io/huey/src/index.html). Being a static webapp, Huey can run locally without a server, but there is nothing that keeps you from serving it from a webserver if you need or want to.
 - It's free! Huey is released under the MIT license, just like DuckDB.
 
 ### Limitations
@@ -26,7 +26,7 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 ## Getting started
 1) [Checkout](https://github.com/rpbouman/huey.git) or [Download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) from github
-2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on resources served by jsdelivr.com, so make sure you're connected to the internet.
+2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on DuckDB WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. Once these resources are downloaded, they are typically cached by your browser, often allowing you to run Huey even without an internet connection. 
 3) Register one or more files or urls, and start analyzing!
 
 ## Registering and Analyzing Files with Huey
