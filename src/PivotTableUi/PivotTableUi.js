@@ -982,11 +982,17 @@ class PivotTableUi extends EventEmitter {
   }
 
   #setCellValueLiteral(cellElement, queryAxisItem, tupleValue, tupleValueField){
+    if (!queryAxisItem){
+      console.warn(`No query axis item!`);
+      return;
+    }
+    
     if (!tupleValue && !tupleValueField) {
       // this really should't happen but sometimes does when the cached tuples are out of sync witht he query model.
       console.warn(`No tuple value and no tuple value field.`);
       return;
     }
+    
     switch (tupleValueField.type.typeId){
       case 12:  // variable size list
         if (tupleValue !== null){
