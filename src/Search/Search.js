@@ -14,7 +14,7 @@ function handleAttributeSearch(event, count){
   }
   var searchElement = event.target;
   var searchString = searchElement.value.trim();
-  var searchPattern = searchString.replace(/([(){}^$+*?.\\])/g, '\\$&');
+  var searchPattern = searchString.replace(/([(){}\[\]^$+*?.\\])/g, '\\$&');
   searchPattern = searchPattern.replace('%', '.+');
   var regex = new RegExp(searchPattern, 'i');
   var attributeUi = byId('attributeUi');
