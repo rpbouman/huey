@@ -97,14 +97,6 @@
       bottom: 0px;
       right: 0px;
 
-      .pivotTableUiCell[data-totals=true],
-      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell {
-        background-color: var( --huey-medium-background-color );
-      }
-
-      .pivotTableUiCell[data-totals=true] > .pivotTableUiCellLabel {
-        font-weight: bold;
-      }
 
       .pivotTableUiRow {
         display: table-row;
@@ -136,9 +128,13 @@
         > .pivotTableUiCell::-webkit-resizer {
           display: none;
         }
-
+        
         > .pivotTableUiHeaderCell {
           background-color: var( --huey-medium-background-color );
+        }
+
+        > .pivotTableUiValueCell {
+          background-color: var( --huey-light-background-color );
         }
 
         > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
@@ -358,6 +354,15 @@
       .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ) > .pivotTableUiValueCell {
         border-bottom-color: var( --huey-dark-border-color );
         border-bottom-style: solid;
+      }
+
+      .pivotTableUiCell[data-totals=true],
+      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell {
+        background-color: var( --huey-medium-background-color );
+      }
+
+      .pivotTableUiCell[data-totals=true] > .pivotTableUiCellLabel {
+        font-weight: bold;
       }
 
     }

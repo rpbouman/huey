@@ -2327,4 +2327,51 @@ function initPivotTableUi(){
   });
 
   var pivotTableUiContextMenu = new ContextMenu(pivotTableUi, 'pivotTableContextMenu');
+  
+  var styleEl = createEl('style');
+  document.head.appendChild(styleEl);
+  var ruleText = [
+    '.pivotTableUiContainer {',
+    '  > .pivotTableUiInnerContainer {',
+    '    > .pivotTableUiTable {',
+    '      .pivotTableUiRow {', 
+    '        > .pivotTableUiCell:nth-child(1) {',
+    '         background-color: var( --huey-highlight-background-color );',
+    '       }',
+    '      }',
+    '    }',
+    '  }',
+    '}'
+  ];
+  var mouseOverHandler = function(event){
+    var target = event.target;
+    while (target && target.classList) {
+      if (target.classList.contains('pivotTableUiCell')){
+        break;
+      }
+      target = target.parentNode;
+    }
+    if (!target || !target.classList){
+      styleEl.textContent = '';
+      return;
+    }
+    var prev = target;
+    var count = 0;
+    do {
+      prev = prev.previousSibling;
+      count += 1;
+    } while (prev);
+    ruleText[4] = `        > .pivotTableUiCell:nth-child(${count}) {`;
+    var css = ruleText.join('');
+    if (styleEl.textContent !== css) {
+      styleEl.textContent = css;
+    }
+  };
+    
+  var dom = pivotTableUi.getDom();
+  dom.addEventListener('mouseover', mouseOverHandler);
+  dom.addEventListener('mouseleave', function(){
+    styleEl.textContent = '';
+  });
+
 }

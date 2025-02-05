@@ -1,0 +1,36 @@
+:root {
+  --huey-pivotui-highlighted-column: 1;
+}
+
+.pivotTableUiContainer {
+
+  > .pivotTableUiInnerContainer {
+    
+    > .pivotTableUiTable {    
+
+      > .pivotTableUiTableBody {
+
+        /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
+        > .pivotTableUiRow:nth-child(even){
+          > .pivotTableUiCell {
+            filter: brightness(99%);
+          }
+        }
+
+        /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
+        > .pivotTableUiRow:hover > .pivotTableUiCell{
+          background-color: var( --huey-highlight-background-color );
+        }
+      }
+
+      .pivotTableUiRow {
+        > .pivotTableUiCell:nth-child( var( --huey-pivotui-highlighted-column ) ) {
+          background-color: var( --huey-highlight-background-color );
+        }
+      }
+      
+    }
+    
+  }
+  
+}

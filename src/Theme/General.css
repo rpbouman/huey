@@ -26,9 +26,10 @@ We keep this one around here for reference, but
   /**
   * Huey background colors
   */
-  --huey-light-background-color: rgb(255,255,255);
+  --huey-light-background-color: rgb(250,250,250);
   --huey-medium-background-color: rgb(245,245,245);
   --huey-dark-background-color: rgb(210,210,210);
+  --huey-highlight-background-color: yellow;
   
   /**
   * Huey border colors
