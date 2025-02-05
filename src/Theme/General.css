@@ -31,6 +31,8 @@ We keep this one around here for reference, but
   --huey-dark-background-color: rgb(210,210,210);
   --huey-highlight-background-color: rgb(232, 244, 248);
   
+  --huey-alternating-rows-brightness: 99%;
+  
   /**
   * Huey border colors
   */
