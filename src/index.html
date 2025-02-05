@@ -1091,6 +1091,24 @@
                 >
                 </select>
               </fieldset>
+              <fieldset>
+                <legend>Appearance</legend>
+                <label
+                  title="Enable to let alternating rows have a slightly different color. This makes easier to visually identify a cell's row headers."
+                  for="alternatingRowColors"
+                >Alternating Row Colors</label>
+                <input type="checkbox" id="alternatingRowColors"/>
+                <label
+                  title="Enable this to create a highlight effect when hovering the mouse pointer over a row. This makes it easier to identify a cell's row headers."
+                  for="hoverRowHighlight"
+                >Hover Row Highlighting</label>
+                <input type="checkbox" id="hoverRowHighlight"/>
+                <label
+                  title="Enable this to create a highlight effect when hovering the mouse pointer over a column. This makes it easier to identify a cell's column headers."
+                  for="hoverColumnHighlight"
+                >Hover Column Highlighting</label>
+                <input type="checkbox" id="hoverColumnHighlight"/>
+              </fieldset>
             </form>
           </div>
         </div>
@@ -2065,6 +2083,7 @@
     <script onload="resourceLoaded(this)" src="DatasourceMenu/DatasourceMenu.js"></script>
     <script onload="resourceLoaded(this)" src="QueryUi/QueryUi.js"></script>
     <script onload="resourceLoaded(this)" src="FilterUi/FilterUi.js"></script>
+    <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUiHighlighting.js"></script>
     <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>
     <script onload="resourceLoaded(this)" src="Routing/Routing.js"></script>
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>

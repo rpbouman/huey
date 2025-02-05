@@ -219,7 +219,8 @@ function getChildWithClassName(dom, className){
       return childNode;
     }
   }
-  throw new Error(`Couldn't find element with classname ${className}`);
+  return undefined;
+  //throw new Error(`Couldn't find element with classname ${className}`);
 }
 
 function escapeHtmlText(text){
