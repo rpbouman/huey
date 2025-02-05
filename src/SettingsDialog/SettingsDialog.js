@@ -70,7 +70,10 @@ class Settings extends EventEmitter {
         ]
       },
       hideRepeatingAxisValues: true,
-      dittoMark: '〃'
+      dittoMark: '〃',
+      alternatingRowColors: true,
+      hoverRowHighlight: true,
+      hoverColumnHighlight: true
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',
