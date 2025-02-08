@@ -288,7 +288,6 @@ class CellSet extends DataSetComponent {
     );
     
     var samplingConfig = queryModel.getSampling(QueryModel.AXIS_CELLS);
-    var datasource = queryModel.getDatasource();
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
       datasource: datasource, 
       queryAxisItems: allItems, 
