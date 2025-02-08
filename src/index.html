@@ -39,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev60.0';
+    var duckdbLibraryVersion = '1.29.1-dev68.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -198,6 +198,8 @@
   <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
+      <header id="logo">Huey</header>
+      <div id="logoVersion"></div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
