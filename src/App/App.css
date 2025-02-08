@@ -165,7 +165,7 @@ body {
       > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
         display: none;
       }
-            
+
       > label[for=queryResultRowsInfo]:has( > output#queryResultRowsInfo:empty ),
       > label[for=queryResultColumnsInfo]:has( > output#queryResultColumnsInfo:empty ) 
       {

@@ -97,7 +97,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         /* layout grid */
         content: "\edba";
       }
-
+      
       /* if the .attributeUiAxisButton is a SPAN (and not a LABEL) then it's not functional and the icon should be hidden */
       > span.attributeUiAxisButton::before {
         visibility:hidden;
@@ -382,6 +382,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Aggregator icons
   *
   */
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=count] ):hover::before,
   details[data-nodetype=derived][data-derivation=count] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="count if true"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="count if false"] > summary > span.label::before,
@@ -392,48 +393,51 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ec4a";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="distinct count"] ):hover::before,
   details[data-nodetype=derived][data-derivation="distinct count"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > span.label::before {
     /* tallymark-4 */
     content: "\ec49";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
   details[data-nodetype=derived][data-derivation=max] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=max] > summary > span.label::before {
     /* math-max */
     content: "\f0f5";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=min] ):hover::before,
   details[data-nodetype=derived][data-derivation=min] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=min] > summary > span.label::before {
     /* math-min */
     content: "\f0f6";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=list] ):hover::before,
   details[data-nodetype=aggregate][data-aggregator=list] > summary > span.label::before {
     /* list */
     content: "\eb6b";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="unique values"] ):hover::before,
+  details[data-nodetype=derived][data-derivation="unique values"] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator="unique values"] > summary > span.label::before {
     /* letter-u-small*/
     content: "\fcdb";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=histogram] ):hover::before,
   details[data-nodetype=aggregate][data-aggregator=histogram] > summary > span.label::before {
     /* chart-bar */
     content: "\ea59";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=sum] ):hover::before,
   details[data-nodetype=derived][data-derivation=sum] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=sum] > summary > span.label::before {
     /* sum */
     content: "\eb73";
-  }
-
-  details[data-nodetype=derived][data-derivation="unique values"] > summary > span.label::before {
-    /* letter-u-small*/
-    content: "\fcdb";
   }
 
   details[data-nodetype=derived][data-derivation="sort values"] > summary > span.label::before {
@@ -441,6 +445,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ef18";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=avg] ):hover::before,
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=geomean] ):hover::before,
   details[data-nodetype=derived][data-derivation=avg] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=geomean] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=avg] > summary > span.label::before {
@@ -448,6 +454,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f0f4";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before,
   details[data-nodetype=derived][data-derivation=mad] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation=median] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=mad] > summary > span.label::before,
@@ -456,48 +464,56 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=mode] ):hover::before,
   details[data-nodetype=derived][data-derivation=mode] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=mode] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=stdev] ):hover::before,
   details[data-nodetype=derived][data-derivation=stdev] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=stdev] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=variance] ):hover::before,
   details[data-nodetype=derived][data-derivation=variance] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=variance] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=entropy] ):hover::before,
   details[data-nodetype=derived][data-derivation=entropy] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=entropy] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=kurtosis] ):hover::before,
   details[data-nodetype=derived][data-derivation=kurtosis] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=skewness] ):hover::before,
   details[data-nodetype=derived][data-derivation=skewness] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=skewness] > summary > span.label::before {
     /* calculator */
     content: "\eb80";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=and] ):hover::before,
   details[data-nodetype=derived][data-derivation=and] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
     /* logical-and */
     content: "\f240";
   }
 
+  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=or] ):hover::before,
   details[data-nodetype=derived][data-derivation=or] > summary > span.label::before,
   details[data-nodetype=aggregate][data-aggregator=or] > summary > span.label::before {
     /* logical-or */
