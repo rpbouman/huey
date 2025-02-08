@@ -8,6 +8,10 @@ async function copyToClipboard(data, mimeType) {
   var clipboard = navigator.clipboard, method, arg;
   if (typeof data === 'string') {
     if (mimeType) {
+      if (!ClipboardItem.supports(mimeType)){
+        console.warn(`Clipboard does not support preferred mimeType ${mimeType}, downgrading to text/plain.`);
+        mimeType = 'text/plain';
+      }      
       data = new Blob([data], {type: mimeType});
     }
     else {
