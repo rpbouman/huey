@@ -1,6 +1,9 @@
 function initAboutDialog(){
   var el;
 
+  el = byId('logoVersion');
+  el.textContent = `v ${hueyVersionNumber} (${hueyVersionName})` ;
+
   el = byId('hueyVersion');
   el.innerText = `Huey version ${hueyVersionNumber} - ${hueyVersionName}`;
 
