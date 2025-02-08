@@ -839,7 +839,7 @@ class PivotTableUi extends EventEmitter {
       var groupingId = this.#getTupleGroupingId(tuple);
 
       var isTotalsRow = Boolean(groupingId);
-      row.setAttribute("data-totals", isTotalsRow);
+      row.setAttribute('data-totals', isTotalsRow);
 
       var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
       for (var j = 0; j < columnsOffset; j++){
@@ -949,6 +949,7 @@ class PivotTableUi extends EventEmitter {
         else {
           cell.removeAttribute('data-totals');
         }
+        
         if (isTotalsOrigin) {
           cell.setAttribute('data-totals-origin', isTotalsOrigin);
         }
@@ -1140,6 +1141,7 @@ class PivotTableUi extends EventEmitter {
       if (!tableRow){
         continue;
       }
+      var isTotalsRow = tableRow.getAttribute('data-totals') === 'true';
       var cellElements = tableRow.childNodes;
 
       if (cellHeadersAxis === QueryModel.AXIS_ROWS && i === 0){
@@ -1161,7 +1163,7 @@ class PivotTableUi extends EventEmitter {
           console.warn(`Warning: no DOM found for cell ${i},${j}`);
           continue;
         }
-        
+                
         var cellIndex = cellsSet.getCellIndex(rowsAxisTupleIndex, columnsAxisTupleIndex);
         var cell = undefined;
         if (cells) {
@@ -1173,7 +1175,12 @@ class PivotTableUi extends EventEmitter {
         var headerCell = firstTableHeaderRowCells.item(j);
         if (headerCell) {
           var lastTableHeaderRowCell = lastTableHeaderRowCells.item(j);
-          cellElement.setAttribute('data-totals', lastTableHeaderRowCell ? lastTableHeaderRowCell.getAttribute('data-totals') : false);
+          if (isTotalsRow || (lastTableHeaderRowCell ? lastTableHeaderRowCell.getAttribute('data-totals') === 'true' : false) ){
+            cellElement.setAttribute('data-totals', true);
+          }
+          else {
+            cellElement.removeAttribute('data-totals');
+          }
           // adjust the column width if necessary.
           var width = headerCell.style.width;
           if (width.endsWith('ch')){
