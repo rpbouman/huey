@@ -101,7 +101,7 @@ class Settings extends EventEmitter {
       exportDelimitedDateFormat: '%x',
       exportDelimitedTimestampFormat: '%c',
       exportDelimitedNullString: '',
-      exportDelimitedColumnDelimiter: ',',
+      exportDelimitedColumnDelimiter: '\t',
       exportDelimitedQuote: '"',
       exportDelimitedEscape: '"',
       // options for json
