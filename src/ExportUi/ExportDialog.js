@@ -353,7 +353,7 @@ class ExportUi {
             progressCallback(`Copying to clipboard..`);
             text = new TextDecoder('utf-8').decode(data);
           }
-          await copyToClipboard(text, 'text/plain');
+          await copyToClipboard(text, mimeType);
           break;
       }
       progressCallback(`Success!`);
