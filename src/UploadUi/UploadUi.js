@@ -430,49 +430,49 @@ class UploadUi {
     var okButton = footer.getElementsByTagName('button').item(1);
     return okButton;
   }
-
 }
 
 var uploadUi;
-function initUploadUi(){
-  uploadUi = new UploadUi('uploadUi');
 
-  function afterUploaded(uploadResults){
-    var currentRoute = Routing.getCurrentRoute();
-    if (!Routing.isSynced(queryModel)) {
-      pageStateManager.setPageState(currentRoute);
-      return;
-    }
+function afterUploaded(uploadResults){
+  var currentRoute = Routing.getCurrentRoute();
+  if (!Routing.isSynced(queryModel)) {
+    pageStateManager.setPageState(currentRoute);
+    return;
+  }
+  
+  if (uploadResults.fail === 0 && uploadResults.success === 1){
+
+    // TODO: check if there is already a query active.
+    // if not, we can just start analyzing the newly uploaded datasource.
+    // But if there is a query active, then we'd be losing it if we just switch to the new datasource.
+    // in these cases we could do two things:
+    // - do nothing, don't even close the upload ui. 
+    //   The user will have a choice anyway, as they can either hit the analyze button, or cancel.
+    // - prompt the user and ask them what to do.
+    //   - if the current query could be satisfied by the new datasource then we could offer that in the prompt
+    //   - we can always offer the option to start analyzing the new datasource (losing the current query)
+    //   - we can always offer to do nothing
     
-    if (uploadResults.fail === 0 && uploadResults.success === 1){
-
-      // TODO: check if there is already a query active.
-      // if not, we can just start analyzing the newly uploaded datasource.
-      // But if there is a query active, then we'd be losing it if we just switch to the new datasource.
-      // in these cases we could do two things:
-      // - do nothing, don't even close the upload ui. 
-      //   The user will have a choice anyway, as they can either hit the analyze button, or cancel.
-      // - prompt the user and ask them what to do.
-      //   - if the current query could be satisfied by the new datasource then we could offer that in the prompt
-      //   - we can always offer the option to start analyzing the new datasource (losing the current query)
-      //   - we can always offer to do nothing
-      
-      if (!currentRoute || !currentRoute.length) {
-        var datasources = uploadResults.datasources;
-        for (var i = 0; i < datasources.length; i++){
-          var datasource = datasources[i];
-          switch (datasource.getType()){
-            case DuckDbDataSource.types.FILE:
-            case DuckDbDataSource.types.FILES:
-            case DuckDbDataSource.types.URL:
-              analyzeDatasource(datasource);
-              return;
-            default:
-          }
+    if (!currentRoute || !currentRoute.length) {
+      var datasources = uploadResults.datasources;
+      for (var i = 0; i < datasources.length; i++){
+        var datasource = datasources[i];
+        switch (datasource.getType()){
+          case DuckDbDataSource.types.FILE:
+          case DuckDbDataSource.types.FILES:
+          case DuckDbDataSource.types.URL:
+            analyzeDatasource(datasource);
+            return;
+          default:
         }
       }
     }
   }
+}
+
+function initUploadUi(){
+  uploadUi = new UploadUi('uploadUi');
 
   byId('uploader')
   .addEventListener('change', async function(event){
