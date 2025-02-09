@@ -474,7 +474,13 @@ function afterUploaded(uploadResults){
 function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');
 
-  byId('uploader')
+  var uploader = byId('uploader');
+  var acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(function(fileType){
+    return `.${fileType}`;
+  }).join(', ');
+  uploader.setAttribute('accept', acceptFileTypes);
+  
+  uploader
   .addEventListener('change', async function(event){
     var fileControl = event.target;
     var files = fileControl.files;
