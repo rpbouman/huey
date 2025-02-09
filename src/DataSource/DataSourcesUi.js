@@ -8,11 +8,11 @@ class DataSourcesUi extends EventEmitter {
     this.#id = id;
 
     var dom = this.getDom();
-
-    dom.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
-    dom.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
-    dom.addEventListener('dragover', this.#dragOverHandler.bind(this));
-    dom.addEventListener('drop', this.#dropHandler.bind(this));
+    var domParent = dom.parentNode;
+    domParent.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
+    domParent.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
+    domParent.addEventListener('dragover', this.#dragOverHandler.bind(this));
+    domParent.addEventListener('drop', this.#dropHandler.bind(this));
   }
 
   #dragEnterHandler(event) {
@@ -58,14 +58,16 @@ class DataSourcesUi extends EventEmitter {
     var dataTransfer = event.dataTransfer;
   }
 
-  #dropHandler(event) {
+  async #dropHandler(event) {
     event.preventDefault();
     event.stopPropagation();
     var dataTransfer = event.dataTransfer;
     var files = dataTransfer.files;
     var items = dataTransfer.items;
+    var uploadResults;
     if (files.length) {
-      uploadUi.uploadFiles(files);
+      uploadResults = await uploadUi.uploadFiles(files);
+      afterUploaded(uploadResults);
     }
     else
     if (items.length){
@@ -79,8 +81,9 @@ class DataSourcesUi extends EventEmitter {
         }
 
         // TODO: we should do something here to makr these data sources as URLs, not "files"
-        item.getAsString(function(uri){
-          uploadUi.uploadFiles([uri]);
+        item.getAsString(async function(uri){
+          uploadResults = await uploadUi.uploadFiles([uri]);
+          afterUploaded(uploadResults);
         });
 
         // support only 1 url at a time.
