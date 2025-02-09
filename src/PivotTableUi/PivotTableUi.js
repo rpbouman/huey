@@ -508,6 +508,10 @@ class PivotTableUi extends EventEmitter {
     // ensure we don't overshoot 
     var tupleIndexInfo = this.#getTupleIndexForPhysicalIndex(QueryModel.AXIS_COLUMNS, physicalColumnsAxisTupleIndex);
     var columnsAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    if (!columnsAxisSizeInfo){
+      return;
+    }
+    
     var count = columnsAxisSizeInfo.columns ? columnsAxisSizeInfo.columns.columnCount : 0;
     var tupleCount = Math.ceil(count / tupleIndexInfo.factor);
     if (tupleIndexInfo.cellsAxisItemIndex){
@@ -1715,6 +1719,10 @@ class PivotTableUi extends EventEmitter {
     var tableHeaderDom = this.#getTableHeaderDom();
 
     var columnAxisSizeInfo = this.#getColumnsAxisSizeInfo();
+    if (!columnAxisSizeInfo) {
+      return;
+    }
+    
     var columnOffset = columnAxisSizeInfo.headers.columnCount;
     var columnCount = columnAxisSizeInfo.headers.columnCount + columnAxisSizeInfo.columns.columnCount;
 
