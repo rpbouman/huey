@@ -38,3 +38,10 @@ nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[r
     display: block;
     margin-top: 2px;
 }
+
+/**
+* If the attribute UI has no items, then the Query Ui is not available.
+*/
+body > main:has( > nav[role=tablist] > div > div[role=tabpanel] > div#attributeUi:empty ) > #workarea > #queryUi {
+  display: none;
+}
