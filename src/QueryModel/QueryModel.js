@@ -632,6 +632,12 @@ class QueryAxis {
   getItems() {
     return [].concat(this.#items);
   }
+  
+  syncItemIndices(){
+    this.#items.forEach(function(item, index){
+      item.index = index;
+    })
+  }
 
   getTotalsItems(){
     var totalsItems = this.#items.filter(function(axisItem){
@@ -951,6 +957,7 @@ class QueryModel extends EventEmitter {
     axesChangeInfo[config.axis] = {
       added: [config]
     };
+    
     if (foundItem){
       var axisChangeInfo = axesChangeInfo[foundItem.axis];
       if (!axisChangeInfo) {
@@ -969,6 +976,11 @@ class QueryModel extends EventEmitter {
     }
     var addedItem = this.#addItem(config);
     axesChangeInfo[addedItem.axis].added = [addedItem];
+
+    this.getQueryAxis(axis).syncItemIndices();
+    if (foundItem && foundItem.axis !== axis){
+      this.getQueryAxis(foundItem.axis).syncItemIndices();
+    }
 
     this.fireEvent('change', eventData);
     return addedItem;
@@ -1000,6 +1012,7 @@ class QueryModel extends EventEmitter {
     
     var axis = this.getQueryAxis(oldAxisId);
     var removedItem = axis.removeItem(item);
+    axis.syncItemIndices();
 
     axesChangeInfo[oldAxisId] = {
       removed: [removedItem]
