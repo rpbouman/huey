@@ -68,3 +68,4 @@ function initErrorDialog(){
     errorDialog.close();
   });
 }
+initErrorDialog()
