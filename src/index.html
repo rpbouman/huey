@@ -2121,6 +2121,14 @@
         };
 
         initApplication();
+      })
+      .catch(function(e){
+        document.body.setAttribute('aria-busy', false);
+        document.body.getElementsByTagName('main')[0].style.display = 'none';
+        showErrorDialog(e);
+      })
+      .finally(function(){
+        document.body.setAttribute('aria-busy', false);
       });
     </script>
   </body>

@@ -38,7 +38,6 @@ function initDuckdbVersion(){
     var version = row[versionColumn];
     var api = row[apiColumn];
     duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
-    document.body.setAttribute('aria-busy', false);
   })
   .catch(function(){
     console.error(`Error fetching duckdb version info.`);
@@ -88,7 +87,6 @@ function initExecuteQuery(){
 
 function initApplication(){
   initDraggableDialogs();
-  initErrorDialog();
   initDuckdbVersion();
   initDataSourcesUi();
   initQueryModel();
