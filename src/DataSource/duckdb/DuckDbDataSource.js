@@ -53,8 +53,8 @@ class DuckDbDataSource extends EventEmitter {
     },
     "xlsx": {
       datasourceType: DuckDbDataSource.types.FILE,
-      duckdb_reader: 'st_read',
-      duckdb_extension: 'spatial',
+      duckdb_reader: 'read_xlsx',
+      duckdb_extension: 'excel',
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     },
     "duckdb": {
@@ -72,10 +72,10 @@ class DuckDbDataSource extends EventEmitter {
     read_csv: {
       // https://duckdb.org/docs/data/csv/reading_faulty_csv_files.html#retrieving-faulty-csv-lines
       //"ignore_errors" : true,
-      "store_rejects" : true,
-      "rejects_scan": 'reject_scans',
-      "rejects_table": 'reject_errors',
-      "rejects_limit": 0
+      "store_rejects" : false
+      //"rejects_scan": 'reject_scans',
+      //"rejects_table": 'reject_errors',
+      //"rejects_limit": 0
     },
     sniff_csv: {
       "sample_size": 20480

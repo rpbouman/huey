@@ -27,7 +27,7 @@ class PageStateManager {
     this.setPageState(newRoute);
   }
 
-  async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources){
+  async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources, newDatasources){
     return new Promise(async function(resolve, reject){
 
       // do we have the referenced datasource?
@@ -40,7 +40,7 @@ class PageStateManager {
 
       // figure out what kind of datasource is referenced
       var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
-
+      
       if (desiredDatasourceIdParts.isUrl) {
         var url = desiredDatasourceIdParts.resource;
         await uploadUi.uploadFiles([url]);
@@ -51,7 +51,7 @@ class PageStateManager {
             referencedColumns,
             true
           );
-          if (isCompatible) {
+          if (isCompatible === true) {
             uploadUi.close();
             resolve(desiredDataSource);
             return;
@@ -71,7 +71,35 @@ class PageStateManager {
         });
         title = 'Incompatible Datasource';
         message += ' isn\'t compatible with your query.';
-        // TODO: show why it's not compatible
+        
+        if (newDatasources && newDatasources.length) {
+          var mismatchedColumns = [];
+          var datasourceSettings = settings.getSettings('datasourceSettings');
+          var useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
+          for (var i = 0; i < newDatasources.length; i++){
+            var newDatasource = newDatasources[i];
+            var datasourceId = newDatasource.getId();
+            var isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
+              datasourceId, 
+              referencedColumns, 
+              useLooseColumnComparisonType
+            );
+            if (isCompatible === true){
+              // this shouldn't happen
+              continue;
+            }
+            isCompatible.forEach(function(columnName){
+              if (mismatchedColumns.indexOf(columnName) === -1) {
+                mismatchedColumns.push(columnName);
+              }
+            })
+          }
+          var mismatchedColumnsString = mismatchedColumns.map(function(mismatchedColumnName){
+            var columnDef = referencedColumns[mismatchedColumnName];
+            return `${mismatchedColumnName} ${columnDef.columnType}`;
+          }).join(', ');
+          message += `\nMissing or unmatched columns: ${mismatchedColumnsString}`;
+        }
       }
       else {
         openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
@@ -79,7 +107,7 @@ class PageStateManager {
           value: -1,
           checked: true,
           labelText: `Browse to open ${desiredDatasourceIdParts.localId}`
-        });        
+        });
         title = 'Datasource not found';
         message += ' doesn\'t exist.';
       }
@@ -148,7 +176,7 @@ class PageStateManager {
     }.bind(this));
   }
 
-  async setPageState(newRoute){
+  async setPageState(newRoute, newUploadResults){
 
     if (!newRoute){
       // TODO: maybe throw an error?
@@ -173,12 +201,16 @@ class PageStateManager {
     var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
 
     var datasource;
-    if (!compatibleDatasources || !compatibleDatasources[datasourceId]) {
+    if (compatibleDatasources && compatibleDatasources[datasourceId]) {
+      datasource = datasourcesUi.getDatasource(datasourceId);
+    }
+    else {
       try {
         datasource = await this.chooseDataSourceForPageStateChangeDialog(
           referencedColumns,
           datasourceId,
-          compatibleDatasources
+          compatibleDatasources,
+          newUploadResults ? newUploadResults.datasources : undefined
         );
       }
       catch (error){
@@ -188,9 +220,6 @@ class PageStateManager {
       if (!datasource) {
         return;
       }
-    }
-    else {
-      datasource = datasourcesUi.getDatasource(datasourceId);
     }
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);

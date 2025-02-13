@@ -81,13 +81,19 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
 
     var datasourceSettings = datasource.getSettings();
     var csvReaderArguments = datasourceSettings.getCsvReaderArguments();
-    csvReaderArguments['ignore_errors'] = true;
+    //csvReaderArguments['ignore_errors'] = true;
     var csvReaderArgumentsSql = DatasourceSettings.getCsvReaderArgumentsSql(csvReaderArguments);
+    if (csvReaderArgumentsSql && csvReaderArgumentsSql.length) {
+      csvReaderArgumentsSql = `, ${csvReaderArgumentsSql}`;
+    }
+    else {
+      csvReaderArgumentsSql = '';
+    }
 
     var fileName = datasource.getFileName();
 
     var sniffer = fileTypeInfo.duckdb_sniffer;
-    var snifferSql = `SELECT * FROM ${sniffer}('${fileName}', ${csvReaderArgumentsSql})`;
+    var snifferSql = `SELECT * FROM ${sniffer}('${fileName}'${csvReaderArgumentsSql})`;
 
     var managedConnection = datasource.getManagedConnection();
     // TODO: show a busy spinner
@@ -95,12 +101,32 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     // TODO: hide the busy spinner
     var row = result.get(0);
 
+    function escapeDelimiter(delim){
+      return delim.replace(/[\t\r\n\0]/g, function(ch){
+        switch (ch){
+          case '\t':
+            ch = '\\t';
+            break;
+          case '\r':
+            ch = '\\r';
+            break;
+          case '\n':
+            ch = '\\n';
+            break;
+          case '\0':
+            ch = '\\0';
+            break;
+        }
+        return ch;
+      });
+    }
+
     var detectedSettings = {
-      csvReaderDelim: row.Delimiter,
-      csvReaderQuote: row.Quote,
-      csvReaderEscape: row.Escape,
+      csvReaderDelim: escapeDelimiter(row.Delimiter),
+      csvReaderQuote: escapeDelimiter(row.Quote),
+      csvReaderEscape: escapeDelimiter(row.Escape),
       csvReaderNewLine: {
-        value: row.NewLineDelimiter
+        value: escapeDelimiter(row.NewLineDelimiter)
       },
       csvReaderSkip: row.SkipRows,
       csvReaderHeader: row.HasHeader,

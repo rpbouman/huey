@@ -539,7 +539,7 @@ class QueryAxis {
   }
 
   findItem(config){
-    var columnName = config.columnName;
+    var columnName = config.columnName || '';
     var derivation = config.derivation;
     var aggregator = config.aggregator;
     var memberExpressionPath = config.memberExpressionPath;
@@ -549,7 +549,7 @@ class QueryAxis {
 
     var items = this.#items;
     var itemIndex = items.findIndex(function(item){
-      if (item.columnName !== columnName){
+      if ((item.columnName || '') !== columnName){
         return false;
       }
 
@@ -790,31 +790,6 @@ class QueryModel extends EventEmitter {
 
   getDatasource(){
     return this.#datasource;
-  }
-
-  /**
-  * finds all columns refs and lists the axes that use the column
-  */
-  getReferencedColumns(){
-    var referencedColumns = {};
-    Object.keys(this.#axes).forEach(function(axisId){
-      var axis = this.getQueryAxis(axisId);
-      axis.getItems().forEach(function(axisItem){
-        var columnName = axisItem.columnName;
-        var columnSpec = referencedColumns[columnName];
-        if (!columnSpec) {
-          columnSpec = {
-            columnType: axisItem.columnType,
-            axes: []
-          };
-          referencedColumns[columnName] = columnSpec;
-        }
-        if (columnSpec.axes.indexOf(axisId) === -1){
-          columnSpec.axes.push(axisId);
-        }
-      });
-    }.bind(this))
-    return referencedColumns;
   }
 
   findItem(config){
@@ -1578,7 +1553,7 @@ class QueryModel extends EventEmitter {
       var items = axes[curr];
       items.forEach(function(item, index){
         var columnName = item.column || item.columnName;
-        if (columnName === '*'){
+        if (columnName === undefined || columnName === '*'){
           return;
         }
         acc[columnName] = {

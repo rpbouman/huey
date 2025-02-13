@@ -268,13 +268,23 @@ class QueryUi {
       }
       expression = `${expression}.${path.join('.')}`;
     }
-    
+
     if (axisItem.derivation) {
-      expression = `${axisItem.derivation} of ${expression}`;
+      if (expression) {
+        expression = `${axisItem.derivation} of ${expression}`;
+      }
+      else {
+        expression = axisItem.derivation;
+      }
     }
     else 
     if (axisItem.aggregator) {
-      expression = `${axisItem.aggregator} of ${expression}`;
+      if (expression) {
+        expression = `${axisItem.aggregator} of ${expression}`;
+      }
+      else {
+        expression = axisItem.aggregator;
+      }
     }
     
     return expression;
@@ -303,7 +313,7 @@ class QueryUi {
 
   #getQueryAxisItemUi(queryModelAxisItem){
     var axisId = queryModelAxisItem.axis;
-    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName}"]`;
+    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName || ''}"]`;
     
     if (queryModelAxisItem.memberExpressionPath){
       cssSelector += `[data-member_expression_path='${JSON.stringify(queryModelAxisItem.memberExpressionPath)}']`;
@@ -354,7 +364,7 @@ class QueryUi {
     
     var title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
     itemUi.setAttribute('title', title);
-    itemUi.setAttribute('data-column_name',  axisItem.columnName);
+    itemUi.setAttribute('data-column_name', axisItem.columnName || '');
 
     var memberExpressionPath = axisItem.memberExpressionPath;
     if (memberExpressionPath) {
