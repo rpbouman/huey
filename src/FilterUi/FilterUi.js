@@ -246,8 +246,14 @@ class FilterDialog {
         }
         return arr;
       }, [])
-      .join(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
-      search.value = pastedText;
+      .join(FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+      var currentValue = search.value;
+      var newValue = [
+        currentValue.slice(0, search.selectionStart),
+        pastedText,
+        currentValue.slice(search.selectionEnd)
+      ].join('');
+      search.value = newValue;
       this.#updatePicklist();
     }.bind(this));
 
