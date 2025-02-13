@@ -437,7 +437,7 @@ var uploadUi;
 function afterUploaded(uploadResults){
   var currentRoute = Routing.getCurrentRoute();
   if (!Routing.isSynced(queryModel)) {
-    pageStateManager.setPageState(currentRoute);
+    pageStateManager.setPageState(currentRoute, uploadResults);
     return;
   }
   

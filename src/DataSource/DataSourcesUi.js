@@ -814,7 +814,7 @@ class DataSourcesUi extends EventEmitter {
         return true;
       }
     }
-    return false;
+    return columnNames;
   }
 
   async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType){
@@ -824,7 +824,7 @@ class DataSourcesUi extends EventEmitter {
     _datasources: for (var datasourceId in datasources){
       var datasource = datasources[datasourceId];
       var isCompatible = await this.isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType);
-      if(isCompatible){
+      if (isCompatible === true){
         foundDatasources[datasourceId] = datasource;
       }
     }
