@@ -148,7 +148,7 @@ class DataSourceMenu {
     return item.outerHTML;
   }
   
-  #datesourceMenuItemChangeHandler(event){
+  #datasourceMenuItemChangeHandler(event){
     var radio = event.target;
     var menuItem = radio.parentNode;
     var datasourceId = menuItem.getAttribute('data-datasource-id');
@@ -200,7 +200,7 @@ class DataSourceMenu {
         index: index,
         value: index,
         labelText: caption,
-        clickHandler: this.#datesourceMenuItemChangeHandler.bind(this)
+        clickHandler: this.#datasourceMenuItemChangeHandler.bind(this)
       };
       var item = DataSourceMenu.getDatasourceMenuItem(config);
       dom.appendChild(item);
