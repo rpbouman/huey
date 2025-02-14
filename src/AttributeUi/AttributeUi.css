@@ -47,7 +47,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         display: inline-block;
         position: absolute;
         width: 24px;
-        padding: 6px 3px 0px 3px;
+        padding: 2px 3px 0px 3px;
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
         color: var( --huey-icon-color-subtle );
