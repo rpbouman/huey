@@ -101,6 +101,7 @@ class AttributeUi {
     'median': {
       folder: "statistics",
       expressionTemplate: 'MEDIAN( ${columnExpression} )',
+      getReturnDataTypeForArgumentDataType: getMedianReturnDataTypeForArgumentDataType,
       createFormatter: function(axisItem){
         var columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
         var dataTypeInfo = getDataTypeInfo(columnType);

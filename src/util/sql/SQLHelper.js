@@ -1313,3 +1313,15 @@ function getUsingSampleClause(samplingConfig, useTableSample){
   }
   return sampleClause;
 }
+
+function getMedianReturnDataTypeForArgumentDataType(argumentDataType){
+  var argumentTypeInfo = getDataTypeInfo(argumentDataType);
+  var returnDataType;
+  if (argumentTypeInfo.isInteger) {
+    returnDataType = 'DOUBLE';
+  }
+  else {
+    returnDataType = argumentDataType;
+  }
+  return returnDataType;
+}
