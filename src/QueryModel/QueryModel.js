@@ -128,7 +128,7 @@ class QueryAxisItem {
   }
 
   static createCaptionForQueryAxisItem(axisItem){
-    var caption = axisItem.columnName;
+    var caption = axisItem.columnName || '';
     var postfix = '';
     var prefix = '';
 
@@ -137,7 +137,7 @@ class QueryAxisItem {
     }
 
     if (axisItem.derivation) {
-      postfix += ` ${axisItem.derivation}`;
+      postfix += `${axisItem.derivation}`;
     }
     else
     if (axisItem.aggregator){
@@ -145,6 +145,9 @@ class QueryAxisItem {
     }
 
     if (postfix) {
+      if (caption && caption.length) {
+        caption += ' ';
+      }
       caption += `${postfix}`;
     }
     if (prefix) {
