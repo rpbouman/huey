@@ -286,13 +286,7 @@ class QueryAxisItem {
       else 
       if (derivation === 'median'){
         dataType = getArrayElementType(dataType);
-        var dataTypeInfo = getDataTypeInfo(dataType);
-        if (dataTypeInfo.isNumeric){
-          return 'DOUBLE';
-        }
-        else {
-          return 'VARCHAR';
-        }
+        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
       }
       else
       if (!derivationInfo.preservesColumnType){
@@ -314,6 +308,10 @@ class QueryAxisItem {
       else
       if (aggregatorInfo.preservesColumnType){
         dataType = columnType;
+      }
+      else 
+      if (aggregator === 'median'){
+        dataType = getMedianReturnDataTypeForArgumentDataType(columnType);
       }
       else {
         dataType = undefined;
