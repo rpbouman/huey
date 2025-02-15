@@ -634,7 +634,7 @@ class SqlQueryGenerator {
       sql.push(groupByClause);
     }
         
-    if (includeOrderBy !== false) {
+    if (includeOrderBy !== false && orderByExpressions.length) {
       sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
     }
 

@@ -2324,7 +2324,7 @@ class PivotTableUi extends EventEmitter {
     try {
       var exportQueryModel = new QueryModel();
       await exportQueryModel.setState(queryModelState);
-      await ExportUi.exportData(exportQueryModel, exportSettings);
+      await ExportUi.exportDataForQueryModel(exportQueryModel, exportSettings);
     }
     catch(error) {
       showErrorDialog(error);
