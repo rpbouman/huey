@@ -1806,6 +1806,15 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            <template id="dataSourceGroupNodeActionButton">
+              <label
+                class="${class}"
+                for="${id}"
+                title="${title}"
+              >
+                <button id="${id}"></button>
+              </label>
+            </template>
             <template id="dataSourceGroupNode">
               <details
                 role="treeitem"

@@ -104,17 +104,14 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #renderDatasourceActionButton(config){
-    var actionButton = createEl('label', {
-      "class": (config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
-      "for": config.id,
-      title: config.title
-    });
-
-    var button = createEl('button',{
-      id: config.id
-    });
-    actionButton.appendChild(button);
-
+    var actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
+    actionButton.setAttribute('class', config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : '');
+    actionButton.setAttribute('for', config.id);
+    actionButton.setAttribute('title', config.title);
+    
+    var button = actionButton.querySelector('button');
+    button.setAttribute('id', config.id);
+    
     var events = config.events;
     if (events) {
       for (var eventName in events) {
