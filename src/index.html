@@ -1829,6 +1829,22 @@
                 </summary>
               </details>
             </template>
+            <template id="dataSourceSchemaNode">
+              <details
+                role="treeitem"
+                data-nodetype="duckdb_schema"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                data-catalog-name="${catalogName}"
+                data-schema-name="${schemaName}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
             <div
               id="datasourcesUi"
               role="tree"

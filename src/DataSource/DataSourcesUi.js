@@ -318,22 +318,12 @@ class DataSourcesUi extends EventEmitter {
       var schemaName = row.table_schema;
       var schemaNode = schemaNodes[schemaName];
       if (schemaNode === undefined) {
-        schemaNodes[schemaName] = schemaNode = createEl('details', {
-          id: datasourceId + ':' + schemaName,
-          role: 'treeitem',
-          "data-nodetype": 'duckdb_schema',
-          title: schemaName,
-          "data-catalog-name": catalogName,
-          "data-schema-name": schemaName,
-        });
-        summary = createEl('summary', {
-        });
-        label = createEl('span', {
-          class: 'label'
-        }, schemaName);
-        summary.appendChild(label);
-
-        schemaNode.appendChild(summary);
+        schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
+        schemaNode.setAttribute('title', schemaName);
+        schemaNode.setAttribute('data-catalog-name', catalogName);
+        schemaNode.setAttribute('data-schema-name', catalogName);
+        schemaNode.querySelector('span.label').textContent = schemaName;
+        schemaNodes[schemaName] = schemaNode;
         datasourceTreeNode.appendChild(schemaNode);
       }
       var tableName = row.table_name;
