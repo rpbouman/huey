@@ -635,14 +635,9 @@ class DataSourcesUi extends EventEmitter {
     if (datasourceGroup === undefined){
       return;
     }
-
+    var groupNode = instantiateTemplate('dataSourceGroupNode');
     var groupType = datasourceGroup.type;
-    var groupNode = createEl('details', {
-      role: 'treeitem',
-      "data-nodetype": 'datasourcegroup',
-      "data-grouptype": groupType,
-      open: true
-    });
+    groupNode.setAttribute('data-grouptype', groupType)
 
     var groupTitle;
     switch (groupType) {
@@ -663,15 +658,8 @@ class DataSourcesUi extends EventEmitter {
     }
     groupNode.setAttribute('title', groupTitle);
 
-    var summary = createEl('summary', {
-    });
-    groupNode.appendChild(summary);
-
     var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
-    var label = createEl('span', {
-      class: 'label'
-    }, caption);
-    summary.appendChild(label);
+    groupNode.querySelector('summary > span.label').textContent = caption;
 
     if (datasourceGroup.typeSignature) {
       this.#createDatasourceNodeActionButtons(datasourceGroup.typeSignature, summary);

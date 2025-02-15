@@ -1806,6 +1806,20 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            <template id="dataSourceGroupNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasourcegroup"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
             <div
               id="datasourcesUi"
               role="tree"
