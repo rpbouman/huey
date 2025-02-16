@@ -84,7 +84,7 @@ class AttributeUi {
     },
     'unique values': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( DISTINCT ${columnExpression} )',
+      expressionTemplate: 'LIST( DISTINCT ${columnExpression} ORDER BY ${columnExpression} )',
       isArray: true
     },
     'mad': {
