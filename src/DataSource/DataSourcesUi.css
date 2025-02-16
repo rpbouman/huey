@@ -91,6 +91,11 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
         /* trash */
         content: '\eb41';
       }
+
+      > label.downloadActionButton::before {
+        /* download */
+        content: '\ea96';
+      }
     }
     
     > summary:hover  > span.label::before {

@@ -103,25 +103,6 @@ class DataSourcesUi extends EventEmitter {
     this.getDom().innerHTML = content;
   }
 
-  #renderDatasourceActionButton(config){
-    var actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
-    actionButton.setAttribute('class', config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : '');
-    actionButton.setAttribute('for', config.id);
-    actionButton.setAttribute('title', config.title);
-    
-    var button = actionButton.querySelector('button');
-    button.setAttribute('id', config.id);
-    
-    var events = config.events;
-    if (events) {
-      for (var eventName in events) {
-        var handler = events[eventName];
-        button.addEventListener(eventName, handler);
-      }
-    }
-    return actionButton;
-  }
-
   #getLooseColumnType(columnType){
     var datasourceSettings = settings.getSettings('datasourceSettings');
     var looseColumnTypes = datasourceSettings.looseColumnTypes;
@@ -255,8 +236,27 @@ class DataSourcesUi extends EventEmitter {
     }
   }
 
-  #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
-    var analyzeActionButton = this.#renderDatasourceActionButton({
+  #renderDatasourceActionButton(config){
+    var actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
+    actionButton.setAttribute('class', config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : '');
+    actionButton.setAttribute('for', config.id);
+    actionButton.setAttribute('title', config.title);
+    
+    var button = actionButton.querySelector('button');
+    button.setAttribute('id', config.id);
+    
+    var events = config.events;
+    if (events) {
+      for (var eventName in events) {
+        var handler = events[eventName];
+        button.addEventListener(eventName, handler);
+      }
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
@@ -266,9 +266,14 @@ class DataSourcesUi extends EventEmitter {
         click: this.#analyzeDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(analyzeActionButton);
-
-    var removeActionButton = this.#renderDatasourceActionButton({
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+  
+  #createDatasourceNodeRemoveActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_remove',
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
@@ -278,9 +283,14 @@ class DataSourcesUi extends EventEmitter {
         click: this.#removeDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(removeActionButton);
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
 
-    var editActionButton = this.#renderDatasourceActionButton({
+  #createDatasourceNodeEditActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_edit',
       "className": "editActionButton",
       popovertarget: 'uploadUi',
@@ -290,7 +300,34 @@ class DataSourcesUi extends EventEmitter {
         click: this.#configureDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(editActionButton);
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeDownloadActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
+      id: datasourceId + '_download',
+      "className": "downloadActionButton",
+      popovertarget: 'uploadUi',
+      popovertargetaction: 'hide',
+      title: 'Download the contents of this datasource to a file.',
+      events: {
+        click: this.#downloadDatasourceClicked.bind(this)
+      }
+    });
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
+    this.#createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement)
+    this.#createDatasourceNodeRemoveActionButton(datasourceId, summaryElement);
+    this.#createDatasourceNodeEditActionButton(datasourceId, summaryElement);
+    this.#createDatasourceNodeDownloadActionButton(datasourceId, summaryElement);
   }
 
   async #loadDatabaseDatasource(databaseDatasource){
@@ -422,27 +459,12 @@ class DataSourcesUi extends EventEmitter {
     
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
-        var removeButton = this.#renderDatasourceActionButton({
-          id: datasourceId + '_remove',
-          "className": "removeActionButton",
-          title: 'Remove this datasource',
-          events: {
-            click: this.#removeDatasourceClicked.bind(this)
-          }
-        });
-        summary.appendChild(removeButton);
+        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
         break;
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.VIEW:
-        var analyzeActionButton = this.#renderDatasourceActionButton({
-          id: datasourceId + '_analyze',
-          "className": "analyzeActionButton",
-          title: 'Open the this datasource in the Query editor',
-          events: {
-            click: this.#analyzeDatasourceClicked.bind(this)
-          }
-        });
-        summary.appendChild(analyzeActionButton);
+        this.#createDatasourceNodeAnalyzeActionButton(datasourceId, summary);
+        this.#createDatasourceNodeDownloadActionButton(datasourceId, summary);
         break;
       default:
         this.#createDatasourceNodeActionButtons(datasourceId, summary);
@@ -588,6 +610,10 @@ class DataSourcesUi extends EventEmitter {
   #configureDatasourceClicked(event){
     var datasource = this.#getDatasourceFromClickEvent(event);
     datasourceSettingsDialog.open(datasource);
+  }
+  
+  #downloadDatasourceClicked(event) {
+    // TODO: implement this.
   }
 
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
