@@ -612,8 +612,110 @@ class DataSourcesUi extends EventEmitter {
     datasourceSettingsDialog.open(datasource);
   }
   
-  #downloadDatasourceClicked(event) {
-    // TODO: implement this.
+  async #downloadDatasourceClicked(event) {
+    var target = event.target;
+    var datasourceNode = target;
+    do {
+      datasourceNode = datasourceNode.parentNode;
+    } while (datasourceNode && datasourceNode.getAttribute('data-nodetype') !== 'datasource');
+    var datasourceId = datasourceNode.getAttribute('id');
+    var datasource = this.getDatasource( datasourceId );
+    var datasourceType = datasource.getType();
+    var isFileType = datasourceType === DuckDbDataSource.types.FILE;
+    var datasourceFileType;
+    if (isFileType) {
+      datasourceFileType = datasource.getFileType();
+    }
+
+    var fileTypes = Object.keys(DuckDbDataSource.fileTypes)
+    .filter(function(fileType){
+      if (isFileType) { 
+        switch (fileType){
+          case datasourceFileType:
+          case 'duckdb':
+          case 'sqlite':
+            return false;
+        }
+      }
+      return true;
+    });
+    var menuItems = fileTypes.sort().map(function(fileType){
+      var id = `fileType-${fileType}`;
+      return `
+        <li role="menuitem">
+          <input 
+            type="radio" 
+            name="fileTypes" 
+            value="${fileType}" 
+            id="${id}"
+          />
+          <label for="${id}">
+            <label>${fileType}</label>
+          </label>
+        </li>
+      `;
+    });
+    var id = 'exportDatasourceMenu';
+    var menu = `
+      <menu class="fileTypes" id="${id}">
+        ${menuItems.join('\n')}
+      </menu>
+    `;
+    
+    var result = await PromptUi.show({
+      title: 'Export Datasource',
+      contents: menu
+    });
+
+    if (result !== 'accept'){
+      return;
+    }
+    var selected = document.querySelector(`menu#${id} > li > input[type=radio]:checked`);
+    if (!selected) {
+      return;
+    }
+    var fileType = selected.value;
+    var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+
+    var exportType = null;
+    var exportDelimited = false;
+    var exportJson = false;
+    var exportParquet = false;
+    var exportXlsx = false;
+    var exportTitle = DataSourcesUi.getCaptionForDatasource(datasource);
+    
+    switch (fileTypeInfo.duckdb_reader){
+      case 'read_csv':
+        exportType = 'exportDelimited';
+        exportDelimited = true;
+        break;
+      case 'read_json':
+        exportType = 'exportJson';
+        exportJson = true;
+        break;
+      case 'read_parquet':
+        exportType = 'exportParquet';
+        exportParquet = true;
+        break;
+      case 'read_xlsx':
+        exportType = 'exportXlsx';
+        exportXlsx = true;
+        break;
+    }
+    var exportSettings = Object.assign(
+      {}, settings.getSettings('exportUi'), {
+      exportDestinationFile: true,
+      exportDestinationClipboard: false,
+      exportType: exportType,
+      exportDelimited: exportDelimited,
+      exportJson: exportJson,
+      exportParquet: exportParquet,
+      exportXlsx: exportXlsx,
+      exportTitle: exportTitle
+    });
+    
+    var sql = `SELECT * ${datasource.getFromClauseSql()}`;
+    await ExportUi.exportData(sql, exportSettings);
   }
 
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){

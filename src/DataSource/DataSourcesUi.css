@@ -184,3 +184,19 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
 #datasourcesUi[data-drop-allowed=false] {
   cursor: 'not-allowed';
 }
+
+/*
+  This is the menu we present in the prompt for datasource export.
+*/
+menu.fileTypes {
+  column-count: 2;
+  > li {
+    list-style-type: none;
+    white-space: nowrap;
+    
+    > label {
+      white-space: nowrap;
+      vertical-align: super;
+    }
+  }
+}
