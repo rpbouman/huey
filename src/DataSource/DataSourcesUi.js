@@ -103,28 +103,6 @@ class DataSourcesUi extends EventEmitter {
     this.getDom().innerHTML = content;
   }
 
-  #renderDatasourceActionButton(config){
-    var actionButton = createEl('label', {
-      "class": (config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : ''),
-      "for": config.id,
-      title: config.title
-    });
-
-    var button = createEl('button',{
-      id: config.id
-    });
-    actionButton.appendChild(button);
-
-    var events = config.events;
-    if (events) {
-      for (var eventName in events) {
-        var handler = events[eventName];
-        button.addEventListener(eventName, handler);
-      }
-    }
-    return actionButton;
-  }
-
   #getLooseColumnType(columnType){
     var datasourceSettings = settings.getSettings('datasourceSettings');
     var looseColumnTypes = datasourceSettings.looseColumnTypes;
@@ -258,8 +236,27 @@ class DataSourcesUi extends EventEmitter {
     }
   }
 
-  #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
-    var analyzeActionButton = this.#renderDatasourceActionButton({
+  #renderDatasourceActionButton(config){
+    var actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
+    actionButton.setAttribute('class', config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : '');
+    actionButton.setAttribute('for', config.id);
+    actionButton.setAttribute('title', config.title);
+    
+    var button = actionButton.querySelector('button');
+    button.setAttribute('id', config.id);
+    
+    var events = config.events;
+    if (events) {
+      for (var eventName in events) {
+        var handler = events[eventName];
+        button.addEventListener(eventName, handler);
+      }
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
@@ -269,9 +266,14 @@ class DataSourcesUi extends EventEmitter {
         click: this.#analyzeDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(analyzeActionButton);
-
-    var removeActionButton = this.#renderDatasourceActionButton({
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+  
+  #createDatasourceNodeRemoveActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_remove',
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
@@ -281,9 +283,14 @@ class DataSourcesUi extends EventEmitter {
         click: this.#removeDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(removeActionButton);
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
 
-    var editActionButton = this.#renderDatasourceActionButton({
+  #createDatasourceNodeEditActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_edit',
       "className": "editActionButton",
       popovertarget: 'uploadUi',
@@ -293,7 +300,34 @@ class DataSourcesUi extends EventEmitter {
         click: this.#configureDatasourceClicked.bind(this)
       }
     });
-    summaryElement.appendChild(editActionButton);
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeDownloadActionButton(datasourceId, summaryElement){
+    var actionButton = this.#renderDatasourceActionButton({
+      id: datasourceId + '_download',
+      "className": "downloadActionButton",
+      popovertarget: 'uploadUi',
+      popovertargetaction: 'hide',
+      title: 'Download the contents of this datasource to a file.',
+      events: {
+        click: this.#downloadDatasourceClicked.bind(this)
+      }
+    });
+    if (summaryElement) {
+      summaryElement.appendChild(actionButton);
+    }
+    return actionButton;
+  }
+
+  #createDatasourceNodeActionButtons(datasourceId, summaryElement) {
+    this.#createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement)
+    this.#createDatasourceNodeRemoveActionButton(datasourceId, summaryElement);
+    this.#createDatasourceNodeEditActionButton(datasourceId, summaryElement);
+    this.#createDatasourceNodeDownloadActionButton(datasourceId, summaryElement);
   }
 
   async #loadDatabaseDatasource(databaseDatasource){
@@ -321,22 +355,12 @@ class DataSourcesUi extends EventEmitter {
       var schemaName = row.table_schema;
       var schemaNode = schemaNodes[schemaName];
       if (schemaNode === undefined) {
-        schemaNodes[schemaName] = schemaNode = createEl('details', {
-          id: datasourceId + ':' + schemaName,
-          role: 'treeitem',
-          "data-nodetype": 'duckdb_schema',
-          title: schemaName,
-          "data-catalog-name": catalogName,
-          "data-schema-name": schemaName,
-        });
-        summary = createEl('summary', {
-        });
-        label = createEl('span', {
-          class: 'label'
-        }, schemaName);
-        summary.appendChild(label);
-
-        schemaNode.appendChild(summary);
+        schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
+        schemaNode.setAttribute('title', schemaName);
+        schemaNode.setAttribute('data-catalog-name', catalogName);
+        schemaNode.setAttribute('data-schema-name', catalogName);
+        schemaNode.querySelector('span.label').textContent = schemaName;
+        schemaNodes[schemaName] = schemaNode;
         datasourceTreeNode.appendChild(schemaNode);
       }
       var tableName = row.table_name;
@@ -389,7 +413,7 @@ class DataSourcesUi extends EventEmitter {
     var oldState = event.oldState;
     var newState = event.newState;
 
-    if (oldState !== 'closed' || newState !== 'open' || target.childNodes.length !== 1) {
+    if (oldState !== 'closed' || newState !== 'open' || target.getElementsByTagName('details').length !== 0) {
       return;
     }
 
@@ -402,15 +426,15 @@ class DataSourcesUi extends EventEmitter {
 
     var type = datasource.getType();
     var datasourceId = datasource.getId();
-    var datasourceNode = createEl('details', {
-      id: datasourceId,
-      role: 'treeitem',
-      "data-nodetype": 'datasource',
-      "data-datasourcetype": type,
-      "title": caption,
-      "open": true
-    });
-
+    
+    var datasourceNode = instantiateTemplate('dataSourceNode', datasourceId);
+    datasourceNode.setAttribute('data-datasourcetype', type);
+    datasourceNode.setAttribute('title', caption);
+    
+    var summary = datasourceNode.querySelector('summary');
+    var label = summary.querySelector('span.label');
+    label.textContent = caption;
+    
     if (attributes){
       for (var attributeName in attributes){
         datasourceNode.setAttribute(attributeName, attributes[attributeName]);
@@ -432,44 +456,19 @@ class DataSourcesUi extends EventEmitter {
       datasourceNode.setAttribute('data-filetype', extension);
     }
 
-    var summary = createEl('summary', {
-    });
-
-    datasourceNode.appendChild(summary);
-
-    var label = createEl('span', {
-      class: 'label'
-    }, caption);
-    summary.appendChild(label);
-
+    
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
-        var removeButton = this.#renderDatasourceActionButton({
-          id: datasourceId + '_remove',
-          "className": "removeActionButton",
-          title: 'Remove this datasource',
-          events: {
-            click: this.#removeDatasourceClicked.bind(this)
-          }
-        });
-        summary.appendChild(removeButton);
+        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
         break;
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.VIEW:
-        var analyzeActionButton = this.#renderDatasourceActionButton({
-          id: datasourceId + '_analyze',
-          "className": "analyzeActionButton",
-          title: 'Open the this datasource in the Query editor',
-          events: {
-            click: this.#analyzeDatasourceClicked.bind(this)
-          }
-        });
-        summary.appendChild(analyzeActionButton);
+        this.#createDatasourceNodeAnalyzeActionButton(datasourceId, summary);
+        this.#createDatasourceNodeDownloadActionButton(datasourceId, summary);
         break;
       default:
         this.#createDatasourceNodeActionButtons(datasourceId, summary);
     }
-
     return datasourceNode;
   }
 
@@ -612,6 +611,112 @@ class DataSourcesUi extends EventEmitter {
     var datasource = this.#getDatasourceFromClickEvent(event);
     datasourceSettingsDialog.open(datasource);
   }
+  
+  async #downloadDatasourceClicked(event) {
+    var target = event.target;
+    var datasourceNode = target;
+    do {
+      datasourceNode = datasourceNode.parentNode;
+    } while (datasourceNode && datasourceNode.getAttribute('data-nodetype') !== 'datasource');
+    var datasourceId = datasourceNode.getAttribute('id');
+    var datasource = this.getDatasource( datasourceId );
+    var datasourceType = datasource.getType();
+    var isFileType = datasourceType === DuckDbDataSource.types.FILE;
+    var datasourceFileType;
+    if (isFileType) {
+      datasourceFileType = datasource.getFileType();
+    }
+
+    var fileTypes = Object.keys(DuckDbDataSource.fileTypes)
+    .filter(function(fileType){
+      if (isFileType) { 
+        switch (fileType){
+          case datasourceFileType:
+          case 'duckdb':
+          case 'sqlite':
+            return false;
+        }
+      }
+      return true;
+    });
+    var menuItems = fileTypes.sort().map(function(fileType){
+      var id = `fileType-${fileType}`;
+      return `
+        <li role="menuitem">
+          <input 
+            type="radio" 
+            name="fileTypes" 
+            value="${fileType}" 
+            id="${id}"
+          />
+          <label for="${id}">
+            <label>${fileType}</label>
+          </label>
+        </li>
+      `;
+    });
+    var id = 'exportDatasourceMenu';
+    var menu = `
+      <menu class="fileTypes" id="${id}">
+        ${menuItems.join('\n')}
+      </menu>
+    `;
+    
+    var result = await PromptUi.show({
+      title: 'Export Datasource',
+      contents: menu
+    });
+
+    if (result !== 'accept'){
+      return;
+    }
+    var selected = document.querySelector(`menu#${id} > li > input[type=radio]:checked`);
+    if (!selected) {
+      return;
+    }
+    var fileType = selected.value;
+    var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+
+    var exportType = null;
+    var exportDelimited = false;
+    var exportJson = false;
+    var exportParquet = false;
+    var exportXlsx = false;
+    var exportTitle = DataSourcesUi.getCaptionForDatasource(datasource);
+    
+    switch (fileTypeInfo.duckdb_reader){
+      case 'read_csv':
+        exportType = 'exportDelimited';
+        exportDelimited = true;
+        break;
+      case 'read_json':
+        exportType = 'exportJson';
+        exportJson = true;
+        break;
+      case 'read_parquet':
+        exportType = 'exportParquet';
+        exportParquet = true;
+        break;
+      case 'read_xlsx':
+        exportType = 'exportXlsx';
+        exportXlsx = true;
+        break;
+    }
+    var exportSettings = Object.assign(
+      {}, settings.getSettings('exportUi'), {
+      exportDestinationFile: true,
+      exportDestinationClipboard: false,
+      exportType: exportType,
+      exportDelimited: exportDelimited,
+      exportJson: exportJson,
+      exportParquet: exportParquet,
+      exportXlsx: exportXlsx,
+      exportTitle: exportTitle
+    });
+    
+    var sql = `SELECT * ${datasource.getFromClauseSql()}`;
+    await ExportUi.exportData(sql, exportSettings);
+  }
 
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
     switch (datasourceGroup.type) {
@@ -635,14 +740,9 @@ class DataSourcesUi extends EventEmitter {
     if (datasourceGroup === undefined){
       return;
     }
-
+    var groupNode = instantiateTemplate('dataSourceGroupNode');
     var groupType = datasourceGroup.type;
-    var groupNode = createEl('details', {
-      role: 'treeitem',
-      "data-nodetype": 'datasourcegroup',
-      "data-grouptype": groupType,
-      open: true
-    });
+    groupNode.setAttribute('data-grouptype', groupType)
 
     var groupTitle;
     switch (groupType) {
@@ -663,18 +763,16 @@ class DataSourcesUi extends EventEmitter {
     }
     groupNode.setAttribute('title', groupTitle);
 
-    var summary = createEl('summary', {
-    });
-    groupNode.appendChild(summary);
-
+    var summary = groupNode.querySelector('summary');
+    var label = summary.querySelector('span.label');
     var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
-    var label = createEl('span', {
-      class: 'label'
-    }, caption);
-    summary.appendChild(label);
+    label.textContent = caption;
 
     if (datasourceGroup.typeSignature) {
-      this.#createDatasourceNodeActionButtons(datasourceGroup.typeSignature, summary);
+      this.#createDatasourceNodeActionButtons(
+        datasourceGroup.typeSignature, 
+        summary
+      );
     }
 
     var datasources = datasourceGroup.datasources;

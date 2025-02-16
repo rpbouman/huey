@@ -1806,6 +1806,57 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            <template id="dataSourceGroupNodeActionButton">
+              <label
+                class="${class}"
+                for="${id}"
+                title="${title}"
+              >
+                <button id="${id}"></button>
+              </label>
+            </template>
+            <template id="dataSourceNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasource"
+                data-datasourcetype="${datasourceType}"
+                title="${title}"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
+            <template id="dataSourceGroupNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasourcegroup"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
+            <template id="dataSourceSchemaNode">
+              <details
+                role="treeitem"
+                data-nodetype="duckdb_schema"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                data-catalog-name="${catalogName}"
+                data-schema-name="${schemaName}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
             <div
               id="datasourcesUi"
               role="tree"
