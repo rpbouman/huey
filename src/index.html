@@ -1815,6 +1815,18 @@
                 <button id="${id}"></button>
               </label>
             </template>
+            <template id="dataSourceNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasource"
+                data-datasourcetype="${datasourceType}"
+                title="${title}"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
             <template id="dataSourceGroupNode">
               <details
                 role="treeitem"

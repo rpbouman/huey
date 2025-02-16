@@ -376,7 +376,7 @@ class DataSourcesUi extends EventEmitter {
     var oldState = event.oldState;
     var newState = event.newState;
 
-    if (oldState !== 'closed' || newState !== 'open' || target.childNodes.length !== 1) {
+    if (oldState !== 'closed' || newState !== 'open' || target.getElementsByTagName('details').length !== 0) {
       return;
     }
 
@@ -389,15 +389,15 @@ class DataSourcesUi extends EventEmitter {
 
     var type = datasource.getType();
     var datasourceId = datasource.getId();
-    var datasourceNode = createEl('details', {
-      id: datasourceId,
-      role: 'treeitem',
-      "data-nodetype": 'datasource',
-      "data-datasourcetype": type,
-      "title": caption,
-      "open": true
-    });
-
+    
+    var datasourceNode = instantiateTemplate('dataSourceNode', datasourceId);
+    datasourceNode.setAttribute('data-datasourcetype', type);
+    datasourceNode.setAttribute('title', caption);
+    
+    var summary = datasourceNode.querySelector('summary');
+    var label = summary.querySelector('span.label');
+    label.textContent = caption;
+    
     if (attributes){
       for (var attributeName in attributes){
         datasourceNode.setAttribute(attributeName, attributes[attributeName]);
@@ -419,16 +419,7 @@ class DataSourcesUi extends EventEmitter {
       datasourceNode.setAttribute('data-filetype', extension);
     }
 
-    var summary = createEl('summary', {
-    });
-
-    datasourceNode.appendChild(summary);
-
-    var label = createEl('span', {
-      class: 'label'
-    }, caption);
-    summary.appendChild(label);
-
+    
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
         var removeButton = this.#renderDatasourceActionButton({
@@ -456,7 +447,6 @@ class DataSourcesUi extends EventEmitter {
       default:
         this.#createDatasourceNodeActionButtons(datasourceId, summary);
     }
-
     return datasourceNode;
   }
 
@@ -645,11 +635,16 @@ class DataSourcesUi extends EventEmitter {
     }
     groupNode.setAttribute('title', groupTitle);
 
+    var summary = groupNode.querySelector('summary');
+    var label = summary.querySelector('span.label');
     var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
-    groupNode.querySelector('summary > span.label').textContent = caption;
+    label.textContent = caption;
 
     if (datasourceGroup.typeSignature) {
-      this.#createDatasourceNodeActionButtons(datasourceGroup.typeSignature, summary);
+      this.#createDatasourceNodeActionButtons(
+        datasourceGroup.typeSignature, 
+        summary
+      );
     }
 
     var datasources = datasourceGroup.datasources;
