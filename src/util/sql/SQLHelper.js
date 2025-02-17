@@ -1010,21 +1010,26 @@ function getQualifiedIdentifier(){
   throw new Error(`Invalid arguments`);
 }
 
-async function ensureDuckDbExtensionLoadedAndInstalled(extensionName){
+async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName){
   var connection = hueyDb.connection;
   var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
   var statement = await connection.prepare(sql);
   var result = await statement.query(extensionName);
   statement.close();
   var loaded, installed;
-  if (result.numRows !== 0) {
-    loaded = result.loaded;
-    installed = result.installed;
+  if (result.numRows === 0) {
     return;
   }
+
+  var row = result.get(0);
+  loaded = row.loaded;
+  installed = row.installed;
   
   if (!installed) {
     sql = `INSTALL ${extensionName}`;
+    if (repositoryName) {
+      sql += ` FROM ${repositoryName}`;
+    }
     result = await connection.query(sql);
   }
   
