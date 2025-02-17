@@ -602,6 +602,55 @@
             </form>
           </div>
         </div>
+        <div>
+          <label
+            role="tab"
+            for="exportXlsx"
+            title="Use this tab to export the data to a Excel (.xlsx) file."
+          >Excel</label>
+          <input
+            id="exportXlsx"
+            name="exportFormat"
+            type="radio"
+          />
+          <div role="tabpanel">
+            <form id="exportXlsxSettings">
+              <label
+                title="Whether to include a row with column headers."
+                for="exportXlsxIncludeHeaders"
+              >Include Headers</label>
+              <input
+                id="exportXlsxIncludeHeaders"
+                title="Check this to include a header row with column names."
+                type="checkbox"
+                checked="true"
+              />
+              <label
+                title="Name of the target sheet."
+                for="exportXlsxSheet"
+              >Sheet name</label>
+              <!-- see https://www.keynotesupport.com/excel-basics/worksheet-names-characters-allowed-prohibited.shtml -->
+              <input
+                id="exportXlsxSheet"
+                title="Optionally enter a name for the target sheet"
+                type="text"
+                size="31"
+                pattern="^[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;]([A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;']{0,29}[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;])?$"
+              />
+              <label
+                for="exportXlsxSheetRowLimit"
+              >Row Limit</label>
+              <input
+                id="exportXlsxSheetRowLimit"
+                value="1048576"
+                type="number"
+                min="0"
+                max="1048576"
+                step="1"
+              />
+            </form>
+          </div>
+        </div>
       </section>
       <footer role="toolbar">
       

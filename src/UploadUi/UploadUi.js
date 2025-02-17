@@ -120,7 +120,7 @@ class UploadUi {
     return uploadItem;
   }
 
-  #createInstallExtensionItem(extensionName){
+  #createInstallExtensionItem(extensionName, extensionRepository){
     var extensionItemId = `duckdb_extension:${extensionName}`;
     var uploadItem = this.#createLoadExtensionItem(extensionItemId);
     var label = uploadItem.getElementsByTagName('span').item(0);
@@ -159,13 +159,27 @@ class UploadUi {
       }
 
       if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
-        requiredExtensions.push(requiredDuckDbExtension);
+        var extensionRepository = fileType.duckdb_extension_repository;
+        requiredExtensions.push({
+          extensionName: requiredDuckDbExtension,
+          extensionRepository: extensionRepository
+        });
       }
     }
     return requiredExtensions;
   }
 
   async loadDuckDbExtension(extensionName){
+    
+    var extensionRepository;
+    switch (typeof extensionName){
+      case 'string':
+        break;
+      case 'object':
+        extensionRepository = extensionName.extensionRepository;
+        extensionName = extensionName.extensionName;
+    }
+    
     var invalid = true;
     var body = this.#getBody();
     var installExtensionItem = this.#createInstallExtensionItem(extensionName);
@@ -203,8 +217,13 @@ class UploadUi {
       else {
         message.innerHTML += `Extension ${extensionName} not installed<br/>`;
 
+        var installSql = `INSTALL ${extensionName}`;
+        if (extensionRepository){
+          message.innerHTML += `Extension ${extensionName} comes from non-standard location "${extensionRepository}".<br/>`;
+          installSql += ` FROM ${extensionRepository}`;
+        }
         message.innerHTML += `Installing extension ${extensionName}<br/>`;
-        var result = await connection.query(`INSTALL ${extensionName}`);
+        var result = await connection.query(installSql);
         message.innerHTML += `Extension ${extensionName} installed<br/>`;
         progressbar.value = parseInt(progressbar.value, 10) + 20;
       }

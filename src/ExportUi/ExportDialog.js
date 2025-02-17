@@ -266,8 +266,12 @@ class ExportUi {
             "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
             "COMPRESSION": compression.value,
           };
-          mimeType = 'text/csv';
-          fileExtension = 'csv';
+          if (columnDelimiter === '\\t') {
+            fileExtension = 'tsv';
+          }
+          else {
+            fileExtension = 'csv';
+          }
           break;
         case 'exportJson':
           compression = exportSettings[exportType + 'Compression'];
@@ -281,7 +285,6 @@ class ExportUi {
             "COMPRESSION": compression.value,
             "ARRAY": rowDelimiter.value
           };
-          mimeType = 'application/json';
           fileExtension = 'json';
           break;
         case 'exportParquet':
@@ -290,7 +293,6 @@ class ExportUi {
             "FORMAT": 'PARQUET',
             "COMPRESSION": compression.value,
           };
-          mimeType = 'application/vnd.apache.parquet';
           fileExtension = 'parquet';
           break;
         case 'exportSql':
@@ -298,6 +300,31 @@ class ExportUi {
           fileExtension = 'sql';
           data = sql;
           break;
+        case 'exportXlsx':
+          fileExtension = 'xlsx';
+          copyStatementOptions = {
+            "FORMAT": '\'xlsx\'',
+            "HEADER": `'${Boolean(exportSettings.exportXlsxIncludeHeaders)}'`,
+            "SHEET_ROW_LIMIT": exportSettings.exportXlsxSheetRowLimit,
+          };
+          var sheetName = (exportSettings.exportXlsxSheet || '').trim();
+          if ( sheetName.length ) {
+            copyStatementOptions["SHEET"] = sheetName;
+          }
+          break;
+        default:
+          console.error(`Don't know how to handle export type "${exportType}".`);
+      }
+
+      var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileExtension);
+      if (!mimeType){
+        mimeType = fileTypeInfo.mimeType;
+      }
+      if (fileTypeInfo.duckdb_extension){
+        await ensureDuckDbExtensionLoadedAndInstalled(
+          fileTypeInfo.duckdb_extension, 
+          fileTypeInfo.duckdb_extension_repository
+        );
       }
 
       if (compression && compression.value !== 'UNCOMPRESSED'){

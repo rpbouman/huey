@@ -88,6 +88,7 @@ class Settings extends EventEmitter {
       exportJson: false,
       exportParquet: false,
       exportSql: false,
+      exportXlsx: false,
       // options for delimited
       exportDelimitedCompression: {
         value: 'UNCOMPRESSED',
@@ -148,7 +149,10 @@ class Settings extends EventEmitter {
           { value: 'newlineAfter', label: 'Newline After' },
           { value: 'newlineBefore', label: 'Newline Before' }
         ]
-      }
+      },
+      exportXlsxIncludeHeaders: true,
+      exportXlsxSheet: '',
+      exportXlsxSheetRowLimit: 1048576
     },
     filterDialogSettings: {
       filterSearchApplyAll: false,
