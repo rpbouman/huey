@@ -37,7 +37,7 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   height: calc(100% - 36px);
 
   details > summary > span.label {
-    max-width: calc(100% - 136px);
+    max-width: calc(100% - 140px);
   }
 
   details[role=treeitem] {
