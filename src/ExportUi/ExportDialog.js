@@ -224,10 +224,10 @@ class ExportUi {
 
   static async exportDataForQueryModel(queryModel, exportSettings, progressCallback){
     var sql = ExportUi.getExportSqlForQueryModel(queryModel, exportSettings);
-    return ExportUi.exportData(sql, exportSettings, progressCallback);
+    return ExportUi.exportData(queryModel.getDatasource(), sql, exportSettings, progressCallback);
   }
 
-  static async exportData(sql, exportSettings, progressCallback){
+  static async exportData(datasource, sql, exportSettings, progressCallback){
     try {
       if (typeof progressCallback !== 'function'){
         progressCallback = function(text){
@@ -350,7 +350,6 @@ class ExportUi {
         var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
         progressCallback(`Preparing copy to ${tmpFileName}`);
         var copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
-        var datasource = queryModel.getDatasource();
         var connection, result;
         try {
           connection = datasource.getManagedConnection();
