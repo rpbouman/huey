@@ -68,7 +68,9 @@ body {
       }  
 
       > label[for=autoRunQuery]::after,
-      > label[for=cloneHueySession]::before
+      > label[for=cloneHueySession]::before,
+      > label[for=quickQueryMenuButton]::after,
+      > label[for=currentDatasourceMenuButton]::after
       {
         border-right-width: 1px;
         border-right-style: solid;
@@ -118,55 +120,60 @@ body {
       > label[for=runQueryButton]::before {
         margin-left: 0px;
       }
-
-      > label[for=quickQueryMenuButton]::after {
-        content: '\00a0';
-      }
-      
+            
       /*
         separators between the top menu bar items
       */
       > label[for=cloneHueySession]::before,
-      > label[for=quickQueryMenuButton]::before 
+      > label[for=quickQueryMenuButton]::before
       {
         border-left-width: 1px;
         border-left-style: solid;
         border-left-color: var(--huey-light-border-color);
       }
 
-      > #currentDatasource {
+      > label[for=quickQueryMenuButton]:has( +label[for=currentDatasourceMenuButton][data-current-datasource=''] ) {
+        display: none;
+      }
+
+      > label[for=currentDatasourceMenuButton] {
         display: inline-block;
-        padding-left: 4px;
-        margin-block-start: 0em;
-        margin-block-end: 0em;
-        font-size: 1em;
-        white-space: nowrap;
+        max-width: calc( 100vw - 650px );
+        vertical-align: bottom;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: calc( 100% - 450px);
-        vertical-align: text-bottom;
       }
 
-      > #currentDatasource:not( :empty )::before {
-        content: 'Datasource: ';
-        padding-left: 8px;
-        border-left-style: solid;
-        border-left-width: 1px;
-        border-left-color: var(--huey-light-border-color);
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty ){
+        pointer-events: none;
       }
 
-      > #currentDatasource:not( :empty )::after {
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) ){
+        pointer-events: auto;
+      }
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty )::after {
         content: ' ';
-        padding-right: 8px;
-        border-right-style: solid;
-        border-right-width: 1px;
-        border-right-color: var(--huey-light-border-color);
+      }
+
+      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) )::after {
+        font-family: var( --huey-icon-font-family );
+        /* caret-down */
+        content: '\fb2a';
+      }
+      
+      > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
+        display: none;
       }
 
       > label[for=queryResultRowsInfo]:has( > output#queryResultRowsInfo:empty ),
       > label[for=queryResultColumnsInfo]:has( > output#queryResultColumnsInfo:empty ) 
       {
         display: none;
+      }
+      
+      #queryResultRowsInfo {
+        padding-left: 1em;
       }
 
       /* separator after 'rows' */ 

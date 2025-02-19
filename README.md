@@ -4,7 +4,7 @@ Huey supports reading from multiple file formats, like .csv, .parquet, .json dat
 
 __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
-![image](https://github.com/rpbouman/huey/assets/647315/b2e45002-409c-4a98-8d38-f5a6bfc6b7e9)
+![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
 ## Key features
 - Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
@@ -18,7 +18,7 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 - Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
 - Truly light-weight. Huey depends on DuckDb-WASM, and Tabler Icons, but nothing more. If it makes sense, dependencies might be added, but up till now we get along fine with what the browser gives us. And that's enough.
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
-- Zero install. Download or checkout the source tree, and open src/index.html in your browser - no server required. Note that although Huey can run locally, there is nothing that keeps you from serving it from a webserver if you want to.
+- Zero install. Huey is a static webapp so you can simply download or checkout the source tree, and open src/index.html in your browser - no server required. Alternatively, [use the Live demo site](https://rpbouman.github.io/huey/src/index.html). Being a static webapp, Huey can run locally without a server, but there is nothing that keeps you from serving it from a webserver if you need or want to.
 - It's free! Huey is released under the MIT license, just like DuckDB.
 
 ### Limitations
@@ -26,14 +26,16 @@ __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https:/
 
 ## Getting started
 1) [Checkout](https://github.com/rpbouman/huey.git) or [Download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) from github
-2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on resources served by jsdelivr.com, so make sure you're connected to the internet.
+2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on DuckDB WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. Once these resources are downloaded, they are typically cached by your browser, often allowing you to run Huey even without an internet connection. 
 3) Register one or more files or urls, and start analyzing!
 
 ## Registering and Analyzing Files with Huey
 
 ### Registering Files
 Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to read and analyze data files. 
-Due to general security policy, the web browser can not simply read files from your local computer: you need to explicitly select and register files in DuckDB WASM's virtual file system. 
+General browser security policies prevent web applications from autonomously accessing files on the local file system. 
+Web application users need to explicitly select the files they want to analyze. 
+Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
 
 To register one or more files, you can either 
 - Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
@@ -151,12 +153,14 @@ Right before the attribute item, there is a widget to expand the Attribute so it
 
 You can think of a derived attribute as an expression (formula) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
-The values that are thus derived from the original attribute values can be thought of as a 'virtual' column and can appear on wither of the pivot table axes.
+The values that are thus derived from the original attribute values can be thought of as a 'virtual' column. Derived attributes may be placed on either the rows or the columns pivot table axis. 
+Derived attributes may be used as filter too.
 
 ### Aggregates
 
 Aggregates are special expressions that calculate a result on a group of attribute values. 
-Aggregates cannot be placed on the horizontal or vertical axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
+Aggregates cannot be placed on the rows or columns axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
+Currently, aggregates can also not be used on the filters axis. (Support for filtering on aggregated values is currently under consideration.)
 
 ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
 
@@ -217,14 +221,24 @@ Immediately after placing a new item on the Filters axis, the Filter Dialog pops
 
 ![image](https://github.com/user-attachments/assets/beae75ae-b158-4e26-b30b-958bffd4f222)
 
-#### Filter Type
+#### Filter Types
+
 The Filter type dropdown appears in the top of the Filter Dialog. Here you choose the operator that should be used to filter the data. The options are:
-- Include: the values in the data must match any of the filter values exactly
-- Exclude: rows from the data appear only when the value from the respective item does not match any of the filter values.
-- Like: the values in the data must match the pattern of one or more filter values
-- Not Like: the values in the data must not match the pattern of any of the filter values
-- Between: the values of the data must be between the filter value-ranges
-- Not Between: the values of the data must not be between any of the filter value-ranges
+- __Include__: the values in the data must match any of the filter values exactly
+- __Exclude__: rows from the data appear only when the value from the respective item does not match any of the filter values. (Negated include)
+- __Like__: the values in the data must match the pattern of one or more filter values. The pattern is a simple [SQL LIKE pattern](https://duckdb.org/docs/sql/functions/pattern_matching.html#like) which supports % (percent sign) as wildcard for zero or more arbitrary characters, and _ (underscore) as wildcard for a single arbitrary character. 
+- __Not Like__: the values in the data must not match the pattern of any of the filter values. (Negated Like)
+- __Between__: the values of the data must be between the filter value-ranges.
+- __Not Between__: the values of the data must not be between any of the filter value-ranges (Negated Between)
+
+#### Array Filter Type 
+
+Array-valued attributes support filtering using the regular Include/Exclude and Between/Not Between filter types. In addition, 4 array-specific filter types are supported: 
+
+- __Include Has Any__: Include the rows if the array contains any of the selected filter values.
+- __Exclude Has Any__: Exclude the rows if the array contains any of the selected filter values. (Negated Has Any)
+- __Include Has All__: Include the rows only if the array contains all of the selected filter values.
+- __Exclude Has All__: Exclude the rows only if the array contains all of the selected filter values. (Negated Has All)
 
 #### Finding Filter Values
 In the top of the Filter Dialog there is an input where you can type a value that will be used as a pattern for retrieving values from the respective item.
@@ -245,9 +259,24 @@ Right above the input, there appear two checkboxes:
 
 #### Adding/Deleting Filter Values
 
-Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them.
-Alternatively, values in the input may be applied explicitly by clicking the button next to the input, or by hitting the Enter button on the keyboard.
+Filter values can be applied to the filter item by finding them in the Filter Value Picklist and clicking them. 
+
+The Range filter types Between and Not Between require two values, and the Filter dialog will reveal two value lists when choosing these filter types. 
+When picking a new value, a new range is added using that value as both lower and upper bound of the range: 
+
+![image](https://github.com/user-attachments/assets/4937056f-bf7a-4032-a8d3-a3d7fc54384f)
+
+The upper bound value is automatically selected, and picking another value from the picklist will overwrite the selected value:
+
+![image](https://github.com/user-attachments/assets/03d2fa78-a0b3-4c2e-b1c9-95a3b8ddd425)
+
+You can always manually select a value in either value list to overwrite it with a new value.
+
+Alternatively, values may be entered manually and added by clicking the button next to the input, or by hitting the Enter key on the keyboard.
+
 Applying a value in this way while an already applied value is selected will overwrite the applied value with the new one.
+To enter multiple filter values at once, separate them with a semi-colon and then hit the button or the Enter key.
+When pasting multiple values from outside Huey, for example from Excel or a text editor, separators like newline and tab are automatically replaced with the semi-colon for ease of use.
 
 Applied values may be removed by selecting them and then hitting the Clear Highlighted dialog button, or the Delete key on the keyboard.
 Hitting the Clear All button will remove all applied values. 
@@ -257,6 +286,17 @@ Hitting the Clear All button will remove all applied values.
 - The Apply button will actually apply the chosen values to the filter and close the Filter Dialog.
 - The Remove button will remove the filter item entirely from the Filter axis and close the Filter Dialog
 - The Cancel button will close the Filter Dialag without changing the state of the filter item.
+
+#### Hiding, Revealing and Toggling applied Filter Values
+Once the filter values are applied, the Filter Item will show the number of values as well as a collapser/expander.
+
+![image](https://github.com/user-attachments/assets/8f042450-8320-4b52-b097-4787031618c9)
+
+By default, the filter item is collapsed. Clicking the expander will reveal the filter items:
+
+![image](https://github.com/user-attachments/assets/edb058d6-c523-4b37-804c-804fcf11ae58)
+
+The filter values have a checkbox that allows you to enable or disable that value. 
 
 ### (Sub)totals
 
@@ -334,3 +374,47 @@ Settings that control the appearance and behavior of the Pivot Table
 
 You can embed huey inside a frame on your own webpage and control the application by sending it commands using the [`postMessage()`-method](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
+
+# Development, Releases, and contributions 
+
+## Branches
+The Huey repository has two important branches - [dev](https://github.com/rpbouman/huey/tree/dev) and [main](https://github.com/rpbouman/huey/tree/main). 
+Active development is done on the dev branch. 
+
+## (Pre-)Release
+Once every while, typically every few weeks, ongoing developments are captured in a (pre-)release, which gets its own version number and a nickname.
+You can checkout prior releases here: [https://github.com/rpbouman/huey/releases](https://github.com/rpbouman/huey/releases)
+
+A new (pre-)release is triggered whenever a dependency is updated (currently, Huey has two dependencies - DuckDB WASM and Tabler Icons).
+Other events that trigger a (pre-)release is when ongoing development of new features and bugfixes is deemed stable - or at least stable enough to focus on new developments.
+
+When a couple of pre-releases have been found stable enough for production usage, a release is made and the work from the dev branch is merged into the main branch.
+The live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html) is a github page that is created right on top of the main branch.
+So, a merge to the main branch is what updates the version of the live demo.
+
+If you just want to enjoy use of a stable version of Huey, you can either use the live demo, or checkout or download the main branch.
+If you want to enjoy the latest developments, then you should use the dev branch.
+
+## Checking your Huey version
+
+You can verify the current Huey version in the about dialog:
+
+![image](https://github.com/user-attachments/assets/7a0b8690-4986-4189-8e8c-be3abd9580e6)
+
+Note that this also gives info on the versions of Huey's dependencies.
+
+## Contributions
+
+Your contributions are welcome! 
+You can contribute in many ways:
+- filing an issue: If something isn't working, or not working the way it's supposed to, please [file an issue](https://github.com/rpbouman/huey/issues/new/choose)!
+  To ensure maximum effectivity, clearly describe the component that is having an issue, describe the observed behavior, describe the expected behavior, and describe how this issue may be reproduced. Please include your browserversion and operating system too. If your issue relies on a dataset, and you are at liberty to share that, then please include that too. Please label your issue as "bug".
+- suggest a feature. You may also file issues to request or suggest features. If you're looking for a feature you know from other tools which Huey doesn't have, then its typically helpful if you name the product and its feature name.
+- fork the repo and send a pull request. If you filed and issue or feature request, or you found an existing issue and feature request, you can also consider picking it up and send a pull request. There is no guarantee that your PR would be accepted, but in general these would be welcome. Just make sure there is an issue filed already that can be referenced, so that it is clear what the PR is attempting to fix or what feature the PR aims to deliver.
+- Become an advocate. If you like Huey, spread the word! Share it with your friends and colleagues, and help them get set up. If Huey was of some help to you in your daily work, consider writing a blog about it, or maybe present your use case at a meeting.
+- Become a sponsor. Just click the "Sponsor" button at the top of the huey github project page:
+
+ ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
+
+ Alternatively, you can sponsor Huey by [making a donation](https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84). 
+ - Commission a feature or consultation: if need help using, installing or deploying Huey, you can always ask for help. Same if you need custom developments. Contact me with such a request and we'll negotiate the details.

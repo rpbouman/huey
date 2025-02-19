@@ -29,8 +29,6 @@ dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
 }
 
 dialog#filterDialog {
-  margin: 0px;
-  position:absolute;
   resize: both;
   padding: 2px 0px 0px 2px;
   min-height: 280px;
@@ -166,7 +164,7 @@ dialog#filterDialog {
 
         > select {
           flex-grow: 1;
-          width: 100%;
+          width: calc( 100% - 10px );
           height: 100%;
         }
       }
@@ -242,6 +240,8 @@ dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]
 dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ),
 dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ){
   flex-grow: 0;
+  max-width: calc( 100% - 86px );
+  z-index: 1;
 }
 
 dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ) > #filterValueList,
@@ -269,3 +269,38 @@ dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]
 #filterValueList, #toFilterValueList {
 }
 
+/* 
+  Operators LIKE and NOT LIKE are hidden by default
+*/
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=like],
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=notlike] {
+  display: none;
+}
+
+/* 
+  Operators LIKE and NOT LIKE are available when the filter item data type is VARCHAR
+*/
+dialog#filterDialog[data-query-model-item-datatype='VARCHAR'] > header[role=toolbar] > select#filterType > option[value=like],
+dialog#filterDialog[data-query-model-item-datatype='VARCHAR'] > header[role=toolbar] > select#filterType > option[value=notlike] {
+  display: block;
+}
+
+/*
+  LIST/ARRAY operators hasany, hasall, nothasany, nothasall are hidden by default
+*/
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=hasany],
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=hasall],
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=nothasany],
+dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=nothasall] {
+  display: none;
+}
+
+/*
+  LIST/ARRAY operators hasany, hasall, nothasany, nothasall are available when the filter axis item data type is an array type. 
+*/
+dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=hasany],
+dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=hasall],
+dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=nothasany],
+dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=nothasall] {
+  display: block;
+}

@@ -164,4 +164,45 @@ class DragAndDropHelper {
     return DragAndDropHelper.encodeDataTransferKey(id);
   }
   
+  static addTextDataForQueryItem(queryAxisItem, data) {
+    var csvData = [];
+    for (var property in queryAxisItem){
+      var value = queryAxisItem[property];
+      var typeOfValue = typeof value;
+      if(property === 'filter') {
+        var filter = value;
+        var filterType = filter.filterType;
+        csvData.push(['filterType', filterType]);
+        Object.keys(filter.values).forEach(function(key, index){
+          csvData.push(['filterValue' + (1 + index), key]);
+        });
+        if (!FilterDialog.isRangeFilterType(filterType)) {
+          continue
+        }
+        Object.keys(filter.toValues).forEach(function(key, index){
+          csvData.push(['toFilterValue' + (1 + index), key]);
+        });
+      }
+      else
+      if (
+        value === null || [
+          'function',
+          'object',
+          'undefined'
+        ].indexOf(typeOfValue) !== -1
+      ){
+        continue;
+      }
+      else {
+        csvData.push([property, value]);
+      }
+    }
+    csvData = getCsv(csvData);
+    
+    data['text/plain'] = csvData;
+    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    data['text/csv'] = new File([csvData], `${itemId}.csv`);
+    
+  }
+  
 }

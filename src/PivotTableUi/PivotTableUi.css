@@ -1,213 +1,3 @@
-.pivotTableUiContainer {
-  overflow: hidden;
-  background-color: var( --huey-light-background-color );
-
-  > .pivotTableUiInnerContainer {
-    overflow: scroll;
-    position: relative;
-    width: 100%;
-    height: calc( 100% - 3px );
-    margin: 1px;
-    top: 0px;
-    bottom: 0px;
-    right: 0px;
-    left: 0px;
-    border-style: none;
-    border-width: 0px;
-    
-    > .pivotTableUiSizer {
-      position: absolute;
-      background-color: transparent;
-      z-index: 0;
-    }
-    
-    > .pivotTableUiSizer.pivotTableUiHorizontalSizer {
-      height: 1px;
-    }
-    
-    > .pivotTableUiSizer.pivotTableUiVerticalSizer {
-      width: 1px;
-    }
-
-    > .pivotTableUiTable {
-      display: table;
-      table-layout: fixed;
-      border-collapse: collapse;
-      border-style: none;
-      border-width: 0px;
-      position: sticky;
-      top: 0px;
-      left: 0px;
-      bottom: 0px;
-      right: 0px;
-      
-      .pivotTableUiRow {
-        display: table-row;
-
-        > .pivotTableUiCell {
-          display: table-cell;
-          border-style:solid;
-          border-width: 1px;
-          border-color: var( --huey-light-border-color );
-          
-          > .pivotTableUiCellLabel {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            position: relative;
-            margin: 0px;
-            padding: 0px 2px 0px 2px;
-            border: 0px;
-            display: block;
-          }
-        }
-
-        > .pivotTableUiCell::-webkit-resizer {
-          display: none;
-        }
-
-        > .pivotTableUiHeaderCell {
-          background-color: var( --huey-medium-background-color );
-        }
-        
-        > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
-        > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
-          font-weight: bold;
-          padding: 0px 2px 0px 4px;
-        }
-        
-        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^="List<Uint>"] > .pivotTableUiCellLabel {
-          font-family: var( --huey-mono-font-family );
-        }
-        
-        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel {
-          text-align: right;
-        }
-
-        > .pivotTableUiCell[data-axis=columns][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^=Decimal][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^=Float][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^=Int][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^=Uint][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Decimal>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Float>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=columns][data-value-type^="List<Uint>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Int>"][data-totals=true] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-axis=rows][data-value-type^="List<Uint>"][data-totals=true] > .pivotTableUiCellLabel {
-          font-family: unset;
-          text-align: unset;
-        }
-
-        > .pivotTableUiCell[data-totals=false]:has( + .pivotTableUiCell[data-totals=true] ) {
-          border-right-color: var( --huey-dark-border-color );
-        }
-
-        > .pivotTableUiCell[data-totals=true] {
-          background-color: var( --huey-medium-background-color );
-          border-right-color: var( --huey-dark-border-color );
-          font-weight: bold;
-        }
-      }
-      
-      .pivotTableUiRow[data-totals=true] {
-        font-weight: bold;
-        background-color: var( --huey-medium-background-color );
-      }
-
-      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell,
-      .pivotTableUiRow:has( + .pivotTableUiRow[data-totals=true]) > .pivotTableUiCell {
-        border-bottom-color: var( --huey-dark-border-color );
-      }
-
-      > .pivotTableUiTableHeader {
-        display: table-header-group;
-        
-        > .pivotTableUiRow:first-child {
-
-          > .pivotTableUiCell {
-            resize: horizontal;
-            overflow: hidden;
-          }
-
-          > .pivotTableUiCell.pivotTableUiStufferCell {
-            width: 100%;
-            resize: none;
-            background: none;
-            border: none;
-          }
-
-          > .pivotTableUiCell::-webkit-resizer {
-            border-right-style: dotted;
-            border-right-width: 2px;
-            border-color: var( --huey-dark-border-color );
-          }
-
-        }
-
-        > .pivotTableUiRow:last-child {
-
-          > .pivotTableUiCell:not(.pivotTableUiRowsAxisHeaderCell) {
-            border-bottom-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiRowsAxisHeaderCell:has( + .pivotTableUiHeaderCell[data-totals] ) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-
-          > .pivotTableUiRowsAxisHeaderCell {
-            border-bottom-color: var( --huey-dark-border-color );
-          }
-          
-          > .pivotTableUiCell.pivotTableUiRowsAxisHeaderCell {
-            border-top-color: var( --huey-dark-border-color );
-          }
-          
-          > .pivotTableUiCell:has( + .pivotTableUiColumnsAxisHeaderCell ) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
-
-        > .pivotTableUiRow:has( + .pivotTableUiRow > .pivotTableUiRowsAxisHeaderCell) > .pivotTableUiHeaderCell:not([data-totals]) {
-          border-bottom-color: var( --huey-dark-border-color );
-        }
-      }
-      
-      > .pivotTableUiTableBody {
-        display: table-row-group;
-        
-        > .pivotTableUiRow {
-
-          > .pivotTableUiCell.pivotTableUiStufferCell {
-            height: 100%;
-            resize: none;
-            background: none;
-            border: none;
-          }
-
-          > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell) {
-            border-right-color: var( --huey-dark-border-color );
-          }
-        }
-      }
-    }
-  }
-}
-
 .pivotTableUiContainer[aria-busy=false] {
 
   > .pivotTableUiInnerContainer {
@@ -228,13 +18,18 @@
 
 .pivotTableUiContainer[aria-busy=true] {
   > .pivotTableUiInnerContainer {
+    /* 
+      this is to prevent scroll events from being generated while the pivot table is updating 
+      https://github.com/rpbouman/huey/issues/360
+    */
+    pointer-events: none;
 
     > .pivotTableUiTable {
 
-      /* 
+      /*
         This is here for https://github.com/rpbouman/huey/issues/70
         basically, we need to suprress display of the label text while we're still busy (rendering the table)
-        If we don't, the cells will not have yet assumed the assigned cell width 
+        If we don't, the cells will not have yet assumed the assigned cell width
         and this messes up our calculation of how much columns we should render.
       */
       > .pivotTableUiTableBody > .pivotTableUiRow > .pivotTableUiHeaderCell > .pivotTableUiCellLabel {
@@ -245,7 +40,7 @@
       .pivotTableUiRow {
 
         > .pivotTableUiCell {
-          border-color: transparent;
+          border-color: transparent !important;
           box-shadow: -2px 1px 1px -2px rgba(200, 200, 200, 0.5);
 
           > .pivotTableUiCellLabel {
@@ -256,6 +51,433 @@
         }
       }
     }
+  }
+}
+
+.pivotTableUiContainer {
+  overflow: hidden;
+  background-color: var( --huey-light-background-color );
+
+  > .pivotTableUiInnerContainer {
+    overflow: scroll;
+    position: relative;
+    width: 100%;
+    height: calc( 100% - 3px );
+    margin: 1px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    border-style: none;
+    border-width: 0px;
+
+    > .pivotTableUiSizer {
+      position: absolute;
+      background-color: transparent;
+      z-index: 0;
+    }
+
+    > .pivotTableUiSizer.pivotTableUiHorizontalSizer {
+      height: 1px;
+    }
+
+    > .pivotTableUiSizer.pivotTableUiVerticalSizer {
+      width: 1px;
+    }
+
+    > .pivotTableUiTable {
+      display: table;
+      table-layout: fixed;
+      border-collapse: collapse;
+      border-style: none;
+      border-width: 0px;
+      position: sticky;
+      top: 0px;
+      left: 0px;
+      bottom: 0px;
+      right: 0px;
+
+
+      .pivotTableUiRow {
+        display: table-row;
+
+        > .pivotTableUiCell {
+          display: table-cell;
+
+          border-width: 1px;
+          border-color: var( --huey-light-border-color );
+
+          border-top-style: solid;
+          border-top-color: var( --huey-light-border-color );
+
+          border-right-style: solid;
+          border-right-color: var( --huey-light-border-color );
+
+          > .pivotTableUiCellLabel {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+            margin: 0px;
+            padding: 0px 2px 0px 2px;
+            border: 0px;
+            display: block;
+          }
+        }
+
+        > .pivotTableUiCell::-webkit-resizer {
+          display: none;
+        }
+        
+        > .pivotTableUiHeaderCell {
+          background-color: var( --huey-medium-background-color );
+        }
+
+        > .pivotTableUiValueCell {
+          background-color: var( --huey-light-background-color );
+        }
+
+        > .pivotTableUiCell.pivotTableUiCellAxisHeaderCell > .pivotTableUiCellLabel,
+        > .pivotTableUiCell > .pivotTableUiCellLabel.pivotTableUiAxisHeaderLabel {
+          font-weight: bold;
+          padding: 0px 2px 0px 4px;
+        }
+
+        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="List<Uint>"] > .pivotTableUiCellLabel {
+          font-family: var( --huey-mono-font-family );
+        }
+
+        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel {
+          text-align: right;
+        }
+
+        > .pivotTableUiHeaderCell[data-axis=rows][data-is-repeating-value=true] {
+          border-top-style: none;
+          border-bottom-style: none;
+        }
+
+        > .pivotTableUiHeaderCell[data-axis=columns][data-is-repeating-value=true] {
+          border-left-style: none;
+          border-right-style: none;
+        }
+
+        > .pivotTableUiHeaderCell[data-axis=columns][data-is-repeating-value=false]:has(
+          +.pivotTableUiHeaderCell[data-is-repeating-value=true]
+        ) {
+          border-left-style: solid;
+          border-right-color: var( --huey-medium-background-color );
+        }
+
+        /*
+          ditto marks are text and should not be aligned according to data type.
+          (Right now I think they look best when centered, but perhaps I'm wrong and then we'll change it.)
+        */
+        > .pivotTableUiHeaderCell[data-is-repeating-value=true] > .pivotTableUiCellLabel {
+          text-align: center;
+          font-family: var( --huey-text-font-family );
+          color: var( --huey-placeholder-color );
+        }
+
+        /**
+        * These are the "Total" labels.
+        */
+        > .pivotTableUiHeaderCell[data-totals=true] > .pivotTableUiCellLabel {
+          font-family: var( --huey-text-font-family );
+          text-align: left;
+        }
+
+      }
+
+      > .pivotTableUiTableHeader {
+        display: table-header-group;
+
+        > .pivotTableUiRow:first-child {
+
+          > .pivotTableUiCell {
+            resize: horizontal;
+            overflow: hidden;
+            border-right-style: solid;
+          }
+
+          > .pivotTableUiHeaderCell:not( [data-axis] ):has(
+            + .pivotTableUiHeaderCell[data-axis]
+          ),
+          > .pivotTableUiHeaderCell:has(
+            + .pivotTableUiHeaderCell[data-is-repeating-value=false]
+          ) {
+            border-right-color: var( --huey-light-border-color );
+          }
+          
+          > .pivotTableUiHeaderCell[data-totals-origin=true]:has(
+            + .pivotTableUiHeaderCell[data-totals-origin=false]
+          ),
+          > .pivotTableUiHeaderCell[data-totals-origin=false]:has(
+            + .pivotTableUiHeaderCell[data-totals-origin=true]
+          ){
+            border-right-color: var( --huey-dark-border-color);
+          }
+
+          > .pivotTableUiCell.pivotTableUiStufferCell {
+            width: 100%;
+            resize: none;
+            background: none;
+            border: none;
+          }
+
+          > .pivotTableUiCell:not( [data-axis] ):has(
+            + .pivotTableUiCell:not( [data-axis] )
+          ) {
+            border-right-color: var( --huey-medium-background-color );
+          }
+
+        }
+
+        > .pivotTableUiRow:first-child:has(
+          > .pivotTableUiCell[data-is-repeating-value]
+        ) {
+          > .pivotTableUiCell:has(
+            + .pivotTableUiCell[data-is-repeating-value=true]
+          ) {
+            border-right-color: var( --huey-medium-background-color );
+          }
+                    
+        }
+
+        > .pivotTableUiRow:first-child:hover {
+          > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+            border-right-color: var( --huey-darkest-border-color ) !important;
+            border-right-style: solid;
+          }
+        }
+
+        > .pivotTableUiRow:not( :first-child ) {
+          > .pivotTableUiHeaderCell:not( [data-axis] ) {
+            border-top-style:none;
+            border-right-style:none;
+          }
+        }
+
+        > .pivotTableUiRow {
+
+
+          > .pivotTableUiCell:first-child {
+            border-left-style: solid;
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:not( .pivotTableUiCellAxisHeaderCell, [data-totals-origin=true] ) {
+            border-top-style: none;
+          }
+
+        }
+
+        > .pivotTableUiRow:last-child {
+          > .pivotTableUiHeaderCell {
+            border-bottom-style: solid;
+            border-bottom-color: var( --huey-darkest-border-color );
+          }
+        }
+
+      }
+
+      > .pivotTableUiTableBody {
+        display: table-row-group;
+
+        > .pivotTableUiRow {
+
+          > .pivotTableUiCell.pivotTableUiStufferCell {
+            height: 100%;
+            resize: none;
+            background: none;
+            border: none;
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true] {
+            border-right-style: none;
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:not( :first-child, [data-axis=cells] ){
+            border-left-style: none;
+          }
+
+          > .pivotTableUiHeaderCell:has( + .pivotTableUiValueCell ) {
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color );
+          }
+
+          /* NULL values in the cells are displayed in a less prominent color */
+          > .pivotTableUiValueCell[data-axis=cells][data-value-literal='NULL'],
+          > .pivotTableUiValueCell[data-axis=cells][data-value-literal^='NULL::'] > span {
+            color: var( --huey-placeholder-color );
+          }
+
+          > .pivotTableUiCellAxisHeaderCell {
+            border-left-style: solid;
+          }
+        }
+
+        /* last row of the table has a dotted bottom border if its not the last tuple to suggest the table is "broken" */
+        > .pivotTableUiRow[data-is-last-row-tuple=false]:nth-last-child(2) {
+          > .pivotTableUiCell {
+            border-bottom-style: dotted;
+            border-bottom-width: 2px;
+          }
+        }
+        
+        /*if the last row is also the last tuple, then the bottom border is solid to indicate the table is complete. */
+        > .pivotTableUiRow[data-is-last-row-tuple=true]:nth-last-child(2) {
+          > .pivotTableUiCell {
+            border-bottom-style: solid;
+          }
+        }
+
+      }
+
+      /* BORDERS FOR TOTALS COLUMNS CELLS */
+      .pivotTableUiValueCell[data-totals=true]:last-child,
+      .pivotTableUiValueCell[data-totals=true]:has( + .pivotTableUiValueCell[data-totals=false] ),
+      .pivotTableUiValueCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ):has( + .pivotTableUiValueCell[data-totals=true][data-cells-axis-item-index='0'] ),
+      .pivotTableUiValueCell[data-totals=false]:has( + .pivotTableUiValueCell[data-totals=true] ){
+        border-right-color: var( --huey-dark-border-color );
+      }
+
+      .pivotTableUiRow[data-totals=true]:nth-last-child(2) > .pivotTableUiValueCell,
+      .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ) > .pivotTableUiValueCell {
+        border-bottom-color: var( --huey-dark-border-color );
+        border-bottom-style: solid;
+      }
+
+      .pivotTableUiCell[data-totals=true],
+      .pivotTableUiRow[data-totals=true] > .pivotTableUiCell {
+        background-color: var( --huey-medium-background-color );
+      }
+
+      .pivotTableUiCell[data-totals=true] > .pivotTableUiCellLabel {
+        font-weight: bold;
+      }
+
+    }
+
+    > .pivotTableUiTable {
+      > .pivotTableUiTableBody {
+        > .pivotTableUiRow[data-totals=true] {
+          > .pivotTableUiHeaderCell:has( + .pivotTableUiHeaderCell[data-totals-origin=true] ) {
+            border-right-style: solid;
+            border-right-color: var( --huey-dark-border-color );
+          }
+        }
+      }
+
+      > .pivotTableUiTableHeader {
+
+        > .pivotTableUiRow {
+
+          > .pivotTableUiHeaderCell[data-totals-origin=true] {
+            border-top-style: solid;
+            border-top-color: var( --huey-dark-border-color );
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:not(
+            [data-axis=cells]
+          ):has( 
+            + .pivotTableUiHeaderCell[data-totals=true]:not( 
+                [data-cells-axis-item-index='0'] 
+              ) 
+          ) {
+            border-right-style: none;
+          }
+
+          > .pivotTableUiHeaderCell[data-totals=true]:last-child,
+          > .pivotTableUiHeaderCell[data-totals=true]:has( + .pivotTableUiHeaderCell[data-totals=false] ),
+          > .pivotTableUiHeaderCell[data-totals=true]:not( [data-cells-axis-item-index='0'] ):has( + .pivotTableUiHeaderCell[data-totals=true][data-cells-axis-item-index='0'] ),
+          > .pivotTableUiHeaderCell[data-totals=false]:has( + .pivotTableUiHeaderCell[data-totals=true] ){
+            border-right-style: solid;
+            border-right-color: var( --huey-dark-border-color );
+          }
+
+          > .pivotTableUiColumnsAxisHeaderCell:has( 
+            + .pivotTableUiHeaderCell:not( .pivotTableUiColumnsAxisHeaderCell ) 
+          ){
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color ) !important;
+          }
+        }
+      }
+    }
+
+    > .pivotTableUiTable[data-cellheadersaxis=columns] {
+
+      > .pivotTableUiTableHeader {
+        > .pivotTableUiRow {
+    
+          > .pivotTableUiHeaderCell:not( [data-axis=cells] ):has(
+            + .pivotTableUiHeaderCell[data-axis=cells]
+          ),
+          > .pivotTableUiRowsAxisHeaderCell:has( 
+            +.pivotTableUiHeaderCell:not( .pivotTableUiRowsAxisHeaderCell ) 
+          ){
+            border-right-style: solid;
+            border-right-color: var( --huey-darkest-border-color ) !important;
+          }
+
+        }
+      }
+
+      > .pivotTableUiTableBody {
+
+        >.pivotTableUiRow[data-totals=true] {
+
+          > .pivotTableUiHeaderCell[data-totals=true],
+          > .pivotTableUiValueCell {
+            border-top-color: var( --huey-dark-border-color );
+            border-bottom-color: var( --huey-dark-border-color );
+            border-bottom-style: solid;
+          }
+        }
+      }
+    }
+
+    > .pivotTableUiTable[data-cellheadersaxis='rows'] {
+
+      > .pivotTableUiTableBody {
+
+        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-axis=cells][data-axis-item-index='0'] ) {
+
+          > .pivotTableUiHeaderCell[data-totals=true],
+          > .pivotTableUiValueCell {
+            border-top-color: var( --huey-dark-border-color );
+          }
+        }
+
+        > .pivotTableUiRow[data-totals=true]:has( > .pivotTableUiHeaderCell[data-axis=cells]:not([data-axis-item-index='0']) ) {
+
+          > .pivotTableUiHeaderCell[data-totals=true][data-axis=rows] {
+            border-top-style: none;
+          }
+        }
+
+        > .pivotTableUiRow[data-totals=true]:nth-last-child(2),
+        > .pivotTableUiRow[data-totals=true]:has( + .pivotTableUiRow[data-totals=false] ){
+          > .pivotTableUiHeaderCell[data-totals=true],
+          > .pivotTableUiValueCell {
+            border-bottom-color: var( --huey-dark-border-color );
+            border-bottom-style: solid;
+          }
+        }
+
+      }
+
+    }
+
   }
 }
 

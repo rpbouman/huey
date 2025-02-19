@@ -26,15 +26,19 @@ We keep this one around here for reference, but
   /**
   * Huey background colors
   */
-  --huey-light-background-color: rgb(255,255,255);
+  --huey-light-background-color: rgb(250,250,250);
   --huey-medium-background-color: rgb(245,245,245);
   --huey-dark-background-color: rgb(210,210,210);
+  --huey-highlight-background-color: rgb(232, 244, 248);
+  
+  --huey-alternating-rows-brightness: 99%;
   
   /**
   * Huey border colors
   */
   --huey-light-border-color: rgb(222,222,222);
   --huey-dark-border-color: rgb(175,175,175);
+  --huey-darkest-border-color: rgb(100,100,100);
   
   /**
   * Huey icon font
@@ -188,6 +192,7 @@ dialog > header {
   top: 0px;
   background-color: var( --huey-medium-background-color );
   padding: .5em 0em .5em 0em;
+  z-index: 1;
 }
 
 /* this is used as dialog contents section */
@@ -272,6 +277,7 @@ form > label {
 
 label {
   color: var( --huey-foreground-color );
+  white-space: nowrap;
 }
 
 form > label::after, form > fieldset > label::after {
@@ -370,6 +376,19 @@ code, pre {
   margin-right: 2px;
 }
 
+label[role=menuitem]:has( > menu[role=menu] ) {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var( --huey-medium-background-color );
+  padding: 0px 2px 2px 0px;
+}
+
+label[role=menuitem]:has( > menu[role=menu][popover]:popover-open ){
+  background-color: var( --huey-dark-background-color );
+  border-color: var( --huey-dark-border-color ) var( --huey-light-border-color ) var( --huey-light-border-color ) var( --huey-dark-border-color );
+  padding: 2px 0px 0px 2px;
+}
+
 *[role=toolbar] > button:hover ,
 label[role=menuitem]:hover,
 menu[role=menu] > li[role=menuitem]:hover {
@@ -418,3 +437,10 @@ menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popoverta
   content: '...';
 }
 
+menu[role="menu"] {
+  
+  > li[role=menuitem] {
+      border-width: 1px;
+      border-color: var(--huey-light-border-color);
+  }
+}

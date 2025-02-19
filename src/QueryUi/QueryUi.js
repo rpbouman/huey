@@ -106,6 +106,7 @@ class QueryUi {
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
     var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+    this.#filterDialogStateChanged();
   }
 
   openFilterDialogForQueryModelItem(queryModelItem){
@@ -119,7 +120,8 @@ class QueryUi {
       }.bind(this), 100);
     }
     else {
-      this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+      //this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
+      this.#openFilterDialogForQueryAxisItemUi(queryAxisItemUi);
     }
   }
 
@@ -258,15 +260,31 @@ class QueryUi {
     }
     var expression = axisItem.columnName;
     if (axisItem.memberExpressionPath) {
-      expression = `${expression}.${axisItem.memberExpressionPath.join('.')}`;
+      var path = Object.assign([], axisItem.memberExpressionPath);
+      switch (axisItem.derivation) {
+        case 'elements':
+        case 'element indices':
+          path.pop();
+      }
+      expression = `${expression}.${path.join('.')}`;
     }
-    
+
     if (axisItem.derivation) {
-      expression = `${axisItem.derivation} of ${expression}`;
+      if (expression) {
+        expression = `${axisItem.derivation} of ${expression}`;
+      }
+      else {
+        expression = axisItem.derivation;
+      }
     }
     else 
     if (axisItem.aggregator) {
-      expression = `${axisItem.aggregator} of ${expression}`;
+      if (expression) {
+        expression = `${axisItem.aggregator} of ${expression}`;
+      }
+      else {
+        expression = axisItem.aggregator;
+      }
     }
     
     return expression;
@@ -295,7 +313,7 @@ class QueryUi {
 
   #getQueryAxisItemUi(queryModelAxisItem){
     var axisId = queryModelAxisItem.axis;
-    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName}"]`;
+    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName || ''}"]`;
     
     if (queryModelAxisItem.memberExpressionPath){
       cssSelector += `[data-member_expression_path='${JSON.stringify(queryModelAxisItem.memberExpressionPath)}']`;
@@ -346,7 +364,7 @@ class QueryUi {
     
     var title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
     itemUi.setAttribute('title', title);
-    itemUi.setAttribute('data-column_name',  axisItem.columnName);
+    itemUi.setAttribute('data-column_name', axisItem.columnName || '');
 
     var memberExpressionPath = axisItem.memberExpressionPath;
     if (memberExpressionPath) {
@@ -539,6 +557,29 @@ class QueryUi {
     this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
     
     this.#initDragAndDrop();
+    
+    this.#initFilterUiEvents();
+  }
+  
+  #initFilterUiEvents(){
+    var filterUi = this.#filterDialog;
+    var filterDialog = filterUi.getDom();
+    filterDialog.addEventListener('close', this.#filterDialogStateChanged.bind(this));
+  }
+  
+  #filterDialogStateChanged(){
+    var filterUi = this.#filterDialog;
+    var filterDialog = filterUi.getDom();
+    var queryAxisItem = filterUi.getQueryAxisItem();
+    var queryAxisItemUi = this.#getQueryAxisItemUi(queryAxisItem);
+    var opened = filterDialog.hasAttribute('open');
+    var attribute = 'data-is-being-edited-by-filter-dialog';
+    if (opened) {
+      queryAxisItemUi.setAttribute(attribute, true);
+    }
+    else {
+      queryAxisItemUi.removeAttribute(attribute);
+    }
   }
   
   #initDragAndDrop(){
@@ -572,6 +613,7 @@ class QueryUi {
       }
 
       data['application/json'] = queryAxisItem;
+      DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
 
       DragAndDropHelper.setData(event, data);
       var dataTransfer = event.dataTransfer;
@@ -737,19 +779,49 @@ class QueryUi {
       
       var info = DragAndDropHelper.getData(event);
       var queryAxisItem = info['application/json'];
-
-      if (axisId === QueryModel.AXIS_CELLS && !Boolean(queryAxisItem.aggregator)) {
-        var defaultAggregator = info.defaultaggregator.value;
-        queryAxisItem.aggregator = defaultAggregator;
+      
+      switch (axisId) {
+        case QueryModel.AXIS_CELLS:
+          if (!Boolean(queryAxisItem.aggregator)) {
+            var defaultAggregator = info.defaultaggregator.value;
+            queryAxisItem.aggregator = defaultAggregator;
+          }
+          delete queryAxisItem.includeTotals;
+          delete queryAxisItem.filter;
+          break;
+        case QueryModel.AXIS_FILTERS:
+          delete queryAxisItem.includeTotals;
+          break;
+        case QueryModel.AXIS_ROWS:
+        case QueryModel.AXIS_COLUMNS:
+          delete queryAxisItem.filter;
+          break;
+        default:
       }
       
       queryAxisItem.axis = axisId;
       
       var item = queryUiElements.item; //prevElements ? prevElements.item : undefined;
+      
+      // assign the dropped item an index to position it on the axis.
       if (item) {
+        var dragOverSide = item.getAttribute('data-dragoverside');
+        // if dragging over an existing item, then we need to update to index to that item's index
+        // (the drag over code already figured out that this new item comes behind this one)
         var queryModelItem = this.#getQueryModelItem(item);
         var index = queryModelItem.index;
+        if (dragOverSide  === 'right'){
+          if (queryAxisItem.axis === axisId && (queryAxisItem.index > index || queryAxisItem.index === undefined)) 
+          index += 1;
+        }
         queryAxisItem.index = index;
+      }
+      else {
+        // https://github.com/rpbouman/huey/issues/368
+        // if we're dropping the item at the end of the axis, 
+        // then it must appear at the end. The item's original index (if any) must be deleted, 
+        // so that the query model will add it to the end.
+        delete queryAxisItem.index;
       }
       cleanupPrevElements();
       

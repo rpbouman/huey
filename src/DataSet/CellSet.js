@@ -106,75 +106,6 @@ class CellSet extends DataSetComponent {
     return allRanges;
   }
 
-  #getCteForTupleGroup(tupleGroup){
-    var queryAxisItems = tupleGroup.queryAxisItems;
-    var fields = tupleGroup.fields;
-    var tuples = tupleGroup.tuples;
-    var cellIndices = Object.keys(tuples);
-
-    var columns = [CellSet.#cellIndexColumnName];
-    var joinConditions = [];
-    var rows = [];
-    var value;
-    var hasNulls = new Array(queryAxisItems.length).fill(false);
-    var lastIndex = cellIndices.length - 1;
-    for (var i = 0; i < cellIndices.length; i++){
-      var cellIndex = cellIndices[i];
-      var tuple = tuples[cellIndex];
-      var row = [cellIndex];
-      for (var j = 0; j < queryAxisItems.length; j++){
-        var queryAxisItem = queryAxisItems[j];
-        if (queryAxisItem === undefined) {
-          continue;
-        }
-        var literalWriter = queryAxisItem.literalWriter;
-        var value = tuple[j];
-        if (value === null){
-          hasNulls[j] = true;
-        }
-        var field = fields[j];
-        var literal = literalWriter(value, field);
-        row.push(literal);
-
-        if (i === lastIndex) {
-          var itemSql;
-          if (queryAxisItem.memberExpressionPath || queryAxisItem.derivation) {
-            itemSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-          }
-          else {
-            itemSql = queryAxisItem.columnName;
-          }
-          columns.push(itemSql);
-          var leftJoinColumn = getQualifiedIdentifier(CellSet.#tupleDataRelationName, itemSql);
-          var rightJoinColumn = getQualifiedIdentifier(CellSet.datasetRelationName, itemSql);
-          var joinOperator = hasNulls[j] ? 'IS NOT DISTINCT FROM' : '=';
-          joinConditions.push(`${leftJoinColumn} ${joinOperator} ${rightJoinColumn}`);
-        }
-
-      }
-      rows.push(row);
-    }
-
-    var relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n ${columns.map(quoteIdentifierWhenRequired).join('\n, ')})`;
-    var valuesSql = rows.map(function(row){
-      return `( ${row.join(', ')} )`;
-    }).join('\n ,');
-    var valuesClause = `(VALUES\n  ${valuesSql}\n) AS ${relationDefinition}`;
-
-    var groupByList = getQualifiedIdentifier(CellSet.#tupleDataRelationName, CellSet.#cellIndexColumnName);
-    var joinClause = (joinConditions.length ? 'LEFT' : 'CROSS') + ' JOIN ' + quoteIdentifierWhenRequired(CellSet.datasetRelationName);
-    if (joinConditions.length){
-      joinClause += `\nON ${joinConditions.join('\n  AND ')}`;
-    }
-
-    var sql = [
-      `FROM ${valuesClause}`,
-      joinClause,
-      `GROUP BY ${groupByList}`
-    ];
-    return sql.join('\n');
-  }
-
   #getTuplesCte(tuplesToQuery, tuplesFields, includeGroupingId){
     var tupleSets = this.#tupleSets;
     var totalsItems = [];
@@ -195,12 +126,12 @@ class CellSet extends DataSetComponent {
             return queryAxisItem.includeTotals;
           });
         }
-        if (j){
-          groupingId <<= totalsItems[j-1].length;
+        if (j && totalsItems[j] && totalsItems[j].length){
+          groupingId <<= totalsItems[j].length;
         }
         var tuple = tuples[j];
         if (tuple){
-          groupingId += parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
+          groupingId |= parseInt(tuple[TupleSet.groupingIdAlias]) || 0;
           var tupleValues = tuple.values;
           var fields = tuplesFields[j];
           _fields: for (var k = 0; k < queryAxisItems.length; k++){
@@ -217,6 +148,7 @@ class CellSet extends DataSetComponent {
       }
       combinationTuples.push(combinationTuple);
     }
+    
     if (cellIndices.length === 0){
       combinationTuples.push([0]);
     }
@@ -231,9 +163,107 @@ class CellSet extends DataSetComponent {
     if (includeGroupingId) {
       relationDefinition.push(quoteIdentifierWhenRequired(TupleSet.groupingIdAlias));
     }
+    
+    if (combinationTuples[0].length !== relationDefinition.length){
+      // this is https://github.com/rpbouman/huey/issues/360
+      // I think this shouldn't happen anymore but we keep this in for now.
+      // 
+      debugger;
+    }
+    
     relationDefinition = `${quoteIdentifierWhenRequired(CellSet.#tupleDataRelationName)}(\n  ${relationDefinition.join('\n, ')}\n)`;
     tuplesSql = `${relationDefinition} AS (\n  FROM (VALUES\n    ${tuplesSql}\n  )\n)`;
     return tuplesSql;
+  }
+  
+  // this method is here to implement
+  // https://github.com/rpbouman/huey/issues/134
+  // idea is to use the tuples to come up with a more clever/optimized query condition 
+  // to be pushed down to the lowest level of the cellset.
+  #getFilterAxisItemsForCells(
+    // object keyed by cellindex, with an array of tuples as value.
+    tuplesToQuery,
+    // fields describing the values of the tuples.
+    tuplesFields,
+    // the cell axis items for which to generate aggregates
+    cellsAxisItemsToFetch
+  ){
+    var tupleSets = this.#tupleSets;
+    var queryModel = this.getQueryModel();
+    var filterAxis = queryModel.getFiltersAxis();
+    var originalFilterAxisItems = filterAxis.getItems();
+    
+    /*
+    // most basic optimization: IN clause for all non-derived items (=columns)
+    // we will make a special tuple filter item for this:
+    // - a filter item that combines multiple axis items, and a array of tuple value arrays
+    var first = true;
+    var columnItems = [];
+    var fields = [];
+    var tupleValues = [];
+    var tuplesFilterItem;
+    for (var tupleIndex in tuplesToQuery){
+      var filterTupleValues = [];
+      var tupleToQuery = tuplesToQuery[tupleIndex];
+      for (var i = 0; i < tupleSets.length; i++){
+        var tuple = tupleToQuery[i];
+        if (!tuple) {
+          continue;
+        }
+        var tupleFields = tuplesFields[i];
+        var tupleValues = tuple.values;
+
+        var tupleSet = tupleSets[i];
+        var queryAxisItems = tupleSet.getQueryAxisItems();
+        
+        for (var j = 0; j < queryAxisItems.length; j++){
+          var queryAxisItem = queryAxisItems[j];
+          if (queryAxisItem.derivation) {
+            continue;
+          }
+          // check if this tuple item appears in the filters axis
+          var sqlForQueryAxisItem = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          var originalFilterAxisItemIndex = originalFilterAxisItems.findIndex(function(filterAxisItem){
+            return QueryAxisItem.getSqlForQueryAxisItem(filterAxisItem) === sqlForQueryAxisItem;
+          });
+          // If it exists as fitler axis item, we can now remove it since the condition we're generating is stronger
+          if (originalFilterAxisItemIndex !== -1) {
+            originalFilterAxisItems.splice(originalFilterAxisItemIndex, 1);
+          }
+            
+          if (first){
+            columnItems.push(queryAxisItem);
+            var tupleField = tupleFields[j];
+            fields.push(tupleField);
+          }
+          var tupleValue = tupleValues[j];
+          filterTupleValues.push(tupleValue);
+        }
+      }
+      
+      if (first) {
+        first = false;
+        if (!columnItems.length) {
+          break;
+        }
+        tuplesFilterItem = {
+          queryAxisItems: columnItems,
+          fields: fields,
+          filter: {
+            filterType: FilterDialog.filterTypes.INCLUDE,
+            values: []
+          }
+        }
+      }
+      tuplesFilterItem.filter.values.push(filterTupleValues)
+    }
+    
+    if (tuplesFilterItem) {
+      originalFilterAxisItems.unshift(tuplesFilterItem);
+    }
+    */
+    
+    return originalFilterAxisItems;
   }
 
   #getSqlQueryForCells(
@@ -251,13 +281,21 @@ class CellSet extends DataSetComponent {
     var columnsAxisItems = queryModel.getColumnsAxis().getItems();
     var axisItems = [].concat(rowsAxisItems, columnsAxisItems);
     var allItems = [].concat(axisItems, cellsAxisItemsToFetch || []);
+    var filterAxisItems = this.#getFilterAxisItemsForCells(
+      tuplesToQuery,
+      tuplesFields,
+      cellsAxisItemsToFetch
+    );
+    
+    var samplingConfig = queryModel.getSampling(QueryModel.AXIS_CELLS);
     var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
-      datasource: queryModel.getDatasource(), 
+      datasource: datasource, 
       queryAxisItems: allItems, 
-      filterAxisItems: queryModel.getFiltersAxis().getItems(),
+      filterAxisItems: filterAxisItems,
       includeOrderBy: false,
       finalStateAsCte: true,
-      cteName: '__huey_cells'
+      cteName: '__huey_cells',
+      samplingConfig: samplingConfig
     });
 
     var totalsItems = allItems.filter(function(queryAxisItem){
@@ -266,7 +304,7 @@ class CellSet extends DataSetComponent {
     var hasTotalsItems = Boolean(totalsItems.length);
     var tuples = this.#getTuplesCte(tuplesToQuery, tuplesFields, hasTotalsItems);
     
-    sql += `\n, ${tuples}`;
+    sql += `, ${tuples}`;
     
     var select = cellsAxisItemsToFetch.map(function(axisItem){
       var expression = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);

@@ -1,0 +1,84 @@
+menu[role=menu]#dataSourceMenu {
+  left: 320px;
+  top: 30px;
+  
+  > li[role=menuitem] {
+    
+    > input[type=radio] {
+      display: none;
+    }
+    
+  }
+  
+}
+
+/* this is used in the datasource menu when prompting for missing datasource */
+menu.dataSources {
+  padding-inline-start: 0px;
+
+  > li {
+    list-style-type: none;
+    white-space: nowrap;
+
+    > label {
+      white-space: nowrap;
+      vertical-align: super;
+    }
+    
+    > label::before {
+      display: inline-block;
+      font-family: var( --huey-icon-font-family ) !important;
+      font-size: var( --huey-icon-medium );
+      color: var( --huey-icon-color );
+      width: 24px;
+    }
+
+    > button {
+      display: none;
+    }
+  }
+}
+
+/**/
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > span.label::before {
+  /* file-type-csv */
+  content: '\fb09';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > summary > span.label::before {
+  /* file-type-csv */
+  content: '\fb09';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > span.label::before {
+  /* file-type-txt */
+  content: '\fb19';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > span.label::before {
+  /* file-type-js */
+  content: '\fb0e';
+}
+
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > span.label::before {
+  /* file-type-sql */
+  content: '\fb0e';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > span.label::before {
+  /* file-stack */
+  content: '\f503';
+}
+
+menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > label::before,
+#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > span.label::before {
+  /* file-type-xls */
+  content: '\fb1b';
+}
+

@@ -15,11 +15,19 @@
     </style>
 
     <script>
-    var hueyVersionNumber = '1.0.0';
-    var hueyVersionName = 'Aylesbury';
+    var hueyVersionNumber = '1.0.4';
+    var hueyVersionName = 'Duclair';
+    
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
-    var tablerIconsFontVersion = '3.26.0';
+    // see: https://github.com/tabler/tabler-icons/issues/1310
+    var tablerIconsFontVersion = '3.25.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
+    var preloadLink = document.createElement('link');
+    preloadLink.setAttribute('rel', 'preload');
+    preloadLink.setAttribute('as', 'font');
+    preloadLink.setAttribute('href', tablerIconsFontUrl);
+    preloadLink.setAttribute('crossorigin', 'true');
+    document.head.insertBefore(preloadLink, document.getElementById('tabler-font'));
     var tablerFontStyleSheet = document.getElementById('tabler-font');
     document.styleSheets[0].insertRule(`
       @font-face {
@@ -31,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev17.0';
+    var duckdbLibraryVersion = '1.29.1-dev68.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -47,6 +55,7 @@
       item.innerText = url;
       list.appendChild(item);
     }
+    
     </script>
 
     <!-- 
@@ -77,6 +86,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DraggableDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
@@ -89,12 +99,14 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DataSource/DataSourcesUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceSettingsDialog/DatasourceSettingsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceSettingsDialog/DatasourceSettingsDialogLogic.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DatasourceMenu/DatasourceMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QueryUi/QueryUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="FilterUi/FilterUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUi.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUiHighlighting.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUiContextMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PromptUi/PromptUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/SidebarLogic.css"/>
@@ -152,11 +164,42 @@
       <option data-auto="true" value="empty">(empty)</option>
       <option data-auto="true" value="NULL">NULL</option>
     </datalist>
+    
+    <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
+    <datalist id="commonDittoMarks">
+      <!-- non breaking space -->
+      <option value="&nbsp;">&nbsp;</option>
+      <!-- one single quote (apostrophe) -->
+      <option value="&apos;">'</option>
+      <!-- two single quotes (apostrophes) -->
+      <option value="&apos;&apos;">''</option>
+      <!-- double quote -->
+      <option value="&quot;">"</option>
+      <!-- Right-Pointing Double Angle Quotation Mark » -->
+      <option value="&#xBB;">&#xBB;</option>
+      <!-- Horizontal bar ― -->
+      <option value="&#x2015;">&#x2015;</option>
+      <!-- left double quotation mark: “ -->
+      <option value="&#x201C;">&#x201C;</option>
+      <!-- right double quotation mark: ” -->
+      <option value="&#x201D;">&#x201D;</option>
+      <!-- double low-9 quotation mark: ” -->
+      <option value="&#x201E;">&#x201E;</option>
+      <!-- double high-9 quotation mark: ” -->
+      <option value="&#x201F;">&#x201E;</option>
+      <!--  DOUBLE PRIME -->
+      <option value="&#x2033;">&#x2033;</option>
+      — „ — 
+      <!-- ditto mark: 〃-->
+      <option value="&#x3003;">&#x3003;</option>
+    </datalist>
   </head>
 
   <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
+      <header id="logo">Huey</header>
+      <div id="logoVersion"></div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
@@ -165,6 +208,7 @@
       popover="manual"
       aria-labelledby="uploadUiTitle"
       aria-describedby="uploadUiDescription"
+      draggable="true"
     >
       <header>
         <h3 id="uploadUiTitle"></h3>
@@ -204,28 +248,11 @@
 
     <dialog
       id="exportDialog"
+      draggable="true"
       popover="auto"
       aria-labelledby="uploadUiTitle"
       aria-busy="false"
     >
-      <dialog role="progressbar">
-        <header>
-          <h3 role="status"></h3>
-        </header>
-        <section>
-          <div class="loader loader-medium">Exporting...</div>
-          <div class="timer">
-            <span class="digit"></span>
-            <span class="digit"></span>
-            <span class="digit"></span>
-            <span class="digit"></span>
-          </div>
-        </section>
-        <footer>
-          <!-- TODO: implement cancel of pending export -->
-          <button id="cancelExportButton">Cancel</button>
-        </footer>
-      </dialog>
       <header>
         <h3 id="exportDialogTitle">Export...</h3>
         <form id="exportGeneralSettings">
@@ -396,7 +423,7 @@
                 <input
                   id="exportDelimitedColumnDelimiter"
                   type="text"
-                  value=","
+                  value="\t"
                   title="Enter the character that is to be used as column delimiter."
                   list="commonCsvFieldDelimiters"
                 />
@@ -575,8 +602,58 @@
             </form>
           </div>
         </div>
+        <div>
+          <label
+            role="tab"
+            for="exportXlsx"
+            title="Use this tab to export the data to a Excel (.xlsx) file."
+          >Excel</label>
+          <input
+            id="exportXlsx"
+            name="exportFormat"
+            type="radio"
+          />
+          <div role="tabpanel">
+            <form id="exportXlsxSettings">
+              <label
+                title="Whether to include a row with column headers."
+                for="exportXlsxIncludeHeaders"
+              >Include Headers</label>
+              <input
+                id="exportXlsxIncludeHeaders"
+                title="Check this to include a header row with column names."
+                type="checkbox"
+                checked="true"
+              />
+              <label
+                title="Name of the target sheet."
+                for="exportXlsxSheet"
+              >Sheet name</label>
+              <!-- see https://www.keynotesupport.com/excel-basics/worksheet-names-characters-allowed-prohibited.shtml -->
+              <input
+                id="exportXlsxSheet"
+                title="Optionally enter a name for the target sheet"
+                type="text"
+                size="31"
+                pattern="^[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;]([A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;']{0,29}[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;])?$"
+              />
+              <label
+                for="exportXlsxSheetRowLimit"
+              >Row Limit</label>
+              <input
+                id="exportXlsxSheetRowLimit"
+                value="1048576"
+                type="number"
+                min="0"
+                max="1048576"
+                step="1"
+              />
+            </form>
+          </div>
+        </div>
       </section>
       <footer role="toolbar">
+      
         <button
           id="exportDialogExecuteButton"
           autofocus="true"
@@ -587,12 +664,31 @@
           popovertargetaction="hide"
         >Close</button>
       </footer>
+      <dialog role="progressbar">
+        <header>
+          <h3 role="status"></h3>
+        </header>
+        <section>
+          <div class="loader loader-medium">Exporting...</div>
+          <div class="timer">
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+            <span class="digit"></span>
+          </div>
+        </section>
+        <footer>
+          <!-- TODO: implement cancel of pending export -->
+          <button id="cancelExportButton">Cancel</button>
+        </footer>
+      </dialog>
     </dialog>
 
     <dialog
       id="filterDialog"
+      draggable="true"
       aria-busy="false"
-      popover="auto"
+      popover="manual"
     >
       <header role="toolbar">
         <label
@@ -606,6 +702,10 @@
           <option value="notlike" title="Exclude data that matches the selected patterns">Not Like</option>
           <option value="between" title="Include data within any of the specified value ranges">Between</option>
           <option value="notbetween" title="Exclude data within any of the specified value ranges">Not Between</option>
+          <option value="hasany" title="Include data where the array has any of the selected keys">Include Has Any</option>
+          <option value="hasall" title="Include data where the array has all selected keys">Include Has All</option>
+          <option value="nothasany" title="Exclude data where the array has any of the selected keys">Exclude Has Any</option>
+          <option value="nothasall" title="Exclude data where the array has all selected keys">Exclude Has All</option>
         </select>
       </header>
       <section>
@@ -717,6 +817,7 @@
 
     <dialog
       id="errorDialog"
+      draggable="true"
       popover="auto"
       aria-labelledby="errorDialogTitle"
       aria-describedby="errorDialogDescription"
@@ -742,6 +843,7 @@
 
     <dialog
       id="settingsDialog"
+      draggable="true"
       aria-labelledby="settingsDialogTitle"
       popover="auto"
     >
@@ -982,6 +1084,7 @@
           <div role="tabpanel">
             <form id="pivotSettings">
               <fieldset>
+                <legend>Columns</legend>
                 <label
                   for="maxCellWidth"
                   title="The maximum string length to consider when sizing pivot table cells and headers"
@@ -993,6 +1096,29 @@
                   min="1"
                   max="256"
                   value="30"
+                />
+              </fieldset>
+              <fieldset>
+                <legend>Repeating Values</legend>
+                <label
+                  for="hideRepeatingAxisValues"
+                  title="Uncheck to always show all axis values; check to hide repeated values."
+                >Hide repeating axis values</label>
+                <input 
+                  id="hideRepeatingAxisValues"
+                  title="Uncheck to always show all axis values; check to hide repeated values."
+                  type="checkbox"
+                />
+                <label
+                  for="dittoMark"
+                  title="A symbol to indicate a repeated value."
+                >Ditto mark</label>
+                <input 
+                  id="dittoMark"
+                  list="commonDittoMarks"
+                  size="6"
+                  type="text"
+                  title="A symbol to indicate a repeated value."
                 />
               </fieldset>
               <fieldset>
@@ -1015,6 +1141,24 @@
                   title="Whether Totals are shown before or after the items"
                 >
                 </select>
+              </fieldset>
+              <fieldset>
+                <legend>Appearance</legend>
+                <label
+                  title="Enable to let alternating rows have a slightly different color. This makes easier to visually identify a cell's row headers."
+                  for="alternatingRowColors"
+                >Alternating Row Colors</label>
+                <input type="checkbox" id="alternatingRowColors"/>
+                <label
+                  title="Enable this to create a highlight effect when hovering the mouse pointer over a row. This makes it easier to identify a cell's row headers."
+                  for="hoverRowHighlight"
+                >Hover Row Highlighting</label>
+                <input type="checkbox" id="hoverRowHighlight"/>
+                <label
+                  title="Enable this to create a highlight effect when hovering the mouse pointer over a column. This makes it easier to identify a cell's column headers."
+                  for="hoverColumnHighlight"
+                >Hover Column Highlighting</label>
+                <input type="checkbox" id="hoverColumnHighlight"/>
               </fieldset>
             </form>
           </div>
@@ -1069,6 +1213,7 @@
 
     <dialog
       id="promptUi"
+      draggable="true"
       aria-labelledby="promptDialogTitle"
       popover="manual"
     >
@@ -1098,7 +1243,8 @@
 
     <dialog
       id="aboutDialog"
-      aria-labelledby="aboutDialogTitle"
+      draggable="true"
+      aria-labelledby"aboutDialogTitle"
       popover="auto"
     >
       <header>
@@ -1138,13 +1284,27 @@
 
     <!-- this template is to present datasources in a prompt dialog and is used by the PageStateManager -->
     <template id="datasource-menu-item">
-      <li role="menuitem" data-nodetype="datasource" data-datasourcetype="">
-        <input id="datasourceMenu-${index}" type="radio" name="compatibleDatasources"/>
+      <li 
+        role="menuitem" 
+        data-nodetype="datasource" 
+        data-datasourcetype=""
+        data-datasource-id=""
+        popovertarget="dataSourceMenu"
+      >
+        <input 
+          type="radio" 
+          name="compatibleDatasources"
+        />
+        <button
+          popovertarget="dataSourceMenu"
+        ></button>
         <label for="datasourceMenu-${index}"></label>
       </li>
     </template>
+    
     <dialog
       id="datasourceSettingsDialog"
+      draggable="true"      
       aria-labelledby="datasourceSettingsDialogTitle"
       popover="auto"
     >
@@ -1615,7 +1775,27 @@
         </label>
 
         <!-- title in the toolbar identifies the currently selected datasource -->
-        <h1 id="currentDatasource"></h1>
+        <label 
+          role="menuitem"
+          id="currentDatasource"
+          for="currentDatasourceMenuButton"
+          data-current-datasource=""
+          title="Current datasource"
+        >
+          <button 
+            id="currentDatasourceMenuButton" 
+            popovertarget="dataSourceMenu"
+          ></button>
+          <menu
+            id="dataSourceMenu"
+            class="dataSources"
+            role="menu"
+            aria-labelledby="currentDatasourceLabel"
+            popover="auto"
+          >
+            
+          </menu>
+        </label>
 
         <!-- info about the last executed query -->
         <label for="queryResultRowsInfo" title="The total number of tuples on the rows axis.">
@@ -1675,6 +1855,57 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            <template id="dataSourceGroupNodeActionButton">
+              <label
+                class="${class}"
+                for="${id}"
+                title="${title}"
+              >
+                <button id="${id}"></button>
+              </label>
+            </template>
+            <template id="dataSourceNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasource"
+                data-datasourcetype="${datasourceType}"
+                title="${title}"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
+            <template id="dataSourceGroupNode">
+              <details
+                role="treeitem"
+                data-nodetype="datasourcegroup"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
+            <template id="dataSourceSchemaNode">
+              <details
+                role="treeitem"
+                data-nodetype="duckdb_schema"
+                title="${title}"
+                data-grouptype="${group-type}"
+                data-datasourceids="${datasource-list}"
+                data-catalog-name="${catalogName}"
+                data-schema-name="${schemaName}"
+                open="true"
+              >
+                <summary>
+                  <span class="label">${caption}</span>
+                </summary>
+              </details>
+            </template>
             <div
               id="datasourcesUi"
               role="tree"
@@ -1704,7 +1935,7 @@
                   id="searchAttribute"
                   type="search"
                   placeholder="Search by Attribute name"
-                  title="Enter a search term to find matching attributes"
+                  title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
                   aria-labelledby="searchAttributesLabel"
                   autofocus="true"
                 />
@@ -1715,7 +1946,7 @@
               class="attributeUi"
               style="flex-grow: 1;"
               role="tree"
-            />
+            ></div>
           </div>
         </div>
       </nav>
@@ -1808,37 +2039,55 @@
           popover="auto"
         >
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyCell">
+            <label 
+              for="pivotTableContextMenuItemCopyCell"
+              title="Copy the value of this cell to the clipboard"
+            >
               Copy Cell Value
               <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
             </label>
           </li>
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyColumn">
-              Copy Column Values
+            <label 
+              for="pivotTableContextMenuItemCopyColumn"
+              title="Copy the column header values to the clipboard"
+            >
+              Copy Column Tuple
               <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
             </label>
           </li>
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyColumnTuples">
+            <label 
+              for="pivotTableContextMenuItemCopyColumnTuples"
+              title="Copy the header values for each column to the clipboard"
+            >
               Copy Column Tuples
               <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
             </label>
           </li>
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyRow">
-              Copy Row Values
+            <label 
+              for="pivotTableContextMenuItemCopyRow"
+              title="Copy the row header values to the clipboard"
+            >
+              Copy Row Tuple
               <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
             </label>
           </li>
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyRowTuples">
+            <label 
+              for="pivotTableContextMenuItemCopyRowTuples"
+              title="Copy the header values for each row to the clipboard"
+            >
               Copy Row Tuples
               <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
             </label>
           </li>
           <li role="menuitem">
-            <label for="pivotTableContextMenuItemCopyTable">
+            <label 
+              for="pivotTableContextMenuItemCopyTable"
+              title="Copy the entire pivot table to the clipboard"
+            >
               Copy Table
               <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
             </label>
@@ -1904,6 +2153,7 @@
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
 
+    <script onload="resourceLoaded(this)" src="DragAndDrop/DraggableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
@@ -1933,8 +2183,10 @@
     <script onload="resourceLoaded(this)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this)" src="Search/Search.js"></script>
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>
+    <script onload="resourceLoaded(this)" src="DatasourceMenu/DatasourceMenu.js"></script>
     <script onload="resourceLoaded(this)" src="QueryUi/QueryUi.js"></script>
     <script onload="resourceLoaded(this)" src="FilterUi/FilterUi.js"></script>
+    <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUiHighlighting.js"></script>
     <script onload="resourceLoaded(this)" src="PivotTableUi/PivotTableUi.js"></script>
     <script onload="resourceLoaded(this)" src="Routing/Routing.js"></script>
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
@@ -1970,6 +2222,14 @@
         };
 
         initApplication();
+      })
+      .catch(function(e){
+        document.body.setAttribute('aria-busy', false);
+        document.body.getElementsByTagName('main')[0].style.display = 'none';
+        showErrorDialog(e);
+      })
+      .finally(function(){
+        document.body.setAttribute('aria-busy', false);
       });
     </script>
   </body>

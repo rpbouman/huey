@@ -1,8 +1,8 @@
 
 menu[role=menu]#pivotTableContextMenu {
-  
+
   > li {
-    
+
     > label[for=pivotTableContextMenuItemCopyCell]:before {
       /* clipboard-copy */
       content: '\f299';
@@ -34,4 +34,17 @@ menu[role=menu]#pivotTableContextMenu {
     }
   }
 
+  > li:has(> label[for=pivotTableContextMenuItemCopyCell]) {
+    border-bottom-style: solid;
+  }
+
+  > li:has(> label[for=pivotTableContextMenuItemCopyColumnTuples]) {
+    border-bottom-style: solid;
+  }
+
+  > li:has(> label[for=pivotTableContextMenuItemCopyRowTuples]) {
+    border-bottom-style: solid;
+  }
+
 }
+

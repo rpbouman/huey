@@ -96,32 +96,46 @@ class SqlQueryGenerator {
   }
   
   static #getConditionForFilterItems(filterItems, tableAlias){
-    return filterItems
-    .filter(function(filterItem){
-      var filter = filterItem.filter;
-      if (!filter) {
-        return false;
+    // cull filter items that have incomplete filters
+    // and filters without any enabled filter values.
+    filterItems = filterItems.filter(function(filterItem){
+      return QueryAxisItem.isFilterItemEffective(filterItem);
+    });
+    
+    // create SQL conditions for filter items
+    var filterConditions = filterItems.map(function(filterItem){
+      var conditionSql;
+      var queryAxisItems = filterItem.queryAxisItems;
+      // this happens when the cellset generates a filter item to push down tuples, 
+      // see https://github.com/rpbouman/huey/issues/134
+      if (queryAxisItems) {
+        var fields = filterItem.fields;
+        var columns = queryAxisItems.map(function(queryAxisItem){
+          var columnSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+          return columnSql;
+        }).join('\n, ');
+        var values = filterItem.filter.values.map(function(tupleValues){
+          var valueList = queryAxisItems.map(function(queryAxisItem, index){
+            var literalWriter = queryAxisItem.literalWriter;
+            var value = tupleValues[index];
+            var field = fields[index];
+            return literalWriter(value, field);
+          }).join(',');
+          return `(${valueList})`;
+        }).join('\n,');
+        conditionSql = `(${columns}) IN (${values})`;
       }
-      
-      var values = filter.values;
-      if (!values){
-        return false;
+      else {
+        conditionSql = QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
       }
-      
-      var keys = Object.keys(values);
-      keys = keys.filter(function(key){
-        var valueObject = values[key];
-        return valueObject.enabled !== false;
-      });
-      if (keys.length === 0) {
-        return false;
-      }
-      return true;
-    })
-    .map(function(filterItem){
-      return QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
-    })
-    .join('\nAND ');
+      return conditionSql;
+    });
+    
+    // combine SQL conditions
+    var filterCondition = filterConditions.join('\nAND ');
+    
+    // done.
+    return filterCondition;
   }
   
   static #transformFilterItems(
@@ -195,7 +209,12 @@ class SqlQueryGenerator {
         }
         else {
           delete filterAxisItem.memberExpressionPath;
-          delete filterAxisItem.derivation;
+          if (filterAxisItem.derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(filterAxisItem.derivation);
+            if (derivationInfo.unnestingFunction) {
+              delete filterAxisItem.derivation;
+            }
+          }
         }
         
         // now we have to check whether the remaining expressionpath of the filter item still contains unnesting expressions.
@@ -217,25 +236,51 @@ class SqlQueryGenerator {
   
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
     var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    var dataFoundationAlias = '__huey_data_foundation';
+    var alias = '__huey_data_foundation';
     var fromClause = datasource.getFromClauseSql();
     
     var filterAxisItems = filterAxisItemsByNestingStage[''];
     delete filterAxisItemsByNestingStage[''];
     
-    var cteIndex = 0;
     var currentItems = queryAxisItems;
-    var cte, ctes = [{
+    var newItems;
+    
+    var cte = {
       items: currentItems,
-      from: `${fromClause} AS "${dataFoundationAlias}"`,
+      from: `${fromClause} AS "${alias}"`,
       filters: filterAxisItems,
-      alias: dataFoundationAlias,
-    }];
+      alias: alias
+    };
+    var ctes = [cte];
+    
+    var findIndexOfRowNumberItem = function(queryAxisItem){
+      return queryAxisItem.derivation === 'row number';
+    };
+    var indexOfRownumberItem = currentItems.findIndex(findIndexOfRowNumberItem);
+    
+    if (indexOfRownumberItem !== -1){
+      newItems = Object.assign([], currentItems);
+      do {
+        var rowNumberItem = newItems[indexOfRownumberItem];
+        var newRowNumberItem = Object.assign({}, rowNumberItem);
+        newRowNumberItem.columnName = QueryAxisItem.getSqlForQueryAxisItem(rowNumberItem);
+        delete newRowNumberItem.derivation;
+        newItems[indexOfRownumberItem] = newRowNumberItem;
+        indexOfRownumberItem = newItems.findIndex(findIndexOfRowNumberItem);
+      } while (indexOfRownumberItem !== -1);
+      alias = 'cte' + (ctes.length + 1);
+      ctes.push({
+        items: newItems,
+        alias: alias,
+        from: `FROM ${cte.alias} AS "${alias}"`,
+        filters: filters
+      });
+    }
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
     do {
-      cte = ctes[cteIndex++];
+      cte = ctes[ctes.length - 1];
       // at the start of a new stage, initialize
       var unnestingDerivation = undefined;
       var unnestingItem = undefined;
@@ -246,7 +291,7 @@ class SqlQueryGenerator {
       var unnestingItemMemberExpressionPathPrefixString = undefined;
       var unnestingItemMemberExpression = undefined;
       var unnestingItemMemberExpressionType = undefined;
-      var newItems = [];
+      newItems = [];
       var filters;
       var currentItems = cte.items;
       cte.items = [];
@@ -381,7 +426,7 @@ class SqlQueryGenerator {
       } // end items loop
       
       if (unnestingItem) {
-        var alias = 'cte' + cteIndex;
+        alias = 'cte' + (ctes.length + 1);
         ctes.push({
           items: newItems,
           alias: alias,
@@ -400,7 +445,6 @@ class SqlQueryGenerator {
     var countAllAlias = options.countAllAlias;
     var nullsSortOrder = options.nullsSortOrder;
     var totalsPosition = options.totalsPosition;
-    var samplingConfig = options.samplingConfig;
     var includeOrderBy = options.includeOrderBy === false ? false : true;
     var useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
     
@@ -416,11 +460,16 @@ class SqlQueryGenerator {
     var selectListExpressions = [];
 
     // the group by expression includes expressons for all axis items.
-    var axisGroupByExpressions, groupByExpressions = {};
+    var axisGroupByExpressions;
+    
+    var groupByExpressions = {};
     groupByExpressions[QueryModel.AXIS_ROWS] = [];
     groupByExpressions[QueryModel.AXIS_COLUMNS] = [];
+    
     // the groupingSets are created when we find an axis item that has includeTotals
-    var axisGroupingSets, groupingSets = {};
+    var axisGroupingSets;
+    
+    var groupingSets = {};
     groupingSets[QueryModel.AXIS_ROWS] = [];
     groupingSets[QueryModel.AXIS_COLUMNS] = [];
     
@@ -433,6 +482,10 @@ class SqlQueryGenerator {
       var columnId = columnIds[i];
       var columnExpression = columnExpressions[columnId];
       var columnAlias = quoteIdentifierWhenRequired(columnId);
+      
+      // TODO: see https://github.com/rpbouman/huey/issues/401
+      // we should check if it's safe to use a column alias. 
+      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
       var columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
@@ -445,26 +498,37 @@ class SqlQueryGenerator {
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
       var queryAxisItem = queryAxisItems[i];
+      var axisId = queryAxisItem.axis;
+      if (axisId === QueryModel.AXIS_CELLS){
+        continue;
+      }
+      
       var sortDirection = queryAxisItem.sortDirection || 'ASC';
       var itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
       itemNullsSortOrder = itemNullsSortOrder ? ` NULLS ${itemNullsSortOrder}` : '';
       
-      var axisId = queryAxisItem.axis;
       axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
-        axisGroupingSets = groupingSets[axisId];
+        // make a grouping set for the group by expression up to this point
         var groupingSet = [].concat(axisGroupByExpressions);
+        axisGroupingSets = groupingSets[axisId];
         axisGroupingSets.push(groupingSet);
-        groupingIdExpressions.push(columnExpressionReference);
+        
+        // each totals column needs to be included in a grouping id expression
+        // so we can figure out which result rows are totals (and for what group).
+        
+        // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
+        groupingIdExpressions.push(columnExpression);
+        
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
-        orderByExpressions.push(columnExpressionReference);
+        orderByExpressions.push(columnExpression);
       }
       
-      if (axisId !== QueryModel.AXIS_CELLS && queryAxisItem.derivation !== 'rownumber'){
-        axisGroupByExpressions.push(columnExpressionReference);
-      }
+      // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
+      axisGroupByExpressions.push(columnExpression);
+      
       var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
@@ -490,7 +554,7 @@ class SqlQueryGenerator {
       }
       else
       if (axisGroupByExpressions.length) {
-        rowsAxisGroupingSets = [axisGroupByExpressions];
+        rowsAxisGroupingSets.push(axisGroupByExpressions);
       }
 
       var columnsAxisGroupingSets = groupingSets[QueryModel.AXIS_COLUMNS];
@@ -503,15 +567,25 @@ class SqlQueryGenerator {
       }
       else
       if (axisGroupByExpressions.length) {
-        columnsAxisGroupingSets = [axisGroupByExpressions];
+        columnsAxisGroupingSets.push(axisGroupByExpressions);
       }
 
-      axisGroupingSets = [].concat(rowsAxisGroupingSets, columnsAxisGroupingSets);
-      rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
-        columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
-          axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
+      if (rowsAxisGroupingSets.length && columnsAxisGroupingSets.length) {
+        axisGroupingSets = [];
+        rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
+          columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
+            axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
+          });
         });
-      });
+      }
+      else 
+      if (rowsAxisGroupingSets.length){
+        axisGroupingSets = rowsAxisGroupingSets;
+      }
+      else
+      if (columnsAxisGroupingSets.length){
+        axisGroupingSets = columnsAxisGroupingSets;
+      }
       
       var groupingSetsSql = axisGroupingSets
       .map(function(groupingSet){                     // generate SQL for grouping set
@@ -521,12 +595,6 @@ class SqlQueryGenerator {
           '  )'
         ].join('\n');
       })
-      .reduce(function(groupingSetsSql, groupingSql){ // deduplicate grouping sets
-        if (groupingSetsSql.indexOf(groupingSql) === -1){
-          groupingSetsSql.push(groupingSql);
-        }
-        return groupingSetsSql;
-      }, [])                                          // join groups
       .join(',');
       groupByClause = `GROUPING SETS(\n${groupingSetsSql}\n)`;
 
@@ -565,11 +633,8 @@ class SqlQueryGenerator {
       groupByClause = `GROUP BY ${groupByClause}`;
       sql.push(groupByClause);
     }
-    
-    if (samplingConfig){
-      sql.push( getUsingSampleClause(samplingConfig, true) );
-    }
-    if (includeOrderBy !== false) {
+        
+    if (includeOrderBy !== false && orderByExpressions.length) {
       sql.push(`ORDER BY ${orderByExpressions.join('\n,')}`);
     }
 
@@ -594,6 +659,11 @@ class SqlQueryGenerator {
         });
       }
       else 
+      if (item.derivation === 'row number') {
+        var rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
+        selectListExpressions[rowNumberSql] = rowNumberSql;
+      }
+      else
       if (item.aggregator === 'count' && item.columnName === '*'){
         return;
       }
@@ -614,6 +684,11 @@ class SqlQueryGenerator {
     
     SqlQueryGenerator.#generateWhereClause(cte, sql);
     
+    var samplingConfig = sqlOptions.samplingConfig;
+    if (samplingConfig){
+      sql.push( getUsingSampleClause(samplingConfig, true) );
+    }
+
     sql.unshift(`"${cte.alias}" AS (`)
     sql.push(')');
     sql = sql.join('\n');
@@ -622,10 +697,14 @@ class SqlQueryGenerator {
   
   static #generateWhereClause(cte, sql){
     var filterAxisItems = cte.filters;
-    if (filterAxisItems && filterAxisItems.length){
-      var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
-      sql.push(`WHERE ${whereCondition}`);
+    if (!filterAxisItems) {
+      return;
     }
+    if (!filterAxisItems.length){
+      return;
+    }
+    var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
+    sql.push(`WHERE ${whereCondition}`);
   }
 
   static getSqlSelectStatementForAxisItems(options){
@@ -653,7 +732,7 @@ class SqlQueryGenerator {
     var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
     var sqls = ctes.map(function(cte, index){
-      options.samplingConfig = index === 0 ? samplingConfig : undefined;
+      sqlOptions.samplingConfig = index === 0 ? samplingConfig : undefined;
       var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
       return sql;
     });

@@ -1,0 +1,43 @@
+.pivotTableUiContainer[data-alternating-row-colors=true] {
+
+  > .pivotTableUiInnerContainer {
+    
+    > .pivotTableUiTable {
+
+      > .pivotTableUiTableBody {
+
+        /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
+        > .pivotTableUiRow:nth-child(even){
+          > .pivotTableUiCell {
+            filter: brightness( var( --huey-alternating-rows-brightness ) );
+          }
+        }
+
+      }
+      
+    }
+    
+  }
+  
+}
+
+
+.pivotTableUiContainer[data-hover-row-highlighting=true] {
+
+  > .pivotTableUiInnerContainer {
+    
+    > .pivotTableUiTable {
+
+      > .pivotTableUiTableBody {
+
+        /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
+        > .pivotTableUiRow:hover > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+          background-color: var( --huey-highlight-background-color );
+        }
+      }
+      
+    }
+    
+  }
+  
+}

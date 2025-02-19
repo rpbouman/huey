@@ -123,7 +123,7 @@ class QuickQueryMenu {
     
     var rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
     rowsAxisItems.push({
-      derivation: 'rownumber',
+      derivation: 'row number',
       caption: '#'
     });
     
@@ -144,7 +144,7 @@ class QuickQueryMenu {
     var samplingConfig = {
       size: 100,
       unit: 'ROWS',
-      method: 'RESERVOIR',
+      method: 'LIMIT',
       seed: 100
     };
     queryModelState.sampling = {};

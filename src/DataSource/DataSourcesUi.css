@@ -3,7 +3,8 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) >
   left: 1em;
   top: 1em;
   width: calc( 100% - 1em );
-  display: inline-block
+  display: inline-block;
+  white-space: normal;
 }
 
 nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader]::after {
@@ -36,7 +37,7 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   height: calc(100% - 36px);
 
   details > summary > span.label {
-    max-width: calc(100% - 136px);
+    max-width: calc(100% - 140px);
   }
 
   details[role=treeitem] {
@@ -89,6 +90,11 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
       > label.removeActionButton::before {
         /* trash */
         content: '\eb41';
+      }
+
+      > label.downloadActionButton::before {
+        /* download */
+        content: '\ea96';
       }
     }
     
@@ -179,70 +185,18 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   cursor: 'not-allowed';
 }
 
-/* this is used in the datasource menu when prompting for missing datasource */
-menu.dataSources {
-  padding-inline-start: 0px;
-
+/*
+  This is the menu we present in the prompt for datasource export.
+*/
+menu.fileTypes {
+  column-count: 2;
   > li {
     list-style-type: none;
     white-space: nowrap;
-
+    
     > label {
       white-space: nowrap;
       vertical-align: super;
     }
-    
-    > label::before {
-      display: inline-block;
-      font-family: var( --huey-icon-font-family ) !important;
-      font-size: var( --huey-icon-medium );
-      color: var( --huey-icon-color );
-      width: 24px;
-    }
-
   }
 }
-
-/**/
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > span.label::before {
-  /* file-type-csv */
-  content: '\fb09';
-}
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > summary > span.label::before {
-  /* file-type-csv */
-  content: '\fb09';
-}
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > span.label::before {
-  /* file-type-txt */
-  content: '\fb19';
-}
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > span.label::before {
-  /* file-type-js */
-  content: '\fb0e';
-}
-
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > span.label::before {
-  /* file-type-sql */
-  content: '\fb0e';
-}
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > span.label::before {
-  /* file-stack */
-  content: '\f503';
-}
-
-menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > label::before,
-#datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > span.label::before {
-  /* file-type-xls */
-  content: '\fb1b';
-}
-

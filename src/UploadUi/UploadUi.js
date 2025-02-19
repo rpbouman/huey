@@ -72,7 +72,6 @@ class UploadUi {
       if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
         var columnMetadata = await duckDbDataSource.getColumnMetadata();
       }
-      progressBar.value = 100;
       return duckDbDataSource;
     }
     catch (error){
@@ -80,6 +79,7 @@ class UploadUi {
       return error;
     }
     finally {
+      progressBar.value = 100;
       if (destroyDatasource && (duckDbDataSource instanceof DuckDbDataSource)){
         duckDbDataSource.destroy();
       }
@@ -120,7 +120,7 @@ class UploadUi {
     return uploadItem;
   }
 
-  #createInstallExtensionItem(extensionName){
+  #createInstallExtensionItem(extensionName, extensionRepository){
     var extensionItemId = `duckdb_extension:${extensionName}`;
     var uploadItem = this.#createLoadExtensionItem(extensionItemId);
     var label = uploadItem.getElementsByTagName('span').item(0);
@@ -159,13 +159,27 @@ class UploadUi {
       }
 
       if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
-        requiredExtensions.push(requiredDuckDbExtension);
+        var extensionRepository = fileType.duckdb_extension_repository;
+        requiredExtensions.push({
+          extensionName: requiredDuckDbExtension,
+          extensionRepository: extensionRepository
+        });
       }
     }
     return requiredExtensions;
   }
 
   async loadDuckDbExtension(extensionName){
+    
+    var extensionRepository;
+    switch (typeof extensionName){
+      case 'string':
+        break;
+      case 'object':
+        extensionRepository = extensionName.extensionRepository;
+        extensionName = extensionName.extensionName;
+    }
+    
     var invalid = true;
     var body = this.#getBody();
     var installExtensionItem = this.#createInstallExtensionItem(extensionName);
@@ -203,8 +217,13 @@ class UploadUi {
       else {
         message.innerHTML += `Extension ${extensionName} not installed<br/>`;
 
+        var installSql = `INSTALL ${extensionName}`;
+        if (extensionRepository){
+          message.innerHTML += `Extension ${extensionName} comes from non-standard location "${extensionRepository}".<br/>`;
+          installSql += ` FROM ${extensionRepository}`;
+        }
         message.innerHTML += `Installing extension ${extensionName}<br/>`;
-        var result = await connection.query(`INSTALL ${extensionName}`);
+        var result = await connection.query(installSql);
         message.innerHTML += `Extension ${extensionName} installed<br/>`;
         progressbar.value = parseInt(progressbar.value, 10) + 20;
       }
@@ -430,51 +449,57 @@ class UploadUi {
     var okButton = footer.getElementsByTagName('button').item(1);
     return okButton;
   }
-
 }
 
 var uploadUi;
-function initUploadUi(){
-  uploadUi = new UploadUi('uploadUi');
 
-  function afterUploaded(uploadResults){
-    var currentRoute = Routing.getCurrentRoute();
-    if (!Routing.isSynced(queryModel)) {
-      pageStateManager.setPageState(currentRoute);
-      return;
-    }
+function afterUploaded(uploadResults){
+  var currentRoute = Routing.getCurrentRoute();
+  if (!Routing.isSynced(queryModel)) {
+    pageStateManager.setPageState(currentRoute, uploadResults);
+    return;
+  }
+  
+  if (uploadResults.fail === 0 && uploadResults.success === 1){
+
+    // TODO: check if there is already a query active.
+    // if not, we can just start analyzing the newly uploaded datasource.
+    // But if there is a query active, then we'd be losing it if we just switch to the new datasource.
+    // in these cases we could do two things:
+    // - do nothing, don't even close the upload ui. 
+    //   The user will have a choice anyway, as they can either hit the analyze button, or cancel.
+    // - prompt the user and ask them what to do.
+    //   - if the current query could be satisfied by the new datasource then we could offer that in the prompt
+    //   - we can always offer the option to start analyzing the new datasource (losing the current query)
+    //   - we can always offer to do nothing
     
-    if (uploadResults.fail === 0 && uploadResults.success === 1){
-
-      // TODO: check if there is already a query active.
-      // if not, we can just start analyzing the newly uploaded datasource.
-      // But if there is a query active, then we'd be losing it if we just switch to the new datasource.
-      // in these cases we could do two things:
-      // - do nothing, don't even close the upload ui. 
-      //   The user will have a choice anyway, as they can either hit the analyze button, or cancel.
-      // - prompt the user and ask them what to do.
-      //   - if the current query could be satisfied by the new datasource then we could offer that in the prompt
-      //   - we can always offer the option to start analyzing the new datasource (losing the current query)
-      //   - we can always offer to do nothing
-      
-      if (!currentRoute || !currentRoute.length) {
-        var datasources = uploadResults.datasources;
-        for (var i = 0; i < datasources.length; i++){
-          var datasource = datasources[i];
-          switch (datasource.getType()){
-            case DuckDbDataSource.types.FILE:
-            case DuckDbDataSource.types.FILES:
-            case DuckDbDataSource.types.URL:
-              analyzeDatasource(datasource);
-              return;
-            default:
-          }
+    if (!currentRoute || !currentRoute.length) {
+      var datasources = uploadResults.datasources;
+      for (var i = 0; i < datasources.length; i++){
+        var datasource = datasources[i];
+        switch (datasource.getType()){
+          case DuckDbDataSource.types.FILE:
+          case DuckDbDataSource.types.FILES:
+          case DuckDbDataSource.types.URL:
+            analyzeDatasource(datasource);
+            return;
+          default:
         }
       }
     }
   }
+}
 
-  byId('uploader')
+function initUploadUi(){
+  uploadUi = new UploadUi('uploadUi');
+
+  var uploader = byId('uploader');
+  var acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(function(fileType){
+    return `.${fileType}`;
+  }).join(', ');
+  uploader.setAttribute('accept', acceptFileTypes);
+  
+  uploader
   .addEventListener('change', async function(event){
     var fileControl = event.target;
     var files = fileControl.files;

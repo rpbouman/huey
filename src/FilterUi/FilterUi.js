@@ -3,23 +3,79 @@ class FilterDialog {
   static MULTIPLE_VALUES_SEPARATOR = ';';
 
   static #numRowsColumnName = '__huey_numrows';
-  static filterTypes = {
+  
+  static equalityFilterTypes = {
     INCLUDE: 'in',
-    EXCLUDE: 'notin',
+    EXCLUDE: 'notin'
+  };
+  
+  static simplePatternFilterTypes = {
     LIKE: 'like',
-    NOTLIKE: 'notlike',
+    NOTLIKE: 'notlike'
+  }
+
+  static rangeFilterTypes = {
     BETWEEN: 'between',
     NOTBETWEEN: 'notbetween'
   };
 
+  static arrayFilterTypes = {
+    HASANY: 'hasany',
+    HASALL: 'hasall',
+    NOTHASANY: 'nothasany',
+    NOTHASALL: 'nothasall'
+  };
+    
+  static filterTypes = Object.assign(
+    {},
+    FilterDialog.equalityFilterTypes,
+    FilterDialog.simplePatternFilterTypes,
+    FilterDialog.rangeFilterTypes,
+    FilterDialog.arrayFilterTypes
+  )
+  
+  static #isFilterTypeInObject(filterTypeObject, filterType){
+    return Object.values(filterTypeObject).indexOf(filterType) !== -1;
+  }
+  
+  static isRangeFilterType(filterType){
+    return FilterDialog.#isFilterTypeInObject(
+      FilterDialog.rangeFilterTypes, 
+      filterType
+    );
+  }
+
+  static isSimplePatternFilterType(filterType){
+    return FilterDialog.#isFilterTypeInObject(
+      FilterDialog.simplePatternFilterTypes, 
+      filterType
+    );
+  }
+
+  static isArrayFilterType(filterType){
+    return FilterDialog.#isFilterTypeInObject(
+      FilterDialog.arrayFilterTypes, 
+      filterType
+    );
+  }
+  
+  static isExclusiveFilterType(filterType){
+    return filterType.startsWith('not');
+  }
+  
   #id = undefined;
   #queryAxisItem = undefined;
   #queryModel = undefined;
 
   #defaultValuePicklistPageSize = 100;
   #defaultSearchAutoQueryTimeout = 1000;
+  #previousFilterTypeIsArrayFilterType = false;
 
   #settings = undefined;
+
+  getQueryAxisItem(){
+    return this.#queryAxisItem;
+  }
 
   #getValuePicklistPageSize(){
     var settings = this.#settings;
@@ -85,18 +141,19 @@ class FilterDialog {
       var filterType = event.target;
       var width, element;
       var filterValuesList = this.#getFilterValuesList();
-      switch (filterType.value){
-        case FilterDialog.filterTypes.BETWEEN:
-        case FilterDialog.filterTypes.NOTBETWEEN:
-          if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
-            this.clearFilterValueLists();
-          }
-          width = '50%';
-          element = filterValuesList.parentNode;
-          break;
-        default:
-          element = filterValuesList;
-          width = '';
+      var isArrayFilterType;
+      if (FilterDialog.isRangeFilterType(filterType.value)){
+        isArrayFilterType = false;
+        if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
+          this.clearFilterValueLists();
+        }
+        width = '50%';
+        element = filterValuesList.parentNode;
+      }
+      else {
+        isArrayFilterType = FilterDialog.isArrayFilterType(filterType.value);
+        element = filterValuesList;
+        width = '';
       }
       element.style.width = width;
 
@@ -104,6 +161,11 @@ class FilterDialog {
       element.style.width = '';
       this.#getValuePicklist().selectedIndex = -1;
       this.#updateValueSelectionStatusText();
+      
+      if (isArrayFilterType !== this.#previousFilterTypeIsArrayFilterType) {
+        this.#updatePicklist();
+      }
+      this.#previousFilterTypeIsArrayFilterType = isArrayFilterType;
     }.bind(this));
 
     var includeAllFiltersCheckbox = this.#getIncludeAllFilters();
@@ -176,7 +238,22 @@ class FilterDialog {
       event.preventDefault();
       var pastedText = getPastedText(event);
       pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
-      search.value = pastedText;
+      pastedText = pastedText
+      .split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
+      .reduce(function(arr, value){
+        if (arr.indexOf(value) === -1){
+          arr.push(value);
+        }
+        return arr;
+      }, [])
+      .join(FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+      var currentValue = search.value;
+      var newValue = [
+        currentValue.slice(0, search.selectionStart),
+        pastedText,
+        currentValue.slice(search.selectionEnd)
+      ].join('');
+      search.value = newValue;
       this.#updatePicklist();
     }.bind(this));
 
@@ -230,28 +307,28 @@ class FilterDialog {
 
     // check the filter type (opearator)
     var filterType = this.#getFilterType().value;
-    var isRangeFilterType = false, isPatternFilterType = false;
-    switch (filterType){
-      case FilterDialog.filterTypes.LIKE:
-      case FilterDialog.filterTypes.NOTLIKE:
-        isPatternFilterType = true;
-        break;
-      case FilterDialog.filterTypes.BETWEEN:
-      case FilterDialog.filterTypes.NOTBETWEEN:
-        isRangeFilterType = true;
-        break;
-      default:
-    }
+    var isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
+    var isPatternFilterType = FilterDialog.isSimplePatternFilterType(filterType);
 
     var toFilterValuesList = this.#getToFilterValuesList();
     var filterValuesList = this.#getFilterValuesList();
     var autoWildcards = this.#getAutoWildChards().checked;
     var literalWriter = this.#queryAxisItem.literalWriter;
+    var parser = this.#queryAxisItem.parser;
     searchStrings.forEach(function(searchString){
       if (isPatternFilterType && autoWildcards) {
         searchString = FilterDialog.#addWildcards(searchString);
       }
       var label = searchString ;
+      if (parser) {
+        try {
+          searchString = parser(searchString);
+        }
+        catch(e){
+          showErrorDialog(e);
+          return;
+        }
+      }
       var literal = literalWriter ? literalWriter(searchString) : searchString;
 
       var options, option;
@@ -356,24 +433,25 @@ class FilterDialog {
     })[nullsSortOrder];
 
     var keys = Object.keys(valuesList);
+    var thisColumnType = this.#queryAxisItem.columnType;
     keys.sort(function(key1, key2){
       var valueObject1 = valuesList[key1];
       var literal1 = valueObject1.literal;
       var valueObject2 = valuesList[key2];
       var literal2 = valueObject2.literal;
 
-      if (literal1.startsWith('NULL::')) {
+      if (literal1 === 'NULL' || literal1.startsWith('NULL::')) {
         return literal2.startsWith('NULL::') ? 0 : sortNull
       }
       else
-      if (literal2.startsWith('NULL::')){
+      if (literal2 === 'NULL' || literal2.startsWith('NULL::')){
         return -sortNull;
       }
 
       if (dataTypeInfo && dataTypeInfo.isNumeric){
         literal1 = literal1.split('::')[0];
         literal2 = literal2.split('::')[0];
-        switch (this.#queryAxisItem.columnType){
+        switch (thisColumnType){
           case 'HUGEINT':
           case 'BIGINT':
           case 'UBIGINT':
@@ -470,6 +548,23 @@ class FilterDialog {
       selectList.appendChild(optionElement);
     }
   }
+  
+  #compareValues(value1, value2){
+    var parser = this.#queryAxisItem.parser;
+    if (parser) {
+      value1 = parser(value1);
+      value2 = parser(value2);
+    }
+    
+    if (value1 > value2) {
+      return 1;
+    }
+    else
+    if (value1 < value2) {
+      return -1;
+    }
+    return 0;
+  }
 
   #handleValuePicklistChange(event){
     var isSqlNull;
@@ -492,15 +587,7 @@ class FilterDialog {
     }
 
     var filterType = this.#getFilterType().value;
-    var isRangeFilterType;
-    switch (filterType){
-      case FilterDialog.filterTypes.BETWEEN:
-      case FilterDialog.filterTypes.NOTBETWEEN:
-        isRangeFilterType = true;
-        break;
-      default:
-        isRangeFilterType = false;
-    }
+    var isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
 
     var filterValuesList = this.#getFilterValuesList();
     var filterValuesListOptions = filterValuesList.options;
@@ -548,12 +635,12 @@ class FilterDialog {
           valueSelectionStatusText = `Existing range collision.`;
         }
         else
-        if ( values === currentValues &&  selectedOption.value > correspondingValue) {
+        if ( values === currentValues &&  this.#compareValues(selectedOption.value, correspondingValue) === 1) {
           // noop, fromValue can't be bigger than toValue
           valueSelectionStatusText = `From Value exceeds to Value.`;
         }
         else
-        if ( values === currentToValues && selectedOption.value < correspondingValue) {
+        if ( values === currentToValues && this.#compareValues(selectedOption.value, correspondingValue) === -1) {
           // noop, toValue can't be smaller than fromValue
           valueSelectionStatusText = `To Value smaller than from Value.`;
         }
@@ -747,38 +834,27 @@ class FilterDialog {
   #updateValueSelectionStatusText(){
     var text;
     var count = this.#getFilterValuesList().options.length;
+    
     if (count === 0) {
       text = 'Select values from the picklist';
     }
     else {
-      var object = 'value', verb;
-      switch (this.#getFilterType().value) {
-        case FilterDialog.filterTypes.INCLUDE:
-          verb = 'included';
-          break;
-        case FilterDialog.filterTypes.EXCLUDE:
-          verb = 'excluded';
-          break;
-        case FilterDialog.filterTypes.LIKE:
-          object += ' pattern';
-          verb = 'included';
-          break;
-        case FilterDialog.filterTypes.NOTLIKE:
-          object += ' pattern';
-          verb = 'excluded';
-          break;
-        case FilterDialog.filterTypes.BETWEEN:
-          object += ' range';
-          verb = 'included';
-          break;
-        case FilterDialog.filterTypes.NOTBETWEEN:
-          object += ' range';
-          verb = 'excluded';
-          break;
+      var filterType = this.#getFilterType().value;
+      var verb = FilterDialog.isExclusiveFilterType(filterType) ? 'excluded' : 'included';
+      
+      var object = 'value';
+      if (FilterDialog.isRangeFilterType(filterType)){
+        object += ' range';
       }
+      else
+      if (FilterDialog.isSimplePatternFilterType(filterType)){
+        object += ' pattern';
+      }
+      
       if (count > 1){
         object += 's';
       }
+      
       text = `${count} ${object} ${verb}.`;
     }
     this.#setValueSelectionStatusText(text);
@@ -833,6 +909,8 @@ class FilterDialog {
   }
 
   #clearDialog(){
+    // https://github.com/rpbouman/huey/issues/421: reset the filter type to default position
+    this.#getFilterType().selectedIndex = 0;
     this.#getValuePicklist().innerHTML = '';
     this.clearFilterValueLists();
     this.#getSearch().value = '';
@@ -841,6 +919,7 @@ class FilterDialog {
   async openFilterDialog(queryModel, queryModelItem, queryAxisItemUi){
     this.#clearDialog();
 
+    this.#previousFilterTypeIsArrayFilterType = false;
     this.#queryAxisItem = queryModelItem;
     this.#queryModel = queryModel;
 
@@ -848,7 +927,12 @@ class FilterDialog {
 
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
+    
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryModelItem);
+    filterDialog.setAttribute('data-query-model-item-datatype', dataType);
+    
     filterDialog.showModal();
+    //filterDialog.show();
     this.#updatePicklist();
   }
 
@@ -859,14 +943,12 @@ class FilterDialog {
       this.#getFilterType().value = filter.filterType;
 
       this.#renderOptionsToSelectList(filter.values, this.#getFilterValuesList());
-      switch (filter.filterType) {
-        case FilterDialog.filterTypes.BETWEEN:
-        case FilterDialog.filterTypes.NOTBETWEEN:
-          this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());
+      if (FilterDialog.isRangeFilterType(filter.filterType)){
+        this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());
       }
     }
     else {
-
+      // noop
     }
     this.#updateValueSelectionStatusText();
   }
@@ -940,6 +1022,35 @@ class FilterDialog {
   #getSqlSelectStatementForPickList(offset, limit){
     var datasource = this.#queryModel.getDatasource();
     var queryAxisItem = this.#queryAxisItem;
+    var filterType = this.#getFilterType().value;
+    
+    // for array filter operators, we need to unnest the array
+    // so, we make a copy of the query axis item and modify it
+    if (FilterDialog.isArrayFilterType(filterType)){
+      queryAxisItem = Object.assign({}, queryAxisItem);
+
+      if (queryAxisItem.memberExpressionPath) {
+        queryAxisItem.memberExpressionPath = Object.assign([], queryAxisItem.memberExpressionPath);
+      }
+      if (queryAxisItem.derivation) {
+        switch (queryAxisItem.derivation) {
+          case 'keyset':
+            queryAxisItem.memberExpressionPath.push('map_keys()');
+            queryAxisItem.memberExpressionPath.push('unnest()');
+            queryAxisItem.derivation = 'elements';
+            break;
+          case 'valuelist':
+            queryAxisItem.memberExpressionPath.push('map_values()');
+            queryAxisItem.memberExpressionPath.push('unnest()');
+            queryAxisItem.derivation = 'elements';
+            break;
+        }
+      }
+      else {
+        queryAxisItem.derivation = 'elements';
+      }
+      delete queryAxisItem.literalWriter;
+    }
 
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
@@ -956,6 +1067,7 @@ class FilterDialog {
     var searchStrings = FilterDialog.#splitSearchString(search.value);
 
     if (searchStrings.length) {
+      
       var filterValues = {};
       var autoWildcards = this.#getAutoWildChards().checked;
       var picklistFilterItem = Object.assign({}, queryAxisItem);
@@ -969,6 +1081,7 @@ class FilterDialog {
           literal: quoteStringLiteral(searchString)
         };
       });
+      
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
         values: filterValues
@@ -1005,24 +1118,24 @@ class FilterDialog {
     return result;
   }
 
-  #populatePickList(resultset, offset, limit){
-    if (offset === 0) {
-      var searchStatus = this.#getSearchStatus();
-      var count = resultset.numRows;
-      if (count) {
-        count = resultset.get(0)[FilterDialog.#numRowsColumnName];
-      }
-      searchStatus.innerHTML = `${count} values found. Click to add to Filter values list`;
+  #updateSearchStatus(resultset){
+    var searchStatus = this.#getSearchStatus();
+    var count = resultset.numRows;
+    if (count) {
+      count = resultset.get(0)[FilterDialog.#numRowsColumnName];
     }
+    searchStatus.innerHTML = `${count} values found. Click to add to Filter values list`;
+  }
 
+  #populatePickList(resultset, offset, limit){
     var listOfValues = this.#getValuePicklist();
-
     var exhausted = resultset.numRows < limit;
 
     var optionGroup, optionsContainer;
     var optionGroupLabelText = `Values ${offset + 1} - ${offset + resultset.numRows}`;
 
     if (offset === 0) {
+      this.#updateSearchStatus(resultset);
       this.clearValuePicklist();
       if (exhausted) {
         optionsContainer = listOfValues;
@@ -1063,7 +1176,6 @@ class FilterDialog {
         }
       }
     }
-    var literalWriter = this.#queryAxisItem.literalWriter;
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
@@ -1073,10 +1185,11 @@ class FilterDialog {
         value = formatter(value, valueField);
         label = formatter(label, labelField);
       }
+      var literal = getDuckDbLiteralForValue(row.value, valueField.type);
       option = createEl('option', {
         value: value,
         label: label,
-        "data-sql-literal": literalWriter(row.value, valueField)
+        "data-sql-literal": literal
       });
       if (value === null){
         option.setAttribute('data-sql-null', true);

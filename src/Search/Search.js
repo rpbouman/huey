@@ -13,10 +13,13 @@ function handleAttributeSearch(event, count){
     return;
   }
   var searchElement = event.target;
-  var searchString = searchElement.value.trim().toUpperCase();
-  console.log(searchString);
-  var attributeUi = byId('attributeUi');  
-  var attributeNodes = attributeUi.querySelectorAll(`details[data-nodetype='column'], details[data-nodetype='member']`);
+  var searchString = searchElement.value.trim();
+  var searchPattern = searchString.replace(/([(){}\[\]^$+*?.\\])/g, '\\$&');
+  searchPattern = searchPattern.replace(/%/g, '.+');
+  var regex = new RegExp(searchPattern, 'i');
+  var attributeUi = byId('attributeUi');
+  var attributeNodes = attributeUi.querySelectorAll(`details`);
+  var matchingAttributeNodes = []
   for (var i = 0; i < attributeNodes.length; i++){
     var attributeNode = attributeNodes.item(i);
     var match;
@@ -24,19 +27,8 @@ function handleAttributeSearch(event, count){
       match = '';
     }
     else {
-      
-      var columnName = attributeNode.getAttribute('data-column_name');
-      if (columnName) {
-        match = columnName.toUpperCase().indexOf(searchString) !== -1;
-      }
-      
-      if (!match) {
-        memberExpressionPath = attributeNode.getAttribute('data-member_expression_path');
-        if (memberExpressionPath){
-          match = memberExpressionPath.toUpperCase().indexOf(searchString) !== -1;
-        }
-      }
-      
+      var caption = attributeNode.querySelector('summary > span.label').textContent;
+      match = regex.test(caption);
       if (!match) {
         match = false;
         attributeNode.removeAttribute('open');
@@ -45,9 +37,20 @@ function handleAttributeSearch(event, count){
     attributeNode.setAttribute('data-matches-searchstring', match);
     
     if (match === true) {
-      var parentNode = attributeNode;
-      while ((parentNode = parentNode.parentNode) && parentNode.nodeName === 'DETAILS') {
-        parentNode.setAttribute('data-matches-searchstring', match);
+      matchingAttributeNodes.push(attributeNode);
+    }
+  }
+  
+  // ensure the ancestors of the matching nodes are visible too
+  for (var i = 0; i < matchingAttributeNodes.length; i++){
+    var parentNode = matchingAttributeNodes[i];
+    while (
+      (parentNode = parentNode.parentNode) && 
+      parentNode.nodeName === 'DETAILS' && 
+      parentNode.getAttribute('data-matches-searchstring') !== 'true'
+    ) {
+      parentNode.setAttribute('data-matches-searchstring', 'true');
+      if (parentNode.getAttribute('open') === null){
         parentNode.setAttribute('open', true);
       }
     }

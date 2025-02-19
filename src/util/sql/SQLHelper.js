@@ -14,6 +14,17 @@ function getLocales(){
   return locales;
 }
 
+function getArrowDecimalAsString(value, type){
+    var strValue = String(value);
+    var isNegative = strValue.startsWith('-') ;
+    var absValue = isNegative ? strValue.substr(1) : strValue;
+    absValue = new Array(type.scale).fill('0').join('') + absValue;
+    var decimalPlace = absValue.length - type.scale;
+    var fractionalPart = absValue.slice(decimalPlace);
+    var integerPart = absValue.slice(0, decimalPlace);
+    return `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+}
+
 function createNumberFormatter(fractionDigits){
   var localeSettings = settings.getSettings('localeSettings');
   var options = {
@@ -47,79 +58,43 @@ function createNumberFormatter(fractionDigits){
     console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
     formatter = new Intl.NumberFormat(locales, options);
   }
-  if (fractionDigits){
-    decimalSeparator = (new Intl.NumberFormat(locales, {minFractionDigits: 1})).formatToParts(123.456).find(function(part){
-      return part.type === 'decimal';
-    })['value'];
-  }
+  
+  function formatArrowDecimal(value, type){
+    var decimalString = getArrowDecimalAsString(value, type);
+    return formatter.format(decimalString);
+  }    
+  
   return {
     format: function(value, field){
-      if (value === null) {
-        return getNullString();
+      switch (value) {
+        case null:
+          return getNullString();
       }
       
+      switch (typeof value){
+        case 'bigint':
+        case 'number':
+          return formatter.format(value);
+      }
+      
+      var strValue;
       if (field) {
-        switch (typeof value){
-          case 'bigint':
-          case 'number':
-            break;
+        var fieldType = field.type;
+        var fieldTypeId = fieldType.typeId;
+        switch (fieldTypeId){
+          case 7: // arrrow decimal
+            return formatArrowDecimal(value, fieldType);
           default:
-            var stringValue = String(value);
-            var fieldType = field.type;
-            var fieldTypeId, fieldTypeScale;
-            
-            if(fieldType) {
-              fieldTypeId = fieldType.typeId;
-              fieldTypeScale = fieldType.scale;
-            }
-            
-            var integerPart, fractionalPart;
-            // arrow decimal
-            if (fieldTypeScale === 0) {
-              integerPart = stringValue;
-            }
-            else {
-              var parts = stringValue.split('.');
-              integerPart = parts[0];
-              if (parts.length === 2){
-                fractionalPart = parts[1];
-              }
-              else {
-                var fractionalPartIndex = integerPart.length - fieldTypeScale;
-                fractionalPart = integerPart.slice(fractionalPartIndex);
-                integerPart = integerPart.slice(0, fractionalPartIndex);
-                if (integerPart === '-') {
-                  integerPart = '-0';
-                }
-              }
-            }
-
-            var integerPart = BigInt(integerPart);
-
-            if (fractionalPart) {
-              if (fractionalPart.length > options.maximumFractionDigits) {
-                fractionalPart = parseFloat('0.' + fractionalPart).toFixed(options.maximumFractionDigits);
-                if (parseFloat(fractionalPart) >= 1) {
-                  integerPart += (integerPart >= 0n ? 1n : -1n);
-                }
-                fractionalPart = String(fractionalPart).split('.')[1];
-              }
-              
-              if (decimalSeparator === undefined) {
-                decimalSeparator = '.';
-              }
-            }
-            
-            stringValue = intFormatter.format(integerPart);
-            if (fractionalPart) {
-              stringValue = `${stringValue}${decimalSeparator}${fractionalPart}`;
-            }
-            
-            return stringValue;
         }
+        var fieldTypeScale;
+      }
+      else {
+        strValue = String(value);
       }
       
-      return formatter.format(value);
+      // fallback
+      console.warn(`Using fallback formatter for number "${strValue}" (${typeof value}; ${field ? field.type.typeId : ''}).`);
+      return strValue;
     }
   };
 }
@@ -129,6 +104,62 @@ function fallbackFormatter(value){
     return getNullString();
   }
   return String(value);
+}
+
+function createDecimalLiteralWriter(precision, scale){
+  var typeDef = 'DECIMAL';
+  if (precision !== undefined) {
+    var typeOfPrecision = typeof precision;
+    if (typeOfPrecision !== 'number') {
+      throw new Error('Precision must be a number, not "${typeOfPrecision}"');
+    }
+    if (precision !== parseInt(precision, 10)){
+      throw new Error(`Precision must be an integer value, got ${precision}`)
+    }
+    
+    if (scale === undefined) {
+      scale = 0;
+    }
+    else {
+      var typeOfScale = typeof scale;
+      if ( typeOfScale !== 'number') {
+        throw new Error('Scale must be a number, not "${typeOfScale}"');
+      }
+      if (scale !== parseInt(scale, 10)){
+        throw new Error(`Scale must be an integer value, got ${scale}`);
+      }
+    }
+    
+    if (scale > precision){
+      throw new Error(`Scale must not exceed precision.`);
+    }
+    
+    typeDef += '(' + precision;
+    if (scale !== undefined){
+      typeDef += ',' +  scale;
+    }
+    typeDef += ')';
+    
+  }
+  else 
+  if (scale){
+    throw new Error(`Cannot specify scale without specifying precision`);
+  }
+  
+  var formatter = new Intl.NumberFormat(undefined, {
+    useGrouping: false,
+    signDisplay: 'negative',
+    minimumIntegerDigits: 1,
+    maximumFractionDigits: scale || 0,
+    minimumSignificantDigits: 1
+  });
+  
+  return function(value, valueField){
+    var decimalString = getArrowDecimalAsString(value, valueField.type);
+    // this is mostly to lose the leading zeroes
+    var formattedDecimalString = formatter.format(decimalString)
+    return `${formattedDecimalString}::${typeDef}`;
+  }
 }
 
 function createDefaultLiteralWriter(type){
@@ -157,7 +188,7 @@ function createLocalDateFormatter(){
   }
 }
 
-function createMonthNameFormatter(modifier){
+function createMonthNameList(modifier){
   var dateFormatter = createDateFormatter({
     month: modifier || 'long'
   });
@@ -174,6 +205,11 @@ function createMonthNameFormatter(modifier){
     var monthName = dateString.replace(/[^\d\w]/g, '');
     monthNames.push(monthName);
   }
+  return monthNames;
+}
+
+function createMonthNameFormatter(modifier){
+  var monthNames = createMonthNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -182,15 +218,39 @@ function createMonthNameFormatter(modifier){
   }
 }
 
+function createMonthNameParser(modifier){
+  var monthNames = createMonthNameList(modifier);
+  return function(monthNameValue){
+    if (!monthNameValue) {
+      return null;
+    }
+    var upperMonthNameValue = monthNameValue.toUpperCase();
+    return monthNames.findIndex(function(listedName){
+      if (listedName === null) {
+        return false;
+      }
+      return listedName.toUpperCase() === upperMonthNameValue;
+    });
+  };
+}
+
 function createMonthShortNameFormatter(){
   return createMonthNameFormatter('short');
+}
+
+function createMonthShortNameParser(){
+  return createMonthNameParser('short');
 }
 
 function createMonthFullNameFormatter(){
   return createMonthNameFormatter('long');
 }
 
-function createDayNameFormatter(modifier){
+function createMonthFullNameParser(){
+  return createMonthNameParser('long');
+}
+
+function createDayNameList(modifier){
   var dateFormatter = createDateFormatter({
     weekday: modifier || 'long'
   });
@@ -208,6 +268,11 @@ function createDayNameFormatter(modifier){
     var dayName = dateString.replace(/[^\d\w]/g, '');
     dayNames.push(dayName);
   }
+  return dayNames;
+}
+
+function createDayNameFormatter(modifier){
+  var dayNames = createDayNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -216,12 +281,36 @@ function createDayNameFormatter(modifier){
   }
 }
 
+function createDayNameParser(modifier){
+  var dayNames = createDayNameList(modifier);
+  return function(dayNameValue){
+    if (!dayNameValue) {
+      return null;
+    }
+    var upperDayNameValue = dayNameValue.toUpperCase();
+    return dayNames.findIndex(function(listedName){
+      if (listedName === null) {
+        return false;
+      }
+      return listedName.toUpperCase() === upperDayNameValue;
+    });
+  };
+}
+
 function createDayShortNameFormatter(){
   return createDayNameFormatter('short');
 }
 
+function createDayShortNameParser(){
+  return createDayNameParser('short');
+}
+
 function createDayFullNameFormatter(){
   return createDayNameFormatter('long');
+}
+
+function createDayFullNameParser(){
+  return createDayNameParser('long');
 }
 
 function monthNumFormatter(monthNum){
@@ -270,10 +359,13 @@ function getDuckDbLiteralForValue(value, type){
     case 1:   // Null
       literal = 'NULL';
       break;
+    case 7:   // Decimal
+      var decimalString = getArrowDecimalAsString(value, type);
+      literal = `${decimalString}::DECIMAL`;
+      break;
     case 2:   // Int
     case 3:   // float
     case 6:   // Bool
-    case 7:   // Decimal
     case -2:  // Int8
     case -3:  // Int16
     case -4:  // Int32
@@ -376,7 +468,19 @@ var dataTypes = {
       };
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
-      return createDefaultLiteralWriter('DECIMAL');
+      var typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
+      if (!typeParts){
+        throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
+      }
+      var precision, scale;
+      if (typeParts[1]){
+        precision = parseInt(typeParts[1], 10);
+        
+        if(typeParts[3]){
+          scale = parseInt(typeParts[3], 10);
+        }
+      }
+      return createDecimalLiteralWriter(precision, scale);
     }
   },
   'DOUBLE': {
@@ -906,21 +1010,26 @@ function getQualifiedIdentifier(){
   throw new Error(`Invalid arguments`);
 }
 
-async function ensureDuckDbExtensionLoadedAndInstalled(extensionName){
+async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName){
   var connection = hueyDb.connection;
   var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
   var statement = await connection.prepare(sql);
   var result = await statement.query(extensionName);
   statement.close();
   var loaded, installed;
-  if (result.numRows !== 0) {
-    loaded = result.loaded;
-    installed = result.installed;
+  if (result.numRows === 0) {
     return;
   }
+
+  var row = result.get(0);
+  loaded = row.loaded;
+  installed = row.installed;
   
   if (!installed) {
     sql = `INSTALL ${extensionName}`;
+    if (repositoryName) {
+      sql += ` FROM ${repositoryName}`;
+    }
     result = await connection.query(sql);
   }
   
@@ -1112,11 +1221,29 @@ function getMapValueType(mapType){
   return keyValueType.valueType;
 }
 
+// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
+// this function will return the type that results from calling map_entries(<map>),
+// which would be: STRUCT(key <keyType>, value <valueType>)[]
+function getMapEntriesType(mapType){
+  var entryType = getMapEntryType(mapType)
+  return getArrayType(entryType);
+}
+
+function getMapEntryType(mapType){
+  var keyType = getMemberExpressionType(mapType, 'key');
+  var valueType = getMemberExpressionType(mapType, 'value');
+  return `STRUCT(key ${keyType}, value ${valueType})`;
+}
+
 function getArrayElementType(arrayType){
   if (!arrayType.endsWith('[]')){
     throw new Error(`Expected an array type`);
   }
   return arrayType.slice(0, -'[]'.length);
+}
+
+function getArrayType(elementType){
+  return elementType + '[]';
 }
 
 function getMemberExpressionType(type, memberExpressionPath){
@@ -1134,14 +1261,16 @@ function getMemberExpressionType(type, memberExpressionPath){
             memberExpressionType = getMapEntriesType(type);
             break;
           case 'map_keys()':
-            memberExpressionType = getArrayElementType(type);
-            memberExpressionType = getMapKeyType(memberExpressionType);
-            memberExpressionType += '[];'
+            //memberExpressionType = getArrayElementType(type);
+            //memberExpressionType = getMapKeyType(memberExpressionType);
+            memberExpressionType = getMapKeyType(type);
+            memberExpressionType = getArrayType(memberExpressionType);
             break;
           case 'map_values()':
-            memberExpressionType = getArrayElementType(type);
-            memberExpressionType = getMapValueType(memberExpressionType);
-            memberExpressionType += '[]';
+            //memberExpressionType = getArrayElementType(type);
+            //memberExpressionType = getMapValueType(memberExpressionType);
+            memberExpressionType = getMapValueType(type);
+            memberExpressionType = getArrayType(memberExpressionType);
             break;
           default:
             var typeDescriptor = getStructTypeDescriptor(type);
@@ -1171,15 +1300,6 @@ function getMemberExpressionType(type, memberExpressionPath){
   }
 }
 
-// argument should be a MAP(<keyType>, <valueType>) typedescriptor.
-// this function will return the type that results from calling map_entries(<map>),
-// which would be: STRUCT(key <keyType>, value <valueType>)[]
-function getMapEntriesType(mapType){
-  var keyType = getMemberExpressionType(mapType, 'key');
-  var valueType = getMemberExpressionType(mapType, 'value');
-  return `STRUCT(key ${keyType}, value ${valueType})[]`;
-}
-
 function extrapolateColumnExpression(expressionTemplate, columnExpression){
   return expressionTemplate.replace(/\$\{columnExpression\}/g, `${columnExpression}`);
 }
@@ -1188,7 +1308,25 @@ function getUsingSampleClause(samplingConfig, useTableSample){
   var size = samplingConfig.size || 100;
   var unit = samplingConfig.unit || 'ROWS';
   var method = samplingConfig.method || 'SYSTEM';
-  var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
-  var sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  var sampleClause;
+  if (method === 'LIMIT'){
+    sampleClause = `LIMIT ${size}`;
+  }
+  else {
+    var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
+    sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
+  }
   return sampleClause;
+}
+
+function getMedianReturnDataTypeForArgumentDataType(argumentDataType){
+  var argumentTypeInfo = getDataTypeInfo(argumentDataType);
+  var returnDataType;
+  if (argumentTypeInfo.isInteger) {
+    returnDataType = 'DOUBLE';
+  }
+  else {
+    returnDataType = argumentDataType;
+  }
+  return returnDataType;
 }

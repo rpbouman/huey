@@ -1,11 +1,11 @@
 class DatasourceSettings extends SettingsBase {
-  
+
   static #template = {
     "csvReader": {
       "csvReaderAutoDetect": true,
-      "csvReaderSampleSize": "20480",
-      "csvReaderSkip": "0",
-      "csvReaderMaxLineSize": "2097152",
+      "csvReaderSampleSize": 20480,
+      "csvReaderSkip": 0,
+      "csvReaderMaxLineSize": 2097152,
       "csvReaderAllVarchar": false,
       "csvReaderAutoTypeCandidates": {
         "options": [
@@ -33,7 +33,7 @@ class DatasourceSettings extends SettingsBase {
       "csvReaderNormalizeNames": false,
       "csvReaderNullPadding": false,
       "csvReaderFileName": false,
-      "csvReaderDelim": "",
+      "csvReaderDelim": ",",
       "csvReaderNewLine": {
         "options": [
          {"value": "", "label": "(default)", "title": "Use default line separator"},
@@ -41,7 +41,7 @@ class DatasourceSettings extends SettingsBase {
          {"value": "\r\n", "label": "CRLF", "title": "Carriage Return/Linefeed pair"},
          {"value": "\n", "label": "LF", "title": "Linefeed"}
         ],
-        "value": ""        
+        "value": ""
       },
       "csvReaderQuote": "\"",
       "csvReaderEscape": "\"",
@@ -52,15 +52,15 @@ class DatasourceSettings extends SettingsBase {
       "csvReaderNullstr": ""
     }
   };
-  
+
   constructor(){
     super();
   }
- 
+
   getTemplate(){
     return Object.assign({}, DatasourceSettings.#template);
   }
-  
+
   static #getDuckDbReaderArgumentName(settingsKey, settingKey){
     if (!settingKey.startsWith(settingsKey)){
       throw new Error(`Settingkey ${settingKey} does not start with settingskey ${settingsKey}`);
@@ -73,10 +73,10 @@ class DatasourceSettings extends SettingsBase {
     argumentName = argumentName.substring(1);
     return argumentName;
   }
-  
+
   getCsvReaderArguments(){
     var csvReaderArguments = {};
-    var csvReaderKey = 'csvReader'; 
+    var csvReaderKey = 'csvReader';
     var csvReaderSettings = this.getSettings(csvReaderKey);
     var templateSettings = DatasourceSettings.#template[csvReaderKey];
     for (var settingKey in csvReaderSettings){
@@ -101,7 +101,7 @@ class DatasourceSettings extends SettingsBase {
     }
     return csvReaderArguments;
   }
-  
+
   static getCsvReaderArgumentsSql(csvReaderArguments){
     return Object.keys(csvReaderArguments).map(function(argumentName){
       var argumentValue = csvReaderArguments[argumentName];
