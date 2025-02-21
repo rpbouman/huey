@@ -113,6 +113,7 @@ class UploadUi {
     uploadItem.getElementsByTagName('p').item(0).setAttribute('id', fileName + '_message');
     var labelSpan = uploadItem.getElementsByTagName('span').item(0);
     labelSpan.textContent = fileName;
+    labelSpan.setAttribute('title', fileName);
     if (fileSize){
       labelSpan.setAttribute('data-file-size', fileSize);
     }
