@@ -16,6 +16,11 @@ dialog#uploadUi {
         width: 100%;
         
         > span {
+          display: inline-block;
+          white-space: nowrap;
+          max-width: calc(100% - 95px);
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         
         > span[data-file-size]::after {
