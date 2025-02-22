@@ -230,9 +230,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=FLOAT] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=REAL] > summary > span.label::before,
   details[data-nodetype=column][data-column_type^=DECIMAL] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=FLOAT] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=REAL] > summary > span.label::before {
     /* decimal */
     content: "\fa26";
