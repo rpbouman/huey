@@ -496,6 +496,20 @@ var dataTypes = {
       return createDefaultLiteralWriter('DOUBLE');
     }    
   },
+  'FLOAT': {
+    defaultAnalyticalRole: 'measure',
+    isNumeric: true,
+    greaterPrecisionAlternative: "DOUBLE",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value, field);
+      };
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createDefaultLiteralWriter('FLOAT');
+    }
+  },
   'REAL': {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
