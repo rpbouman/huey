@@ -176,25 +176,18 @@ class QueryAxisItem {
     if (alias){
       sqlExpression.unshift(alias);
     }
-
     sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
 
     if (item.memberExpressionPath) {
-      var memberExpressionPath = item.memberExpressionPath;
-      var memberExpression = memberExpressionPath
-      .map(function(memberExpressionPathElement){
-        // todo: escape single quote in memberExpressionPathElement
-        var expression;
-        if (memberExpressionPathElement.endsWith('()')){
-          expression = '.' + memberExpressionPathElement;
+      sqlExpression = item.memberExpressionPath.reduce(function(acc, curr){
+        if ( curr.endsWith('()') ) {
+          acc = `${curr.slice(0, -2)}( ${acc} )`;
         }
         else {
-          expression = `['${memberExpressionPathElement}']`;
+          acc += `['${curr}']`;
         }
-        return expression;
-      })
-      .join('');
-      sqlExpression += memberExpression;
+        return acc;
+      }, sqlExpression);
     }
     return sqlExpression;
   }
