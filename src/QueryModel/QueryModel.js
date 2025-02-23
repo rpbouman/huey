@@ -255,7 +255,6 @@ class QueryAxisItem {
       }
       else
       if (derivationInfo.hasKeyDataType || derivationInfo.hasKeyArrayDataType){
-        dataType = getArrayElementType(dataType);
         dataType = getMemberExpressionType(dataType, 'key');
         if (derivationInfo.hasKeyArrayDataType){
           dataType = getArrayType(dataType);
