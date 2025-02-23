@@ -61,12 +61,14 @@ class UploadUi {
         progressBar.value = parseInt(progressBar.value, 10) + 40;
       }
 
-      var canAccess = await duckDbDataSource.validateAccess();
+      var tryResult = await duckDbDataSource.tryAccess(100);
+      var isAccessible = tryResult.success;
       progressBar.value = parseInt(progressBar.value, 10) + 30;
 
-      if (canAccess !== true) {
+      if (isAccessible !== true) {
         destroyDatasource = true;
-        throw new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
+        var errorMessage = tryResult.lastAttempt.message;
+        throw new Error(`Error uploading file ${file.name}: ${errorMessage}.`);
       }
 
       if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {

@@ -1,4 +1,6 @@
 class DuckDbDataSource extends EventEmitter {
+  
+  static #defaultNumberOfAccessAttempts = 1;
 
   static types = {
     "DUCKDB": 'duckdb',
@@ -82,7 +84,8 @@ class DuckDbDataSource extends EventEmitter {
       "sample_size": 20480
     },
     read_json_auto: {
-      "ignore_errors": true
+      "ignore_errors": true,
+      "maximum_object_size": 16777216
     }
   };
 
@@ -752,6 +755,65 @@ class DuckDbDataSource extends EventEmitter {
     }
     return result;
   }
+  
+  async tryAccess(maxAttempts){
+    switch (typeof maxAttempts){
+      case undefined:
+        maxAttempts = DuckDbDataSource.#defaultNumberOfAccessAttempts;
+    }
+    var done = false;
+    var success = false;
+    var attempts = 0;
+    var attempt;
+    var datasourceType = this.getType();
+    _attempts: while (attempts++ <= maxAttempts) {
+      attempt = await this.validateAccess();
+      if (attempt === true) {
+        success = true;
+        break;
+      }
+      var message = attempt.message;
+      if (/^Out of Memory Error: failed to allocate data of size/.test(message)){
+        break _attempts;
+      }
+      
+      switch (datasourceType){
+        case DuckDbDataSource.types.FILE:
+        case DuckDbDataSource.types.FILES:
+          var fileType = this.getFileType();
+          var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+          var reader = fileTypeInfo.duckdb_reader;
+          switch (reader){
+            case 'read_json_auto':
+              if (/"maximum_object_size" of \d+ bytes exceeded/.test(message)){
+                var parts = /\(>(\d+) bytes\)/.exec(message);
+                var newObjectSize = parseInt(parts[1], 10);
+                this.#settings.assignSettings(['jsonReader', 'jsonReaderMaximumObjectSize'], newObjectSize);
+              }
+              else {
+                // all adaptive measures failed, time to throw in the towel.
+                break _attempts;
+              }
+              break;
+            case 'read_csv':
+            case 'read_parquet':
+            case 'read_xlsx':
+            default:
+              // no adaptive measures implemented, time to throw in the towel.
+              break _attempts;
+          }
+          break;
+        default:
+          break _attempts;
+      }
+    };
+    return {
+      success: success,
+      attempts: attempts,
+      maxAttempts: maxAttempts,
+      lastAttempt: attempt
+    };
+  }
 
   getQualifiedObjectName(){
     var qualifiedObjectName;
@@ -811,7 +873,7 @@ class DuckDbDataSource extends EventEmitter {
     var duckdbReaderArguments = Object.assign({},
       DuckDbDataSource.duckdb_reader_arguments[duckdb_reader]
     );
-
+    
     if (duckdbReaderArguments.rejects_scan && duckdbReaderArguments.rejects_table){
       this.#rejects_tables = [
         duckdbReaderArguments.rejects_scan,
@@ -831,21 +893,15 @@ class DuckDbDataSource extends EventEmitter {
       fileName = quoteStringLiteral(fileNames);
     }
 
-    duckdbReaderArguments = Object.keys(duckdbReaderArguments).reduce(function(acc, argName){
-      var argValue = duckdbReaderArguments[argName];
-      switch (typeof argValue){
-        case 'string':
-          argValue = quoteStringLiteral(argValue);
-          break;
-        case 'boolean':
-          argValue = String(argValue);
-          break;
-      }
-      acc.push(`${argName} = ${argValue}`);
-      return acc;
-    }, []);
-    duckdbReaderArguments.unshift(fileName);
-    return `${duckdb_reader}( ${duckdbReaderArguments.join(', ')} )`;
+    var readerArgumentsSql = DatasourceSettings.getReaderArgumentsSql(settings);
+    if (readerArgumentsSql && readerArgumentsSql.length){
+      readerArgumentsSql = `${fileName}, ${readerArgumentsSql}`;
+    }
+    else {
+      readerArgumentsSql = fileName;
+    }
+    var readerSql = `${duckdb_reader}( ${readerArgumentsSql} )`;
+    return readerSql;
   }
 
   getRelationExpression(alias, sqlOptions){
@@ -862,7 +918,8 @@ class DuckDbDataSource extends EventEmitter {
         var fileExtension = this.#fileType;
         var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
         var duckdb_reader = fileType.duckdb_reader;
-        sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames);
+        var readerSettings = this.#settings.getReaderArguments(duckdb_reader);
+        sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames, readerSettings);
         break;
       case DuckDbDataSource.types.FILE:
         var fileName = this.getFileName();
@@ -870,7 +927,8 @@ class DuckDbDataSource extends EventEmitter {
         var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
         if (fileType) {
           var duckdb_reader = fileType.duckdb_reader;
-          sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName);
+          var readerSettings = this.#settings.getReaderArguments(duckdb_reader);
+          sql = this.#getDuckDbFileReaderCall(duckdb_reader, fileName, readerSettings);
         }
         else {
           sql = getQuotedIdentifier(fileName);
