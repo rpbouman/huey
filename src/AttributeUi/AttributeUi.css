@@ -11,8 +11,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   /**
   * hide the expand/collapse widget for these attribute nodes.
   */
+  details[role=treeitem][data-nodetype=derived][data-member_expression_type=JSON] > summary,
   details[role=treeitem][data-nodetype=aggregate] > summary,
-  details[role=treeitem][data-nodetype=derived]:not( [data-derivation=elements], [data-derivation=entries] ) > summary {
+  details[role=treeitem][data-nodetype=derived]:not( 
+    [data-derivation=elements], 
+    [data-derivation=entries] 
+  ) > summary {
     list-style: none;
     margin-left: 14px;
   }
@@ -258,6 +262,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ea70";
   }
 
+  details[data-nodetype=derived][data-member_expression_type=JSON] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=JSON] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=JSON] > summary > span.label::before {
     /* JSON */
