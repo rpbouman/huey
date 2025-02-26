@@ -137,7 +137,7 @@ class QueryAxisItem {
     }
 
     if (axisItem.derivation) {
-      postfix += `${axisItem.derivation}`;
+      postfix += ` ${axisItem.derivation}`;
     }
     else
     if (axisItem.aggregator){
@@ -145,9 +145,6 @@ class QueryAxisItem {
     }
 
     if (postfix) {
-      if (caption && caption.length) {
-        caption += ' ';
-      }
       caption += `${postfix}`;
     }
     if (prefix) {
@@ -243,6 +240,16 @@ class QueryAxisItem {
     var columnType = queryAxisItem.columnType;
     var dataType = columnType;
 
+    /* 
+      see https://github.com/rpbouman/huey/issues/505
+      If items have a member expression path, then we first need to unwrap that and get the type of the path.
+      Once we have that, we can evaluate type hints like hasElementDataType, hasKeyArrayDataType, preservesColumnType
+    */
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
+    }
+
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
       derivationInfo = AttributeUi.getDerivationInfo(derivation);
@@ -285,11 +292,6 @@ class QueryAxisItem {
         console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
     }
-    else
-    if (queryAxisItem.memberExpressionPath) {
-      var memberExpressionPath = queryAxisItem.memberExpressionPath;
-      dataType = getMemberExpressionType(columnType, memberExpressionPath);
-    }
 
     var aggregatorInfo, aggregator = queryAxisItem.aggregator;
     if (aggregator) {
@@ -298,12 +300,8 @@ class QueryAxisItem {
         dataType = aggregatorInfo.columnType;
       }
       else
-      if (aggregatorInfo.preservesColumnType){
-        dataType = columnType;
-      }
-      else 
       if (aggregator === 'median'){
-        dataType = getMedianReturnDataTypeForArgumentDataType(columnType);
+        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
       }
       else {
         dataType = undefined;
