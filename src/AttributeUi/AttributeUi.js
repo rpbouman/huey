@@ -935,7 +935,11 @@ class AttributeUi {
         }
       case 'column':
       case 'member':
-        if (columnType.startsWith('STRUCT') || columnType.startsWith('MAP') ) {
+        if (
+          columnType.startsWith('STRUCT') || 
+          columnType.startsWith('MAP') ||
+          config.profile.memberExpressionType && isArrayType(config.profile.memberExpressionType)
+        ) {
           this.#loadChildNodes(node);
         }
         break;
@@ -1239,7 +1243,7 @@ class AttributeUi {
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (expressionType.endsWith('[]')){
+    if (isArrayType(expressionType)){
       this.#loadArrayChildNodes(node, typeName, profile);
     }
     else

@@ -847,7 +847,7 @@ var dataTypes = {
 };
 
 function getDataTypeInfo(columnType){
-  if (columnType.endsWith('[]')) {
+  if (isArrayType(columnType)) {
     return dataTypes['ARRAY'];
   }
   var columnTypeUpper = columnType.toUpperCase();
@@ -1250,7 +1250,7 @@ function getMapEntryType(mapType){
 }
 
 function getArrayElementType(arrayType){
-  if (!arrayType.endsWith('[]')){
+  if (!isArrayType(arrayType)){
     throw new Error(`Expected an array type`);
   }
   return arrayType.slice(0, -'[]'.length);
@@ -1260,16 +1260,27 @@ function getArrayType(elementType){
   return elementType + '[]';
 }
 
+function isArrayType(dataType){
+  return dataType.endsWith('[]');
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
     var typeOfMemberExpressionPath = typeof memberExpressionPath;
     switch (typeOfMemberExpressionPath) {
       case 'object':
+        //TODO: 
+        // for all the cases where the member expression path element has parenthesis, 
+        // we should be looking up the corresponding derivation
+        // and extract the type info from there.
         var memberExpression = memberExpressionPath[0];
         var memberExpressionType;
         switch (memberExpression) {
           case 'unnest()':
             memberExpressionType = getArrayElementType(type);
+            break;
+          case 'generate_subscripts()':
+            memberExpressionType = 'BIGINT';
             break;
           case 'map_entries()':
             memberExpressionType = getMapEntriesType(type);

@@ -248,6 +248,9 @@ class QueryAxisItem {
     if (queryAxisItem.memberExpressionPath) {
       var memberExpressionPath = queryAxisItem.memberExpressionPath;
       dataType = getMemberExpressionType(columnType, memberExpressionPath);
+      if (memberExpressionPath[memberExpressionPath.length - 1].endsWith('()')){
+        return dataType;
+      }
     }
 
     var derivationInfo, derivation = queryAxisItem.derivation;
