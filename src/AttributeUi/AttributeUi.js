@@ -352,7 +352,7 @@ class AttributeUi {
     "first letter": {
       folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     "length": {
       folder: 'string operations',
@@ -362,22 +362,22 @@ class AttributeUi {
     'lowercase': {
       folder: 'string operations',
       expressionTemplate: "LOWER( ${columnExpression} )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'NOACCENT': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOACCENT",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'NOCASE': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOCASE",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'uppercase': {
       folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     }
   }
 
