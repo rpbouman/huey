@@ -810,7 +810,7 @@ class FilterDialog {
     return byId('filterDialogSpinner');
   }
 
-  setBusy(trueOrFalse){
+  #setBusy(trueOrFalse){
     var dom = this.getDom();
     dom.setAttribute('aria-busy', String(trueOrFalse));
   }
@@ -1102,6 +1102,7 @@ class FilterDialog {
   }
 
   async #getPicklistValues(offset, limit){
+    this.#setBusy(true);
     var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
@@ -1197,7 +1198,7 @@ class FilterDialog {
       optionsContainer.appendChild(option);
     }
 
-    this.setBusy(false);
+    this.#setBusy(false);
 
     if (exhausted){
       return;
