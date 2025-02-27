@@ -1,7 +1,7 @@
 #filterDialogSpinner {
   position:absolute;
   left: 50%;
-  top: 170px;
+  top: 250px;
   zoom: 33%;
 }
 
@@ -11,18 +11,22 @@ dialog#filterDialog[aria-busy=false] #filterDialogSpinner {
 
 dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
   display: block;
+}
 
+dialog#filterDialog[aria-busy=true] {
   > section > header > section {
 
     > header > search#filterSearch  {
       color: transparent;
       text-shadow: 0 0 5px rgba(0,0,0,0.5);
+      background-color: var( --huey-medium-background-color ); 
     }
     
     > section > select#filterPicklist {
       color: transparent;
       text-shadow: 0 0 5px rgba(0,0,0,0.5);
       overflow: auto;
+      background-color: var( --huey-medium-background-color ); 
     }
 
   }
