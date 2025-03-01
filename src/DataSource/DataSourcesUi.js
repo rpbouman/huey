@@ -637,9 +637,7 @@ class DataSourcesUi extends EventEmitter {
             value="${fileType}" 
             id="${id}"
           />
-          <label for="${id}">
-            <label>${fileType}</label>
-          </label>
+          <label for="${id}">${fileType}</label>
         </li>
       `;
     });
@@ -710,6 +708,11 @@ class DataSourcesUi extends EventEmitter {
   }
   
   async #downloadDatasourceClicked(event) {
+    var button = event.target;
+    if (button.getAttribute('aria-busy') === 'true'){
+      return;
+    }
+    
     var datasource = this.#getDatasourceFromClickEvent(event);
     var datasourceFileType;
     switch (datasource.getType()){
@@ -722,6 +725,7 @@ class DataSourcesUi extends EventEmitter {
     if (!targetFileType) {
       return;
     }
+    button.setAttribute('aria-busy', 'true');
     
     var exportSettings = DataSourcesUi.#getDatasourceExportSettings(targetFileType);
     var exportTitle = DataSourcesUi.getCaptionForDatasource(datasource);
@@ -729,6 +733,7 @@ class DataSourcesUi extends EventEmitter {
     
     var sql = `SELECT * ${datasource.getFromClauseSql()}`;
     await ExportUi.exportData(datasource, sql, exportSettings);
+    button.setAttribute('aria-busy', 'false');
   }
 
   #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
