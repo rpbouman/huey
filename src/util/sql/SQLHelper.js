@@ -920,9 +920,9 @@ function unQuoteIdentifier(str){
 }
 
 function identifierRequiresQuoting(identifier){
-  // TODO: check if the identifier is a reserved word, see https://duckdb.org/docs/sql/meta/duckdb_table_functions#duckdb_keywords
-  // https://duckdb.org/docs/sql/dialect/keywords_and_identifiers.html
-  return /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier);
+  return window.hueyDb.reservedWords.includes(identifier.toLowerCase()) || 
+    /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier)
+  ;
 }
 
 function quoteIdentifierWhenRequired(identifier){
