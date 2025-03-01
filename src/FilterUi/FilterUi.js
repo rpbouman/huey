@@ -1110,6 +1110,10 @@ class FilterDialog {
     if (offset === undefined){
       offset = 0;
     }
+    // TODO: best practices would say we shouldn't use LIMIT / OFFSET; 
+    // we could theoretically do better by doing some sort of keyset pagination
+    // by filtering for values greater than the last value of the previous page-loader
+    // However, I tried this and it didn't really seem to make a difference, at least not in plain duckdb.
     sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     var timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
