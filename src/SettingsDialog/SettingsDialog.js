@@ -141,6 +141,8 @@ class Settings extends EventEmitter {
           { value: 'upperCase', label: 'Upper Case', title: 'All upper case'}
         ]
       },
+      exportParquetCompressionLevel: 3,
+      exportParquetRowGroupSize: 122880,
       exportSqlAlwaysQuoteIdentifiers: true,
       exportSqlCommaStyle: {
         value: 'newlineBefore',

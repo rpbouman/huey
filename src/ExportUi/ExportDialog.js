@@ -291,8 +291,13 @@ class ExportUi {
           compression = exportSettings[exportType + 'Compression'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
+            "ROW_GROUP_SIZE": exportSettings['exportParquetRowGroupSize'],
             "COMPRESSION": compression.value,
           };
+          if (compression.value === 'ZTSD') {
+            var compressionLevel = exportSettings[exportType + 'CompressionLevel'];
+            copyStatementOptions['COMPRESSION_LEVEL'] = compressionLevel;
+          }
           fileExtension = 'parquet';
           break;
         case 'exportSql':
