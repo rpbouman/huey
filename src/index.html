@@ -530,14 +530,43 @@
           />
           <div role="tabpanel">
             <form id="exportParquetSettings">
-              <label
-                for="exportParquetCompression"
-                title="Use this to choose the algorithm used for compressing the query result."
-              >Compression</label>
-              <select
-                id="exportParquetCompression"
-                title="Use this to choose the algorithm used for compressing the query result."
-              ></select>
+              <fieldset>
+                <legend>Compression</legend>
+                <label
+                  for="exportParquetCompression"
+                  title="Use this to choose the algorithm used for compressing the query result."
+                >Compression</label>
+                <select
+                  id="exportParquetCompression"
+                  title="Use this to choose the algorithm used for compressing the query result."
+                ></select>
+                <label
+                  for="exportParquetCompressionLevel"
+                  title="Compression level, set between 1 (lowest compression, fastest) and 22 (highest compression, slowest)."
+                >Compression Level</label>
+                <input 
+                  id="exportParquetCompressionLevel" 
+                  type="number" 
+                  value="3" 
+                  min="1" 
+                  max="22" 
+                  step="1"
+                />
+              </fieldset>
+              <fieldset>
+                <legend>Rowgroups</legend>
+                <label
+                  for="exportParquetRowGroupSize"
+                  title="The target size, i.e., number of rows, of each row group."
+                >Row group size</label>
+                <input 
+                  id="exportParquetRowGroupSize" 
+                  type="number" 
+                  step="1" 
+                  min="1" 
+                  value="122880"
+                />
+              </fieldset>
             </form>
           </div>
         </div>
