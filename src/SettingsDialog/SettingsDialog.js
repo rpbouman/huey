@@ -154,7 +154,15 @@ class Settings extends EventEmitter {
       },
       exportXlsxIncludeHeaders: true,
       exportXlsxSheet: '',
-      exportXlsxSheetRowLimit: 1048576
+      exportXlsxSheetRowLimit: 1048576,
+      exportQueryEncoding: {
+        value: 'JSON',
+        options: [
+          { value: 'JSON', label: 'JSON', title: 'JSON representation of the query state'},
+          { value: 'HASH', label: 'URL Hash', title: 'A URL hash to create a shortcut link to the query'}
+        ]
+      },
+      exportQueryIndentation: 2
     },
     filterDialogSettings: {
       filterSearchApplyAll: false,

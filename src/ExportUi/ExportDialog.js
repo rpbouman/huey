@@ -317,19 +317,46 @@ class ExportUi {
             copyStatementOptions["SHEET"] = sheetName;
           }
           break;
+        case 'exportQuery':
+          var encodingSettings = exportSettings[exportType + 'Encoding'];
+          var encodingOption = encodingSettings.options.find(function(option){
+            return option.value === encodingSettings.value;
+          });
+          var indent = exportSettings[exportType + 'Indentation'];
+          fileExtension = encodingOption.fileExtension;
+          mimeType = encodingOption.mimeType;
+          data = queryModel.getState();
+          data = JSON.stringify(data, null, indent);
+          switch  (encodingOption.value) {
+            case 'HASH':
+              data = encodeURIComponent( data );
+              data = btoa( data );
+              data = '#' + data;
+              fileExtension = 'hueyqh';
+              mimeType = 'text/plain';
+              break;
+            case 'JSON':
+              fileExtension = 'hueyq';
+              mimeType = 'application/json';
+              break;
+            default:
+          }
+          break;
         default:
           console.error(`Don't know how to handle export type "${exportType}".`);
       }
 
       var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileExtension);
-      if (!mimeType){
-        mimeType = fileTypeInfo.mimeType;
-      }
-      if (fileTypeInfo.duckdb_extension){
-        await ensureDuckDbExtensionLoadedAndInstalled(
-          fileTypeInfo.duckdb_extension, 
-          fileTypeInfo.duckdb_extension_repository
-        );
+      if (fileTypeInfo) {
+        if (!mimeType){
+          mimeType = fileTypeInfo.mimeType;
+        }
+        if (fileTypeInfo.duckdb_extension){
+          await ensureDuckDbExtensionLoadedAndInstalled(
+            fileTypeInfo.duckdb_extension, 
+            fileTypeInfo.duckdb_extension_repository
+          );
+        }
       }
 
       if (compression && compression.value !== 'UNCOMPRESSED'){
