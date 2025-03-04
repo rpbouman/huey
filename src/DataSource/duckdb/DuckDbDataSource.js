@@ -57,7 +57,7 @@ class DuckDbDataSource extends EventEmitter {
       datasourceType: DuckDbDataSource.types.FILE,
       duckdb_reader: 'read_xlsx',
       duckdb_extension: 'excel',
-      duckdb_extension_repository: 'core_nightly',
+      //duckdb_extension_repository: 'core_nightly',
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     },
     "duckdb": {
