@@ -16,14 +16,24 @@ class Routing {
   }
       
   static getRouteForQueryModel(queryModel){
-    var queryModelObject = queryModel.getState();    
+    var queryModelState;
+    if (queryModel instanceof QueryModel) {
+      queryModelState = queryModel.getState();
+    }
+    else
+    if (typeof queryModel === 'object') {
+      queryModelState = queryModel;
+    }
+    else {
+      throw new Error(`Invalid argument: expected query model instance or query model state.`);
+    }
     
-    if (queryModelObject === null) {
+    if (queryModelState === null) {
       return undefined;
     }
     
     var routeObject = {
-      queryModel: queryModelObject
+      queryModel: queryModelState 
     };
     var json = JSON.stringify( routeObject );
     var ascii = encodeURIComponent( json );
@@ -67,4 +77,5 @@ class Routing {
       document.location.hash = hash;
     }
   }
+  
 }
