@@ -928,7 +928,17 @@ class FilterDialog {
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
     
-    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryModelItem);
+    var dataType;
+    if (queryModelItem.derivation) {
+      var derivationInfo = AttributeUi.getDerivationInfo(queryModelItem.derivation);
+      if (derivationInfo.dataValueTypeOverride) {
+        dataType = derivationInfo.dataValueTypeOverride;
+      }
+    }
+    if (!dataType) {
+      dataType = QueryAxisItem.getQueryAxisItemDataType(queryModelItem);
+    }
+
     filterDialog.setAttribute('data-query-model-item-datatype', dataType);
     
     filterDialog.showModal();
