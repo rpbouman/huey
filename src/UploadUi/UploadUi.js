@@ -123,8 +123,14 @@ class UploadUi {
         throw new Error(`Error uploading file ${file.name}: ${errorMessage}.`);
       }
 
-      if (duckDbDataSource && duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
-        var columnMetadata = await duckDbDataSource.getColumnMetadata();
+      if (duckDbDataSource) {
+        switch (duckDbDataSource.getType()){
+          case DuckDbDataSource.types.FILE:
+            var columnMetadata = await duckDbDataSource.getColumnMetadata();
+            break;
+          case DuckDbDataSource.types.DUCKDB:
+          case DuckDbDataSource.types.SQLITE:
+        }
         return duckDbDataSource;
       }
       else
