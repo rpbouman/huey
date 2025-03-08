@@ -225,7 +225,16 @@ dialog#filterDialog {
       width: 5.5em;
     }  
   }
+}
 
+dialog#filterDialog:is(
+  [data-query-model-item-datatype="DECIMAL"],
+  [data-query-model-item-datatype="DOUBLE"],
+  [data-query-model-item-datatype$="INT"], 
+  [data-query-model-item-datatype="INTEGER"]
+) select[multiple] option {
+  padding-right: 1em;
+  text-align: right;
 }
 
 /* panel with the toFilterValueList is hidden by default, but visible for between/notbetween operators. */
