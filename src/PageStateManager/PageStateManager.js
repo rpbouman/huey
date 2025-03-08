@@ -164,6 +164,10 @@ class PageStateManager {
               }
             }
             byId('uploader').click();
+            // TODO: there's a loose end here
+            // this function returns a promise so we should either reject or resolve.
+            // but this code path does neither.
+            resolve(null);
             break;
           case 'reject':
             reject();
@@ -212,6 +216,14 @@ class PageStateManager {
           compatibleDatasources,
           newUploadResults ? newUploadResults.datasources : undefined
         );
+        // TODO: this is a bit funky, we're getting null because the ui flow to select a datasource
+        // at some point gets disconnected when we have to open the filepicker.
+        // For now we'll leave it but we need to find a more rigourous wat to define UI workflows
+        // because now it's just a load of Promispaghetti
+        if (datasource === null) {
+          Routing.updateRouteFromQueryModel(queryModelState);
+          return;
+        }
       }
       catch (error){
         queryModel.clear();
