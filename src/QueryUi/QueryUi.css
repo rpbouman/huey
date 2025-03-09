@@ -198,12 +198,12 @@
         content: "\eabc";
       }
 
-      > li[data-derivation=iso-date] > span:before {
+      > li[data-derivation="iso-date"] > span:before {
         /* calendar */
         content: "\ea53";
       }
 
-      > li[data-derivation=iso-year] > span:before,
+      > li[data-derivation="iso-year"] > span:before,
       > li[data-derivation=year] > span:before {
         /* letter-y */
         content: "\ec68";
@@ -313,6 +313,21 @@
       > li[data-derivation='element indices'] > span:before {
         /* list-numbers */
         content: "\ef11";
+      }
+
+      > li[data-derivation='hash'] > span:before,
+      > li[data-derivation='md5'] > span:before,
+      > li[data-derivation='md5 low'] > span:before,
+      > li[data-derivation='md5 high'] > span:before {
+        /* IconNumber123 */
+        content: "\f554";
+      }
+
+      > li[data-derivation='md5 (hex)'] > span:before,
+      > li[data-derivation='sha-1'] > span:before,
+      > li[data-derivation='sha-256'] > span:before {
+        /* binary */
+        content: "\ee08";
       }
 
       /**

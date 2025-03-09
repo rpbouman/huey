@@ -347,6 +347,50 @@ class AttributeUi {
       columnType: 'UTINYINT'
     }
   };
+  
+  static hashDerivations = {
+    "hash": {
+      folder: 'hashes',
+      expressionTemplate: 'hash( ${columnExpression} )',
+      columnType: 'UBIGINT'
+    },
+    "md5 (hex)": {
+      folder: 'hashes',
+      expressionTemplate: 'md5( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    },
+    "md5": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number( ${columnExpression} )',
+      columnType: 'HUGEINT',
+      forString: true
+    },
+    "md5 low": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number_lower( ${columnExpression} )',
+      columnType: 'BIGINT',
+      forString: true
+    },
+    "md5 high": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number_higher( ${columnExpression} )',
+      columnType: 'BIGINT',
+      forString: true
+    },
+    "sha-1": {
+      folder: 'hashes',
+      expressionTemplate: 'sha1( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    },
+    "sha-256": {
+      folder: 'hashes',
+      expressionTemplate: 'sha256( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    }
+  };
 
   static textDerivations = {
     "first letter": {
@@ -446,11 +490,35 @@ class AttributeUi {
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
     var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    
+    var hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
+    
+    var arrayType = typeName === 'ARRAY';
+    var mapType = typeName === 'MAP';
+    var structType = typeName === 'STRUCT';
+    // note: for this purpose, JSON is treated as string.
+    var stringType = isStringType(typeName) || typeName === 'JSON';
+    var objectType;
+    if (!stringType) {
+      objectType =  arrayType || mapType || structType;
+    }
+    
+    if (objectType){
+      Object.keys(hashDerivations).forEach(function(hashDerivationKey){
+        var hashDerivation = hashDerivations[hashDerivationKey];
+        if (hashDerivation.forString) {
+          delete hashDerivations[hashDerivationKey];
+        }
+      });
+    }
+    
+    var needHashDerivations = stringType || objectType;
 
     var applicableDerivations = Object.assign({},
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
   }
@@ -461,6 +529,7 @@ class AttributeUi {
       AttributeUi.dateFields,
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
+      AttributeUi.hashDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
       AttributeUi.mapDerivations

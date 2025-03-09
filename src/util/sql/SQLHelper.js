@@ -1273,6 +1273,10 @@ function isStructType(dataType) {
   return dataType.startsWith('STRUCT(') && dataType.endsWith(')');
 }
 
+function isStringType(dataType){
+  return dataType === 'VARCHAR' || dataType === 'BLOB';
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
     var typeOfMemberExpressionPath = typeof memberExpressionPath;
