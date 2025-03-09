@@ -269,6 +269,18 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\f7b2";
   }
 
+  details[data-nodetype=derived][data-derivation="hash"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 (low)"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 (high)"] > summary > span.label::before {
+    /* IconNumber123 */
+    content: "\f554";
+  }
+
+
+  details[data-nodetype=derived][data-derivation="md5 (hex)"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="sha-1"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="sha-256"] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=UUID] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=UUID] > summary > span.label::before {
     /* binary */
@@ -280,12 +292,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Derivation icons
   *
   */
-  details[data-nodetype=derived][data-derivation=iso-date] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation=local-date] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="iso-date"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="local-date"] > summary > span.label::before {
     /* calendar */
     content: "\ea53";
   }
-  details[data-nodetype=derived][data-derivation=iso-year] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="iso-year"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
     /* letter-y */
     content: "\ec68";
@@ -326,7 +338,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\fcca";
   }
 
-  details[data-nodetype=derived][data-derivation=iso-time] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="iso-time"] > summary > span.label::before {
     /* clock */
     content: "\ea70";
   }
