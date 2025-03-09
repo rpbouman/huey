@@ -592,19 +592,22 @@ class AttributeUi {
   async #queryModelChangeHandler(event){
     try {
       var eventData = event.eventData;
-      if (eventData.propertiesChanged) {
-        if (eventData.propertiesChanged.datasource) {
-          var searchAttributeUiDisplay;
-          if (eventData.propertiesChanged.datasource.newValue) {
-            this.clear(true);
-            var datasource = eventData.propertiesChanged.datasource.newValue;
-            var columnMetadata = await datasource.getColumnMetadata();
-            this.render(columnMetadata);
-          }
-          else {
-            this.clear(false);
-          }
-        }
+      var propertiesChanged = eventData.propertiesChanged;
+      if (!propertiesChanged) {
+        return;
+      }
+      var datasourceChanged = eventData.propertiesChanged.datasource;
+      if (!datasourceChanged){
+        return;
+      }
+      var newDatasource = eventData.propertiesChanged.datasource.newValue;
+      if (newDatasource) {
+        this.clear(true);
+        var columnMetadata = await newDatasource.getColumnMetadata();
+        this.render(columnMetadata);
+      }
+      else {
+        this.clear(false);
       }
     }
     catch(e){
