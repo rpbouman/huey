@@ -1270,12 +1270,14 @@ class AttributeUi {
 
   #toggleNodeState(event){
     var node = event.target;
-    if (event.newState === 'open'){
-      if (node.childNodes.length === 1){
-        this.#loadChildNodes(node);
-        this.#updateState();
-      }
+    if (event.newState !== 'open'){
+      return;
     }
+    if (node.childNodes.length !== 1){
+      return;
+    }
+    this.#loadChildNodes(node);
+    this.#updateState();
   }
 
   #updateState(){
