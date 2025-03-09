@@ -1196,9 +1196,10 @@ function getStructTypeDescriptor(structColumnType){
 }
 
 function getMapKeyValueType(mapType){
-  if (!mapType.startsWith('MAP(') || !mapType.endsWith(')')){
+  if (!isMapType(mapType)){
     throw new Error(`Expected a MAP type`)
   }
+  
   var level = 0;
   var i;
   var elementTypes = unQuote(mapType, 'MAP(', ')');
@@ -1264,6 +1265,14 @@ function isArrayType(dataType){
   return dataType.endsWith('[]');
 }
 
+function isMapType(dataType) {
+  return dataType.startsWith('MAP(') && dataType.endsWith(')');
+}
+
+function isStructType(dataType) {
+  return dataType.startsWith('STRUCT(') && dataType.endsWith(')');
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
     var typeOfMemberExpressionPath = typeof memberExpressionPath;
@@ -1304,7 +1313,7 @@ function getMemberExpressionType(type, memberExpressionPath){
         return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
         break;
       case 'string':
-        if (!type.startsWith('MAP')){
+        if (!isMapType(type)){
           throw new Error(`Expected a MAP type`);
         }
         switch (memberExpressionPath){
