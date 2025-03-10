@@ -21,7 +21,9 @@ function getArrowDecimalAsString(value, type){
     absValue = new Array(type.scale).fill('0').join('') + absValue;
     var decimalPlace = absValue.length - type.scale;
     var fractionalPart = absValue.slice(decimalPlace);
+    fractionalPart = fractionalPart.replace(/0+$/, '');
     var integerPart = absValue.slice(0, decimalPlace);
+    integerPart = integerPart.replace(/^0+/, '');
     return `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
 }
 

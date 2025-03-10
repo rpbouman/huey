@@ -229,7 +229,7 @@ dialog#filterDialog {
 }
 
 dialog#filterDialog:is(
-  [data-query-model-item-datatype="DECIMAL"],
+  [data-query-model-item-datatype^="DECIMAL"],
   [data-query-model-item-datatype="DOUBLE"],
   [data-query-model-item-datatype$="INT"], 
   [data-query-model-item-datatype="INTEGER"]
@@ -240,25 +240,25 @@ dialog#filterDialog:is(
 }
 
 dialog#filterDialog:not(
-  [data-query-model-item-datatype="DECIMAL"],
+  [data-query-model-item-datatype^="DECIMAL"],
   [data-query-model-item-datatype="DOUBLE"],
   [data-query-model-item-datatype$="INT"], 
   [data-query-model-item-datatype="INTEGER"]
 ) > section:has( 
   > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
 ) select[multiple=true] option::after {
-  content: "\00a0\00a0(" attr( data-sql-literal ) ")";
+  content: "\00a0\00a0(" attr( value ) ")";
 }
 
 dialog#filterDialog:is(
-  [data-query-model-item-datatype="DECIMAL"],
+  [data-query-model-item-datatype^="DECIMAL"],
   [data-query-model-item-datatype="DOUBLE"],
   [data-query-model-item-datatype$="INT"], 
   [data-query-model-item-datatype="INTEGER"]
 ) > section:has( 
   > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
 ) select[multiple=true] option::before {
-  content: "(" attr( data-sql-literal ) ")\00a0\00a0";
+  content: "(" attr( value ) ")\00a0\00a0";
 }
 
 /* panel with the toFilterValueList is hidden by default, but visible for between/notbetween operators. */
