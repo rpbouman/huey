@@ -1192,7 +1192,7 @@ class FilterDialog {
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
-      var value = valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value);
+      var value = row.value === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value));
       var label = row.label;
       if (formatter) {
         label = formatter(label, labelField);

@@ -15,16 +15,23 @@ function getLocales(){
 }
 
 function getArrowDecimalAsString(value, type){
-    var strValue = String(value);
-    var isNegative = strValue.startsWith('-') ;
-    var absValue = isNegative ? strValue.substr(1) : strValue;
-    absValue = new Array(type.scale).fill('0').join('') + absValue;
-    var decimalPlace = absValue.length - type.scale;
-    var fractionalPart = absValue.slice(decimalPlace);
-    fractionalPart = fractionalPart.replace(/0+$/, '');
-    var integerPart = absValue.slice(0, decimalPlace);
-    integerPart = integerPart.replace(/^0+/, '');
-    return `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+  if (value === null) {
+    return 'NULL';
+  }
+  var strValue = String(value);
+  var isNegative = strValue.startsWith('-') ;
+  var absValue = isNegative ? strValue.substr(1) : strValue;
+  absValue = new Array(type.scale).fill('0').join('') + absValue;
+  var decimalPlace = absValue.length - type.scale;
+  var fractionalPart = absValue.slice(decimalPlace);
+  fractionalPart = fractionalPart.replace(/0+$/, '');
+  var integerPart = absValue.slice(0, decimalPlace);
+  integerPart = integerPart.replace(/^0+/, '');
+  var str = `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+  if (str === '.'){
+    str = '0';
+  }
+  return str;
 }
 
 function createNumberFormatter(fractionDigits){
