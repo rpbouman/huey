@@ -1177,27 +1177,24 @@ class FilterDialog {
 
     var formatter = this.#queryAxisItem.formatter;
     var valueField, labelField;
-    if (formatter) {
-      var fields = resultset.schema.fields;
-      for (var i = 0; i < fields.length; i++) {
-        var field = fields[i];
-        switch (field.name) {
-          case 'label':
-            labelField = field;
-            break;
-          case 'value':
-            valueField = field;
-            break;
-        }
+    var fields = resultset.schema.fields;
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      switch (field.name) {
+        case 'label':
+          labelField = field;
+          break;
+        case 'value':
+          valueField = field;
+          break;
       }
     }
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
-      var value = row.value;
+      var value = valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value);
       var label = row.label;
       if (formatter) {
-        value = formatter(value, valueField);
         label = formatter(label, labelField);
       }
       var literal = getDuckDbLiteralForValue(row.value, valueField.type);
