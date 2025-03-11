@@ -354,19 +354,9 @@
                 id="exportDelimitedCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               >
-                <option
-                  selected="true"
-                  title="Uncompressed - no compression will be applied"
-                  value="UNCOMPRESSED"
-                >uncompressed</option>
-                <option
-                  title="GZIP - applies gzip compression"
-                  value="GZIP"
-                >gzip</option>
-                <option
-                  title="ZTSD - applies ztsd compression"
-                  value="ZTSD"
-                >ztsd</option>
+                <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                <option value="ZTSD" label="ztsd" title="ZTSD - applies ztsd compression"/>
               </select>
               <label
                 title="Whether to include a line of column headers."
@@ -528,7 +518,11 @@
               <select
                 id="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
-              ></select>
+              >
+                <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                <option value="ZTSD" label="ztsd" title="ZTSD - applies ztsd compression"/>
+              </select>
               <fieldset>
                 <legend>Formatting</legend>
                 <label
@@ -561,7 +555,10 @@
                 <select
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
-                ></select>
+                >
+                  <option value="false" label="newline" title="This option generates one row-object per line (JSONL format)"/>
+                  <option value="true" label="array" title="This option generates an array with row-object elements (JSON)"/>
+                </select>
               </fieldset>
             </form>
           </div>
@@ -591,7 +588,15 @@
                 <select
                   id="exportParquetCompression"
                   title="Use this to choose the algorithm used for compressing the query result."
-                ></select>
+                >
+                  <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                  <option value="BROTLI" label="brotli" title="BROTLI - applies Brotli compression"/>
+                  <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                  <option value="LZ4" label="lz4" title="LZ4 - applies LZ4 compression"/>
+                  <option value="LZ4_RAW" label="lz4 raw" title="LZ4 Raw - applies LZ4 Raw compression"/>
+                  <option value="SNAPPY" label="snappy" title="SNAPPY - applies snappy compression"/>
+                  <option value="ZTSD" label="ztsd" title="ZTSD - applies ztsd compression"/>
+                </select>
                 <label
                   for="exportParquetCompressionLevel"
                   title="Compression level, set between 1 (lowest compression, fastest) and 22 (highest compression, slowest)."
@@ -697,7 +702,10 @@
           <div role="tabpanel">
             <form id="exportQuerySettings">
               <label for="exportQueryEncoding">Encoding</label>
-              <select id="exportQueryEncoding"></select>
+              <select id="exportQueryEncoding">
+                <option value="JSON" label="JSON" title="JSON representation of the query state"/>
+                <option value="HASH" label="URL Hash" title="A URL hash to create a shortcut link to the query"/>
+              </select>
               <label for="exportQueryIndentation">Indentation</label>
               <input id="exportQueryIndentation" type="number" step="1" min="0"/>
             </form>
