@@ -91,12 +91,7 @@ class Settings extends EventEmitter {
       exportXlsx: false,
       // options for delimited
       exportDelimitedCompression: {
-        value: 'UNCOMPRESSED',
-        options: [
-          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
-          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
-          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
-        ]
+        value: 'UNCOMPRESSED'
       },
       exportDelimitedIncludeHeaders: true,
       exportDelimitedDateFormat: '%x',
@@ -107,60 +102,31 @@ class Settings extends EventEmitter {
       exportDelimitedEscape: '"',
       // options for json
       exportJsonCompression: {
-        value: 'UNCOMPRESSED',
-        options: [
-          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
-          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
-          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
-        ]
+        value: 'UNCOMPRESSED'
       },
       exportJsonDateFormat: '%x',
       exportJsonTimestampFormat: '%c',
       // true for array, false for newline
       exportJsonRowDelimiter: {
-        value: "true",
-        options: [
-          { "value": "false", label: "newline" },
-          { "value": "true", label: "array" }
-        ]
+        value: "true"
       },
       exportParquetCompression: {
-        value: 'SNAPPY',
-        options: [
-          { value: 'UNCOMPRESSED', label: 'uncompressed' , title: 'Uncompressed - no compression will be applied'},
-          { value: 'GZIP', label: 'gzip' , title: 'GZIP - applies gzip compression'},
-          { value: 'SNAPPY', label: 'snappy' , title: 'SNAPPY - applies snappy compression'},
-          { value: 'ZTSD', label: 'ztsd' , title: 'ZTSD - applies ztsd compression'}
-        ]
+        value: 'SNAPPY'
       },
       exportSqlKeywordLettercase: {
-        value: 'upperCase',
-        options: [
-          { value: 'initialCapital', label: 'Initial Capital', title: 'Initial capital followed by lowercase'},
-          { value: 'lowerCase', label: 'Lower Case', title: 'All lower case'},
-          { value: 'upperCase', label: 'Upper Case', title: 'All upper case'}
-        ]
+        value: 'upperCase'
       },
       exportParquetCompressionLevel: 3,
       exportParquetRowGroupSize: 122880,
       exportSqlAlwaysQuoteIdentifiers: true,
       exportSqlCommaStyle: {
-        value: 'newlineBefore',
-        options: [
-          { value: 'spaceAfter', label: 'Space After' },
-          { value: 'newlineAfter', label: 'Newline After' },
-          { value: 'newlineBefore', label: 'Newline Before' }
-        ]
+        value: 'newlineBefore'
       },
       exportXlsxIncludeHeaders: true,
       exportXlsxSheet: '',
       exportXlsxSheetRowLimit: 1048576,
       exportQueryEncoding: {
-        value: 'JSON',
-        options: [
-          { value: 'JSON', label: 'JSON', title: 'JSON representation of the query state'},
-          { value: 'HASH', label: 'URL Hash', title: 'A URL hash to create a shortcut link to the query'}
-        ]
+        value: 'JSON'
       },
       exportQueryIndentation: 2
     },
@@ -576,26 +542,30 @@ class Settings extends EventEmitter {
   }
 
   static #synchronizeSelect(settingsOrDialog, settings, property, control){
+    var optionsFromControl = control.options;
+    var optionsFromSettings = settings[property].options;
+    var index = 0;
+    var numOptions = optionsFromSettings ? optionsFromSettings.length : optionsFromControl.length;
     switch (settingsOrDialog) {
       case 'settings':
-        var optionsFromSettings = [];
-        var optionsFromControl = control.options;
-
         var valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
         }
 
-        for (var i = 0; i < optionsFromControl.length; i++){
-          var optionFromControl = optionsFromControl[i];
-          var value = optionFromControl.value;
-          var label = optionFromControl.label || value;
-          if (valueGetter){
-            value = valueGetter.call(null, optionFromControl, this);
+        if (optionsFromSettings) {
+          for (; index < numOptions; index++){
+            var optionFromControl = optionsFromControl[index];
+            var value = optionFromControl.value;
+            var label = optionFromControl.label || value;
+            if (valueGetter){
+              value = valueGetter.call(null, optionFromControl, this);
+            }
+            optionsFromSettings.push({value: value, label: label});
           }
-          optionsFromSettings.push({value: value, label: label});
+          settings[property].options = optionsFromSettings;
         }
-        settings[property].options = optionsFromSettings;
+        
         if (valueGetter) {
           settings[property].value = valueGetter.call(null, control, this);
         }
@@ -604,7 +574,6 @@ class Settings extends EventEmitter {
         }
         break;
       case 'dialog':
-        var optionsFromSettings = settings[property].options;
         var valueFromSettings = settings[property].value;
 
         var valueSetter = control.getAttribute('data-value-setter');
@@ -612,24 +581,26 @@ class Settings extends EventEmitter {
           valueSetter = eval(valueSetter);
         }
 
-        control.options.length = 0;
-        for (var i = 0; i < optionsFromSettings.length; i++){
-          var optionFromSettings = optionsFromSettings[i];
-          var value = optionFromSettings.value;
-          var label = optionFromSettings.label || value;
-          var title = optionFromSettings.title || label;
-          var option = createEl('option', {
-            label: label,
-            title: title
-          }, label);
+        if (optionsFromSettings) {
+          control.options.length = 0;
+          for (; index < numOptions; index++){
+            var optionFromSettings = optionsFromSettings[index];
+            var value = optionFromSettings.value;
+            var label = optionFromSettings.label || value;
+            var title = optionFromSettings.title || label;
+            var option = createEl('option', {
+              label: label,
+              title: title
+            }, label);
 
-          if (valueSetter) {
-            valueSetter.call(null, option, value, this);
+            if (valueSetter) {
+              valueSetter.call(null, option, value, this);
+            }
+            else {
+              option.value = value;
+            }
+            control.appendChild(option);
           }
-          else {
-            option.value = value;
-          }
-          control.appendChild(option);
         }
 
         if (valueSetter) {
@@ -672,7 +643,6 @@ class Settings extends EventEmitter {
       keys.forEach(function(propertyName){
         var sourceValue = source[propertyName];
         var targetValue = target[propertyName];
-        //if (targetValue === undefined || targetValue === null || targetValue === '') {
         if (targetValue === undefined){
           //target either does not have this key at all, or it is null or the empty string (which we deem safe to overwrite)
           //so we create it and simply assign the value.
@@ -692,14 +662,20 @@ class Settings extends EventEmitter {
           //do the actual assignment to the missing key.
           target[propertyName] = targetValue;
         }
-        else if (sourceValue === null) {
+        else 
+        if (sourceValue === null) {
           // we won't overwrite with null from template.
         }
-        else if (typeof targetValue === 'object' && targetValue.constructor === sourceValue.constructor){
+        else 
+        if (typeof targetValue === 'object' && targetValue.constructor === sourceValue.constructor){
           // only if the sourceValue is not null, and both targetValue and sourceValue are reference types, copy the contents.
+          if (sourceValue.value && sourceValue.options === undefined && targetValue.value && targetValue.options !== undefined) {
+            delete targetValue.options;
+          }
           copyData(sourceValue, targetValue);
         }
-        else if (typeof sourceValue !== typeof targetValue){
+        else 
+        if (typeof sourceValue !== typeof targetValue){
           console.error('Property ' + propertyName + ' exists in source and target but have different types (' + (typeof sourceValue) + ';' + (typeof targetValue) +')');
         }
         else {
