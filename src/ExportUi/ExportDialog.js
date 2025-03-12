@@ -294,7 +294,7 @@ class ExportUi {
             "ROW_GROUP_SIZE": exportSettings['exportParquetRowGroupSize'],
             "COMPRESSION": compression.value,
           };
-          if (compression.value === 'ZTSD') {
+          if (compression.value === 'ZSTD') {
             var compressionLevel = exportSettings[exportType + 'CompressionLevel'];
             copyStatementOptions['COMPRESSION_LEVEL'] = compressionLevel;
           }
@@ -368,8 +368,8 @@ class ExportUi {
             case 'GZIP':
               mimeType = 'application/gzip';
               break;
-            case 'ZTSD':
-              mimeType = 'application/ztsd';
+            case 'ZSTD':
+              mimeType = 'application/zstd';
               break;
             default:
               mimeType = 'application/octet-stream';
