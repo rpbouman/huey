@@ -137,7 +137,7 @@ class QueryAxisItem {
     }
 
     if (axisItem.derivation) {
-      postfix += `${axisItem.derivation}`;
+      postfix += ` ${axisItem.derivation}`;
     }
     else
     if (axisItem.aggregator){
@@ -145,9 +145,6 @@ class QueryAxisItem {
     }
 
     if (postfix) {
-      if (caption && caption.length) {
-        caption += ' ';
-      }
       caption += `${postfix}`;
     }
     if (prefix) {
@@ -176,25 +173,18 @@ class QueryAxisItem {
     if (alias){
       sqlExpression.unshift(alias);
     }
-
     sqlExpression = getQualifiedIdentifier(sqlExpression, sqlOptions);
 
     if (item.memberExpressionPath) {
-      var memberExpressionPath = item.memberExpressionPath;
-      var memberExpression = memberExpressionPath
-      .map(function(memberExpressionPathElement){
-        // todo: escape single quote in memberExpressionPathElement
-        var expression;
-        if (memberExpressionPathElement.endsWith('()')){
-          expression = '.' + memberExpressionPathElement;
+      sqlExpression = item.memberExpressionPath.reduce(function(acc, curr){
+        if ( curr.endsWith('()') ) {
+          acc = `${curr.slice(0, -2)}( ${acc} )`;
         }
         else {
-          expression = `['${memberExpressionPathElement}']`;
+          acc += `['${curr}']`;
         }
-        return expression;
-      })
-      .join('');
-      sqlExpression += memberExpression;
+        return acc;
+      }, sqlExpression);
     }
     return sqlExpression;
   }
@@ -250,6 +240,19 @@ class QueryAxisItem {
     var columnType = queryAxisItem.columnType;
     var dataType = columnType;
 
+    /* 
+      see https://github.com/rpbouman/huey/issues/505
+      If items have a member expression path, then we first need to unwrap that and get the type of the path.
+      Once we have that, we can evaluate type hints like hasElementDataType, hasKeyArrayDataType, preservesColumnType
+    */
+    if (queryAxisItem.memberExpressionPath) {
+      var memberExpressionPath = queryAxisItem.memberExpressionPath;
+      dataType = getMemberExpressionType(columnType, memberExpressionPath);
+      if (memberExpressionPath[memberExpressionPath.length - 1].endsWith('()')){
+        return dataType;
+      }
+    }
+
     var derivationInfo, derivation = queryAxisItem.derivation;
     if (derivation) {
       derivationInfo = AttributeUi.getDerivationInfo(derivation);
@@ -262,7 +265,6 @@ class QueryAxisItem {
       }
       else
       if (derivationInfo.hasKeyDataType || derivationInfo.hasKeyArrayDataType){
-        dataType = getArrayElementType(dataType);
         dataType = getMemberExpressionType(dataType, 'key');
         if (derivationInfo.hasKeyArrayDataType){
           dataType = getArrayType(dataType);
@@ -293,11 +295,6 @@ class QueryAxisItem {
         console.warn(`Item ${QueryAxisItem.getIdForQueryAxisItem(queryAxisItem)} has derivation "${derivation}" which does not preserve column type and no column type set.`);
       }
     }
-    else
-    if (queryAxisItem.memberExpressionPath) {
-      var memberExpressionPath = queryAxisItem.memberExpressionPath;
-      dataType = getMemberExpressionType(columnType, memberExpressionPath);
-    }
 
     var aggregatorInfo, aggregator = queryAxisItem.aggregator;
     if (aggregator) {
@@ -306,12 +303,8 @@ class QueryAxisItem {
         dataType = aggregatorInfo.columnType;
       }
       else
-      if (aggregatorInfo.preservesColumnType){
-        dataType = columnType;
-      }
-      else 
       if (aggregator === 'median'){
-        dataType = getMedianReturnDataTypeForArgumentDataType(columnType);
+        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
       }
       else {
         dataType = undefined;

@@ -75,3 +75,27 @@ body > main:has( > #workarea > #queryUi > section[data-axis=cells] > ol > li ) >
 {
   display: block;
 }
+
+form#exportParquetSettings {
+  > fieldset:has( > input#exportParquetCompressionLevel ) {
+
+    > label[for=exportParquetCompressionLevel] {
+      display: none;
+    }
+
+    > input#exportParquetCompressionLevel {
+      display: none;
+    }
+  }
+
+  > fieldset:has( > select#exportParquetCompression > option[value=ZSTD]:checked ) {
+    > label[for=exportParquetCompressionLevel] {
+      display: inline;
+    }
+
+    > input#exportParquetCompressionLevel {
+      display: inline;
+    }
+  }
+
+}

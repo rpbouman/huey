@@ -11,8 +11,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   /**
   * hide the expand/collapse widget for these attribute nodes.
   */
+  details[role=treeitem][data-nodetype=derived][data-member_expression_type=JSON] > summary,
   details[role=treeitem][data-nodetype=aggregate] > summary,
-  details[role=treeitem][data-nodetype=derived]:not( [data-derivation=elements], [data-derivation=entries] ) > summary {
+  details[role=treeitem][data-nodetype=derived]:not( 
+    [data-derivation=elements], 
+    [data-derivation=entries] 
+  ) > summary {
     list-style: none;
     margin-left: 14px;
   }
@@ -230,9 +234,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=member][data-member_expression_type=FLOAT] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=REAL] > summary > span.label::before,
   details[data-nodetype=column][data-column_type^=DECIMAL] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=DOUBLE] > summary > span.label::before,
+  details[data-nodetype=column][data-column_type=FLOAT] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=REAL] > summary > span.label::before {
     /* decimal */
     content: "\fa26";
@@ -256,12 +262,25 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\ea70";
   }
 
+  details[data-nodetype=derived][data-member_expression_type=JSON] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=JSON] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=JSON] > summary > span.label::before {
     /* JSON */
     content: "\f7b2";
   }
 
+  details[data-nodetype=derived][data-derivation="hash"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 (low)"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 (high)"] > summary > span.label::before {
+    /* IconNumber123 */
+    content: "\f554";
+  }
+
+
+  details[data-nodetype=derived][data-derivation="md5 (hex)"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="sha-1"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="sha-256"] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type=UUID] > summary > span.label::before,
   details[data-nodetype=column][data-column_type=UUID] > summary > span.label::before {
     /* binary */
@@ -273,12 +292,12 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * Derivation icons
   *
   */
-  details[data-nodetype=derived][data-derivation=iso-date] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation=local-date] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="iso-date"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="local-date"] > summary > span.label::before {
     /* calendar */
     content: "\ea53";
   }
-  details[data-nodetype=derived][data-derivation=iso-year] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="iso-year"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
     /* letter-y */
     content: "\ec68";
@@ -319,7 +338,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: "\fcca";
   }
 
-  details[data-nodetype=derived][data-derivation=iso-time] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="iso-time"] > summary > span.label::before {
     /* clock */
     content: "\ea70";
   }

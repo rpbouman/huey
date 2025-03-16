@@ -438,6 +438,7 @@ class QueryUi {
         var toValueKey = toValueKeys[i];
         var toValueObject = toValues[toValueKey];
         valueUi.setAttribute('data-to-value', toValueKey);
+        valueLabel += ` - ${toValueObject.label}`;
       }
 
       var labelSpan = label.querySelector('span');

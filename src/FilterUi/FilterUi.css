@@ -1,7 +1,7 @@
 #filterDialogSpinner {
   position:absolute;
   left: 50%;
-  top: 170px;
+  top: 250px;
   zoom: 33%;
 }
 
@@ -11,18 +11,22 @@ dialog#filterDialog[aria-busy=false] #filterDialogSpinner {
 
 dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
   display: block;
+}
 
+dialog#filterDialog[aria-busy=true] {
   > section > header > section {
 
     > header > search#filterSearch  {
       color: transparent;
       text-shadow: 0 0 5px rgba(0,0,0,0.5);
+      background-color: var( --huey-medium-background-color ); 
     }
     
     > section > select#filterPicklist {
       color: transparent;
       text-shadow: 0 0 5px rgba(0,0,0,0.5);
       overflow: auto;
+      background-color: var( --huey-medium-background-color ); 
     }
 
   }
@@ -70,37 +74,37 @@ dialog#filterDialog {
   > section {
     flex-grow: .75;
     padding: 2px;
+
+    menu[role=toolbar] {
+      padding: unset;
+      height: unset;
+      margin-bottom: 4px;
+
+      > label > input[type=checkbox] {
+        visibility: hidden;
+        display: none;
+      }
+
+      > label:has( > input[type=checkbox] )::after {
+        font-family: var( --huey-icon-font-family );
+        color: var(--huey-icon-color-subtle);  
+        /* square */
+        content: "\eb2c";
+      }
+
+      > label:has( > input[type=checkbox]:checked )::after {
+        /* checkbox */
+        content: "\eba6";
+        color: var( --huey-icon-color-highlight );
+      }    
+
+      > label:has( > input[type=checkbox] ):hover::after {
+        color: var( --huey-icon-color-highlight );
+      }
+    }
     
     > header {
       white-space: nowrap;
-
-      > menu[role=toolbar] {
-        padding: unset;
-        height: unset;
-        margin-bottom: 4px;
-
-        > label > input[type=checkbox] {
-          visibility: hidden;
-          display: none;
-        }
-
-        > label:has( > input[type=checkbox] )::after {
-          font-family: var( --huey-icon-font-family );
-          color: var(--huey-icon-color-subtle);  
-          /* square */
-          content: "\eb2c";
-        }
-
-        > label:has( > input[type=checkbox]:checked )::after {
-          /* checkbox */
-          content: "\eba6";
-          color: var( --huey-icon-color-highlight );
-        }    
-
-        > label:has( > input[type=checkbox] ):hover::after {
-          color: var( --huey-icon-color-highlight );
-        }
-      }
 
       > section {
 
@@ -160,6 +164,7 @@ dialog#filterDialog {
 
         > label {
           flex-grow: 0;
+          margin-bottom: 4px;
         }
 
         > select {
@@ -221,7 +226,39 @@ dialog#filterDialog {
       width: 5.5em;
     }  
   }
+}
 
+dialog#filterDialog:is(
+  [data-query-model-item-datatype^="DECIMAL"],
+  [data-query-model-item-datatype="DOUBLE"],
+  [data-query-model-item-datatype$="INT"], 
+  [data-query-model-item-datatype="INTEGER"]
+) select[multiple] option {
+  padding-right: 1em;
+  text-align: right;
+  font-family: var( --huey-mono-font-family );
+}
+
+dialog#filterDialog:not(
+  [data-query-model-item-datatype^="DECIMAL"],
+  [data-query-model-item-datatype="DOUBLE"],
+  [data-query-model-item-datatype$="INT"], 
+  [data-query-model-item-datatype="INTEGER"]
+) > section:has( 
+  > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
+) select[multiple=true] option::after {
+  content: "\00a0\00a0(" attr( value ) ")";
+}
+
+dialog#filterDialog:is(
+  [data-query-model-item-datatype^="DECIMAL"],
+  [data-query-model-item-datatype="DOUBLE"],
+  [data-query-model-item-datatype$="INT"], 
+  [data-query-model-item-datatype="INTEGER"]
+) > section:has( 
+  > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
+) select[multiple=true] option::before {
+  content: "(" attr( value ) ")\00a0\00a0";
 }
 
 /* panel with the toFilterValueList is hidden by default, but visible for between/notbetween operators. */

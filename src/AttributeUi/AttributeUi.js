@@ -347,12 +347,56 @@ class AttributeUi {
       columnType: 'UTINYINT'
     }
   };
+  
+  static hashDerivations = {
+    "hash": {
+      folder: 'hashes',
+      expressionTemplate: 'hash( ${columnExpression} )',
+      columnType: 'UBIGINT'
+    },
+    "md5 (hex)": {
+      folder: 'hashes',
+      expressionTemplate: 'md5( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    },
+    "md5": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number( ${columnExpression} )',
+      columnType: 'HUGEINT',
+      forString: true
+    },
+    "md5 low": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number_lower( ${columnExpression} )',
+      columnType: 'BIGINT',
+      forString: true
+    },
+    "md5 high": {
+      folder: 'hashes',
+      expressionTemplate: 'md5_number_higher( ${columnExpression} )',
+      columnType: 'BIGINT',
+      forString: true
+    },
+    "sha-1": {
+      folder: 'hashes',
+      expressionTemplate: 'sha1( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    },
+    "sha-256": {
+      folder: 'hashes',
+      expressionTemplate: 'sha256( ${columnExpression} )',
+      columnType: 'VARCHAR',
+      forString: true
+    }
+  };
 
   static textDerivations = {
     "first letter": {
       folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     "length": {
       folder: 'string operations',
@@ -362,22 +406,22 @@ class AttributeUi {
     'lowercase': {
       folder: 'string operations',
       expressionTemplate: "LOWER( ${columnExpression} )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'NOACCENT': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOACCENT",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'NOCASE': {
       folder: 'string operations',
       expressionTemplate: "${columnExpression} COLLATE NOCASE",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     },
     'uppercase': {
       folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
-      preservesColumnType: true
+      columnType: 'VARCHAR'
     }
   }
 
@@ -446,11 +490,35 @@ class AttributeUi {
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
     var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    
+    var hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
+    
+    var arrayType = typeName === 'ARRAY';
+    var mapType = typeName === 'MAP';
+    var structType = typeName === 'STRUCT';
+    // note: for this purpose, JSON is treated as string.
+    var stringType = isStringType(typeName) || typeName === 'JSON';
+    var objectType;
+    if (!stringType) {
+      objectType =  arrayType || mapType || structType;
+    }
+    
+    if (objectType){
+      Object.keys(hashDerivations).forEach(function(hashDerivationKey){
+        var hashDerivation = hashDerivations[hashDerivationKey];
+        if (hashDerivation.forString) {
+          delete hashDerivations[hashDerivationKey];
+        }
+      });
+    }
+    
+    var needHashDerivations = stringType || objectType;
 
     var applicableDerivations = Object.assign({},
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
   }
@@ -461,6 +529,7 @@ class AttributeUi {
       AttributeUi.dateFields,
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
+      AttributeUi.hashDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
       AttributeUi.mapDerivations
@@ -592,19 +661,22 @@ class AttributeUi {
   async #queryModelChangeHandler(event){
     try {
       var eventData = event.eventData;
-      if (eventData.propertiesChanged) {
-        if (eventData.propertiesChanged.datasource) {
-          var searchAttributeUiDisplay;
-          if (eventData.propertiesChanged.datasource.newValue) {
-            this.clear(true);
-            var datasource = eventData.propertiesChanged.datasource.newValue;
-            var columnMetadata = await datasource.getColumnMetadata();
-            this.render(columnMetadata);
-          }
-          else {
-            this.clear(false);
-          }
-        }
+      var propertiesChanged = eventData.propertiesChanged;
+      if (!propertiesChanged) {
+        return;
+      }
+      var datasourceChanged = eventData.propertiesChanged.datasource;
+      if (!datasourceChanged){
+        return;
+      }
+      var newDatasource = eventData.propertiesChanged.datasource.newValue;
+      if (newDatasource) {
+        this.clear(true);
+        var columnMetadata = await newDatasource.getColumnMetadata();
+        this.render(columnMetadata);
+      }
+      else {
+        this.clear(false);
       }
     }
     catch(e){
@@ -935,7 +1007,11 @@ class AttributeUi {
         }
       case 'column':
       case 'member':
-        if (columnType.startsWith('STRUCT') || columnType.startsWith('MAP') ) {
+        if (
+          isStructType(columnType) || 
+          isMapType(columnType) ||
+          config.profile.memberExpressionType && isArrayType(config.profile.memberExpressionType)
+        ) {
           this.#loadChildNodes(node);
         }
         break;
@@ -1239,15 +1315,15 @@ class AttributeUi {
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (expressionType.endsWith('[]')){
+    if (isArrayType(expressionType)){
       this.#loadArrayChildNodes(node, typeName, profile);
     }
     else
-    if (expressionType.startsWith('MAP')){ 
+    if (isMapType(expressionType)){ 
       this.#loadMapChildNodes(node, typeName, profile);
     }
     else
-    if (expressionType.startsWith('STRUCT')){
+    if (isStructType(expressionType)){
       this.#loadMemberChildNodes(node, typeName, profile);
     }
 
@@ -1263,12 +1339,14 @@ class AttributeUi {
 
   #toggleNodeState(event){
     var node = event.target;
-    if (event.newState === 'open'){
-      if (node.childNodes.length === 1){
-        this.#loadChildNodes(node);
-        this.#updateState();
-      }
+    if (event.newState !== 'open'){
+      return;
     }
+    if (node.childNodes.length !== 1){
+      return;
+    }
+    this.#loadChildNodes(node);
+    this.#updateState();
   }
 
   #updateState(){

@@ -34,6 +34,36 @@ class UploadUi {
     this.#cancelPendingUploads = true;
   }
 
+  static #handleHueyFileContents(contents, extension){
+    var queryModelState;
+    switch (extension) {
+      case 'hueyqh':
+        if (!contents.startsWith('#')){
+          throw new Error(`No hash found!`);
+        }
+        var route = contents.slice(1);
+        queryModelState = Routing.getQueryModelStateFromRoute(route);
+        break;
+      case 'hueyq':
+        queryModelState = JSON.parse(contents);
+        break;
+    }
+    return queryModelState;
+  }
+
+  static async #handleHueyFile(file, uploadItem){
+    var fileName = file.name;
+    var extension = fileName.split('.').pop().toLowerCase();
+    var fileContents = await file.text();
+    return UploadUi.#handleHueyFileContents(fileContents, extension);
+  }
+
+  static async #handleHueyFileUrl(url, uploadItem){
+    var extension = url.split('.').pop().toLowerCase();
+    var contents = await fetch(url);
+    return UploadUi.#handleHueyFileContents(contents, extension);
+  }
+
   async #uploadFile(file, uploadItem){
 
     var progressBar = uploadItem.getElementsByTagName('progress').item(0);
@@ -44,35 +74,69 @@ class UploadUi {
 
     var duckDbDataSource;
     var destroyDatasource = false;
+    
+    var hueyFileRegex = /\.hueyqh?$/i;
+    var hueyQueryState;
     try {
       if (typeof file === 'string'){
-        duckDbDataSource = await DuckDbDataSource.createFromUrl(duckdb, instance, file);
-        progressBar.value = parseInt(progressBar.value, 10) + 20;
+        
+        if (hueyFileRegex.test(file)){
+          hueyQueryState = await UploadUi.#handleHueyFileUrl(file, uploadItem);
+        }
+        else {
+          duckDbDataSource = await DuckDbDataSource.createFromUrl(duckdb, instance, file);
+          progressBar.value = parseInt(progressBar.value, 10) + 20;
 
-        await duckDbDataSource.registerFile();
-        progressBar.value = parseInt(progressBar.value, 10) + 40;
+          await duckDbDataSource.registerFile();
+          progressBar.value = parseInt(progressBar.value, 10) + 40;
+        }
       }
       else
       if (file instanceof File){
-        duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
-        progressBar.value = parseInt(progressBar.value, 10) + 20;
+        
+        if (hueyFileRegex.test(file.name)){
+          hueyQueryState = await UploadUi.#handleHueyFile(file, uploadItem);
+        }
+        else {
+          duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
+          progressBar.value = parseInt(progressBar.value, 10) + 20;
 
-        await duckDbDataSource.registerFile();
-        progressBar.value = parseInt(progressBar.value, 10) + 40;
+          await duckDbDataSource.registerFile();
+          progressBar.value = parseInt(progressBar.value, 10) + 40;
+        }
       }
 
-      var canAccess = await duckDbDataSource.validateAccess();
+      var tryResult, isAccessible;
+      if (duckDbDataSource) {
+        tryResult = await duckDbDataSource.tryAccess(100);
+        isAccessible = tryResult.success;
+      }
+      else 
+      if (hueyQueryState){
+        isAccessible = true;
+      }
       progressBar.value = parseInt(progressBar.value, 10) + 30;
 
-      if (canAccess !== true) {
+      if (isAccessible !== true) {
         destroyDatasource = true;
-        throw new Error(`Error uploading file ${file.name}: ${canAccess.message}.`);
+        var errorMessage = tryResult.lastAttempt.message;
+        throw new Error(`Error uploading file ${file.name}: ${errorMessage}.`);
       }
 
-      if (duckDbDataSource.getType() === DuckDbDataSource.types.FILE) {
-        var columnMetadata = await duckDbDataSource.getColumnMetadata();
+      if (duckDbDataSource) {
+        switch (duckDbDataSource.getType()){
+          case DuckDbDataSource.types.FILE:
+            var columnMetadata = await duckDbDataSource.getColumnMetadata();
+            break;
+          case DuckDbDataSource.types.DUCKDB:
+          case DuckDbDataSource.types.SQLITE:
+        }
+        return duckDbDataSource;
       }
-      return duckDbDataSource;
+      else
+      if (hueyQueryState){
+        return hueyQueryState;
+      }
     }
     catch (error){
       destroyDatasource = true;
@@ -113,6 +177,7 @@ class UploadUi {
     uploadItem.getElementsByTagName('p').item(0).setAttribute('id', fileName + '_message');
     var labelSpan = uploadItem.getElementsByTagName('span').item(0);
     labelSpan.textContent = fileName;
+    labelSpan.setAttribute('title', fileName);
     if (fileSize){
       labelSpan.setAttribute('data-file-size', fileSize);
     }
@@ -269,6 +334,13 @@ class UploadUi {
 
     var messageText;
     var message = uploadItem.getElementsByTagName('p').item(0);
+    if (uploadResult instanceof Error){
+      messageText = uploadResult.message;
+      uploadItem.setAttribute('open', true);
+      uploadItem.setAttribute('aria-invalid', String(true));
+      uploadItem.setAttribute('aria-errormessage', message.id);
+    }
+    else
     if (uploadResult instanceof DuckDbDataSource) {
       var datasourceId = uploadResult.getId();
       var type = uploadResult.getType();
@@ -296,14 +368,32 @@ class UploadUi {
       uploadItem.setAttribute('aria-invalid', String(false));
       messageText = 'Succesfully loaded.';
     }
-    else {
-      messageText = uploadResult.message;
-      uploadItem.setAttribute('open', true);
-      uploadItem.setAttribute('aria-invalid', String(true));
-      uploadItem.setAttribute('aria-errormessage', message.id);
+    else
+    if (typeof uploadResult === 'object') {
+      var route = Routing.getRouteForQueryModel(uploadResult);
+      var menu = summary.getElementsByTagName('menu').item(0);
+      var objectName = 'the query';
+      
+      var id = `link_to_route_${route}`;
+      var analyzeButton = createEl('button', {
+        id: id,
+        'data-route': route
+      });
+      analyzeButton.addEventListener('click', async function(event){
+        await pageStateManager.setPageState(route);
+      });
+      var analyzeButtonLabel = createEl('label', {
+        "class": 'analyzeActionButton',
+        "for": id,
+        "title": `Start exploring data from ${objectName}`
+      });
+      analyzeButtonLabel.appendChild(analyzeButton);
+      
+      menu.appendChild(analyzeButtonLabel);
+      uploadItem.setAttribute('aria-invalid', String(false));
+      messageText = 'Succesfully loaded.';
     }
     message.innerText = messageText;
-
   }
 
   async uploadFiles(files){
@@ -343,6 +433,10 @@ class UploadUi {
       var uploadResult = uploadResults[i];
       var uploadItem = body.childNodes.item(i + requiredDuckDbExtensions.length);
       this.#updateUploadItem(uploadItem, uploadResult);
+      if (uploadResult instanceof Error) {
+        countFail += 1;
+      }
+      else 
       if (uploadResult instanceof DuckDbDataSource ) {
         datasources.push(uploadResult);
         var type = uploadResult.getType();
@@ -353,8 +447,9 @@ class UploadUi {
         ofTypeCount += 1;
         datasourceTypes[type] = ofTypeCount;
       }
-      else {
-        countFail += 1;
+      else 
+      if (typeof uploadResult === 'object'){
+       
       }
     }
 
@@ -460,33 +555,38 @@ function afterUploaded(uploadResults){
     return;
   }
   
-  if (uploadResults.fail === 0 && uploadResults.success === 1){
-
-    // TODO: check if there is already a query active.
-    // if not, we can just start analyzing the newly uploaded datasource.
-    // But if there is a query active, then we'd be losing it if we just switch to the new datasource.
-    // in these cases we could do two things:
-    // - do nothing, don't even close the upload ui. 
-    //   The user will have a choice anyway, as they can either hit the analyze button, or cancel.
-    // - prompt the user and ask them what to do.
-    //   - if the current query could be satisfied by the new datasource then we could offer that in the prompt
-    //   - we can always offer the option to start analyzing the new datasource (losing the current query)
-    //   - we can always offer to do nothing
-    
-    if (!currentRoute || !currentRoute.length) {
-      var datasources = uploadResults.datasources;
-      for (var i = 0; i < datasources.length; i++){
-        var datasource = datasources[i];
-        switch (datasource.getType()){
-          case DuckDbDataSource.types.FILE:
-          case DuckDbDataSource.types.FILES:
-          case DuckDbDataSource.types.URL:
-            analyzeDatasource(datasource);
-            return;
-          default:
-        }
-      }
-    }
+  if ( uploadResults.fail !== 0 ){
+    // failed: keep the dialog open so the user can inspect the details
+    return;
+  }
+  
+  if ( uploadResults.success !== 1 ) {
+    // multiple results: we can't choose so keep the dialog open so the user can.
+    return;
+  }
+  
+  if (currentRoute){
+    // there is already a query active, so we won't start analyzing the new datasource.
+    // Possible TODO: check if the new datasource is compatible with the current query.
+    // if it is, prompt the user to apply it to the new datasource.
+    return;
+  }
+  
+  // try to start analyzing the new datasource.
+  var datasources = uploadResults.datasources.filter(function(datasource){
+    return datasource instanceof DuckDbDataSource;
+  });
+  if (datasources.length === 0) {
+    return;
+  }
+  var datasource = datasources[0];
+  switch (datasource.getType()){
+    case DuckDbDataSource.types.FILE:
+    case DuckDbDataSource.types.FILES:
+    case DuckDbDataSource.types.URL:
+      analyzeDatasource(datasource);
+      return;
+    default:
   }
 }
 
@@ -497,6 +597,10 @@ function initUploadUi(){
   var acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(function(fileType){
     return `.${fileType}`;
   }).join(', ');
+  acceptFileTypes = [].concat(acceptFileTypes, [
+    '.hueyq',
+    '.hueyqh'
+  ]);
   uploader.setAttribute('accept', acceptFileTypes);
   
   uploader

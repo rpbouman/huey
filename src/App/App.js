@@ -23,20 +23,26 @@ function initDuckdbVersion(){
   var connection = window.hueyDb.connection;
   var versionColumn = 'version';
   var apiColumn = 'api';
+  var reservedWordsColumn = 'reserved_words';
   var columns = {
     "version()": versionColumn,
-    "current_setting('duckdb_api')": apiColumn
+    "current_setting('duckdb_api')": apiColumn,
+    "list( keyword_name )": reservedWordsColumn,
   };
   var selectListSql = Object.keys(columns).map(function(key){
     return `${key} AS ${getQuotedIdentifier(columns[key])}`;
   }).join('\n,');
-  var sql = `SELECT ${selectListSql}`
+  var sql = `SELECT ${selectListSql}`;
+  sql += `\nFROM duckdb_keywords()\nWHERE keyword_category != 'unreserved'`;
   var result = connection.query(sql)
   .then(function(resultset){
     var duckdbVersionLabel = byId('duckdbVersionLabel');
     var row = resultset.get(0);
     var version = row[versionColumn];
     var api = row[apiColumn];
+    var reservedWords = row[reservedWordsColumn];
+    reservedWords = String(reservedWords).slice(1, -1).split(',');
+    window.hueyDb.reservedWords = reservedWords;
     duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
   })
   .catch(function(){

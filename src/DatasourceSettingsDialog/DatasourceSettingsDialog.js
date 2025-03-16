@@ -80,9 +80,9 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     }
 
     var datasourceSettings = datasource.getSettings();
-    var csvReaderArguments = datasourceSettings.getCsvReaderArguments();
+    var csvReaderArguments = datasourceSettings.getReaderArguments('csvReader');
     //csvReaderArguments['ignore_errors'] = true;
-    var csvReaderArgumentsSql = DatasourceSettings.getCsvReaderArgumentsSql(csvReaderArguments);
+    var csvReaderArgumentsSql = DatasourceSettings.getReaderArgumentsSql(csvReaderArguments);
     if (csvReaderArgumentsSql && csvReaderArgumentsSql.length) {
       csvReaderArgumentsSql = `, ${csvReaderArgumentsSql}`;
     }

@@ -153,6 +153,18 @@ button {
   background-color: var( --huey-dark-background-color );
 }
 
+@keyframes blink-live{
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+label:has( button[aria-busy=true] ) {
+  pointer-events: none;
+  cursor: wait;
+  animation: blink-live 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
 fieldset {
   margin: 0.5em 0.25em .5em 0.25em;
   border-color: var( --huey-light-border-color );

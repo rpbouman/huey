@@ -15,12 +15,12 @@
     </style>
 
     <script>
-    var hueyVersionNumber = '1.0.5';
-    var hueyVersionName = 'Duclair GA';
+    var hueyVersionNumber = '1.0.6';
+    var hueyVersionName = 'Elizabeth';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.25.0';
+    var tablerIconsFontVersion = '3.31.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     var preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
@@ -39,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev68.0';
+    var duckdbLibraryVersion = '1.29.1-dev115.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -354,19 +354,9 @@
                 id="exportDelimitedCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
               >
-                <option
-                  selected="true"
-                  title="Uncompressed - no compression will be applied"
-                  value="UNCOMPRESSED"
-                >uncompressed</option>
-                <option
-                  title="GZIP - applies gzip compression"
-                  value="GZIP"
-                >gzip</option>
-                <option
-                  title="ZTSD - applies ztsd compression"
-                  value="ZTSD"
-                >ztsd</option>
+                <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                <option value="ZSTD" label="zstd" title="ZTSD - applies zstd compression"/>
               </select>
               <label
                 title="Whether to include a line of column headers."
@@ -454,6 +444,58 @@
           </div>
         </div>
         <!--
+          See: https://duckdb.org/docs/stable/extensions/excel#writing-xlsx-files
+        -->
+        <div>
+          <label
+            role="tab"
+            for="exportXlsx"
+            title="Use this tab to export the data to a Microsoft Excel (.xlsx) file."
+          >Excel</label>
+          <input
+            id="exportXlsx"
+            name="exportFormat"
+            type="radio"
+          />
+          <div role="tabpanel">
+            <form id="exportXlsxSettings">
+              <label
+                title="Whether to include a row with column headers."
+                for="exportXlsxIncludeHeaders"
+              >Include Headers</label>
+              <input
+                id="exportXlsxIncludeHeaders"
+                title="Check this to include a header row with column names."
+                type="checkbox"
+                checked="true"
+              />
+              <label
+                title="Name of the target sheet."
+                for="exportXlsxSheet"
+              >Sheet name</label>
+              <!-- see https://www.keynotesupport.com/excel-basics/worksheet-names-characters-allowed-prohibited.shtml -->
+              <input
+                id="exportXlsxSheet"
+                title="Optionally enter a name for the target sheet"
+                type="text"
+                size="31"
+                pattern="^[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;]([A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;']{0,29}[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;])?$"
+              />
+              <label
+                for="exportXlsxSheetRowLimit"
+              >Row Limit</label>
+              <input
+                id="exportXlsxSheetRowLimit"
+                value="1048576"
+                type="number"
+                min="0"
+                max="1048576"
+                step="1"
+              />
+            </form>
+          </div>
+        </div>
+        <!--
           See: https://duckdb.org/docs/sql/statements/copy.html#json-options
         -->
         <div>
@@ -476,7 +518,11 @@
               <select
                 id="exportJsonCompression"
                 title="Use this to choose the algorithm used for compressing the query result."
-              ></select>
+              >
+                <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                <option value="ZSTD" label="zstd" title="ZSTD - applies zstd compression"/>
+              </select>
               <fieldset>
                 <legend>Formatting</legend>
                 <label
@@ -509,7 +555,10 @@
                 <select
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
-                ></select>
+                >
+                  <option value="false" label="newline" title="This option generates one row-object per line (JSONL format)"/>
+                  <option value="true" label="array" title="This option generates an array with row-object elements (JSON)"/>
+                </select>
               </fieldset>
             </form>
           </div>
@@ -530,14 +579,51 @@
           />
           <div role="tabpanel">
             <form id="exportParquetSettings">
-              <label
-                for="exportParquetCompression"
-                title="Use this to choose the algorithm used for compressing the query result."
-              >Compression</label>
-              <select
-                id="exportParquetCompression"
-                title="Use this to choose the algorithm used for compressing the query result."
-              ></select>
+              <fieldset>
+                <legend>Compression</legend>
+                <label
+                  for="exportParquetCompression"
+                  title="Use this to choose the algorithm used for compressing the query result."
+                >Compression</label>
+                <select
+                  id="exportParquetCompression"
+                  title="Use this to choose the algorithm used for compressing the query result."
+                >
+                  <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
+                  <option value="BROTLI" label="brotli" title="BROTLI - applies Brotli compression"/>
+                  <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
+                  <option value="LZ4" label="lz4" title="LZ4 - applies LZ4 compression"/>
+                  <option value="LZ4_RAW" label="lz4 raw" title="LZ4 Raw - applies LZ4 Raw compression"/>
+                  <option value="SNAPPY" label="snappy" title="SNAPPY - applies snappy compression"/>
+                  <option value="ZSTD" label="zstd" title="ZSTD - applies zstd compression"/>
+                </select>
+                <label
+                  for="exportParquetCompressionLevel"
+                  title="Compression level, set between 1 (lowest compression, fastest) and 22 (highest compression, slowest)."
+                >Compression Level</label>
+                <input 
+                  id="exportParquetCompressionLevel" 
+                  type="number" 
+                  value="3" 
+                  min="1" 
+                  max="22" 
+                  step="1"
+                />
+              </fieldset>
+              <fieldset>
+                <legend>Rowgroups</legend>
+                <label
+                  for="exportParquetRowGroupSize"
+                  title="The target size, i.e., number of rows, of each row group."
+                >Row group size</label>
+                <input 
+                  id="exportParquetRowGroupSize" 
+                  type="number" 
+                  step="1" 
+                  min="1" 
+                  value="122880"
+                />
+              </fieldset>
             </form>
           </div>
         </div>
@@ -605,49 +691,23 @@
         <div>
           <label
             role="tab"
-            for="exportXlsx"
-            title="Use this tab to export the data to a Excel (.xlsx) file."
-          >Excel</label>
+            for="exportQuery"
+            title="Use this tab to export your query."
+          >Query</label>
           <input
-            id="exportXlsx"
+            id="exportQuery"
             name="exportFormat"
             type="radio"
           />
           <div role="tabpanel">
-            <form id="exportXlsxSettings">
-              <label
-                title="Whether to include a row with column headers."
-                for="exportXlsxIncludeHeaders"
-              >Include Headers</label>
-              <input
-                id="exportXlsxIncludeHeaders"
-                title="Check this to include a header row with column names."
-                type="checkbox"
-                checked="true"
-              />
-              <label
-                title="Name of the target sheet."
-                for="exportXlsxSheet"
-              >Sheet name</label>
-              <!-- see https://www.keynotesupport.com/excel-basics/worksheet-names-characters-allowed-prohibited.shtml -->
-              <input
-                id="exportXlsxSheet"
-                title="Optionally enter a name for the target sheet"
-                type="text"
-                size="31"
-                pattern="^[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;]([A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;']{0,29}[A-Za-z0-9 `~!@#\$%\^&amp;\(\)\-_=+\{\}\|;:,&lt;\.&gt;])?$"
-              />
-              <label
-                for="exportXlsxSheetRowLimit"
-              >Row Limit</label>
-              <input
-                id="exportXlsxSheetRowLimit"
-                value="1048576"
-                type="number"
-                min="0"
-                max="1048576"
-                step="1"
-              />
+            <form id="exportQuerySettings">
+              <label for="exportQueryEncoding">Encoding</label>
+              <select id="exportQueryEncoding">
+                <option value="JSON" label="JSON" title="JSON representation of the query state"/>
+                <option value="HASH" label="URL Hash" title="A URL hash to create a shortcut link to the query"/>
+              </select>
+              <label for="exportQueryIndentation">Indentation</label>
+              <input id="exportQueryIndentation" type="number" step="1" min="0"/>
             </form>
           </div>
         </div>
@@ -788,6 +848,18 @@
           </div>
         </section>
         <footer id="filterValueSelectionStatus" role="status"></footer>
+        <menu role="toolbar">
+          <label 
+            for="filterDialogShowRawCheckbox"
+            title="Check to display raw values. Uncheck to display formatter values."
+          >
+            Reveal raw values:
+            <input 
+              id="filterDialogShowRawCheckbox"
+              type="checkbox"
+            />
+          </label>
+        </menu>
         <footer role="toolbar">
           <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.)">Clear Highlighted</button>
           <button id="filterDialogClearButton" title="Clear the values list">Clear All</button>

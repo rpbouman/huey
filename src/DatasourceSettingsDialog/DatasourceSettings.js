@@ -1,5 +1,13 @@
 class DatasourceSettings extends SettingsBase {
 
+  static #reader_settings = {
+    'read_csv': 'csvReader',
+    'read_json': 'jsonReader',
+    'read_json_auto': 'jsonReader',
+    'read_parquet': 'parquetReader',
+    'read_xlsx': 'xlsxReader'
+  };
+
   static #template = {
     "csvReader": {
       "csvReaderAutoDetect": true,
@@ -50,6 +58,33 @@ class DatasourceSettings extends SettingsBase {
       "csvReaderDateformat": "",
       "csvReaderTimestampformat": "",
       "csvReaderNullstr": ""
+    },
+    "jsonReader": {
+      "jsonReaderFormat": {
+        "options": [
+          {"value": "auto", "label": "Automatic", "title": "Automatic" },
+          {"value": "unstructured", "label": "Unstructured", "title": "Unstructured" },
+          {"value": "newline_delimited", "label": "Newline delimited", "title": "Delimited by newlines" },
+          {"value": "array", "label": "Array", "title": "Array" },
+        ],
+        "value": "auto"
+      },
+      "jsonReaderMaximumObjectSize": 16777216,
+      "jsonReaderAutoDetect": true,
+      "jsonReaderDateFormat": "iso",
+      "jsonReaderMaximumDepth": -1,
+      "jsonReaderRecords": {
+        "options": [
+          {"value": "auto", "label": "Automatic", "title": "Automatic" },
+          {"value": "true", "label": "True", "title": "True" },
+          {"value": "false", "label": "False", "title": "False" },
+        ]
+      },
+      "jsonReaderSampleSize": 20480,
+      "jsonReaderTimestampformat": "iso",
+      "jsonReaderUnionByName": true,
+      "jsonReaderMapInferenceThreshold": 200,
+      "jsonReaderFieldAppearanceThreshold": 0.1
     }
   };
 
@@ -74,13 +109,17 @@ class DatasourceSettings extends SettingsBase {
     return argumentName;
   }
 
-  getCsvReaderArguments(){
-    var csvReaderArguments = {};
-    var csvReaderKey = 'csvReader';
-    var csvReaderSettings = this.getSettings(csvReaderKey);
-    var templateSettings = DatasourceSettings.#template[csvReaderKey];
-    for (var settingKey in csvReaderSettings){
-      var value = csvReaderSettings[settingKey];
+  getReaderArguments(readerKey){
+    
+    if (DatasourceSettings.#reader_settings[readerKey] !== undefined) {
+      readerKey = DatasourceSettings.#reader_settings[readerKey];
+    }
+    
+    var readerArguments = {};
+    var readerSettings = this.getSettings(readerKey);
+    var templateSettings = DatasourceSettings.#template[readerKey];
+    for (var settingKey in readerSettings){
+      var value = readerSettings[settingKey];
       var templateValue = templateSettings[settingKey];
       var valueIsDefault;
       switch (typeof(value)){
@@ -95,16 +134,16 @@ class DatasourceSettings extends SettingsBase {
           valueIsDefault = value === templateValue;
       }
       if (!valueIsDefault) {
-        var argumentName = DatasourceSettings.#getDuckDbReaderArgumentName(csvReaderKey, settingKey);
-        csvReaderArguments[argumentName] = value;
+        var argumentName = DatasourceSettings.#getDuckDbReaderArgumentName(readerKey, settingKey);
+        readerArguments[argumentName] = value;
       }
     }
-    return csvReaderArguments;
+    return readerArguments;
   }
 
-  static getCsvReaderArgumentsSql(csvReaderArguments){
-    return Object.keys(csvReaderArguments).map(function(argumentName){
-      var argumentValue = csvReaderArguments[argumentName];
+  static getReaderArgumentsSql(readerArguments){
+    return Object.keys(readerArguments).map(function(argumentName){
+      var argumentValue = readerArguments[argumentName];
       switch (typeof(argumentValue)){
         case 'string':
           argumentValue = quoteStringLiteral(argumentValue);

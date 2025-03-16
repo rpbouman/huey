@@ -810,7 +810,7 @@ class FilterDialog {
     return byId('filterDialogSpinner');
   }
 
-  setBusy(trueOrFalse){
+  #setBusy(trueOrFalse){
     var dom = this.getDom();
     dom.setAttribute('aria-busy', String(trueOrFalse));
   }
@@ -928,7 +928,17 @@ class FilterDialog {
     this.#positionFilterDialog(queryAxisItemUi);
     var filterDialog = this.getDom();
     
-    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryModelItem);
+    var dataType;
+    if (queryModelItem.derivation) {
+      var derivationInfo = AttributeUi.getDerivationInfo(queryModelItem.derivation);
+      if (derivationInfo.dataValueTypeOverride) {
+        dataType = derivationInfo.dataValueTypeOverride;
+      }
+    }
+    if (!dataType) {
+      dataType = QueryAxisItem.getQueryAxisItemDataType(queryModelItem);
+    }
+
     filterDialog.setAttribute('data-query-model-item-datatype', dataType);
     
     filterDialog.showModal();
@@ -1102,6 +1112,7 @@ class FilterDialog {
   }
 
   async #getPicklistValues(offset, limit){
+    this.#setBusy(true);
     var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
@@ -1109,6 +1120,10 @@ class FilterDialog {
     if (offset === undefined){
       offset = 0;
     }
+    // TODO: best practices would say we shouldn't use LIMIT / OFFSET; 
+    // we could theoretically do better by doing some sort of keyset pagination
+    // by filtering for values greater than the last value of the previous page-loader
+    // However, I tried this and it didn't really seem to make a difference, at least not in plain duckdb.
     sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     var timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
@@ -1162,27 +1177,24 @@ class FilterDialog {
 
     var formatter = this.#queryAxisItem.formatter;
     var valueField, labelField;
-    if (formatter) {
-      var fields = resultset.schema.fields;
-      for (var i = 0; i < fields.length; i++) {
-        var field = fields[i];
-        switch (field.name) {
-          case 'label':
-            labelField = field;
-            break;
-          case 'value':
-            valueField = field;
-            break;
-        }
+    var fields = resultset.schema.fields;
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      switch (field.name) {
+        case 'label':
+          labelField = field;
+          break;
+        case 'value':
+          valueField = field;
+          break;
       }
     }
     var option;
     for (var i = 0; i < resultset.numRows; i++) {
       var row = resultset.get(i);
-      var value = row.value;
+      var value = row.value === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value));
       var label = row.label;
       if (formatter) {
-        value = formatter(value, valueField);
         label = formatter(label, labelField);
       }
       var literal = getDuckDbLiteralForValue(row.value, valueField.type);
@@ -1197,7 +1209,7 @@ class FilterDialog {
       optionsContainer.appendChild(option);
     }
 
-    this.setBusy(false);
+    this.#setBusy(false);
 
     if (exhausted){
       return;

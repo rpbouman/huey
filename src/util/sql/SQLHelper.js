@@ -15,14 +15,23 @@ function getLocales(){
 }
 
 function getArrowDecimalAsString(value, type){
-    var strValue = String(value);
-    var isNegative = strValue.startsWith('-') ;
-    var absValue = isNegative ? strValue.substr(1) : strValue;
-    absValue = new Array(type.scale).fill('0').join('') + absValue;
-    var decimalPlace = absValue.length - type.scale;
-    var fractionalPart = absValue.slice(decimalPlace);
-    var integerPart = absValue.slice(0, decimalPlace);
-    return `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+  if (value === null) {
+    return 'NULL';
+  }
+  var strValue = String(value);
+  var isNegative = strValue.startsWith('-') ;
+  var absValue = isNegative ? strValue.substr(1) : strValue;
+  absValue = new Array(type.scale).fill('0').join('') + absValue;
+  var decimalPlace = absValue.length - type.scale;
+  var fractionalPart = absValue.slice(decimalPlace);
+  fractionalPart = fractionalPart.replace(/0+$/, '');
+  var integerPart = absValue.slice(0, decimalPlace);
+  integerPart = integerPart.replace(/^0+/, '');
+  var str = `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+  if (str === '.'){
+    str = '0';
+  }
+  return str;
 }
 
 function createNumberFormatter(fractionDigits){
@@ -496,6 +505,20 @@ var dataTypes = {
       return createDefaultLiteralWriter('DOUBLE');
     }    
   },
+  'FLOAT': {
+    defaultAnalyticalRole: 'measure',
+    isNumeric: true,
+    greaterPrecisionAlternative: "DOUBLE",
+    createFormatter: function(){
+      var formatter = createNumberFormatter(true);
+      return function(value, field){
+        return formatter.format(value, field);
+      };
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createDefaultLiteralWriter('FLOAT');
+    }
+  },
   'REAL': {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
@@ -833,7 +856,7 @@ var dataTypes = {
 };
 
 function getDataTypeInfo(columnType){
-  if (columnType.endsWith('[]')) {
+  if (isArrayType(columnType)) {
     return dataTypes['ARRAY'];
   }
   var columnTypeUpper = columnType.toUpperCase();
@@ -906,9 +929,9 @@ function unQuoteIdentifier(str){
 }
 
 function identifierRequiresQuoting(identifier){
-  // TODO: check if the identifier is a reserved word, see https://duckdb.org/docs/sql/meta/duckdb_table_functions#duckdb_keywords
-  // https://duckdb.org/docs/sql/dialect/keywords_and_identifiers.html
-  return /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier);
+  return window.hueyDb.reservedWords.includes(identifier.toLowerCase()) || 
+    /^\d|[\s\[\]\{\}\(\)\.\/\+\-\&\*\^\?\\<>'"%=~!:;@#]/.test(identifier)
+  ;
 }
 
 function quoteIdentifierWhenRequired(identifier){
@@ -1182,9 +1205,10 @@ function getStructTypeDescriptor(structColumnType){
 }
 
 function getMapKeyValueType(mapType){
-  if (!mapType.startsWith('MAP(') || !mapType.endsWith(')')){
+  if (!isMapType(mapType)){
     throw new Error(`Expected a MAP type`)
   }
+  
   var level = 0;
   var i;
   var elementTypes = unQuote(mapType, 'MAP(', ')');
@@ -1236,7 +1260,7 @@ function getMapEntryType(mapType){
 }
 
 function getArrayElementType(arrayType){
-  if (!arrayType.endsWith('[]')){
+  if (!isArrayType(arrayType)){
     throw new Error(`Expected an array type`);
   }
   return arrayType.slice(0, -'[]'.length);
@@ -1246,16 +1270,39 @@ function getArrayType(elementType){
   return elementType + '[]';
 }
 
+function isArrayType(dataType){
+  return dataType.endsWith('[]');
+}
+
+function isMapType(dataType) {
+  return dataType.startsWith('MAP(') && dataType.endsWith(')');
+}
+
+function isStructType(dataType) {
+  return dataType.startsWith('STRUCT(') && dataType.endsWith(')');
+}
+
+function isStringType(dataType){
+  return dataType === 'VARCHAR' || dataType === 'BLOB';
+}
+
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
     var typeOfMemberExpressionPath = typeof memberExpressionPath;
     switch (typeOfMemberExpressionPath) {
       case 'object':
+        //TODO: 
+        // for all the cases where the member expression path element has parenthesis, 
+        // we should be looking up the corresponding derivation
+        // and extract the type info from there.
         var memberExpression = memberExpressionPath[0];
         var memberExpressionType;
         switch (memberExpression) {
           case 'unnest()':
             memberExpressionType = getArrayElementType(type);
+            break;
+          case 'generate_subscripts()':
+            memberExpressionType = 'BIGINT';
             break;
           case 'map_entries()':
             memberExpressionType = getMapEntriesType(type);
@@ -1279,7 +1326,7 @@ function getMemberExpressionType(type, memberExpressionPath){
         return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
         break;
       case 'string':
-        if (!type.startsWith('MAP')){
+        if (!isMapType(type)){
           throw new Error(`Expected a MAP type`);
         }
         switch (memberExpressionPath){
