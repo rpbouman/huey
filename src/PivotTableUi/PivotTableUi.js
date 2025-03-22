@@ -52,13 +52,7 @@ class PivotTableUi extends EventEmitter {
   }
 
   #initDom(config) {
-    var template = byId(PivotTableUi.#templateId);
-    var clone = template.content.cloneNode(true);
-    var index = 0, element;
-    do {
-      element = clone.childNodes.item(index++);
-    } while (element && element.nodeType !== element.ELEMENT_NODE);
-    element.setAttribute('id', config.id);
+    var dom = instantiateTemplate(PivotTableUi.#templateId, config.id)
 
     var container = config.container;
     switch (typeof container){
@@ -66,7 +60,7 @@ class PivotTableUi extends EventEmitter {
         container = byId(config.container);
     }
 
-    container.appendChild(element);
+    container.appendChild(dom);
   }
 
   #getTotalsString(axisItem){
