@@ -1,18 +1,23 @@
 class QueryUi {
 
+  static #templateId = 'queryUiTemplate';
+  static #queryUiFilterAxisItemTemplateId = 'queryUiFilterAxisItem';
+  static #queryUiAxisItemTemplateId = 'queryUiAxisItem';
+  static #queryUiFilterAxisItemValueTemplateId = 'queryUiFilterAxisItemValue';
+  static #queryUiAxisTemplateId = 'queryUiAxis';
+
   #id = undefined;
+  #container = undefined;
   #queryModel = undefined;
   #filterDialog = filterDialog;
-  #queryAxisTemplateId = undefined;
-  #queryAxisItemTemplateId = undefined;
-
 
   constructor(config){
+    this.#container = config.container
     this.#id = config.id || 'queryUi';
+
     this.#queryModel = config.queryModel;
     this.#filterDialog = config.filterDialog;
-    this.#queryAxisTemplateId = config.queryAxisTemplateId || 'queryUiAxis';
-    this.#queryAxisItemTemplateId = config.queryAxisItemTemplateId || 'queryUiAxisItem';
+    this.#initDom(config);
     this.#renderAxes();
     this.#initEvents();
   }
@@ -355,10 +360,10 @@ class QueryUi {
     var itemUi, itemUiTemplateId;
     switch (axisId) {
       case QueryModel.AXIS_FILTERS:
-        itemUiTemplateId = 'queryUiFilterAxisItem';
+        itemUiTemplateId = QueryUi.#queryUiFilterAxisItemTemplateId;
         break;
       default:
-        itemUiTemplateId = 'queryUiAxisItem';
+        itemUiTemplateId = QueryUi.#queryUiAxisItemTemplateId;
     }
     itemUi = this.#instantiateQueryUiTemplate(itemUiTemplateId, id);
     
@@ -426,7 +431,7 @@ class QueryUi {
       var valueId = itemUi.id + '-' + i;
       var valueLabel = valueObject.label;
       
-      var valueUi = instantiateTemplate('queryUiFilterAxisItemValue');
+      var valueUi = instantiateTemplate(QueryUi.#queryUiFilterAxisItemValueTemplateId);
       var label = valueUi.querySelector('label');
       label.setAttribute('for', valueId);
       valueUi.setAttribute('data-value-index', i);
@@ -916,7 +921,7 @@ class QueryUi {
   #renderAxis(config){
     var axisId = config.axisId;
     var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
-    var axis = this.#instantiateQueryUiTemplate(this.#queryAxisTemplateId, this.#id + '-' + axisId);
+    var axis = this.#instantiateQueryUiTemplate(QueryUi.#queryUiAxisTemplateId, this.#id + '-' + axisId);
     
     var itemArea = axis.querySelector('ol');
 
@@ -951,6 +956,18 @@ class QueryUi {
     this.getDom().appendChild(axis);
   }
 
+  #initDom(config) {
+    var dom = instantiateTemplate(QueryUi.#templateId, config.id)
+
+    var container = config.container;
+    switch (typeof container){
+      case 'string':
+        container = byId(config.container);
+    }
+
+    container.appendChild(dom);
+  }
+
   #renderAxes(){
     this.#renderAxis({
       axisId: QueryModel.AXIS_FILTERS
@@ -975,6 +992,7 @@ var queryUi;
 function initQueryUi(){
   queryUi = new QueryUi({
     id: 'queryUi',
+    container: 'workarea',
     queryModel: queryModel,
     filterDialog: filterDialog
   });
