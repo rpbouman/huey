@@ -1,3 +1,34 @@
+const queryParams = document.location.search.substr(1).split('&').reduce(function(acc, nameValue){
+  nameValue = nameValue.split('=');
+  var name = nameValue[0];
+  var value = nameValue[1];
+  var existingValue = acc[name];
+  switch (typeof existingValue){
+    case 'undefined':
+      break;
+    case 'object':
+      existingValue.push(value);
+      value = existingValue;
+      break;
+    default:
+      value = [existingValue, value];
+  }
+  acc[name] = value;
+  return acc;
+}, {});
+
+function getDuckDbLogLevel(duckdb){
+  var loglevel;
+  var paramLoglevel = queryParams.loglevel;
+  if (paramLoglevel){
+    loglevel = duckdb.LogLevel[paramLoglevel];
+    if (typeof loglevel !== 'number'){
+      loglevel = duckdb.LogLevel[loglevel];
+    }
+  }
+  return typeof loglevel === 'number' ? loglevel : duckdb.LogLevel.INFO;
+}
+
 function duckDbRowToJSON(object){
   var pojo;
   if (typeof object.toJSON === 'function'){

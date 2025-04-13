@@ -2275,7 +2275,7 @@
     <script onload="resourceLoaded(this)" src="SessionCloner/SessionCloner.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
-    <script type="module">
+    <script type="module">      
       import(duckDbLibraryUrl)
       .then(async function(duckdb){
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
@@ -2285,7 +2285,10 @@
           new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
         );
         const worker = new Worker(worker_url);
-        const logger = new duckdb.ConsoleLogger();
+        const loglevel = getDuckDbLogLevel(duckdb);
+        console.log(`Creating DuckDb Console Logger with level ${loglevel} (${duckdb.getLogLevelLabel(loglevel)}).`);
+        const logger = new duckdb.ConsoleLogger(loglevel);
+        
         const db = new duckdb.AsyncDuckDB(logger, worker);
         URL.revokeObjectURL(worker_url);
 
