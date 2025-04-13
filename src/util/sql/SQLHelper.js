@@ -849,6 +849,12 @@ var dataTypes = {
     }
   },
   'JSON': {
+    defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){      
+      return function(value, field){
+        return `${quoteStringLiteral(String(value))}::JSON`;
+      }
+    }
   },
   'UNION': {
     defaultAnalyticalRole: 'attribute'
