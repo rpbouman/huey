@@ -91,9 +91,35 @@ class DuckDbDataSource extends EventEmitter {
 
   // this is a crutch for reading from url.
   // basically this lets us find out what reader duckdb chose to read the url
-  static async #whatFileType(url, connection){
+  static async #whatFileType(url, connection, contentType){
     var fileTypes = DuckDbDataSource.fileTypes;
-
+    var candidateFileTypes = {};
+    
+    for (var fileTypeName in fileTypes){
+      var fileType = fileTypes[fileTypeName];
+      if (fileType.mimeType === contentType){
+        candidateFileTypes[fileTypeName] = fileType;
+        continue;
+      }
+      
+      switch (contentType){
+        case 'binary/octet-stream':
+          if (!fileType.mimeType.startsWith('text/') && !fileType.mimeType.startsWith('application/json')) {
+            candidateFileTypes[fileTypeName] = fileType;
+          }
+          continue;
+        case 'text/plain':
+          if (fileType.mimeType.startsWith('text/') || fileType.mimeType.startsWith('application/json')) {
+            candidateFileTypes[fileTypeName] = fileType;
+          }
+          continue;
+      }
+    }
+    
+    if (Object.keys(candidateFileTypes).length){
+      fileTypes = candidateFileTypes;
+    }
+    
     var readers = Object.keys(fileTypes).reduce(function(acc, curr, index){
       var fileType = fileTypes[curr];
       var reader = fileType.duckdb_reader;
@@ -109,14 +135,26 @@ class DuckDbDataSource extends EventEmitter {
       '',
       'LIMIT 0'
     ];
-    connection = connection || window.hueyDb.connection;
     var possibleTypes = [];
     try {
-      var promises = readers.map(function(reader){
+      var promises = readers.map(async function(reader){
         var readerCall = `${reader}( ${quoteStringLiteral(url)} )`;
         statementLines[2] = readerCall;
         var sql = statementLines.join('\n');
-        return connection.query(sql);
+        // create a new connection for each try. 
+        // see: issue https://github.com/rpbouman/huey/issues/536.
+        // if we hit the xlsx reader and that runs into issues, the connection is borked and we get uncaught errors.
+        // this does not appear to happen when we create a new connection.
+        var connection = await window.hueyDb.instance.connect();
+        var promise = connection.query(sql);
+        promise.finally(function(){
+          try {
+            connection.close();
+          }
+          catch(e){
+          }
+        });
+        return promise;
       });
 
       var reader;
@@ -558,7 +596,7 @@ class DuckDbDataSource extends EventEmitter {
       var protocol = this.#fileProtocol || this.#duckDb.DuckDBDataProtocol.HTTP;
       if (!this.#fileType){
         var connection = await this.getConnection();
-        var fileTypes = await DuckDbDataSource.#whatFileType(url, connection);
+        var fileTypes = await DuckDbDataSource.#whatFileType(url, connection, this.#contentType);
         if (fileTypes) {
           if (fileTypes.length === 1){
             this.#fileType = fileTypes[0];
