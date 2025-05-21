@@ -15,12 +15,12 @@
     </style>
 
     <script>
-    var hueyVersionNumber = '1.0.7';
-    var hueyVersionName = 'Forest';
+    var hueyVersionNumber = '1.0.8';
+    var hueyVersionName = 'Gimbsheimer';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.31.0';
+    var tablerIconsFontVersion = '3.33.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     var preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
@@ -39,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev132.0';
+    var duckdbLibraryVersion = '1.29.1-dev202.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -2275,7 +2275,7 @@
     <script onload="resourceLoaded(this)" src="SessionCloner/SessionCloner.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
-    <script type="module">
+    <script type="module">      
       import(duckDbLibraryUrl)
       .then(async function(duckdb){
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
@@ -2285,7 +2285,10 @@
           new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
         );
         const worker = new Worker(worker_url);
-        const logger = new duckdb.ConsoleLogger();
+        const loglevel = getDuckDbLogLevel(duckdb);
+        console.log(`Creating DuckDb Console Logger with level ${loglevel} (${duckdb.getLogLevelLabel(loglevel)}).`);
+        const logger = new duckdb.ConsoleLogger(loglevel);
+        
         const db = new duckdb.AsyncDuckDB(logger, worker);
         URL.revokeObjectURL(worker_url);
 
