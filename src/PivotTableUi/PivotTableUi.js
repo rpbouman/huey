@@ -2117,6 +2117,7 @@ class PivotTableUi extends EventEmitter {
 
     var exportSettings = this.#settings.getSettings('exportUi');
     exportSettings.exportType = 'exportDelimited';
+    exportSettings.exportDelimitedCompression = {value: 'UNCOMPRESSED'};
     exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = true);
 
     exportSettings.exportDestinationClipboard = true;
