@@ -224,7 +224,8 @@ class ExportUi {
 
   static async exportDataForQueryModel(queryModel, exportSettings, progressCallback){
     var sql = ExportUi.getExportSqlForQueryModel(queryModel, exportSettings);
-    return ExportUi.exportData(queryModel.getDatasource(), sql, exportSettings, progressCallback);
+    var datasource = queryModel.getDatasource();
+    return ExportUi.exportData(datasource, sql, exportSettings, progressCallback);
   }
 
   static async exportData(datasource, sql, exportSettings, progressCallback){
