@@ -31,17 +31,52 @@ class ContextMenu {
     
     // initialize the items in the context menu so the context menu is closed when an item is activated.
     var dom = this.getDom();
+    this.#initMenuItems(dom, menuHost);
+  }
+  
+  #initMenuItems(dom, menuHost){
     var menuItems = dom.querySelectorAll('li[role=menuitem] > label > button');
     for (var i = 0; i < menuItems.length; i++){
       var menuItem = menuItems.item(i);
-      menuItem.setAttribute('popovertarget', this.#menuId);
-      menuItem.setAttribute('popoveraction', 'hide');
-      menuItem.addEventListener('click', function(event){
-        event.preventDefault();
-        dom.hidePopover();
-        menuHost.contextMenuItemClicked.call(menuHost, event);
-      });
+      var popoverTarget = menuItem.getAttribute('popovertarget');
+      if (popoverTarget){
+        this.#initNestedMenuitem(menuItem, dom, menuHost);
+      }
+      else {
+        this.#initActionMenuitem(menuItem, dom, menuHost);
+      }
     }
+  }
+  
+  #initNestedMenuitem(menuItem, dom, menuHost){
+    var popoverTarget = menuItem.getAttribute('popovertarget');
+    var label = menuItem.parentNode;
+    var item = label.parentNode;
+    item.addEventListener('mouseenter', function(event){
+      var popoverTargetDom = byId(popoverTarget);
+      var itemBoundingRect = item.getBoundingClientRect();
+      popoverTargetDom.showPopover();
+      popoverTargetDom.style.left = (itemBoundingRect.x + itemBoundingRect.width) + 'px';
+      popoverTargetDom.style.top = itemBoundingRect.y + 'px';
+    });
+    item.addEventListener('mouseleave', function(event){
+      var popoverTargetDom = byId(popoverTarget);
+      popoverTargetDom.hidePopover();
+    });
+  }
+  
+  #initActionMenuitem(menuItem, dom, menuHost){
+    menuItem.setAttribute('popovertarget', this.#menuId);
+    menuItem.setAttribute('popoveraction', 'hide');
+    this.#createMenuitemClickHandler(menuItem, dom, menuHost);
+  }
+  
+  #createMenuitemClickHandler(menuItem, dom, menuHost){
+    menuItem.addEventListener('click', function(event){
+      event.preventDefault();
+      dom.hidePopover();
+      menuHost.contextMenuItemClicked.call(menuHost, event);
+    });
   }
 
   // show the popover at the coordinates of the initiating contextmenu event.

@@ -1724,58 +1724,112 @@
       popover="auto"
     >
       <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyCell"
-          title="Copy the value of this cell to the clipboard"
+        <menu
+          id="copySubmenu"
+          role="menu"
+          popover="auto"
         >
-          Copy Cell Value
-          <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyCell"
+              title="Copy the value of this cell to the clipboard"
+            >
+              Copy Cell Value
+              <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyColumn"
+              title="Copy the column header values to the clipboard"
+            >
+              Copy Column Tuple
+              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyColumnTuples"
+              title="Copy the header values for each column to the clipboard"
+            >
+              Copy Column Tuples
+              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyRow"
+              title="Copy the row header values to the clipboard"
+            >
+              Copy Row Tuple
+              <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyRowTuples"
+              title="Copy the header values for each row to the clipboard"
+            >
+              Copy Row Tuples
+              <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyTable"
+              title="Copy the entire pivot table to the clipboard"
+            >
+              Copy Table
+              <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
+            </label>
+          </li>
+        </menu>
+        <label
+          for="copySubmenuActivate"
+        >
+          Copy
+          <button
+            id="copySubmenuActivate"
+            popovertarget="copySubmenu"
+          >
+          </button>
         </label>
       </li>
       <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyColumn"
-          title="Copy the column header values to the clipboard"
+        <label
+          for="filterSubmenuActivate"
         >
-          Copy Column Tuple
-          <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+          Filter
+          <button
+            id="filterSubmenuActivate"
+            popovertarget="filterSubmenu"
+          >
+          </button>
         </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyColumnTuples"
-          title="Copy the header values for each column to the clipboard"
+        <menu
+          id="filterSubmenu"
+          role="menu"
+          popover="auto"
         >
-          Copy Column Tuples
-          <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyRow"
-          title="Copy the row header values to the clipboard"
-        >
-          Copy Row Tuple
-          <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyRowTuples"
-          title="Copy the header values for each row to the clipboard"
-        >
-          Copy Row Tuples
-          <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyTable"
-          title="Copy the entire pivot table to the clipboard"
-        >
-          Copy Table
-          <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
-        </label>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemFilterIncludeValue"
+              title="Add this value in an include filter"
+            >
+              Include Value
+              <button id="pivotTableContextMenuItemFilterIncludeValue">Include Value</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemFilterExcludeValue"
+              title="Add this value in an exclude filter"
+            >
+              Exclude Value
+              <button id="pivotTableContextMenuItemFilterExcludeValue">Exclude Value</button>
+            </label>
+          </li>
+        </menu>
       </li>
     </menu>
 
