@@ -423,6 +423,7 @@ menu[role=menu][popover] {
 
 menu[role=menu][popover] {
   position:absolute;
+  padding: 0px;
   margin: 0px;
   border-width: 1px;
   border-style: solid;
@@ -433,6 +434,18 @@ menu[role=menu][popover] {
     var( --huey-light-border-color )
   ;
   background-color: var( --huey-medium-background-color );
+}
+
+menu[role=menu] > li[role=menuitem]:has( menu[role=menu] ) > label::after {
+  /* chevron-right */
+  font-family: var(--huey-icon-font-family);
+  font-size: var(--huey-icon-normal);
+  vertical-align: bottom;
+  color: var(--huey-icon-color-subtle);
+  margin: 0px 4px 0px 0px;
+  display: inline-block;
+  content: '\ea61';
+  position: relative;
 }
 
 menu > li[role=separator] {

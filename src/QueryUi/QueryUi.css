@@ -533,6 +533,7 @@
 
   /* Cells axis header icon */
   > section[data-axis=cells] > header > label:has( > button )::after {
+    /* layout-grid */
     content: "\edba";
   }
 
@@ -682,6 +683,16 @@
     /* Filter axis item filter icon */
     > li:has( > details > ol > li ) > menu > label:nth-child(1):has( > button )::after {
       color: var( --huey-icon-highlight );
+    }
+
+    > li[data-filterType=like] > menu > label:nth-child(1):has( > button )::after {
+      /* filter question */
+      content: "\fb86";
+    }
+
+    > li[data-filterType=between] > menu > label:nth-child(1):has( > button )::after {
+      /* filter code */
+      content: "\fb7f";
     }
 
     > li[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {

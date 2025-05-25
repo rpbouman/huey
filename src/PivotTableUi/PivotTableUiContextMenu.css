@@ -1,48 +1,73 @@
 
 menu[role=menu]#pivotTableContextMenu {
 
-  > li {
+  li {
 
-    > label[for=pivotTableContextMenuItemCopyCell]:before {
+    /* icon for the filter submenu item */
+    > label[for=filterSubmenuActivate]:before {
+      /* filter */
+      content: '\eaa5';
+    }
+    
+    /* icons for the various filter submenu items */
+    > label[for=pivotTableContextMenuItemFilterIncludeValue]:before {
+      /* filter */
+      content: '\eaa5';
+    }
+
+    > label[for=pivotTableContextMenuItemFilterExcludeValue]:before {
+      /* filter exclamation */
+      content: '\fb82';
+    }
+
+    /* icon for the copy submenu item */
+    > label[for=copySubmenuActivate]:before {
       /* clipboard-copy */
       content: '\f299';
+    }
+
+    /* icons for the various copy menu items*/
+    > label[for=pivotTableContextMenuItemCopyCell]:before {
+      /* layout-grid */
+      content: '\edba';
     }
 
     > label[for=pivotTableContextMenuItemCopyColumn]:before {
-      /* clipboard-copy */
-      content: '\f299';
+      /* table-column */
+      content: '\faff';
     }
 
     > label[for=pivotTableContextMenuItemCopyColumnTuples]:before {
-      /* clipboard-copy */
-      content: '\f299';
+      /* table-column */
+      content: '\faff';
     }
 
     > label[for=pivotTableContextMenuItemCopyRow]:before {
-      /* clipboard-copy */
-      content: '\f299';
+      /* table-row */
+      content: '\fb00';
     }
 
     > label[for=pivotTableContextMenuItemCopyRowTuples]:before {
-      /* clipboard-copy */
-      content: '\f299';
+      /* table-row */
+      content: '\fb00';
     }
 
     > label[for=pivotTableContextMenuItemCopyTable]:before {
-      /* clipboard-copy */
-      content: '\f299';
+      /* table */
+      content: '\eba1';
     }
   }
-
-  > li:has(> label[for=pivotTableContextMenuItemCopyCell]) {
+  
+  /* Separator lines between the various copy menu items */ 
+  li:has(> label[for=pivotTableContextMenuItemCopyCell]) {
     border-bottom-style: solid;
   }
 
-  > li:has(> label[for=pivotTableContextMenuItemCopyColumnTuples]) {
+  li:has(> label[for=pivotTableContextMenuItemCopyColumnTuples]) {
     border-bottom-style: solid;
   }
 
-  > li:has(> label[for=pivotTableContextMenuItemCopyRowTuples]) {
+  li:has(> label[for=pivotTableContextMenuItemCopyRowTuples]) {
     border-bottom-style: solid;
   }
 
