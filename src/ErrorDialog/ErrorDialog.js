@@ -44,8 +44,16 @@ function showErrorDialog(config){
   
   var description = config.description;
   if (!description){
-    description = [title];
+    description = title;
   }
+  if (typeof description === 'string') {
+    description = [description];
+  }
+  
+  if (! (description instanceof Array) ) {
+    description = [];
+  }
+  
   var errorDialogDescription = byId('errorDialogDescription');
   errorDialogDescription.innerHTML = description.map(escapeHtmlText).join('<br/>');
 
