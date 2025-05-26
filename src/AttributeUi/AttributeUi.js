@@ -374,7 +374,7 @@ class AttributeUi {
     },
     "md5 high": {
       folder: 'hashes',
-      expressionTemplate: 'md5_number_higher( ${columnExpression} )',
+      expressionTemplate: 'md5_number_upper( ${columnExpression} )',
       columnType: 'BIGINT',
       forString: true
     },
