@@ -369,13 +369,13 @@ class AttributeUi {
     "md5 low": {
       folder: 'hashes',
       expressionTemplate: 'md5_number_lower( ${columnExpression} )',
-      columnType: 'BIGINT',
+      columnType: 'UBIGINT',
       forString: true
     },
     "md5 high": {
       folder: 'hashes',
       expressionTemplate: 'md5_number_upper( ${columnExpression} )',
-      columnType: 'BIGINT',
+      columnType: 'UBIGINT',
       forString: true
     },
     "sha-1": {
