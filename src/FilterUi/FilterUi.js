@@ -1061,7 +1061,13 @@ class FilterDialog {
       }
       delete queryAxisItem.literalWriter;
     }
-
+    
+    // https://github.com/rpbouman/huey/issues/553
+    // never produce totals in the picklist result.
+    if (queryAxisItem.includeTotals){
+      queryAxisItem = Object.assign({}, queryAxisItem);
+      delete queryAxisItem.includeTotals;
+    }
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
       Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
