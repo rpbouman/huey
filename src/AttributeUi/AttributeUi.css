@@ -271,8 +271,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   details[data-nodetype=derived][data-derivation="hash"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="md5"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 (low)"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 (high)"] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="md5 low"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 high"] > summary > span.label::before {
     /* IconNumber123 */
     content: "\f554";
   }
