@@ -581,20 +581,24 @@
           > li[role=menuitem] {
             
             display: list-item;
+            width: 100%;
             
-            > label {
+            > label:has( > input[type=checkbox] ) {
               display: inline-block;
-              width: 100%;
-              
+              width: 100%; 
               > span {
                 display: inline-block;
                 width: 100%;
+                position: relative;
+                left: -10px;
+                top: -2px;                
               }
             }
             
-            > label:has( > input[type=checkbox] ):before {
+            > label:has( > input[type=checkbox] ):before,
+            > label:has( > button ):before {
               display: inline-block;
-              width: 16px;
+              width: 24px;
               padding: 0px 2px 0px 2px;
               font-family: var( --huey-icon-font-family ) !important;
               font-size: var( --huey-icon-medium );
@@ -608,15 +612,32 @@
             > label:has( > input[type=checkbox]:checked ):before {
               content: "\eba6";
               color: var( --huey-icon-color );
+            }            
+            
+            > label:has( > button ) {
+              display: inline-block;
+              width: 24px;
+              position: relative;
+              right: -6px;
             }
             
+            > label:has( > button ):before {
+              width: 24px;
+              /* trash */
+              content: "\eb41";
+              color: var( --huey-icon-color-subtle );
+            }
+                        
           }
           
-          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover {
+          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover
+          {
             background-color: var( --huey-light-background-color );
           }
 
-          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover > label::before {
+          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover > label::before,
+          > li[role=menuitem]:has( > label > button ):hover > label::before 
+          {
             color: var( --huey-icon-color-highlight );
           }
           
