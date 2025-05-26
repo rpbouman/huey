@@ -346,8 +346,8 @@ menu[role=menu] > li[role=menuitem] > label:has( > button ),
 menu[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] ),
 ol[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
 {
-  display: block;
-  width: 100%;
+  display: inline-block;
+  width: 72%
 }
 
 header[role=toolbar] > label:has( > button )::before,
@@ -436,7 +436,7 @@ menu[role=menu][popover] {
   background-color: var( --huey-medium-background-color );
 }
 
-menu[role=menu] > li[role=menuitem]:has( menu[role=menu] ) > label::after {
+menu[role=menu] > li[role=menuitem]:has( menu[role=menu] )::after {
   /* chevron-right */
   font-family: var(--huey-icon-font-family);
   font-size: var(--huey-icon-normal);
