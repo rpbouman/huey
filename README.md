@@ -115,7 +115,7 @@ The Query Builder is at the top right of the workarea. The pivot table is at the
 
 #### Searching Attributes
 
-Especially when there are a lot of attributes, it can be useful to search for attributes by nam To do that, use the Attribute Search feature. 
+Especially when there are a lot of attributes, it can be useful to search for attributes. To do that, use the Attribute Search feature. 
 Simply type a part of the attribute name in the search input, and after a brief timeout, the list of attributes will automatically show only those attributes that (partially) match the search string:
 
 ![image](https://github.com/user-attachments/assets/1ab093d3-90f9-445a-bfaa-e6af1e81397e)
