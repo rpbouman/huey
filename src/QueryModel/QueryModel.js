@@ -547,10 +547,12 @@ class QueryAxis {
 
     var items = this.#items;
     var itemIndex = items.findIndex(function(item){
+      // check column name
       if ((item.columnName || '') !== columnName){
         return false;
       }
 
+      // check member expression path
       if (memberExpressionPath) {
         if (!item.memberExpressionPath){
           return false;
@@ -564,6 +566,7 @@ class QueryAxis {
         return false;
       }
 
+      // check derivation
       if (derivation) {
         return item.derivation === derivation;
       }
@@ -572,7 +575,7 @@ class QueryAxis {
         return false;
       }
 
-      else
+      // check aggregator
       if (aggregator) {
         return item.aggregator === aggregator;
       }
@@ -580,6 +583,8 @@ class QueryAxis {
       if (item.aggregator){
         return false;
       }
+
+      // all checks passed
       return true;
     });
 
