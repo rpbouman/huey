@@ -953,16 +953,18 @@ class DuckDbDataSource extends EventEmitter {
     var sql = '';
     switch (this.getType()) {
       case DuckDbDataSource.types.FILES:
-        var fileExtension = this.#fileType;
-        var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+        var fileType = DuckDbDataSource.getFileTypeInfo(this.#fileType);
         var duckdb_reader = fileType.duckdb_reader;
         var readerSettings = this.#settings.getReaderArguments(duckdb_reader);
         sql = this.#getDuckDbFileReaderCall(duckdb_reader, this.#fileNames, readerSettings);
         break;
       case DuckDbDataSource.types.FILE:
+        if (!this.#fileType) {
+          var fileExtension = this.getFileExtension();
+          this.#fileType = fileExtension;
+        }
+        var fileType = DuckDbDataSource.getFileTypeInfo(this.#fileType);
         var fileName = this.getFileName();
-        var fileExtension = this.getFileExtension();
-        var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
         if (fileType) {
           var duckdb_reader = fileType.duckdb_reader;
           var readerSettings = this.#settings.getReaderArguments(duckdb_reader);
