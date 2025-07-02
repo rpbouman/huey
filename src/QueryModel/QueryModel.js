@@ -197,6 +197,10 @@ class QueryAxisItem {
         columnExpression = `${quoteIdentifierWhenRequired(alias)}.*`;
       }
     }
+    else 
+    if (item.derivation){ 
+      columnExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias, sqlOptions);
+    }
     else {
       columnExpression = QueryAxisItem.getSqlForColumnExpression(item, alias, sqlOptions);
     }
