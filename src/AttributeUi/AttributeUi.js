@@ -599,6 +599,7 @@ class AttributeUi {
   
   static #getUiNodeColumnExpression(config){
     var columnExpression = config.profile.column_name;
+    columnExpression = quoteIdentifierWhenRequired(columnExpression);
     var memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
@@ -620,8 +621,20 @@ class AttributeUi {
           break;
         case 'aggregate':
         case 'derived':
-          var expressionTemplate = config.expressionTemplate;
-          title = extrapolateColumnExpression(expressionTemplate, columnExpression);
+          title = columnExpression;
+          var expressionTemplate;
+          var derivation = config.derivation;
+          if (derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+            expressionTemplate = derivationInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
+          var aggregator = config.aggregator;
+          if (aggregator){
+            var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+            expressionTemplate = aggregatorInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
           break;
       }
     }
@@ -1158,7 +1171,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1198,7 +1210,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1261,7 +1272,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1287,7 +1297,6 @@ class AttributeUi {
         type: 'aggregate',
         aggregator: aggregationName,
         title: aggregator.title,
-        expressionTemplate: aggregator.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
