@@ -803,8 +803,16 @@ class AttributeUi {
     var name = `${config.type}_${columnExpression}`;
     var id = `${name}`;
 
-    var analyticalRole = 'attribute';
+    var derivation = config.derivation;
+    if (derivation){
+      id += `_${derivation}`;
+    }
     var aggregator = config.aggregator;
+    if (aggregator){
+      id += `_${aggregator}`;
+    }
+
+    var analyticalRole = 'attribute';
 
     var createInput;
     switch (config.type) {
@@ -819,12 +827,6 @@ class AttributeUi {
           case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
-            switch (config.type) {
-              case 'derived':
-                var derivation = config.derivation;
-                id += `_${derivation}`;
-                break;
-            }
             id += `_${axisId}`;
             createInput = 'radio';
             break;
@@ -840,7 +842,6 @@ class AttributeUi {
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            id += `_${aggregator}`;
             createInput = 'checkbox';
             break;
           default:
