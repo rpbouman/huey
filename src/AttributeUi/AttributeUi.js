@@ -989,6 +989,7 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', config.derivation);
+        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
@@ -1336,12 +1337,19 @@ class AttributeUi {
 
     var nodeType = node.getAttribute('data-nodetype');
 
-    switch (nodeType) {
+    switch (nodeType){
       case 'column':
       case 'member':
         this.#loadDerivationChildNodes(node, typeName, profile);
+    }
+
+    switch (nodeType) {
+      case 'derived':
+      case 'column':
+      case 'member':
         this.#loadAggregatorChildNodes(node, typeName, profile);
     }
+    
   }
 
   #toggleNodeState(event){

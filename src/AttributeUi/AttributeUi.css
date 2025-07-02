@@ -15,7 +15,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details[role=treeitem][data-nodetype=aggregate] > summary,
   details[role=treeitem][data-nodetype=derived]:not( 
     [data-derivation=elements], 
-    [data-derivation=entries] 
+    [data-derivation=entries],
+    [data-derivation="first letter"]
   ) > summary {
     list-style: none;
     margin-left: 14px;
