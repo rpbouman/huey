@@ -568,7 +568,9 @@ class QueryAxis {
 
       // check derivation
       if (derivation) {
-        return item.derivation === derivation;
+        if (item.derivation !== derivation) {
+          return false;
+        }
       }
       else
       if (item.derivation){
@@ -577,7 +579,9 @@ class QueryAxis {
 
       // check aggregator
       if (aggregator) {
-        return item.aggregator === aggregator;
+        if (item.aggregator !== aggregator){
+          return false;
+        }
       }
       else
       if (item.aggregator){
