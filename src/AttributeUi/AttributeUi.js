@@ -999,9 +999,12 @@ class AttributeUi {
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
+        if (derivation){
+          node.setAttribute('data-derivation', derivation);
+        }
         break;
       case 'derived':
-        node.setAttribute('data-derivation', config.derivation);
+        node.setAttribute('data-derivation', derivation);
         node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       default:
@@ -1296,6 +1299,7 @@ class AttributeUi {
       var config = {
         type: 'aggregate',
         aggregator: aggregationName,
+        derivation: profile.derivation,
         title: aggregator.title,
         profile: profile
       };
@@ -1329,6 +1333,12 @@ class AttributeUi {
       memberExpressionPath: memberExpressionPath
     };
 
+    var nodeType = node.getAttribute('data-nodetype');
+    if (nodeType === 'derived'){
+      var derivation = node.getAttribute('data-derivation');
+      profile.derivation = derivation;
+    }
+
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
@@ -1343,8 +1353,6 @@ class AttributeUi {
     if (isStructType(expressionType)){
       this.#loadMemberChildNodes(node, typeName, profile);
     }
-
-    var nodeType = node.getAttribute('data-nodetype');
 
     switch (nodeType){
       case 'column':
