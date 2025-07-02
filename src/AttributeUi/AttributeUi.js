@@ -1000,23 +1000,30 @@ class AttributeUi {
     // for STRUCT columns and members, preload the child nodes (instead of lazy load)
     // this is necessary so that a search will always find all applicable attributes
     // with lazy load it would only find whatever happens to be visited/browsed already.
+    var typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
         if (['elements'].indexOf(derivation) === -1) {
           break;
         }
+        typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
+        break;
       case 'column':
+        typeToCheckIfChildnodesAreNeeded = columnType;
+        break;
       case 'member':
-        if (
-          isStructType(columnType) || 
-          isMapType(columnType) ||
-          config.profile.memberExpressionType && isArrayType(config.profile.memberExpressionType)
-        ) {
-          this.#loadChildNodes(node);
-        }
+        typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
         break;
     }
-
+    if (
+      typeToCheckIfChildnodesAreNeeded && (
+        isStructType(typeToCheckIfChildnodesAreNeeded) || 
+        isMapType(typeToCheckIfChildnodesAreNeeded) ||
+        isArrayType(typeToCheckIfChildnodesAreNeeded)
+      )
+    ) {
+      this.#loadChildNodes(node);
+    }
     return node;
   }
 
