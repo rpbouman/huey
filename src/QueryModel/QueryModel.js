@@ -139,7 +139,7 @@ class QueryAxisItem {
     if (axisItem.derivation) {
       postfix += ` ${axisItem.derivation}`;
     }
-    else
+
     if (axisItem.aggregator){
       prefix = `${axisItem.aggregator} of `;
     }
@@ -147,6 +147,7 @@ class QueryAxisItem {
     if (postfix) {
       caption += `${postfix}`;
     }
+
     if (prefix) {
       caption = prefix + caption;
     }
