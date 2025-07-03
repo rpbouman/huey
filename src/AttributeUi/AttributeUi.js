@@ -1363,6 +1363,10 @@ class AttributeUi {
     }
 
     switch (nodeType){
+      case 'derived':
+        if (['elements'].indexOf(derivation) === -1){
+          break;
+        }
       case 'column':
       case 'member':
         this.#loadDerivationChildNodes(node, typeName, profile);
