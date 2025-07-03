@@ -599,6 +599,7 @@ class AttributeUi {
   
   static #getUiNodeColumnExpression(config){
     var columnExpression = config.profile.column_name;
+    columnExpression = quoteIdentifierWhenRequired(columnExpression);
     var memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
@@ -620,8 +621,20 @@ class AttributeUi {
           break;
         case 'aggregate':
         case 'derived':
-          var expressionTemplate = config.expressionTemplate;
-          title = extrapolateColumnExpression(expressionTemplate, columnExpression);
+          title = columnExpression;
+          var expressionTemplate;
+          var derivation = config.derivation;
+          if (derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+            expressionTemplate = derivationInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
+          var aggregator = config.aggregator;
+          if (aggregator){
+            var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+            expressionTemplate = aggregatorInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
           break;
       }
     }
@@ -790,8 +803,16 @@ class AttributeUi {
     var name = `${config.type}_${columnExpression}`;
     var id = `${name}`;
 
-    var analyticalRole = 'attribute';
+    var derivation = config.derivation;
+    if (derivation){
+      id += `_${derivation}`;
+    }
     var aggregator = config.aggregator;
+    if (aggregator){
+      id += `_${aggregator}`;
+    }
+
+    var analyticalRole = 'attribute';
 
     var createInput;
     switch (config.type) {
@@ -806,12 +827,6 @@ class AttributeUi {
           case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
-            switch (config.type) {
-              case 'derived':
-                var derivation = config.derivation;
-                id += `_${derivation}`;
-                break;
-            }
             id += `_${axisId}`;
             createInput = 'radio';
             break;
@@ -827,7 +842,6 @@ class AttributeUi {
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            id += `_${aggregator}`;
             createInput = 'checkbox';
             break;
           default:
@@ -986,9 +1000,13 @@ class AttributeUi {
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
+        if (derivation){
+          node.setAttribute('data-derivation', derivation);
+        }
         break;
       case 'derived':
-        node.setAttribute('data-derivation', config.derivation);
+        node.setAttribute('data-derivation', derivation);
+        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
@@ -1157,7 +1175,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1197,7 +1214,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1260,7 +1276,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1285,8 +1300,8 @@ class AttributeUi {
       var config = {
         type: 'aggregate',
         aggregator: aggregationName,
+        derivation: profile.derivation,
         title: aggregator.title,
-        expressionTemplate: aggregator.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1319,29 +1334,43 @@ class AttributeUi {
       memberExpressionPath: memberExpressionPath
     };
 
+    var nodeType = node.getAttribute('data-nodetype');
+    if (nodeType === 'derived'){
+      var derivation = node.getAttribute('data-derivation');
+      profile.derivation = derivation;
+    }
+
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (isArrayType(expressionType)){
-      this.#loadArrayChildNodes(node, typeName, profile);
-    }
-    else
-    if (isMapType(expressionType)){ 
-      this.#loadMapChildNodes(node, typeName, profile);
-    }
-    else
-    if (isStructType(expressionType)){
-      this.#loadMemberChildNodes(node, typeName, profile);
+    if (nodeType !== 'derived'){
+      // only load these derivations if we're not ourself a derived node.
+      if (isArrayType(expressionType)){
+        this.#loadArrayChildNodes(node, typeName, profile);
+      }
+      else
+      if (isMapType(expressionType)){ 
+        this.#loadMapChildNodes(node, typeName, profile);
+      }
+      else
+      if (isStructType(expressionType)){
+        this.#loadMemberChildNodes(node, typeName, profile);
+      }
     }
 
-    var nodeType = node.getAttribute('data-nodetype');
-
-    switch (nodeType) {
+    switch (nodeType){
       case 'column':
       case 'member':
         this.#loadDerivationChildNodes(node, typeName, profile);
+    }
+
+    switch (nodeType) {
+      case 'derived':
+      case 'column':
+      case 'member':
         this.#loadAggregatorChildNodes(node, typeName, profile);
     }
+    
   }
 
   #toggleNodeState(event){
