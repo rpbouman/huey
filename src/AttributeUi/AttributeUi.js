@@ -1335,15 +1335,19 @@ class AttributeUi {
     };
 
     var nodeType = node.getAttribute('data-nodetype');
+    var derivation;
     if (nodeType === 'derived'){
-      var derivation = node.getAttribute('data-derivation');
+      derivation = node.getAttribute('data-derivation');
       profile.derivation = derivation;
     }
 
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (nodeType !== 'derived'){
+    if (
+      nodeType !== 'derived' ||
+      ['elements'].indexOf(derivation) !== -1
+    ){
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
         this.#loadArrayChildNodes(node, typeName, profile);
