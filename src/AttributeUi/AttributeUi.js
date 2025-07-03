@@ -1343,16 +1343,19 @@ class AttributeUi {
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (isArrayType(expressionType)){
-      this.#loadArrayChildNodes(node, typeName, profile);
-    }
-    else
-    if (isMapType(expressionType)){ 
-      this.#loadMapChildNodes(node, typeName, profile);
-    }
-    else
-    if (isStructType(expressionType)){
-      this.#loadMemberChildNodes(node, typeName, profile);
+    if (nodeType !== 'derived'){
+      // only load these derivations if we're not ourself a derived node.
+      if (isArrayType(expressionType)){
+        this.#loadArrayChildNodes(node, typeName, profile);
+      }
+      else
+      if (isMapType(expressionType)){ 
+        this.#loadMapChildNodes(node, typeName, profile);
+      }
+      else
+      if (isStructType(expressionType)){
+        this.#loadMemberChildNodes(node, typeName, profile);
+      }
     }
 
     switch (nodeType){
