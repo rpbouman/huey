@@ -290,10 +290,14 @@ class ExportUi {
           break;
         case 'exportParquet':
           compression = exportSettings[exportType + 'Compression'];
+          var parquetVersion = exportSettings[exportType + 'Version'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
             "ROW_GROUP_SIZE": exportSettings['exportParquetRowGroupSize'],
+            //this option requires preserve_insertion_order to be disabled.
+            //"ROW_GROUP_SIZE_BYTES": exportSettings['exportParquetRowGroupSizeBytes'],
             "COMPRESSION": compression.value,
+            "PARQUET_VERSION": parquetVersion.value
           };
           if (compression.value === 'ZSTD') {
             var compressionLevel = exportSettings[exportType + 'CompressionLevel'];

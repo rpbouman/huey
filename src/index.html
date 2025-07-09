@@ -580,6 +580,20 @@
           <div role="tabpanel">
             <form id="exportParquetSettings">
               <fieldset>
+                <legend>Version</legend>
+                <label 
+                  for="exportParquetVersion"
+                  title="The parquet version to use."
+                >Version</label>
+                <select
+                  id="exportParquetVersion"
+                  title="The parquet version to use."
+                >
+                  <option value="V1" label="V1" title="Parquet Version 1"/>
+                  <option value="V2" label="V2" title="Parquet Version 2"/>
+                </select>
+              </fieldset>
+              <fieldset>
                 <legend>Compression</legend>
                 <label
                   for="exportParquetCompression"
@@ -615,7 +629,7 @@
                 <label
                   for="exportParquetRowGroupSize"
                   title="The target size, i.e., number of rows, of each row group."
-                >Row group size</label>
+                >Row group size (no. of rows)</label>
                 <input 
                   id="exportParquetRowGroupSize" 
                   type="number" 
@@ -623,6 +637,20 @@
                   min="1" 
                   value="122880"
                 />
+                <!-- 
+                This option requires preserve_insertion_order to be disabled.
+                <label
+                  for="exportParquetRowGroupSizeBytes"
+                  title="The target size of each row group as number of bytes."
+                >Row group size (bytes)</label>
+                <input 
+                  id="exportParquetRowGroupSizeBytes" 
+                  type="number" 
+                  step="1" 
+                  min="1" 
+                  value="125829120"
+                />
+                -->
               </fieldset>
             </form>
           </div>
