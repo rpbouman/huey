@@ -1233,7 +1233,12 @@ class FilterDialog {
       "data-limit": limit
     });
     optionGroup.appendChild(option);
-    listOfValues.appendChild(optionGroup);
+    //Fix https://github.com/rpbouman/huey/issues/566
+    setTimeout(
+      function(){
+        listOfValues.appendChild(optionGroup);
+      }, 1
+    );
   }
 
   getDom(){
