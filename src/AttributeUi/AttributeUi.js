@@ -752,8 +752,8 @@ class AttributeUi {
   }
 
   async #axisButtonClicked(node, axis, checked){
-    var head = node.childNodes.item(0);
-    var inputs = head.getElementsByTagName('input');
+    var head = node.querySelector('summary');
+    var inputs = head.querySelectorAll('input');
     var aggregator;
     switch (axis){
       case QueryModel.AXIS_ROWS:
@@ -814,7 +814,8 @@ class AttributeUi {
 
     var analyticalRole = 'attribute';
 
-    var createInput;
+    var dummyButtonTemplate = 'attribute-node-axis-dummybutton';
+    var axisButtonTemplate = dummyButtonTemplate;
     switch (config.type) {
       case 'column':
       case 'member':
@@ -828,7 +829,7 @@ class AttributeUi {
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
             id += `_${axisId}`;
-            createInput = 'radio';
+            axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
           default:
         }
@@ -842,7 +843,7 @@ class AttributeUi {
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            createInput = 'checkbox';
+            axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
           default:
         }
@@ -850,12 +851,9 @@ class AttributeUi {
       default:
     }
 
-    var axisButton = createEl(createInput ? 'label' : 'span', {
-      'data-axis': axisId,
-      "class": 'attributeUiAxisButton'
-    });
-
-    if (!createInput){
+    var axisButton = instantiateTemplate(axisButtonTemplate);
+    axisButton.setAttribute('data-axis', axisId);
+    if (axisButtonTemplate === dummyButtonTemplate){
       return axisButton;
     }
 
@@ -867,11 +865,9 @@ class AttributeUi {
     axisButton.setAttribute('title', uncheckedTitle);
 
     axisButton.setAttribute('for', id);
-    var axisButtonInput = createEl('input', {
-      type: 'checkbox',
-      id: id,
-      'data-axis': axisId
-    });
+    var axisButtonInput = axisButton.querySelector('input');
+    axisButtonInput.setAttribute('id', id);
+    axisButtonInput.setAttribute('data-axis', axisId);
 
     if (aggregator && axisId === QueryModel.AXIS_CELLS) {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
@@ -880,9 +876,6 @@ class AttributeUi {
     if (config.derivation){
       axisButtonInput.setAttribute('data-derivation', config.derivation);
     }
-
-    axisButton.appendChild(axisButtonInput);
-
     return axisButton;
   }
 
@@ -900,19 +893,19 @@ class AttributeUi {
     head.appendChild(filterButton);
   }
 
-  #renderAttributeUiNodeHead(config) {
-    var head = createEl('summary', {
-    });
+  #renderAttributeUiNodeHead(node, config) {
+    var head = node.querySelector('summary');
 
     var caption = AttributeUi.#getUiNodeCaption(config);
     var title = AttributeUi.#getUiNodeTitle(config);
-
-    var label = createEl('span', {
+    
+    var label = head.querySelector('span');
+    label.textContent = caption;
+    setAttributes(label, {
       "class": 'label',
       "title": `${caption}: ${title}`,
       "draggable": true
-    }, caption);
-    head.appendChild(label);
+    });
 
     this.#renderAttributeUiNodeAxisButtons(config, head);
 
@@ -989,8 +982,7 @@ class AttributeUi {
       attributes['data-member_expression_path'] = JSON.stringify(memberExpressionPath);
       attributes['data-member_expression_type'] = config.profile.memberExpressionType;
     }
-
-    var node = createEl('details', attributes);
+    var node = instantiateTemplate('attribute-node', attributes);
 
     var derivation = config.derivation;
     switch (config.type){
@@ -1012,8 +1004,7 @@ class AttributeUi {
         throw new Error(`Invalid node type "${config.type}".`);
     }
 
-    var head = this.#renderAttributeUiNodeHead(config);
-    node.appendChild(head);
+    this.#renderAttributeUiNodeHead(node, config);
 
     // for STRUCT columns and members, preload the child nodes (instead of lazy load)
     // this is necessary so that a search will always find all applicable attributes
@@ -1097,19 +1088,17 @@ class AttributeUi {
   }
 
   #renderFolderNode(config){
-    var node = createEl('details', {
-      role: 'treeitem',
-      'data-nodetype': 'folder',
+    var node = instantiateTemplate('attribute-node', {
+      'data-nodetype': 'folder'
     });
+    var label = node.querySelector('span.label');
+    label.textContent = config.caption;
 
-    var head = createEl('summary', {
+    var filler = instantiateTemplate('attribute-node-axis-dummybutton', {
+      'data-axis': 'none'
     });
+    node.querySelector('summary').appendChild(filler);
 
-    var label = createEl('span', {
-      "class": 'label'
-    }, config.caption);
-    head.appendChild(label);
-    node.appendChild(head);
     return node;
   }
 
@@ -1386,7 +1375,7 @@ class AttributeUi {
     if (event.newState !== 'open'){
       return;
     }
-    if (node.childNodes.length !== 1){
+    if (node.querySelector('details') !== null){
       return;
     }
     this.#loadChildNodes(node);

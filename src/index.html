@@ -2264,12 +2264,39 @@
                 />
               </fieldset>
             </search>
+
+            <template id="attribute-node">
+              <details role="treeitem" data-nodetype="">
+                <summary>
+                  <span class="label"></span>
+                </summary>
+              </details>
+            </template>
+            
+            <template id="attribute-node-axis-dummybutton">
+              <span class="attributeUiAxisButton" data-axis=""/>
+            </template>
+            
+            <template id="attribute-node-axis-checkbox">
+              <label 
+                class="attributeUiAxisButton" 
+                data-axis=""
+                data-title-checked=""
+                data-title-unchecked=""
+                title=""
+                for=""
+              >
+                <input type="checkbox"/>
+              </label>
+            </template>
+            
             <div
               id="attributeUi"
               class="attributeUi"
               style="flex-grow: 1;"
               role="tree"
-            ></div>
+            >              
+            </div>
           </div>
         </div>
       </nav>
