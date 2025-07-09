@@ -110,14 +110,18 @@ class Settings extends EventEmitter {
       exportJsonRowDelimiter: {
         value: "true"
       },
-      exportParquetCompression: {
-        value: 'SNAPPY'
-      },
       exportSqlKeywordLettercase: {
         value: 'upperCase'
       },
+      exportParquetCompression: {
+        value: 'SNAPPY'
+      },
+      exportParquetVersion: {
+        value: 'V1'
+      },
       exportParquetCompressionLevel: 3,
       exportParquetRowGroupSize: 122880,
+      exportParquetRowGroupSizeBytes: 1024*122880,
       exportSqlAlwaysQuoteIdentifiers: true,
       exportSqlCommaStyle: {
         value: 'newlineBefore'
