@@ -57,6 +57,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         display: inline-block;
         position: absolute;
         width: 24px;
+        height: 22px;
         padding: 2px 3px 0px 3px;
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
@@ -71,6 +72,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
       .attributeUiAxisButton > input[type=checkbox] {
         display: none;
+      }
+
+      > .attributeUiAxisButton[data-axis=none] {
+        width: 110px;
+        right: 0px;
       }
 
       > .attributeUiAxisButton[data-axis=rows] {
