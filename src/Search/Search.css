@@ -26,3 +26,8 @@ main > nav#sidebar > div:has( > label[role=tab][for=attributesTab] ) > div[role=
 #attributeUi details[data-matches-searchstring=false] {
   display: none;
 }
+
+::highlight(HueyAttributeSearchHighlights) {
+  background-color: var( --huey-highlight-background-color );
+  color: black;
+}

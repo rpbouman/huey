@@ -110,14 +110,18 @@ class Settings extends EventEmitter {
       exportJsonRowDelimiter: {
         value: "true"
       },
-      exportParquetCompression: {
-        value: 'SNAPPY'
-      },
       exportSqlKeywordLettercase: {
         value: 'upperCase'
       },
+      exportParquetCompression: {
+        value: 'SNAPPY'
+      },
+      exportParquetVersion: {
+        value: 'V1'
+      },
       exportParquetCompressionLevel: 3,
       exportParquetRowGroupSize: 122880,
+      exportParquetRowGroupSizeBytes: 1024*122880,
       exportSqlAlwaysQuoteIdentifiers: true,
       exportSqlCommaStyle: {
         value: 'newlineBefore'
@@ -148,7 +152,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(255,255,255)",
               "--huey-medium-background-color": "rgb(245,245,245)",
               "--huey-dark-background-color": "rgb(210,210,210)",
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(222,222,222)",
               "--huey-dark-border-color": "rgb(175,175,175)",
@@ -169,7 +173,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(240,248,255)", // Alice Blue
               "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
               "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
               "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
@@ -190,7 +194,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(245,245,255)", // Lavender
               "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
               "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
               "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
@@ -211,7 +215,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "#F0E68C",
               "--huey-medium-background-color": "#A7D3A4",
               "--huey-dark-background-color": "#5B8266",
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "#A5B479",
               "--huey-dark-border-color": "#334D56",
@@ -232,7 +236,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "#D5D5D5",
               "--huey-medium-background-color": "#D2B48C",
               "--huey-dark-background-color": "#008080",
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "#8B4513",
               "--huey-dark-border-color": "#2F4F4F",
@@ -253,7 +257,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(182,187,229)",
               "--huey-medium-background-color": "rgb(108,115,183)",
               "--huey-dark-background-color": "rgb(67,71,119)",
-              "--huey-highlight-background-color": "rgb(232, 244, 248)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "rgb(99,46,64)",
               "--huey-dark-border-color": "rgb(42,34,55)",
@@ -274,7 +278,7 @@ class Settings extends EventEmitter {
               "--huey-light-background-color": "rgb(30, 30, 30)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
               "--huey-dark-background-color": "rgb(110 110, 110)",
-              "--huey-highlight-background-color": "rgb(100, 100, 100)",
+              "--huey-highlight-background-color": "yellow",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "rgb(80, 80, 80)",
               "--huey-dark-border-color": "rgb(110, 110, 110)",
@@ -295,7 +299,7 @@ class Settings extends EventEmitter {
           "--huey-light-background-color": "rgb(255,255,255)",
           "--huey-medium-background-color": "rgb(245,245,245)",
           "--huey-dark-background-color": "rgb(210,210,210)",
-          "--huey-highlight-background-color": "rgb(232, 244, 248)",
+          "--huey-highlight-background-color": "yellow",
           "--huey-alternating-rows-brightness": "99%",
           "--huey-light-border-color": "rgb(222,222,222)",
           "--huey-dark-border-color": "rgb(175,175,175)",

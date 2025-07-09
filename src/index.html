@@ -15,12 +15,12 @@
     </style>
 
     <script>
-    var hueyVersionNumber = '1.0.8';
-    var hueyVersionName = 'Gimbsheimer';
+    var hueyVersionNumber = '1.0.9';
+    var hueyVersionName = 'Golden Cascade';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.33.0';
+    var tablerIconsFontVersion = '3.34.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     var preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
@@ -39,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev202.0';
+    var duckdbLibraryVersion = '1.29.1-dev263.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -580,6 +580,20 @@
           <div role="tabpanel">
             <form id="exportParquetSettings">
               <fieldset>
+                <legend>Version</legend>
+                <label 
+                  for="exportParquetVersion"
+                  title="The parquet version to use."
+                >Version</label>
+                <select
+                  id="exportParquetVersion"
+                  title="The parquet version to use."
+                >
+                  <option value="V1" label="V1" title="Parquet Version 1"/>
+                  <option value="V2" label="V2" title="Parquet Version 2"/>
+                </select>
+              </fieldset>
+              <fieldset>
                 <legend>Compression</legend>
                 <label
                   for="exportParquetCompression"
@@ -615,7 +629,7 @@
                 <label
                   for="exportParquetRowGroupSize"
                   title="The target size, i.e., number of rows, of each row group."
-                >Row group size</label>
+                >Row group size (no. of rows)</label>
                 <input 
                   id="exportParquetRowGroupSize" 
                   type="number" 
@@ -623,6 +637,20 @@
                   min="1" 
                   value="122880"
                 />
+                <!-- 
+                This option requires preserve_insertion_order to be disabled.
+                <label
+                  for="exportParquetRowGroupSizeBytes"
+                  title="The target size of each row group as number of bytes."
+                >Row group size (bytes)</label>
+                <input 
+                  id="exportParquetRowGroupSizeBytes" 
+                  type="number" 
+                  step="1" 
+                  min="1" 
+                  value="125829120"
+                />
+                -->
               </fieldset>
             </form>
           </div>
@@ -1724,58 +1752,112 @@
       popover="auto"
     >
       <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyCell"
-          title="Copy the value of this cell to the clipboard"
+        <menu
+          id="copySubmenu"
+          role="menu"
+          popover="auto"
         >
-          Copy Cell Value
-          <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyCell"
+              title="Copy the value of this cell to the clipboard"
+            >
+              Copy Cell Value
+              <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyColumn"
+              title="Copy the column header values to the clipboard"
+            >
+              Copy Column Tuple
+              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyColumnTuples"
+              title="Copy the header values for each column to the clipboard"
+            >
+              Copy Column Tuples
+              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyRow"
+              title="Copy the row header values to the clipboard"
+            >
+              Copy Row Tuple
+              <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyRowTuples"
+              title="Copy the header values for each row to the clipboard"
+            >
+              Copy Row Tuples
+              <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemCopyTable"
+              title="Copy the entire pivot table to the clipboard"
+            >
+              Copy Table
+              <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
+            </label>
+          </li>
+        </menu>
+        <label
+          for="copySubmenuActivate"
+        >
+          Copy
+          <button
+            id="copySubmenuActivate"
+            popovertarget="copySubmenu"
+          >
+          </button>
         </label>
       </li>
       <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyColumn"
-          title="Copy the column header values to the clipboard"
+        <label
+          for="filterSubmenuActivate"
         >
-          Copy Column Tuple
-          <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+          Filter
+          <button
+            id="filterSubmenuActivate"
+            popovertarget="filterSubmenu"
+          >
+          </button>
         </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyColumnTuples"
-          title="Copy the header values for each column to the clipboard"
+        <menu
+          id="filterSubmenu"
+          role="menu"
+          popover="auto"
         >
-          Copy Column Tuples
-          <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyRow"
-          title="Copy the row header values to the clipboard"
-        >
-          Copy Row Tuple
-          <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyRowTuples"
-          title="Copy the header values for each row to the clipboard"
-        >
-          Copy Row Tuples
-          <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
-        </label>
-      </li>
-      <li role="menuitem">
-        <label 
-          for="pivotTableContextMenuItemCopyTable"
-          title="Copy the entire pivot table to the clipboard"
-        >
-          Copy Table
-          <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
-        </label>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemFilterIncludeValue"
+              title="Add this value in an include filter"
+            >
+              Include Value
+              <button id="pivotTableContextMenuItemFilterIncludeValue">Include Value</button>
+            </label>
+          </li>
+          <li role="menuitem">
+            <label 
+              for="pivotTableContextMenuItemFilterExcludeValue"
+              title="Add this value in an exclude filter"
+            >
+              Exclude Value
+              <button id="pivotTableContextMenuItemFilterExcludeValue">Exclude Value</button>
+            </label>
+          </li>
+        </menu>
       </li>
     </menu>
 
@@ -1864,6 +1946,9 @@
             id=""
             type="checkbox"
           />
+        </label>
+        <label for="">
+          <button></button>
         </label>
       </li>
     </template>
@@ -2207,12 +2292,39 @@
                 />
               </fieldset>
             </search>
+
+            <template id="attribute-node">
+              <details role="treeitem" data-nodetype="">
+                <summary>
+                  <span class="label"></span>
+                </summary>
+              </details>
+            </template>
+            
+            <template id="attribute-node-axis-dummybutton">
+              <span class="attributeUiAxisButton" data-axis=""/>
+            </template>
+            
+            <template id="attribute-node-axis-checkbox">
+              <label 
+                class="attributeUiAxisButton" 
+                data-axis=""
+                data-title-checked=""
+                data-title-unchecked=""
+                title=""
+                for=""
+              >
+                <input type="checkbox"/>
+              </label>
+            </template>
+            
             <div
               id="attributeUi"
               class="attributeUi"
               style="flex-grow: 1;"
               role="tree"
-            ></div>
+            >              
+            </div>
           </div>
         </div>
       </nav>

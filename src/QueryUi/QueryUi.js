@@ -432,7 +432,7 @@ class QueryUi {
       var valueLabel = valueObject.label;
       
       var valueUi = instantiateTemplate(QueryUi.#queryUiFilterAxisItemValueTemplateId);
-      var label = valueUi.querySelector('label');
+      var label = valueUi.querySelector('label:has( > input[type=checkbox] )');
       label.setAttribute('for', valueId);
       valueUi.setAttribute('data-value-index', i);
       valueUi.setAttribute('data-value', valueKey);
@@ -449,7 +449,30 @@ class QueryUi {
       var labelSpan = label.querySelector('span');
       labelSpan.textContent = valueLabel;
       valuesUi.appendChild(valueUi);
+      
+      var deleteValueId = valueId + '-delete'; 
+      label = valueUi.querySelector('label:has( > button )');
+      label.setAttribute('for', deleteValueId);
+      var button = label.querySelector('button');
+      button.setAttribute('id', deleteValueId);
+      button.addEventListener('click', this.#deleteFilterValueClickHandler.bind(this));
     }
+  }
+  
+  #deleteFilterValueClickHandler(event){
+    event.stopPropagation();
+    var button = event.target;
+    var label = button.parentNode;
+    var item = label.parentNode;
+    var list = item.parentNode;
+    var details = list.parentNode;
+    var queryUiItem = details.parentNode;
+    var queryModelItem = this.#getQueryModelItem(queryUiItem);
+    var filter = queryModelItem.filter;
+    var values = filter.values;
+    var value = item.getAttribute('data-value');
+    delete values[value];
+    this.#queryModel.setQueryAxisItemFilter(queryModelItem, filter);
   }
   
   #filterItemToggleHandler(event){

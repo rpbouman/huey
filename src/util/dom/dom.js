@@ -18,16 +18,26 @@ function createEl(tagName, attributes, content){
   return el;
 }
 
-function instantiateTemplate(templateId, instanceId) {
+function instantiateTemplate(templateId, idOrAttributes) {
   var template = byId(templateId);
   var clone = template.content.cloneNode(true);
   var index = 0, node;
   do {
     node = clone.childNodes.item(index++);
   } while (node && node.nodeType !== node.ELEMENT_NODE);
-  
-  if (instanceId !== undefined) {
-    node.setAttribute('id', instanceId);
+    
+  var typeOfIdOrAttributes = typeof idOrAttributes;
+  switch (typeOfIdOrAttributes) {
+    case 'undefined':
+      break;
+    case 'string':
+      node.setAttribute('id', idOrAttributes);
+      break;
+    case 'object':
+      setAttributes(node, idOrAttributes);
+      break;
+    default:
+      throw new Error(`Expected string id or attributes object, not ${typeOfIdOrAttributes}`);
   }
   return node;
 }

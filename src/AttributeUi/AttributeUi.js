@@ -369,13 +369,13 @@ class AttributeUi {
     "md5 low": {
       folder: 'hashes',
       expressionTemplate: 'md5_number_lower( ${columnExpression} )',
-      columnType: 'BIGINT',
+      columnType: 'UBIGINT',
       forString: true
     },
     "md5 high": {
       folder: 'hashes',
-      expressionTemplate: 'md5_number_higher( ${columnExpression} )',
-      columnType: 'BIGINT',
+      expressionTemplate: 'md5_number_upper( ${columnExpression} )',
+      columnType: 'UBIGINT',
       forString: true
     },
     "sha-1": {
@@ -599,6 +599,7 @@ class AttributeUi {
   
   static #getUiNodeColumnExpression(config){
     var columnExpression = config.profile.column_name;
+    columnExpression = quoteIdentifierWhenRequired(columnExpression);
     var memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
@@ -620,8 +621,20 @@ class AttributeUi {
           break;
         case 'aggregate':
         case 'derived':
-          var expressionTemplate = config.expressionTemplate;
-          title = extrapolateColumnExpression(expressionTemplate, columnExpression);
+          title = columnExpression;
+          var expressionTemplate;
+          var derivation = config.derivation;
+          if (derivation) {
+            var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+            expressionTemplate = derivationInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
+          var aggregator = config.aggregator;
+          if (aggregator){
+            var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+            expressionTemplate = aggregatorInfo.expressionTemplate;
+            title = extrapolateColumnExpression(expressionTemplate, title);
+          }
           break;
       }
     }
@@ -739,8 +752,8 @@ class AttributeUi {
   }
 
   async #axisButtonClicked(node, axis, checked){
-    var head = node.childNodes.item(0);
-    var inputs = head.getElementsByTagName('input');
+    var head = node.querySelector('summary');
+    var inputs = head.querySelectorAll('input');
     var aggregator;
     switch (axis){
       case QueryModel.AXIS_ROWS:
@@ -790,10 +803,19 @@ class AttributeUi {
     var name = `${config.type}_${columnExpression}`;
     var id = `${name}`;
 
-    var analyticalRole = 'attribute';
+    var derivation = config.derivation;
+    if (derivation){
+      id += `_${derivation}`;
+    }
     var aggregator = config.aggregator;
+    if (aggregator){
+      id += `_${aggregator}`;
+    }
 
-    var createInput;
+    var analyticalRole = 'attribute';
+
+    var dummyButtonTemplate = 'attribute-node-axis-dummybutton';
+    var axisButtonTemplate = dummyButtonTemplate;
     switch (config.type) {
       case 'column':
       case 'member':
@@ -806,14 +828,8 @@ class AttributeUi {
           case QueryModel.AXIS_FILTERS:
           case QueryModel.AXIS_COLUMNS:
           case QueryModel.AXIS_ROWS:
-            switch (config.type) {
-              case 'derived':
-                var derivation = config.derivation;
-                id += `_${derivation}`;
-                break;
-            }
             id += `_${axisId}`;
-            createInput = 'radio';
+            axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
           default:
         }
@@ -827,8 +843,7 @@ class AttributeUi {
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
-            id += `_${aggregator}`;
-            createInput = 'checkbox';
+            axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
           default:
         }
@@ -836,12 +851,9 @@ class AttributeUi {
       default:
     }
 
-    var axisButton = createEl(createInput ? 'label' : 'span', {
-      'data-axis': axisId,
-      "class": 'attributeUiAxisButton'
-    });
-
-    if (!createInput){
+    var axisButton = instantiateTemplate(axisButtonTemplate);
+    axisButton.setAttribute('data-axis', axisId);
+    if (axisButtonTemplate === dummyButtonTemplate){
       return axisButton;
     }
 
@@ -853,11 +865,9 @@ class AttributeUi {
     axisButton.setAttribute('title', uncheckedTitle);
 
     axisButton.setAttribute('for', id);
-    var axisButtonInput = createEl('input', {
-      type: 'checkbox',
-      id: id,
-      'data-axis': axisId
-    });
+    var axisButtonInput = axisButton.querySelector('input');
+    axisButtonInput.setAttribute('id', id);
+    axisButtonInput.setAttribute('data-axis', axisId);
 
     if (aggregator && axisId === QueryModel.AXIS_CELLS) {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
@@ -866,9 +876,6 @@ class AttributeUi {
     if (config.derivation){
       axisButtonInput.setAttribute('data-derivation', config.derivation);
     }
-
-    axisButton.appendChild(axisButtonInput);
-
     return axisButton;
   }
 
@@ -886,19 +893,19 @@ class AttributeUi {
     head.appendChild(filterButton);
   }
 
-  #renderAttributeUiNodeHead(config) {
-    var head = createEl('summary', {
-    });
+  #renderAttributeUiNodeHead(node, config) {
+    var head = node.querySelector('summary');
 
     var caption = AttributeUi.#getUiNodeCaption(config);
     var title = AttributeUi.#getUiNodeTitle(config);
-
-    var label = createEl('span', {
+    
+    var label = head.querySelector('span');
+    label.textContent = caption;
+    setAttributes(label, {
       "class": 'label',
       "title": `${caption}: ${title}`,
       "draggable": true
-    }, caption);
-    head.appendChild(label);
+    });
 
     this.#renderAttributeUiNodeAxisButtons(config, head);
 
@@ -975,8 +982,7 @@ class AttributeUi {
       attributes['data-member_expression_path'] = JSON.stringify(memberExpressionPath);
       attributes['data-member_expression_type'] = config.profile.memberExpressionType;
     }
-
-    var node = createEl('details', attributes);
+    var node = instantiateTemplate('attribute-node', attributes);
 
     var derivation = config.derivation;
     switch (config.type){
@@ -986,37 +992,47 @@ class AttributeUi {
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
+        if (derivation){
+          node.setAttribute('data-derivation', derivation);
+        }
         break;
       case 'derived':
-        node.setAttribute('data-derivation', config.derivation);
+        node.setAttribute('data-derivation', derivation);
+        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
     }
 
-    var head = this.#renderAttributeUiNodeHead(config);
-    node.appendChild(head);
+    this.#renderAttributeUiNodeHead(node, config);
 
     // for STRUCT columns and members, preload the child nodes (instead of lazy load)
     // this is necessary so that a search will always find all applicable attributes
     // with lazy load it would only find whatever happens to be visited/browsed already.
+    var typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
         if (['elements'].indexOf(derivation) === -1) {
           break;
         }
+        typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
+        break;
       case 'column':
+        typeToCheckIfChildnodesAreNeeded = columnType;
+        break;
       case 'member':
-        if (
-          isStructType(columnType) || 
-          isMapType(columnType) ||
-          config.profile.memberExpressionType && isArrayType(config.profile.memberExpressionType)
-        ) {
-          this.#loadChildNodes(node);
-        }
+        typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
         break;
     }
-
+    if (
+      typeToCheckIfChildnodesAreNeeded && (
+        isStructType(typeToCheckIfChildnodesAreNeeded) || 
+        isMapType(typeToCheckIfChildnodesAreNeeded) ||
+        isArrayType(typeToCheckIfChildnodesAreNeeded)
+      )
+    ) {
+      this.#loadChildNodes(node);
+    }
     return node;
   }
 
@@ -1072,19 +1088,17 @@ class AttributeUi {
   }
 
   #renderFolderNode(config){
-    var node = createEl('details', {
-      role: 'treeitem',
-      'data-nodetype': 'folder',
+    var node = instantiateTemplate('attribute-node', {
+      'data-nodetype': 'folder'
     });
+    var label = node.querySelector('span.label');
+    label.textContent = config.caption;
 
-    var head = createEl('summary', {
+    var filler = instantiateTemplate('attribute-node-axis-dummybutton', {
+      'data-axis': 'none'
     });
+    node.querySelector('summary').appendChild(filler);
 
-    var label = createEl('span', {
-      "class": 'label'
-    }, config.caption);
-    head.appendChild(label);
-    node.appendChild(head);
     return node;
   }
 
@@ -1150,7 +1164,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1190,7 +1203,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1253,7 +1265,6 @@ class AttributeUi {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
-        expressionTemplate: derivation.expressionTemplate,
         profile: nodeProfile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1278,8 +1289,8 @@ class AttributeUi {
       var config = {
         type: 'aggregate',
         aggregator: aggregationName,
+        derivation: profile.derivation,
         title: aggregator.title,
-        expressionTemplate: aggregator.expressionTemplate,
         profile: profile
       };
       var childNode = this.#renderAttributeUiNode(config);
@@ -1312,29 +1323,51 @@ class AttributeUi {
       memberExpressionPath: memberExpressionPath
     };
 
+    var nodeType = node.getAttribute('data-nodetype');
+    var derivation;
+    if (nodeType === 'derived'){
+      derivation = node.getAttribute('data-derivation');
+      profile.derivation = derivation;
+    }
+
     var expressionType = memberExpressionType || columnType;
     var typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (isArrayType(expressionType)){
-      this.#loadArrayChildNodes(node, typeName, profile);
-    }
-    else
-    if (isMapType(expressionType)){ 
-      this.#loadMapChildNodes(node, typeName, profile);
-    }
-    else
-    if (isStructType(expressionType)){
-      this.#loadMemberChildNodes(node, typeName, profile);
+    if (
+      nodeType !== 'derived' ||
+      ['elements'].indexOf(derivation) !== -1
+    ){
+      // only load these derivations if we're not ourself a derived node.
+      if (isArrayType(expressionType)){
+        this.#loadArrayChildNodes(node, typeName, profile);
+      }
+      else
+      if (isMapType(expressionType)){ 
+        this.#loadMapChildNodes(node, typeName, profile);
+      }
+      else
+      if (isStructType(expressionType)){
+        this.#loadMemberChildNodes(node, typeName, profile);
+      }
     }
 
-    var nodeType = node.getAttribute('data-nodetype');
-
-    switch (nodeType) {
+    switch (nodeType){
+      case 'derived':
+        if (['elements'].indexOf(derivation) === -1){
+          break;
+        }
       case 'column':
       case 'member':
         this.#loadDerivationChildNodes(node, typeName, profile);
+    }
+
+    switch (nodeType) {
+      case 'derived':
+      case 'column':
+      case 'member':
         this.#loadAggregatorChildNodes(node, typeName, profile);
     }
+    
   }
 
   #toggleNodeState(event){
@@ -1342,7 +1375,7 @@ class AttributeUi {
     if (event.newState !== 'open'){
       return;
     }
-    if (node.childNodes.length !== 1){
+    if (node.querySelector('details') !== null){
       return;
     }
     this.#loadChildNodes(node);

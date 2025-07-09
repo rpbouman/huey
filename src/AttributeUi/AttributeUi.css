@@ -12,15 +12,21 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   * hide the expand/collapse widget for these attribute nodes.
   */
   details[role=treeitem][data-nodetype=derived][data-member_expression_type=JSON] > summary,
-  details[role=treeitem][data-nodetype=aggregate] > summary,
-  details[role=treeitem][data-nodetype=derived]:not( 
-    [data-derivation=elements], 
-    [data-derivation=entries] 
-  ) > summary {
+  details[role=treeitem][data-nodetype=aggregate] > summary ,
+  details[role=treeitem][data-nodetype=derived][data-derivation="row number"] > summary 
+  {
     list-style: none;
     margin-left: 14px;
   }
-
+  
+  
+/*  
+  details[role=treeitem][data-nodetype=derived]:not( 
+    [data-derivation=elements], 
+    [data-derivation=entries],
+    [data-derivation="first letter"]
+  ) > summary 
+*/
 
   details[role=treeitem] {
 
@@ -51,6 +57,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         display: inline-block;
         position: absolute;
         width: 24px;
+        height: 22px;
         padding: 2px 3px 0px 3px;
         font-family: var( --huey-icon-font-family ) !important;
         font-size: var( --huey-icon-medium );
@@ -65,6 +72,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
       .attributeUiAxisButton > input[type=checkbox] {
         display: none;
+      }
+
+      > .attributeUiAxisButton[data-axis=none] {
+        width: 110px;
+        right: 0px;
       }
 
       > .attributeUiAxisButton[data-axis=rows] {
@@ -271,8 +283,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
   details[data-nodetype=derived][data-derivation="hash"] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation="md5"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 (low)"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 (high)"] > summary > span.label::before {
+  details[data-nodetype=derived][data-derivation="md5 low"] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation="md5 high"] > summary > span.label::before {
     /* IconNumber123 */
     content: "\f554";
   }

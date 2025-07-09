@@ -139,7 +139,7 @@ class QueryAxisItem {
     if (axisItem.derivation) {
       postfix += ` ${axisItem.derivation}`;
     }
-    else
+
     if (axisItem.aggregator){
       prefix = `${axisItem.aggregator} of `;
     }
@@ -147,6 +147,7 @@ class QueryAxisItem {
     if (postfix) {
       caption += `${postfix}`;
     }
+
     if (prefix) {
       caption = prefix + caption;
     }
@@ -196,6 +197,10 @@ class QueryAxisItem {
       if (alias) {
         columnExpression = `${quoteIdentifierWhenRequired(alias)}.*`;
       }
+    }
+    else 
+    if (item.derivation){ 
+      columnExpression = QueryAxisItem.getSqlForDerivedQueryAxisItem(item, alias, sqlOptions);
     }
     else {
       columnExpression = QueryAxisItem.getSqlForColumnExpression(item, alias, sqlOptions);
@@ -543,10 +548,12 @@ class QueryAxis {
 
     var items = this.#items;
     var itemIndex = items.findIndex(function(item){
+      // check column name
       if ((item.columnName || '') !== columnName){
         return false;
       }
 
+      // check member expression path
       if (memberExpressionPath) {
         if (!item.memberExpressionPath){
           return false;
@@ -560,22 +567,29 @@ class QueryAxis {
         return false;
       }
 
+      // check derivation
       if (derivation) {
-        return item.derivation === derivation;
+        if (item.derivation !== derivation) {
+          return false;
+        }
       }
       else
       if (item.derivation){
         return false;
       }
 
-      else
+      // check aggregator
       if (aggregator) {
-        return item.aggregator === aggregator;
+        if (item.aggregator !== aggregator){
+          return false;
+        }
       }
       else
       if (item.aggregator){
         return false;
       }
+
+      // all checks passed
       return true;
     });
 

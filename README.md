@@ -2,7 +2,11 @@
 Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
-__Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
+Checkout my [DataZen talk on youtube](https://www.youtube.com/watch?v=1A0r4CbLSaI) for background and a demo if its features. 
+
+Or, __Try Huey now online__ [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
+
+(Note: this is a static webapp. Any data you load into the app stays on your local client.)
 
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
@@ -108,6 +112,17 @@ The following screenshot may help to explain:
 
 In the screenshot, the Attribute Sidebar is at the left side. The workarea is to the right of the Attribute Sidebar. 
 The Query Builder is at the top right of the workarea. The pivot table is at the bottom right.
+
+#### Searching Attributes
+
+When there are a lot of attributes, it can be useful to use search to find them. 
+To do that, use the Attribute Search feature: Simply type a part of the attribute name in the search input.
+After a brief timeout, the list of attributes will automatically show only those attributes that (partially) match the search string:
+
+![image](https://github.com/user-attachments/assets/1ab093d3-90f9-445a-bfaa-e6af1e81397e)
+
+The search string is treated as a regular expression, and is matched in a case-insensitive manner, making it both easy and powerful.
+For extra convenience, the attribute searchstring also supports `%` as wildcard for any sequence of characters (just like the SQL `LIKE` operator). 
 
 ### Query Builder
 

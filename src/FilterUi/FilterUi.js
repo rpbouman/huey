@@ -1061,7 +1061,13 @@ class FilterDialog {
       }
       delete queryAxisItem.literalWriter;
     }
-
+    
+    // https://github.com/rpbouman/huey/issues/553
+    // never produce totals in the picklist result.
+    if (queryAxisItem.includeTotals){
+      queryAxisItem = Object.assign({}, queryAxisItem);
+      delete queryAxisItem.includeTotals;
+    }
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
       Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
@@ -1227,7 +1233,12 @@ class FilterDialog {
       "data-limit": limit
     });
     optionGroup.appendChild(option);
-    listOfValues.appendChild(optionGroup);
+    //Fix https://github.com/rpbouman/huey/issues/566
+    setTimeout(
+      function(){
+        listOfValues.appendChild(optionGroup);
+      }, 1
+    );
   }
 
   getDom(){

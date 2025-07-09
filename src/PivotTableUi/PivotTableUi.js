@@ -2103,7 +2103,198 @@ class PivotTableUi extends EventEmitter {
     this.#contextMenuContext = cell;
   }
 
-  async contextMenuItemClicked(event) {
+  async contextMenuItemClicked(event){
+    var target = event.target;
+    var id = target.id;
+    
+    var suffix = id.substr('pivotTableContextMenuItem'.length);
+    if (suffix.startsWith('Copy')){
+      await this.#contextMenuCopyClicked(event);
+    }
+    else
+    if (suffix.startsWith('Filter')){
+      await this.#contextMenuFilterClicked(event);
+    }
+  }
+
+  // see: https://github.com/rpbouman/huey/issues/543
+  async #contextMenuFilterClicked(event){
+    var target = event.target;
+    var id = target.id;
+
+    var contextMenuContext = this.#contextMenuContext;
+    this.#contextMenuContext = null;
+
+    var axis = contextMenuContext.getAttribute('data-axis');
+    switch(axis){
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        break;
+      default:
+        showErrorDialog({
+          title: `Invalid axis: ${axis}`,
+          description: `Can not filter on items from the "${axis}" axis.`
+        });
+        return;
+    }
+
+    var filterType = FilterDialog.equalityFilterTypes.INCLUDE;
+    switch(id){
+      case 'pivotTableContextMenuItemFilterExcludeValue':
+        filterType = FilterDialog.equalityFilterTypes.EXCLUDE;
+      case 'pivotTableContextMenuItemFilterIncludeValue':
+        break;
+      default:
+        // we didn't expect This
+        throw new Error(`Unrecognized context menu option "${id}"`);
+    }
+
+    var queryModel = this.#queryModel;
+    var queryModelAxis = queryModel.getQueryAxis(axis);
+    var axisItemIndex = contextMenuContext.getAttribute('data-axis-item-index');
+    var queryModelItem = Object.assign({}, queryModelAxis.getItems()[parseInt(axisItemIndex, 10)]);
+    
+    var filterValue = contextMenuContext.textContent;
+    var literal = contextMenuContext.getAttribute('data-value-literal');
+
+    queryModelItem.axis = QueryModel.AXIS_FILTERS;
+    var newFilter, newFilterValues = {};
+    var newFilterValueListValue = {
+      value: filterValue, 
+      label: filterValue, 
+      literal: literal
+    };
+    var newFilterItem = queryModel.findItem(queryModelItem);
+    if (newFilterItem){
+      // this filter item already exists.
+      var oldFilter = newFilterItem.filter;
+      var oldFilterValues = oldFilter ? oldFilter.values : undefined;
+      var oldFilterValueEntry = oldFilterValues ? oldFilterValues[filterValue] : undefined;
+      var oldFilterValueEntryDisabled = oldFilterValueEntry ? oldFilterValueEntry.enabled === false : false;
+      var numOldFilterValues = oldFilterValues ? Object.keys(oldFilterValues).length : 0;
+
+      switch(filterType){
+        case FilterDialog.equalityFilterTypes.INCLUDE:
+          // if the user select to include the current value, it should be taken to mean to include *only* this value.
+          // i.e. the existing filter for this item is replaced by a simple "in" filter, having only the chosen value.
+          newFilterValues[filterValue] = newFilterValueListValue;
+          newFilter = {
+            filterType: filterType,
+            values: newFilterValues
+          }
+          break;
+        case FilterDialog.equalityFilterTypes.EXCLUDE:
+          // Use chose "exclude". 
+          // This probably means the existing filter item should be adjusted to exclude *also* this value
+          // What this means exactly depends on the type of the existing filter item
+          switch (oldFilter.filterType){
+            case FilterDialog.equalityFilterTypes.INCLUDE:
+              // The existing filter must either be empty, or already include the current value, else the user couldn't have chosen it
+              // The action is to simply remove the current value from the value list of the existing Filter
+              // BUT! if this leaves the list of values empty, then removing the current value will have the effect of not applying any restriction at all
+              // so, in this (edge) case, we must change the filter from INCLUDE to EXCLUDE, and add the current value.
+              if (numOldFilterValues === 0) {
+                oldFilter.filterType = FilterDialog.equalityFilterTypes.EXCLUDE;
+                newFilter = oldFilter;
+              }
+              else 
+              if (oldFilterValueEntry) {
+                if (oldFilterValueEntryDisabled) {
+                  // this shouldn't happen
+                  throw new Error('Unexpected: old filter entry is disabled');
+                }
+                else
+                if (numOldFilterValues === 1) {
+                  // in this case, removing the value from the list would leave an empty list, which would not exclude the current value
+                  // so, we change the filter type from INCLUDE to EXCLUDE instead.
+                  oldFilter.filterType = FilterDialog.equalityFilterTypes.EXCLUDE;
+                  newFilter = oldFilter;
+                }
+                else {
+                  // current value is in the inlcude list, so let's remove it:
+                  delete oldFilterValues[filterValue];
+                  newFilter = oldFilter;
+                }
+              }
+              else {
+                // this shouldn't happen
+                throw new Error('Unexpected: old filter does not have an entry for the value');
+              }
+              break;
+            case FilterDialog.equalityFilterTypes.EXCLUDE:
+              // We should check the existing list to see if the current value is already in the list. 
+              // If it is, then it must mean that current value is disabled, else the user could never have selected it. In this case we can simple enable it
+              // If it is not, then we should simply add the current value to the list.
+              if (oldFilterValueEntry) {
+                if (oldFilterValueEntryDisabled){
+                  delete oldFilterValueEntry['enabled'];
+                  newFilter = oldFilter;
+                }
+                else {
+                  throw new Error('Unexpected: old filter entry is not disabled');
+                }
+              }
+              else {
+                oldFilterValues[filterValue] = newFilterValueListValue;
+                newFilter = oldFilter;
+              }
+              break;
+            case FilterDialog.simplePatternFilterTypes.LIKE:
+              // if the existing filter is of type like, and the list of values that satisfies the like contains more values than only the current value, 
+              // then we have a problem, as we cannot modify this filter in a way that would exclude only the current value. 
+              // In this case, we should probably prompt the user, either to inform them that their request can't be executed 
+              // or to ask offer them alternative actions (we can park this for a future improvement and for now just refuse to satisfy the request)
+              break;
+            case FilterDialog.simplePatternFilterTypes.NOTLIKE:
+              // if the existing filter is of type not like
+              // This is somewhat (but not quite) like the "not in" case (above)
+              // if none of the current patterns match the current value, we can simply add the current value as a new pattern
+              // if there is a pattern that is exactly equal to the current value, and it is disabled, then we can enable it.
+              // if there is a (disabled) pattern that matches the current value, then we cannot simply enable it 
+              // as that would likely also exclude other values. 
+              // So instead we should then just add the current value as new pattern.
+              break;
+            case FilterDialog.rangeFilterTypes.BETWEEN:
+              // if the existing filter is of type between, 
+              // then we can identify the ranges that includes the current value, and split them so they won't include the current value anymore.            
+              break;
+            case FilterDialog.rangeFilterTypes.NOTBETWEEN:
+              // if the existing filter is of type not between, then we can simply add an entry from and to the current value
+              break;
+            case FilterDialog.arrayFilterTypes.HASANY:
+              break;
+            case FilterDialog.arrayFilterTypes.HASALL:
+              break;
+            case FilterDialog.arrayFilterTypes.NOTHASANY:
+              break;
+            case FilterDialog.arrayFilterTypes.NOTHASALL:
+              break;
+            default:
+          }
+          
+          break;
+        default:
+          // can't happen
+      }
+      
+      queryModel.setQueryAxisItemFilter(newFilterItem, newFilter);
+    }
+    else {
+      // this is easy. The query does not yet include a filter for this item so we just add it.
+      newFilterItem = queryModelItem;
+      newFilterValues[filterValue] = newFilterValueListValue;
+      
+      newFilter = {
+        filterType: filterType,
+        values: newFilterValues
+      }
+      
+      newFilterItem.filter = newFilter;
+      queryModel.addItem(newFilterItem);
+    }
+  }
+
+  async #contextMenuCopyClicked(event) {
     var target = event.target;
     var id = target.id;
 
@@ -2117,6 +2308,7 @@ class PivotTableUi extends EventEmitter {
 
     var exportSettings = this.#settings.getSettings('exportUi');
     exportSettings.exportType = 'exportDelimited';
+    exportSettings.exportDelimitedCompression = {value: 'UNCOMPRESSED'};
     exportSettings.exportResultShapePivot = !(exportSettings.exportResultShapeTable = true);
 
     exportSettings.exportDestinationClipboard = true;
@@ -2313,6 +2505,9 @@ class PivotTableUi extends EventEmitter {
         else {
         }
         break;
+      default:
+        // we didn't expect This
+        throw new Error(`Unrecognized context menu option "${id}"`);
     }
 
     try {

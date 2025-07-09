@@ -224,7 +224,8 @@ class ExportUi {
 
   static async exportDataForQueryModel(queryModel, exportSettings, progressCallback){
     var sql = ExportUi.getExportSqlForQueryModel(queryModel, exportSettings);
-    return ExportUi.exportData(queryModel.getDatasource(), sql, exportSettings, progressCallback);
+    var datasource = queryModel.getDatasource();
+    return ExportUi.exportData(datasource, sql, exportSettings, progressCallback);
   }
 
   static async exportData(datasource, sql, exportSettings, progressCallback){
@@ -289,10 +290,14 @@ class ExportUi {
           break;
         case 'exportParquet':
           compression = exportSettings[exportType + 'Compression'];
+          var parquetVersion = exportSettings[exportType + 'Version'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
             "ROW_GROUP_SIZE": exportSettings['exportParquetRowGroupSize'],
+            //this option requires preserve_insertion_order to be disabled.
+            //"ROW_GROUP_SIZE_BYTES": exportSettings['exportParquetRowGroupSizeBytes'],
             "COMPRESSION": compression.value,
+            "PARQUET_VERSION": parquetVersion.value
           };
           if (compression.value === 'ZSTD') {
             var compressionLevel = exportSettings[exportType + 'CompressionLevel'];
