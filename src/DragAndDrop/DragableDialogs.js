@@ -3,22 +3,13 @@
 * This class will install dragstart/drag/dragend eventhandlers on the body element
 * In dragstart, it checks whether the dragevent source element is a dialog.
 * If it is, it will initiate the dragging of the dialog element
-*
-* To do this, the dialog will first be closed, and then reopened using (non modal) open() method
-* This is necessary to allow the dialog to move in response to the drag events.
-* (dialogs opened with showModal() do not respond to style changes that attempt to position them by setting lef/top style properties)
-* 
-* Finally, at dragend, the dialog is closed again, and reopened with showModal().
-*
-* If your dialog is not modal, and you want to suppress the closing and reopening of the dialog,
-* be sure to add a data-modal="false" attribute omm the dialog.
 * 
 * Once this class is instantiated, the only thing that you need to do to make dialogs draggable 
 * is to give them a draggable="true" attribute.
 * 
 */
 
-class DraggableDialogs {
+class DragableDialogs {
   
   #dialog = undefined;
   #dragImgEl = undefined;
@@ -115,6 +106,6 @@ class DraggableDialogs {
   }
 }
 
-function initDraggableDialogs(){
-  new DraggableDialogs();
+function initDragableDialogs(){
+  new DragableDialogs();
 }

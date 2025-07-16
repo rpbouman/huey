@@ -123,7 +123,7 @@ function initExecuteQuery(){
 }
 
 function initApplication(){
-  initDraggableDialogs();
+  initDragableDialogs();
   initDuckdbVersion();
   initDataSourcesUi();
   initQueryModel();

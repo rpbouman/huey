@@ -175,6 +175,8 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       settings: {autoRunQuery: true}
     });
     
+    //var pivotTableUiContextMenu = new ContextMenu(this.#columnsTabPivotTableUi, 'pivotTableContextMenu');
+     
   }
 
   async #downloadCsvReaderRejectsHandler(event){
