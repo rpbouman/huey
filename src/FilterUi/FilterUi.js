@@ -1234,11 +1234,11 @@ class FilterDialog {
     });
     optionGroup.appendChild(option);
     //Fix https://github.com/rpbouman/huey/issues/566
-    setTimeout(
-      function(){
+    //setTimeout(
+      //function(){
         listOfValues.appendChild(optionGroup);
-      }, 1
-    );
+      //}, 100
+    //);
   }
 
   getDom(){

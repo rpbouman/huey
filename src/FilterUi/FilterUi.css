@@ -132,6 +132,11 @@ dialog#filterDialog {
             box-shadow: 0px 0px 0px transparent;
             width: calc( 100% - 10px );
             height: calc( 100% );
+            /* 
+              https://github.com/rpbouman/huey/issues/566 
+              ensure minheight is listsize (4) * height of option (ca 20px;
+            */
+            min-height: 80px;
             overflow-x: auto;
             resize: vertical;
 
@@ -170,7 +175,11 @@ dialog#filterDialog {
         > select {
           flex-grow: 1;
           width: calc( 100% - 10px );
-          height: 100%;
+          /* 
+            https://github.com/rpbouman/huey/issues/566 
+            ensure minheight is listsize (4) * height of option (ca 20px;
+          */          
+          min-height: 80px;
         }
       }
 
