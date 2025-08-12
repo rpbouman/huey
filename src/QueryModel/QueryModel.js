@@ -1494,8 +1494,11 @@ class QueryModel extends EventEmitter {
         datasource = datasourcesUi.getDatasource(datasourceId);
       }
       else
-      if(queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource){
+      if ( queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource ){
         datasource = queryModelState.datasource;
+      }
+      else {
+        datasource = this.getDatasource();
       }
 
       if (this.getDatasource() === datasource) {

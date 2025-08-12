@@ -116,8 +116,9 @@ class ExportUi {
     var axisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
     var filterAxisItems = queryModel.getFiltersAxis().getItems();
 
+    var datasource = queryModel.getDatasource();
     var opts = Object.assign({}, options, {
-      datasource: queryModel.getDatasource(),
+      datasource: datasource,
       queryAxisItems: axisItems, 
       filterAxisItems: filterAxisItems,
     });

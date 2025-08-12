@@ -2316,6 +2316,7 @@ class PivotTableUi extends EventEmitter {
 
     var queryAxisItem, cellsAxisItem, filter, filterAxisItem, itemId;
     var queryModel = this.#queryModel;
+    var datasource = queryModel.getDatasource();
     var cellHeadersAxis = queryModel.getCellHeadersAxis();
 
     var queryModelState = queryModel.getState();
@@ -2512,7 +2513,18 @@ class PivotTableUi extends EventEmitter {
 
     try {
       var exportQueryModel = new QueryModel();
-      await exportQueryModel.setState(queryModelState);
+
+      // https://github.com/rpbouman/huey/issues/584
+      // currently not all datasources are cleanly restored from state
+      // in particular, on the fly datasources form a list of files.
+      // while we figure out a better solution, we now simply reuse the existing datasource.
+      var datasourceId = queryModelState.datasourceId;
+      var parts = DuckDbDataSource.parseId(datasourceId);
+      if (parts.type === DuckDbDataSource.types.FILES){
+        delete queryModelState.datasourceId;
+        exportQueryModel.setDatasource(datasource);
+      }
+      await exportQueryModel.setState(queryModelState);      
       await ExportUi.exportDataForQueryModel(exportQueryModel, exportSettings);
     }
     catch(error) {
