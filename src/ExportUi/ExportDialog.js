@@ -315,11 +315,12 @@ class ExportUi {
           fileExtension = 'xlsx';
           copyStatementOptions = {
             "FORMAT": '\'xlsx\'',
-            "HEADER": `'${Boolean(exportSettings.exportXlsxIncludeHeaders)}'`,
+            "HEADER": `${Boolean(exportSettings.exportXlsxIncludeHeaders)}`,
             "SHEET_ROW_LIMIT": exportSettings.exportXlsxSheetRowLimit,
           };
           var sheetName = (exportSettings.exportXlsxSheet || '').trim();
           if ( sheetName.length ) {
+            sheetName = quoteStringLiteral(sheetName);
             copyStatementOptions["SHEET"] = sheetName;
           }
           break;
