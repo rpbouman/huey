@@ -1039,26 +1039,27 @@ class FilterDialog {
     if (FilterDialog.isArrayFilterType(filterType)){
       queryAxisItem = Object.assign({}, queryAxisItem);
 
-      if (queryAxisItem.memberExpressionPath) {
-        queryAxisItem.memberExpressionPath = Object.assign([], queryAxisItem.memberExpressionPath);
+      if (!queryAxisItem.memberExpressionPath) {
+        queryAxisItem.memberExpressionPath = [];
       }
+
+      queryAxisItem.memberExpressionPath = Object.assign([], queryAxisItem.memberExpressionPath);
       if (queryAxisItem.derivation) {
         switch (queryAxisItem.derivation) {
           case 'keyset':
             queryAxisItem.memberExpressionPath.push('map_keys()');
-            queryAxisItem.memberExpressionPath.push('unnest()');
             queryAxisItem.derivation = 'elements';
             break;
           case 'valuelist':
             queryAxisItem.memberExpressionPath.push('map_values()');
-            queryAxisItem.memberExpressionPath.push('unnest()');
             queryAxisItem.derivation = 'elements';
             break;
         }
       }
       else {
-        queryAxisItem.derivation = 'elements';
       }
+      queryAxisItem.derivation = 'elements';
+      queryAxisItem.memberExpressionPath.push('unnest()');
       delete queryAxisItem.literalWriter;
     }
     
@@ -1068,6 +1069,7 @@ class FilterDialog {
       queryAxisItem = Object.assign({}, queryAxisItem);
       delete queryAxisItem.includeTotals;
     }
+    
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
       Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
