@@ -326,9 +326,7 @@ class ExportUi {
           break;
         case 'exportQuery':
           var encodingSettings = exportSettings[exportType + 'Encoding'];
-          var encodingOption = encodingSettings.options.find(function(option){
-            return option.value === encodingSettings.value;
-          });
+          var encodingOption = encodingSettings.value;
           var indent = exportSettings[exportType + 'Indentation'];
           fileExtension = encodingOption.fileExtension;
           mimeType = encodingOption.mimeType;
