@@ -392,7 +392,23 @@ function getDuckDbLiteralForValue(value, type){
       literal = quoteStringLiteral(value); 
       break;
     case 8:   // Date
-      literal = `DATE'${value.getUTCFullYear()}-${value.getUTCMonth() + 1}-${value.getUTCDate()}'`;
+      switch (typeof value) {
+        case 'number':
+          value = new Date(value);
+        case 'object':
+          if (value === null) {
+            literal = 'NULL::DATE';
+            break;
+          }
+          else 
+          if (value instanceof Date) {
+            literal = `DATE'${value.toISOString().split('T')[0]}'`;
+            break;
+          }
+        default:
+          literal = '';
+          console.error(`Error rendering value "${String(value)}" (typeId: ${typeId}).`);
+      }
       break;
     case 10:   // Timestamp
       literal = `to_timestamp( ${value}::DOUBLE / 1000)`;
