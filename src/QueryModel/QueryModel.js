@@ -307,9 +307,13 @@ class QueryAxisItem {
       if (aggregatorInfo.columnType) {
         dataType = aggregatorInfo.columnType;
       }
+      else 
+      if (aggregatorInfo.preservesColumnType){
+        // noop
+      }
       else
-      if (aggregator === 'median'){
-        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
+      if (aggregatorInfo && typeof aggregatorInfo.getReturnDataTypeForArgumentDataType === 'function'){
+        dataType = aggregatorInfo.getReturnDataTypeForArgumentDataType(dataType);
       }
       else {
         dataType = undefined;
