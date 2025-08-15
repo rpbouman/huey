@@ -138,6 +138,9 @@ class QuickQueryMenu {
         caption: columnName,
         aggregator: 'min'
       };
+      item.formatter = QueryAxisItem.createFormatter(item);
+      item.literalWriter = QueryAxisItem.createLiteralWriter(item);
+      item.parser = QueryAxisItem.createParser(item);
       cellsAxisItems.push(item);
     });
     
