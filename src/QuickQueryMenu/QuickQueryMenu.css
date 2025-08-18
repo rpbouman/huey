@@ -54,7 +54,7 @@ menu[role=toolbar]:has( #currentDatasource:empty ) > label#quickQueryMenuLabel {
 }
 
 
-/* "Clear All" quick query is not availabel by default */
+/* "Clear All" quick query is not available by default */
 menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
   display: none;
 }
