@@ -1397,6 +1397,9 @@ class AttributeUi {
       var items = queryAxis.getItems();
       for (var j = 0; j < items.length; j++){
         var item = items[j];
+        if (!item.columnName) {
+          continue;
+        }
         if (!item.derivation && !item.aggregator){
           continue;
         }
@@ -1416,8 +1419,8 @@ class AttributeUi {
       if (referencedColumns[columnName] === undefined) {
         continue;
       }
-      var descendants = attributeNode.childNodes;
-      if (descendants.length > 1) {
+      var descendants = attributeNode.querySelectorAll('details');
+      if (descendants.length > 0) {
         continue;
       }
       this.#loadChildNodes(attributeNode);
