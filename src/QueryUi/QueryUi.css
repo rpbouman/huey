@@ -263,6 +263,15 @@
         content: "\ec62";
       }
 
+      > li[data-derivation='timestamp (secs)'] > span:before,
+      > li[data-derivation='timestamp (millis)'] > span:before,
+      > li[data-derivation='timestamp (micros)'] > span:before,
+      > li[data-derivation='timestamp (nanos)'] > span:before 
+      {
+        /* stopwatch */
+        content: "\ff9b";
+      }
+
       > li[data-derivation=lowercase] > span:before {
         /* letter-case-lower */
         content: "\eea2";

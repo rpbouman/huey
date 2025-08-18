@@ -369,6 +369,15 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     /* letter-s */
     content: "\ec62";
   }
+  
+  details[data-nodetype=derived][data-derivation='timestamp (secs)'] > summary > span.label::before, 
+  details[data-nodetype=derived][data-derivation='timestamp (millis)'] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='timestamp (micros)'] > summary > span.label::before,
+  details[data-nodetype=derived][data-derivation='timestamp (nanos)'] > summary > span.label::before
+  {
+    /* stopwatch */
+    content: "\ff9b";
+  }
 
   details[data-nodetype=derived][data-derivation=lowercase] > summary > span.label::before {
     /* letter-case-lower */
