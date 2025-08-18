@@ -550,6 +550,7 @@ class Settings extends EventEmitter {
     var optionsFromSettings = settings[property].options;
     var index = 0;
     var numOptions = optionsFromSettings ? optionsFromSettings.length : optionsFromControl.length;
+    var exists = {};
     switch (settingsOrDialog) {
       case 'settings':
         var valueGetter = control.getAttribute('data-value-getter');
@@ -557,10 +558,19 @@ class Settings extends EventEmitter {
           valueGetter = eval(valueGetter);
         }
 
-        if (optionsFromSettings) {
+        if (optionsFromControl) {
+          optionsFromSettings = [];
           for (; index < numOptions; index++){
             var optionFromControl = optionsFromControl[index];
             var value = optionFromControl.value;
+
+            if (exists[value]) {
+              continue;
+            }
+            else {
+              exists[value] = true;
+            }
+            
             var label = optionFromControl.label || value;
             if (valueGetter){
               value = valueGetter.call(null, optionFromControl, this);
@@ -590,6 +600,14 @@ class Settings extends EventEmitter {
           for (; index < numOptions; index++){
             var optionFromSettings = optionsFromSettings[index];
             var value = optionFromSettings.value;
+
+            if (exists[value]) {
+              continue;
+            }
+            else {
+              exists[value] = true;
+            }
+
             var label = optionFromSettings.label || value;
             var title = optionFromSettings.title || label;
             var option = createEl('option', {
