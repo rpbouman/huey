@@ -316,7 +316,27 @@ class AttributeUi {
       createFormatter: createDayShortNameFormatter,
       createParser: createDayShortNameParser,
       dataValueTypeOverride: 'Utf8'
-    }
+    },
+    'timestamp (secs)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch( ${columnExpression} )',
+      columnType: 'DOUBLE'
+    },
+    'timestamp (millis)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_ms( ${columnExpression} )',
+      columnType: 'BIGINT'
+    },
+    'timestamp (micros)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_us( ${columnExpression} )',
+      columnType: 'BIGINT'
+    },
+    'timestamp (nanos)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_ns( ${columnExpression} )',
+      columnType: 'BIGINT'
+    }      
   };
 
   static timeFields = {
