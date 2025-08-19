@@ -395,6 +395,7 @@ class QueryAxisItem {
     }
 
     var sql = '', logicalOperator;
+    var needsParentheses = false;
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
 
@@ -405,6 +406,7 @@ class QueryAxisItem {
           // TODO: if the column happens not to contain any nulls, we can omit this condition
           if (indexOfNull === -1) {
             sql = `${columnExpression} IS NULL OR `;
+            needsParentheses = true;
           }
           operator += literalLists.valueLiterals.length === 1 ? ' !' : ' NOT';
           logicalOperator = 'AND';
@@ -414,7 +416,11 @@ class QueryAxisItem {
           sql += `${columnExpression} ${operator} ${values}`;
 
           if (indexOfNull !== -1) {
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+            if (!logicalOperator) {
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`;
           }
           sql = `( ${sql} )`;
           break;
@@ -448,14 +454,19 @@ class QueryAxisItem {
               nullCondition = `${columnExpression} IS NULL`;
               if (literalLists.valueLiterals.length) {
                 sql = `(${sql}) OR ${nullCondition}`;
+                needsParentheses = true;
               }
               else {
                 sql = nullCondition;
               }
             }
           }
-          else{
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+          else {
+            if (!logicalOperator) {
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`;
           }
           break;
 
@@ -468,7 +479,11 @@ class QueryAxisItem {
           sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
             acc += '\n';
             if (currIndex) {
-              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+              if (!logicalOperator){
+                logicalOperator = 'OR';
+                needsParentheses = true;
+              }
+              acc += logicalOperator + ' ';
             }
             var fromValue = literalLists.valueLiterals[currIndex];
             var toValue = literalLists.toValueLiterals[currIndex];
@@ -477,13 +492,13 @@ class QueryAxisItem {
           }, '');
 
           if (nullCondition) {
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR '} ${sql}`
+            if (!logicalOperator){
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`
           }
-          if (!logicalOperator && nullCondition || literalLists.valueLiterals.length > 1) {
-            sql = `( ${sql} )`;
-          }
-          break;
-        
+          break;        
         case FilterDialog.filterTypes.NOTHASANY:
         case FilterDialog.filterTypes.NOTHASALL:
         case FilterDialog.filterTypes.HASANY:
@@ -514,6 +529,9 @@ class QueryAxisItem {
     }
     else {
       sql = nullCondition;
+    }
+    if (needsParentheses) {
+      sql = `( ${sql} )`;
     }
     return sql;
   }
