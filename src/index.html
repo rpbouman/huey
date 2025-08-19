@@ -58,27 +58,24 @@
     
     </script>
 
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Theme/icons.css"/>
     <!-- 
       Markup for resource loading
     -->
     <style type="text/css">
       ul#resources > li::marker {
         font-family: "tabler-icons";
-        /* file */
-        content: '\eaa4';
+        content: var( --icon-file );
       }
 
       ul#resources > li[data-resource-type=css]::marker {
-        /* file-type-css */
-        content: '\fb08';
+        content: var( --icon-file-type-css );
       }
       ul#resources > li[data-resource-type=js]::marker {
-        /* file-type-js */
-        content: '\fb0e';
+        content: var( --icon-file-type-js );
       }
       ul#resources > li[data-resource-type=woff2]::marker {
-        /* file-typography */
-        content: '\f041';
+        content: var( --icon-file-typography );
       }
     </style>
 

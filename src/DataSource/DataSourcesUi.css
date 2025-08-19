@@ -12,7 +12,7 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) >
   font-size: 140px;
   width: 100%;
   font-family: var( --huey-icon-font-family );
-  content: "\eb47";
+  content: var( --icon-upload );
   text-align: center;
   color: var( --huey-icon-color-subtle );
 }
@@ -78,23 +78,19 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
       }
 
       > label.editActionButton::before {
-        /* settings */
-        content: '\eb20';
+        content: var( --icon-settings );
       }
 
       > label.analyzeActionButton::before {
-        /* analyze */
-        content: '\f3a3';
+        content: var( --icon-analyze );
       }
 
       > label.removeActionButton::before {
-        /* trash */
-        content: '\eb41';
+        content: var( --icon-trash );
       }
 
       > label.downloadActionButton::before {
-        /* download */
-        content: '\ea96';
+        content: var( --icon-download );
       }
     }
     
@@ -109,8 +105,7 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   details[data-nodetype=datasourcegroup][data-grouptype=sqlite] > summary > span.label::before,
   details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > span.label::before
   {
-    /* folder */
-    content: '\eaad';
+    content: var( --icon-folder );
   }
 
   details[data-nodetype=datasourcegroup][open][data-grouptype=duckdb] > summary > span.label::before,
@@ -118,18 +113,15 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
   details[data-nodetype=datasourcegroup][open][data-grouptype=sqlite] > summary > span.label::before,
   details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
    {
-    /* folder open */
-    content: '\faf7';
+    content: var( --icon-folder-open );
   }
 
   details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
-    /* bucket */
-    content: '\ea47';
+    content: var( --icon-bucket);
   }
 
   details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
-    /* bucket droplet */
-    content: '\f56a';
+    content: var( --icon-bucket droplet );
   }
 
   details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
@@ -140,34 +132,27 @@ nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > 
 
   details[data-nodetype=datasource][data-datasourcetype=duckdb] {
     > summary > span.label::before {
-      /* file-database */
-      /* content: '\f037';*/
-      /* database*/
-      content: '\ea88';
+      content: var( --icon-database );
     }
 
     > details[data-nodetype=duckdb_schema] {
 
       > details[data-nodetype=datasource][data-datasourcetype=table] summary > span.label::before {
-        /* table */
-        content: '\eba1';
+        content: var( --icon-table );
       }
 
       > details[data-nodetype=datasource][data-datasourcetype=view] summary > span.label::before {
-        /* table-options */
-        content: '\f25c';
+        content: var( --icon-table-options );
       }
     }
   }
 
   details[data-nodetype=datasource][data-datasourcetype=file] > summary > span.label::before {
-    /* file */
-    content: '\eaa4';
+    content: var( --icon-file );
   }
 
   details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > span.label::before {
-    /* feather */
-    content: '\ee8b';
+    content: var( --icon-feather );
   }
 
   details[data-nodetype=datasource][data-reject_count] > summary > span.label::before {

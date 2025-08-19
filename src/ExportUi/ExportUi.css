@@ -60,7 +60,7 @@ menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
 }
 
 menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::before {
-  content: "\ea96";
+  content: var( --icon-download );
 }
 
 /* export is not available by default, ...  */

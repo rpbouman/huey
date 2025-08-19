@@ -243,13 +243,6 @@ dialog > footer button {
   user-select: none;
 }
 
-dialog > footer[role=toolbar] > button[value=Ok]:before{
-  content: "Ok"
-}
-dialog > footer[role=toolbar] > button[value=Cancel]:before{
-  content: "Cancel"
-}
-
 dialog h1:first-child,
 dialog h2:first-child,
 dialog h3:first-child,
@@ -437,14 +430,13 @@ menu[role=menu][popover] {
 }
 
 menu[role=menu] > li[role=menuitem]:has( menu[role=menu] )::after {
-  /* chevron-right */
   font-family: var(--huey-icon-font-family);
   font-size: var(--huey-icon-normal);
   vertical-align: bottom;
   color: var(--huey-icon-color-subtle);
   margin: 0px 4px 0px 0px;
   display: inline-block;
-  content: '\ea61';
+  content: var( --icon-chevron-right );
   position: relative;
 }
 
@@ -465,7 +457,7 @@ menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popoverta
 menu[role="menu"] {
   
   > li[role=menuitem] {
-      border-width: 1px;
-      border-color: var(--huey-light-border-color);
+    border-width: 1px;
+    border-color: var(--huey-light-border-color);
   }
 }

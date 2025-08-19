@@ -88,13 +88,11 @@ dialog#filterDialog {
       > label:has( > input[type=checkbox] )::after {
         font-family: var( --huey-icon-font-family );
         color: var(--huey-icon-color-subtle);  
-        /* square */
-        content: "\eb2c";
+        content: var( --icon-square );
       }
 
       > label:has( > input[type=checkbox]:checked )::after {
-        /* checkbox */
-        content: "\eba6";
+        content: var( --icon-checkbox );
         color: var( --huey-icon-color-highlight );
       }    
 
@@ -122,7 +120,7 @@ dialog#filterDialog {
           > button#addFilterValueButton::before {
             font-family: var( --huey-icon-font-family );
             font-size: var( --huey-icon-medium );
-            content: "\fa02"
+            content: var( --icon-filter-plus );
           }
 
         }
