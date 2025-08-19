@@ -31,10 +31,6 @@ dialog#errorDialog > details#errorDialogDetails {
 dialog#errorDialog > details#errorDialogDetails > summary {
 }
 
-dialog#errorDialog > details#errorDialogDetails > summary:after {
-  content: 'Details...'
-}
-
 dialog#errorDialog > details#errorDialogDetails > pre {
   overflow: scroll;
 }
