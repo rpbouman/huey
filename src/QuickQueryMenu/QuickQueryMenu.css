@@ -29,6 +29,10 @@ menu[role=menu]#quickQueryMenu {
     > label[for=quickQueryDataPreviewButton]:before {
       content: var( --icon-article );
     }
+
+    > label[for=quickQueryDestructuredDataPreviewButton]:before {
+      content: var( --icon-code-dots );
+    }
   }
 
   > li:has( label[for=quickQueryClearAllButton] ) {
