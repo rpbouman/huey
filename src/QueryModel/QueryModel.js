@@ -340,17 +340,16 @@ class QueryAxisItem {
       });
     }
     
-    var valueLiterals = keys.map(function(key){
+    var isRangeFilterType = FilterDialog.isRangeFilterType(filter.filterType);
+    var toValueKeys = isRangeFilterType ? Object.keys(toValues) : undefined;
+    var toValueLiterals = isRangeFilterType ? [] : undefined;
+    var valueLiterals = keys.map(function(key, index){
       var entry = values[key];
+      if (isRangeFilterType) {
+        toValueLiterals.push( toValues[toValueKeys[index]].literal );
+      }
       return entry.literal;
     });
-    var toValueLiterals;
-    if (FilterDialog.isRangeFilterType(filter.filterType)) {
-      toValueLiterals = Object.keys(toValues).map(function(key){
-        var entry = toValues[key];
-        return entry.literal;
-      });
-    }
     return {
       valueLiterals: valueLiterals,
       toValueLiterals: toValueLiterals
