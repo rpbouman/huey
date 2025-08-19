@@ -438,7 +438,11 @@ class QueryAxisItem {
           sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
             acc += '\n';
             if (currIndex) {
-              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+              if (!logicalOperator) {
+                logicalOperator = 'OR';
+                needsParentheses = true;
+              }
+              acc += logicalOperator + ' ';
             }
             var value = literalLists.valueLiterals[currIndex];
             acc += `${columnExpression} ${operator} ${value}`;
