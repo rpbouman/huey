@@ -247,6 +247,13 @@
       > li[data-derivation=second] > span:before {
         content: var( --icon-letter-s );
       }
+      
+      > li[data-derivation='UUIDv7 timestamp'] > span:before {
+        content: var( --icon-calendar-clock );
+      }
+      > li[data-derivation='UUID version'] > span:before {
+        content: var( --icon-letter-v-small );
+      }
 
       > li[data-derivation='timestamp (secs)'] > span:before,
       > li[data-derivation='timestamp (millis)'] > span:before,
