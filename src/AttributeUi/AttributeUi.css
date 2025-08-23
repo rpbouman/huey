@@ -275,6 +275,11 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: var( --icon-decimal );
   }
 
+  details[data-nodetype=derived][data-derivation='UUID version'] > summary > span.label::before {
+    content: var( --icon-letter-v-small );
+  }
+
+  details[data-nodetype=derived][data-derivation='UUIDv7 timestamp'] > summary > span.label::before,
   details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > span.label::before,
   details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > span.label::before {
     content: var( --icon-calendar-clock );

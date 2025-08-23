@@ -229,6 +229,7 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
+      // fallback formatter to suppress group separator in year
       createFormatter: function(){
         return fallbackFormatter;
       }
@@ -237,6 +238,7 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( ISOYEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
+      // fallback formatter to suppress group separator in year
       createFormatter: function(){
         return fallbackFormatter;
       }
@@ -443,7 +445,21 @@ class AttributeUi {
       expressionTemplate: "UPPER( ${columnExpression} )",
       columnType: 'VARCHAR'
     }
-  }
+  };
+  
+  /* https://github.com/rpbouman/huey/issues/612 */
+  static uuidDerivations = {
+    "UUID version": {
+      folder: 'UUID',
+      expressionTemplate: "uuid_extract_version( ${columnExpression} )",
+      columnType: 'INTEGER'
+    },
+    "UUIDv7 timestamp": {
+      folder: 'UUID',
+      expressionTemplate: "CASE uuid_extract_version( ${columnExpression} ) WHEN 7 THEN uuid_extract_timestamp( ${columnExpression} ) END",
+      columnType: 'TIMESTAMP WITH TIME ZONE'
+    },
+  };
 
   static arrayDerivations = {
     "elements": {
@@ -478,7 +494,7 @@ class AttributeUi {
       expressionTemplate: "length( list_distinct( ${columnExpression} ) )",
       columnType: 'BIGINT'
     }
-  }
+  };
 
   static mapDerivations = {
     "entries": {
@@ -510,6 +526,7 @@ class AttributeUi {
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
     var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    var hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
     
     var hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
     
@@ -538,6 +555,7 @@ class AttributeUi {
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
@@ -550,6 +568,7 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
       AttributeUi.hashDerivations,
+      AttributeUi.uuidDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
       AttributeUi.mapDerivations
