@@ -4,7 +4,7 @@ Huey supports reading from multiple file formats, like .csv, .parquet, .json dat
 
 Checkout my [DataZen talk on youtube](https://www.youtube.com/watch?v=1A0r4CbLSaI) for background and a demo if its features. 
 
-Or, __Try Huey now__ using the [sample reports](https://github.com/rpbouman/huey?tab=readme-ov-file#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
+Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey?tab=readme-ov-file#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
 (Note: this is a live demo that allows you to runvHuey without even downloading it. Even though it's available online, it's still a static webapp: any data you load into it is safe, and stays on your local client.)
 
