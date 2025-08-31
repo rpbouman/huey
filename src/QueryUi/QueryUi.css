@@ -606,49 +606,6 @@
         
       }
       
-      > details:has( ol:empty ) > summary > span:after {
-        content: ' (0)'
-      }
-      > details:has( ol > li:nth-child(1) ) > summary > span:after {
-        content: ' (1)'
-      }
-      > details:has( ol > li:nth-child(2) ) > summary > span:after {
-        content: ' (2)'
-      }
-      > details:has( ol > li:nth-child(3) ) > summary > span:after {
-        content: ' (3)'
-      }
-      > details:has( ol > li:nth-child(4) ) > summary > span:after {
-        content: ' (4)'
-      }
-      > details:has( ol > li:nth-child(5) ) > summary > span:after {
-        content: ' (5)'
-      }
-      > details:has( ol > li:nth-child(6) ) > summary > span:after {
-        content: ' (6)'
-      }
-      > details:has( ol > li:nth-child(7) ) > summary > span:after {
-        content: ' (7)'
-      }
-      > details:has( ol > li:nth-child(8) ) > summary > span:after {
-        content: ' (8)'
-      }
-      > details:has( ol > li:nth-child(9) ) > summary > span:after {
-        content: ' (9)'
-      }
-      > details:has( ol > li:nth-child(10) ) > summary > span:after {
-        content: ' (10)'
-      }
-      > details:has( ol > li:nth-child(11) ) > summary > span:after {
-        content: ' (> 10)'
-      }
-      > details:has( ol > li:nth-child(21) ) > summary > span:after {
-        content: ' (> 20)'
-      }
-      > details:has( ol > li:nth-child(31) ) > summary > span:after {
-        content: ' (> 30)'
-      }
-
       > menu {
         > label:nth-child(1):has( > button )::after {
           content: var( --icon-filter-check);
@@ -685,26 +642,7 @@
       margin: .5em 0em .5em 0em;
       font-weight: bold;
     }
-    
-    > li[data-filterType=in] > details > header:before {
-      content: 'Include:';
-    }
-    > li[data-filterType=notin] > details > header:before {
-      content: 'Exclude:';
-    }
-    > li[data-filterType=like] > details > header:before {
-      content: 'Like:';
-    }
-    > li[data-filterType=notlike] > details > header:before {
-      content: 'Not Like:';
-    }
-    > li[data-filterType=between] > details > header:before {
-      content: 'Between:';
-    }
-    > li[data-filterType=notbetween] > details > header:before {
-      content: 'Not Between:';
-    }
-    
+        
   }
 
   label > button,

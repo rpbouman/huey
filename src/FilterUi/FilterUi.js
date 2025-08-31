@@ -63,6 +63,18 @@ class FilterDialog {
     return filterType.startsWith('not');
   }
   
+  static getLabelForFilterType(filterType){
+    var selectElement = byId('filterType');
+    var options = selectElement.options;
+    for (var i = 0; i < options.length; i++){
+      var option = options.item(i);
+      if (option.value === filterType){
+        return option.textContent;
+      }
+    }
+    return undefined;
+  }
+  
   #id = undefined;
   #queryAxisItem = undefined;
   #queryModel = undefined;

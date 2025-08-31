@@ -348,6 +348,11 @@ class QueryUi {
     }
     return title;
   }
+  
+  #getCaptionUi(itemUi){
+    var captionUi = itemUi.getElementsByTagName('span').item(0);
+    return captionUi;
+  }
 
   #createQueryAxisItemUi(axisItem){
     var axisId = axisItem.axis;
@@ -390,7 +395,7 @@ class QueryUi {
     }
 
     var captionText = this.#getQueryAxisItemUiCaption(axisItem);
-    var captionUi = itemUi.getElementsByTagName('span').item(0);
+    var captionUi = this.#getCaptionUi(itemUi);
     captionUi.innerText = captionText;
 
     var toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
@@ -408,7 +413,15 @@ class QueryUi {
   #createQueryAxisItemFilterUi(itemUi, axisItem){
     var valuesUi = itemUi.getElementsByTagName('ol')[0];
     var filter = axisItem.filter;
-    itemUi.setAttribute('data-filterType', filter.filterType);
+
+    var filterType = filter.filterType;
+    itemUi.setAttribute('data-filterType', filterType);
+
+    var filterTypeLabel = FilterDialog.getLabelForFilterType(filterType);
+
+    var header = itemUi.querySelector('details > header');
+    header.textContent = filterTypeLabel;
+
     
     var detailsElement = itemUi.getElementsByTagName('details')[0];
     if (filter.toggleState === 'open') {
@@ -420,6 +433,9 @@ class QueryUi {
           
     var values = filter.values;
     var valueKeys = Object.keys(values);
+    
+    var captionUi = this.#getCaptionUi(itemUi);
+    captionUi.textContent += ` (${valueKeys.length})`;
     
     var toValues = filter.toValues;
     var toValueKeys = toValues? Object.keys(toValues) : undefined;
@@ -457,6 +473,7 @@ class QueryUi {
       button.setAttribute('id', deleteValueId);
       button.addEventListener('click', this.#deleteFilterValueClickHandler.bind(this));
     }
+    
   }
   
   #deleteFilterValueClickHandler(event){
