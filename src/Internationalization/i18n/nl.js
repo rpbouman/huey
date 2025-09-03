@@ -98,7 +98,7 @@ Internationalization.setTexts({
   "Data Types": "Datatypes",
   "Datasource Settings": " gegevensbron instellingen",
   "Datasource Type properties": "Eigenschappen gegevensbron type",
-  "Datasources": " gegevensbronnen",
+  "Datasources": "Gegevensbronnen",
   "Date Format": "Datumformaat",
   "Decimal Separator": "Decimale scheidingsteken",
   "Decimals": "Decimale plaatsen",

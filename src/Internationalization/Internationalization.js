@@ -1,6 +1,6 @@
 class Internationalization {
   
-  static #texts = {};
+  static #texts;
   static #currentLanguage = undefined;
   static #languageIndex = undefined;
   static #hueyNativeLanguage = 'en';
@@ -46,6 +46,9 @@ class Internationalization {
     var language = languages[ Internationalization.#languageIndex++ ];
     if (language === Internationalization.#hueyNativeLanguage){
       console.log(`No need to load Internationalization texts for Huey native language "${Internationalization.#hueyNativeLanguage}".`);
+      if (Internationalization.#texts === undefined) {
+        return;
+      }
       Internationalization.#applyTexts(true);
       return;
     }

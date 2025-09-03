@@ -393,7 +393,7 @@ class UploadUi {
       uploadItem.setAttribute('aria-invalid', String(false));
       messageText = 'Succesfully loaded.';
     }
-    message.innerText = messageText;
+    message.textContent = messageText;
   }
 
   async uploadFiles(files){
@@ -403,9 +403,9 @@ class UploadUi {
 
     var numFiles = files.length;
     var header = this.#getHeader();
-    header.innerText = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    header.textContent = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
     var description = this.#getDescription();
-    description.innerText = 'Upload in progress. This will take a few moments...';
+    description.textContent = 'Upload in progress. This will take a few moments...';
 
     var body = this.#getBody();
     body.innerHTML = '';
@@ -493,7 +493,7 @@ class UploadUi {
       }
     }
 
-    this.#getHeader().innerText = message;
+    this.#getHeader().textContent = message;
     this.#getDescription().innerHTML = description;
     
     return {

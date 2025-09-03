@@ -74,7 +74,7 @@ function initDuckdbVersion(){
     var reservedWords = row[reservedWordsColumn];
     reservedWords = String(reservedWords).slice(1, -1).split(',');
     window.hueyDb.reservedWords = reservedWords;
-    duckdbVersionLabel.innerText = `DuckDB ${version}, API: ${api}`;
+    duckdbVersionLabel.textContent = `DuckDB ${version}, API: ${api}`;
   })
   .catch(function(){
     console.error(`Error fetching duckdb version info.`);
@@ -202,8 +202,8 @@ function initApplication(){
 
         break;
     }
-    byId('queryResultRowsInfo').innerText = numRowsTuples;
-    byId('queryResultColumnsInfo').innerText = numColumnsTuples;
+    byId('queryResultRowsInfo').textContent = numRowsTuples;
+    byId('queryResultColumnsInfo').textContent = numColumnsTuples;
   });
 
   bufferEvents(pivotTableUi, 'busy', function(event, count){

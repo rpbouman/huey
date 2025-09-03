@@ -754,7 +754,7 @@ class PivotTableUi extends EventEmitter {
           labelText = String.fromCharCode(160);
         }
 
-        label.innerText = labelText;
+        label.textContent = labelText;
         label.title = titleText;
 
         if (j === 0){
@@ -938,7 +938,7 @@ class PivotTableUi extends EventEmitter {
           labelText = String.fromCharCode(160);
         }
 
-        label.innerText = labelText;
+        label.textContent = labelText;
         label.title = titleText;
         
         if (isTotals){
@@ -1030,7 +1030,7 @@ class PivotTableUi extends EventEmitter {
     var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
     if (!cell || !cellsAxisItem){
       label.title = '';
-      return label.innerText = '';
+      return label.textContant = '';
     }
 
     var values = cell.values;
@@ -1054,7 +1054,7 @@ class PivotTableUi extends EventEmitter {
     else {
       labelText = String(value);
     }
-    label.innerText = labelText;
+    label.textContent = labelText;
 
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
     label.title = `${caption}: ${labelText}`;
@@ -1297,7 +1297,7 @@ class PivotTableUi extends EventEmitter {
               "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel',
             });
             label.title = labelText;
-            label.innerText = labelText;
+            label.textContent = labelText;
             tableCell.appendChild(label);
           }
           else
@@ -1334,7 +1334,7 @@ class PivotTableUi extends EventEmitter {
           "class": 'pivotTableUiCellLabel pivotTableUiAxisHeaderLabel'
         });
         label.title = labelText;
-        label.innerText = labelText;
+        label.textContent = labelText;
         columnWidth = labelText.length + 1;
 
         if (columnWidth > PivotTableUi.#maximumCellWidth) {
@@ -1483,7 +1483,7 @@ class PivotTableUi extends EventEmitter {
             "class": "pivotTableUiCellLabel"
           });
           label.title = labelText;
-          label.innerText = labelText;
+          label.textContent = labelText;
 
           cell.appendChild(label);
 
@@ -1680,7 +1680,7 @@ class PivotTableUi extends EventEmitter {
             "class": "pivotTableUiCellLabel",
           });
           label.title = labelText;
-          label.innerText = labelText;
+          label.textContent = labelText;
           cell.appendChild(label);
 
           if (headerCellWidth < labelText.length){

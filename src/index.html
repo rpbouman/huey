@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Huey</title>
+    <title class="i18nIgnore">Huey</title>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="description" content="Huey is an open-source browser-based application that lets you make crosstabs/pivot tables on larget datasets."/>
@@ -11,8 +11,7 @@
     />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
 
-    <style id="tabler-font">
-    </style>
+    <style id="tabler-font"></style>
 
     <script>
     var hueyVersionNumber = '1.0.10';
@@ -53,7 +52,7 @@
       item.className = 'i18nIgnore';
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
-      item.innerText = url;
+      item.textContent = url;
       list.appendChild(item);
     }
     
@@ -2017,7 +2016,7 @@
           id="quickQueryMenuLabel"
           for="quickQueryMenuButton"
           title="The Quick Query Menu provides easy access to predefined queries for exploring the datasource."
-        >Quick Query<button
+        ><span>Quick Query</span><button
             id="quickQueryMenuButton"
             popovertarget="quickQueryMenu"
             popovertargetaction="show"
@@ -2032,7 +2031,7 @@
               <label
                 for="quickQueryClearAllButton"
                 title="Clear the query and start a new one."
-              >Clear All
+              ><span>Clear All</span>
                 <button
                   id="quickQueryClearAllButton"
                   title="Clear the query and start a new one."
@@ -2045,7 +2044,7 @@
               <label
                 for="quickQueryFlipAxesButton"
                 title="Flip the rows and columns axes."
-              >Flip Axes
+              ><span>Flip Axes</span>
                 <button
                   id="quickQueryFlipAxesButton"
                   title="Flip the rows and columns axes."
@@ -2058,7 +2057,7 @@
               <label
                 for="quickQueryCellHeadersOnColumnsButton"
                 title="Place the cell headers on the columns axis."
-              >Cell Headers on Columns
+              ><span>Cell Headers on Columns</span>
                 <button
                   id="quickQueryCellHeadersOnColumnsButton"
                   title="Place the cell headers on the columns axis."
@@ -2071,7 +2070,7 @@
               <label
                 for="quickQueryCellHeadersOnRowsButton"
                 title="Place the cell headers on the rows axis."
-              >Cell Headers on Rows
+              ><span>Cell Headers on Rows</span>
                 <button
                   id="quickQueryCellHeadersOnRowsButton"
                   title="Place the cell headers on the rows axis."
@@ -2084,7 +2083,7 @@
               <label
                 for="quickQueryColumnStatisticsButton"
                 title="Get statistics for each column."
-              >Column Statistics
+              ><span>Column Statistics</span>
                 <button
                   id="quickQueryColumnStatisticsButton"
                   title="Get statistics for each column."
@@ -2097,7 +2096,7 @@
               <label
                 for="quickQueryDataPreviewButton"
                 title="Add all columns to the query and preview the data at the detail level."
-              >Data Preview
+              ><span>Data Preview</span>
                 <button
                   id="quickQueryDataPreviewButton"
                   title="Add all columns to the query and preview the data at the detail level."
@@ -2110,7 +2109,7 @@
               <label
                 for="quickQueryDestructuredDataPreviewButton"
                 title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."
-              >Destructured Data Preview
+              ><span>Destructured Data Preview</span>
                 <button
                   id="quickQueryDestructuredDataPreviewButton"
                   title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."

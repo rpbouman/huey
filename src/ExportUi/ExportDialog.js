@@ -490,7 +490,7 @@ class ExportDialog {
     var titleTemplate = exportTemplate.value;
 
     var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
-    byId('exportTitle').innerText = title;
+    byId('exportTitle').textContent = title;
   }
 
   #updateDialog(){
@@ -529,14 +529,14 @@ class ExportDialog {
 
       var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
       var progressCallback = function(text){
-        progressMessageElement.innerText = text;
+        progressMessageElement.textContent = text;
       }
       progressCallback('Preparing export...');
 
       var settings = this.#settings;
       var exportSettings = settings.getSettings('exportUi');
 
-      exportSettings.exportTitle = byId('exportTitle').innerText;
+      exportSettings.exportTitle = byId('exportTitle').textContent;
       var tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
 
       function copyUiSetting(setting, exportTypePrefix){

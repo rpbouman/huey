@@ -5,14 +5,14 @@ function initAboutDialog(){
   el.textContent = `v ${hueyVersionNumber} (${hueyVersionName})` ;
 
   el = byId('hueyVersion');
-  el.innerText = `Huey version ${hueyVersionNumber} - ${hueyVersionName}`;
+  el.textContent = `Huey version ${hueyVersionNumber} - ${hueyVersionName}`;
 
   el = byId('tablerIconsUrl');
-  el.innerText = `Tabler Icons v${tablerIconsFontVersion}`;
+  el.textContent = `Tabler Icons v${tablerIconsFontVersion}`;
   
   el = byId('duckDbLibraryUrl');
   el.setAttribute('href', duckDbLibraryUrl);
-  el.innerText = `DuckDB WASM ${duckdbLibraryVersion}`;
+  el.textContent = `DuckDB WASM ${duckdbLibraryVersion}`;
 }
 
 initAboutDialog();

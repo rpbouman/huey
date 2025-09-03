@@ -396,7 +396,7 @@ class QueryUi {
 
     var captionText = this.#getQueryAxisItemUiCaption(axisItem);
     var captionUi = this.#getCaptionUi(itemUi);
-    captionUi.innerText = captionText;
+    captionUi.textContent = captionText;
 
     var toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
     if (toggleTotalsCheckbox) {
@@ -960,7 +960,6 @@ class QueryUi {
 
   #renderAxis(config){
     var axisId = config.axisId;
-    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
     var axis = this.#instantiateQueryUiTemplate(QueryUi.#queryUiAxisTemplateId, this.#id + '-' + axisId);
     
     var itemArea = axis.querySelector('ol');
@@ -992,7 +991,8 @@ class QueryUi {
 
     axis.setAttribute('data-axis', axisId);
     var heading = axis.getElementsByTagName('h1').item(0);
-    heading.innerText = caption;
+    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
+    heading.textContent = caption;
     this.getDom().appendChild(axis);
   }
 

@@ -840,7 +840,7 @@ class FilterDialog {
   }
 
   #setValueSelectionStatusText(text){
-    this.#getValueSelectionStatus().innerText = text;
+    this.#getValueSelectionStatus().textContent = text;
   }
 
   #updateValueSelectionStatusText(){

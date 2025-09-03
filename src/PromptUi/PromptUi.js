@@ -23,8 +23,10 @@ class PromptUi {
   static show(config){
     return new Promise(function(resolve, reject){
       var promptDialog = byId( 'promptUi');
-      promptDialog.querySelector('#' + promptDialog.getAttribute('aria-labelledby')).innerText = config.title;
-      promptDialog.querySelector('section').innerHTML = config.contents;
+      var ariaLabel = promptDialog.querySelector('#' + promptDialog.getAttribute('aria-labelledby'))
+      ariaLabel.textContent = config.title;
+      var section = promptDialog.querySelector('section')
+      section.innerHTML = config.contents;
 
       var closeHandler = function(event){
         byId('promptUi').removeEventListener('close', closeHandler);
