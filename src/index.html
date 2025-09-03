@@ -39,7 +39,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev269.0';
+    var duckdbLibraryVersion = '1.29.1-dev280.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -50,6 +50,7 @@
         return;
       }
       var item = document.createElement('li');
+      item.className = 'i18nIgnore';
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
       item.innerText = url;
@@ -137,66 +138,66 @@
 
     <datalist id="commonDateFormats">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value="%x">2024-06-03 (iso)</option>
-      <option value="%d/%m/%Y">03/06/2024</option>
-      <option value="%A, %-d %B %Y">Monday, 3 June 2024</option>
+      <option value="%x" class="i18nIgnore">2024-06-03 (iso)</option>
+      <option value="%d/%m/%Y" class="i18nIgnore">03/06/2024</option>
+      <option value="%A, %-d %B %Y" class="i18nIgnore">Monday, 3 June 2024</option>
     </datalist>
 
     <datalist id="commonTimestampFormats">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value="%c">2024-06-03 13:23:05 (iso)</option>
-      <option value="%d/%m/%Y %I:%M:%S %p">03/06/2024 01:23:05 am</option>
-      <option value="%A, %-d %B %Y %H:%M ">Monday, 3 June 2024 13:23</option>
+      <option value="%c" class="i18nIgnore">2024-06-03 13:23:05 (iso)</option>
+      <option value="%d/%m/%Y %I:%M:%S %p" class="i18nIgnore">03/06/2024 01:23:05 am</option>
+      <option value="%A, %-d %B %Y %H:%M" class="i18nIgnore">Monday, 3 June 2024 13:23</option>
     </datalist>
 
     <datalist id="commonDecimalSeparators">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value=".">dot</option>
-      <option value=",">comma</option>
-      <option value="_">underscore</option>
-      <option value=" ">space</option>
+      <option value=".">Dot</option>
+      <option value=",">Comma</option>
+      <option value="_">Underscore</option>
+      <option value=" ">Space</option>
     </datalist>
 
     <datalist id="commonCsvNullValueStrings">
       <option data-auto="true" value="empty">(empty)</option>
-      <option data-auto="true" value="NULL">NULL</option>
+      <option data-auto="true" class="i18nIgnore" value="NULL">NULL</option>
     </datalist>
     
     <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
     <datalist id="commonDittoMarks">
       <!-- non breaking space -->
-      <option value="&nbsp;">&nbsp;</option>
+      <option value="&nbsp;" class="i18nIgnore">&nbsp;</option>
       <!-- one single quote (apostrophe) -->
-      <option value="&apos;">'</option>
+      <option value="&apos;" class="i18nIgnore">'</option>
       <!-- two single quotes (apostrophes) -->
-      <option value="&apos;&apos;">''</option>
+      <option value="&apos;&apos;" class="i18nIgnore">''</option>
       <!-- double quote -->
-      <option value="&quot;">"</option>
+      <option value="&quot;" class="i18nIgnore">"</option>
       <!-- Right-Pointing Double Angle Quotation Mark » -->
-      <option value="&#xBB;">&#xBB;</option>
+      <option value="&#xBB;" class="i18nIgnore">&#xBB;</option>
       <!-- Horizontal bar ― -->
-      <option value="&#x2015;">&#x2015;</option>
+      <option value="&#x2015;" class="i18nIgnore">&#x2015;</option>
       <!-- left double quotation mark: “ -->
-      <option value="&#x201C;">&#x201C;</option>
+      <option value="&#x201C;" class="i18nIgnore">&#x201C;</option>
       <!-- right double quotation mark: ” -->
-      <option value="&#x201D;">&#x201D;</option>
+      <option value="&#x201D;" class="i18nIgnore">&#x201D;</option>
       <!-- double low-9 quotation mark: ” -->
-      <option value="&#x201E;">&#x201E;</option>
+      <option value="&#x201E;" class="i18nIgnore">&#x201E;</option>
       <!-- double high-9 quotation mark: ” -->
-      <option value="&#x201F;">&#x201E;</option>
+      <option value="&#x201F;" class="i18nIgnore">&#x201E;</option>
       <!--  DOUBLE PRIME -->
-      <option value="&#x2033;">&#x2033;</option>
+      <option value="&#x2033;" class="i18nIgnore">&#x2033;</option>
       — „ — 
       <!-- ditto mark: 〃-->
-      <option value="&#x3003;">&#x3003;</option>
+      <option value="&#x3003;" class="i18nIgnore">&#x3003;</option>
     </datalist>
   </head>
 
   <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
-      <header id="logo">Huey</header>
-      <div id="logoVersion"></div>
+      <header id="logo" class="i18nIgnore">Huey</header>
+      <div id="logoVersion" class="i18nIgnore"></div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
@@ -209,7 +210,7 @@
     >
       <header>
         <h3 id="uploadUiTitle"></h3>
-        <p id="uploadUiDescription">;</p>
+        <p id="uploadUiDescription"></p>
         <div class="timer">
           <span class="digit"></span>
           <span class="digit"></span>
@@ -303,7 +304,7 @@
             <legend title="Control where the results are exported to">Export destination</legend>
             <label
               for="exportDestinationFile"
-              title="Download the export data as a file so you can store it on your system."
+              title="Download the export data and save it to a local file."
             >File</label>
             <input
               id="exportDestinationFile"
@@ -320,7 +321,7 @@
               id="exportDestinationClipboard"
               type="radio"
               name="exportDestination"
-              title="Check this to copy the export data to the clipboard so you can paste it in other applications"
+              title="Check to copy the data to the clipboard in order to paste it in other applications"
             />
           </fieldset>
         </form>
@@ -353,7 +354,7 @@
               >
                 <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
                 <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
-                <option value="ZSTD" label="zstd" title="ZTSD - applies zstd compression"/>
+                <option value="ZSTD" label="zstd" title="ZSTD - applies zstd compression"/>
               </select>
               <label
                 title="Whether to include a line of column headers."
@@ -885,7 +886,7 @@
           </label>
         </menu>
         <footer role="toolbar">
-          <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.)">Clear Highlighted</button>
+          <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.">Clear Highlighted</button>
           <button id="filterDialogClearButton" title="Clear the values list">Clear All</button>
         </footer>
       </section>
@@ -1351,10 +1352,10 @@
           Relational OLAP powered by DuckDB-WASM
         </p>
         <ul>
-          <li id="hueyVersion"></li>
-          <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a id="duckDbLibraryUrl" target="_duckdb-jsdelivr"></a></li>
-          <li><a id="tablerIconsUrl" href="https://tabler.io/icons" target="_tabler-icons"></a></li>
+          <li id="hueyVersion" class="i18nIgnore"></li>
+          <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel" class="i18nIgnore"></a></li>
+          <li><a id="duckDbLibraryUrl" target="_duckdb-jsdelivr" class="i18nIgnore"></a></li>
+          <li><a id="tablerIconsUrl" href="https://tabler.io/icons" target="_tabler-icons" class="i18nIgnore"></a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
@@ -1500,7 +1501,7 @@
               </fieldset>
               <fieldset>
                 <legend>Data Types</legend>
-                <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code>VARCHAR</code></label>
+                <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code class="i18nIgnore">VARCHAR</code></label>
                 <input
                   id="csvReaderAllVarchar"
                   type="checkbox"
@@ -1568,9 +1569,9 @@
                   title="Set the new line character(s) in the file."
                 >
                   <option value="" title="Automatically detect the row delimiter">(auto)</option>
-                  <option value="\r" title="Carriage Return">CR</option>
-                  <option value="\r\n" title="Carriage Return/Linefeed pair">CRLF</option>
-                  <option value="\n" title="Linefeed">LF</option>
+                  <option value="\r" title="Carriage Return" class="i18nIgnore">CR</option>
+                  <option value="\r\n" title="Carriage Return/Linefeed pair" class="i18nIgnore">CRLF</option>
+                  <option value="\n" title="Linefeed" class="i18nIgnore">LF</option>
                 </select>
                 <label for="csvReaderQuote" title="The string used to quote values">Quote Character</label>
                 <input
@@ -2030,11 +2031,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryClearAllButton"
-                title="Clear the query so you can start a new one."
+                title="Clear the query and start a new one."
               >Clear All
                 <button
                   id="quickQueryClearAllButton"
-                  title="Clear the query so you can start a new one."
+                  title="Clear the query and start a new one."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Clear All</button>
@@ -2095,11 +2096,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryDataPreviewButton"
-                title="Add all columns to the query so you can preview the data at the detail level."
+                title="Add all columns to the query and preview the data at the detail level."
               >Data Preview
                 <button
                   id="quickQueryDataPreviewButton"
-                  title="Add all columns to the query so you can preview the data at the detail level."
+                  title="Add all columns to the query and preview the data at the detail level."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Data Preview</button>
@@ -2108,11 +2109,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryDestructuredDataPreviewButton"
-                title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
+                title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."
               >Destructured Data Preview
                 <button
                   id="quickQueryDestructuredDataPreviewButton"
-                  title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
+                  title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Destructured Data Preview</button>
@@ -2157,7 +2158,7 @@
             id="aboutButton"
             popovertarget="aboutDialog"
             popovertargetaction="show"
-          >About</button>
+          >About Huey...</button>
         </label>
 
         <label for="settingsButton" title="Open the Huey Settings dialog.">
@@ -2165,7 +2166,7 @@
             id="settingsButton"
             popovertarget="settingsDialog"
             popovertargetaction="show"
-          >Settings</button>
+          >Settings...</button>
         </label>
 
         <label
@@ -2336,6 +2337,7 @@
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
+    <script onload="resourceLoaded(this)" src="Internationalization/Internationalization.js"></script>
 
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
