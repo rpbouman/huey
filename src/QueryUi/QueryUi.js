@@ -342,6 +342,7 @@ class QueryUi {
       axisItem.filter && Object.keys(axisItem.filter.values).length === 0
     ) {
       title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
+      title = Internationalization.getText(title) || title;
     }
     else {
       title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
@@ -985,14 +986,15 @@ class QueryUi {
     var labels = axis.getElementsByTagName('label');
 
     var primaryAxisActionLabel = labels.item(0);
-    primaryAxisActionLabel.setAttribute('title', primaryAxisActionLabelTitle);
+    Internationalization.setAttributes(primaryAxisActionLabel, 'title', primaryAxisActionLabelTitle);
 
-    labels.item(1).setAttribute('title', `Clear all items from the ${axisId} axis.`);
+    var removeTitle = `Clear all items from the ${axisId} axis.`;
+    Internationalization.setAttributes(labels.item(1), 'title', removeTitle);
 
     axis.setAttribute('data-axis', axisId);
     var heading = axis.getElementsByTagName('h1').item(0);
     var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
-    heading.textContent = caption;
+    Internationalization.setTextContent(heading, caption);
     this.getDom().appendChild(axis);
   }
 

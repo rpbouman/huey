@@ -1,9 +1,23 @@
 class Internationalization {
   
   static #texts;
-  static #currentLanguage = undefined;
   static #languageIndex = undefined;
   static #hueyNativeLanguage = 'en';
+  static #currentLocale = undefined;
+  
+  static #translateableAttributes = [
+    'alt',
+    'placeholder',
+    'title', 
+    'aria-braillelabel',
+    'aria-brailleroledescription',
+    'aria-description',
+    'aria-label', 
+    'aria-placeholder',
+    'aria-roledescription',
+    'aria-valuenow',
+    'aria-valuetext'
+  ];
   
   static {
     document.addEventListener('DOMContentLoaded', Internationalization.#init);
@@ -11,10 +25,23 @@ class Internationalization {
   }
     
   static #init(event){
+    if (Internationalization.#currentLocale === undefined){
+      Internationalization.#setCurrentLocale(Internationalization.#hueyNativeLanguage);
+    }
     var languages = navigator.languages;
     Internationalization.#loadTexts();
   }
   
+  static #setCurrentLocale(localeName){
+    var locale = new Intl.Locale(localeName);
+    Internationalization.#currentLocale = locale;
+    document.documentElement.setAttribute('lang', Internationalization.getCurrentLanguage());
+  }
+
+  static getCurrentLanguage(){
+    return Internationalization.#currentLocale.language;
+  }
+
   static #languageChanged(event){
     console.log('Language change occurred, re-initializing Internationalization.');
     Internationalization.#languageIndex = undefined;
@@ -46,10 +73,8 @@ class Internationalization {
     var language = languages[ Internationalization.#languageIndex++ ];
     if (language === Internationalization.#hueyNativeLanguage){
       console.log(`No need to load Internationalization texts for Huey native language "${Internationalization.#hueyNativeLanguage}".`);
-      if (Internationalization.#texts === undefined) {
-        return;
-      }
       Internationalization.#applyTexts(true);
+      Internationalization.#setCurrentLocale(language);
       return;
     }
     
@@ -72,7 +97,7 @@ class Internationalization {
       var resource = parts.pop();
       parts = resource.split('.');
       var language = parts[0];
-      Internationalization.#currentLanguage = language;
+      Internationalization.#setCurrentLocale(language);
       console.log(message + ' succeeded.');
       Internationalization.#applyTexts();
     }
@@ -99,19 +124,7 @@ class Internationalization {
   }
   
   static #getAttributeElements(){
-    var attributeNames = [
-      'alt',
-      'placeholder',
-      'title', 
-      'aria-braillelabel',
-      'aria-brailleroledescription',
-      'aria-description',
-      'aria-label', 
-      'aria-placeholder',
-      'aria-roledescription',
-      'aria-valuenow',
-      'aria-valuetext'
-    ];
+    var attributeNames = Internationalization.#translateableAttributes;
     
     var selection = {};
     for (var i = 0; i < attributeNames.length; i++){
@@ -213,7 +226,8 @@ class Internationalization {
       allTexts[key] = value || null;
     });
     
-    return Object.keys(allTexts).sort(function(a, b){
+    return Object.keys(allTexts)
+    .sort(function(a, b){
       var A = a.toUpperCase();
       var B = b.toUpperCase();
       if (A > B) {
@@ -222,9 +236,6 @@ class Internationalization {
       else
       if (A < B){
         return -1;
-      }
-      if (A > B) {
-        return 1;
       }
       else
       if (a > b){
@@ -242,17 +253,64 @@ class Internationalization {
   }
   
   static getText(key){
-    var text = Internationalization.#texts[key];
+    var text = Internationalization.getCurrentLanguage() === Internationalization.#hueyNativeLanguage ? key : Internationalization.#texts[key];
     if (text === undefined){
-      console.warn(`Translation for content "${key}" not found`);
+      //console.warn(`Translation for content "${key}" not found`);
       return undefined;
     }
     var args = arguments;
-    return text.replace(/\{\d+\}/g, function(match){
+    return text.replace(/\{[1-9]\d*\}/g, function(match){
       var index = match.slice(1, -1);
       index = parseInt(index, 10);
       return args[index];
-    })
+    });
+  }
+  
+  static setTextContent(element, key){
+    var args = [];
+    for (var i = 0; i < arguments.length; i++){
+      if (i === 0) {
+        continue;
+      }
+      args.push(arguments[i]);
+    }
+    var i18nNativeAttributeName = 'data-i18n-native-text';
+    element.setAttribute(i18nNativeAttributeName, key);
+    if (args.length > 1){
+      var i18nNativeArgsAttributeName = i18nNativeAttributeName + '-args';
+      element.setAttribute(i18nNativeArgsAttributeName, JSON.stringify(args.slice(1)));
+    }
+    var translatedText = Internationalization.getText.apply(Internationalization, args) || key;
+    element.textContent = translatedText;
+  }
+  
+  static setAttributes(element, attributes, key){
+    if (typeof attributes === 'string'){
+      attributes = [attributes];
+    }
+    var args = [];
+    for (var i = 2; i < arguments.length; i++){
+      args.push(arguments[i]);
+    }
+    
+    for (var i = 0; i < attributes.length; i++){
+      var attributeName = attributes[i];
+      if (Internationalization.#translateableAttributes.indexOf(attributeName) === -1){
+        element.setAttribute(attributeName, key);
+      }
+      var i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
+      if (element.hasAttribute(i18nNativeAttributeName)){
+      }
+      else {
+        element.setAttribute(i18nNativeAttributeName, key);
+        if (args.length > 1){
+          element.setAttribute(i18nNativeAttributeName + '-args', JSON.stringify(args.slice(1)));
+        }
+      }
+      var attributeValue = Internationalization.getText.apply(Internationalization, args) || key;
+      element.setAttribute(attributeName, attributeValue);
+    }
+    
   }
   
 }

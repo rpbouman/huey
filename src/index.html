@@ -38,7 +38,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev280.0';
+    var duckdbLibraryVersion = '1.29.1-dev283.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -548,7 +548,7 @@
                 <label
                   for="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
-                >Row delimiter</label>
+                >Row Delimiter</label>
                 <select
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
@@ -675,14 +675,14 @@
               >
                 <option
                   title="Initial capital followed by lowercase"
-                  value="initialCapital">Initial Capital</option>
+                  value="initialCapital">initial capital</option>
                 <option
-                  title="Lowercase"
-                  value="lowerCase">Lower Case</option>
+                  title="lowercase"
+                  value="lowerCase">lowercase</option>
                 <option
-                  title="Uppercase"
+                  title="uppercase"
                   value="upperCase"
-                  selected="true">Upper Case</option>
+                  selected="true">uppercase</option>
               </select>
               <label
                 for="exportSqlAlwaysQuoteIdentifiers"
@@ -800,7 +800,7 @@
               for="filterSearchApplyAll"
               title="Check to include the other filter items (in addition to the search string) to populate the picklist"
             >
-              Apply all filters:
+              <span>Apply all filters</span>:
               <input
                 id="filterSearchApplyAll"
                 type="checkbox"
@@ -811,7 +811,7 @@
               for="filterSearchAutoWildcards"
               title="Check to automatically apply LIKE wildcards"
             >
-              Auto-wildcards:
+              <span>Auto-wildcards</span>:
               <input
                 id="filterSearchAutoWildcards"
                 type="checkbox"
@@ -877,7 +877,7 @@
             for="filterDialogShowRawCheckbox"
             title="Check to display raw values. Uncheck to display formatter values."
           >
-            Reveal raw values:
+            <span>Reveal raw values:</span>
             <input 
               id="filterDialogShowRawCheckbox"
               type="checkbox"
@@ -1478,7 +1478,7 @@
                   id="csvReaderSampleSize"
                   type="number"
                   min="0"
-                  title="he number of sample rows for auto detection of parameters. Default: 20480"
+                  title="The number of sample rows for auto detection of parameters. Default: 20480"
                 />
               </fieldset>
               <fieldset>
@@ -1714,13 +1714,13 @@
           popovertarget="datasourceSettingsDialog"
           popovertargetaction="hide"
           value="Ok"
-        />
+        >Ok</button>
         <button
           id="datasourceSettingsDialogCancelButton"
           popovertarget="datasourceSettingsDialog"
           popovertargetaction="hide"
           value="Cancel"
-        />
+        >Cancel</button>
       </footer>
     </dialog>
 
@@ -1758,7 +1758,7 @@
               for="pivotTableContextMenuItemCopyCell"
               title="Copy the value of this cell to the clipboard"
             >
-              Copy Cell Value
+              <span>Copy Cell Value</span>
               <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
             </label>
           </li>
@@ -1767,8 +1767,8 @@
               for="pivotTableContextMenuItemCopyColumn"
               title="Copy the column header values to the clipboard"
             >
-              Copy Column Tuple
-              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+              <span>Copy Column Headings</span>
+              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1776,8 +1776,8 @@
               for="pivotTableContextMenuItemCopyColumnTuples"
               title="Copy the header values for each column to the clipboard"
             >
-              Copy Column Tuples
-              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
+              <span>Copy All Column Headings</span>
+              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy All Column Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1785,8 +1785,8 @@
               for="pivotTableContextMenuItemCopyRow"
               title="Copy the row header values to the clipboard"
             >
-              Copy Row Tuple
-              <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
+              <span>Copy Row Headings</span>
+              <button id="pivotTableContextMenuItemCopyRow">Copy Row Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1794,8 +1794,8 @@
               for="pivotTableContextMenuItemCopyRowTuples"
               title="Copy the header values for each row to the clipboard"
             >
-              Copy Row Tuples
-              <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
+              <span>Copy All Row Headings</span>
+              <button id="pivotTableContextMenuItemCopyRowTuples">Copy All Row Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1803,15 +1803,16 @@
               for="pivotTableContextMenuItemCopyTable"
               title="Copy the entire pivot table to the clipboard"
             >
-              Copy Table
+              <span>Copy Table</span>
               <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
             </label>
           </li>
         </menu>
-        <label
+        <label 
           for="copySubmenuActivate"
+          title="Menu with copy actions"
         >
-          Copy
+          <span>Copy</span>
           <button
             id="copySubmenuActivate"
             popovertarget="copySubmenu"
@@ -1820,10 +1821,11 @@
         </label>
       </li>
       <li role="menuitem">
-        <label
+        <label 
           for="filterSubmenuActivate"
+          title="Menu with filter actions"
         >
-          Filter
+          <span>Filter</span>
           <button
             id="filterSubmenuActivate"
             popovertarget="filterSubmenu"
@@ -1840,7 +1842,7 @@
               for="pivotTableContextMenuItemFilterIncludeValue"
               title="Add this value in an include filter"
             >
-              Include Value
+              <span>Include Value</span>
               <button id="pivotTableContextMenuItemFilterIncludeValue">Include Value</button>
             </label>
           </li>
@@ -1849,7 +1851,7 @@
               for="pivotTableContextMenuItemFilterExcludeValue"
               title="Add this value in an exclude filter"
             >
-              Exclude Value
+              <span>Exclude Value</span>
               <button id="pivotTableContextMenuItemFilterExcludeValue">Exclude Value</button>
             </label>
           </li>
@@ -2016,7 +2018,9 @@
           id="quickQueryMenuLabel"
           for="quickQueryMenuButton"
           title="The Quick Query Menu provides easy access to predefined queries for exploring the datasource."
-        ><span>Quick Query</span><button
+        >
+          <span>Quick Query</span>
+          <button
             id="quickQueryMenuButton"
             popovertarget="quickQueryMenu"
             popovertargetaction="show"
@@ -2219,7 +2223,7 @@
                 title="${title}"
               >
                 <summary>
-                  <span class="label">${caption}</span>
+                  <span class="label i18nIgnore">${caption}</span>
                 </summary>
               </details>
             </template>
@@ -2249,7 +2253,7 @@
                 open="true"
               >
                 <summary>
-                  <span class="label">${caption}</span>
+                  <span class="label i18nIgnore">${caption}</span>
                 </summary>
               </details>
             </template>
@@ -2324,10 +2328,8 @@
         </div>
       </nav>
 
-      <div id="workarea" class="workarea">
-
-
-      </div>
+      <div id="workarea" class="workarea"></div>
+      
     </main>
 
     <script onload="resourceLoaded(this)" src="util/dom/dom.js"></script>

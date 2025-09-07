@@ -848,7 +848,7 @@ class FilterDialog {
     var count = this.#getFilterValuesList().options.length;
     
     if (count === 0) {
-      text = 'Select values from the picklist';
+      text = Internationalization.getText('Select values from the picklist');
     }
     else {
       var filterType = this.#getFilterType().value;
@@ -867,7 +867,8 @@ class FilterDialog {
         object += 's';
       }
       
-      text = `${count} ${object} ${verb}.`;
+      text = `{1} ${object} ${verb}.`;
+      text = Internationalization.getText(text, count);
     }
     this.#setValueSelectionStatusText(text);
   }
@@ -1159,7 +1160,7 @@ class FilterDialog {
     if (count) {
       count = resultset.get(0)[FilterDialog.#numRowsColumnName];
     }
-    searchStatus.innerHTML = `${count} values found. Click to add to Filter values list`;
+    searchStatus.innerHTML = Internationalization.getText('{1} values found. Click to add to Filter values list', count);
   }
 
   #populatePickList(resultset, offset, limit){

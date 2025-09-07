@@ -230,7 +230,7 @@ dialog#filterDialog {
     height: 30px;
     
     > button {
-      width: 5.5em;
+      width: 6em;
     }  
   }
 }

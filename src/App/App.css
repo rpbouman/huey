@@ -171,21 +171,25 @@ body {
       }
       
       #queryResultRowsInfo {
-        padding-left: 1em;
       }
 
-      /* separator after 'rows' */ 
-      > label[for=queryResultRowsInfo]:after {
-        content: ' rows;';
+      > label[for=queryResultRowsInfo]:before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-column );
       }
 
       /* if the columns info is empty then no separator after 'rows' */ 
-      > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):after {
-        content: ' rows';
+      > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-column );
       }
       
-      > label[for=queryResultColumnsInfo]:after {
-        content: ' columns';
+      > label[for=queryResultColumnsInfo]:before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-row );
       }
     }
     

@@ -622,18 +622,27 @@ class AttributeUi {
   }
 
   static #getUiNodeCaption(config){
-    switch (config.type){
+    var nodeType = config.type; 
+    var caption;
+    switch ( nodeType ){
       case 'column':
-        return config.profile.column_name;
+        caption = config.profile.column_name;
+        break;
       case 'member':
         var memberExpressionPath = config.profile.memberExpressionPath;
         var tmp = [].concat(memberExpressionPath);
-        return tmp.pop();
+        caption = tmp.pop();
+        break;
       case 'derived':
-        return config.derivation;
+        caption = config.derivation;
+        break;
       case 'aggregate':
-        return config.aggregator;
+        caption = config.aggregator;
+        break;
+      default:
+        console.warn(`Don't know how to create caption for node of type ${nodeType}`)
     }
+    return caption;
   }
   
   static #getUiNodeColumnExpression(config){
@@ -650,32 +659,34 @@ class AttributeUi {
     var columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
     
     var title = config.title;
-    if (!title){
-      switch (config.type) {
-        case 'column':
-          title = `${config.profile.column_type}`;
-          break;
-        case 'member':
-          title = `${config.columnType} ${columnExpression}`;
-          break;
-        case 'aggregate':
-        case 'derived':
-          title = columnExpression;
-          var expressionTemplate;
-          var derivation = config.derivation;
-          if (derivation) {
-            var derivationInfo = AttributeUi.getDerivationInfo(derivation);
-            expressionTemplate = derivationInfo.expressionTemplate;
-            title = extrapolateColumnExpression(expressionTemplate, title);
-          }
-          var aggregator = config.aggregator;
-          if (aggregator){
-            var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
-            expressionTemplate = aggregatorInfo.expressionTemplate;
-            title = extrapolateColumnExpression(expressionTemplate, title);
-          }
-          break;
-      }
+    if (title){
+      return title;
+    }
+    
+    switch (config.type) {
+      case 'column':
+        title = `${config.profile.column_type}`;
+        break;
+      case 'member':
+        title = `${config.columnType} ${columnExpression}`;
+        break;
+      case 'aggregate':
+      case 'derived':
+        title = columnExpression;
+        var expressionTemplate;
+        var derivation = config.derivation;
+        if (derivation) {
+          var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+          expressionTemplate = derivationInfo.expressionTemplate;
+          title = extrapolateColumnExpression(expressionTemplate, title);
+        }
+        var aggregator = config.aggregator;
+        if (aggregator){
+          var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+          expressionTemplate = aggregatorInfo.expressionTemplate;
+          title = extrapolateColumnExpression(expressionTemplate, title);
+        }
+        break;
     }
     return title;
   }
@@ -897,10 +908,17 @@ class AttributeUi {
     }
 
     var attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator);
-    var checkedTitle = `Click to remove ${attributeCaption} from the ${axisId} axis.`;
+    
+    var translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
+    
+    var checkedTitleKey = `Click to remove {1} from the ${axisId}-axis`;
+    var checkedTitle = Internationalization.getText(checkedTitleKey, translatedAttributeCaption);
     axisButton.setAttribute('data-title-checked', checkedTitle);
-    var uncheckedTitle = `Click to add ${attributeCaption} to the ${axisId} axis.`;
+    
+    var uncheckedTitleKey = `Click to add {1} to the ${axisId}-axis`;
+    var uncheckedTitle = Internationalization.getText(uncheckedTitleKey, translatedAttributeCaption);
     axisButton.setAttribute('data-title-unchecked', uncheckedTitle);
+    
     axisButton.setAttribute('title', uncheckedTitle);
 
     axisButton.setAttribute('for', id);
@@ -939,7 +957,15 @@ class AttributeUi {
     var title = AttributeUi.#getUiNodeTitle(config);
     
     var label = head.querySelector('span');
-    label.textContent = caption;
+    switch (config.type) {
+      case 'derived':
+      case 'aggregate':
+        Internationalization.setTextContent(label, caption);
+        caption = Internationalization.getText(caption) || caption;
+        break;
+      default:
+        label.textContent = caption;
+    }
     setAttributes(label, {
       "class": 'label',
       "title": `${caption}: ${title}`,
@@ -1106,7 +1132,7 @@ class AttributeUi {
     // generic rownum
     var rownumNode = this.#renderAttributeUiNode({
       type: 'derived',
-      title: 'Row number',
+      title: 'row number',
       derivation: 'row number',
       profile: {
         column_name: '',
@@ -1131,7 +1157,7 @@ class AttributeUi {
       'data-nodetype': 'folder'
     });
     var label = node.querySelector('span.label');
-    label.textContent = config.caption;
+    Internationalization.setTextContent(label, config.caption);
 
     var filler = instantiateTemplate('attribute-node-axis-dummybutton', {
       'data-axis': 'none'

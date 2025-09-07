@@ -1,6 +1,12 @@
+menu[role=toolbar] > label#currentDatasource {
+  anchor-name: --current-datasource-menu-label;
+}
+
+
 menu[role=menu]#dataSourceMenu {
-  left: 320px;
-  top: 30px;
+  position: fixed;
+  left: anchor( --current-datasource-menu-label left);
+  top: calc( anchor( --current-datasource-menu-label bottom) + 4px );
   
   > li[role=menuitem] {
     

@@ -1,8 +1,12 @@
+menu[role=toolbar] > label#quickQueryMenuLabel {
+  anchor-name: --quick-query-menu-label;
+}
 
 menu[role=menu]#quickQueryMenu {
-  left: 216px;
-  top: 30px;
-
+  
+  position: fixed;
+  left: anchor(--quick-query-menu-label left);
+  top: calc( anchor(--quick-query-menu-label bottom) + 4px );
 
   > li {
 
