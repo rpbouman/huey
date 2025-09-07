@@ -288,7 +288,7 @@ class Internationalization {
   static getText(key){
     var text = Internationalization.getCurrentLanguage() === Internationalization.#hueyNativeLanguage ? key : Internationalization.#texts[key];
     if (text === undefined){
-      console.warn(`Translation for content "${key}" not found`);
+      //console.warn(`Translation for content "${key}" not found`);
       return undefined;
     }
     var args = arguments;
