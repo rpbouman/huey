@@ -22,6 +22,7 @@ We keep this one around here for reference, but
   */
   --huey-foreground-color: rgb(50,50,50);
   --huey-placeholder-color: rgb(180,180,180);
+  --huey-highlight-color: white;
     
   /**
   * Huey background colors
@@ -29,7 +30,7 @@ We keep this one around here for reference, but
   --huey-light-background-color: rgb(250,250,250);
   --huey-medium-background-color: rgb(245,245,245);
   --huey-dark-background-color: rgb(210,210,210);
-  --huey-highlight-background-color: yellow;
+  --huey-highlight-background-color: red;
   
   --huey-alternating-rows-brightness: 99%;
   

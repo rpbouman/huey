@@ -32,7 +32,9 @@
 
         /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
         > .pivotTableUiRow:hover > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+          
           background-color: var( --huey-highlight-background-color );
+          color: var( --huey-highlight-color );
         }
       }
       
