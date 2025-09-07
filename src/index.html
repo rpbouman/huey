@@ -217,6 +217,7 @@
           <span class="digit"></span>
         </div>
       </header>
+      
       <template id="uploadItemTemplate">
         <details id="filename">
           <summary>
@@ -230,8 +231,10 @@
           <p></p>
         </details>
       </template>
+      
       <section id="uploadProgressList">
       </section>
+      
       <footer role="toolbar">
         <button
           id="uploadDialogOkButton"
@@ -1903,12 +1906,12 @@
       <section>
         <header>
           <label><button id="-axis-primary-action"></button></label>
-          <h1>Axis Caption</h1>
+          <h1></h1>
         </header>
         <ol>
         </ol>
         <footer>
-          <label title="Clear all items from this axis"><button id="-clear-axis">Clear axis</button></label>
+          <label title="Remove all items from this axis"><button id="-clear-axis">Clear axis</button></label>
         </footer>
       </section>
     </template>
@@ -1916,36 +1919,42 @@
     <template id="queryUiAxisItem">
       <li draggable="true">
         <label title="Move this item to the left">
-          <button id="-move-left">Move item left</button>
+          <button id="-move-left">Move this item to the left</button>
         </label>
-        <span>caption</span>
+        <span></span>
         <menu>
           <label title="Calculate totals for this level">
             <input id="-toggle-totals" type="checkbox"/>
           </label>
           <label title="Move this item to the other axis">
-            <button id="-move-to-other-axis">Move item to other axis</button>
+            <button id="-move-to-other-axis">Move this item to the other axis</button>
           </label>
           <label title="Remove this item from the axis">
-            <button id="-remove-from-axis">Remove item from axis</button>
+            <button id="-remove-from-axis">Remove this item from the axis</button>
           </label>
         </menu>
         <label title="Move this item to the right">
-          <button id="-move-right">Move item right</button>
+          <button id="-move-right">Move this item to the right</button>
         </label>
       </li>
     </template>
 
     <template id="queryUiFilterAxisItemValue">
       <li role="menuitem">
-        <label for="">
+        <label 
+          title="Use the checkbox to enable/disable this condition"
+          for=""
+        >
           <span></span>
           <input
             id=""
             type="checkbox"
           />
         </label>
-        <label for="">
+        <label 
+          title="Remove this filter condition"
+          for=""
+        >
           <button></button>
         </label>
       </li>
@@ -1954,13 +1963,13 @@
     <template id="queryUiFilterAxisItem">
       <li draggable="true">
         <label title="Move this item to the left">
-          <button id="-move-left">Move item left</button>
+          <button id="-move-left">Move this item to the left</button>
         </label>
         <details>
           <summary>
-            <span>caption</span>
+            <span></span>
           </summary>
-          <header></header>
+          <header title="Filter condition type"></header>
           <ol role="menu"></ol>
         </details>
         <menu>
@@ -1968,11 +1977,11 @@
             <button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button>
           </label>
           <label title="Remove this item from the axis">
-            <button id="-remove-from-axis">Remove item from axis</button>
+            <button id="-remove-from-axis">Remove this item from the axis</button>
           </label>
         </menu>
         <label title="Move this item to the right">
-          <button id="-move-right">Move item right</button>
+          <button id="-move-right">Move this item to the right</button>
         </label>
       </li>
     </template>
@@ -2206,6 +2215,7 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            
             <template id="dataSourceGroupNodeActionButton">
               <label
                 class="${class}"
@@ -2215,6 +2225,7 @@
                 <button id="${id}"></button>
               </label>
             </template>
+            
             <template id="dataSourceNode">
               <details
                 role="treeitem"
@@ -2227,6 +2238,7 @@
                 </summary>
               </details>
             </template>
+            
             <template id="dataSourceGroupNode">
               <details
                 role="treeitem"
@@ -2241,6 +2253,7 @@
                 </summary>
               </details>
             </template>
+            
             <template id="dataSourceSchemaNode">
               <details
                 role="treeitem"
@@ -2257,6 +2270,7 @@
                 </summary>
               </details>
             </template>
+            
             <div
               id="datasourcesUi"
               role="tree"

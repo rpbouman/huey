@@ -117,20 +117,53 @@ class Internationalization {
     Internationalization.#texts = textObject;
     Internationalization.#applyTexts();
   }
-  
-  static #getTextContentElements(){
-    var textContentElements = document.querySelectorAll('*:not( .i18nIgnore ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )');
-    return textContentElements;
+    
+  static #copyElements(nodeList, elements){
+    if (elements === undefined) {
+      elements = [];
+    }
+    for (var i = 0; i < nodeList.length; i++){
+      elements.push(nodeList.item(i));
+    }
+    return elements;
+  }    
+    
+  static #getTextContentElements(){    
+    var selector = '*:not( .i18nIgnore ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )';
+    
+    var textContentElements = document.querySelectorAll(selector);
+    var elements = Internationalization.#copyElements(textContentElements);
+    
+    // template elements themselves will be picked up by the selector. 
+    // but, their content will not be.
+    // so, we need a separate loop to apply the selector on their content
+    var templateElements = document.querySelectorAll('template');
+    for (var i = 0; i < templateElements.length; i++){
+      var templateElement = templateElements.item(i);
+      var templateContent = templateElement.content.querySelectorAll(selector);
+      Internationalization.#copyElements(templateContent, elements);
+    }
+    
+    return elements;
   }
   
   static #getAttributeElements(){
     var attributeNames = Internationalization.#translateableAttributes;
+    var templateElements = document.querySelectorAll('template');
     
     var selection = {};
     for (var i = 0; i < attributeNames.length; i++){
       var attributeName = attributeNames[i];
-      var elements = document.querySelectorAll(`*:not( .i18nIgnore )[${attributeName}]`);
-      selection[attributeName] = elements;
+      var selector = `*:not( .i18nIgnore )[${attributeName}]`;
+      var elements = document.querySelectorAll(selector);
+      selection[attributeName] = Internationalization.#copyElements(elements);
+      
+      // also add template content with the attribute.
+      for (var j = 0; j < templateElements.length; j++){
+        var templateElement = templateElements.item(j);
+        var templateContent = templateElement.content.querySelectorAll(selector);
+        Internationalization.#copyElements(templateContent, selection[attributeName]);
+      }
     }
     return selection;
   }
@@ -139,7 +172,7 @@ class Internationalization {
     var textContentElements = Internationalization.#getTextContentElements();
     var i18nNativeAttributeName = 'data-i18n-native-text';
     for (var i = 0; i < textContentElements.length; i++){
-      var element = textContentElements.item(i);
+      var element = textContentElements[i];
       var key, value;
 
       if (element.hasAttribute(i18nNativeAttributeName)){
@@ -167,7 +200,7 @@ class Internationalization {
       var key, value;
       
       for (var j = 0; j < elements.length; j++){
-        var element = elements.item(j);
+        var element = elements[j];
         if (!element.hasAttribute(attributeName)){
           continue;
         }
@@ -255,7 +288,7 @@ class Internationalization {
   static getText(key){
     var text = Internationalization.getCurrentLanguage() === Internationalization.#hueyNativeLanguage ? key : Internationalization.#texts[key];
     if (text === undefined){
-      //console.warn(`Translation for content "${key}" not found`);
+      console.warn(`Translation for content "${key}" not found`);
       return undefined;
     }
     var args = arguments;

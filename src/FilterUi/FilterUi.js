@@ -1158,9 +1158,27 @@ class FilterDialog {
     var searchStatus = this.#getSearchStatus();
     var count = resultset.numRows;
     if (count) {
-      count = resultset.get(0)[FilterDialog.#numRowsColumnName];
+      count = parseInt(String(resultset.get(0)[FilterDialog.#numRowsColumnName]), 10);
     }
-    searchStatus.innerHTML = Internationalization.getText('{1} values found. Click to add to Filter values list', count);
+    var message;
+    switch(count){
+      case 0:
+        message = 'No values found.'
+        message = Internationalization.getText(message);
+        break;
+      case 1:
+        message = '{1} value found.'
+        message = Internationalization.getText(message, count);
+        break;
+      default:
+        message = '{1} values found.'
+        message = Internationalization.getText(message, count);
+        break;
+    }
+    if (count){
+      message += ' ' + Internationalization.getText('Click to add to Filter values list');
+    }
+    searchStatus.innerHTML = message;
   }
 
   #populatePickList(resultset, offset, limit){

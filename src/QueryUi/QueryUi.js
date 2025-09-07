@@ -275,20 +275,22 @@ class QueryUi {
     }
 
     if (axisItem.derivation) {
-      if (expression) {
-        expression = `${axisItem.derivation} of ${expression}`;
+      var translatedDerivation = Internationalization.getText(axisItem.derivation);
+      if (expression) {        
+        expression = Internationalization.getText('{1} of {2}', translatedDerivation, expression);
       }
       else {
-        expression = axisItem.derivation;
+        expression = translatedDerivation;
       }
     }
     else 
     if (axisItem.aggregator) {
+      var translatedAggregator = Internationalization.getText(axisItem.aggregator);
       if (expression) {
-        expression = `${axisItem.aggregator} of ${expression}`;
+        expression = Internationalization.getText('{1} of {2}', translatedAggregator, expression);
       }
       else {
-        expression = axisItem.aggregator;
+        expression = translatedAggregator;
       }
     }
     

@@ -35,9 +35,10 @@ dialog#filterDialog[aria-busy=true] {
 dialog#filterDialog {
   resize: both;
   padding: 2px 0px 0px 2px;
-  min-height: 280px;
-  min-width: 300px;
-  width: 300px;
+  min-height: 396px;
+  min-width: 370px;
+  height: 396px;
+  width: 370px;
   
   > header[role=toolbar] {
     padding-left: .5em;
