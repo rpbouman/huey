@@ -260,41 +260,14 @@ class QueryUi {
   }
 
   #getQueryAxisItemUiCaption(axisItem){
+    var caption;
     if (axisItem.caption) {
-      return axisItem.caption;
+      caption = axisItem.caption;
     }
-    var expression = axisItem.columnName;
-    if (axisItem.memberExpressionPath) {
-      var path = Object.assign([], axisItem.memberExpressionPath);
-      switch (axisItem.derivation) {
-        case 'elements':
-        case 'element indices':
-          path.pop();
-      }
-      expression = `${expression}.${path.join('.')}`;
+    else {
+      caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
     }
-
-    if (axisItem.derivation) {
-      var translatedDerivation = Internationalization.getText(axisItem.derivation);
-      if (expression) {        
-        expression = Internationalization.getText('{1} of {2}', translatedDerivation, expression);
-      }
-      else {
-        expression = translatedDerivation;
-      }
-    }
-    else 
-    if (axisItem.aggregator) {
-      var translatedAggregator = Internationalization.getText(axisItem.aggregator);
-      if (expression) {
-        expression = Internationalization.getText('{1} of {2}', translatedAggregator, expression);
-      }
-      else {
-        expression = translatedAggregator;
-      }
-    }
-    
-    return expression;
+    return caption;
   }
 
   #getQueryModelItem(queryAxisItemUi){
