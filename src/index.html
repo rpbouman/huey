@@ -797,30 +797,43 @@
       </header>
       <section>
         <header>
-          <menu role="toolbar">
-
-            <label
-              for="filterSearchApplyAll"
-              title="Check to include the other filter items (in addition to the search string) to populate the picklist"
-            >
-              <span>Apply all filters</span>:
-              <input
-                id="filterSearchApplyAll"
-                type="checkbox"
-              />
-            </label>
-
-            <label
-              for="filterSearchAutoWildcards"
-              title="Check to automatically apply LIKE wildcards"
-            >
-              <span>Auto-wildcards</span>:
-              <input
-                id="filterSearchAutoWildcards"
-                type="checkbox"
-              />
-            </label>
-
+          <menu role="menubar">
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchApplyAll"
+                title="Check to include the other filter items (in addition to the search string) to populate the picklist"
+              >
+                <span>Apply all filters</span>
+                <input
+                  id="filterSearchApplyAll"
+                  type="checkbox"
+                />
+              </label>
+            </li>
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchAutoWildcards"
+                title="Check to automatically apply LIKE wildcards"
+              >
+                <span>Auto-wildcards</span>
+                <input
+                  id="filterSearchAutoWildcards"
+                  type="checkbox"
+                />                
+              </label>
+            </li>
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchCaseSensitive"
+                title="Is the search term case-sensitive?"
+              >
+                <span>Case sensitive</span>
+                <input
+                  id="filterSearchCaseSensitive"
+                  type="checkbox"
+                />
+              </label>
+            </li>
           </menu>
           <section>
             <div id="filterDialogSpinner" class="loader loader-medium"></div>
@@ -875,17 +888,19 @@
           </div>
         </section>
         <footer id="filterValueSelectionStatus" role="status"></footer>
-        <menu role="toolbar">
-          <label 
-            for="filterDialogShowRawCheckbox"
-            title="Check to display raw values. Uncheck to display formatter values."
-          >
-            <span>Reveal raw values:</span>
-            <input 
-              id="filterDialogShowRawCheckbox"
-              type="checkbox"
-            />
-          </label>
+        <menu role="menubar">
+          <li role="menuitemcheckbox">
+            <label 
+              for="filterDialogShowRawCheckbox"
+              title="Check to display raw values. Uncheck to display formatter values."
+            >
+              <span>Reveal raw values</span>
+              <input 
+                id="filterDialogShowRawCheckbox"
+                type="checkbox"
+              />
+            </label>
+          </li>
         </menu>
         <footer role="toolbar">
           <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.">Clear Highlighted</button>

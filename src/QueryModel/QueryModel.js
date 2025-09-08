@@ -380,6 +380,11 @@ class QueryAxisItem {
     var filter = queryAxisItem.filter;
 
     var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryAxisItem);          
+    if (dataType === 'VARCHAR' && filter.caseSensitive === false) {
+      columnExpression = `${columnExpression} COLLATE NOCASE`;
+    }
+
     var operator = '';
 
     var nullCondition;
@@ -420,6 +425,7 @@ class QueryAxisItem {
         case FilterDialog.filterTypes.INCLUDE:
           operator += literalLists.valueLiterals.length === 1 ? '=' : ' IN';
           var values = literalLists.valueLiterals.length === 1 ? literalLists.valueLiterals[0] : `( ${literalLists.valueLiterals.join('\n,')} )`;
+          
           sql += `${columnExpression} ${operator} ${values}`;
 
           if (indexOfNull !== -1) {
