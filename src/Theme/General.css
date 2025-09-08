@@ -306,6 +306,7 @@ form > fieldset > select{
   margin-top: 2px;
 }
 
+menu[role=menubar],
 menu[role=toolbar] {
   list-style-type: none;
   margin-block: 0px;

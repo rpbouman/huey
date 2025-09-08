@@ -201,6 +201,14 @@ class FilterDialog {
       this.#updatePicklist();
     }.bind(this));
 
+    var caseSensitive = this.#getCaseSensitive();
+    caseSensitive.addEventListener('change', function(event){
+      var target = event.target;
+      settings.assignSettings(['filterDialogSettings', 'filterSearchCaseSensitive'], target.checked);
+
+      this.#updatePicklist();
+    }.bind(this));
+
     this.#initSearchQueryHandler();
     this.#initAddFilterValueButton();
   }
@@ -881,6 +889,10 @@ class FilterDialog {
     return byId('filterSearchAutoWildcards');
   }
 
+  #getCaseSensitive(){
+    return byId('filterSearchCaseSensitive');
+  }
+
   #getFilterType(){
     return byId('filterType');
   }
@@ -1112,10 +1124,12 @@ class FilterDialog {
           literal: quoteStringLiteral(searchString)
         };
       });
-      
+     
+      var caseSensitive = this.#getCaseSensitive();
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
-        values: filterValues
+        values: filterValues,
+        caseSensitive: caseSensitive.checked
       }
       filterAxisItems.push(picklistFilterItem);
     }

@@ -126,6 +126,7 @@ class SqlQueryGenerator {
         conditionSql = `(${columns}) IN (${values})`;
       }
       else {
+        // this is the "normal", ui driven filter route.
         conditionSql = QueryAxisItem.getFilterConditionSql(filterItem, tableAlias);
       }
       return conditionSql;

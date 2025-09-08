@@ -35,10 +35,10 @@ dialog#filterDialog[aria-busy=true] {
 dialog#filterDialog {
   resize: both;
   padding: 2px 0px 0px 2px;
-  min-height: 396px;
-  min-width: 370px;
-  height: 396px;
-  width: 370px;
+  min-height: 432px;
+  min-width: 350px;
+  height: 432px;
+  width: 350px;
   
   > header[role=toolbar] {
     padding-left: .5em;
@@ -76,29 +76,37 @@ dialog#filterDialog {
     flex-grow: .75;
     padding: 2px;
 
-    menu[role=toolbar] {
+    menu[role=menubar] {
       padding: unset;
       height: unset;
+      margin-top: 0px;
+      margin-left: 4px;
       margin-bottom: 4px;
 
-      > label > input[type=checkbox] {
-        visibility: hidden;
-        display: none;
-      }
+      > li[role=menuitem],
+      > li[role=menuitemcheckbox] {
+        
+        display: inline-block;
 
-      > label:has( > input[type=checkbox] )::after {
-        font-family: var( --huey-icon-font-family );
-        color: var(--huey-icon-color-subtle);  
-        content: var( --icon-square );
-      }
+        > label > input[type=checkbox] {
+          visibility: hidden;
+          display: none;
+        }
 
-      > label:has( > input[type=checkbox]:checked )::after {
-        content: var( --icon-checkbox );
-        color: var( --huey-icon-color-highlight );
-      }    
+        > label:has( > input[type=checkbox] )::after {
+          font-family: var( --huey-icon-font-family );
+          color: var(--huey-icon-color-subtle);  
+          content: var( --icon-square );
+        }
 
-      > label:has( > input[type=checkbox] ):hover::after {
-        color: var( --huey-icon-color-highlight );
+        > label:has( > input[type=checkbox]:checked )::after {
+          content: var( --icon-checkbox );
+          color: var( --huey-icon-color-highlight );
+        }    
+
+        > label:has( > input[type=checkbox] ):hover::after {
+          color: var( --huey-icon-color-highlight );
+        }
       }
     }
     
