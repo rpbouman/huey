@@ -67,14 +67,19 @@ function initDuckdbVersion(){
   sql += `\nFROM duckdb_keywords()\nWHERE keyword_category != 'unreserved'`;
   var result = connection.query(sql)
   .then(function(resultset){
-    var duckdbVersionLabel = byId('duckdbVersionLabel');
     var row = resultset.get(0);
     var version = row[versionColumn];
     var api = row[apiColumn];
     var reservedWords = row[reservedWordsColumn];
     reservedWords = String(reservedWords).slice(1, -1).split(',');
     window.hueyDb.reservedWords = reservedWords;
+
+    var duckdbVersionLabel = byId('duckdbVersionLabel');
     duckdbVersionLabel.textContent = `DuckDB ${version}, API: ${api}`;
+    
+    var duckdbAvatar = byId('duckdb-version-specific-avatar');
+    var duckdbVersionParts = /v(\d+)\.(\d+).(\d)/.exec(version);
+    duckdbAvatar.src = `https://duckdb.org/images/release-icons/${duckdbVersionParts[1]}.${duckdbVersionParts[2]}.0.svg`
   })
   .catch(function(){
     console.error(`Error fetching duckdb version info.`);
