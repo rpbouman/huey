@@ -82,3 +82,28 @@
 #spinner > div {
   text-align: center;
 }
+
+div#powered-by {
+  
+}
+
+div#powered-by::before {
+  display: block;
+  font-size: xx-small;
+  content: 'p o w e r e d   b y:'
+}
+
+div#powered-by::after {
+  display: block;
+  content: ' ';
+  /* 
+    Image credit: DuckDB.org 
+    https://duckdb.org/images/logo-dl/DuckDB_Logo-horizontal.svg
+  */
+  background-image: url('DuckDB_Logo-horizontal.svg');
+  background-repeat: no-repeat;
+  position:relative;
+  width: 150px;
+  height: 50px;
+  margin: auto;
+}
