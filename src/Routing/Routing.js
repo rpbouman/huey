@@ -32,7 +32,7 @@ class Routing {
       return undefined;
     }
     
-    var routeObject = {
+    var routeObject = queryModelState.queryModel ? queryModelState : {
       queryModel: queryModelState 
     };
     var json = JSON.stringify( routeObject );
