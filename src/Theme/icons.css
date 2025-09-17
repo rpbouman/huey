@@ -54,7 +54,6 @@
   --icon-math-avg: '\f0f4';
   --icon-math-max: '\f0f5';
   --icon-math-min: '\f0f6';
-  --icon-code-dots: '\f1e5';
   --icon-logical-and: '\f240';
   --icon-logical-or: '\f245';
   --icon-ruler-3: '\f290';
@@ -69,6 +68,7 @@
   --icon-number-16-small: '\fce9';
   --icon-number-32-small: '\10002';
   --icon-number-64-small: '\ffe2';
+  --icon-brackets-contain: '\f1e5';
   --icon-code-dots: '\f61a';
   --icon-exclamation-circle: '\f634';
   --icon-player-play-filled: '\f691';

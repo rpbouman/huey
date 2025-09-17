@@ -20,14 +20,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   }
   
   
-/*  
-  details[role=treeitem][data-nodetype=derived]:not( 
-    [data-derivation=elements], 
-    [data-derivation=entries],
-    [data-derivation="first letter"]
-  ) > summary 
-*/
-
   details[role=treeitem] {
 
     > summary {
@@ -261,7 +253,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
   details[data-nodetype=member][data-member_expression_type$='[]'] > summary > span.label::before,
   details[data-nodetype=column][data-column_type$='[]'] > summary > span.label::before
   {
-    content: var( --icon-code-dots );
+    content: var( --icon-brackets-contain );
   }
 
   details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
