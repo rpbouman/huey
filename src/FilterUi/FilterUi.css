@@ -88,6 +88,10 @@ dialog#filterDialog {
         
         display: inline-block;
 
+        > label:has( > input[type=checkbox] ) > span::after{
+          content: ":"
+        }
+
         > label > input[type=checkbox] {
           visibility: hidden;
           display: none;

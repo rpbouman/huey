@@ -286,7 +286,8 @@ label {
   white-space: nowrap;
 }
 
-form > label::after, form > fieldset > label::after {
+form > label::after, 
+form > fieldset > label::after {
   content: ":"
 }
 
