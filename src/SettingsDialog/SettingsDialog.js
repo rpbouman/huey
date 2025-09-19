@@ -137,7 +137,7 @@ class Settings extends EventEmitter {
     filterDialogSettings: {
       filterSearchApplyAll: false,
       filterSearchAutoWildcards: true,
-      caseSensitive: true
+      filterSearchCaseSensitive: false
     },
     themeSettings: {
       themes: {
@@ -148,11 +148,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(50,50,50)",
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "rgb(180,180,180)",
               "--huey-light-background-color": "rgb(255,255,255)",
               "--huey-medium-background-color": "rgb(245,245,245)",
               "--huey-dark-background-color": "rgb(210,210,210)",
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(222,222,222)",
               "--huey-dark-border-color": "rgb(175,175,175)",
@@ -169,11 +170,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(30,144,255)", // Dodger Blue
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "rgb(173,216,230)", // Light Blue
               "--huey-light-background-color": "rgb(240,248,255)", // Alice Blue
               "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
               "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
               "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
@@ -190,11 +192,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(70,130,180)", // Steel Blue
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "rgb(176,196,222)", // Light Steel Blue
               "--huey-light-background-color": "rgb(245,245,255)", // Lavender
               "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
               "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
               "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
@@ -211,11 +214,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "#000000",
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "#A9A9A9",
               "--huey-light-background-color": "#F0E68C",
               "--huey-medium-background-color": "#A7D3A4",
               "--huey-dark-background-color": "#5B8266",
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "#A5B479",
               "--huey-dark-border-color": "#334D56",
@@ -232,11 +236,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "black",
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "#A9A9A9",
               "--huey-light-background-color": "#D5D5D5",
               "--huey-medium-background-color": "#D2B48C",
               "--huey-dark-background-color": "#008080",
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "#8B4513",
               "--huey-dark-border-color": "#2F4F4F",
@@ -253,11 +258,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(36,36,74)",
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "rgb(180,180,180)",
               "--huey-light-background-color": "rgb(182,187,229)",
               "--huey-medium-background-color": "rgb(108,115,183)",
               "--huey-dark-background-color": "rgb(67,71,119)",
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "rgb(99,46,64)",
               "--huey-dark-border-color": "rgb(42,34,55)",
@@ -274,11 +280,12 @@ class Settings extends EventEmitter {
               "--huey-text-font-size": "10pt",
               "--huey-mono-font-family": "monospace",
               "--huey-foreground-color": "rgb(220, 220, 220)",
+              "--huey-highlight-color": "white",
               "--huey-placeholder-color": "rgb(100, 100, 100)",
               "--huey-light-background-color": "rgb(30, 30, 30)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
               "--huey-dark-background-color": "rgb(110 110, 110)",
-              "--huey-highlight-background-color": "yellow",
+              "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "80%",
               "--huey-light-border-color": "rgb(80, 80, 80)",
               "--huey-dark-border-color": "rgb(110, 110, 110)",
@@ -295,11 +302,12 @@ class Settings extends EventEmitter {
           "--huey-text-font-size": "10pt",
           "--huey-mono-font-family": "monospace",
           "--huey-foreground-color": "rgb(50,50,50)",
+          "--huey-highlight-color": "white",
           "--huey-placeholder-color": "rgb(180,180,180)",
           "--huey-light-background-color": "rgb(255,255,255)",
           "--huey-medium-background-color": "rgb(245,245,245)",
           "--huey-dark-background-color": "rgb(210,210,210)",
-          "--huey-highlight-background-color": "yellow",
+          "--huey-highlight-background-color": "rgb(050, 150, 255)",
           "--huey-alternating-rows-brightness": "99%",
           "--huey-light-border-color": "rgb(222,222,222)",
           "--huey-dark-border-color": "rgb(175,175,175)",
@@ -550,6 +558,7 @@ class Settings extends EventEmitter {
     var optionsFromSettings = settings[property].options;
     var index = 0;
     var numOptions = optionsFromSettings ? optionsFromSettings.length : optionsFromControl.length;
+    var exists = {};
     switch (settingsOrDialog) {
       case 'settings':
         var valueGetter = control.getAttribute('data-value-getter');
@@ -557,10 +566,19 @@ class Settings extends EventEmitter {
           valueGetter = eval(valueGetter);
         }
 
-        if (optionsFromSettings) {
+        if (optionsFromControl) {
+          optionsFromSettings = [];
           for (; index < numOptions; index++){
             var optionFromControl = optionsFromControl[index];
             var value = optionFromControl.value;
+
+            if (exists[value]) {
+              continue;
+            }
+            else {
+              exists[value] = true;
+            }
+            
             var label = optionFromControl.label || value;
             if (valueGetter){
               value = valueGetter.call(null, optionFromControl, this);
@@ -590,6 +608,7 @@ class Settings extends EventEmitter {
           for (; index < numOptions; index++){
             var optionFromSettings = optionsFromSettings[index];
             var value = optionFromSettings.value;
+
             var label = optionFromSettings.label || value;
             var title = optionFromSettings.title || label;
             var option = createEl('option', {
@@ -603,6 +622,14 @@ class Settings extends EventEmitter {
             else {
               option.value = value;
             }
+
+            if (exists[option.value]) {
+              continue;
+            }
+            else {
+              exists[option.value] = true;
+            }
+
             control.appendChild(option);
           }
         }

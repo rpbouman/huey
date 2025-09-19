@@ -116,8 +116,9 @@ class ExportUi {
     var axisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
     var filterAxisItems = queryModel.getFiltersAxis().getItems();
 
+    var datasource = queryModel.getDatasource();
     var opts = Object.assign({}, options, {
-      datasource: queryModel.getDatasource(),
+      datasource: datasource,
       queryAxisItems: axisItems, 
       filterAxisItems: filterAxisItems,
     });
@@ -314,25 +315,24 @@ class ExportUi {
           fileExtension = 'xlsx';
           copyStatementOptions = {
             "FORMAT": '\'xlsx\'',
-            "HEADER": `'${Boolean(exportSettings.exportXlsxIncludeHeaders)}'`,
+            "HEADER": `${Boolean(exportSettings.exportXlsxIncludeHeaders)}`,
             "SHEET_ROW_LIMIT": exportSettings.exportXlsxSheetRowLimit,
           };
           var sheetName = (exportSettings.exportXlsxSheet || '').trim();
           if ( sheetName.length ) {
+            sheetName = quoteStringLiteral(sheetName);
             copyStatementOptions["SHEET"] = sheetName;
           }
           break;
         case 'exportQuery':
           var encodingSettings = exportSettings[exportType + 'Encoding'];
-          var encodingOption = encodingSettings.options.find(function(option){
-            return option.value === encodingSettings.value;
-          });
+          var encodingOption = encodingSettings.value;
           var indent = exportSettings[exportType + 'Indentation'];
-          fileExtension = encodingOption.fileExtension;
-          mimeType = encodingOption.mimeType;
-          data = queryModel.getState();
+          data = {
+            queryModel: queryModel.getState()
+          };
           data = JSON.stringify(data, null, indent);
-          switch  (encodingOption.value) {
+          switch  (encodingOption) {
             case 'HASH':
               data = encodeURIComponent( data );
               data = btoa( data );
@@ -490,7 +490,7 @@ class ExportDialog {
     var titleTemplate = exportTemplate.value;
 
     var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
-    byId('exportTitle').innerText = title;
+    byId('exportTitle').textContent = title;
   }
 
   #updateDialog(){
@@ -527,16 +527,20 @@ class ExportDialog {
       var dialog = this.#getDialog();
       dialog.setAttribute('aria-busy', String(true));
 
+      var settings = this.#settings;
+      exportSettings = settings.getSettings('exportUi');
+      Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
+      this.#settings.assignSettings('exportUi', exportSettings);
+      
       var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
       var progressCallback = function(text){
-        progressMessageElement.innerText = text;
+        progressMessageElement.textContent = text;
       }
       progressCallback('Preparing export...');
 
-      var settings = this.#settings;
       var exportSettings = settings.getSettings('exportUi');
 
-      exportSettings.exportTitle = byId('exportTitle').innerText;
+      exportSettings.exportTitle = byId('exportTitle').textContent;
       var tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
 
       function copyUiSetting(setting, exportTypePrefix){
@@ -622,9 +626,6 @@ class ExportDialog {
       var queryModel = this.#queryModel;
       await ExportUi.exportDataForQueryModel(queryModel, exportSettings, progressCallback);
 
-      exportSettings = settings.getSettings('exportUi');
-      Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
-      this.#settings.assignSettings('exportUi', exportSettings);
     }
     catch (e){
       showErrorDialog(e);

@@ -63,6 +63,18 @@ class FilterDialog {
     return filterType.startsWith('not');
   }
   
+  static getLabelForFilterType(filterType){
+    var selectElement = byId('filterType');
+    var options = selectElement.options;
+    for (var i = 0; i < options.length; i++){
+      var option = options.item(i);
+      if (option.value === filterType){
+        return option.textContent;
+      }
+    }
+    return undefined;
+  }
+  
   #id = undefined;
   #queryAxisItem = undefined;
   #queryModel = undefined;
@@ -185,6 +197,14 @@ class FilterDialog {
     autoWildcardsCheckbox.addEventListener('change', function(event){
       var target = event.target;
       settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
+
+      this.#updatePicklist();
+    }.bind(this));
+
+    var caseSensitive = this.#getCaseSensitive();
+    caseSensitive.addEventListener('change', function(event){
+      var target = event.target;
+      settings.assignSettings(['filterDialogSettings', 'filterSearchCaseSensitive'], target.checked);
 
       this.#updatePicklist();
     }.bind(this));
@@ -828,7 +848,7 @@ class FilterDialog {
   }
 
   #setValueSelectionStatusText(text){
-    this.#getValueSelectionStatus().innerText = text;
+    this.#getValueSelectionStatus().textContent = text;
   }
 
   #updateValueSelectionStatusText(){
@@ -836,7 +856,7 @@ class FilterDialog {
     var count = this.#getFilterValuesList().options.length;
     
     if (count === 0) {
-      text = 'Select values from the picklist';
+      text = Internationalization.getText('Select values from the picklist');
     }
     else {
       var filterType = this.#getFilterType().value;
@@ -855,7 +875,8 @@ class FilterDialog {
         object += 's';
       }
       
-      text = `${count} ${object} ${verb}.`;
+      text = `{1} ${object} ${verb}.`;
+      text = Internationalization.getText(text, count);
     }
     this.#setValueSelectionStatusText(text);
   }
@@ -866,6 +887,10 @@ class FilterDialog {
 
   #getAutoWildChards(){
     return byId('filterSearchAutoWildcards');
+  }
+
+  #getCaseSensitive(){
+    return byId('filterSearchCaseSensitive');
   }
 
   #getFilterType(){
@@ -1039,26 +1064,27 @@ class FilterDialog {
     if (FilterDialog.isArrayFilterType(filterType)){
       queryAxisItem = Object.assign({}, queryAxisItem);
 
-      if (queryAxisItem.memberExpressionPath) {
-        queryAxisItem.memberExpressionPath = Object.assign([], queryAxisItem.memberExpressionPath);
+      if (!queryAxisItem.memberExpressionPath) {
+        queryAxisItem.memberExpressionPath = [];
       }
+
+      queryAxisItem.memberExpressionPath = Object.assign([], queryAxisItem.memberExpressionPath);
       if (queryAxisItem.derivation) {
         switch (queryAxisItem.derivation) {
           case 'keyset':
             queryAxisItem.memberExpressionPath.push('map_keys()');
-            queryAxisItem.memberExpressionPath.push('unnest()');
             queryAxisItem.derivation = 'elements';
             break;
           case 'valuelist':
             queryAxisItem.memberExpressionPath.push('map_values()');
-            queryAxisItem.memberExpressionPath.push('unnest()');
             queryAxisItem.derivation = 'elements';
             break;
         }
       }
       else {
-        queryAxisItem.derivation = 'elements';
       }
+      queryAxisItem.derivation = 'elements';
+      queryAxisItem.memberExpressionPath.push('unnest()');
       delete queryAxisItem.literalWriter;
     }
     
@@ -1068,6 +1094,7 @@ class FilterDialog {
       queryAxisItem = Object.assign({}, queryAxisItem);
       delete queryAxisItem.includeTotals;
     }
+    
     var queryAxisItems = [
       Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
       Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
@@ -1097,10 +1124,12 @@ class FilterDialog {
           literal: quoteStringLiteral(searchString)
         };
       });
-      
+     
+      var caseSensitive = this.#getCaseSensitive();
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
-        values: filterValues
+        values: filterValues,
+        caseSensitive: caseSensitive.checked
       }
       filterAxisItems.push(picklistFilterItem);
     }
@@ -1143,9 +1172,27 @@ class FilterDialog {
     var searchStatus = this.#getSearchStatus();
     var count = resultset.numRows;
     if (count) {
-      count = resultset.get(0)[FilterDialog.#numRowsColumnName];
+      count = parseInt(String(resultset.get(0)[FilterDialog.#numRowsColumnName]), 10);
     }
-    searchStatus.innerHTML = `${count} values found. Click to add to Filter values list`;
+    var message;
+    switch(count){
+      case 0:
+        message = 'No values found.'
+        message = Internationalization.getText(message);
+        break;
+      case 1:
+        message = '{1} value found.'
+        message = Internationalization.getText(message, count);
+        break;
+      default:
+        message = '{1} values found.'
+        message = Internationalization.getText(message, count);
+        break;
+    }
+    if (count){
+      message += ' ' + Internationalization.getText('Click to add to Filter values list');
+    }
+    searchStatus.innerHTML = message;
   }
 
   #populatePickList(resultset, offset, limit){
@@ -1234,11 +1281,11 @@ class FilterDialog {
     });
     optionGroup.appendChild(option);
     //Fix https://github.com/rpbouman/huey/issues/566
-    setTimeout(
-      function(){
+    //setTimeout(
+      //function(){
         listOfValues.appendChild(optionGroup);
-      }, 1
-    );
+      //}, 100
+    //);
   }
 
   getDom(){

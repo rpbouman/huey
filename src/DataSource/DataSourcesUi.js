@@ -263,7 +263,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Open the this datasource in the Query editor',
+      title: Internationalization.getText('Open {1} in the Query editor', datasourceId),
       events: {
         click: this.#analyzeDatasourceClicked.bind(this)
       }
@@ -280,7 +280,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Remove this datasource',
+      title: Internationalization.getText('Remove datasource {1}', datasourceId),
       events: {
         click: this.#removeDatasourceClicked.bind(this)
       }
@@ -297,7 +297,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "editActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Configure datasource details',
+      title: Internationalization.getText('Configure datasource details of {1}', datasourceId),
       events: {
         click: this.#configureDatasourceClicked.bind(this)
       }
@@ -314,7 +314,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "downloadActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Download the contents of this datasource to a file.',
+      title: Internationalization.getText('Download the contents of datasource {1} to a file.', datasourceId),
       events: {
         click: this.#downloadDatasourceClicked.bind(this)
       }
@@ -745,7 +745,7 @@ class DataSourcesUi extends EventEmitter {
       case DuckDbDataSource.types.FILE:
         var datasources = datasourceGroup.datasources;
         if (miscGroup) {
-          return 'Files';
+          return Internationalization.getText('Files');
         }
         return Object.keys(datasources).map(function(datasourceId){
           var datasource = datasources[datasourceId];
@@ -779,10 +779,11 @@ class DataSourcesUi extends EventEmitter {
       default:
         groupTitle = `${groupType}`;
     }
-    groupNode.setAttribute('title', groupTitle);
+    Internationalization.setAttributes(groupNode, 'title', groupTitle)
 
     var summary = groupNode.querySelector('summary');
     var label = summary.querySelector('span.label');
+    // TODO: some group titels are translateable, some aren't
     var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
     label.textContent = caption;
 

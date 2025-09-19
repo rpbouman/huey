@@ -35,9 +35,10 @@ dialog#filterDialog[aria-busy=true] {
 dialog#filterDialog {
   resize: both;
   padding: 2px 0px 0px 2px;
-  min-height: 280px;
-  min-width: 300px;
-  width: 300px;
+  min-height: 432px;
+  min-width: 350px;
+  height: 432px;
+  width: 350px;
   
   > header[role=toolbar] {
     padding-left: .5em;
@@ -75,31 +76,41 @@ dialog#filterDialog {
     flex-grow: .75;
     padding: 2px;
 
-    menu[role=toolbar] {
+    menu[role=menubar] {
       padding: unset;
       height: unset;
+      margin-top: 0px;
+      margin-left: 4px;
       margin-bottom: 4px;
 
-      > label > input[type=checkbox] {
-        visibility: hidden;
-        display: none;
-      }
+      > li[role=menuitem],
+      > li[role=menuitemcheckbox] {
+        
+        display: inline-block;
 
-      > label:has( > input[type=checkbox] )::after {
-        font-family: var( --huey-icon-font-family );
-        color: var(--huey-icon-color-subtle);  
-        /* square */
-        content: "\eb2c";
-      }
+        > label:has( > input[type=checkbox] ) > span::after{
+          content: ":"
+        }
 
-      > label:has( > input[type=checkbox]:checked )::after {
-        /* checkbox */
-        content: "\eba6";
-        color: var( --huey-icon-color-highlight );
-      }    
+        > label > input[type=checkbox] {
+          visibility: hidden;
+          display: none;
+        }
 
-      > label:has( > input[type=checkbox] ):hover::after {
-        color: var( --huey-icon-color-highlight );
+        > label:has( > input[type=checkbox] )::after {
+          font-family: var( --huey-icon-font-family );
+          color: var(--huey-icon-color-subtle);  
+          content: var( --icon-square );
+        }
+
+        > label:has( > input[type=checkbox]:checked )::after {
+          content: var( --icon-checkbox );
+          color: var( --huey-icon-color-highlight );
+        }    
+
+        > label:has( > input[type=checkbox] ):hover::after {
+          color: var( --huey-icon-color-highlight );
+        }
       }
     }
     
@@ -122,7 +133,7 @@ dialog#filterDialog {
           > button#addFilterValueButton::before {
             font-family: var( --huey-icon-font-family );
             font-size: var( --huey-icon-medium );
-            content: "\fa02"
+            content: var( --icon-filter-plus );
           }
 
         }
@@ -132,6 +143,11 @@ dialog#filterDialog {
             box-shadow: 0px 0px 0px transparent;
             width: calc( 100% - 10px );
             height: calc( 100% );
+            /* 
+              https://github.com/rpbouman/huey/issues/566 
+              ensure minheight is listsize (4) * height of option (ca 20px;
+            */
+            min-height: 80px;
             overflow-x: auto;
             resize: vertical;
 
@@ -170,7 +186,11 @@ dialog#filterDialog {
         > select {
           flex-grow: 1;
           width: calc( 100% - 10px );
-          height: 100%;
+          /* 
+            https://github.com/rpbouman/huey/issues/566 
+            ensure minheight is listsize (4) * height of option (ca 20px;
+          */          
+          min-height: 80px;
         }
       }
 
@@ -223,7 +243,7 @@ dialog#filterDialog {
     height: 30px;
     
     > button {
-      width: 5.5em;
+      width: 6em;
     }  
   }
 }

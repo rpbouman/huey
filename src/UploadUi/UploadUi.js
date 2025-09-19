@@ -257,55 +257,51 @@ class UploadUi {
 
       var connection = hueyDb.connection;
 
-      message.innerHTML += 'Preparing extension check<br/>';
+      message.innerHTML += Internationalization.getText('Preparing extension check') + '<br/>';
       var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
       var statement = await connection.prepare(sql);
       progressbar.value = parseInt(progressbar.value, 10) + 20;
 
-      message.innerHTML += `Checking extension ${extensionName}<br/>`;
+      message.innerHTML += Internationalization.getText('Checking extension {1}', extensionName) + '<br/>';
       var result = await statement.query(extensionName);
       statement.close();
       progressbar.value = parseInt(progressbar.value, 10) + 20;
 
       if (result.numRows === 0) {
-        message.innerHTML += `Extension ${extensionName} not found<br/>`;
+        message.innerHTML += Internationalization.getText('Extension {1} not found', extensionName) + '<br/>';
         throw new Error(`Extension not found`);
       }
       else {
-        message.innerHTML += `Extension ${extensionName} exists<br/>`;
+        message.innerHTML += Internationalization.getText('Extension {1} exists', extensionName) + '<br/>';
       }
 
       var row = result.get(0);
       if (row['installed']){
-        message.innerHTML += `Extension ${extensionName} already installed<br/>`;
+        message.innerHTML += Internationalization.getText('Extension {1} already installed', extensionName) + '<br/>';
       }
       else {
-        message.innerHTML += `Extension ${extensionName} not installed<br/>`;
+        message.innerHTML += Internationalization.getText('Extension {1} not installed', extensionName) + '<br/>';
 
         var installSql = `INSTALL ${extensionName}`;
         if (extensionRepository){
-          message.innerHTML += `Extension ${extensionName} comes from non-standard location "${extensionRepository}".<br/>`;
+          message.innerHTML += Internationalization.getText('Extension {1} comes from non-standard location {2}', extensionName, extensionRepository) + '<br/>';          
           installSql += ` FROM ${extensionRepository}`;
         }
-        message.innerHTML += `Installing extension ${extensionName}<br/>`;
+        message.innerHTML += Internationalization.getText('Installing extension {1}', extensionName) + '<br/>';
         var result = await connection.query(installSql);
-        message.innerHTML += `Extension ${extensionName} installed<br/>`;
+        message.innerHTML += Internationalization.getText('Extension {1} is now installed', extensionName) + '<br/>';
         progressbar.value = parseInt(progressbar.value, 10) + 20;
       }
 
-      if (row['loaded']){
-        message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
-        invalid = false;
-      }
-      else {
-        message.innerHTML += `Extension ${extensionName} not loaded<br/>`;
-
-        message.innerHTML += `Loading extension ${extensionName}<br/>`;
+      if (!row['loaded']){
+        message.innerHTML += Internationalization.getText('Extension {1} not loaded', extensionName) + '<br/>';
+        message.innerHTML += Internationalization.getText('Loading extension {1}', extensionName) + '<br/>';
         await connection.query(`LOAD ${extensionName}`);
-        message.innerHTML += `Extension ${extensionName} is loaded<br/>`;
-        progressbar.value = parseInt(progressbar.value, 10) + 20;
-        invalid = false;
       }
+      
+      message.innerHTML += Internationalization.getText('Extension {1} is loaded', extensionName) + '<br/>';
+      progressbar.value = parseInt(progressbar.value, 10) + 20;
+      invalid = false;
       if (invalid === false) {
         progressbar.value = 100;
       }
@@ -339,6 +335,9 @@ class UploadUi {
       uploadItem.setAttribute('open', true);
       uploadItem.setAttribute('aria-invalid', String(true));
       uploadItem.setAttribute('aria-errormessage', message.id);
+      
+      // TODO: see if we can translate
+      uploadItem.textContent = messageText;
     }
     else
     if (uploadResult instanceof DuckDbDataSource) {
@@ -352,21 +351,21 @@ class UploadUi {
           var analyzeButton = createEl('label', {
             "class": 'analyzeActionButton',
             "for": `${datasourceId}_analyze`,
-            "title": `Start exploring data from ${objectName}`
           });
+          Internationalization.setAttributes(analyzeButton, 'title', 'Start exploring data from {1}', objectName);
           menu.appendChild(analyzeButton);
 
           var settingsButton = createEl('label', {
             "class": 'editActionButton',
             "for": `${datasourceId}_edit`,
-            "title": `Configure ${objectName}`
           });
+          Internationalization.setAttributes(settingsButton, 'title', 'Configure {1}', objectName);
           menu.appendChild(settingsButton);
           break;
       }
       
       uploadItem.setAttribute('aria-invalid', String(false));
-      messageText = 'Succesfully loaded.';
+      Internationalization.setTextContent(message, 'Succesfully loaded.');
     }
     else
     if (typeof uploadResult === 'object') {
@@ -384,16 +383,15 @@ class UploadUi {
       });
       var analyzeButtonLabel = createEl('label', {
         "class": 'analyzeActionButton',
-        "for": id,
-        "title": `Start exploring data from ${objectName}`
+        "for": id
       });
+      Internationalization.setAttributes(analyzeButtonLabel, 'title', 'Start exploring data from {1}', objectName);
       analyzeButtonLabel.appendChild(analyzeButton);
       
       menu.appendChild(analyzeButtonLabel);
       uploadItem.setAttribute('aria-invalid', String(false));
-      messageText = 'Succesfully loaded.';
+      Internationalization.setTextContent(message, 'Succesfully loaded.');
     }
-    message.innerText = messageText;
   }
 
   async uploadFiles(files){
@@ -403,9 +401,9 @@ class UploadUi {
 
     var numFiles = files.length;
     var header = this.#getHeader();
-    header.innerText = `Uploading ${numFiles} file${numFiles === 1 ? '' : 's'}.`;
+    Internationalization.setTextContent(header, `Uploading {1} file${numFiles === 1 ? '' : 's'}.`, numFiles);
     var description = this.#getDescription();
-    description.innerText = 'Upload in progress. This will take a few moments...';
+    Internationalization.setTextContent(description, 'Upload in progress. This will take a few moments...');
 
     var body = this.#getBody();
     body.innerHTML = '';
@@ -457,21 +455,24 @@ class UploadUi {
     if (datasources.length) {
       datasourcesUi.addDatasources(datasources);
     }
+    
     var message, description;
     var countSuccess = uploadResults.length - countFail;
     if (countFail) {
       if (countSuccess){
-        message = `${countSuccess} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, ${countFail} failed.`;
-        description = 'Some uploads failed. Successfull uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
+        message = Internationalization.getText(`{1} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, {2} failed.`, countSuccess, countFail);
+        var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
+        description = Internationalization.getText('Some uploads failed. Successful uploads are available in the {1}.', datasourcesTab);
       }
       else {
-        message = `${countFail} file${countFail > 1 ? 's' : ''} failed.`;
-        description = 'All uploads failed. You can review the errors below:';
+        message = Internationalization.getText(`{1} file${countFail > 1 ? 's' : ''} failed.`, countFail);
+        description = Internationalization.getText('All uploads failed. You can review the errors below:');
       }
     }
     else {
       message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
-      description = 'Your uploads are available in the <label for="datasourcesTab">Datasources tab</label>.';
+      var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
+      description = Internationalization.getText('Your uploads are available in the {1}.', datasourcesTab);
     }
 
     if (countSuccess !== 0){
@@ -479,21 +480,22 @@ class UploadUi {
         description = [
           description,
           '<br/>',
-          '<br/>Click the <span class="editActionButton"></span> button to configure the datasource.',
-         '<br/>Click the <span class="analyzeActionButton"></span> button to start exploring.'
+          '<br/>' + Internationalization.getText('Click the {1} button to configure the datasource.', '<span class="editActionButton"></span>'),
+         '<br/>' + Internationalization.getText('Click the {1} button to start exploring.', '<span class="analyzeActionButton"></span>')
         ].join('\n');
       }
       
       if (datasourceTypes[DuckDbDataSource.types.DUCKDB] || datasourceTypes[DuckDbDataSource.types.SQLITE]){
+        var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
         description = [
           description,
           '<br/>',
-          '<br/>For database files, use the datasources tab to browse the database for tables or views to analyze.'
+          '<br/>' + Internationalization.getText('For database files, use the {1} to browse for tables or views to analyze.', datasourcesTab)
         ].join('\n');
       }
     }
 
-    this.#getHeader().innerText = message;
+    this.#getHeader().textContent = message;
     this.#getDescription().innerHTML = description;
     
     return {
@@ -624,4 +626,3 @@ function initUploadUi(){
   });
 
 }
-

@@ -29,5 +29,5 @@ main > nav#sidebar > div:has( > label[role=tab][for=attributesTab] ) > div[role=
 
 ::highlight(HueyAttributeSearchHighlights) {
   background-color: var( --huey-highlight-background-color );
-  color: black;
+  color: var( --huey-highlight-color );
 }

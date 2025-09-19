@@ -40,7 +40,7 @@ function showErrorDialog(config){
     title = `${config.type}: ${title}`;
   }
   var errorDialogTitle = byId('errorDialogTitle');
-  errorDialogTitle.innerText = title;
+  errorDialogTitle.textContent = title;
   
   var description = config.description;
   if (!description){

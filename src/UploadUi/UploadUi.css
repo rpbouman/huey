@@ -89,14 +89,12 @@ dialog#uploadUi {
 
   > header > p#uploadUiDescription > span.editActionButton::after,
   > section#uploadProgressList > details[aria-invalid=false] > summary > menu > label.editActionButton[for]::before {
-    /* settings */
-    content: '\eb20';
+    content: var( --icon-settings );
   }
 
   > header > p#uploadUiDescription > span.analyzeActionButton::after,
   > section#uploadProgressList > details[aria-invalid=false] > summary > menu > label.analyzeActionButton[for]::before {
-    /* analyze */
-    content: '\f3a3';  
+    content: var( --icon-analyze );
   }
   
 }

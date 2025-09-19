@@ -15,8 +15,7 @@ dialog#errorDialog > header > #errorDialogTitle::before {
   position:relative;
   top:.2em;
   color: red;
-  /* IconExclamationCircle */
-  content: '\f634';
+  content: var( --icon-exclamation-circle );
 }
 
 
@@ -30,10 +29,6 @@ dialog#errorDialog > details#errorDialogDetails {
 }
 
 dialog#errorDialog > details#errorDialogDetails > summary {
-}
-
-dialog#errorDialog > details#errorDialogDetails > summary:after {
-  content: 'Details...'
 }
 
 dialog#errorDialog > details#errorDialogDetails > pre {

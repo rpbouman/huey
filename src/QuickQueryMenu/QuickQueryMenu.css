@@ -1,39 +1,41 @@
+menu[role=toolbar] > label#quickQueryMenuLabel {
+  anchor-name: --quick-query-menu-label;
+}
 
 menu[role=menu]#quickQueryMenu {
-  left: 216px;
-  top: 30px;
-
+  
+  position: fixed;
+  left: anchor(--quick-query-menu-label left);
+  top: calc( anchor(--quick-query-menu-label bottom) + 4px );
 
   > li {
 
     > label[for=quickQueryClearAllButton]:before {
-      /* trash */
-      content: '\eb41';
+      content: var( --icon-trash );
     }
 
     > label[for=quickQueryFlipAxesButton]:before {
-      /* switch */
-      content: '\eb33';
+      content: var( --icon-switch );
     }
 
     > label[for=quickQueryCellHeadersOnColumnsButton]:before {
-      /* table-row */
-      content: '\fb00';
+      content: var( --icon-table-row );
     }
 
     > label[for=quickQueryCellHeadersOnRowsButton]:before {
-      /* table-column */
-      content: '\faff';
+      content: var( --icon-table-column );
     }
 
     > label[for=quickQueryColumnStatisticsButton]:before {
-      /* calculator */
-      content: '\eb80';
+      content: var( --icon-calculator );
     }
 
     > label[for=quickQueryDataPreviewButton]:before {
-      /* article */
-      content: '\f1e2';
+      content: var( --icon-article );
+    }
+
+    > label[for=quickQueryDestructuredDataPreviewButton]:before {
+      content: var( --icon-code-dots );
     }
   }
 
@@ -54,7 +56,7 @@ menu[role=toolbar]:has( #currentDatasource:empty ) > label#quickQueryMenuLabel {
 }
 
 
-/* "Clear All" quick query is not availabel by default */
+/* "Clear All" quick query is not available by default */
 menu#quickQueryMenu > li:has( > label[for=quickQueryClearAllButton] ) {
   display: none;
 }

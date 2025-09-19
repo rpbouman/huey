@@ -60,17 +60,20 @@ class PageStateManager {
       }
 
       var title;
-      var message = `The requested ${desiredDatasourceIdParts.type} ${desiredDatasourceIdParts.localId}`;
+      var message;;
       var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
       var openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
           value: -1,
           checked: true,
-          labelText: 'Browse for a new Datasource'
+          labelText: Internationalization.getText('Browse for a new Datasource')
         });
         title = 'Incompatible Datasource';
-        message += ' isn\'t compatible with your query.';
+        message = Internationalization.getText(
+          'The requested {1} {2} isn\'t compatible with your query.', 
+          desiredDatasourceIdParts.type, desiredDatasourceIdParts.localId
+        );
         
         if (newDatasources && newDatasources.length) {
           var mismatchedColumns = [];
@@ -98,25 +101,28 @@ class PageStateManager {
             var columnDef = referencedColumns[mismatchedColumnName];
             return `${mismatchedColumnName} ${columnDef.columnType}`;
           }).join(', ');
-          message += `\nMissing or unmatched columns: ${mismatchedColumnsString}`;
+          message += '\n' + Internationalization.getText('Missing or unmatched columns: {1}', mismatchedColumnsString);
         }
       }
       else {
+        message = Internationalization.getText(
+          'The requested {1} {2} doesn\'t exist.', 
+          desiredDatasourceIdParts.type, desiredDatasourceIdParts.localId
+        );
         openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
           datasourceType: desiredDatasourceIdParts.type,
           value: -1,
           checked: true,
-          labelText: `Browse to open ${desiredDatasourceIdParts.localId}`
+          labelText: Internationalization.getText('Browse to open {1}', desiredDatasourceIdParts.localId)
         });
         title = 'Datasource not found';
-        message += ' doesn\'t exist.';
       }
 
       var list = '<menu class="dataSources">';
       var datasourceType;
       var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
       if (compatibleDatasourceIds.length) {
-        message += '<br/>Choose any of the compatible datasources instead, or browse for a new one:';
+        message += '<br/>' + Internationalization.getText('Choose any of the compatible datasources instead, or browse for a new one:');
         list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
           var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
           datasourceType = compatibleDatasource.getType();
@@ -144,7 +150,7 @@ class PageStateManager {
       message += list;
 
       var choice = PromptUi.show({
-        title: title,
+        title: Internationalization.getText(title),
         contents: message
       });
 

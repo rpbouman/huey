@@ -138,6 +138,9 @@ class QuickQueryMenu {
         caption: columnName,
         aggregator: 'min'
       };
+      item.formatter = QueryAxisItem.createFormatter(item);
+      item.literalWriter = QueryAxisItem.createLiteralWriter(item);
+      item.parser = QueryAxisItem.createParser(item);
       cellsAxisItems.push(item);
     });
     
@@ -161,6 +164,11 @@ class QuickQueryMenu {
   }
   
   async #destructuredDataPreviewButtonClickHandler(event){
+    // this should be like the data preview but,
+    // - any STRUCT columns should be expanded to column.member items
+    // - if a member of a STRUCT happens to be STRUCT, it should expanded to members too
+    // - any arrays should be expanded to unnest() expressions.
+    alert('Not implemented');
   }
 
 }

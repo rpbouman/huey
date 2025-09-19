@@ -3,7 +3,7 @@ menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton ) {
 }
 
 menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton )::before {
-  content: '\eac5';
+  content: var( --icon-info-circle );
 }
 
 #aboutDialog {

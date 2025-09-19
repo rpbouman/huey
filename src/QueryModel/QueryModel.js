@@ -128,29 +128,37 @@ class QueryAxisItem {
   }
 
   static createCaptionForQueryAxisItem(axisItem){
-    var caption = axisItem.columnName || '';
-    var postfix = '';
-    var prefix = '';
-
-    if (axisItem.memberExpressionPath){
-      postfix += `.${axisItem.memberExpressionPath.join('.')}`;
+    var caption = axisItem.columnName;
+    if (axisItem.memberExpressionPath) {
+      var path = Object.assign([], axisItem.memberExpressionPath);
+      switch (axisItem.derivation) {
+        case 'elements':
+        case 'element indices':
+          path.pop();
+      }
+      caption = `${caption}.${path.join('.')}`;
     }
 
     if (axisItem.derivation) {
-      postfix += ` ${axisItem.derivation}`;
+      var translatedDerivation = Internationalization.getText(axisItem.derivation);
+      if (caption) {        
+        caption = Internationalization.getText('{1} of {2}', translatedDerivation, caption);
+      }
+      else {
+        caption = translatedDerivation;
+      }
     }
-
-    if (axisItem.aggregator){
-      prefix = `${axisItem.aggregator} of `;
+    else 
+    if (axisItem.aggregator) {
+      var translatedAggregator = Internationalization.getText(axisItem.aggregator);
+      if (caption) {
+        caption = Internationalization.getText('{1} of {2}', translatedAggregator, caption);
+      }
+      else {
+        caption = translatedAggregator;
+      }
     }
-
-    if (postfix) {
-      caption += `${postfix}`;
-    }
-
-    if (prefix) {
-      caption = prefix + caption;
-    }
+    
     return caption;
   }
 
@@ -307,9 +315,13 @@ class QueryAxisItem {
       if (aggregatorInfo.columnType) {
         dataType = aggregatorInfo.columnType;
       }
+      else 
+      if (aggregatorInfo.preservesColumnType){
+        // noop
+      }
       else
-      if (aggregator === 'median'){
-        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
+      if (aggregatorInfo && typeof aggregatorInfo.getReturnDataTypeForArgumentDataType === 'function'){
+        dataType = aggregatorInfo.getReturnDataTypeForArgumentDataType(dataType);
       }
       else {
         dataType = undefined;
@@ -336,17 +348,16 @@ class QueryAxisItem {
       });
     }
     
-    var valueLiterals = keys.map(function(key){
+    var isRangeFilterType = FilterDialog.isRangeFilterType(filter.filterType);
+    var toValueKeys = isRangeFilterType ? Object.keys(toValues) : undefined;
+    var toValueLiterals = isRangeFilterType ? [] : undefined;
+    var valueLiterals = keys.map(function(key, index){
       var entry = values[key];
+      if (isRangeFilterType) {
+        toValueLiterals.push( toValues[toValueKeys[index]].literal );
+      }
       return entry.literal;
     });
-    var toValueLiterals;
-    if (FilterDialog.isRangeFilterType(filter.filterType)) {
-      toValueLiterals = Object.keys(toValues).map(function(key){
-        var entry = toValues[key];
-        return entry.literal;
-      });
-    }
     return {
       valueLiterals: valueLiterals,
       toValueLiterals: toValueLiterals
@@ -369,6 +380,11 @@ class QueryAxisItem {
     var filter = queryAxisItem.filter;
 
     var columnExpression = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem, alias);
+    var dataType = QueryAxisItem.getQueryAxisItemDataType(queryAxisItem);          
+    if (dataType === 'VARCHAR' && filter.caseSensitive === false) {
+      columnExpression = `${columnExpression} COLLATE NOCASE`;
+    }
+
     var operator = '';
 
     var nullCondition;
@@ -391,6 +407,7 @@ class QueryAxisItem {
     }
 
     var sql = '', logicalOperator;
+    var needsParentheses = false;
     if (literalLists.valueLiterals.length > 0) {
       switch (filter.filterType) {
 
@@ -401,16 +418,22 @@ class QueryAxisItem {
           // TODO: if the column happens not to contain any nulls, we can omit this condition
           if (indexOfNull === -1) {
             sql = `${columnExpression} IS NULL OR `;
+            needsParentheses = true;
           }
           operator += literalLists.valueLiterals.length === 1 ? ' !' : ' NOT';
           logicalOperator = 'AND';
         case FilterDialog.filterTypes.INCLUDE:
           operator += literalLists.valueLiterals.length === 1 ? '=' : ' IN';
           var values = literalLists.valueLiterals.length === 1 ? literalLists.valueLiterals[0] : `( ${literalLists.valueLiterals.join('\n,')} )`;
+          
           sql += `${columnExpression} ${operator} ${values}`;
 
           if (indexOfNull !== -1) {
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+            if (!logicalOperator) {
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`;
           }
           sql = `( ${sql} )`;
           break;
@@ -428,7 +451,11 @@ class QueryAxisItem {
           sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
             acc += '\n';
             if (currIndex) {
-              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+              if (!logicalOperator) {
+                logicalOperator = 'OR';
+                needsParentheses = true;
+              }
+              acc += logicalOperator + ' ';
             }
             var value = literalLists.valueLiterals[currIndex];
             acc += `${columnExpression} ${operator} ${value}`;
@@ -444,14 +471,19 @@ class QueryAxisItem {
               nullCondition = `${columnExpression} IS NULL`;
               if (literalLists.valueLiterals.length) {
                 sql = `(${sql}) OR ${nullCondition}`;
+                needsParentheses = true;
               }
               else {
                 sql = nullCondition;
               }
             }
           }
-          else{
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR'} ${sql}`;
+          else {
+            if (!logicalOperator) {
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`;
           }
           break;
 
@@ -464,7 +496,11 @@ class QueryAxisItem {
           sql = literalLists.valueLiterals.reduce(function(acc, curr, currIndex){
             acc += '\n';
             if (currIndex) {
-              acc += (logicalOperator ? logicalOperator : 'OR') + ' ';
+              if (!logicalOperator){
+                logicalOperator = 'OR';
+                needsParentheses = true;
+              }
+              acc += logicalOperator + ' ';
             }
             var fromValue = literalLists.valueLiterals[currIndex];
             var toValue = literalLists.toValueLiterals[currIndex];
@@ -473,13 +509,13 @@ class QueryAxisItem {
           }, '');
 
           if (nullCondition) {
-            sql = `${nullCondition} ${logicalOperator ? logicalOperator : 'OR '} ${sql}`
+            if (!logicalOperator){
+              logicalOperator = 'OR';
+              needsParentheses = true;
+            }
+            sql = `${nullCondition} ${logicalOperator} ${sql}`
           }
-          if (!logicalOperator && nullCondition || literalLists.valueLiterals.length > 1) {
-            sql = `( ${sql} )`;
-          }
-          break;
-        
+          break;        
         case FilterDialog.filterTypes.NOTHASANY:
         case FilterDialog.filterTypes.NOTHASALL:
         case FilterDialog.filterTypes.HASANY:
@@ -510,6 +546,9 @@ class QueryAxisItem {
     }
     else {
       sql = nullCondition;
+    }
+    if (needsParentheses) {
+      sql = `( ${sql} )`;
     }
     return sql;
   }
@@ -1494,8 +1533,11 @@ class QueryModel extends EventEmitter {
         datasource = datasourcesUi.getDatasource(datasourceId);
       }
       else
-      if(queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource){
+      if ( queryModelState.datasource && queryModelState.datasource instanceof DuckDbDataSource ){
         datasource = queryModelState.datasource;
+      }
+      else {
+        datasource = this.getDatasource();
       }
 
       if (this.getDatasource() === datasource) {

@@ -86,16 +86,16 @@ body {
 
 
       > label[for=uploader]::before {
-        content: "\eb47";
+        content: var( --icon-upload );
       }
       
       
       > label[for=loadFromUrl]::before {
-        content: "\ea75";
+        content: var( --icon-cloud-upload );
       }  
 
       > label[for=cloneHueySession]::before {
-        content: "\ea7a";
+        content: var( --icon-copy );
         padding-left: 8px;
       }
 
@@ -109,8 +109,7 @@ body {
         color: var(--huey-icon-color-subtle);
         margin: 0px 4px 0px 4px;
         display: inline-block;
-        /* square */
-        content: "\eb2c";
+        content: var( --icon-square );
       }
 
       > label[for=autoRunQuery]:hover::after {
@@ -158,8 +157,7 @@ body {
 
       > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) )::after {
         font-family: var( --huey-icon-font-family );
-        /* caret-down */
-        content: '\fb2a';
+        content: var( --icon-caret-down );
       }
       
       > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
@@ -173,21 +171,25 @@ body {
       }
       
       #queryResultRowsInfo {
-        padding-left: 1em;
       }
 
-      /* separator after 'rows' */ 
-      > label[for=queryResultRowsInfo]:after {
-        content: ' rows;'
+      > label[for=queryResultRowsInfo]:before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-column );
       }
 
       /* if the columns info is empty then no separator after 'rows' */ 
-      > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):after {
-        content: ' rows'
+      > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-column );
       }
       
-      > label[for=queryResultColumnsInfo]:after {
-        content: ' columns'
+      > label[for=queryResultColumnsInfo]:before {
+        font-family: var( --huey-icon-font-family );
+        font-size: var( --huey-icon-medium );
+        content: var( --icon-table-row );
       }
     }
     
@@ -201,20 +203,17 @@ body {
     }
 
     > label[for=runQueryButton]::before {
-      /* player-play */
-      content: "\ed46";
+      content: var( --icon-player-play );
     }
   }
 
   > main:has( > .workarea > #pivotTableUi[data-needs-update=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
-    /* player-play */
-    content: "\ed46";
+    content: var( --icon-player-play );
     color: var( --huey-icon-highlight );
   }
 
   > main:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
-    /* player-play-filled */
-    content: "\f691";
+    content: var( --icon-player-play-filled );
     color: var( --huey-icon-highlight );
     pointer-events: none;
   }
@@ -226,8 +225,7 @@ body:has( #autoRunQuery:checked ) {
     > menu[role=toolbar] {
       
       > label[for=autoRunQuery]::after {
-        /* checkbox */
-        content: "\eba6";
+        content: var( --icon-checkbox );
         color: var( --huey-icon-color-highlight );
       }
       

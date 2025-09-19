@@ -1,6 +1,12 @@
+menu[role=toolbar] > label#currentDatasource {
+  anchor-name: --current-datasource-menu-label;
+}
+
+
 menu[role=menu]#dataSourceMenu {
-  left: 320px;
-  top: 30px;
+  position: fixed;
+  left: anchor( --current-datasource-menu-label left);
+  top: calc( anchor( --current-datasource-menu-label bottom) + 4px );
   
   > li[role=menuitem] {
     
@@ -43,42 +49,35 @@ menu.dataSources {
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=csv] > summary > span.label::before {
-  /* file-type-csv */
-  content: '\fb09';
+  content: var( --icon-file-type-csv );
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=tsv] > summary > span.label::before {
-  /* file-type-csv */
-  content: '\fb09';
+  content: var( --icon-file-type-csv );
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=txt] > summary > span.label::before {
-  /* file-type-txt */
-  content: '\fb19';
+  content: var( --icon-file-type-txt );
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype^=json] > summary > span.label::before {
-  /* file-type-js */
-  content: '\fb0e';
+  content: var( --icon-file-type-js );
 }
 
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=sql] > summary > span.label::before {
-  /* file-type-sql */
-  content: '\fb0e';
+  content: var( --icon-file-type-sql );
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=parquet] > summary > span.label::before {
-  /* file-stack */
-  content: '\f503';
+  content: var( --icon-file-stack );
 }
 
 menu.dataSources > li[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > label::before,
 #datasourcesUi details[data-nodetype=datasource][data-datasourcetype=file][data-filetype=xlsx] > summary > span.label::before {
-  /* file-type-xls */
-  content: '\fb1b';
+  content: var( --icon-file-type-xls ) ;
 }
 

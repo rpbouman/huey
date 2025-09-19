@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Huey</title>
+    <title class="i18nIgnore">Huey</title>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="description" content="Huey is an open-source browser-based application that lets you make crosstabs/pivot tables on larget datasets."/>
@@ -11,16 +11,15 @@
     />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
 
-    <style id="tabler-font">
-    </style>
+    <style id="tabler-font"></style>
 
     <script>
-    var hueyVersionNumber = '1.0.9';
-    var hueyVersionName = 'Golden Cascade';
+    var hueyVersionNumber = '1.0.10';
+    var hueyVersionName = 'Grimao Ermaôs';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.34.0';
+    var tablerIconsFontVersion = '3.35.0';
     var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     var preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
@@ -39,7 +38,7 @@
       }
     `);
 
-    var duckdbLibraryVersion = '1.29.1-dev263.0';
+    var duckdbLibraryVersion = '1.30.1-dev2.0';
     var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -50,35 +49,33 @@
         return;
       }
       var item = document.createElement('li');
+      item.className = 'i18nIgnore';
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
-      item.innerText = url;
+      item.textContent = url;
       list.appendChild(item);
     }
     
     </script>
 
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Theme/icons.css"/>
     <!-- 
       Markup for resource loading
     -->
     <style type="text/css">
       ul#resources > li::marker {
         font-family: "tabler-icons";
-        /* file */
-        content: '\eaa4';
+        content: var( --icon-file );
       }
 
       ul#resources > li[data-resource-type=css]::marker {
-        /* file-type-css */
-        content: '\fb08';
+        content: var( --icon-file-type-css );
       }
       ul#resources > li[data-resource-type=js]::marker {
-        /* file-type-js */
-        content: '\fb0e';
+        content: var( --icon-file-type-js );
       }
       ul#resources > li[data-resource-type=woff2]::marker {
-        /* file-typography */
-        content: '\f041';
+        content: var( --icon-file-typography );
       }
     </style>
 
@@ -86,7 +83,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
-    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DraggableDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DragableDialogs.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
@@ -140,66 +137,67 @@
 
     <datalist id="commonDateFormats">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value="%x">2024-06-03 (iso)</option>
-      <option value="%d/%m/%Y">03/06/2024</option>
-      <option value="%A, %-d %B %Y">Monday, 3 June 2024</option>
+      <option value="%x" class="i18nIgnore">2024-06-03 (iso)</option>
+      <option value="%d/%m/%Y" class="i18nIgnore">03/06/2024</option>
+      <option value="%A, %-d %B %Y" class="i18nIgnore">Monday, 3 June 2024</option>
     </datalist>
 
     <datalist id="commonTimestampFormats">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value="%c">2024-06-03 13:23:05 (iso)</option>
-      <option value="%d/%m/%Y %I:%M:%S %p">03/06/2024 01:23:05 am</option>
-      <option value="%A, %-d %B %Y %H:%M ">Monday, 3 June 2024 13:23</option>
+      <option value="%c" class="i18nIgnore">2024-06-03 13:23:05 (iso)</option>
+      <option value="%d/%m/%Y %I:%M:%S %p" class="i18nIgnore">03/06/2024 01:23:05 am</option>
+      <option value="%A, %-d %B %Y %H:%M" class="i18nIgnore">Monday, 3 June 2024 13:23</option>
     </datalist>
 
     <datalist id="commonDecimalSeparators">
       <option data-auto="true" value="(default)">(default)</option>
-      <option value=".">dot</option>
-      <option value=",">comma</option>
-      <option value="_">underscore</option>
-      <option value=" ">space</option>
+      <option value=".">Dot</option>
+      <option value=",">Comma</option>
+      <option value="_">Underscore</option>
+      <option value=" ">Space</option>
     </datalist>
 
     <datalist id="commonCsvNullValueStrings">
       <option data-auto="true" value="empty">(empty)</option>
-      <option data-auto="true" value="NULL">NULL</option>
+      <option data-auto="true" class="i18nIgnore" value="NULL">NULL</option>
     </datalist>
     
     <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
     <datalist id="commonDittoMarks">
       <!-- non breaking space -->
-      <option value="&nbsp;">&nbsp;</option>
+      <option value="&nbsp;" class="i18nIgnore">&nbsp;</option>
       <!-- one single quote (apostrophe) -->
-      <option value="&apos;">'</option>
+      <option value="&apos;" class="i18nIgnore">'</option>
       <!-- two single quotes (apostrophes) -->
-      <option value="&apos;&apos;">''</option>
+      <option value="&apos;&apos;" class="i18nIgnore">''</option>
       <!-- double quote -->
-      <option value="&quot;">"</option>
+      <option value="&quot;" class="i18nIgnore">"</option>
       <!-- Right-Pointing Double Angle Quotation Mark » -->
-      <option value="&#xBB;">&#xBB;</option>
+      <option value="&#xBB;" class="i18nIgnore">&#xBB;</option>
       <!-- Horizontal bar ― -->
-      <option value="&#x2015;">&#x2015;</option>
+      <option value="&#x2015;" class="i18nIgnore">&#x2015;</option>
       <!-- left double quotation mark: “ -->
-      <option value="&#x201C;">&#x201C;</option>
+      <option value="&#x201C;" class="i18nIgnore">&#x201C;</option>
       <!-- right double quotation mark: ” -->
-      <option value="&#x201D;">&#x201D;</option>
+      <option value="&#x201D;" class="i18nIgnore">&#x201D;</option>
       <!-- double low-9 quotation mark: ” -->
-      <option value="&#x201E;">&#x201E;</option>
+      <option value="&#x201E;" class="i18nIgnore">&#x201E;</option>
       <!-- double high-9 quotation mark: ” -->
-      <option value="&#x201F;">&#x201E;</option>
+      <option value="&#x201F;" class="i18nIgnore">&#x201E;</option>
       <!--  DOUBLE PRIME -->
-      <option value="&#x2033;">&#x2033;</option>
+      <option value="&#x2033;" class="i18nIgnore">&#x2033;</option>
       — „ — 
       <!-- ditto mark: 〃-->
-      <option value="&#x3003;">&#x3003;</option>
+      <option value="&#x3003;" class="i18nIgnore">&#x3003;</option>
     </datalist>
   </head>
 
   <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
-      <header id="logo">Huey</header>
-      <div id="logoVersion"></div>
+      <header id="logo" class="i18nIgnore">Huey</header>
+      <div id="logoVersion" class="i18nIgnore"></div>
+      <div id="powered-by"></div>
       <ul id="resources" style="position:absolute; top: 0px" ></ul>
     </div>
 
@@ -212,7 +210,7 @@
     >
       <header>
         <h3 id="uploadUiTitle"></h3>
-        <p id="uploadUiDescription">;</p>
+        <p id="uploadUiDescription"></p>
         <div class="timer">
           <span class="digit"></span>
           <span class="digit"></span>
@@ -220,6 +218,7 @@
           <span class="digit"></span>
         </div>
       </header>
+      
       <template id="uploadItemTemplate">
         <details id="filename">
           <summary>
@@ -233,8 +232,10 @@
           <p></p>
         </details>
       </template>
+      
       <section id="uploadProgressList">
       </section>
+      
       <footer role="toolbar">
         <button
           id="uploadDialogOkButton"
@@ -306,7 +307,7 @@
             <legend title="Control where the results are exported to">Export destination</legend>
             <label
               for="exportDestinationFile"
-              title="Download the export data as a file so you can store it on your system."
+              title="Download the export data and save it to a local file."
             >File</label>
             <input
               id="exportDestinationFile"
@@ -323,7 +324,7 @@
               id="exportDestinationClipboard"
               type="radio"
               name="exportDestination"
-              title="Check this to copy the export data to the clipboard so you can paste it in other applications"
+              title="Check to copy the data to the clipboard in order to paste it in other applications"
             />
           </fieldset>
         </form>
@@ -356,7 +357,7 @@
               >
                 <option value="UNCOMPRESSED" label="uncompressed" title="Uncompressed - no compression will be applied"/>
                 <option value="GZIP" label="gzip" title="GZIP - applies gzip compression"/>
-                <option value="ZSTD" label="zstd" title="ZTSD - applies zstd compression"/>
+                <option value="ZSTD" label="zstd" title="ZSTD - applies zstd compression"/>
               </select>
               <label
                 title="Whether to include a line of column headers."
@@ -551,7 +552,7 @@
                 <label
                   for="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
-                >Row delimiter</label>
+                >Row Delimiter</label>
                 <select
                   id="exportJsonRowDelimiter"
                   title="This controls how rows are delimited in the JSON output"
@@ -678,14 +679,14 @@
               >
                 <option
                   title="Initial capital followed by lowercase"
-                  value="initialCapital">Initial Capital</option>
+                  value="initialCapital">initial capital</option>
                 <option
-                  title="Lowercase"
-                  value="lowerCase">Lower Case</option>
+                  title="lowercase"
+                  value="lowerCase">lowercase</option>
                 <option
-                  title="Uppercase"
+                  title="uppercase"
                   value="upperCase"
-                  selected="true">Upper Case</option>
+                  selected="true">uppercase</option>
               </select>
               <label
                 for="exportSqlAlwaysQuoteIdentifiers"
@@ -741,7 +742,6 @@
         </div>
       </section>
       <footer role="toolbar">
-      
         <button
           id="exportDialogExecuteButton"
           autofocus="true"
@@ -798,30 +798,43 @@
       </header>
       <section>
         <header>
-          <menu role="toolbar">
-
-            <label
-              for="filterSearchApplyAll"
-              title="Check to include the other filter items (in addition to the search string) to populate the picklist"
-            >
-              Apply all filters:
-              <input
-                id="filterSearchApplyAll"
-                type="checkbox"
-              />
-            </label>
-
-            <label
-              for="filterSearchAutoWildcards"
-              title="Check to automatically apply LIKE wildcards"
-            >
-              Auto-wildcards:
-              <input
-                id="filterSearchAutoWildcards"
-                type="checkbox"
-              />
-            </label>
-
+          <menu role="menubar">
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchApplyAll"
+                title="Check to include the other filter items (in addition to the search string) to populate the picklist"
+              >
+                <span>Apply all filters</span>
+                <input
+                  id="filterSearchApplyAll"
+                  type="checkbox"
+                />
+              </label>
+            </li>
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchAutoWildcards"
+                title="Check to automatically apply LIKE wildcards"
+              >
+                <span>Auto-wildcards</span>
+                <input
+                  id="filterSearchAutoWildcards"
+                  type="checkbox"
+                />                
+              </label>
+            </li>
+            <li role="menuitemcheckbox">
+              <label
+                for="filterSearchCaseSensitive"
+                title="Is the search term case-sensitive?"
+              >
+                <span>Case sensitive</span>
+                <input
+                  id="filterSearchCaseSensitive"
+                  type="checkbox"
+                />
+              </label>
+            </li>
           </menu>
           <section>
             <div id="filterDialogSpinner" class="loader loader-medium"></div>
@@ -844,7 +857,7 @@
               <select
                 id="filterPicklist"
                 multiple="true"
-                size="5"
+                size="4"
                 title="Click values in the picklist to add them to the Filter values list. (Hold ctrl-key to select multiple items, hold shift-key to select a range.)"
                 tabindex="0"
               >
@@ -859,7 +872,7 @@
             <select
               id="filterValueList"
               multiple="true"
-              size="7"
+              size="4"
               title="Values in this list will be used to filter the results. Add items to the list by choosing from the picklist above; click items in the list to remove them."
             >
             </select>
@@ -876,20 +889,22 @@
           </div>
         </section>
         <footer id="filterValueSelectionStatus" role="status"></footer>
-        <menu role="toolbar">
-          <label 
-            for="filterDialogShowRawCheckbox"
-            title="Check to display raw values. Uncheck to display formatter values."
-          >
-            Reveal raw values:
-            <input 
-              id="filterDialogShowRawCheckbox"
-              type="checkbox"
-            />
-          </label>
+        <menu role="menubar">
+          <li role="menuitemcheckbox">
+            <label 
+              for="filterDialogShowRawCheckbox"
+              title="Check to display raw values. Uncheck to display formatter values."
+            >
+              <span>Reveal raw values</span>
+              <input 
+                id="filterDialogShowRawCheckbox"
+                type="checkbox"
+              />
+            </label>
+          </li>
         </menu>
         <footer role="toolbar">
-          <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.)">Clear Highlighted</button>
+          <button id="filterDialogClearSelectedButton" title="Clear highlighted items from the selection.">Clear Highlighted</button>
           <button id="filterDialogClearButton" title="Clear the values list">Clear All</button>
         </footer>
       </section>
@@ -928,7 +943,7 @@
       <section id="errorDialogDescription">
       </section>
       <details id="errorDialogDetails">
-        <summary></summary>
+        <summary>Details...</summary>
         <pre id="errorDialogStack"></pre>
       </details>
       <footer role="toolbar">
@@ -1351,14 +1366,17 @@
         <h3 id="aboutDialogTitle">About Huey...</h3>
       </header>
       <section>
-        <p>
-          Relational OLAP powered by DuckDB-WASM
+        <p >
+          Relational OLAP powered by DuckDB-WASM 
         </p>
         <ul>
-          <li id="hueyVersion"></li>
-          <li><a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel"></a></li>
-          <li><a id="duckDbLibraryUrl" target="_duckdb-jsdelivr"></a></li>
-          <li><a id="tablerIconsUrl" href="https://tabler.io/icons" target="_tabler-icons"></a></li>
+          <li id="hueyVersion" class="i18nIgnore"></li>
+          <li>
+            <a href="https://duckdb.org/" target="_duckdb" id="duckdbVersionLabel" class="i18nIgnore"></a>
+            <img id="duckdb-version-specific-avatar" width="16px" src="https://duckdb.org/images/release-icons/1.3.0.svg"/>
+          </li>
+          <li><a id="duckDbLibraryUrl" target="_duckdb-jsdelivr" class="i18nIgnore"></a></li>
+          <li><a id="tablerIconsUrl" href="https://tabler.io/icons" target="_tabler-icons" class="i18nIgnore"></a></li>
           <li><a href="https://github.com/rpbouman/huey/" target="_github">Huey Github Repository</a></li>
           <li><a href="https://github.com/rpbouman/huey/issues/new" target="_github">Bug report/feature request...</a></li>
           <li><a href="https://raw.githubusercontent.com/rpbouman/huey/dev/LICENSE" target="_github">License (MIT)</a></li>
@@ -1482,7 +1500,7 @@
                   id="csvReaderSampleSize"
                   type="number"
                   min="0"
-                  title="he number of sample rows for auto detection of parameters. Default: 20480"
+                  title="The number of sample rows for auto detection of parameters. Default: 20480"
                 />
               </fieldset>
               <fieldset>
@@ -1504,7 +1522,7 @@
               </fieldset>
               <fieldset>
                 <legend>Data Types</legend>
-                <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code>VARCHAR</code></label>
+                <label for="csvReaderAllVarchar" title="Skip type detection and assume all columns to be of type VARCHAR.">All <code class="i18nIgnore">VARCHAR</code></label>
                 <input
                   id="csvReaderAllVarchar"
                   type="checkbox"
@@ -1572,9 +1590,9 @@
                   title="Set the new line character(s) in the file."
                 >
                   <option value="" title="Automatically detect the row delimiter">(auto)</option>
-                  <option value="\r" title="Carriage Return">CR</option>
-                  <option value="\r\n" title="Carriage Return/Linefeed pair">CRLF</option>
-                  <option value="\n" title="Linefeed">LF</option>
+                  <option value="\r" title="Carriage Return" class="i18nIgnore">CR</option>
+                  <option value="\r\n" title="Carriage Return/Linefeed pair" class="i18nIgnore">CRLF</option>
+                  <option value="\n" title="Linefeed" class="i18nIgnore">LF</option>
                 </select>
                 <label for="csvReaderQuote" title="The string used to quote values">Quote Character</label>
                 <input
@@ -1718,13 +1736,13 @@
           popovertarget="datasourceSettingsDialog"
           popovertargetaction="hide"
           value="Ok"
-        />
+        >Ok</button>
         <button
           id="datasourceSettingsDialogCancelButton"
           popovertarget="datasourceSettingsDialog"
           popovertargetaction="hide"
           value="Cancel"
-        />
+        >Cancel</button>
       </footer>
     </dialog>
 
@@ -1762,7 +1780,7 @@
               for="pivotTableContextMenuItemCopyCell"
               title="Copy the value of this cell to the clipboard"
             >
-              Copy Cell Value
+              <span>Copy Cell Value</span>
               <button id="pivotTableContextMenuItemCopyCell">Copy Cell Value</button>
             </label>
           </li>
@@ -1771,8 +1789,8 @@
               for="pivotTableContextMenuItemCopyColumn"
               title="Copy the column header values to the clipboard"
             >
-              Copy Column Tuple
-              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Values</button>
+              <span>Copy Column Headings</span>
+              <button id="pivotTableContextMenuItemCopyColumn">Copy Column Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1780,8 +1798,8 @@
               for="pivotTableContextMenuItemCopyColumnTuples"
               title="Copy the header values for each column to the clipboard"
             >
-              Copy Column Tuples
-              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy Column Tuples</button>
+              <span>Copy All Column Headings</span>
+              <button id="pivotTableContextMenuItemCopyColumnTuples">Copy All Column Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1789,8 +1807,8 @@
               for="pivotTableContextMenuItemCopyRow"
               title="Copy the row header values to the clipboard"
             >
-              Copy Row Tuple
-              <button id="pivotTableContextMenuItemCopyRow">Copy Row Values</button>
+              <span>Copy Row Headings</span>
+              <button id="pivotTableContextMenuItemCopyRow">Copy Row Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1798,8 +1816,8 @@
               for="pivotTableContextMenuItemCopyRowTuples"
               title="Copy the header values for each row to the clipboard"
             >
-              Copy Row Tuples
-              <button id="pivotTableContextMenuItemCopyRowTuples">Copy Row Tuples</button>
+              <span>Copy All Row Headings</span>
+              <button id="pivotTableContextMenuItemCopyRowTuples">Copy All Row Headings</button>
             </label>
           </li>
           <li role="menuitem">
@@ -1807,15 +1825,16 @@
               for="pivotTableContextMenuItemCopyTable"
               title="Copy the entire pivot table to the clipboard"
             >
-              Copy Table
+              <span>Copy Table</span>
               <button id="pivotTableContextMenuItemCopyTable">Copy Table</button>
             </label>
           </li>
         </menu>
-        <label
+        <label 
           for="copySubmenuActivate"
+          title="Menu with copy actions"
         >
-          Copy
+          <span>Copy</span>
           <button
             id="copySubmenuActivate"
             popovertarget="copySubmenu"
@@ -1824,10 +1843,11 @@
         </label>
       </li>
       <li role="menuitem">
-        <label
+        <label 
           for="filterSubmenuActivate"
+          title="Menu with filter actions"
         >
-          Filter
+          <span>Filter</span>
           <button
             id="filterSubmenuActivate"
             popovertarget="filterSubmenu"
@@ -1844,7 +1864,7 @@
               for="pivotTableContextMenuItemFilterIncludeValue"
               title="Add this value in an include filter"
             >
-              Include Value
+              <span>Include Value</span>
               <button id="pivotTableContextMenuItemFilterIncludeValue">Include Value</button>
             </label>
           </li>
@@ -1853,7 +1873,7 @@
               for="pivotTableContextMenuItemFilterExcludeValue"
               title="Add this value in an exclude filter"
             >
-              Exclude Value
+              <span>Exclude Value</span>
               <button id="pivotTableContextMenuItemFilterExcludeValue">Exclude Value</button>
             </label>
           </li>
@@ -1905,12 +1925,12 @@
       <section>
         <header>
           <label><button id="-axis-primary-action"></button></label>
-          <h1>Axis Caption</h1>
+          <h1></h1>
         </header>
         <ol>
         </ol>
         <footer>
-          <label title="Clear all items from this axis"><button id="-clear-axis">Clear axis</button></label>
+          <label title="Remove all items from this axis"><button id="-clear-axis">Clear axis</button></label>
         </footer>
       </section>
     </template>
@@ -1918,36 +1938,42 @@
     <template id="queryUiAxisItem">
       <li draggable="true">
         <label title="Move this item to the left">
-          <button id="-move-left">Move item left</button>
+          <button id="-move-left">Move this item to the left</button>
         </label>
-        <span>caption</span>
+        <span></span>
         <menu>
           <label title="Calculate totals for this level">
             <input id="-toggle-totals" type="checkbox"/>
           </label>
           <label title="Move this item to the other axis">
-            <button id="-move-to-other-axis">Move item to other axis</button>
+            <button id="-move-to-other-axis">Move this item to the other axis</button>
           </label>
           <label title="Remove this item from the axis">
-            <button id="-remove-from-axis">Remove item from axis</button>
+            <button id="-remove-from-axis">Remove this item from the axis</button>
           </label>
         </menu>
         <label title="Move this item to the right">
-          <button id="-move-right">Move item right</button>
+          <button id="-move-right">Move this item to the right</button>
         </label>
       </li>
     </template>
 
     <template id="queryUiFilterAxisItemValue">
       <li role="menuitem">
-        <label for="">
+        <label 
+          title="Use the checkbox to enable/disable this condition"
+          for=""
+        >
           <span></span>
           <input
             id=""
             type="checkbox"
           />
         </label>
-        <label for="">
+        <label 
+          title="Remove this filter condition"
+          for=""
+        >
           <button></button>
         </label>
       </li>
@@ -1956,13 +1982,13 @@
     <template id="queryUiFilterAxisItem">
       <li draggable="true">
         <label title="Move this item to the left">
-          <button id="-move-left">Move item left</button>
+          <button id="-move-left">Move this item to the left</button>
         </label>
         <details>
           <summary>
-            <span>caption</span>
+            <span></span>
           </summary>
-          <header></header>
+          <header title="Filter condition type"></header>
           <ol role="menu"></ol>
         </details>
         <menu>
@@ -1970,11 +1996,11 @@
             <button id="-edit-filter-condition">Click to open the filter dialog to edit the filter.</button>
           </label>
           <label title="Remove this item from the axis">
-            <button id="-remove-from-axis">Remove item from axis</button>
+            <button id="-remove-from-axis">Remove this item from the axis</button>
           </label>
         </menu>
         <label title="Move this item to the right">
-          <button id="-move-right">Move item right</button>
+          <button id="-move-right">Move this item to the right</button>
         </label>
       </li>
     </template>
@@ -2020,7 +2046,9 @@
           id="quickQueryMenuLabel"
           for="quickQueryMenuButton"
           title="The Quick Query Menu provides easy access to predefined queries for exploring the datasource."
-        >Quick Query<button
+        >
+          <span>Quick Query</span>
+          <button
             id="quickQueryMenuButton"
             popovertarget="quickQueryMenu"
             popovertargetaction="show"
@@ -2034,11 +2062,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryClearAllButton"
-                title="Clear the query so you can start a new one."
-              >Clear All
+                title="Clear the query and start a new one."
+              ><span>Clear All</span>
                 <button
                   id="quickQueryClearAllButton"
-                  title="Clear the query so you can start a new one."
+                  title="Clear the query and start a new one."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Clear All</button>
@@ -2048,7 +2076,7 @@
               <label
                 for="quickQueryFlipAxesButton"
                 title="Flip the rows and columns axes."
-              >Flip Axes
+              ><span>Flip Axes</span>
                 <button
                   id="quickQueryFlipAxesButton"
                   title="Flip the rows and columns axes."
@@ -2061,7 +2089,7 @@
               <label
                 for="quickQueryCellHeadersOnColumnsButton"
                 title="Place the cell headers on the columns axis."
-              >Cell Headers on Columns
+              ><span>Cell Headers on Columns</span>
                 <button
                   id="quickQueryCellHeadersOnColumnsButton"
                   title="Place the cell headers on the columns axis."
@@ -2074,7 +2102,7 @@
               <label
                 for="quickQueryCellHeadersOnRowsButton"
                 title="Place the cell headers on the rows axis."
-              >Cell Headers on Rows
+              ><span>Cell Headers on Rows</span>
                 <button
                   id="quickQueryCellHeadersOnRowsButton"
                   title="Place the cell headers on the rows axis."
@@ -2087,7 +2115,7 @@
               <label
                 for="quickQueryColumnStatisticsButton"
                 title="Get statistics for each column."
-              >Column Statistics
+              ><span>Column Statistics</span>
                 <button
                   id="quickQueryColumnStatisticsButton"
                   title="Get statistics for each column."
@@ -2099,11 +2127,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryDataPreviewButton"
-                title="Add all columns to the query so you can preview the data at the detail level."
-              >Data Preview
+                title="Add all columns to the query and preview the data at the detail level."
+              ><span>Data Preview</span>
                 <button
                   id="quickQueryDataPreviewButton"
-                  title="Add all columns to the query so you can preview the data at the detail level."
+                  title="Add all columns to the query and preview the data at the detail level."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Data Preview</button>
@@ -2112,11 +2140,11 @@
             <li role="menuitem">
               <label
                 for="quickQueryDestructuredDataPreviewButton"
-                title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
-              >Destructured Data Preview
+                title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."
+              ><span>Destructured Data Preview</span>
                 <button
                   id="quickQueryDestructuredDataPreviewButton"
-                  title="Add scalar columns and STRUCT members to the query so you can preview the data at the detail level."
+                  title="Add scalar columns and STRUCT members to the query and preview the data at the detail level."
                   popovertarget="quickQueryMenu"
                   popovertargetaction="hide"
                 >Destructured Data Preview</button>
@@ -2161,7 +2189,7 @@
             id="aboutButton"
             popovertarget="aboutDialog"
             popovertargetaction="show"
-          >About</button>
+          >About Huey...</button>
         </label>
 
         <label for="settingsButton" title="Open the Huey Settings dialog.">
@@ -2169,7 +2197,7 @@
             id="settingsButton"
             popovertarget="settingsDialog"
             popovertargetaction="show"
-          >Settings</button>
+          >Settings...</button>
         </label>
 
         <label
@@ -2206,6 +2234,7 @@
             role="tabpanel"
           >
             <label for="uploader">Drop some files here, or click the Upload button:</label>
+            
             <template id="dataSourceGroupNodeActionButton">
               <label
                 class="${class}"
@@ -2215,6 +2244,7 @@
                 <button id="${id}"></button>
               </label>
             </template>
+            
             <template id="dataSourceNode">
               <details
                 role="treeitem"
@@ -2223,10 +2253,11 @@
                 title="${title}"
               >
                 <summary>
-                  <span class="label">${caption}</span>
+                  <span class="label i18nIgnore">${caption}</span>
                 </summary>
               </details>
             </template>
+            
             <template id="dataSourceGroupNode">
               <details
                 role="treeitem"
@@ -2241,6 +2272,7 @@
                 </summary>
               </details>
             </template>
+            
             <template id="dataSourceSchemaNode">
               <details
                 role="treeitem"
@@ -2253,10 +2285,11 @@
                 open="true"
               >
                 <summary>
-                  <span class="label">${caption}</span>
+                  <span class="label i18nIgnore">${caption}</span>
                 </summary>
               </details>
             </template>
+            
             <div
               id="datasourcesUi"
               role="tree"
@@ -2323,16 +2356,13 @@
               class="attributeUi"
               style="flex-grow: 1;"
               role="tree"
-            >              
-            </div>
+            ></div>
           </div>
         </div>
       </nav>
 
-      <div id="workarea" class="workarea">
-
-
-      </div>
+      <div id="workarea" class="workarea"></div>
+      
     </main>
 
     <script onload="resourceLoaded(this)" src="util/dom/dom.js"></script>
@@ -2341,8 +2371,9 @@
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
+    <script onload="resourceLoaded(this)" src="Internationalization/Internationalization.js"></script>
 
-    <script onload="resourceLoaded(this)" src="DragAndDrop/DraggableDialogs.js"></script>
+    <script onload="resourceLoaded(this)" src="DragAndDrop/DragableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 

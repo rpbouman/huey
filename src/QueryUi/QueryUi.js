@@ -260,39 +260,14 @@ class QueryUi {
   }
 
   #getQueryAxisItemUiCaption(axisItem){
+    var caption;
     if (axisItem.caption) {
-      return axisItem.caption;
+      caption = axisItem.caption;
     }
-    var expression = axisItem.columnName;
-    if (axisItem.memberExpressionPath) {
-      var path = Object.assign([], axisItem.memberExpressionPath);
-      switch (axisItem.derivation) {
-        case 'elements':
-        case 'element indices':
-          path.pop();
-      }
-      expression = `${expression}.${path.join('.')}`;
+    else {
+      caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
     }
-
-    if (axisItem.derivation) {
-      if (expression) {
-        expression = `${axisItem.derivation} of ${expression}`;
-      }
-      else {
-        expression = axisItem.derivation;
-      }
-    }
-    else 
-    if (axisItem.aggregator) {
-      if (expression) {
-        expression = `${axisItem.aggregator} of ${expression}`;
-      }
-      else {
-        expression = axisItem.aggregator;
-      }
-    }
-    
-    return expression;
+    return caption;
   }
 
   #getQueryModelItem(queryAxisItemUi){
@@ -342,11 +317,17 @@ class QueryUi {
       axisItem.filter && Object.keys(axisItem.filter.values).length === 0
     ) {
       title = 'No filters set. Click the filter Icon to open the Filter Dialog to create filters.';
+      title = Internationalization.getText(title) || title;
     }
     else {
       title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
     }
     return title;
+  }
+  
+  #getCaptionUi(itemUi){
+    var captionUi = itemUi.getElementsByTagName('span').item(0);
+    return captionUi;
   }
 
   #createQueryAxisItemUi(axisItem){
@@ -390,8 +371,8 @@ class QueryUi {
     }
 
     var captionText = this.#getQueryAxisItemUiCaption(axisItem);
-    var captionUi = itemUi.getElementsByTagName('span').item(0);
-    captionUi.innerText = captionText;
+    var captionUi = this.#getCaptionUi(itemUi);
+    captionUi.textContent = captionText;
 
     var toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
     if (toggleTotalsCheckbox) {
@@ -408,7 +389,15 @@ class QueryUi {
   #createQueryAxisItemFilterUi(itemUi, axisItem){
     var valuesUi = itemUi.getElementsByTagName('ol')[0];
     var filter = axisItem.filter;
-    itemUi.setAttribute('data-filterType', filter.filterType);
+
+    var filterType = filter.filterType;
+    itemUi.setAttribute('data-filterType', filterType);
+
+    var filterTypeLabel = FilterDialog.getLabelForFilterType(filterType);
+
+    var header = itemUi.querySelector('details > header');
+    header.textContent = filterTypeLabel;
+
     
     var detailsElement = itemUi.getElementsByTagName('details')[0];
     if (filter.toggleState === 'open') {
@@ -420,6 +409,9 @@ class QueryUi {
           
     var values = filter.values;
     var valueKeys = Object.keys(values);
+    
+    var captionUi = this.#getCaptionUi(itemUi);
+    captionUi.textContent += ` (${valueKeys.length})`;
     
     var toValues = filter.toValues;
     var toValueKeys = toValues? Object.keys(toValues) : undefined;
@@ -457,6 +449,7 @@ class QueryUi {
       button.setAttribute('id', deleteValueId);
       button.addEventListener('click', this.#deleteFilterValueClickHandler.bind(this));
     }
+    
   }
   
   #deleteFilterValueClickHandler(event){
@@ -943,7 +936,6 @@ class QueryUi {
 
   #renderAxis(config){
     var axisId = config.axisId;
-    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
     var axis = this.#instantiateQueryUiTemplate(QueryUi.#queryUiAxisTemplateId, this.#id + '-' + axisId);
     
     var itemArea = axis.querySelector('ol');
@@ -969,13 +961,15 @@ class QueryUi {
     var labels = axis.getElementsByTagName('label');
 
     var primaryAxisActionLabel = labels.item(0);
-    primaryAxisActionLabel.setAttribute('title', primaryAxisActionLabelTitle);
+    Internationalization.setAttributes(primaryAxisActionLabel, 'title', primaryAxisActionLabelTitle);
 
-    labels.item(1).setAttribute('title', `Clear all items from the ${axisId} axis.`);
+    var removeTitle = `Clear all items from the ${axisId} axis.`;
+    Internationalization.setAttributes(labels.item(1), 'title', removeTitle);
 
     axis.setAttribute('data-axis', axisId);
     var heading = axis.getElementsByTagName('h1').item(0);
-    heading.innerText = caption;
+    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
+    Internationalization.setTextContent(heading, caption);
     this.getDom().appendChild(axis);
   }
 

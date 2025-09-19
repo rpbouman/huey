@@ -58,8 +58,7 @@
       }
 
       > label:has( > button )::after {
-        /* trash */
-        content: "\eb41";
+        content: var( --icon-trash );
       }
     }
 
@@ -128,13 +127,13 @@
         /* buttons to move the item */
         > label:first-child:has( > button )::after {
           /* chevron left */
-          content: "\ea60";
+          content: var( --icon-chevron-left );
           vertical-align: top;
         }
 
         > label:last-child:has( > button )::after {
           /* chevron right */
-          content: "\ea61";
+          content: var( --icon-chevron-right );
           vertical-align: top;
         }
 
@@ -146,8 +145,7 @@
 
           /* axis item action to remove item from axis */
           > label:nth-child(3):has( > button )::after {
-            /* trash */
-            content: "\eb41";
+            content: var( --icon-trash );
           }
         }
 
@@ -194,140 +192,130 @@
       *
       */
       > li[data-derivation='row number'] > span:before {
-        /* hash */
-        content: "\eabc";
+        content: var( --icon-hash );
       }
 
       > li[data-derivation="iso-date"] > span:before {
-        /* calendar */
-        content: "\ea53";
+        content: var( --icon-calendar );
       }
 
       > li[data-derivation="iso-year"] > span:before,
       > li[data-derivation=year] > span:before {
-        /* letter-y */
-        content: "\ec68";
+        content: var( --icon-letter-y );
       }
 
       > li[data-derivation=quarter] > span:before {
-        /* letter q */
-        content: "\ec60";
+        content: var( --icon-letter-q );
       }
       > li[data-derivation="month shortname"] > span:before,
       > li[data-derivation="month name"] > span:before,
       > li[data-derivation="month num"] > span:before {
-        /* letter m */
-        content: "\ec5c";
+        content: var( --icon-letter-m );
       }
 
       > li[data-derivation="week num"] > span:before {
-        /* calendar-week */
-        content: "\fd30";
+        content: var( --icon-calendar-week );
       }
 
       > li[data-derivation="day of year"] > span:before {
-        /* letter-d */
-        content: "\ec53";
+        content: var( --icon-letter-d);
       }
 
       > li[data-derivation="day of month"] > span:before {
-        /* calendar-month */
-        content: "\fd2f";
+        content: var( --icon-calendar-month );
       }
 
       > li[data-derivation="day of week shortname"] > span:before,
       > li[data-derivation="day of week name"] > span:before,
       > li[data-derivation="iso-day of week"] > span:before,
       > li[data-derivation="day of week num"] > span:before {
-        /* letter-d-small */
-        content: "\fcca";
+        content: var( --icon-letter-d-small );
       }
 
       > li[data-derivation="iso-time"] > span:before {
-        /* clock */
-        content: "\ea70";
+        content: var( --icon-clcck );
       }
 
       > li[data-derivation=hour] > span:before {
-        /* letter-h */
-        content: "\ec57";
+        content: var( --icon-letter-h );
       }
 
       > li[data-derivation=minute] > span:before {
-        /* letter-m-small */
-        content: "\fcd3";
+        content: var( --icon-letter-m-small );
       }
 
       > li[data-derivation=second] > span:before {
-        /* letter-s */
-        content: "\ec62";
+        content: var( --icon-letter-s );
+      }
+      
+      > li[data-derivation='UUIDv7 timestamp'] > span:before {
+        content: var( --icon-calendar-clock );
+      }
+      > li[data-derivation='UUID version'] > span:before {
+        content: var( --icon-letter-v-small );
+      }
+
+      > li[data-derivation='timestamp (secs)'] > span:before,
+      > li[data-derivation='timestamp (millis)'] > span:before,
+      > li[data-derivation='timestamp (micros)'] > span:before,
+      > li[data-derivation='timestamp (nanos)'] > span:before 
+      {
+        content: var( --icon-stopwatch );
       }
 
       > li[data-derivation=lowercase] > span:before {
-        /* letter-case-lower */
-        content: "\eea2";
+        content: var( --icon-letter-case-lower );
       }
 
       > li[data-derivation=uppercase] > span:before {
-        /* letter-case-upper */
-        content: "\eea4";
+        content: var( --icon-letter-case-upper );
       }
 
       > li[data-derivation=NOACCENT] > span:before {
-        /* letter-case */
-        content: "\eea5";
+        content: var( --icon-letter-case );
       }
 
       > li[data-derivation=NOCASE] > span:before {
-        /* letter-case */
-        content: "\eea5";
+        content: var( --icon-letter-case );
       }
 
       > li[data-derivation='first letter'] > span:before {
-        /* sort-a-z */
-        content: "\f54f";
+        content: var( --icon-sort-a-z );
       }
 
       > li[data-derivation='keys'] > span:before {
-        /* key */
-        content: "\eac7";
+        content: var( --icon-key );
       }
 
       > li[data-derivation='cardinality'] > span:before,
       > li[data-derivation='unique values length'] > span:before,
       > li[data-derivation='length'] > span:before {
-        /* ruler-3 */
-        content: "\f290";
+        content: var( --icon-ruler-3 );
       }
 
       > li[data-derivation='unique values'] > span:before {
-        /* letter-u-small*/
-        content: "\fcdb";
+        content: var( --icon-letter-u-small );
       }
 
       > li[data-derivation='sort values'] > span:before {
-        /* sort-ascending-letters*/
-        content: "\ef18";
+        content: var( --icon-sort-ascending-letters );
       }
 
       > li[data-derivation='element indices'] > span:before {
-        /* list-numbers */
-        content: "\ef11";
+        content: var( --icon-list-numbers );
       }
 
       > li[data-derivation='hash'] > span:before,
       > li[data-derivation='md5'] > span:before,
       > li[data-derivation='md5 low'] > span:before,
       > li[data-derivation='md5 high'] > span:before {
-        /* IconNumber123 */
-        content: "\f554";
+        content: var( --icon-number-123 );
       }
 
       > li[data-derivation='md5 (hex)'] > span:before,
       > li[data-derivation='sha-1'] > span:before,
       > li[data-derivation='sha-256'] > span:before {
-        /* binary */
-        content: "\ee08";
+        content: var( --icon-binary );
       }
 
       /**
@@ -341,107 +329,90 @@
       > li[data-aggregator="count if true"] > span:before,
       > li[data-aggregator="count if false"] > span:before,
       > li[data-aggregator=count] > span:before {
-        /* tallymarks */
-        content: "\ec4a";
+        content: var( --icon-tallymarks );
       }
 
       > li[data-derivation="distinct count"] > span:before,
       > li[data-aggregator="distinct count"] > span:before {
-        /* tallymark-4 */
-        content: "\ec49";
+        content: var( --icon-tallymark-4 );
       }
 
       > li[data-derivation=max] > span:before,
       > li[data-aggregator=max] > span:before {
-        /* math-max */
-        content: "\f0f5";
+        content: var( --icon-math-max );
       }
 
       > li[data-derivation=min] > span:before,
       > li[data-aggregator=min] > span:before {
-        /* math-min */
-        content: "\f0f6";
+        content: var( --icon-math-min );
       }
 
       > li[data-aggregator=list] > span:before {
-        /* list */
-        content: "\eb6b";
+        content: var( --icon-list );
       }
 
       > li[data-derivation="unique values"] > span:before,
       > li[data-aggregator="unique values"] > span:before {
-        /* letter-u-small*/
-        content: "\fcdb";
+        content: var( --icon-letter-u-small );
       }
 
       > li[data-derivation=sum] > span:before,
       > li[data-aggregator=sum] > span:before {
-        /* sum */
-        content: "\eb73";
+        content: var( --icon-sum );
       }
 
       > li[data-derivation=geomean] > span:before,
       > li[data-derivation=avg] > span:before,
       > li[data-aggregator=geomean] > span:before,
       > li[data-aggregator=avg] > span:before {
-        /* math-avg */
-        content: "\f0f4";
+        content: var( --icon-math-avg );
       }
 
       > li[data-derivation=mad] > span:before,
       > li[data-derivation=median] > span:before,
       > li[data-aggregator=mad] > span:before,
       > li[data-aggregator=median] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=mode] > span:before,
       > li[data-aggregator=mode] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=stdev] > span:before,
       > li[data-aggregator=stdev] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=variance] > span:before,
       > li[data-aggregator=variance] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=entropy] > span:before,
       > li[data-aggregator=entropy] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=kurtosis] > span:before,
       > li[data-aggregator=kurtosis] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=skewness] > span:before,
       > li[data-aggregator=skewness] > span:before {
-        /* calculator */
-        content: "\eb80";
+        content: var( --icon-calculator );
       }
 
       > li[data-derivation=or] > span:before,
       > li[data-aggregator=or] > span:before {
-        /* logical-or */
-        content: "\f245";
+        content: var( --icon-logical-or );
       }
 
       > li[data-derivation=and] > span:before,
       > li[data-aggregator=and] > span:before {
-        /* logical-and*/
-        content: "\f240";
+        content: var( --icon-logical-and );
       }
 
       > li[data-is-being-edited-by-filter-dialog=true] {
@@ -498,21 +469,18 @@
 
   /* filter axis header icon */
   > section[data-axis=filters] > header > label:has( > button )::after {
-    /* filter */
-    content: "\eaa5";
+    content: var( --icon-filter );
   }
 
   > section[data-axis=columns] > header {
     /* Columns axis header icon */
     > label:has( > button )::after {
-      /* table-row */
-      content: "\fb00";
+      content: var( --icon-table-row );
     }
 
     /* axis icon is a button to flip the non-cells axes */
     > label:has( > button ):hover::after {
-      /* table-column */
-      content: "\faff";
+      content: var( --icon-table-column );
     }
 
   }
@@ -520,29 +488,25 @@
   > section[data-axis=rows] > header  {
     /* Rows axis header icon */
     > label:has( > button )::after {
-      /* table-column */
-      content: "\faff";
+      content: var( --icon-table-column );
     }
 
     /* axis icon is a button to flip the non-cells axes */
     > label:has( > button ):hover::after {
-      /* table-row */
-      content: "\fb00";
+      content: var( --icon-table-row );
     }
   }
 
   /* Cells axis header icon */
   > section[data-axis=cells] > header > label:has( > button )::after {
-    /* layout-grid */
-    content: "\edba";
+    content: var( --icon-layout-grid );
   }
 
 
   /*  */
   > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after,
   > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after {
-    /* abacus */
-    content: "\f05c";
+    content: var( --icon-abacus );
   }
 
   /*  */
@@ -554,13 +518,11 @@
 
   /* axis item action to move item to other axis */
   > section[data-axis=rows] > ol > li > menu > label:nth-child(2):has( > button )::after {
-    /* table-row */
-    content: "\fb00";
+    content: var( --icon-table-row );
   }
 
   > section[data-axis=columns] > ol > li > menu > label:nth-child(2):has( > button )::after {
-    /* table-column */
-    content: "\faff";
+    content: var( --icon-table-column );
   }
 
   > section[data-axis=filters] > ol {
@@ -605,12 +567,12 @@
             }
             
             > label:has( > input[type=checkbox] ):before {
-              content: "\eb2c";
+              content: var( --icon-square );
               color: var( --huey-icon-color-subtle );
             }
             
             > label:has( > input[type=checkbox]:checked ):before {
-              content: "\eba6";
+              content: var( --icon-checkbox );
               color: var( --huey-icon-color );
             }            
             
@@ -623,8 +585,7 @@
             
             > label:has( > button ):before {
               width: 24px;
-              /* trash */
-              content: "\eb41";
+              content: var( --icon-trash );
               color: var( --huey-icon-color-subtle );
             }
                         
@@ -645,58 +606,13 @@
         
       }
       
-      > details:has( ol:empty ) > summary > span:after {
-        content: ' (0)'
-      }
-      > details:has( ol > li:nth-child(1) ) > summary > span:after {
-        content: ' (1)'
-      }
-      > details:has( ol > li:nth-child(2) ) > summary > span:after {
-        content: ' (2)'
-      }
-      > details:has( ol > li:nth-child(3) ) > summary > span:after {
-        content: ' (3)'
-      }
-      > details:has( ol > li:nth-child(4) ) > summary > span:after {
-        content: ' (4)'
-      }
-      > details:has( ol > li:nth-child(5) ) > summary > span:after {
-        content: ' (5)'
-      }
-      > details:has( ol > li:nth-child(6) ) > summary > span:after {
-        content: ' (6)'
-      }
-      > details:has( ol > li:nth-child(7) ) > summary > span:after {
-        content: ' (7)'
-      }
-      > details:has( ol > li:nth-child(8) ) > summary > span:after {
-        content: ' (8)'
-      }
-      > details:has( ol > li:nth-child(9) ) > summary > span:after {
-        content: ' (9)'
-      }
-      > details:has( ol > li:nth-child(10) ) > summary > span:after {
-        content: ' (10)'
-      }
-      > details:has( ol > li:nth-child(11) ) > summary > span:after {
-        content: ' (> 10)'
-      }
-      > details:has( ol > li:nth-child(21) ) > summary > span:after {
-        content: ' (> 20)'
-      }
-      > details:has( ol > li:nth-child(31) ) > summary > span:after {
-        content: ' (> 30)'
-      }
-
       > menu {
         > label:nth-child(1):has( > button )::after {
-          /* filter check */
-          content: "\fb7e";
+          content: var( --icon-filter-check);
         }
 
         > label:nth-child(2):has( > button )::after {
-          /* trash */
-          content: "\eb41";
+          content: var( --icon-trash);
         }
       }
     }
@@ -707,18 +623,15 @@
     }
 
     > li[data-filterType=like] > menu > label:nth-child(1):has( > button )::after {
-      /* filter question */
-      content: "\fb86";
+      content: var( --icon-filter-question);
     }
 
     > li[data-filterType=between] > menu > label:nth-child(1):has( > button )::after {
-      /* filter code */
-      content: "\fb7f";
+      content: var( --icon-filter-code );
     }
 
     > li[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {
-      /* filter exclamation */
-      content: "\fb82";
+      content: var( --icon-filter-exclamation );
     }
     
     /* 
@@ -729,26 +642,7 @@
       margin: .5em 0em .5em 0em;
       font-weight: bold;
     }
-    
-    > li[data-filterType=in] > details > header:before {
-      content: 'Include:';
-    }
-    > li[data-filterType=notin] > details > header:before {
-      content: 'Exclude:';
-    }
-    > li[data-filterType=like] > details > header:before {
-      content: 'Like:';
-    }
-    > li[data-filterType=notlike] > details > header:before {
-      content: 'Not Like:';
-    }
-    > li[data-filterType=between] > details > header:before {
-      content: 'Between:';
-    }
-    > li[data-filterType=notbetween] > details > header:before {
-      content: 'Not Between:';
-    }
-    
+        
   }
 
   label > button,
@@ -772,10 +666,8 @@
 }
 
 .queryUi[data-cellheadersaxis=columns] > section[data-axis=cells] > header > label:has( > button ):hover::after {
-  /* table-column */
-  content: "\faff";
+  content: var( --icon-table-column );
 }
 .queryUi[data-cellheadersaxis=rows] > section[data-axis=cells] > header > label:has( > button ):hover::after {
-  /* table-row */
-  content: "\fb00";
+  content: var( --icon-table-row );
 }

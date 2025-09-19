@@ -5,56 +5,47 @@ menu[role=menu]#pivotTableContextMenu {
 
     /* icon for the filter submenu item */
     > label[for=filterSubmenuActivate]:before {
-      /* filter */
-      content: '\eaa5';
+      content: var( --icon-filter ); 
     }
     
     /* icons for the various filter submenu items */
     > label[for=pivotTableContextMenuItemFilterIncludeValue]:before {
-      /* filter */
-      content: '\eaa5';
+      content: var( --icon-filter ); 
     }
 
     > label[for=pivotTableContextMenuItemFilterExcludeValue]:before {
-      /* filter exclamation */
-      content: '\fb82';
+      content: var( --icon-filter-exclamation ); 
     }
 
     /* icon for the copy submenu item */
     > label[for=copySubmenuActivate]:before {
       /* clipboard-copy */
-      content: '\f299';
+      content: var( --icon-clipboard-copy ); 
     }
 
     /* icons for the various copy menu items*/
     > label[for=pivotTableContextMenuItemCopyCell]:before {
-      /* layout-grid */
-      content: '\edba';
+      content: var( --icon-layout-grid ); 
     }
 
     > label[for=pivotTableContextMenuItemCopyColumn]:before {
-      /* table-column */
-      content: '\faff';
+      content: var( --icon-table-column ); 
     }
 
     > label[for=pivotTableContextMenuItemCopyColumnTuples]:before {
-      /* table-column */
-      content: '\faff';
+      content: var( --icon-table-column ); 
     }
 
     > label[for=pivotTableContextMenuItemCopyRow]:before {
-      /* table-row */
-      content: '\fb00';
+      content: var( --icon-table-row ); 
     }
 
     > label[for=pivotTableContextMenuItemCopyRowTuples]:before {
-      /* table-row */
-      content: '\fb00';
+      content: var( --icon-table-row ); 
     }
 
     > label[for=pivotTableContextMenuItemCopyTable]:before {
-      /* table */
-      content: '\eba1';
+      content: var( --icon-table ); 
     }
   }
   

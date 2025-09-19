@@ -229,6 +229,7 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( YEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
+      // fallback formatter to suppress group separator in year
       createFormatter: function(){
         return fallbackFormatter;
       }
@@ -237,6 +238,7 @@ class AttributeUi {
       folder: 'date fields',
       expressionTemplate: "CAST( ISOYEAR( ${columnExpression} ) AS INT)",
       columnType: 'INTEGER',
+      // fallback formatter to suppress group separator in year
       createFormatter: function(){
         return fallbackFormatter;
       }
@@ -316,7 +318,27 @@ class AttributeUi {
       createFormatter: createDayShortNameFormatter,
       createParser: createDayShortNameParser,
       dataValueTypeOverride: 'Utf8'
-    }
+    },
+    'timestamp (secs)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch( ${columnExpression} )',
+      columnType: 'DOUBLE'
+    },
+    'timestamp (millis)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_ms( ${columnExpression} )',
+      columnType: 'BIGINT'
+    },
+    'timestamp (micros)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_us( ${columnExpression} )',
+      columnType: 'BIGINT'
+    },
+    'timestamp (nanos)': {
+      folder: 'timestamps',
+      expressionTemplate: 'epoch_ns( ${columnExpression} )',
+      columnType: 'BIGINT'
+    }      
   };
 
   static timeFields = {
@@ -423,7 +445,21 @@ class AttributeUi {
       expressionTemplate: "UPPER( ${columnExpression} )",
       columnType: 'VARCHAR'
     }
-  }
+  };
+  
+  /* https://github.com/rpbouman/huey/issues/612 */
+  static uuidDerivations = {
+    "UUID version": {
+      folder: 'UUID',
+      expressionTemplate: "uuid_extract_version( ${columnExpression} )",
+      columnType: 'INTEGER'
+    },
+    "UUIDv7 timestamp": {
+      folder: 'UUID',
+      expressionTemplate: "CASE uuid_extract_version( ${columnExpression} ) WHEN 7 THEN uuid_extract_timestamp( ${columnExpression} ) END",
+      columnType: 'TIMESTAMP WITH TIME ZONE'
+    },
+  };
 
   static arrayDerivations = {
     "elements": {
@@ -458,7 +494,7 @@ class AttributeUi {
       expressionTemplate: "length( list_distinct( ${columnExpression} ) )",
       columnType: 'BIGINT'
     }
-  }
+  };
 
   static mapDerivations = {
     "entries": {
@@ -490,6 +526,7 @@ class AttributeUi {
     var hasTimeFields = Boolean(typeInfo.hasTimeFields);
     var hasDateFields = Boolean(typeInfo.hasDateFields);
     var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    var hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
     
     var hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
     
@@ -518,6 +555,7 @@ class AttributeUi {
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
@@ -530,6 +568,7 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.textDerivations,
       AttributeUi.hashDerivations,
+      AttributeUi.uuidDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
       AttributeUi.mapDerivations
@@ -583,18 +622,27 @@ class AttributeUi {
   }
 
   static #getUiNodeCaption(config){
-    switch (config.type){
+    var nodeType = config.type; 
+    var caption;
+    switch ( nodeType ){
       case 'column':
-        return config.profile.column_name;
+        caption = config.profile.column_name;
+        break;
       case 'member':
         var memberExpressionPath = config.profile.memberExpressionPath;
         var tmp = [].concat(memberExpressionPath);
-        return tmp.pop();
+        caption = tmp.pop();
+        break;
       case 'derived':
-        return config.derivation;
+        caption = config.derivation;
+        break;
       case 'aggregate':
-        return config.aggregator;
+        caption = config.aggregator;
+        break;
+      default:
+        console.warn(`Don't know how to create caption for node of type ${nodeType}`)
     }
+    return caption;
   }
   
   static #getUiNodeColumnExpression(config){
@@ -611,32 +659,34 @@ class AttributeUi {
     var columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
     
     var title = config.title;
-    if (!title){
-      switch (config.type) {
-        case 'column':
-          title = `${config.profile.column_type}`;
-          break;
-        case 'member':
-          title = `${config.columnType} ${columnExpression}`;
-          break;
-        case 'aggregate':
-        case 'derived':
-          title = columnExpression;
-          var expressionTemplate;
-          var derivation = config.derivation;
-          if (derivation) {
-            var derivationInfo = AttributeUi.getDerivationInfo(derivation);
-            expressionTemplate = derivationInfo.expressionTemplate;
-            title = extrapolateColumnExpression(expressionTemplate, title);
-          }
-          var aggregator = config.aggregator;
-          if (aggregator){
-            var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
-            expressionTemplate = aggregatorInfo.expressionTemplate;
-            title = extrapolateColumnExpression(expressionTemplate, title);
-          }
-          break;
-      }
+    if (title){
+      return title;
+    }
+    
+    switch (config.type) {
+      case 'column':
+        title = `${config.profile.column_type}`;
+        break;
+      case 'member':
+        title = `${config.columnType} ${columnExpression}`;
+        break;
+      case 'aggregate':
+      case 'derived':
+        title = columnExpression;
+        var expressionTemplate;
+        var derivation = config.derivation;
+        if (derivation) {
+          var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+          expressionTemplate = derivationInfo.expressionTemplate;
+          title = extrapolateColumnExpression(expressionTemplate, title);
+        }
+        var aggregator = config.aggregator;
+        if (aggregator){
+          var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+          expressionTemplate = aggregatorInfo.expressionTemplate;
+          title = extrapolateColumnExpression(expressionTemplate, title);
+        }
+        break;
     }
     return title;
   }
@@ -858,10 +908,17 @@ class AttributeUi {
     }
 
     var attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator);
-    var checkedTitle = `Click to remove ${attributeCaption} from the ${axisId} axis.`;
+    
+    var translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
+    
+    var checkedTitleKey = `Click to remove {1} from the ${axisId}-axis`;
+    var checkedTitle = Internationalization.getText(checkedTitleKey, translatedAttributeCaption);
     axisButton.setAttribute('data-title-checked', checkedTitle);
-    var uncheckedTitle = `Click to add ${attributeCaption} to the ${axisId} axis.`;
+    
+    var uncheckedTitleKey = `Click to add {1} to the ${axisId}-axis`;
+    var uncheckedTitle = Internationalization.getText(uncheckedTitleKey, translatedAttributeCaption);
     axisButton.setAttribute('data-title-unchecked', uncheckedTitle);
+    
     axisButton.setAttribute('title', uncheckedTitle);
 
     axisButton.setAttribute('for', id);
@@ -900,7 +957,15 @@ class AttributeUi {
     var title = AttributeUi.#getUiNodeTitle(config);
     
     var label = head.querySelector('span');
-    label.textContent = caption;
+    switch (config.type) {
+      case 'derived':
+      case 'aggregate':
+        Internationalization.setTextContent(label, caption);
+        caption = Internationalization.getText(caption) || caption;
+        break;
+      default:
+        label.textContent = caption;
+    }
     setAttributes(label, {
       "class": 'label',
       "title": `${caption}: ${title}`,
@@ -1067,7 +1132,7 @@ class AttributeUi {
     // generic rownum
     var rownumNode = this.#renderAttributeUiNode({
       type: 'derived',
-      title: 'Row number',
+      title: 'row number',
       derivation: 'row number',
       profile: {
         column_name: '',
@@ -1092,7 +1157,7 @@ class AttributeUi {
       'data-nodetype': 'folder'
     });
     var label = node.querySelector('span.label');
-    label.textContent = config.caption;
+    Internationalization.setTextContent(label, config.caption);
 
     var filler = instantiateTemplate('attribute-node-axis-dummybutton', {
       'data-axis': 'none'
@@ -1397,6 +1462,9 @@ class AttributeUi {
       var items = queryAxis.getItems();
       for (var j = 0; j < items.length; j++){
         var item = items[j];
+        if (!item.columnName) {
+          continue;
+        }
         if (!item.derivation && !item.aggregator){
           continue;
         }
@@ -1416,8 +1484,8 @@ class AttributeUi {
       if (referencedColumns[columnName] === undefined) {
         continue;
       }
-      var descendants = attributeNode.childNodes;
-      if (descendants.length > 1) {
+      var descendants = attributeNode.querySelectorAll('details');
+      if (descendants.length > 0) {
         continue;
       }
       this.#loadChildNodes(attributeNode);

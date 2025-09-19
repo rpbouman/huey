@@ -16,5 +16,5 @@ menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {
 }
 
 menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton )::before {
-  content: '\eb20';
+  content: var( --icon-settings );
 }
