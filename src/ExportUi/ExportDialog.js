@@ -393,6 +393,12 @@ class ExportUi {
           result = await connection.query(copyStatement);
           progressCallback(`Extracting from ${tmpFileName}`);
           data = await connection.copyFileToBuffer(tmpFileName);
+          
+          // fix for https://github.com/rpbouman/huey/issues/627
+          // for some reason, we get the buffer back with a single leading 0x80 byte.
+          if (fileExtension === 'xlsx' && data[0] === 0x80){
+            data  = data.slice(1);
+          }
         }
         finally {
           if (data) {
