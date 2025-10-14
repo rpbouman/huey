@@ -595,7 +595,7 @@ var dataTypes = {
     }
   },
   'BIGINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "HUGEINT",
@@ -670,7 +670,7 @@ var dataTypes = {
     }    
   },
   'UBIGINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
