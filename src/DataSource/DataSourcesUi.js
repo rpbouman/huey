@@ -614,12 +614,13 @@ class DataSourcesUi extends EventEmitter {
     datasourceSettingsDialog.open(datasource);
   }
   
-  static #getDownloadMenuHTML(fromFileType){
+  static #getDownloadMenuHTML(fromFileType, includeFromFileType){
     var fileTypes = Object.keys(DuckDbDataSource.fileTypes)
     .filter(function(fileType){
       if (Boolean(fromFileType)) { 
         switch (fileType){
           case fromFileType:
+            return includeFromFileType !== false;
           case 'duckdb':
           case 'sqlite':
             return false;
@@ -649,8 +650,8 @@ class DataSourcesUi extends EventEmitter {
     return menu;
   }
   
-  static async #promptExportDataFormat(fromFileType){
-    var menu = DataSourcesUi.#getDownloadMenuHTML(fromFileType);
+  static async #promptExportDataFormat(fromFileType, includeFromFileType){
+    var menu = DataSourcesUi.#getDownloadMenuHTML(fromFileType, includeFromFileType);
     var result = await PromptUi.show({
       title: 'Export Datasource',
       contents: menu
@@ -714,14 +715,15 @@ class DataSourcesUi extends EventEmitter {
     }
     
     var datasource = this.#getDatasourceFromClickEvent(event);
-    var datasourceFileType;
+    var datasourceFileType, includeFromFileType = false;
     switch (datasource.getType()){
-      case DuckDbDataSource.types.FILE:
       case DuckDbDataSource.types.FILES:
+        includeFromFileType = true;
+      case DuckDbDataSource.types.FILE:
         datasourceFileType = datasource.getFileType();
     }
 
-    var targetFileType = await DataSourcesUi.#promptExportDataFormat(datasourceFileType);
+    var targetFileType = await DataSourcesUi.#promptExportDataFormat(datasourceFileType, includeFromFileType);
     if (!targetFileType) {
       return;
     }
