@@ -393,6 +393,14 @@ class ExportUi {
           result = await connection.query(copyStatement);
           progressCallback(`Extracting from ${tmpFileName}`);
           data = await connection.copyFileToBuffer(tmpFileName);
+          
+          // fix for https://github.com/rpbouman/huey/issues/627
+          // for some reason, we get the buffer back with a leading byte.
+          // It does not appear to be the same byte
+          if (fileExtension === 'xlsx' && data.length >= 3 && data[1] === 'P'.charCodeAt(0) && data[2] === 'K'.charCodeAt(0)){
+            console.warn(`Corrupt excel file! First byte was ${data[0]} - slicing from position 1.`);
+            data  = data.slice(1);
+          }
         }
         finally {
           if (data) {
