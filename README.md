@@ -2,7 +2,8 @@
 Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
-Checkout my [DataZen talk on youtube](https://www.youtube.com/watch?v=1A0r4CbLSaI) for background and a demo if its features. 
+There's a recording available of me [demoing Huey](https://www.youtube.com/watch?v=qCx4hG9J3O8) at the 3rd DuckDB Meetup.
+Or, if you like some more background, checkout my [DataZen talk on youtube](https://www.youtube.com/watch?v=1A0r4CbLSaI).
 
 Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey?tab=readme-ov-file#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 

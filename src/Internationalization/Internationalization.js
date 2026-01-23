@@ -129,7 +129,7 @@ class Internationalization {
   }    
     
   static #getTextContentElements(){    
-    var selector = '*:not( .i18nIgnore ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )';
+    var selector = '*:not( [translate=no] ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )';
     
     var textContentElements = document.querySelectorAll(selector);
     var elements = Internationalization.#copyElements(textContentElements);
@@ -154,7 +154,7 @@ class Internationalization {
     var selection = {};
     for (var i = 0; i < attributeNames.length; i++){
       var attributeName = attributeNames[i];
-      var selector = `*:not( .i18nIgnore )[${attributeName}]`;
+      var selector = `*:not( [translate=no] )[${attributeName}]`;
       var elements = document.querySelectorAll(selector);
       selection[attributeName] = Internationalization.#copyElements(elements);
       
