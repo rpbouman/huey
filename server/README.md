@@ -41,6 +41,15 @@ From the repo root:
 PYTHONPATH=. python -m pytest server/tests -v
 ```
 
+## Docker
+
+From the repo root:
+
+```bash
+docker build -f server/Dockerfile -t query-service .
+docker run -p 8000:8000 query-service
+```
+
 ## Config
 
 Environment variables (optional, prefix `QUERYSERVICE_`):
