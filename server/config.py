@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     port: int = 8000
     log_level: str = "INFO"
 
+    # Optional: path to datasets config YAML (for dataset/schema loader)
+    datasets_config_path: Optional[str] = None
+
     # Optional: S3 / engine config (for later issues)
     s3_bucket: Optional[str] = None
     s3_region: Optional[str] = None

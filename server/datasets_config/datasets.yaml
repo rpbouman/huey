@@ -1,0 +1,15 @@
+# Example dataset definitions for QueryService.
+# Override path via QUERYSERVICE_DATASETS_CONFIG_PATH.
+
+datasets:
+  - dataset_id: trades_v1
+    fields:
+      - name: date
+        type: date
+        is_dimension: true
+      - name: symbol
+        type: string
+        is_dimension: true
+      - name: volume
+        type: int64
+        is_measure: true
