@@ -13,6 +13,7 @@ from fastapi import FastAPI
 from server.config import get_settings
 from server.routers import health
 
+
 # Configure logging before creating app
 def _setup_logging(level: str) -> None:
     logging.basicConfig(

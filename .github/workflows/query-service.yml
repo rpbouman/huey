@@ -1,0 +1,50 @@
+# QueryService: build, lint, unit tests
+name: QueryService CI
+
+on:
+  push:
+    branches: [dev, main]
+    paths: ['server/**', '.github/workflows/query-service.yml', '.ruff.toml']
+  pull_request:
+    branches: [dev, main]
+    paths: ['server/**', '.github/workflows/query-service.yml', '.ruff.toml']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-query-service-${{ hashFiles('server/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-query-service-
+
+      - name: Install dependencies
+        run: pip install -r server/requirements.txt
+
+      - name: Run unit tests
+        run: PYTHONPATH=. python -m pytest server/tests -v
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint
+        run: ruff check server/
