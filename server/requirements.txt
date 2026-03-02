@@ -1,0 +1,10 @@
+# QueryService – Huey OLAP backend
+# Python 3.9+
+
+fastapi>=0.109.0,<1.0
+uvicorn[standard]>=0.27.0,<1.0
+pydantic-settings>=2.0.0,<3.0
+
+# Tests
+pytest>=7.0.0,<9.0
+httpx>=0.26.0,<1.0
