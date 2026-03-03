@@ -19,7 +19,16 @@
   function RemoteConnection(datasource) {
     this._datasource = datasource;
     this._abortController = null;
+    this._state = 'queried';
   }
+
+  RemoteConnection.prototype.getConnectionId = function () {
+    return 'remote';
+  };
+
+  RemoteConnection.prototype.getState = function () {
+    return this._state;
+  };
 
   RemoteConnection.prototype.getSchema = function () {
     var baseUrl = this._datasource.getBaseUrl();
@@ -119,6 +128,7 @@
 
   RemoteConnection.prototype.cancelPendingQuery = function () {
     if (this._abortController) {
+      this._state = 'canceled';
       this._abortController.abort();
       this._abortController = null;
     }
@@ -164,6 +174,10 @@
 
   RemoteDatasource.prototype.getSchema = function () {
     return this._connection.getSchema();
+  };
+
+  RemoteDatasource.prototype.getRejects = function () {
+    return Promise.resolve();
   };
 
   RemoteDatasource.prototype.destroy = function () {

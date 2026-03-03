@@ -223,8 +223,94 @@ class TupleSet extends DataSetComponent {
     }
   }
 
+  #buildRemoteTuplesQuery(limit, offset){
+    var queryModel = this.getQueryModel();
+    var axisId = this.#queryAxisId;
+    var queryAxis = queryModel.getQueryAxis(axisId);
+    var items = queryAxis.getItems();
+    if (!items.length) return null;
+    var fields = items.map(function(item) {
+      return {
+        field: item.columnName,
+        derivation: item.derivation || null,
+        sort: 'asc',
+        include_totals: item.includeTotals !== false
+      };
+    });
+    var filterAxis = queryModel.getFiltersAxis();
+    var filterItems = filterAxis.getItems();
+    var filters = filterItems.filter(function(item) { return item.filter; }).map(function(item) {
+      return {
+        field: item.columnName,
+        operator: 'in',
+        values: (item.filter && item.filter.values) ? item.filter.values : []
+      };
+    });
+    return {
+      axis: axisId,
+      fields: fields,
+      filters: filters,
+      paging: { limit: limit, offset: offset }
+    };
+  }
+
+  #remoteResponseToResultSet(apiResponse, axisItems, includeCountAll){
+    var items = apiResponse.items || [];
+    var totalCount = apiResponse.total_count != null ? apiResponse.total_count : items.length;
+    var hasGroupingId = items.some(function(item) { return item.grouping_id != null; });
+    var fieldNames = axisItems.map(function(item) { return item.columnName; });
+    var fields = [];
+    if (hasGroupingId) fields.push({ name: TupleSet.groupingIdAlias });
+    fieldNames.forEach(function(name) { fields.push({ name: name }); });
+    if (includeCountAll) fields.push({ name: '__huey_count' });
+    var numRows = items.length;
+    var get = (function(items, fieldNames, totalCount, includeCountAll, hasGroupingId) {
+      return function(i) {
+        var row = {};
+        var item = items[i];
+        if (!item) return row;
+        if (hasGroupingId) row[TupleSet.groupingIdAlias] = item.grouping_id != null ? item.grouping_id : 0;
+        var vals = item.values || [];
+        for (var j = 0; j < fieldNames.length; j++) {
+          row[fieldNames[j]] = vals[j];
+        }
+        if (includeCountAll) {
+          row['__huey_count'] = i === 0 ? totalCount : (numRows > 0 ? totalCount : 0);
+        }
+        return row;
+      };
+    })(items, fieldNames, totalCount, includeCountAll, hasGroupingId);
+    return {
+      numRows: numRows,
+      schema: { fields: fields },
+      get: get
+    };
+  }
+
   async #executeAxisQuery(limit, offset){
     var includeCountExpression = offset === 0;
+    var queryModel = this.getQueryModel();
+    var datasource = queryModel.getDatasource();
+    var isRemote = datasource && datasource.getType && datasource.getType() === 'remote';
+
+    if (isRemote && datasource.getManagedConnection().fetchTuples) {
+      var query = this.#buildRemoteTuplesQuery(limit, offset);
+      if (!query) return 0;
+      var dateRange = { type: 'single', date: new Date().toISOString().slice(0, 10) };
+      var connection = await this.getManagedConnection();
+      var apiResponse;
+      try {
+        apiResponse = await connection.fetchTuples(dateRange, query);
+      } catch (e) {
+        console.error('Remote tuples fetch failed', e);
+        throw e;
+      }
+      if (connection.getState() === 'canceled') return 0;
+      var axisItems = this.getQueryAxisItems();
+      var resultSet = this.#remoteResponseToResultSet(apiResponse, axisItems, includeCountExpression);
+      this.#loadTuples(resultSet, offset);
+      return resultSet.numRows;
+    }
 
     var axisSql = this.#getSqlSelectStatement(includeCountExpression);
     if (!axisSql){
