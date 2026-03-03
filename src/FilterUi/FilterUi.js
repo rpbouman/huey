@@ -1148,21 +1148,52 @@ class FilterDialog {
 
   async #getPicklistValues(offset, limit){
     this.#setBusy(true);
-    var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
     }
     if (offset === undefined){
       offset = 0;
     }
-    // TODO: best practices would say we shouldn't use LIMIT / OFFSET; 
-    // we could theoretically do better by doing some sort of keyset pagination
-    // by filtering for values greater than the last value of the previous page-loader
-    // However, I tried this and it didn't really seem to make a difference, at least not in plain duckdb.
+    var datasource = this.#queryModel.getDatasource();
+    var isRemote = datasource && datasource.getType && datasource.getType() === 'remote';
+
+    if (isRemote && datasource.getManagedConnection().fetchPicklist) {
+      var search = this.#getSearch();
+      var query = {
+        field: this.#queryAxisItem.columnName,
+        search: search && search.value ? search.value : undefined,
+        filters: this.#getOtherFilterAxisItems(true).filter(function(item) { return item.filter; }).map(function(item) {
+          return { field: item.columnName, operator: 'in', values: (item.filter && item.filter.values) ? Object.keys(item.filter.values) : [] };
+        }),
+        paging: { limit: limit, offset: offset }
+      };
+      var dateRange = { type: 'single', date: new Date().toISOString().slice(0, 10) };
+      var connection = datasource.getManagedConnection();
+      var timeMessage = `Executing filter dialog picklist query.`;
+      console.time(timeMessage);
+      var apiResponse = await connection.fetchPicklist(dateRange, query);
+      console.timeEnd(timeMessage);
+      var totalCount = apiResponse.total_count != null ? apiResponse.total_count : (apiResponse.values || []).length;
+      var values = apiResponse.values || [];
+      var fields = (offset === 0 ? [{ name: FilterDialog.#numRowsColumnName }] : []).concat([{ name: 'value', type: { typeId: 0 } }, { name: 'label', type: { typeId: 0 } }]);
+      var resultSet = {
+        numRows: values.length,
+        schema: { fields: fields },
+        get: function(i) {
+          var v = values[i];
+          var row = { value: v ? v.value : null, label: v ? (v.label != null ? v.label : v.value) : null };
+          if (offset === 0 && i === 0) row[FilterDialog.#numRowsColumnName] = totalCount;
+          return row;
+        }
+      };
+      this.#setBusy(false);
+      return resultSet;
+    }
+
+    var sql = this.#getSqlSelectStatementForPickList(offset, limit);
     sql += `\nLIMIT ${limit} OFFSET ${offset}`;
     var timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
-    var datasource = this.#queryModel.getDatasource();
     var result = await datasource.query(sql);
     console.timeEnd(timeMessage);
     return result;
