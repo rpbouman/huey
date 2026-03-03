@@ -711,6 +711,28 @@ class AttributeUi {
     return caption;
   }
 
+  /**
+   * Convert QueryService schema response to columnSummary shape for render().
+   * schema: { dataset_id, fields: [{ name, type, is_dimension?, is_measure? }] }
+   */
+  static schemaToColumnSummary(schema){
+    var fields = (schema && schema.fields) ? schema.fields : [];
+    return {
+      numRows: fields.length,
+      get: function(i) {
+        var f = fields[i];
+        return {
+          toJSON: function() {
+            return {
+              column_name: f ? f.name : '',
+              column_type: f ? f.type : 'VARCHAR'
+            };
+          }
+        };
+      }
+    };
+  }
+
   constructor(id, queryModel){
     this.#id = id;
     this.#queryModel = queryModel;
@@ -735,7 +757,13 @@ class AttributeUi {
       var newDatasource = eventData.propertiesChanged.datasource.newValue;
       if (newDatasource) {
         this.clear(true);
-        var columnMetadata = await newDatasource.getColumnMetadata();
+        var columnMetadata;
+        if (newDatasource.getType && newDatasource.getType() === 'remote') {
+          var schema = await newDatasource.getSchema();
+          columnMetadata = AttributeUi.schemaToColumnSummary(schema);
+        } else {
+          columnMetadata = await newDatasource.getColumnMetadata();
+        }
         this.render(columnMetadata);
       }
       else {
