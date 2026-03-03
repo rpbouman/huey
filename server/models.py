@@ -94,3 +94,24 @@ class PicklistResponse(BaseModel):
     total_count: int
     values: list[dict[str, str]]  # [{value, label}]
     paging: dict[str, int]  # limit, offset, returned
+
+
+# --- Export (POST /export, GET /export/{id}) ---
+class ExportRequest(BaseModel):
+    """POST /export body (envelope)."""
+
+    dataset_id: str
+    date_range: dict[str, Any]
+    query: dict[str, Any]  # export_type, axes, filters, max_rows, format
+    client_context: Optional[ClientContext] = None
+
+
+class ExportResponse(BaseModel):
+    export_id: str
+    status: str  # pending | complete | failed
+
+
+class ExportStatusResponse(BaseModel):
+    export_id: str
+    status: str
+    download_url: Optional[str] = None

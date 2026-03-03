@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from server.config import get_settings
-from server.routers import health, query, schema
+from server.routers import export, health, query, schema
 
 
 # Configure logging before creating app
@@ -43,6 +43,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(export.router)
 app.include_router(health.router)
 app.include_router(query.router)
 app.include_router(schema.router)
