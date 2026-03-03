@@ -8,22 +8,12 @@ from fastapi import APIRouter, HTTPException
 
 from server import datasets
 from server.models import ExportRequest, ExportResponse, ExportStatusResponse
+from server.validators import validate_date_range
 
 router = APIRouter(prefix="/export", tags=["export"])
 
 # In-memory export job store (MVP; no background worker)
 _exports: dict[str, dict] = {}
-
-
-def _get_date_from_range(date_range: dict) -> str | None:
-    if not date_range:
-        return None
-    t = date_range.get("type")
-    if t == "single":
-        return date_range.get("date")
-    if t == "range":
-        return date_range.get("start")
-    return None
 
 
 @router.post("", response_model=ExportResponse)
@@ -34,8 +24,9 @@ def post_export(body: ExportRequest) -> ExportResponse:
     dataset_id = body.dataset_id
     if datasets.get_schema(dataset_id) is None:
         raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
-    if not _get_date_from_range(body.date_range or {}):
-        raise HTTPException(status_code=400, detail="Invalid date_range")
+    _, err = validate_date_range(body.date_range or {})
+    if err:
+        raise HTTPException(status_code=400, detail=err)
 
     export_id = "exp-" + str(uuid.uuid4())[:8]
     _exports[export_id] = {"status": "pending", "dataset_id": dataset_id}

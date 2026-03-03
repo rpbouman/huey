@@ -13,6 +13,7 @@ from server.models import (
     QueryTuplesRequest,
     TuplesResponse,
 )
+from server.validators import validate_date_range
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -21,12 +22,8 @@ def _get_date_from_range(date_range: dict) -> str | None:
     """Extract a single date for partition path (single day or range start)."""
     if not date_range:
         return None
-    t = date_range.get("type")
-    if t == "single":
-        return date_range.get("date")
-    if t == "range":
-        return date_range.get("start")
-    return None
+    date_str, _ = validate_date_range(date_range)
+    return date_str
 
 
 @router.post("/tuples", response_model=TuplesResponse)
@@ -41,9 +38,9 @@ def post_query_tuples(body: QueryTuplesRequest) -> TuplesResponse:
         raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
 
     date_range = body.date_range
-    date_str = _get_date_from_range(date_range)
-    if not date_str:
-        raise HTTPException(status_code=400, detail="Invalid date_range")
+    date_str, err = validate_date_range(date_range or {})
+    if err:
+        raise HTTPException(status_code=400, detail=err)
 
     query = body.query or {}
     paging = query.get("paging") or {}
@@ -69,9 +66,9 @@ def post_query_cells(body: QueryCellsRequest) -> CellsResponse:
     if schema is None:
         raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
 
-    date_range = body.date_range
-    if not _get_date_from_range(date_range):
-        raise HTTPException(status_code=400, detail="Invalid date_range")
+    date_str, err = validate_date_range(body.date_range or {})
+    if err:
+        raise HTTPException(status_code=400, detail=err)
 
     return CellsResponse(cells=[])
 
@@ -87,8 +84,9 @@ def post_query_picklist(body: QueryPicklistRequest) -> PicklistResponse:
     if schema is None:
         raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
 
-    if not _get_date_from_range(body.date_range):
-        raise HTTPException(status_code=400, detail="Invalid date_range")
+    date_str, err = validate_date_range(body.date_range or {})
+    if err:
+        raise HTTPException(status_code=400, detail=err)
 
     query = body.query or {}
     paging = query.get("paging") or {}
