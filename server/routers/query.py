@@ -5,7 +5,14 @@ Query endpoints: /query/tuples, /query/cells, /query/picklist (tech spec).
 from fastapi import APIRouter, HTTPException
 
 from server import datasets
-from server.models import CellsResponse, QueryCellsRequest, QueryTuplesRequest, TuplesResponse
+from server.models import (
+    CellsResponse,
+    PicklistResponse,
+    QueryCellsRequest,
+    QueryPicklistRequest,
+    QueryTuplesRequest,
+    TuplesResponse,
+)
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -67,3 +74,29 @@ def post_query_cells(body: QueryCellsRequest) -> CellsResponse:
         raise HTTPException(status_code=400, detail="Invalid date_range")
 
     return CellsResponse(cells=[])
+
+
+@router.post("/picklist", response_model=PicklistResponse)
+def post_query_picklist(body: QueryPicklistRequest) -> PicklistResponse:
+    """
+    POST /query/picklist: fetch distinct values for a field (filter UI).
+    Basic implementation: validates request, returns empty values.
+    """
+    dataset_id = body.dataset_id
+    schema = datasets.get_schema(dataset_id)
+    if schema is None:
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
+
+    if not _get_date_from_range(body.date_range):
+        raise HTTPException(status_code=400, detail="Invalid date_range")
+
+    query = body.query or {}
+    paging = query.get("paging") or {}
+    limit = paging.get("limit", 100)
+    offset = paging.get("offset", 0)
+
+    return PicklistResponse(
+        total_count=0,
+        values=[],
+        paging={"limit": limit, "offset": offset, "returned": 0},
+    )

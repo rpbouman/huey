@@ -78,3 +78,19 @@ class QueryCellsRequest(BaseModel):
 
 class CellsResponse(BaseModel):
     cells: list[dict[str, Any]]  # [{row_index, column_index, values: {alias: value}}]
+
+
+# --- Picklist (POST /query/picklist) ---
+class QueryPicklistRequest(BaseModel):
+    """POST /query/picklist body (envelope)."""
+
+    dataset_id: str
+    date_range: dict[str, Any]
+    query: dict[str, Any]  # field, search, filters, paging
+    client_context: Optional[ClientContext] = None
+
+
+class PicklistResponse(BaseModel):
+    total_count: int
+    values: list[dict[str, str]]  # [{value, label}]
+    paging: dict[str, int]  # limit, offset, returned
