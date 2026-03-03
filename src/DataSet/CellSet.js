@@ -359,11 +359,70 @@ class CellSet extends DataSetComponent {
     
   }
 
+  #buildRemoteCellsQuery(tuplesToQuery, tuplesFields, cellsAxisItemsToFetch){
+    var queryModel = this.getQueryModel();
+    var rowsAxis = queryModel.getRowsAxis().getItems();
+    var columnsAxis = queryModel.getColumnsAxis().getItems();
+    var filterAxis = queryModel.getFiltersAxis().getItems();
+    var filters = filterAxis.filter(function(item) { return item.filter; }).map(function(item) {
+      return { field: item.columnName, operator: 'in', values: (item.filter && item.filter.values) ? item.filter.values : [] };
+    });
+    var rowCount = 0, colCount = 0;
+    var tupleSets = this.#tupleSets;
+    if (tupleSets[0]) rowCount = Math.max(1, tupleSets[0].getTupleCountSync() || 0);
+    if (tupleSets[1]) colCount = Math.max(1, tupleSets[1].getTupleCountSync() || 0);
+    var axes = {
+      rows: rowsAxis.map(function(item) { return { field: item.columnName, derivation: item.derivation || null }; }),
+      columns: columnsAxis.map(function(item) { return { field: item.columnName, derivation: item.derivation || null }; }),
+      measures: (cellsAxisItemsToFetch || []).map(function(item) {
+        return { field: item.columnName, aggregation: item.aggregator || 'sum', alias: item.columnName };
+      })
+    };
+    return {
+      rows: { start_index: 0, count: rowCount },
+      columns: { start_index: 0, count: colCount },
+      axes: axes,
+      filters: filters
+    };
+  }
+
+  #remoteCellsResponseToResultSet(apiResponse, cellsAxisItemsToFetch, columnCount){
+    var cells = apiResponse.cells || [];
+    var colCount = columnCount || 1;
+    var measureAliases = (cellsAxisItemsToFetch || []).map(function(item) { return item.columnName; });
+    var fields = [{ name: CellSet.#cellIndexColumnName }].concat(measureAliases.map(function(a) { return { name: a }; }));
+    var numRows = cells.length;
+    var get = function(i) {
+      var c = cells[i];
+      if (!c) return {};
+      var row = {};
+      row[CellSet.#cellIndexColumnName] = (c.row_index || 0) * colCount + (c.column_index || 0);
+      var vals = c.values || {};
+      measureAliases.forEach(function(a) { row[a] = vals[a]; });
+      return row;
+    };
+    return { numRows: numRows, schema: { fields: fields }, get: get };
+  }
+
   async #executeCellsQuery(
     tuplesToQuery,
     tuplesFields,
     cellsAxisItemsToFetch
   ) {
+    var queryModel = this.getQueryModel();
+    var datasource = queryModel.getDatasource();
+    var isRemote = datasource && datasource.getType && datasource.getType() === 'remote';
+
+    if (isRemote && datasource.getManagedConnection().fetchCells) {
+      var query = this.#buildRemoteCellsQuery(tuplesToQuery, tuplesFields, cellsAxisItemsToFetch);
+      var colCount = query.columns && query.columns.count ? query.columns.count : 1;
+      var dateRange = { type: 'single', date: new Date().toISOString().slice(0, 10) };
+      var connection = await this.getManagedConnection();
+      var apiResponse = await connection.fetchCells(dateRange, query);
+      var resultSet = this.#remoteCellsResponseToResultSet(apiResponse, cellsAxisItemsToFetch, colCount);
+      return resultSet;
+    }
+
     var sql = this.#getSqlQueryForCells(
       tuplesToQuery,
       tuplesFields,
