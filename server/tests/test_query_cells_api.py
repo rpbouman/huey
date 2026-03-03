@@ -33,3 +33,10 @@ def test_query_cells_dataset_not_found(client: TestClient) -> None:
     body = {"dataset_id": "nonexistent", "date_range": {"type": "single", "date": "2026-03-01"}, "query": {}}
     r = client.post("/query/cells", json=body)
     assert r.status_code == 404
+
+
+def test_query_cells_bad_date_range(client: TestClient) -> None:
+    """POST /query/cells with invalid date_range returns 400."""
+    body = {"dataset_id": "trades_v1", "date_range": {}, "query": {}}
+    r = client.post("/query/cells", json=body)
+    assert r.status_code == 400

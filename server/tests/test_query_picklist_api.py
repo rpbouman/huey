@@ -31,3 +31,10 @@ def test_query_picklist_dataset_not_found(client: TestClient) -> None:
     body = {"dataset_id": "nonexistent", "date_range": {"type": "single", "date": "2026-03-01"}, "query": {}}
     r = client.post("/query/picklist", json=body)
     assert r.status_code == 404
+
+
+def test_query_picklist_bad_date_range(client: TestClient) -> None:
+    """POST /query/picklist with invalid date_range returns 400."""
+    body = {"dataset_id": "trades_v1", "date_range": {"type": "single", "date": "not-a-date"}, "query": {}}
+    r = client.post("/query/picklist", json=body)
+    assert r.status_code == 400
