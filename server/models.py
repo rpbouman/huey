@@ -64,3 +64,17 @@ class TuplesResponse(BaseModel):
     total_count: int
     items: list[TupleItem]
     paging: dict[str, int]  # limit, offset, returned
+
+
+# --- Cells (POST /query/cells) ---
+class QueryCellsRequest(BaseModel):
+    """POST /query/cells body (envelope)."""
+
+    dataset_id: str
+    date_range: dict[str, Any]
+    query: dict[str, Any]  # rows, columns, axes, filters
+    client_context: Optional[ClientContext] = None
+
+
+class CellsResponse(BaseModel):
+    cells: list[dict[str, Any]]  # [{row_index, column_index, values: {alias: value}}]

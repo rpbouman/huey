@@ -5,7 +5,7 @@ Query endpoints: /query/tuples, /query/cells, /query/picklist (tech spec).
 from fastapi import APIRouter, HTTPException
 
 from server import datasets
-from server.models import QueryTuplesRequest, TuplesResponse
+from server.models import CellsResponse, QueryCellsRequest, QueryTuplesRequest, TuplesResponse
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -49,3 +49,21 @@ def post_query_tuples(body: QueryTuplesRequest) -> TuplesResponse:
         items=[],
         paging={"limit": limit, "offset": offset, "returned": 0},
     )
+
+
+@router.post("/cells", response_model=CellsResponse)
+def post_query_cells(body: QueryCellsRequest) -> CellsResponse:
+    """
+    POST /query/cells: fetch cell values for a window of row/column tuples.
+    Basic implementation: validates request, returns empty cells.
+    """
+    dataset_id = body.dataset_id
+    schema = datasets.get_schema(dataset_id)
+    if schema is None:
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset_id}")
+
+    date_range = body.date_range
+    if not _get_date_from_range(date_range):
+        raise HTTPException(status_code=400, detail="Invalid date_range")
+
+    return CellsResponse(cells=[])
