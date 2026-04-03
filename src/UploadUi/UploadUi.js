@@ -78,6 +78,7 @@ class UploadUi {
     var hueyFileRegex = /\.hueyqh?$/i;
     var hueyQueryState;
     try {
+      
       if (typeof file === 'string'){
         
         if (hueyFileRegex.test(file)){
@@ -207,7 +208,8 @@ class UploadUi {
         fileName = file.name;
       }
       else {
-        throw new Error(`Don't know how to handle item of type ${typeof file}.`);
+        const typeOfFile = typeof file;
+        throw new Error(`Don't know how to handle item of type ${typeOfFile === 'object' ? file.constructor.name : typeOfFile}.`);
       }
 
       var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);

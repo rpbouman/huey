@@ -1,0 +1,62 @@
+{
+  "name": "Huey – Pivot Tables on DuckDB",
+  "short_name": "Huey",
+  "description": "Browser-based ROLAP pivot tables powered by DuckDB-WASM. Analyze CSV, Excel xlsx, Parquet, JSON and DuckDB files locally – no server required.",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a2e",
+  "theme_color": "#f5a623",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "pwa/screenshot.png",
+      "sizes": "1280x726",
+      "type": "image/png",
+      "label": "Screenshot showing a Huey Pivot Table"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": ".",
+      "accept": {
+        "text/csv": [".csv"],
+        "text/tab-separated-values": [".tsv"],
+        "text/json": [".json", ".jsonl"],
+        "application/vnd.apache.parquet": [".parquet"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+        "application/duckdb": [".duckdb"],
+        "application/sqlite": [".sqlite"],
+        "application/hueyqh": [".hueyqh"],
+        "application/hueyq": [".hueyq"]
+      }
+    }
+  ]
+}

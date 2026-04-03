@@ -145,6 +145,7 @@ function initApplication(){
   initSessionCloner();
   initQuickQueryMenu();
   initDataSourceMenu();
+  initPwa();
 
   var currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
