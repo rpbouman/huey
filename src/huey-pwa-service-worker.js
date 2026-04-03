@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v24';
+const CACHE_VERSION = 'v25';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -79,9 +79,6 @@ const APP_SHELL = [
   'FilterUi/FilterUi.css',
   'FilterUi/FilterUi.js',
   'Internationalization/Internationalization.js',
-  'Internationalization/huey.i18n.labels.template.js',
-  'Internationalization/i18n/nl.js',
-  'Internationalization/i18n/pt-BR.js',
   'PageStateManager/PageStateManager.js',
   'PivotTableUi/PivotTableUi.css',
   'PivotTableUi/PivotTableUi.js',
