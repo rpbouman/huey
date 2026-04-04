@@ -1,173 +1,215 @@
-nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader] {
-  position: relative;
-  left: 1em;
-  top: 1em;
-  width: calc( 100% - 1em );
-  display: inline-block;
-  white-space: normal;
+nav#sidebar[role=tablist] {
+  > div {
+    > div[role=tabpanel]{
+      
+      &:has( > div#datasourcesUi) {
+        
+        > label:is( [for=uploader], [for=loadFromUrl] ){
+          position: relative;
+          left: 1em;
+          top: 1em;
+          width: calc( 100% - 1em );
+          display: inline-block;
+          white-space: normal;
+          
+          &::after {
+            display:inline-block;
+            font-size: 140px;
+            width: 100%;
+            font-family: var( --huey-icon-font-family );
+            text-align: center;
+            color: var( --huey-icon-color-subtle );
+          }
+
+          &:hover::after {
+            color: var( --huey-icon-color-highlight );
+          }
+
+          &[for=uploader]::after {
+            content: var( --icon-upload );
+          }
+
+          &[for=loadFromUrl]::after {
+            content: var( --icon-cloud-upload );
+          }
+          
+        }
+        
+      }
+
+      &:has( > div#datasourcesUi details) > label:is( [for=uploader], [for=loadFromUrl] ) {
+        display: none;
+      }
+            
+    }
+  }
 }
 
-nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi) > label[for=uploader]::after {
-  display:inline-block;
-  font-size: 140px;
-  width: 100%;
-  font-family: var( --huey-icon-font-family );
-  content: var( --icon-upload );
-  text-align: center;
-  color: var( --huey-icon-color-subtle );
-}
-nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi ) > label[for=uploader]:hover::after {
-  color: var( --huey-icon-color-highlight );
-}
-
-nav#sidebar[role=tablist] > div > div[role=tabpanel]:has( > div#datasourcesUi details) > label[for=uploader] {
-  display: none;
-}
-
-nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi {
-  display: none;
-}
-
-nav#sidebar[role=tablist] > div > div[role=tabpanel] > div#datasourcesUi:has( > details ){
-  display: block;
-}
 
 #datasourcesUi {
   padding-top: 12px;
   height: calc(100% - 36px);
-
-  details > summary > span.label {
-    max-width: calc(100% - 140px);
+  display: none;
+  
+  &:has( details ){
+    display: block;
   }
 
-  details[role=treeitem] {
 
-    > summary {
+  &[data-drop-allowed=true] {
+    cursor: 'copy';
+  }
 
-      > label {
-        > button {
-          display: none;
-          appearance: none;
+  &[data-drop-allowed=false] {
+    cursor: 'not-allowed';
+  }
+
+  details {
+
+    &[role=treeitem] {
+
+      > summary {
+        > label {
+          
+          &:has( > button ) {
+            &::before {
+              display: block;
+              float: inline-end;
+              width: 24px;
+              padding: 6px 3px 0px 3px;
+              font-family: var( --huey-icon-font-family ) !important;
+              font-size: var( --huey-icon-medium );
+              color: var( --huey-icon-color-subtle );
+            }
+            
+            &:hover::before {
+              color: var( --huey-icon-color-highlight );
+            }
+          }
+
+          &.editActionButton::before {
+            content: var( --icon-settings );
+          }
+
+          &.analyzeActionButton::before {
+            content: var( --icon-analyze );
+          }
+
+          &.removeActionButton::before {
+            content: var( --icon-trash );
+          }
+
+          &.downloadActionButton::before {
+            content: var( --icon-download );
+          }
+
+          > button {
+            display: none;
+            appearance: none;
+          }
+
+        }
+
+        &:hover > span.label::before {
+          color: var( --huey-icon-color-highlight );
+        }
+
+        > span {
+          &.label {
+            max-width: calc(100% - 140px);
+          }
+          
+          &::before {
+            display: inline-block;
+            font-family: var( --huey-icon-font-family ) !important;
+            font-size: var( --huey-icon-medium );
+            color: var( --huey-icon-color-subtle );
+            width: 24px;
+            padding: 6px 3px 0px 3px;
+            text-align: center;
+            position: relative;
+            top: 3px;
+          }
         }
       }
+    }
+        
+    &[data-nodetype=datasourcegroup]:is( 
+      [data-grouptype=duckdb], 
+      [data-grouptype=file], 
+      [data-datasourcetype=duckdb] 
+    ) > summary > span.label::before,
+    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > span.label::before
+    {
+      content: var( --icon-folder );
+    }
 
-      > span.label::before {
-        display: inline-block;
-        font-family: var( --huey-icon-font-family ) !important;
-        font-size: var( --huey-icon-medium );
-        color: var( --huey-icon-color-subtle );
-        width: 24px;
-        padding: 6px 3px 0px 3px;
-        text-align: center;
-        position: relative;
-        top: 3px;
+    &[data-nodetype=datasourcegroup][open]:is( 
+      [data-grouptype=duckdb], 
+      [data-grouptype=file], 
+      [data-datasourcetype=duckdb] 
+    ) > summary > span.label::before,
+    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
+    {
+      content: var( --icon-folder-open );
+    }
+    
+    &[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] {
+      
+      > summary > span.label::before {
+        content: var( --icon-bucket);
       }
-
-      > label:has( > button )::before {
-        display: block;
-        float: inline-end;
-        width: 24px;
-        padding: 6px 3px 0px 3px;
-        font-family: var( --huey-icon-font-family ) !important;
-        font-size: var( --huey-icon-medium );
-        color: var( --huey-icon-color-subtle );
-      }
-
-      > label:has( > button ):hover::before {
-        color: var( --huey-icon-color-highlight );
-      }
-
-      > label.editActionButton::before {
-        content: var( --icon-settings );
-      }
-
-      > label.analyzeActionButton::before {
-        content: var( --icon-analyze );
-      }
-
-      > label.removeActionButton::before {
-        content: var( --icon-trash );
-      }
-
-      > label.downloadActionButton::before {
-        content: var( --icon-download );
+      
+      &:is([open]) {
+        > summary > span.label::before {
+          content: var( --icon-bucket-droplet );
+        }
       }
     }
     
-    > summary:hover  > span.label::before {
-      color: var( --huey-icon-color-highlight );
+    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
+    &[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
+      list-style: none;
+      margin-left: 16px;
     }
+    
+    &[data-nodetype=datasource]{
 
-  }
+      &[data-datasourcetype=duckdb] {
+        > summary > span.label::before {
+          content: var( --icon-database );
+        }
 
-  details[data-nodetype=datasourcegroup][data-grouptype=duckdb] > summary > span.label::before,
-  details[data-nodetype=datasourcegroup][data-grouptype=file] > summary > span.label::before,
-  details[data-nodetype=datasourcegroup][data-grouptype=sqlite] > summary > span.label::before,
-  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > span.label::before
-  {
-    content: var( --icon-folder );
-  }
+        > details[data-nodetype=duckdb_schema] {
 
-  details[data-nodetype=datasourcegroup][open][data-grouptype=duckdb] > summary > span.label::before,
-  details[data-nodetype=datasourcegroup][open][data-grouptype=file] > summary > span.label::before,
-  details[data-nodetype=datasourcegroup][open][data-grouptype=sqlite] > summary > span.label::before,
-  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
-   {
-    content: var( --icon-folder-open );
-  }
-
-  details[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
-    content: var( --icon-bucket);
-  }
-
-  details[open][data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] > summary > span.label::before {
-    content: var( --icon-bucket droplet );
-  }
-
-  details[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
-  details[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
-    list-style: none;
-    margin-left: 16px;
-  }
-
-  details[data-nodetype=datasource][data-datasourcetype=duckdb] {
-    > summary > span.label::before {
-      content: var( --icon-database );
-    }
-
-    > details[data-nodetype=duckdb_schema] {
-
-      > details[data-nodetype=datasource][data-datasourcetype=table] summary > span.label::before {
-        content: var( --icon-table );
+          > details[data-nodetype=datasource] {
+            &[data-datasourcetype=table] summary > span.label::before {
+              content: var( --icon-table );
+            }
+            
+            &[data-datasourcetype=view] summary > span.label::before {
+              content: var( --icon-table-options );
+            }
+          }
+          
+        }
       }
-
-      > details[data-nodetype=datasource][data-datasourcetype=view] summary > span.label::before {
-        content: var( --icon-table-options );
+      
+      &[data-datasourcetype=file] > summary > span.label::before {
+        content: var( --icon-file );
+      }
+      
+      &[data-datasourcetype=sqlite] > summary > span.label::before {
+        content: var( --icon-feather );
+      }
+      
+      &[data-reject_count] > summary > span.label::before {
+        content: '\ede6';
+        color: red;
       }
     }
   }
 
-  details[data-nodetype=datasource][data-datasourcetype=file] > summary > span.label::before {
-    content: var( --icon-file );
-  }
-
-  details[data-nodetype=datasource][data-datasourcetype=sqlite] > summary > span.label::before {
-    content: var( --icon-feather );
-  }
-
-  details[data-nodetype=datasource][data-reject_count] > summary > span.label::before {
-    content: '\ede6';
-    color: red;
-  }
-
-}
-
-#datasourcesUi[data-drop-allowed=true] {
-  cursor: 'copy';
-}
-
-#datasourcesUi[data-drop-allowed=false] {
-  cursor: 'not-allowed';
 }
 
 /*
