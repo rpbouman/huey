@@ -16,21 +16,20 @@
     <style id="tabler-font"></style>
 
     <script>
-    var hueyVersionNumber = '1.0.16';
-    var hueyVersionName = 'Hungarian';
+    const hueyVersionNumber = '1.0.16';
+    const hueyVersionName = 'Hungarian';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.40.0';
+    const tablerIconsFontVersion = '3.40.0';
     
-    var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
-    var preloadLink = document.createElement('link');
+    const tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
+    const preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
     preloadLink.setAttribute('as', 'font');
     preloadLink.setAttribute('href', tablerIconsFontUrl);
     preloadLink.setAttribute('crossorigin', 'true');
     document.head.insertBefore(preloadLink, document.getElementById('tabler-font'));
-    var tablerFontStyleSheet = document.getElementById('tabler-font');
     document.styleSheets[0].insertRule(`
       @font-face {
         font-family: "tabler-icons";
@@ -41,17 +40,17 @@
       }
     `);
     
-    var duckdbLibraryVersion = '1.33.1-dev39.0';
-    var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
+    const duckdbLibraryVersion = '1.33.1-dev39.0';
+    const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
-      var url = element.href || element.src;
+      const url = element.href || element.src;
       console.log(`Loaded ${url}`);
-      var list = document.getElementById('resources');
+      const list = document.getElementById('resources');
       if (!list) {
         return;
       }
-      var item = document.createElement('li');
+      const item = document.createElement('li');
       item.className = 'i18nIgnore';
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
@@ -2432,7 +2431,7 @@
     <script onload="resourceLoaded(this)" src="pwa/pwa.js"></script>
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
-    <script type="module">      
+    <script type="module">
       import(duckDbLibraryUrl)
       .then(async function(duckdb){
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
