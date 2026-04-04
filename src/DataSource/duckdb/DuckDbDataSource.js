@@ -244,26 +244,6 @@ class DuckDbDataSource extends EventEmitter {
     return Boolean(this.#url);
   }
 
-  static getFileNameParts(fileName){
-    if (fileName instanceof File) {
-      fileName = fileName.name;
-    }
-
-    var separator = '.';
-    var fileNameParts = fileName.split( separator );
-    if (fileNameParts.length < 2){
-      return undefined;
-    }
-    var extension = fileNameParts.pop();
-    var lowerCaseExtension = extension.toLowerCase();
-    var fileNameWithoutExtension = fileNameParts.join( separator );
-    return {
-      extension: extension,
-      lowerCaseExtension: lowerCaseExtension,
-      fileNameWithoutExtension: fileNameWithoutExtension
-    };
-  }
-
   static async getResourceInfoForUrl(url, httpMethod, requestHeaders){
     return new Promise(function(resolve, reject){
       try {
@@ -377,13 +357,17 @@ class DuckDbDataSource extends EventEmitter {
               "Range": 'bytes=0-16'
             });
             var responseText = response.responseText;
-            if (responseText.startsWith('SQLite format 3\0')) {
-              config.type = DuckDbDataSource.types.SQLITE;
+            var guessedType = await FileUtils.checkMagicBytes(responseText);
+            switch (guessedType) {
+              case 'duckdb':
+                config.type = DuckDbDataSource.types.DUCKDB;
+                break;
+              case 'sqlite':
+                config.type = DuckDbDataSource.types.SQLITE;
+                break;
+              default:
             }
-            else
-            if (responseText.substring(7, 7 + 'DUCK'.length) === 'DUCK') {
-              config.type = DuckDbDataSource.types.DUCKDB;
-            }
+
             if (config.type) {
               delete config.url;
             }
@@ -400,18 +384,35 @@ class DuckDbDataSource extends EventEmitter {
     return dsInstance;
   }
 
-  static createFromFile(duckdb, instance, file) {
+  static async createFromFile(duckdb, instance, file) {
     if (!(file instanceof File)){
       throw new Error(`The file argument must be an instance of File`);
     }
 
-    var fileName = file.name;
-    var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
-    var fileExtension = fileNameParts.lowerCaseExtension;
-    var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+    const fileName = file.name;
+    const fileNameParts = FileUtils.getFileNameParts(fileName);
+    const fileExtension = fileNameParts.lowerCaseExtension;
+    let fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
 
     if (!fileType){
-      throw new Error(`Could not determine filetype of file "${fileName}".`);
+      const guessedType = await FileUtils.checkMagicBytes(file);
+      
+      switch (guessedType) {
+        case 'duckdb':
+          fileType = DuckDbDataSource.types.DUCKDB;
+          break;
+        case 'sqlite':
+          fileType = DuckDbDataSource.types.SQLITE;
+          break;
+        case 'parquet':
+          fileType = DuckDbDataSource.types.PARQUET;
+          break;
+        default:
+          throw new Error(`Could not determine filetype of file "${fileName}".`);
+      }
+      
+      fileType = DuckDbDataSource.getFileTypeInfo(fileType);
+      
     }
     var config = {
       type: fileType.datasourceType,
@@ -484,7 +485,7 @@ class DuckDbDataSource extends EventEmitter {
             default:
               throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
           }
-          var parts = DuckDbDataSource.getFileNameParts(this.#objectName);
+          var parts = FileUtils.getFileNameParts(this.#objectName);
           this.#fileType = parts.lowerCaseExtension;
         }
         break;
@@ -1022,7 +1023,7 @@ class DuckDbDataSource extends EventEmitter {
 
   #getFileNameParts(){
     var fileName = this.getFileName();
-    return DuckDbDataSource.getFileNameParts(fileName);
+    return FileUtils.getFileNameParts(fileName);
   }
 
   getFileExtension(){

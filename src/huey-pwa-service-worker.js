@@ -123,6 +123,7 @@ const APP_SHELL = [
   'util/dom/dom.js',
   'util/event/EventBuffer.js',
   'util/event/EventEmitter.js',
+  'util/file/FileUtils.js',
   'util/misc/misc.js',
   'util/resize/resize.css',
   'util/sql/SQLHelper.js'
