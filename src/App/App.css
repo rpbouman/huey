@@ -41,7 +41,7 @@ nav#sidebar::-webkit-scrollbar-corner{
   height: calc(100vh - 38px);
   overflow: hidden;
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
   border-top-style:solid;
   border-top-color: var( --huey-dark-border-color );
   border-top-width: 1px;
@@ -55,17 +55,17 @@ nav#sidebar::-webkit-scrollbar-corner{
 
 .button {
   display: inline-block;
-  
+
 }
 
 body {
-  
+
   > main {
-    
+
     > menu[role=toolbar] {
 
       > label {
-      }  
+      }
 
       > label[for=autoRunQuery]::after,
       > label[for=cloneHueySession]::before,
@@ -77,22 +77,20 @@ body {
         border-right-color: var(--huey-light-border-color);
         padding-right: 8px;
       }
-      
+
       > label[for=uploader] {
         > input[type=file]#uploader {
           display: none;
         }
       }
 
-
       > label[for=uploader]::before {
         content: var( --icon-upload );
       }
-      
-      
+
       > label[for=loadFromUrl]::before {
         content: var( --icon-cloud-upload );
-      }  
+      }
 
       > label[for=cloneHueySession]::before {
         content: var( --icon-copy );
@@ -101,7 +99,7 @@ body {
 
       > label[for=autoRunQuery] {
       }
-      
+
       > label[for=autoRunQuery]::after {
         font-family: var( --huey-icon-font-family );
         font-size: var(--huey-icon-normal);
@@ -119,7 +117,7 @@ body {
       > label[for=runQueryButton]::before {
         margin-left: 0px;
       }
-            
+
       /*
         separators between the top menu bar items
       */
@@ -159,17 +157,17 @@ body {
         font-family: var( --huey-icon-font-family );
         content: var( --icon-caret-down );
       }
-      
+
       > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
         display: none;
       }
 
       > label[for=queryResultRowsInfo]:has( > output#queryResultRowsInfo:empty ),
-      > label[for=queryResultColumnsInfo]:has( > output#queryResultColumnsInfo:empty ) 
+      > label[for=queryResultColumnsInfo]:has( > output#queryResultColumnsInfo:empty )
       {
         display: none;
       }
-      
+
       #queryResultRowsInfo {
       }
 
@@ -179,20 +177,20 @@ body {
         content: var( --icon-table-column );
       }
 
-      /* if the columns info is empty then no separator after 'rows' */ 
+      /* if the columns info is empty then no separator after 'rows' */
       > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):before {
         font-family: var( --huey-icon-font-family );
         font-size: var( --huey-icon-medium );
         content: var( --icon-table-column );
       }
-      
+
       > label[for=queryResultColumnsInfo]:before {
         font-family: var( --huey-icon-font-family );
         font-size: var( --huey-icon-medium );
         content: var( --icon-table-row );
       }
     }
-    
+
   }
 
   /**/
@@ -217,22 +215,22 @@ body {
     color: var( --huey-icon-highlight );
     pointer-events: none;
   }
-  
+
 }
 
 body:has( #autoRunQuery:checked ) {
   > main {
     > menu[role=toolbar] {
-      
+
       > label[for=autoRunQuery]::after {
         content: var( --icon-checkbox );
         color: var( --huey-icon-color-highlight );
       }
-      
+
       > label[for=runQueryButton] {
         visibility: hidden;
       }
-      
+
     }
   }
 }
