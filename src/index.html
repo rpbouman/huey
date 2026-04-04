@@ -13,7 +13,6 @@
     />
     
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-
     <style id="tabler-font"></style>
 
     <script>
@@ -67,19 +66,25 @@
       Markup for resource loading
     -->
     <style type="text/css">
-      ul#resources > li::marker {
-        font-family: "tabler-icons";
-        content: var( --icon-file );
-      }
-
-      ul#resources > li[data-resource-type=css]::marker {
-        content: var( --icon-file-type-css );
-      }
-      ul#resources > li[data-resource-type=js]::marker {
-        content: var( --icon-file-type-js );
-      }
-      ul#resources > li[data-resource-type=woff2]::marker {
-        content: var( --icon-file-typography );
+      ul#resources {
+        > li {
+          &::marker {
+            font-family: "tabler-icons";
+            content: var( --icon-file );
+          }
+          
+          &[data-resource-type=css]::marker {
+            content: var( --icon-file-type-css );
+          }
+          
+          &[data-resource-type=js]::marker {
+            content: var( --icon-file-type-js );
+          }
+          
+          &[data-resource-type=woff2]::marker {
+            content: var( --icon-file-typography );
+          }
+        }
       }
     </style>
 
