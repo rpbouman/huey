@@ -1,14 +1,5 @@
 class UploadUi {
 
-  static #fileSizeFormatter = new Intl.NumberFormat(
-    navigator.language, {
-      style: 'unit',
-      notation: 'compact',
-      unit: 'byte',
-      unitDisplay: 'narrow'
-    }
-  );
-
   #id = undefined;
   #pendingUploads = undefined;
   #cancelPendingUploads = false;
@@ -99,7 +90,7 @@ class UploadUi {
           hueyQueryState = await UploadUi.#handleHueyFile(file, uploadItem);
         }
         else {
-          duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
+          duckDbDataSource = await DuckDbDataSource.createFromFile(duckdb, instance, file);
           progressBar.value = parseInt(progressBar.value, 10) + 20;
 
           await duckDbDataSource.registerFile();
@@ -165,10 +156,7 @@ class UploadUi {
     else
     if (file instanceof File) {
       fileName = file.name;
-      fileSize = UploadUi.#fileSizeFormatter.format(file.size);
-      if (fileSize.endsWith('BB')){
-        fileSize = fileSize.replace(/BB/, 'GB');
-      }
+      fileSize = FileUtils.formatFileSize(file);
     }
     else {
       throw new Error(`Don't know how to handle item of type ${typeof file}`);
@@ -212,7 +200,7 @@ class UploadUi {
         throw new Error(`Don't know how to handle item of type ${typeOfFile === 'object' ? file.constructor.name : typeOfFile}.`);
       }
 
-      var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+      var fileNameParts = FileUtils.getFileNameParts(fileName);
       var fileExtension = fileNameParts.lowerCaseExtension;
 
       var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);

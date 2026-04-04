@@ -190,7 +190,7 @@ class DataSourceMenu {
       var fileName, fileNameParts;
       if ( datasourceType === DuckDbDataSource.types.FILE) {
         fileName = datasource.getFileName();
-        fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+        fileNameParts = FileUtils.getFileNameParts(fileName);
       }
       
       var config = {

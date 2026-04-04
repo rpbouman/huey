@@ -129,7 +129,7 @@ class PageStateManager {
           switch (datasourceType) {
             case DuckDbDataSource.types.FILE:
               var fileName = compatibleDatasource.getFileName();
-              var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+              var fileNameParts = FileUtils.getFileNameParts(fileName);
               break;
             default:
           }
