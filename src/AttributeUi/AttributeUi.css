@@ -474,7 +474,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     content: var( --icon-math-avg );
   }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
   details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before,
   details[data-nodetype=derived][data-derivation=mad] > summary > span.label::before,
   details[data-nodetype=derived][data-derivation=median] > summary > span.label::before,
