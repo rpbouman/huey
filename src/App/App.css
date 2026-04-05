@@ -1,238 +1,252 @@
+html {
+  > body {
+    
 
-main.layout {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 99fr;
-  grid-template-rows: 1fr 1fr 99fr;
-  gap: 0px;
-}
+    &:is( [aria-busy=true] ) {
+      > main#layout {
+        display: none;
+      }
+    }
 
-main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) {
-  cursor: wait;
-}
+    &:is( [aria-busy=false] ){
+      > #spinner {
+        display: none;
+      }
+    }
+    
+    &:has( #autoRunQuery:checked ) {
+      > main {
+        > menu[role=toolbar] {
 
-html > body[aria-busy=true] > main#layout {
-  display: none;
-}
+          > label {
+            &:is( [for=autoRunQuery] )::after {
+              content: var( --icon-checkbox );
+              color: var( --huey-icon-color-highlight );
+            } 
+            
+            &:is( [for=runQueryButton] ) {
+              visibility: hidden;
+            }
+          }
+        }
+      }
+    }
 
-html > body[aria-busy=false] > #spinner {
-  display: none;
-}
+    > main.layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 99fr;
+      grid-template-rows: 1fr 1fr 99fr;
+      gap: 0px;
+      
+      &:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) {
+        cursor: wait;
+      }
+      
+      > menu[role=toolbar] {
 
-nav#sidebar {
-  width: 350px;
-  height: calc(100vh - 40px);
-  max-width: calc(100vw - 14px);
-  grid-column: 1/1;
-  grid-row: 2/ span 2;
-  padding: 4px 4px 0px 4px;
-  display: flex;
-  min-width: 170px;
-}
+        > label {
+          
+          &:is( 
+            [for=autoRunQuery], 
+            [for=cloneHueySession],
+            [for=quickQueryMenuButton],
+            [for=currentDatasourceMenuButton]
+          )::after {
+            border-right-width: 1px;
+            border-right-style: solid;
+            border-right-color: var(--huey-light-border-color);
+            padding-right: 8px;
+          }
+          
+          &:is( [for=uploader] ) {
+            > input[type=file]#uploader {
+              display: none;
+            }
+            
+            &[for=uploader]::before {
+            content: var( --icon-upload );
+            }
+          }
+          
+          &:is( [for=loadFromUrl] )::before {
+            content: var( --icon-cloud-upload );
+          } 
+          
+          &:is( [for=cloneHueySession] )::before {
+            content: var( --icon-copy );
+            padding-left: 8px;
+          }
+          
+          &:is( [for=cloneHueySession] )::before {
+            content: var( --icon-copy );
+            padding-left: 8px;
+          }
 
+          &:is( [for=autoRunQuery] )::after {
+            font-family: var( --huey-icon-font-family );
+            font-size: var(--huey-icon-normal);
+            vertical-align: sub;
+            color: var(--huey-icon-color-subtle);
+            margin: 0px 4px 0px 4px;
+            display: inline-block;
+            content: var( --icon-square );
+          }
+          
+          &:is( [for=autoRunQuery] ):hover::after {
+            color: var( --huey-icon-color-highlight );
+          }
 
-nav#sidebar::-webkit-scrollbar-corner{
-  background-color: var( --huey-medium-background-color );
-}
+          &:is( [for=runQueryButton] )::before {
+            margin-left: 0px;
+          }
+          
+          &:is( 
+            [for=cloneHueySession], 
+            [for=quickQueryMenuButton] 
+          ) ::before {
+            border-left-width: 1px;
+            border-left-style: solid;
+            border-left-color: var(--huey-light-border-color);
+          }
 
-.workarea {
-  grid-column: 2/2;
-  grid-row: 2/2;
-  height: calc(100vh - 38px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border-top-style:solid;
-  border-top-color: var( --huey-dark-border-color );
-  border-top-width: 1px;
+          &:is( [for=quickQueryMenuButton] ):has( +label[for=currentDatasourceMenuButton][data-current-datasource=''] ) {
+            display: none;
+          }
 
-  border-left-color: var( --huey-dark-border-color );
-  border-left-width: 1px;
-  border-left-style: solid;
+          &:is( [for=currentDatasourceMenuButton] ) {
+            display: inline-block;
+            max-width: calc( 100vw - 650px );
+            vertical-align: bottom;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          
+          &:is( [for=currentDatasourceMenuButton] ){
+            
+            &:has( > menu#dataSourceMenu:empty ) {
+              pointer-events: none;
 
-  border-top-left-radius: 12px;
+              &::after {
+                content: ' ';
+              }
+            }
+
+            > menu#dataSourceMenu:not( :empty ) {
+              pointer-events: auto;
+            }
+            
+            &:has( menu#dataSourceMenu:not( :empty ) ) {
+              &::after {
+                font-family: var( --huey-icon-font-family );
+                content: var( --icon-chevron-down );
+              }
+            }
+            
+            &:is( [data-current-datasource=''] ) {
+              display: none;
+            }
+          }
+          
+          
+          &:is( [for=queryResultRowsInfo] ) {
+            
+            &:has( > output#queryResultRowsInfo:empty ) {
+              display: none;
+            }
+            
+            &::before {
+              font-family: var( --huey-icon-font-family );
+              font-size: var( --huey-icon-medium );
+              content: var( --icon-table-column );
+            }
+            
+            &:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):before {
+              font-family: var( --huey-icon-font-family );
+              font-size: var( --huey-icon-medium );
+              content: var( --icon-table-column );
+            }
+          }
+          
+          &:is( [for=queryResultColumnsInfo] ) {
+            
+            &:has( > output#queryResultColumnsInfo:empty ) {
+              display: none;
+            }
+            
+            &:before {
+              font-family: var( --huey-icon-font-family );
+              font-size: var( --huey-icon-medium );
+              content: var( --icon-table-row );
+            }
+          }
+          
+        }
+
+        &:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] {
+
+          > label[for=runQueryButton] {
+            pointer-events: none;
+          }
+
+          > label[for=runQueryButton]::before {
+            content: var( --icon-player-play );
+          }
+        }
+
+        &:has( > .workarea > #pivotTableUi[data-needs-update=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+          content: var( --icon-player-play );
+          color: var( --huey-icon-highlight );
+        }
+
+        &:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
+          content: var( --icon-player-play-filled );
+          color: var( --huey-icon-highlight );
+          pointer-events: none;
+        }
+
+      }
+      
+      
+      > nav#sidebar {
+        width: 350px;
+        height: calc(100vh - 40px);
+        max-width: calc(100vw - 14px);
+        grid-column: 1/1;
+        grid-row: 2/ span 2;
+        padding: 4px 4px 0px 4px;
+        display: flex;
+        min-width: 170px;
+        
+        &::-webkit-scrollbar-corner{
+          background-color: var( --huey-medium-background-color );
+        }
+      }
+      
+      div#workarea {
+        grid-column: 2/2;
+        grid-row: 2/2;
+        height: calc(100vh - 38px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        border-top-style:solid;
+        border-top-color: var( --huey-dark-border-color );
+        border-top-width: 1px;
+
+        border-left-color: var( --huey-dark-border-color );
+        border-left-width: 1px;
+        border-left-style: solid;
+
+        border-top-left-radius: 12px;
+      }
+      
+    }
+    
+  }
 }
 
 .button {
   display: inline-block;
-
 }
-
-body {
-
-  > main {
-
-    > menu[role=toolbar] {
-
-      > label {
-      }
-
-      > label[for=autoRunQuery]::after,
-      > label[for=cloneHueySession]::before,
-      > label[for=quickQueryMenuButton]::after,
-      > label[for=currentDatasourceMenuButton]::after
-      {
-        border-right-width: 1px;
-        border-right-style: solid;
-        border-right-color: var(--huey-light-border-color);
-        padding-right: 8px;
-      }
-
-      > label[for=uploader] {
-        > input[type=file]#uploader {
-          display: none;
-        }
-      }
-
-      > label[for=uploader]::before {
-        content: var( --icon-upload );
-      }
-
-      > label[for=loadFromUrl]::before {
-        content: var( --icon-cloud-upload );
-      }
-
-      > label[for=cloneHueySession]::before {
-        content: var( --icon-copy );
-        padding-left: 8px;
-      }
-
-      > label[for=autoRunQuery] {
-      }
-
-      > label[for=autoRunQuery]::after {
-        font-family: var( --huey-icon-font-family );
-        font-size: var(--huey-icon-normal);
-        vertical-align: sub;
-        color: var(--huey-icon-color-subtle);
-        margin: 0px 4px 0px 4px;
-        display: inline-block;
-        content: var( --icon-square );
-      }
-
-      > label[for=autoRunQuery]:hover::after {
-        color: var( --huey-icon-color-highlight );
-      }
-
-      > label[for=runQueryButton]::before {
-        margin-left: 0px;
-      }
-
-      /*
-        separators between the top menu bar items
-      */
-      > label[for=cloneHueySession]::before,
-      > label[for=quickQueryMenuButton]::before
-      {
-        border-left-width: 1px;
-        border-left-style: solid;
-        border-left-color: var(--huey-light-border-color);
-      }
-
-      > label[for=quickQueryMenuButton]:has( +label[for=currentDatasourceMenuButton][data-current-datasource=''] ) {
-        display: none;
-      }
-
-      > label[for=currentDatasourceMenuButton] {
-        display: inline-block;
-        max-width: calc( 100vw - 650px );
-        vertical-align: bottom;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty ){
-        pointer-events: none;
-      }
-
-      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) ){
-        pointer-events: auto;
-      }
-
-      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:empty )::after {
-        content: ' ';
-      }
-
-      > label[for=currentDatasourceMenuButton]:has( > menu#dataSourceMenu:not( :empty ) )::after {
-        font-family: var( --huey-icon-font-family );
-        content: var( --icon-caret-down );
-      }
-
-      > label[for=currentDatasourceMenuButton][data-current-datasource=''] {
-        display: none;
-      }
-
-      > label[for=queryResultRowsInfo]:has( > output#queryResultRowsInfo:empty ),
-      > label[for=queryResultColumnsInfo]:has( > output#queryResultColumnsInfo:empty )
-      {
-        display: none;
-      }
-
-      #queryResultRowsInfo {
-      }
-
-      > label[for=queryResultRowsInfo]:before {
-        font-family: var( --huey-icon-font-family );
-        font-size: var( --huey-icon-medium );
-        content: var( --icon-table-column );
-      }
-
-      /* if the columns info is empty then no separator after 'rows' */
-      > label[for=queryResultRowsInfo]:has( + label[for=queryResultColumnsInfo] > output#queryResultColumnsInfo:empty ):before {
-        font-family: var( --huey-icon-font-family );
-        font-size: var( --huey-icon-medium );
-        content: var( --icon-table-column );
-      }
-
-      > label[for=queryResultColumnsInfo]:before {
-        font-family: var( --huey-icon-font-family );
-        font-size: var( --huey-icon-medium );
-        content: var( --icon-table-row );
-      }
-    }
-
-  }
-
-  /**/
-  > main:has( > .workarea > #pivotTableUi[data-needs-update=false]) > menu[role=toolbar] {
-
-    > label[for=runQueryButton] {
-      pointer-events: none;
-    }
-
-    > label[for=runQueryButton]::before {
-      content: var( --icon-player-play );
-    }
-  }
-
-  > main:has( > .workarea > #pivotTableUi[data-needs-update=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
-    content: var( --icon-player-play );
-    color: var( --huey-icon-highlight );
-  }
-
-  > main:has( > .workarea > #pivotTableUi[aria-busy=true]) > menu[role=toolbar] > label[for=runQueryButton]::before {
-    content: var( --icon-player-play-filled );
-    color: var( --huey-icon-highlight );
-    pointer-events: none;
-  }
-
-}
-
-body:has( #autoRunQuery:checked ) {
-  > main {
-    > menu[role=toolbar] {
-
-      > label[for=autoRunQuery]::after {
-        content: var( --icon-checkbox );
-        color: var( --huey-icon-color-highlight );
-      }
-
-      > label[for=runQueryButton] {
-        visibility: hidden;
-      }
-
-    }
-  }
-}
-
 
