@@ -1,10 +1,14 @@
-menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton ) {
-  float: right;
+menu[role=toolbar] {
+  > label {
+    &[for=aboutButton]:has( > button#aboutButton ) {
+      float: right;
+      &::before {
+        content: var( --icon-info-circle );
+      }
+    }
+  }
 }
 
-menu[role=toolbar] > label[for=aboutButton]:has( > button#aboutButton )::before {
-  content: var( --icon-info-circle );
-}
 
 #aboutDialog {
   /* center the dialog */
