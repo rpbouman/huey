@@ -12,7 +12,7 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
 ## Key features
-- Supports reading .parquet, .csv, .json and .duckdb database files. (Support for reading MS Excel .xlsx files and .sqlite is planned)
+- Supports reading .parquet, .csv, .json, .xlsx (MS Excel) and .duckdb database files. (Support for .sqlite is planned)
 - A comprehensive Attribute menu for exploring the structure of your dataset
 - An intuitive query builder that supports projection, aggregation, filtering, and (sub)totals
 - A pivot table to present analysis results
