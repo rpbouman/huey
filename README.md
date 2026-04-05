@@ -26,7 +26,7 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 - Run it your way! 
   - Huey is a static webapp: you can simply download or checkout the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
   - The latest stable release is availabe online as [Live demo site](https://rpbouman.github.io/huey/src/index.html). One click and you're up and running! Even in this setup, any data you process with Huey remains local and private. There is no active server-side process.
-  - Huey is also a [progressive web app](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-Huey-as-PWA).  
+  - Huey is also a [progressive web app](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-huey-on-your-device-as-progressive-web-app-pwa).
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
 
 ### Limitations
