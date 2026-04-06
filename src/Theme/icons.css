@@ -43,6 +43,7 @@
   --icon-player-play: '\ed46';
   --icon-layout-grid: '\edba';
   --icon-binary: '\ee08';
+  --icon-fingerprint: '\ebd1';
   --icon-feather: '\ee8b';
   --icon-letter-case-lower: '\eea2';
   --icon-letter-case-upper: '\eea4';
@@ -68,6 +69,8 @@
   --icon-number-16-small: '\fce9';
   --icon-number-32-small: '\10002';
   --icon-number-64-small: '\ffe2';
+  --icon-brackets: '\ebcd';
+  --icon-brackets-angle: '\fcb2';
   --icon-brackets-contain: '\f1e5';
   --icon-code-dots: '\f61a';
   --icon-exclamation-circle: '\f634';
@@ -96,7 +99,9 @@
   --icon-calendar-clock: '\fd2e';
   --icon-calendar-month: '\fd2f';
   --icon-calendar-week: '\fd30';
-  --icon-stopwatch: '\ff9b';  
+  --icon-stopwatch: '\ff9b';
+  --icon-time-duration-30: '\fad7';
   --icon-switch: '\eb33';
   --icon-article: '\f1e2';
+  --icon-tags: '\ef86';
 }

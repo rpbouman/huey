@@ -8,19 +8,20 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 .attributeUi {
   user-select: none;
 
-  /**
-  * hide the expand/collapse widget for these attribute nodes.
-  */
-  details[role=treeitem][data-nodetype=derived][data-member_expression_type=JSON] > summary,
-  details[role=treeitem][data-nodetype=aggregate] > summary ,
-  details[role=treeitem][data-nodetype=derived][data-derivation="row number"] > summary 
-  {
-    list-style: none;
-    margin-left: 14px;
-  }
-  
-  
   details[role=treeitem] {
+    /**
+    * hide the expand/collapse widget for these attribute nodes.
+    */
+    &:is( 
+      [data-nodetype=derived][data-member_expression_type=JSON], 
+      [data-nodetype=derived][data-derivation="row number"], 
+      [data-nodetype=aggregate]
+    ) {
+      > summary {
+        list-style: none;
+        margin-left: 14px;
+      }
+    }
 
     > summary {
       white-space: nowrap;
@@ -62,488 +63,705 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         color: var( --huey-icon-color-highlight );
       }
 
-      .attributeUiAxisButton > input[type=checkbox] {
-        display: none;
+      .attributeUiAxisButton {
+        
+        > input[type=checkbox] {
+          display: none;
+        }
+        
       }
 
-      > .attributeUiAxisButton[data-axis=none] {
-        width: 110px;
-        right: 0px;
+      > .attributeUiAxisButton {
+
+        &:has( > input[type=checkbox]:checked ) {
+          color: var( --huey-icon-color-highlight );
+        }
+
+        &[data-axis=none] {
+          width: 110px;
+          right: 0px;
+        }
+        
+        &[data-axis=rows] {
+          right: 90px;
+          
+          &::before {
+            /*
+              It may seem backward that we're using the table-column icon for the rows axis,
+              but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
+            */
+            content: var( --icon-table-column );
+          }
+        }
+        
+        &[data-axis=columns] {
+          right: 60px;
+          
+          &::before {
+            /*
+              It may seem backward that we're using the table-row icon for the columns axis,
+              but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
+            */
+            content: var( --icon-table-row );
+          }
+        }
+        
+        &[data-axis=cells] {
+          right: 30px;
+          
+          &::before {
+            content: var( --icon-layout-grid );
+          }
+        }
+
+        &[data-axis=filters] {
+          right: 0px;
+          
+          &::before {
+            content: var( --icon-filter );
+          }
+          
+          &:has( > input[type=checkbox]:checked )::before {
+            content: var( --icon-filter-off );
+          }
+        }
+        
       }
 
-      > .attributeUiAxisButton[data-axis=rows] {
-        right: 90px;
-      }
-      
-      > .attributeUiAxisButton[data-axis=rows]::before {
-        /*
-          It may seem backward that we're using the table-column icon for the rows axis,
-          but because the icon shows the highlighted first column, it matches the location of the row headers of a pivot table
-        */
-        content: var( --icon-table-column );
-      }
-
-      > .attributeUiAxisButton[data-axis=columns] {
-        right: 60px;
-      }
-      
-      > .attributeUiAxisButton[data-axis=columns]::before {
-        /*
-          It may seem backward that we're using the table-row icon for the columns axis,
-          but because the icon shows the highlighted first row, it matches the location of the column headers of a pivot table
-        */
-        content: var( --icon-table-row );
-      }
-
-      > .attributeUiAxisButton[data-axis=cells] {
-        right: 30px;
-      }
-      
-      > .attributeUiAxisButton[data-axis=cells]::before {
-        content: var( --icon-layout-grid );
-      }
       
       /* if the .attributeUiAxisButton is a SPAN (and not a LABEL) then it's not functional and the icon should be hidden */
       > span.attributeUiAxisButton::before {
         visibility:hidden;
       }
 
-      > .attributeUiAxisButton:has( > input[type=checkbox]:checked ) {
-        color: var( --huey-icon-color-highlight );
-      }
+      &:hover {
+        > span.attributeUiAxisButton,
+        > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+          background-color: var( --huey-light-background-color );
+        }
 
-      > .attributeUiAxisButton[data-axis=filters] {
-        right: 0px;
-      }
-      
-      > .attributeUiAxisButton[data-axis=filters]::before {
-        content: var( --icon-filter );
-      }
-
-      > .attributeUiAxisButton[data-axis=filters]:has( > input[type=checkbox]:checked )::before {
-        content: var( --icon-filter-off );
-      }
-
-    }
-
-    > summary:hover {
-      > span.attributeUiAxisButton,
-      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
-        background-color: var( --huey-light-background-color );
-      }
-
-      > span.label::before {
-        color: var( --huey-icon-color-highlight );
+        > span.label::before {
+          color: var( --huey-icon-color-highlight );
+        }
       }
     }
 
     /**
     * folder icons
     */
-    [data-nodetype=folder] > summary > span.label::before {
+    &[data-nodetype=folder] > summary > span.label::before {
       content: var( --icon-folder );
     }
 
-    [data-nodetype=folder][open] > summary > span.label::before {
+    &[data-nodetype=folder][open] > summary > span.label::before {
       content: var( --icon-folder-open );
     }
     
-  }
+    /**
+    *
+    * Data type icons & derivations
+    *
+    */
+    &[data-nodetype=derived] {
 
-  /**
-  *
-  * Data type icons & derivations
-  *
-  */
-  details[data-nodetype=derived][data-derivation='row number'] > summary > span.label::before {
-    content: var( --icon-hash );
-  }
+      &[data-derivation='row number'] > summary > span.label::before {
+        content: var( --icon-hash );
+      }
+      
+    }
+    
+    &:is(
+      [data-column_type=VARCHAR][data-nodetype=column],
+      [data-member_expression_type=VARCHAR]:is(
+        [data-nodetype=member],
+        [data-nodetype=derived]:is( 
+          [data-derivation='entry keys'], 
+          [data-derivation='entry values'], 
+          [data-derivation='elements'] 
+        )
+      )
+    ) > summary > span.label::before {
+      content: var( --icon-txt );
+    }
 
-  details[data-nodetype=derived][data-member_expression_type=VARCHAR]:has( 
-    [data-derivation='entry keys'], 
-    [data-derivation='entry values'], 
-    [data-derivation='elements'] 
-  ) > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=VARCHAR] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=VARCHAR] > summary > span.label::before {
-    content: var( --icon-txt );
-  }
+    &:is(
+      [data-column_type=BLOB][data-nodetype=column],
+      [data-member_expression_type=BLOB][data-nodetype=member]
+    ) > summary > span.label::before {
+      content: var( --icon-binary );
+    }
+    
+    &:is(
+      [data-column_type=BOOLEAN][data-nodetype=column],
+      [data-member_expression_type=BOOLEAN]:is(
+        [data-nodetype=derived][data-derivation='elements'],
+        [data-nodetype=member]
+      )
+    ) 
+    > summary > span.label::before {
+      content: var( --icon-square-check );
+    }
+    
+    &:is(
+      &:is(
+        [data-column_type$=INT],
+        [data-column_type$=INTEGER],
+        [data-column_type=BIGNUM]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type$=INT],
+        [data-member_expression_type$=INTEGER],
+        [data-member_expression_type=BIGNUM]
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-number-123 );
+    }
 
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BOOLEAN] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=BOOLEAN] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=BOOLEAN] > summary > span.label::before {
-    content: var( --icon-square-check );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$=INT] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$=INTEGER] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type$=INT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type$=INTEGER] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type$=INT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type$=INTEGER] > summary > span.label::before
-  {
-    content: var( --icon-number-123 );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=UBIGINT] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=BIGINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=UBIGINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=BIGINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=UBIGINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=BIGINT] > summary > span.label::before
-  {
-    content: var( --icon-number-64-small );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=UINTEGER] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=INTEGER] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=UINTEGER] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=INTEGER] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=UINTEGER] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=INTEGER] > summary > span.label::before
-  {
-    content: var( --icon-number-32-small );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=USMALLINT] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=SMALLINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=USMALLINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=SMALLINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=USMALLINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=SMALLINT] > summary > span.label::before
-  {
-    content: var( --icon-number-16-small );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=UTINYINT] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type=TINYINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=UTINYINT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=TINYINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=UTINYINT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=TINYINT] > summary > span.label::before
-  {
-    content: var( --icon-number-8-small );
-  }
-
-  details[data-nodetype=derived][data-derivation='keyset'] > summary > span.label::before {
-    content: var( --icon-key );
-  }
-
-  details[data-nodetype=derived][data-derivation='valuelist'] > summary > span.label::before {
-    content: var( --icon-shopping-cart );
-  }
-
-  details[data-nodetype=derived][data-derivation='entries'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=STRUCT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type^=STRUCT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type^=STRUCT] > summary > span.label::before
-  {
-    content: var( --icon-code-dots );
-  }
-
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type^=MAP] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type^=MAP] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type^=MAP] > summary > span.label::before
-  {
-    content: var( --icon-list-letters );
-  }
-
-  details[data-nodetype=derived][data-derivation='entries'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='elements'][data-member_expression_type$='[]'] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type$='[]'] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type$='[]'] > summary > span.label::before
-  {
-    content: var( --icon-brackets-contain );
-  }
-
-  details[data-nodetype=member][data-member_expression_type^=DECIMAL] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=DOUBLE] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=FLOAT] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=REAL] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type^=DECIMAL] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=DOUBLE] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=FLOAT] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=REAL] > summary > span.label::before {
-    content: var( --icon-decimal );
-  }
-
-  details[data-nodetype=derived][data-derivation='UUID version'] > summary > span.label::before {
-    content: var( --icon-letter-v-small );
-  }
-
-  details[data-nodetype=derived][data-derivation='UUIDv7 timestamp'] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type^=TIMESTAMP] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type^=TIMESTAMP] > summary > span.label::before {
-    content: var( --icon-calendar-clock );
-  }
-
-  details[data-nodetype=member][data-member_expression_type=DATE] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=DATE] > summary > span.label::before {
-    content: var( --icon-calendar );
-  }
-
-  details[data-nodetype=member][data-member_expression_type=TIME] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=TIME] > summary > span.label::before {
-    content: var( --icon-clock );
-  }
-
-  details[data-nodetype=derived][data-member_expression_type=JSON] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=JSON] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=JSON] > summary > span.label::before {
-    content: var( --icon-JSON );
-  }
-
-  details[data-nodetype=derived][data-derivation="hash"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 low"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="md5 high"] > summary > span.label::before {
-    content: var( --icon-number-123 );
-  }
-
-
-  details[data-nodetype=derived][data-derivation="md5 (hex)"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="sha-1"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="sha-256"] > summary > span.label::before,
-  details[data-nodetype=member][data-member_expression_type=UUID] > summary > span.label::before,
-  details[data-nodetype=column][data-column_type=UUID] > summary > span.label::before {
-    content: var( --icon-binary );
-  }
-
-  /**
-  *
-  * Derivation icons
-  *
-  */
-  details[data-nodetype=derived][data-derivation="iso-date"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="local-date"] > summary > span.label::before {
-    content: var( --icon-calendar );
-  }
-  details[data-nodetype=derived][data-derivation="iso-year"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation=year] > summary > span.label::before {
-    content: var( --icon-letter-y );
-  }
-
-  details[data-nodetype=derived][data-derivation=quarter] > summary > span.label::before {
-    content: var( --icon-letter-q );
-  }
-
-  details[data-nodetype=derived][data-derivation="month name"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="month shortname"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="month num"] > summary > span.label::before {
-    content: var( --icon-letter-m );
-  }
-
-  details[data-nodetype=derived][data-derivation="week num"] > summary > span.label::before {
-    content: var( --icon-calendar-week );
-  }
-
-  details[data-nodetype=derived][data-derivation="day of year"] > summary > span.label::before {
-    content: var( --icon-letter-d );
-  }
-
-  details[data-nodetype=derived][data-derivation="day of month"] > summary > span.label::before {
-    content: var( --icon-calendar-month );
-  }
-
-  details[data-nodetype=derived][data-derivation="day of week shortname"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="day of week name"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="iso-day of week"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="day of week num"] > summary > span.label::before {
-    content: var( --icon-letter-d-small );
-  }
-
-  details[data-nodetype=derived][data-derivation="iso-time"] > summary > span.label::before {
-    content: var( --icon-clock );
-  }
-
-  details[data-nodetype=derived][data-derivation=hour] > summary > span.label::before {
-    content: var( --icon-letter-h );
-  }
-
-  details[data-nodetype=derived][data-derivation=minute] > summary > span.label::before {
-    content: var( --icon-letter-m-small );
-  }
-
-  details[data-nodetype=derived][data-derivation=second] > summary > span.label::before {
-    content: var( --icon-letter-s );
-  }
+    &:is(
+      &:is(
+        [data-column_type=UBIGINT],
+        [data-column_type=BIGINT]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type=UBIGINT],
+        [data-member_expression_type=BIGINT]
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-number-64-small );
+    }
   
-  details[data-nodetype=derived][data-derivation='timestamp (secs)'] > summary > span.label::before, 
-  details[data-nodetype=derived][data-derivation='timestamp (millis)'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='timestamp (micros)'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='timestamp (nanos)'] > summary > span.label::before
-  {
-    content: var( --icon-stopwatch );
-  }
+    &:is(
+      &:is(
+        [data-column_type=UINTEGER],
+        [data-column_type=INTEGER]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type=UINTEGER],
+        [data-member_expression_type=INTEGER]
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-number-32-small );
+    }
+ 
+    &:is(
+      &:is(
+        [data-column_type=USMALLINT],
+        [data-column_type=SMALLINT]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type=USMALLINT],
+        [data-member_expression_type=SMALLINT]
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-number-16-small );
+    }
 
-  details[data-nodetype=derived][data-derivation=lowercase] > summary > span.label::before {
-    content: var( --icon-letter-case-lower );
-  }
+    &:is(
+      &:is(
+        [data-column_type=UTINYINT],
+        [data-column_type=TINYINT]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type=UTINYINT],
+        [data-member_expression_type=TINYINT]
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-number-8-small );
+    }
+        
+    &:is(
+      [data-nodetype=derived][data-derivation='keyset']
+    ) 
+    > summary > span.label::before {
+      content: var( --icon-key );
+    }
 
-  details[data-nodetype=derived][data-derivation=uppercase] > summary > span.label::before {
-    content: var( --icon-letter-case-upper );
-  }
+    &:is(
+      [data-nodetype=derived][data-derivation='valuelist']
+    ) 
+    > summary > span.label::before {
+      content: var( --icon-shopping-cart );
+    }
 
-  details[data-nodetype=derived][data-derivation=NOACCENT] > summary > span.label::before {
-    content: var( --icon-letter-case );
-  }
+    &:is(
+      &:is(
+        [data-column_type^=STRUCT][data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type^=STRUCT]
+      ):is(
+        [data-nodetype=derived]:is(
+          [data-derivation='entries'],
+          [data-derivation='elements']
+        )
+      ) 
+    ) > summary > span.label::before {
+      content: var( --icon-code-dots );
+    }
 
-  details[data-nodetype=derived][data-derivation=NOCASE] > summary > span.label::before {
-    content: var( --icon-letter-case );
-  }
+    
+    &:is(
+      [data-column_type^=MAP][data-nodetype=column],
+      [data-member_expression_type^=MAP]:is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      )
+    ) > summary > span.label::before {
+      content: var( --icon-list-letters );
+    }
 
-  details[data-nodetype=derived][data-derivation='first letter'] > summary > span.label::before {
-    content: var( --icon-sort-a-z );
-  }
+    /*
+      first, check if type ends with ] - if so it is an array.
+      but the array can either be fixed or variable length
+      we will give them both the [] icon.
+    */
+    &:is(
+      &:is( [data-column_type$=']'][data-nodetype=column] ),
+      &:is(
+        [data-member_expression_type$=']']
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ),
+      &:is( [data-nodetype=derived][data-derivation='entries'] )
+    ) > summary > span.label::before {
+      content: var( --icon-brackets );
+    }
 
-  details[data-nodetype=derived][data-derivation='entry count'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='unique values length'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='length'] > summary > span.label::before {
-    content: var( --icon-ruler-3 );
-  }
+    /*
+      now, check if type ends with [] - if so it is a variable length array.
+      we will give it the [...] icon.
+      This overrides the previous logic 
+    */
+    &:is(
+      &:is( [data-column_type$='[]'][data-nodetype=column] ),
+      &:is(
+        [data-member_expression_type$='[]']
+      ):is(
+        [data-nodetype=member],
+        [data-nodetype=derived][data-derivation='elements']
+      ),
+      &:is( [data-nodetype=derived][data-derivation='entries'] )
+    ) > summary > span.label::before {
+      content: var( --icon-brackets-contain );
+    }
 
-  details[data-nodetype=derived][data-derivation='entry indices'] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation='element indices'] > summary > span.label::before {
-    content: var( --icon-list-numbers );
-  }
+    &:is(
+      &:is(
+        [data-column_type^=DECIMAL],
+        [data-column_type=DOUBLE],
+        [data-column_type=FLOAT],
+        [data-column_type=REAL]
+      ):is(
+        [data-nodetype=column]
+      ),
+      &:is(
+        [data-member_expression_type^=DECIMAL],
+        [data-member_expression_type=DOUBLE],
+        [data-member_expression_type=FLOAT],
+        [data-member_expression_type=REAL]
+      ):is(
+        [data-nodetype=member]
+      )
+    ) > summary > span.label::before {
+      content: var( --icon-decimal );
+    }
+    
 
-  /**
-  *
-  * Aggregator icons
-  *
-  */
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=count] ):hover::before,
-  details[data-nodetype=derived][data-derivation=count] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="count if true"] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation="count if false"] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator="count if true"] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator="count if false"] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=count] > summary > span.label::before {
-    content: var( --icon-tallymarks );
-  }
+    &:is( 
+      [data-derivation='UUID version'][data-nodetype=derived] 
+    ) > summary > span.label::before {
+      content: var( --icon-letter-v-small );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="distinct count"] ):hover::before,
-  details[data-nodetype=derived][data-derivation="distinct count"] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator="distinct count"] > summary > span.label::before {
-    content: var( --icon-tallymark-4 );
-  }
+    &:is(
+      [data-column_type^=TIMESTAMP][data-nodetype=column],
+      [data-member_expression_type^=TIMESTAMP][data-nodetype=member],
+      [data-derivation='UUIDv7 timestamp'][data-nodetype=derived]
+    ) > summary > span.label::before {
+      content: var( --icon-calendar-clock );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
-  details[data-nodetype=derived][data-derivation=max] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=max] > summary > span.label::before {
-    content: var( --icon-math-max );
-  }
+    &:is(
+      [data-column_type=DATE][data-nodetype=column],
+      [data-member_expression_type=DATE][data-nodetype=member],
+    ) > summary > span.label::before {
+      content: var( --icon-calendar );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=min] ):hover::before,
-  details[data-nodetype=derived][data-derivation=min] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=min] > summary > span.label::before {
-    content: var( --icon-math-min );
-  }
+    &:is(
+      [data-column_type=INTERVAL][data-nodetype=column],
+      [data-member_expression_type=INTERVAL][data-nodetype=member],
+    ) > summary > span.label::before {
+      content: var( --icon-time-duration-30 );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=list] ):hover::before,
-  details[data-nodetype=aggregate][data-aggregator=list] > summary > span.label::before {
-    content: var( --icon-list );
-  }
+    &:is(
+      [data-column_type^=ENUM][data-nodetype=column],
+      [data-member_expression_type^=ENUM][data-nodetype=member],
+    ) > summary > span.label::before {
+      content: var( --icon-tags );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="unique values"] ):hover::before,
-  details[data-nodetype=derived][data-derivation="unique values"] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator="unique values"] > summary > span.label::before {
-    content: var( --icon-letter-u-small );
-  }
+    &:is(
+      &:is(
+        [data-column_type=TIME],
+        [data-column_type=TIME_NS],
+        [data-column_type='TIME WITH TIME ZONE']
+      ):is( [data-nodetype=column]),
+      &:is(
+        [data-member_expression_type=TIME],
+        [data-member_expression_type=TIME_NS],
+        [data-member_expression_type='TIME WITH TIME ZONE']
+      ):is( [data-nodetype=member] )
+    ) > summary > span.label::before {
+      content: var( --icon-clock );
+    }
+    
+    &:is(
+      [data-column_type=JSON][data-nodetype=column],
+      [data-member_expression_type=JSON][data-nodetype=member],
+      [data-member_expression_type=JSON][data-nodetype=derived]
+    ) > summary > span.label::before {
+      content: var( --icon-JSON );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=histogram] ):hover::before,
-  details[data-nodetype=aggregate][data-aggregator=histogram] > summary > span.label::before {
-    content: var( --icon-chart-bar );
-  }
+    &:is(
+      [data-derivation="hash"],
+      [data-derivation="md5"],
+      [data-derivation="md5 low"],
+      [data-derivation="md5 high"]
+    ):is(
+      [data-nodetype=derived]
+    ) > summary > span.label::before {
+      content: var( --icon-number-123 );
+    }
+    
+    &:is(
+      &:is(
+        [data-column_type=UUID][data-nodetype=column],
+        [data-member_expression_type=UUID][data-nodetype=member]
+      ),
+      &:is(
+        [data-derivation="md5 (hex)"],
+        [data-derivation="sha-1"],
+        [data-derivation="sha-256"],
+      ):is(
+        [data-nodetype=derived]
+      )
+    ) > summary > span.label::before {
+      content: var( --icon-fingerprint );
+    }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=sum] ):hover::before,
-  details[data-nodetype=derived][data-derivation=sum] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=sum] > summary > span.label::before {
-    content: var( --icon-sum );
-  }
+    /**
+    *
+    * Derivation icons
+    *
+    */
+    &[data-nodetype=derived] {
+      
+      &:is(
+        [data-derivation="iso-date"],
+        [data-derivation="local-date"] 
+      ) > summary > span.label::before {
+        content: var( --icon-calendar );
+      }
 
-  details[data-nodetype=derived][data-derivation="sort values"] > summary > span.label::before {
-    content: var( --icon-sort-ascending-letters );
-  }
+      &:is(
+        [data-derivation="iso-year"],
+        [data-derivation=year]
+      ) > summary > span.label::before {
+        content: var( --icon-letter-y );
+      }
+      
+      &[data-derivation=quarter] > summary > span.label::before {
+        content: var( --icon-letter-q );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=avg] ):hover::before,
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=geomean] ):hover::before,
-  details[data-nodetype=derived][data-derivation=avg] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=geomean] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=avg] > summary > span.label::before {
-    content: var( --icon-math-avg );
-  }
+      &:is(
+        [data-derivation="month name"],
+        [data-derivation="month shortname"],
+        [data-derivation="month num"]
+      )  > summary > span.label::before {
+        content: var( --icon-letter-m );
+      }
+      
+      &[data-derivation="week num"] > summary > span.label::before {
+        content: var( --icon-calendar-week );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before,
-  details[data-nodetype=derived][data-derivation=mad] > summary > span.label::before,
-  details[data-nodetype=derived][data-derivation=median] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=mad] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=median] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation="day of year"] > summary > span.label::before {
+        content: var( --icon-letter-d );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=mode] ):hover::before,
-  details[data-nodetype=derived][data-derivation=mode] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=mode] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation="day of month"] > summary > span.label::before {
+        content: var( --icon-calendar-month );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=stdev] ):hover::before,
-  details[data-nodetype=derived][data-derivation=stdev] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=stdev] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &:is(
+        [data-derivation="day of week shortname"],
+        [data-derivation="day of week name"],
+        [data-derivation="iso-day of week"],
+        [data-derivation="day of week num"]
+      )  > summary > span.label::before {
+        content: var( --icon-letter-d-small );
+      }
+      
+      &[data-derivation="iso-time"] > summary > span.label::before {
+        content: var( --icon-clock );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=variance] ):hover::before,
-  details[data-nodetype=derived][data-derivation=variance] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=variance] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation=hour] > summary > span.label::before {
+        content: var( --icon-letter-h );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=entropy] ):hover::before,
-  details[data-nodetype=derived][data-derivation=entropy] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=entropy] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation=minute] > summary > span.label::before {
+        content: var( --icon-letter-m-small );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=kurtosis] ):hover::before,
-  details[data-nodetype=derived][data-derivation=kurtosis] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=kurtosis] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation=second] > summary > span.label::before {
+        content: var( --icon-letter-s );
+      }
+  
+      &:is(
+        [data-derivation='timestamp (secs)'], 
+        [data-derivation='timestamp (millis)'],
+        [data-derivation='timestamp (micros)'],
+        [data-derivation='timestamp (nanos)']
+      ) > summary > span.label::before {
+        content: var( --icon-stopwatch );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=skewness] ):hover::before,
-  details[data-nodetype=derived][data-derivation=skewness] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=skewness] > summary > span.label::before {
-    content: var( --icon-calculator );
-  }
+      &[data-derivation=lowercase] > summary > span.label::before {
+        content: var( --icon-letter-case-lower );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=and] ):hover::before,
-  details[data-nodetype=derived][data-derivation=and] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=and] > summary > span.label::before {
-    content: var( --icon-logical-and );
-  }
+      &[data-derivation=uppercase] > summary > span.label::before {
+        content: var( --icon-letter-case-upper );
+      }
 
-  details > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=or] ):hover::before,
-  details[data-nodetype=derived][data-derivation=or] > summary > span.label::before,
-  details[data-nodetype=aggregate][data-aggregator=or] > summary > span.label::before {
-    content: var( --icon-logical-or );
-  }
+      &[data-derivation=NOACCENT] > summary > span.label::before {
+        content: var( --icon-letter-case );
+      }
 
-  /**
-  *
-  * https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
-  *
-  */
-  details > summary:has( > label > input[type=checkbox]:checked ) > span.label,
-  details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
-    font-weight: bold;
-  }
+      &[data-derivation=NOCASE] > summary > span.label::before {
+        content: var( --icon-letter-case );
+      }
 
-  details > summary:has( > label > input[type=checkbox]:checked ) > span.label:before,
-  details:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label:before {
-    color: var( --huey-icon-color-highlight );
-    font-weight: normal;
+      &[data-derivation='first letter'] > summary > span.label::before {
+        content: var( --icon-sort-a-z );
+      }
+
+      &:is(
+        [data-derivation='entry count'],
+        [data-derivation='unique values length'],
+        [data-derivation='length'] 
+      ) > summary > span.label::before {
+        content: var( --icon-ruler-3 );
+      }
+
+      &:is(
+        [data-derivation='entry indices'],
+        [data-derivation='element indices'] 
+      ) > summary > span.label::before {
+        content: var( --icon-list-numbers );
+      }
+
+    }
+        
+    /**
+    *
+    * Aggregator icons
+    *
+    */
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^=count] ):hover::before,
+    &:is(
+      [data-derivation^=count][data-nodetype=derived],
+      [data-aggregator^=count][data-nodetype=aggregate]
+    ) > summary > span.label::before {
+      content: var( --icon-tallymarks );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^="distinct count"] ):hover::before,
+    &:is(
+      [data-derivation^="distinct count"][data-nodetype=derived],
+      [data-aggregator^="distinct count"][data-nodetype=aggregate] 
+    ) > summary > span.label::before {
+      content: var( --icon-tallymark-4 );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
+    &:is(
+      [data-derivation=max][data-nodetype=derived],
+      [data-aggregator=max][data-nodetype=aggregate]
+    ) > summary > span.label::before {
+      content: var( --icon-math-max );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=min] ):hover::before,
+    &:is(
+      [data-derivation=min][data-nodetype=derived],
+      [data-aggregator=min][data-nodetype=aggregate]
+    ) > summary > span.label::before {
+      content: var( --icon-math-min );
+    }
+    
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=list] ):hover::before,
+    &[data-aggregator=list][data-nodetype=aggregate] > summary > span.label::before {
+      content: var( --icon-list );
+    }
+    
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="unique values"] ):hover::before,
+    &:is(
+      [data-derivation="unique values"][data-nodetype=derived],
+      [data-aggregator="unique values"][data-nodetype=aggregate] 
+    ) > summary > span.label::before {
+      content: var( --icon-letter-u-small );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=histogram] ):hover::before,
+    &[data-aggregator=histogram][data-nodetype=aggregate] > summary > span.label::before {
+      content: var( --icon-chart-bar );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=sum] ):hover::before,
+    &:is(
+      [data-derivation=sum][data-nodetype=derived],
+      [data-aggregator=sum][data-nodetype=aggregate]
+    ) > summary > span.label::before {
+      content: var( --icon-sum );
+    }
+
+    &[data-nodetype=derived][data-derivation="sort values"] > summary > span.label::before {
+      content: var( --icon-sort-ascending-letters );
+    }
+
+    
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( 
+      input[type=checkbox][data-aggregator=avg],
+      input[type=checkbox][data-aggregator=geomean]
+    ):hover::before,
+    &:is(
+      [data-nodetype=derived][data-derivation=avg],
+      [data-nodetype=aggregate]:is(
+        [data-aggregator=geomean],
+        [data-aggregator=avg]
+      )
+    ) > summary > span.label::before {
+      content: var( --icon-math-avg );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before,
+    &:is(
+      [data-nodetype=derived][data-derivation=mad],
+      [data-nodetype=derived][data-derivation=median],
+      [data-nodetype=aggregate][data-aggregator=mad],
+      [data-nodetype=aggregate][data-aggregator=median] 
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+    
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=mode] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=mode],
+      &[data-nodetype=aggregate][data-aggregator=mode]
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=stdev] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=stdev],
+      &[data-nodetype=aggregate][data-aggregator=stdev]
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=variance] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=variance],
+      &[data-nodetype=aggregate][data-aggregator=variance]
+    )  > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=entropy] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=entropy],
+      &[data-nodetype=aggregate][data-aggregator=entropy]
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=kurtosis] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=kurtosis],
+      &[data-nodetype=aggregate][data-aggregator=kurtosis]
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=skewness] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=skewness],
+      &[data-nodetype=aggregate][data-aggregator=skewness]
+    ) > summary > span.label::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=and] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=and],
+      &[data-nodetype=aggregate][data-aggregator=and]
+    ) > summary > span.label::before {
+      content: var( --icon-logical-and );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=or] ):hover::before,
+    &:is(
+      &[data-nodetype=derived][data-derivation=or],
+      &[data-nodetype=aggregate][data-aggregator=or]
+    ) > summary > span.label::before {
+      content: var( --icon-logical-or );
+    }
+
+    /**
+    *
+    * https://github.com/rpbouman/huey/issues/223: highlight labels of attribute ui nodes that somehow contribute to the query.
+    *
+    */
+    > summary:has( > label > input[type=checkbox]:checked ) > span.label,
+    &:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label {
+      font-weight: bold;
+    }
+
+    > summary:has( > label > input[type=checkbox]:checked ) > span.label:before,
+    &:has( details > summary > label > input[type=checkbox]:checked ) > summary > span.label:before {
+      color: var( --huey-icon-color-highlight );
+      font-weight: normal;
+    }
   }
 
 }
