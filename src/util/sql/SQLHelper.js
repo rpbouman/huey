@@ -3,14 +3,14 @@ function getDataTypeNameFromColumnType(columnType){
 }
 
 function getNullString(){
-  var generalSettings = settings.getSettings('localeSettings');
-  var nullString = generalSettings.nullString;
+  const generalSettings = settings.getSettings('localeSettings');
+  const nullString = generalSettings.nullString;
   return nullString;
 }
 
 function getLocales(){
-  var localeSettings = settings.getSettings('localeSettings');
-  var locales = localeSettings.locale;
+  const localeSettings = settings.getSettings('localeSettings');
+  const locales = localeSettings.locale;
   return locales;
 }
 
@@ -18,16 +18,16 @@ function getArrowDecimalAsString(value, type){
   if (value === null) {
     return 'NULL';
   }
-  var strValue = String(value);
-  var isNegative = strValue.startsWith('-') ;
-  var absValue = isNegative ? strValue.substr(1) : strValue;
+  const strValue = String(value);
+  const isNegative = strValue.startsWith('-') ;
+  let absValue = isNegative ? strValue.substr(1) : strValue;
   absValue = new Array(type.scale).fill('0').join('') + absValue;
-  var decimalPlace = absValue.length - type.scale;
-  var fractionalPart = absValue.slice(decimalPlace);
+  const decimalPlace = absValue.length - type.scale;
+  let fractionalPart = absValue.slice(decimalPlace);
   fractionalPart = fractionalPart.replace(/0+$/, '');
-  var integerPart = absValue.slice(0, decimalPlace);
+  let integerPart = absValue.slice(0, decimalPlace);
   integerPart = integerPart.replace(/^0+/, '');
-  var str = `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
+  let str = `${isNegative ? '-' : ''}${integerPart}.${fractionalPart}`;
   if (str === '.'){
     str = '0';
   }
@@ -35,14 +35,12 @@ function getArrowDecimalAsString(value, type){
 }
 
 function createNumberFormatter(fractionDigits){
-  var localeSettings = settings.getSettings('localeSettings');
-  var options = {
+  const localeSettings = settings.getSettings('localeSettings');
+  let options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
   
-  var intFormatter, decimalSeparator;
-  var locales = getLocales();
-  intFormatter = new Intl.NumberFormat(locales, Object.assign({maximumFractionDigits: 0}, options));
+  let locales = getLocales();
   if (fractionDigits){
     options.minimumFractionDigits = localeSettings.minimumFractionDigits;
     options.maximumFractionDigits = localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits;
@@ -50,7 +48,7 @@ function createNumberFormatter(fractionDigits){
       options.maximumFractionDigits = options.minimumFractionDigits;
     }
   }
-  var formatter;
+  let formatter;
   try {
     formatter = new Intl.NumberFormat(locales, options);
   }
@@ -86,16 +84,14 @@ function createNumberFormatter(fractionDigits){
           return formatter.format(value);
       }
       
-      var strValue;
+      let strValue;
       if (field) {
-        var fieldType = field.type;
-        var fieldTypeId = fieldType.typeId;
-        switch (fieldTypeId){
+        const fieldType = field.type;
+        switch (fieldType.typeId){
           case 7: // arrrow decimal
             return formatArrowDecimal(value, fieldType);
           default:
         }
-        var fieldTypeScale;
       }
       else {
         strValue = String(value);
@@ -110,12 +106,12 @@ function createNumberFormatter(fractionDigits){
 
 function createTimestampFormatter(withTimeZone){
   // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
-  // allowing us to use the value directly as argumnet to the Date constructor.
+  // allowing us to use the value directly as argument to the Date constructor.
   // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
   // and since the Duckdb TIMESTAMP is measured in microseconds, there will be 3 such decimal digits
-  var localeSettings = settings.getSettings('localeSettings');
-  var locales = localeSettings.locale;      
-  var formatter = new Intl.DateTimeFormat(locales, {
+  const localeSettings = settings.getSettings('localeSettings');
+  let locales = localeSettings.locale;      
+  let formatter = new Intl.DateTimeFormat(locales, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -128,8 +124,8 @@ function createTimestampFormatter(withTimeZone){
     if (value === null ){
       return getNullString();
     }
-    var date = new Date(value);
-    var parts = String(value).split('.');
+    let date = new Date(value);
+    let parts = String(value).split('.');
     var micros;
     if (parts.length === 2) {
       micros = parseInt( parts[1], 10 );
@@ -153,6 +149,60 @@ function createTimestampLiteralWriter(timezoneDatatypeName){
   };
 }
 
+function createTimeFormatter(withTimeZone){
+  // we will receive the value as a javascript Number, representing the milliseconds since Epoch,
+  // allowing us to use the value directly as argument to the Date constructor.
+  // the number may (will) have decimal digits, representing any bit of time beyond the milliseconds resolution
+  // and since the Duckdb TIME is measured in microseconds, there will be 3 such decimal digits
+  const localeSettings = settings.getSettings('localeSettings');
+  let locales = localeSettings.locale;      
+  let formatter = new Intl.DateTimeFormat(locales, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3
+  });
+  return function(value, field){
+    if (value === null ){
+      return getNullString();
+    }
+    // interestingly, duckdb TIME is returned as bigint value
+    // this is quite different from timestamps / dates, where the value is a number.
+    console.log(value)
+    value = parseInt(value, 10) / 1000;
+    let date = new Date(value);
+    let parts = String(value).split('.');
+    var micros;
+    if (parts.length === 2) {
+      micros = parseInt( parts[1], 10 );
+    }
+    var dateTimeString = formatter.format(date);
+    
+    if (!micros) {
+      return dateTimeString;
+    }
+    
+    return `${dateTimeString} ${micros}μs`;
+  };
+}
+
+function createTimeLiteralWriter(timezoneDatatypeName){
+  if (timezoneDatatypeName === undefined){
+    timezoneDatatypeName = 'TIME';
+  }
+  return function(value, field){
+    const number = parseInt(value, 10) / 1000;
+    const date = new Date(number);
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+    const millis = date.getUTCMilliseconds();
+    const micros = String(number).split('.')[1] || '';
+    const expression = `make_time( ${hours}, ${minutes}, ${seconds}.${millis}${micros} )`;
+    return value === null ? `NULL::${timezoneDatatypeName}` : expression;
+  };
+}
+
 function fallbackFormatter(value){
   if (value === null || value === undefined){
     return getNullString();
@@ -161,9 +211,9 @@ function fallbackFormatter(value){
 }
 
 function createDecimalLiteralWriter(precision, scale){
-  var typeDef = 'DECIMAL';
+  let typeDef = 'DECIMAL';
   if (precision !== undefined) {
-    var typeOfPrecision = typeof precision;
+    const typeOfPrecision = typeof precision;
     if (typeOfPrecision !== 'number') {
       throw new Error('Precision must be a number, not "${typeOfPrecision}"');
     }
@@ -175,8 +225,7 @@ function createDecimalLiteralWriter(precision, scale){
       scale = 0;
     }
     else {
-      var typeOfScale = typeof scale;
-      if ( typeOfScale !== 'number') {
+      if ( typeof scale !== 'number') {
         throw new Error('Scale must be a number, not "${typeOfScale}"');
       }
       if (scale !== parseInt(scale, 10)){
@@ -209,9 +258,9 @@ function createDecimalLiteralWriter(precision, scale){
   });
   
   return function(value, valueField){
-    var decimalString = getArrowDecimalAsString(value, valueField.type);
+    const decimalString = getArrowDecimalAsString(value, valueField.type);
     // this is mostly to lose the leading zeroes
-    var formattedDecimalString = formatter.format(decimalString)
+    const formattedDecimalString = formatter.format(decimalString)
     return `${formattedDecimalString}::${typeDef}`;
   }
 }
@@ -223,13 +272,13 @@ function createDefaultLiteralWriter(type){
 }
 
 function createDateFormatter(options){
-  var locales = getLocales();
-  var dateFormatter = new Intl.DateTimeFormat(locales, options);
+  const locales = getLocales();
+  const dateFormatter = new Intl.DateTimeFormat(locales, options);
   return dateFormatter;
 }
 
 function createLocalDateFormatter(){
-  var dateFormatter = createDateFormatter({
+  const dateFormatter = createDateFormatter({
     year: 'numeric',
     month: 'numeric',
     day: 'numeric'
@@ -243,27 +292,27 @@ function createLocalDateFormatter(){
 }
 
 function createMonthNameList(modifier){
-  var dateFormatter = createDateFormatter({
+  const dateFormatter = createDateFormatter({
     month: modifier || 'long'
   });
-  var monthNames = [null];
-  var date;
-  for (var i = 0; i < 12; i++){
+  const monthNames = [null];
+  let date;
+  for (let i = 0; i < 12; i++){
     if (date){
       date.setMonth(i);
     }
     else{
-      date = new Date(2000, i, 01);
+      date = new Date(2000, i, 1);
     }
-    var dateString = dateFormatter.format(date);
-    var monthName = dateString.replace(/[^\d\w]/g, '');
+    const dateString = dateFormatter.format(date);
+    const monthName = dateString.replace(/[^\d\w]/g, '');
     monthNames.push(monthName);
   }
   return monthNames;
 }
 
 function createMonthNameFormatter(modifier){
-  var monthNames = createMonthNameList(modifier);
+  const monthNames = createMonthNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -273,13 +322,13 @@ function createMonthNameFormatter(modifier){
 }
 
 function createMonthNameParser(modifier){
-  var monthNames = createMonthNameList(modifier);
+  const monthNames = createMonthNameList(modifier);
   return function(monthNameValue){
     if (!monthNameValue) {
       return null;
     }
-    var upperMonthNameValue = monthNameValue.toUpperCase();
-    return monthNames.findIndex(function(listedName){
+    const upperMonthNameValue = monthNameValue.toUpperCase();
+    return monthNames.findIndex(listedName => {
       if (listedName === null) {
         return false;
       }
@@ -305,28 +354,28 @@ function createMonthFullNameParser(){
 }
 
 function createDayNameList(modifier){
-  var dateFormatter = createDateFormatter({
+  const dateFormatter = createDateFormatter({
     weekday: modifier || 'long'
   });
-  var dayNames = [];
-  var date;
-  for (var i = 1; i < 8; i++){
+  const dayNames = [];
+  let date;
+  for (let i = 1; i < 8; i++){
     if (date){
       date.setDate(i);
     }
     else {
       // 2023-01-01 started on a sunday
-      date = new Date(2023, 0, 01);
+      date = new Date(2023, 0, 1);
     }
-    var dateString = dateFormatter.format(date);
-    var dayName = dateString.replace(/[^\d\w]/g, '');
+    const dateString = dateFormatter.format(date);
+    const dayName = dateString.replace(/[^\d\w]/g, '');
     dayNames.push(dayName);
   }
   return dayNames;
 }
 
 function createDayNameFormatter(modifier){
-  var dayNames = createDayNameList(modifier);
+  const dayNames = createDayNameList(modifier);
   return function(value){
     if (value === null) {
       return getNullString();
@@ -336,13 +385,13 @@ function createDayNameFormatter(modifier){
 }
 
 function createDayNameParser(modifier){
-  var dayNames = createDayNameList(modifier);
+  const dayNames = createDayNameList(modifier);
   return function(dayNameValue){
     if (!dayNameValue) {
       return null;
     }
-    var upperDayNameValue = dayNameValue.toUpperCase();
-    return dayNames.findIndex(function(listedName){
+    const upperDayNameValue = dayNameValue.toUpperCase();
+    return dayNames.findIndex(listedName =>{
       if (listedName === null) {
         return false;
       }
@@ -406,15 +455,15 @@ function getDuckDbLiteralForValue(value, type){
   if (value === null){
     return 'NULL';
   }
-  var literal = '';
-  var typeId = type.typeId;
+  let literal = '';
+  const typeId = type.typeId;
   // see: https://github.com/apache/arrow/blob/main/js/src/enum.ts
   switch (typeId){
     case 1:   // Null
       literal = 'NULL';
       break;
     case 7:   // Decimal
-      var decimalString = getArrowDecimalAsString(value, type);
+      const decimalString = getArrowDecimalAsString(value, type);
       literal = `${decimalString}::DECIMAL`;
       break;
     case 2:   // Int
@@ -460,36 +509,35 @@ function getDuckDbLiteralForValue(value, type){
       break;
     case 12:  // LIST
     case 16:  // fixed size list
-      var literal;
-      var elementType = type.children[0].type;
-      for (var i = 0; i < value.length; i++){
+      const elementType = type.children[0].type;
+      for (let i = 0; i < value.length; i++){
         if (i) {
           literal += ',';
         }
-        var elementValue = value.get(i);
+        const elementValue = value.get(i);
         literal += getDuckDbLiteralForValue(elementValue, elementType)
       }
       literal = `[${literal}]`;
       break;
     case 13:  // Struct
-      literal = type.children.map(function(entry){
-        var entryName = entry.name;
-        var entryValue = value[entryName];
-        var entryType = entry.type;
-        var entryValueLiteral = getDuckDbLiteralForValue(entryValue, entryType);
-        var entryLiteral = `${quoteStringLiteral(entryName)}: ${entryValueLiteral}`;
+      literal = type.children.map(entry =>{
+        const entryName = entry.name;
+        const entryValue = value[entryName];
+        const entryType = entry.type;
+        const entryValueLiteral = getDuckDbLiteralForValue(entryValue, entryType);
+        const entryLiteral = `${quoteStringLiteral(entryName)}: ${entryValueLiteral}`;
         return entryLiteral;
       }).join(',');
       literal = `{${literal}}`;
       break;
     case 17:  // Map
-      var mapEntryType = type.children[0].type;
-      var keyType = mapEntryType.children[0].type;
-      var valueType = mapEntryType.children[1].type;
-      var entries = Object.entries(value);
-      literal = 'MAP{' + entries.map(function(entry){
-        var keyLiteral = getDuckDbLiteralForValue(entry[0], keyType);
-        var valueLiteral = getDuckDbLiteralForValue(entry[1], valueType);
+      const mapEntryType = type.children[0].type;
+      const keyType = mapEntryType.children[0].type;
+      const valueType = mapEntryType.children[1].type;
+      const entries = Object.entries(value);
+      literal = 'MAP{' + entries.map(entry => {
+        const keyLiteral = getDuckDbLiteralForValue(entry[0], keyType);
+        const valueLiteral = getDuckDbLiteralForValue(entry[1], valueType);
         return `${keyLiteral}: ${valueLiteral}`;
       }).join(',') + '}';
       break;
@@ -532,17 +580,17 @@ var dataTypes = {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
-      var formatter = createNumberFormatter(true);
+      const formatter = createNumberFormatter(true);
       return function(value, field){
         return formatter.format(value, field)
       };
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
-      var typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
+      const typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
       if (!typeParts){
         throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
       }
-      var precision, scale;
+      let precision, scale;
       if (typeParts[1]){
         precision = parseInt(typeParts[1], 10);
         
@@ -557,7 +605,7 @@ var dataTypes = {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(){
-      var formatter = createNumberFormatter(true);
+      const formatter = createNumberFormatter(true);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -571,7 +619,7 @@ var dataTypes = {
     isNumeric: true,
     greaterPrecisionAlternative: "DOUBLE",
     createFormatter: function(){
-      var formatter = createNumberFormatter(true);
+      const formatter = createNumberFormatter(true);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -585,7 +633,7 @@ var dataTypes = {
     isNumeric: true,
     greaterPrecisionAlternative: "DOUBLE",
     createFormatter: function(){
-      var formatter = createNumberFormatter(true);
+      const formatter = createNumberFormatter(true);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -600,7 +648,7 @@ var dataTypes = {
     isInteger: true,
     greaterPrecisionAlternative: "HUGEINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -615,7 +663,7 @@ var dataTypes = {
     defaultAnalyticalRole: 'attribute',
     isInteger: true,
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -630,7 +678,7 @@ var dataTypes = {
     isInteger: true,
     greaterPrecisionAlternative: "BIGINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -645,7 +693,7 @@ var dataTypes = {
     isInteger: true,
     greaterPrecisionAlternative: "INTEGER",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -660,7 +708,7 @@ var dataTypes = {
     isInteger: true,
     greaterPrecisionAlternative: "SMALLINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -676,7 +724,7 @@ var dataTypes = {
     isUnsigned: true,
     greaterPrecisionAlternative: "UHUGEINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -690,7 +738,7 @@ var dataTypes = {
     isNumeric: true,
     isInteger: true,
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -706,7 +754,7 @@ var dataTypes = {
     isUnsigned: true,
     greaterPrecisionAlternative: "UBIGINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -722,7 +770,7 @@ var dataTypes = {
     isUnsigned: true,
     greaterPrecisionAlternative: "UINTEGER",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -738,7 +786,7 @@ var dataTypes = {
     isUnsigned: true,
     greaterPrecisionAlternative: "USMALLINT",
     createFormatter: function(){
-      var formatter = createNumberFormatter(false);
+      const formatter = createNumberFormatter(false);
       return function(value, field){
         return formatter.format(value, field);
       };
@@ -764,10 +812,11 @@ var dataTypes = {
   'DATE': {
     defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
+    hasTimestampFields: true,
     createFormatter: function(){
-      var localeSettings = settings.getSettings('localeSettings');
-      var locales = localeSettings.locale;
-      var formatter = new Intl.DateTimeFormat(locales, {
+      const localeSettings = settings.getSettings('localeSettings');
+      const locales = localeSettings.locale;
+      const formatter = new Intl.DateTimeFormat(locales, {
         year: 'numeric',
         month: 'short',
         day: '2-digit'
@@ -784,9 +833,9 @@ var dataTypes = {
         if (value === null) {
           return 'NULL::DATE';
         }
-        var dateValue = new Date(value);
-        var monthNum = monthNumFormatter(1 + dateValue.getUTCMonth())
-        var dayNum = dayNumFormatter(dateValue.getUTCDate());
+        const dateValue = new Date(value);
+        const monthNum = monthNumFormatter(1 + dateValue.getUTCMonth());
+        const dayNum = dayNumFormatter(dateValue.getUTCDate());
         return `DATE'${dateValue.getUTCFullYear()}-${monthNum}-${dayNum}'`;
       };
     }
@@ -794,18 +843,41 @@ var dataTypes = {
   'TIME': {
     defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
+    hasTimestampFields: true,
+    createFormatter: function(){
+      return createTimeFormatter(false);
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createTimeLiteralWriter('TIMESTAMP');
+    }
   },
   'TIME_NS': {
     defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
+    hasTimestampFields: true,
+    createFormatter: function(){
+      return createTimeFormatter(false);
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createTimeLiteralWriter('TIMESTAMP');
+    }
   },
   'TIME WITH TIME ZONE': {
     defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
+    hasTimestampFields: true,
+    hasTimezone: true,
+    createFormatter: function(){
+      return createTimeFormatter(true);
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return createTimeLiteralWriter('TIMESTAMPTZ');
+    }
   },
   'TIMESTAMP': {
     defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
+    hasTimestampFields: true,
     hasTimeFields: true,
     createFormatter: function(){
       return createTimestampFormatter(false);
@@ -817,6 +889,7 @@ var dataTypes = {
   'TIMESTAMP WITH TIME ZONE': {
     defaultAnalyticalRole: 'attribute',
     hasDateFields: true,
+    hasTimestampFields: true,
     hasTimeFields: true,
     hasTimezone: true,
     //TODO: find a way to pass thetime zone into the formatter
@@ -861,10 +934,10 @@ var dataTypes = {
     defaultAnalyticalRole: 'attribute',
     createLiteralWriter: function(dataTypeInfo, dataType){      
       return function(value, field){
-        var type = field.type;
-        var duckdbValue = getDuckDbLiteralForValue(value, type);
-        duckdbValue = `CAST( ${duckdbValue} AS ${dataType} )`;
-        return duckdbValue;
+        const type = field.type;
+        const duckdbValue = getDuckDbLiteralForValue(value, type);
+        const duckdbValueExpression = `CAST( ${duckdbValue} AS ${dataType} )`;
+        return duckdbValueExpression;
       }
     }
   },
@@ -878,10 +951,10 @@ var dataTypes = {
     defaultAnalyticalRole: 'attribute',
     createLiteralWriter: function(dataTypeInfo, dataType){      
       return function(value, field){
-        var type = field.type;
-        var duckdbValue = getDuckDbLiteralForValue(value, type);
-        duckdbValue = `CAST( ${duckdbValue} AS ${dataType} )`;
-        return duckdbValue;
+        const type = field.type;
+        const duckdbValue = getDuckDbLiteralForValue(value, type);
+        const duckdbValueExpression = `CAST( ${duckdbValue} AS ${dataType} )`;
+        return duckdbValueExpression;
       }
     }
   },
@@ -902,8 +975,8 @@ function getDataTypeInfo(columnType){
   if (isArrayType(columnType)) {
     return dataTypes['ARRAY'];
   }
-  var columnTypeUpper = columnType.toUpperCase();
-  var typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
+  const columnTypeUpper = columnType.toUpperCase();
+  const typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
     return columnTypeUpper.startsWith(dataTypeName.toUpperCase());
   });
   if (typeNames.length === 0) {
@@ -911,14 +984,14 @@ function getDataTypeInfo(columnType){
   }
   
   // check if there exists a type with exactly the given name
-  var dataTypeInfo = dataTypes[columnTypeUpper];
+  const dataTypeInfo = dataTypes[columnTypeUpper];
   if (dataTypeInfo) {
     return dataTypeInfo;
   }
   
   // no. This means the type is in some way modified/parameterized, like DECIMAL(nn, nn)
   // try to find the "best" match.
-  typeNames.sort(function(a, b){
+  typeNames.sort((a, b) => {
     if (a.length > b.length) {
       return 1;
     }
@@ -928,7 +1001,7 @@ function getDataTypeInfo(columnType){
     }
     return 0;
   });
-  var typeName = typeNames[0];
+  const typeName = typeNames[0];
   return dataTypes[typeName];
 }
 
@@ -1014,82 +1087,67 @@ function formatKeyword(keyword, letterCase){
 }
 
 function getQualifiedIdentifier(){
-  var sqlOptions;
+  let sqlOptions = normalizeSqlOptions();
   switch (arguments.length) {
     case 0:
       throw new Error(`Invalid number of arguments.`);
     case 1:
-      sqlOptions = normalizeSqlOptions(sqlOptions);
-      var arg = arguments[0];
+      const arg = arguments[0];
       return getQualifiedIdentifier(arg, sqlOptions);
-      break;
     case 2:
       switch (typeof arguments[1]) {
         case 'object':  //2nd argument is sqlOptions
-          sqlOptions = normalizeSqlOptions(sqlOptions);
           switch (typeof arguments[0]) {
             case 'string':
               return getQualifiedIdentifier([arguments[0]], sqlOptions);
-              break;
             case 'object':
               if (arguments[0] instanceof Array ) {
-                function identifierQuoter (identifier){
-                  return getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers);
-                };
-                
                 return arguments[0]
-                .map(identifierQuoter)
+                .map(identifier => getIdentifier(identifier, sqlOptions.alwaysQuoteIdentifiers))
                 .join('.')
                 ;
               }
             default:
               throw new Error(`Invalid argument`);
           }
-          break;
         case 'string':
           return getQualifiedIdentifier([arguments[0], arguments[1]]);
-          break;
         case 'undefined':
-          return getQualifiedIdentifier(arguments[0], normalizeSqlOptions());
-          break;
+          return getQualifiedIdentifier(arguments[0], sqlOptions);
         default:
           throw new Error(`Invalid argument type ${typeof arguments[1]}`);
       }
-      break;
     default:
-      var n = arguments.length;
-      var lastArgument = arguments[n - 1];
-      var sqlOptions;
+      let n = arguments.length;
+      const lastArgument = arguments[n - 1];
       if (typeof lastArgument === 'object') {
         sqlOptions = lastArgument;
         n -= 1;
       }
       sqlOptions = normalizeSqlOptions(sqlOptions);
       
-      var args = [];
+      const args = [];
       for (var i = 0; i < n; i++){
-        var identifier = arguments[i];
+        const identifier = arguments[i];
         args.push(identifier);
       }
       return getQualifiedIdentifier(args, sqlOptions);
   }
-  throw new Error(`Invalid arguments`);
 }
 
 async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName){
-  var connection = hueyDb.connection;
-  var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
-  var statement = await connection.prepare(sql);
-  var result = await statement.query(extensionName);
+  const connection = hueyDb.connection;
+  let sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
+  const statement = await connection.prepare(sql);
+  const result = await statement.query(extensionName);
   statement.close();
-  var loaded, installed;
   if (result.numRows === 0) {
     return;
   }
 
   var row = result.get(0);
-  loaded = row.loaded;
-  installed = row.installed;
+  const loaded = row.loaded;
+  const installed = row.installed;
   
   if (!installed) {
     sql = `INSTALL ${extensionName}`;
@@ -1107,13 +1165,12 @@ async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repository
 }
 
 function getCopyToStatement(selectStatement, fileName, options){
-  var optionsString = Object
-  .keys(options)
-  .map(function(option){
+  const optionsString = Object.keys(options)
+  .map(option => {
     return `${option} ${options[option]}`
   }).join('\n, ');
   
-  var copyStatement = [
+  const copyStatement = [
     'COPY (',
     selectStatement,
     `) TO '${fileName}' WITH (`,
@@ -1134,7 +1191,7 @@ function getSqlHeader(){
 }
 
 function getComma(commaStyle) {
-  var prefix = '', postfix = ''
+  let prefix = '', postfix = ''
   switch(commaStyle){
     case 'spaceAfter':
       postfix = ' ';
@@ -1150,12 +1207,12 @@ function getComma(commaStyle) {
 }
 
 function normalizeSqlOptions(sqlOptions){
-  var defaultSqlSettings = settings.getSettings('sqlSettings');
+  const defaultSqlSettings = settings.getSettings('sqlSettings');
   return Object.assign({}, defaultSqlSettings, sqlOptions);
 }
 
 function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
-  var valuesClause = `(VALUES (${valueLiterals.join('),(')}) )`;
+  let valuesClause = `(VALUES (${valueLiterals.join('),(')}) )`;
   if (tableAlias){
     valuesClause += ` AS ${tableAlias}`;
     if (columnAlias){
@@ -1166,8 +1223,8 @@ function getSqlValuesClause(valueLiterals, tableAlias, columnAlias){
 }
 
 function getStructTypeDescriptor(structColumnType){
-  var index = 0;
-  var keyword = 'STRUCT';
+  let index = 0;
+  const keyword = 'STRUCT';
   if (!structColumnType.startsWith(keyword)){
     throw new Error(`Type "${structColumnType}" is not a STRUCT: expected keyword ${keyword} at position ${index}`);
   }
@@ -1176,12 +1233,12 @@ function getStructTypeDescriptor(structColumnType){
     throw new Error(`Type "${structColumnType}" is not a STRUCT: expected "("  at position ${index} `);
   }
   index += 1;
-  var structure = {};
+  const structure = {};
   
   function parseMemberName(){
-    var memberName;
-    var startOfMemberName = index;
-    var endOfMemberName;
+    let memberName;
+    let startOfMemberName = index;
+    let endOfMemberName;
     if (structColumnType.charAt(index) === '"') {
       startOfMemberName += 1;
       endOfMemberName = structColumnType.indexOf('"', startOfMemberName);
@@ -1196,10 +1253,11 @@ function getStructTypeDescriptor(structColumnType){
   }
   
   function parseMemberType(){
-    var startOfMemberType = index;
-    var level = 0;
+    const startOfMemberType = index;
+    let endOfMemberType;
+    let level = 0;
     _loop: while (index < structColumnType.length){
-      var ch = structColumnType.charAt(index);
+      const ch = structColumnType.charAt(index);
       switch (ch) {
         case '(':
           level++;
@@ -1217,21 +1275,21 @@ function getStructTypeDescriptor(structColumnType){
       }
       index++;
     }
-    var memberType = structColumnType.substring(startOfMemberType, endOfMemberType);
+    const memberType = structColumnType.substring(startOfMemberType, endOfMemberType);
     return memberType;
   }
   
   _loop: while (index < structColumnType.length) {
 
-    var memberName = parseMemberName();
+    const memberName = parseMemberName();
     if (structColumnType.charAt(index) !== ' '){
       throw new Error(`Error parsing STRUCT ${structColumnType}: expected "  "  at ${index}`);
     }
     index += 1;
-    var type = parseMemberType();
+    const type = parseMemberType();
     structure[memberName] = type;
     
-    var ch = structColumnType.charAt(index);
+    const ch = structColumnType.charAt(index);
     switch(ch) {
       case ',':
         index += 1;
@@ -1252,9 +1310,9 @@ function getMapKeyValueType(mapType){
     throw new Error(`Expected a MAP type`)
   }
   
-  var level = 0;
-  var i;
-  var elementTypes = unQuote(mapType, 'MAP(', ')');
+  let level = 0;
+  let i;
+  const elementTypes = unQuote(mapType, 'MAP(', ')');
   _loop: for (i = 0; i < elementTypes.length; i++){
     var ch = elementTypes.charAt(i);
     switch (ch){
@@ -1270,8 +1328,8 @@ function getMapKeyValueType(mapType){
         }
     }
   }
-  var keyType = elementTypes.slice(0, i).trim();
-  var valueType = elementTypes.slice(i + 1).trim();
+  const keyType = elementTypes.slice(0, i).trim();
+  const valueType = elementTypes.slice(i + 1).trim();
   return {
     keyType: keyType,
     valueType: valueType
@@ -1279,12 +1337,12 @@ function getMapKeyValueType(mapType){
 }
 
 function getMapKeyType(mapType){
-  var keyValueType = getMapKeyValueType(mapType);
+  const keyValueType = getMapKeyValueType(mapType);
   return keyValueType.keyType;
 }
 
 function getMapValueType(mapType){
-  var keyValueType = getMapKeyValueType(mapType);
+  const keyValueType = getMapKeyValueType(mapType);
   return keyValueType.valueType;
 }
 
@@ -1292,13 +1350,13 @@ function getMapValueType(mapType){
 // this function will return the type that results from calling map_entries(<map>),
 // which would be: STRUCT(key <keyType>, value <valueType>)[]
 function getMapEntriesType(mapType){
-  var entryType = getMapEntryType(mapType)
+  const entryType = getMapEntryType(mapType)
   return getArrayType(entryType);
 }
 
 function getMapEntryType(mapType){
-  var keyType = getMemberExpressionType(mapType, 'key');
-  var valueType = getMemberExpressionType(mapType, 'value');
+  const keyType = getMemberExpressionType(mapType, 'key');
+  const valueType = getMemberExpressionType(mapType, 'value');
   return `STRUCT(key ${keyType}, value ${valueType})`;
 }
 
@@ -1332,15 +1390,15 @@ function isStringType(dataType){
 
 function getMemberExpressionType(type, memberExpressionPath){
   if (memberExpressionPath.length) {
-    var typeOfMemberExpressionPath = typeof memberExpressionPath;
+    const typeOfMemberExpressionPath = typeof memberExpressionPath;
     switch (typeOfMemberExpressionPath) {
       case 'object':
         //TODO: 
         // for all the cases where the member expression path element has parenthesis, 
         // we should be looking up the corresponding derivation
         // and extract the type info from there.
-        var memberExpression = memberExpressionPath[0];
-        var memberExpressionType;
+        const memberExpression = memberExpressionPath[0];
+        let memberExpressionType;
         switch (memberExpression) {
           case 'unnest()':
             memberExpressionType = getArrayElementType(type);
@@ -1368,7 +1426,6 @@ function getMemberExpressionType(type, memberExpressionPath){
             memberExpressionType = typeDescriptor[memberExpression];
         }
         return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
-        break;
       case 'string':
         if (!isMapType(type)){
           throw new Error(`Expected a MAP type`);
@@ -1381,7 +1438,6 @@ function getMemberExpressionType(type, memberExpressionPath){
           default:
             throw new Error(`Don't know how to handle memerExpressionPath "${memberExpressionPath}"`);
         }
-        break;
       default:
         throw new Error(`Don't know how to handle memerExpressionPath of type "${typeOfMemberExpressionPath}"`);
     }
@@ -1396,23 +1452,23 @@ function extrapolateColumnExpression(expressionTemplate, columnExpression){
 }
 
 function getUsingSampleClause(samplingConfig, useTableSample){
-  var size = samplingConfig.size || 100;
-  var unit = samplingConfig.unit || 'ROWS';
-  var method = samplingConfig.method || 'SYSTEM';
-  var sampleClause;
+  const size = samplingConfig.size || 100;
+  const unit = samplingConfig.unit || 'ROWS';
+  const method = samplingConfig.method || 'SYSTEM';
+  let sampleClause;
   if (method === 'LIMIT'){
     sampleClause = `LIMIT ${size}`;
   }
   else {
-    var sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
+    const sampleKeyword = useTableSample ? 'TABLESAMPLE' : 'USING SAMPLE';
     sampleClause = `${sampleKeyword} ${size} ${unit} ( ${method}${samplingConfig.seed === undefined ? '' : ', ' + samplingConfig.seed} )`;
   }
   return sampleClause;
 }
 
 function getMedianReturnDataTypeForArgumentDataType(argumentDataType){
-  var argumentTypeInfo = getDataTypeInfo(argumentDataType);
-  var returnDataType;
+  const argumentTypeInfo = getDataTypeInfo(argumentDataType);
+  let returnDataType;
   if (argumentTypeInfo.isInteger) {
     returnDataType = 'DOUBLE';
   }
