@@ -344,7 +344,11 @@ class AttributeUi {
   static timeFields = {
     'iso-time': {
       folder: 'time fields',
-      expressionTemplate: "strftime( ${columnExpression}, '%H:%M:%S' )",
+      expressionTemplate: [
+        'HOUR( ${columnExpression} )',
+        'MINUTE( ${columnExpression} )',
+        'SECOND( ${columnExpression} )',
+      ].map( expression => `RIGHT( '0'||${expression}, 2 )`).join(`||':'||`),
       columnType: 'VARCHAR'
     },
     'hour': {
@@ -584,7 +588,6 @@ class AttributeUi {
 
   static getApplicableAggregators(typeName) {
     const typeInfo = getDataTypeInfo(typeName);
-
     const isNumeric = Boolean(typeInfo.isNumeric);
 
     const applicableAggregators = {};
