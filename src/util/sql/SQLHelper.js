@@ -794,7 +794,14 @@ var dataTypes = {
   'TIME': {
     defaultAnalyticalRole: 'attribute',
     hasTimeFields: true,
-    
+  },
+  'TIME_NS': {
+    defaultAnalyticalRole: 'attribute',
+    hasTimeFields: true,
+  },
+  'TIME WITH TIME ZONE': {
+    defaultAnalyticalRole: 'attribute',
+    hasTimeFields: true,
   },
   'TIMESTAMP': {
     defaultAnalyticalRole: 'attribute',
@@ -880,7 +887,7 @@ var dataTypes = {
   },
   'JSON': {
     defaultAnalyticalRole: 'attribute',
-    createLiteralWriter: function(dataTypeInfo, dataType){      
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         return `${quoteStringLiteral(String(value))}::JSON`;
       }
@@ -1299,7 +1306,8 @@ function getArrayElementType(arrayType){
   if (!isArrayType(arrayType)){
     throw new Error(`Expected an array type`);
   }
-  return arrayType.slice(0, -'[]'.length);
+  const match = /\[\d*\]$/.exec(arrayType);
+  return arrayType.slice(0, -match[0].length);
 }
 
 function getArrayType(elementType){
@@ -1307,7 +1315,7 @@ function getArrayType(elementType){
 }
 
 function isArrayType(dataType){
-  return dataType.endsWith('[]');
+  return /\[\d*\]$/.test( dataType );
 }
 
 function isMapType(dataType) {
