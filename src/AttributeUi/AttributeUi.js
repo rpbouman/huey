@@ -318,7 +318,10 @@ class AttributeUi {
       createFormatter: createDayShortNameFormatter,
       createParser: createDayShortNameParser,
       dataValueTypeOverride: 'Utf8'
-    },
+    }
+  };
+  
+  static timestampFields = {
     'timestamp (secs)': {
       folder: 'timestamps',
       expressionTemplate: 'epoch( ${columnExpression} )',
@@ -338,8 +341,8 @@ class AttributeUi {
       folder: 'timestamps',
       expressionTemplate: 'epoch_ns( ${columnExpression} )',
       columnType: 'BIGINT'
-    }      
-  };
+    }
+  }
 
   static timeFields = {
     'iso-time': {
@@ -529,6 +532,7 @@ class AttributeUi {
 
     const hasTimeFields = Boolean(typeInfo.hasTimeFields);
     const hasDateFields = Boolean(typeInfo.hasDateFields);
+    const hasTimestampFields = Boolean(typeInfo.hasTimestampFields);
     const hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
     const hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
     
@@ -558,6 +562,7 @@ class AttributeUi {
     var applicableDerivations = Object.assign({},
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
+      hasTimestampFields ? AttributeUi.timestampFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
       hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
@@ -570,6 +575,7 @@ class AttributeUi {
       AttributeUi.tupleNumberDerivations,
       AttributeUi.dateFields,
       AttributeUi.timeFields,
+      AttributeUi.timestampFields,
       AttributeUi.textDerivations,
       AttributeUi.hashDerivations,
       AttributeUi.uuidDerivations,
