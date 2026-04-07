@@ -34,6 +34,18 @@ function getArrowDecimalAsString(value, type){
   return str;
 }
 
+function createStringTypeFormatter(){
+  return function(value){
+    if (value === null){
+      return getNullString();
+    }
+    if (typeof value === 'string'){
+      value = value.replace(/\r\n|\n|\r/g, ' ');
+    }
+    return String(value);
+  }
+}
+
 function createNumberFormatter(fractionDigits){
   const localeSettings = settings.getSettings('localeSettings');
   let options = {
@@ -457,7 +469,7 @@ function getDuckDbLiteralForValue(value, type){
   }
   let literal = '';
   const typeId = type.typeId;
-  // see: https://github.com/apache/arrow/blob/main/js/src/enum.ts
+  // see: https://github.com/apache/arrow-js/blob/main/src/enum.ts
   switch (typeId){
     case 1:   // Null
       literal = 'NULL';
@@ -550,7 +562,7 @@ function getDuckDbLiteralForValue(value, type){
     case 18:  // duration
     case 19:  // large binary
     case 20:  // large utf8
-    case -1:  // Dictionary
+    case -1:  // Dictionary - this is what duckdb uses for ENUM Type
     case -13: // DateDay
     case -14: // DateMillisecond
     case -15: // TimestampSecond
@@ -908,22 +920,20 @@ var dataTypes = {
     hasUUIDDerivations: true
   },
   'ENUM': {
-    defaultAnalyticalRole: 'attribute'
+    defaultAnalyticalRole: 'attribute',
+    hasTextDerivations: true,
+    hasEnumDerivations: true,
+    createFormatter: createStringTypeFormatter,
+    createLiteralWriter(dataTypeInfo, dataType){
+      return function(value, field){
+        return value === null ? 'NULL::VARCHAR' : `${quoteStringLiteral(value)}::${dataType}`;
+      };
+    }
   },
   'VARCHAR': {
     defaultAnalyticalRole: 'attribute',
     hasTextDerivations: true,
-    createFormatter: function(){
-      return function(value){
-        if (value === null){
-          return getNullString();
-        }
-        if (typeof value === 'string'){
-          value = value.replace(/\r\n|\n|\r/g, ' ');
-        }
-        return String(value);
-      }
-    },
+    createFormatter: createStringTypeFormatter,
     createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         return value === null ? 'NULL::VARCHAR' : quoteStringLiteral(value);
@@ -932,7 +942,7 @@ var dataTypes = {
   },
   'ARRAY': {
     defaultAnalyticalRole: 'attribute',
-    createLiteralWriter: function(dataTypeInfo, dataType){      
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         const type = field.type;
         const duckdbValue = getDuckDbLiteralForValue(value, type);

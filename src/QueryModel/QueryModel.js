@@ -35,7 +35,7 @@ class QueryAxisItem {
       var dataTypeInfo = getDataTypeInfo(dataType);
       if (dataTypeInfo) {
         if (dataTypeInfo.createFormatter){
-          return dataTypeInfo.createFormatter();
+          return dataTypeInfo.createFormatter(axisItem);
         }
       }
       else {

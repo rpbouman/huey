@@ -378,42 +378,42 @@ class AttributeUi {
   };
   
   static hashDerivations = {
-    "hash": {
+    'hash': {
       folder: 'hashes',
       expressionTemplate: 'hash( ${columnExpression} )',
       columnType: 'UBIGINT'
     },
-    "md5 (hex)": {
+    'md5 (hex)': {
       folder: 'hashes',
       expressionTemplate: 'md5( ${columnExpression} )',
       columnType: 'VARCHAR',
       forString: true
     },
-    "md5": {
+    'md5': {
       folder: 'hashes',
       expressionTemplate: 'md5_number( ${columnExpression} )',
       columnType: 'HUGEINT',
       forString: true
     },
-    "md5 low": {
+    'md5 low': {
       folder: 'hashes',
       expressionTemplate: 'md5_number_lower( ${columnExpression} )',
       columnType: 'UBIGINT',
       forString: true
     },
-    "md5 high": {
+    'md5 high': {
       folder: 'hashes',
       expressionTemplate: 'md5_number_upper( ${columnExpression} )',
       columnType: 'UBIGINT',
       forString: true
     },
-    "sha-1": {
+    'sha-1': {
       folder: 'hashes',
       expressionTemplate: 'sha1( ${columnExpression} )',
       columnType: 'VARCHAR',
       forString: true
     },
-    "sha-256": {
+    'sha-256': {
       folder: 'hashes',
       expressionTemplate: 'sha256( ${columnExpression} )',
       columnType: 'VARCHAR',
@@ -422,12 +422,12 @@ class AttributeUi {
   };
 
   static textDerivations = {
-    "first letter": {
+    'first letter': {
       folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
       columnType: 'VARCHAR'
     },
-    "length": {
+    'length': {
       folder: 'string operations',
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
@@ -451,6 +451,14 @@ class AttributeUi {
       folder: 'string operations',
       expressionTemplate: "UPPER( ${columnExpression} )",
       columnType: 'VARCHAR'
+    }
+  };
+
+  static enumDerivations = {
+    'code': {
+      folder: 'enum',
+      expressionTemplate: 'enum_code( ${columnExpression} )',
+      columnType: 'INTEGER'
     }
   };
   
@@ -534,6 +542,7 @@ class AttributeUi {
     const hasDateFields = Boolean(typeInfo.hasDateFields);
     const hasTimestampFields = Boolean(typeInfo.hasTimestampFields);
     const hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    const hasEnumDerivations = Boolean(typeInfo.hasEnumDerivations);
     const hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
     
     const hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
@@ -564,6 +573,7 @@ class AttributeUi {
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTimestampFields ? AttributeUi.timestampFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      hasEnumDerivations ? AttributeUi.enumDerivations : undefined,
       hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
@@ -577,6 +587,7 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.timestampFields,
       AttributeUi.textDerivations,
+      AttributeUi.enumDerivations,
       AttributeUi.hashDerivations,
       AttributeUi.uuidDerivations,
       AttributeUi.arrayDerivations,
