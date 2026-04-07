@@ -1,53 +1,58 @@
+nav#sidebar[role=tablist] {
+  > div {
+    
+    /**
+    *
+    * Hide attribute UI by default
+    *
+    */
+    &:has( > label[for=attributesTab]) {
+      display: none;
+    }
+    
+    /**
+    *
+    * Show attribute UI if there is at least one item in the Attribute UI
+    *
+    */
+    
+    &:has( 
+      > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+    )  {
+      display: block;
+    }
 
-/**
-*
-* Hide attribute UI by default
-*
-*/
-nav#sidebar[role=tablist] > div:has( > label[for=attributesTab]) {
-  display: none;
-}
-/**
-*
-* Show attribute UI if there is at least one item in the Attribute UI
-*
-*/
-nav#sidebar[role=tablist] > div:has( 
-  > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
-)  {
-  display: block;
-}
+    /**
+    *
+    * If the Attribute UI is not visible, then we won't see the "filler" tab at the end (which draws the tabstrip line). 
+    * The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
+    *
+    */
+    
+    /* default: show the filler  */
+    &:has( > label[role=tab][for=datasourcesTab] ){
+      flex-grow: 1;
+    }
 
+    /* override default and hide the filler of we have attributes.  */
+    &:has( 
+      > label[role=tab][for=datasourcesTab]
+    ):has( 
+      + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+    ) {
+      flex-grow: 0;
+    }
 
-/**
-*
-* If the Attribute UI is not visible, then we won't see the "filler" tab at the end (which draws the tabstrip line). 
-* The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
-*
-*/
-
-/* default: show the filler  */
-nav#sidebar[role=tablist] > div:has( > label[role=tab][for=datasourcesTab] ){
-  flex-grow: 1;
-}
-
-/* override default and hide the filler of we have attributes.  */
-nav#sidebar[role=tablist] > div:has( 
-  > label[role=tab][for=datasourcesTab]
-):has( 
-  + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
-) {
-  flex-grow: 0;
-}
-
-nav#sidebar[role=tablist] > div:has( > label[role=tab][for=datasourcesTab]):after {
-    content: ' ';
-    width: 100%;
-    border-bottom-style: solid;
-    border-color: var(--huey-light-border-color);
-    border-width: 2px;
-    display: block;
-    margin-top: 2px;
+    &:has( > label[role=tab][for=datasourcesTab] ):after {
+        content: ' ';
+        width: 100%;
+        border-bottom-style: solid;
+        border-color: var(--huey-light-border-color);
+        border-width: 2px;
+        display: block;
+        margin-top: 2px;
+    }
+  }
 }
 
 /**
