@@ -1,3 +1,4 @@
+
 /**
 *
 * Hide attribute UI by default
@@ -8,12 +9,15 @@ nav#sidebar[role=tablist] > div:has( > label[for=attributesTab]) {
 }
 /**
 *
-* Show attribute UI if there is at least one data source
+* Show attribute UI if there is at least one item in the Attribute UI
 *
 */
-nav#sidebar[role=tablist]:has( > div > div[role=tabpanel] > div#datasourcesUi details ) > div:has( > label[for=attributesTab]) {
+nav#sidebar[role=tablist] > div:has( 
+  > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+)  {
   display: block;
 }
+
 
 /**
 *
@@ -21,15 +25,22 @@ nav#sidebar[role=tablist]:has( > div > div[role=tabpanel] > div#datasourcesUi de
 * The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
 *
 */
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ){
+
+/* default: show the filler  */
+nav#sidebar[role=tablist] > div:has( > label[role=tab][for=datasourcesTab] ){
   flex-grow: 1;
 }
 
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi details ){
+/* override default and hide the filler of we have attributes.  */
+nav#sidebar[role=tablist] > div:has( 
+  > label[role=tab][for=datasourcesTab]
+):has( 
+  + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+) {
   flex-grow: 0;
 }
 
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ):after {
+nav#sidebar[role=tablist] > div:has( > label[role=tab][for=datasourcesTab]):after {
     content: ' ';
     width: 100%;
     border-bottom-style: solid;
