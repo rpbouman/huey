@@ -2,6 +2,28 @@ function getDataTypeNameFromColumnType(columnType){
   return /^[^\(]+/.exec(columnType)[0];
 }
 
+// lookup table for bit strings. Using this for BIT to string rendering
+const bitStrings = (function(){
+  const BIT_BASE = 2;
+  const BYTE_WIDTH = 8;
+  
+  const array = new Array(
+    Math.pow(BIT_BASE,BYTE_WIDTH)
+  ).fill(null)
+  .map((element, index, array) => (index).toString(BIT_BASE).padStart(BYTE_WIDTH, '0'));
+  return array;
+}());
+
+function duckdbBITtoString(uInt8Array){
+  const strings = new Array(uInt8Array.length - 1);
+  uInt8Array
+  .subarray(1)
+  .forEach((byte, index) => strings[index] = bitStrings[byte]);
+  
+  strings[0] = strings[0].slice(uInt8Array[0]);
+  return strings.join('');
+}
+
 function getNullString(){
   const generalSettings = settings.getSettings('localeSettings');
   const nullString = generalSettings.nullString;
@@ -494,6 +516,8 @@ function getDuckDbLiteralForValue(value, type){
     case -12: // Float64
       literal = String(value);
       break;
+    // case 4: // array of uint8. Used for BLOB, BITSTRING
+      
     case 5:   // Utf8 (string)
       literal = quoteStringLiteral(value); 
       break;
@@ -582,7 +606,16 @@ function getDuckDbLiteralForValue(value, type){
     case -29: // DurationMicrosecond
     case -30: // DurationNanosecond
     default:
-      throw new Error(`Unrecognized arrow type ${typeId}`);
+      console.warn(new Error(`Unrecognized arrow type ${typeId}`));
+      console.log(value);
+      //throw new Error(`Unrecognized arrow type ${typeId}`);
+      switch (typeof value) {
+        case 'object':
+          literal = value === null? 'null' : value.toString();
+          break;
+        default: 
+          literal = value;
+      }
   }
   return literal;
 }
@@ -809,6 +842,22 @@ var dataTypes = {
   },
   'BIT': {
     defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return function(value) {
+        if (value === null) {
+          return 'NULL::BIT';
+        }
+        return `'${duckdbBITtoString(value)}'::BIT`;
+      }
+    },
+    createFormatter: function(){
+      return function(value){
+        if (value === null){
+          return getNullString();
+        }
+        return duckdbBITtoString(value);
+      }
+    }
   },
   'BOOLEAN': {
     defaultAnalyticalRole: 'attribute',
@@ -820,6 +869,23 @@ var dataTypes = {
   },
   'BLOB': {
     defaultAnalyticalRole: 'attribute',
+    hasBlobDerivations: true,    
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return function(value, field){
+        if (value === null) {
+          return 'NULL::BLOB';
+        }
+        return `from_hex( '${value.toHex()}' )`;
+      }
+    },
+    createFormatter(){
+      return function(value, field){
+        if (value === null){
+          return getNullString();
+        }
+        return value.toHex();
+      }
+    }
   },
   'DATE': {
     defaultAnalyticalRole: 'attribute',

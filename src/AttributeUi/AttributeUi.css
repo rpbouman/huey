@@ -175,11 +175,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       [data-member_expression_type=VARCHAR]:is(
         [data-nodetype=member],
         [data-nodetype=derived]:is( 
+          [data-derivation='string'], 
           [data-derivation='entry keys'], 
           [data-derivation='entry values'], 
           [data-derivation='elements'] 
         )
-      )
+      ),
+      [data-column_type=BLOB][data-nodetype=derived][data-derivation=string]
     ) > summary > span.label::before {
       content: var( --icon-txt );
     }
@@ -187,6 +189,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     &:is(
       [data-column_type=BLOB][data-nodetype=column],
       [data-member_expression_type=BLOB][data-nodetype=member]
+    ) > summary > span.label::before {
+      content: var( --icon-binary );
+    }
+
+    &:is(
+      [data-column_type=BIT][data-nodetype=column],
+      [data-member_expression_type=BIT][data-nodetype=member]
     ) > summary > span.label::before {
       content: var( --icon-binary );
     }
@@ -232,7 +241,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       ):is(
         [data-nodetype=member],
         [data-nodetype=derived][data-derivation='elements']
-      ) 
+      ),
+      [data-nodetype=derived][data-derivation=base64]
     ) > summary > span.label::before {
       content: var( --icon-number-64-small );
     }
@@ -268,7 +278,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       ):is(
         [data-nodetype=member],
         [data-nodetype=derived][data-derivation='elements']
-      ) 
+      ),
+      [data-nodetype=derived][data-derivation=hex]
     ) > summary > span.label::before {
       content: var( --icon-number-16-small );
     }
@@ -577,7 +588,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       &:is(
         [data-derivation='entry count'],
         [data-derivation='unique values length'],
-        [data-derivation='length'] 
+        [data-derivation='length'],
+        [data-derivation='octet-length'] 
       ) > summary > span.label::before {
         content: var( --icon-ruler-3 );
       }
