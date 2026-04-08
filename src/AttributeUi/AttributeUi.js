@@ -827,7 +827,7 @@ class AttributeUi {
     const columnName = node.getAttribute('data-column_name');
     const columnType = node.getAttribute('data-column_type');
 
-    const memberExpressionPath = node.getAttribute('data-member_expression_path');
+    let memberExpressionPath = node.getAttribute('data-member_expression_path');
     if (memberExpressionPath) {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
