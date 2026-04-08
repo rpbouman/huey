@@ -155,9 +155,9 @@ button {
 }
 
 @keyframes blink-live{
-    0% { opacity: 1.0; }
-    50% { opacity: 0.0; }
-    100% { opacity: 1.0; }
+  0% { opacity: 1.0; }
+  50% { opacity: 0.0; }
+  100% { opacity: 1.0; }
 }
 
 label:has( button[aria-busy=true] ) {
@@ -349,8 +349,9 @@ ol[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
 header[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > button )::before,
 menu[role=toolbar] > label:has( > input[type=file] )::before,
+menu[role=toolbar] > label:has( > input[type=checkbox] )::before,
 menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
-*[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox])::before 
+*[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )::before 
 {  
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
@@ -363,8 +364,9 @@ menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
 header[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > button )::before,
 menu[role=toolbar] > label:hover:has( > input[type=file] )::before,
+menu[role=toolbar] > label:hover:has( > input[type=checkbox] )::before,
 menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before,
-*[role=menu] > li[role=menuitem]:hover > label:has( > input[type=checkbox])::before
+*[role=menu] > li[role=menuitem]:hover > label:has( > input[type=checkbox] )::before
 {
   color: var( --huey-icon-color-highlight );
 }

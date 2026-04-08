@@ -1,4 +1,72 @@
-nav#sidebar[role=tablist] {
+  nav#sidebar[role=tablist] {
+
+  height: calc(100vh - 40px);
+  max-width: calc(100vw - 14px);
+  grid-column: 1/1;
+  grid-row: 2/ span 2;
+  padding: 4px 4px 0px 4px;
+  display: flex;
+
+  width: 350px;
+  min-width: 170px;
+  
+  &::-webkit-scrollbar-corner{
+    background-color: var( --huey-medium-background-color );
+  }
+
+  /**
+  * Collapse/expand sidebar
+  */
+  > menu[role=toolbar] {
+    padding: 0px;
+    height: 23px;
+    /*
+    border-bottom-style: solid;
+    border-color: var(--huey-light-border-color);
+    border-width: 2px;
+    */
+    display: block;
+    margin-top: -2px;
+
+    > label[for=sidebarPin] {
+      
+      > input#sidebarPin[type=checkbox] {
+        appearance: none;
+        display: none;
+      }
+
+      /**
+      * By default, it's collapsed
+      */
+      &::before {
+        margin-right: -2px;
+        content: var( --icon-layout-sidebar-right-collapse );
+      }
+      
+      /**
+      * if checked, it's expanded
+      */
+      &:has( > input[type=checkbox]:checked )::before {
+        content: var( --icon-layout-sidebar-left-collapse );
+      }
+    }
+  }
+
+  &:has( > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:not( :checked ) ) {
+
+    width: 24px;
+    min-width: 24px;
+    resize: none;
+
+    > div:has( > label[role=tab] ) {
+      display: none;
+    }
+
+    /* > menu[role=toolbar] {
+      border-bottom-style: none;
+    }*/
+  }
+
   > div {
     
     /**
@@ -15,7 +83,6 @@ nav#sidebar[role=tablist] {
     * Show attribute UI if there is at least one item in the Attribute UI
     *
     */
-    
     &:has( 
       > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
     )  {
@@ -30,7 +97,8 @@ nav#sidebar[role=tablist] {
     */
     
     /* default: show the filler  */
-    &:has( > label[role=tab][for=datasourcesTab] ){
+    &:has( > label[role=tab][for=datasourcesTab] ),
+    &:has( > label[role=tab][for=attributesTab] ){
       flex-grow: 1;
     }
 
@@ -43,16 +111,29 @@ nav#sidebar[role=tablist] {
       flex-grow: 0;
     }
 
-    &:has( > label[role=tab][for=datasourcesTab] ):after {
-        content: ' ';
-        width: 100%;
-        border-bottom-style: solid;
-        border-color: var(--huey-light-border-color);
-        border-width: 2px;
-        display: block;
-        margin-top: 2px;
+    &:has( > label[role=tab] )::after {
+      content: ' ';
+      width: 100%;
+      border-bottom-style: solid;
+      border-color: var(--huey-light-border-color);
+      border-width: 2px;
+      display: block;
+    }
+    
+    &:has( > label[role=tab][for=attributesTab] )::after {
+      content: ' ';
+      width: 100%;
+      border-bottom-style: solid;
+      border-color: var(--huey-light-border-color);
+      border-width: 2px;
+      display: block;
+    }
+
+    &:has( > label[role=tab][for=attributesTab] + input#attributesTab:checked  )::after {
+      margin-top: -2px;
     }
   }
+  
 }
 
 /**
