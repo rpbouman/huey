@@ -207,22 +207,6 @@ html {
 
       }
       
-      
-      > nav#sidebar {
-        width: 350px;
-        height: calc(100vh - 40px);
-        max-width: calc(100vw - 14px);
-        grid-column: 1/1;
-        grid-row: 2/ span 2;
-        padding: 4px 4px 0px 4px;
-        display: flex;
-        min-width: 170px;
-        
-        &::-webkit-scrollbar-corner{
-          background-color: var( --huey-medium-background-color );
-        }
-      }
-      
       div#workarea {
         grid-column: 2/2;
         grid-row: 2/2;
