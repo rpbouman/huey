@@ -422,6 +422,11 @@ class AttributeUi {
   };
 
   static textDerivations = {
+    'base64': {
+      folder: 'string operations',
+      expressionTemplate: "base64( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
     'first letter': {
       folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
@@ -452,6 +457,29 @@ class AttributeUi {
       expressionTemplate: "UPPER( ${columnExpression} )",
       columnType: 'VARCHAR'
     }
+  };
+
+  static blobDerivations = {
+    'base64': {
+      folder: 'BLOB operations',
+      expressionTemplate: "base64( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'hex': {
+      folder: 'BLOB operations',
+      expressionTemplate: "hex( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'octet-length': {
+      folder: 'BLOB operations',
+      expressionTemplate: "octet_length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    'string': {
+      folder: 'BLOB operations',
+      expressionTemplate: "decode( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
   };
 
   static enumDerivations = {
@@ -542,6 +570,7 @@ class AttributeUi {
     const hasDateFields = Boolean(typeInfo.hasDateFields);
     const hasTimestampFields = Boolean(typeInfo.hasTimestampFields);
     const hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
+    const hasBlobDerivations = Boolean(typeInfo.hasBlobDerivations);
     const hasEnumDerivations = Boolean(typeInfo.hasEnumDerivations);
     const hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
     
@@ -573,6 +602,7 @@ class AttributeUi {
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTimestampFields ? AttributeUi.timestampFields : undefined,
       hasTextDerivations ? AttributeUi.textDerivations : undefined,
+      hasBlobDerivations ? AttributeUi.blobDerivations : undefined,
       hasEnumDerivations ? AttributeUi.enumDerivations : undefined,
       hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
@@ -587,6 +617,7 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.timestampFields,
       AttributeUi.textDerivations,
+      AttributeUi.blobDerivations,
       AttributeUi.enumDerivations,
       AttributeUi.hashDerivations,
       AttributeUi.uuidDerivations,
