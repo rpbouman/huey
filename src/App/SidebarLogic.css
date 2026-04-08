@@ -57,8 +57,8 @@
   */
   &:has( > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:not( :checked ) ) {
 
-    width: 24px;
-    min-width: 24px;
+    width: 24px !important;
+    min-width: 24px !important;
     resize: none;
 
     > div:has( > label[role=tab] ) {
