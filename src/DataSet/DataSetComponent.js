@@ -14,12 +14,12 @@ class DataSetComponent {
   }
 
   async #getDatasouceManagedConnection(){
-    var queryModel = this.#queryModel;
-    var datasource = queryModel.getDatasource();
+    const queryModel = this.#queryModel;
+    const datasource = queryModel.getDatasource();
     if (!datasource){
       return undefined;
     }
-    var managedConnection = await datasource.getManagedConnection();
+    const managedConnection = await datasource.getManagedConnection();
     return managedConnection;
   }
   
@@ -35,7 +35,7 @@ class DataSetComponent {
   }
   
   async cancelPendingQuery(){
-    var connection = await this.getManagedConnection();
+    const connection = await this.getManagedConnection();
     return await connection.cancelPendingQuery();
   }  
 }
