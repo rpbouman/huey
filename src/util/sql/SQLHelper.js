@@ -2,6 +2,36 @@ function getDataTypeNameFromColumnType(columnType){
   return /^[^\(]+/.exec(columnType)[0];
 }
 
+function decodeDuckDBBignum(uint8Array) {
+  if (uint8Array.length < 4) return 0n;
+
+  const isPositive = uint8Array[0] >= 128;
+  
+  // 1. Extract Length (Bytes 1 & 2)
+  let length;
+  if (isPositive) {
+    length = (uint8Array[1] << 8) | uint8Array[2];
+  } else {
+    // Invert the length bytes for negative numbers
+    length = ((uint8Array[1] ^ 0xFF) << 8) | (uint8Array[2] ^ 0xFF);
+  }
+
+  // 2. Extract Magnitude (Byte 3 and any subsequent bytes)
+  // Your samples show 4 bytes total, meaning 1 byte of magnitude
+  let magnitude = 0n;
+  for (let i = 0; i < length; i++) {
+    const byteIndex = 3 + i;
+    let byte = uint8Array[byteIndex];
+    
+    if (!isPositive) {
+      byte = byte ^ 0xFF; // Flip bits back for negative numbers
+    }
+    
+    magnitude = (magnitude << 8n) | BigInt(byte);
+  }
+
+  return isPositive ? magnitude : -magnitude;
+}
 // lookup table for bit strings. Using this for BIT to string rendering
 const bitStrings = (function(){
   const BIT_BASE = 2;
@@ -685,6 +715,27 @@ var dataTypes = {
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
       return createDefaultLiteralWriter('REAL');
+    }
+  },
+  'BIGNUM': {
+    defaultAnalyticalRole: 'measure',
+    isNumeric: true,
+    isInteger: true,
+    createFormatter: function(){
+      return function(value, field){
+        if (value === null) {
+          return null;
+        }
+        return decodeDuckDBBignum(value).toString();
+      };
+    },
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      return function(value, field){
+        if (value === null) {
+          return 'NULL::BIGNUM';
+        }
+        return decodeDuckDBBignum(value).toString() + '::BIGNUM' 
+      };
     }
   },
   'BIGINT': {
