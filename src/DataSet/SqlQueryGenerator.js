@@ -1,10 +1,10 @@
 class SqlQueryGenerator {
 
   static #getUnnestingFunctions(){
-    var unnestingFunctions = {};
-    Object.keys(AttributeUi.arrayDerivations).forEach(function(arrayDerivationKey){
-      var arrayDerivation = AttributeUi.arrayDerivations[arrayDerivationKey];
-      var unnestingFunction = arrayDerivation.unnestingFunction;
+    const unnestingFunctions = {};
+    Object.keys(AttributeUi.arrayDerivations).forEach(arrayDerivationKey => {
+      const arrayDerivation = AttributeUi.arrayDerivations[arrayDerivationKey];
+      const unnestingFunction = arrayDerivation.unnestingFunction;
       if (!unnestingFunction){
         return;
       }
@@ -14,22 +14,22 @@ class SqlQueryGenerator {
   }
   
   static #getExpressionString(columnName, memberExpressionPath){
-    var columnExpression = quoteIdentifierWhenRequired(columnName);
-    var pathExpression = memberExpressionPath.map(function(memberExpressionPathElement){
+    const columnExpression = quoteIdentifierWhenRequired(columnName);
+    const pathExpression = memberExpressionPath.map(memberExpressionPathElement => {
       return `[${quoteStringLiteral( memberExpressionPathElement ) }]`
     }).join('');
     return `${columnExpression}${pathExpression}`;
   }
 
   static #getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem){
-    var memberExpressionPath = filterAxisItem.memberExpressionPath;
+    const memberExpressionPath = filterAxisItem.memberExpressionPath;
     if (!memberExpressionPath || !memberExpressionPath.length){
       return undefined;
     }
-    var memberExpressionPathString = undefined;
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    for (var j = 0; j < memberExpressionPath.length; j++) {
-      var memberExpressionPathElement = memberExpressionPath[j];
+    let memberExpressionPathString = undefined;
+    const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    for (let j = 0; j < memberExpressionPath.length; j++) {
+      const memberExpressionPathElement = memberExpressionPath[j];
       if (unnestingFunctions[memberExpressionPathElement] === undefined) {
         continue;
       }
@@ -43,24 +43,23 @@ class SqlQueryGenerator {
   }
 
   static #getFilterItemsByNestingStage(filterAxisItems){
-    var filterAxisItemsByNestingStage = {};
+    const filterAxisItemsByNestingStage = {};
     if (!filterAxisItems){
       return filterAxisItemsByNestingStage;
     }
     
     // only retain filter items that have values
-    filterAxisItems = filterAxisItems.filter(function(filterAxisItem){
-      var filter = filterAxisItem.filter;
+    filterAxisItems = filterAxisItems.filter(filterAxisItem => {
+      const filter = filterAxisItem.filter;
       if (!filter){
         return false;
       }
-      var values = filter.values;
+      const values = filter.values;
       if (!values){
         return false;
       }
-      var keys = Object.keys(values);
-      keys = keys.filter(function(key){
-        var valueObject = values[key];
+      const keys = Object.keys(values).filter(key => {
+        const valueObject = values[key];
         return valueObject.enabled !== false;
       });
       if (!keys.length){
@@ -75,11 +74,10 @@ class SqlQueryGenerator {
 
     // analyze the filter items and store them in a dict: 
     // - filter items that require unnesting are stored by memberExpressionPath
-    var topLevelFilterAxisItems = [];
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    for (var i = 0; i < filterAxisItems.length; i++){
-      var filterAxisItem = filterAxisItems[i];
-      var memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
+    const topLevelFilterAxisItems = [];
+    for (let i = 0; i < filterAxisItems.length; i++){
+      const filterAxisItem = filterAxisItems[i];
+      const memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
       if (memberExpressionPathString) {
         filterAxisItemsByNestingStage[memberExpressionPathString] = filterAxisItem;
       }
@@ -98,27 +96,27 @@ class SqlQueryGenerator {
   static #getConditionForFilterItems(filterItems, tableAlias){
     // cull filter items that have incomplete filters
     // and filters without any enabled filter values.
-    filterItems = filterItems.filter(function(filterItem){
+    filterItems = filterItems.filter(filterItem => {
       return QueryAxisItem.isFilterItemEffective(filterItem);
     });
     
     // create SQL conditions for filter items
-    var filterConditions = filterItems.map(function(filterItem){
-      var conditionSql;
-      var queryAxisItems = filterItem.queryAxisItems;
+    const filterConditions = filterItems.map(filterItem => {
+      let conditionSql;
+      const queryAxisItems = filterItem.queryAxisItems;
       // this happens when the cellset generates a filter item to push down tuples, 
       // see https://github.com/rpbouman/huey/issues/134
       if (queryAxisItems) {
-        var fields = filterItem.fields;
-        var columns = queryAxisItems.map(function(queryAxisItem){
-          var columnSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
+        const fields = filterItem.fields;
+        const columns = queryAxisItems.map(queryAxisItem => {
+          const columnSql = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
           return columnSql;
         }).join('\n, ');
-        var values = filterItem.filter.values.map(function(tupleValues){
-          var valueList = queryAxisItems.map(function(queryAxisItem, index){
-            var literalWriter = queryAxisItem.literalWriter;
-            var value = tupleValues[index];
-            var field = fields[index];
+        const values = filterItem.filter.values.map(tupleValues => {
+          const valueList = queryAxisItems.map((queryAxisItem, index) => {
+            const literalWriter = queryAxisItem.literalWriter;
+            const value = tupleValues[index];
+            const field = fields[index];
             return literalWriter(value, field);
           }).join(',');
           return `(${valueList})`;
@@ -133,7 +131,7 @@ class SqlQueryGenerator {
     });
     
     // combine SQL conditions
-    var filterCondition = filterConditions.join('\nAND ');
+    const filterCondition = filterConditions.join('\nAND ');
     
     // done.
     return filterCondition;
@@ -145,20 +143,20 @@ class SqlQueryGenerator {
     unnestingOperationItem, 
     cte
   ){
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    var unnestingFunctionNames = Object.keys(unnestingFunctions);
-    var filters = [];
+    const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    const unnestingFunctionNames = Object.keys(unnestingFunctions);
+    const filters = [];
     
     // check each filter path to see if it matches this unnesting stage
-    var filterPaths = Object.keys(filterAxisItemsByNestingStage);
-    for (var i = 0; i < filterPaths.length; i++){
-      var filterPath = filterPaths[i];
+    const filterPaths = Object.keys(filterAxisItemsByNestingStage);
+    for (let i = 0; i < filterPaths.length; i++){
+      const filterPath = filterPaths[i];
       //if (!filterPath.startsWith(unnestingItemMemberExpressionPathPrefixString)){
         // filter path prefix does not match this path prefix, so leave it
       //  continue;
       //}
-      var originalFilterAxisItem = filterAxisItemsByNestingStage[filterPath];
-      var itemPrefix = SqlQueryGenerator.#getExpressionString(
+      const originalFilterAxisItem = filterAxisItemsByNestingStage[filterPath];
+      const itemPrefix = SqlQueryGenerator.#getExpressionString(
         originalFilterAxisItem.columnName,
         originalFilterAxisItem.memberExpressionPath
       );
@@ -167,9 +165,9 @@ class SqlQueryGenerator {
       }
       
       // check if there is an unnesting function in the filter, immediately after the prefix
-      for (var j = 0; j < unnestingFunctionNames.length; j++){
-        var unnestingFunctionName = unnestingFunctionNames[j];
-        var unnestingExpression = unnestingItemMemberExpressionPathPrefixString + `['${unnestingFunctionName}']`;
+      for (let j = 0; j < unnestingFunctionNames.length; j++){
+        const unnestingFunctionName = unnestingFunctionNames[j];
+        const unnestingExpression = unnestingItemMemberExpressionPathPrefixString + `['${unnestingFunctionName}']`;
         if (!itemPrefix.startsWith(unnestingExpression)){
           // filter path does not match this unnesting function, so try the next
           continue;
@@ -183,13 +181,13 @@ class SqlQueryGenerator {
         
         // since these filter items are part of this unnesting stage, 
         // we need replace them with new filter items that reference the column of the unnested item
-        var substituteMemberExpressionPath = originalFilterAxisItem.memberExpressionPath.slice(unnestingOperationItem.memberExpressionPath.length + 1);
-        var columnExpression = [unnestingOperationItem.columnName].concat(unnestingOperationItem.memberExpressionPath);
+        const substituteMemberExpressionPath = originalFilterAxisItem.memberExpressionPath.slice(unnestingOperationItem.memberExpressionPath.length + 1);
+        const columnExpression = [unnestingOperationItem.columnName].concat(unnestingOperationItem.memberExpressionPath);
         columnExpression.push(unnestingFunctionName);
 
         // we also need to substittue the column data type to reflect the column change.
-        var substituteColumnType;
-        var unnestingFunction = unnestingFunctions[unnestingFunctionName];
+        let substituteColumnType;
+        const unnestingFunction = unnestingFunctions[unnestingFunctionName];
         if (unnestingFunction.columnType){
           substituteColumnType = unnestingFunction.columnType;
         }
@@ -199,7 +197,7 @@ class SqlQueryGenerator {
           substituteColumnType = getArrayElementType(substituteColumnType);
         }
         
-        var filterAxisItem = Object.assign({}, originalFilterAxisItem, {
+        const filterAxisItem = Object.assign({}, originalFilterAxisItem, {
           columnName: columnExpression.join('.'),
           columnType: substituteColumnType
         });
@@ -211,7 +209,7 @@ class SqlQueryGenerator {
         else {
           delete filterAxisItem.memberExpressionPath;
           if (filterAxisItem.derivation) {
-            var derivationInfo = AttributeUi.getDerivationInfo(filterAxisItem.derivation);
+            const derivationInfo = AttributeUi.getDerivationInfo(filterAxisItem.derivation);
             if (derivationInfo.unnestingFunction) {
               delete filterAxisItem.derivation;
             }
@@ -221,7 +219,7 @@ class SqlQueryGenerator {
         // now we have to check whether the remaining expressionpath of the filter item still contains unnesting expressions.
         // if it does, then we have to replace the original item in filterAxisItemsByNestingStage with the substituted one
         // if it does not, then we have to remove the path and the item from filterAxisItemsByNestingStage and add them to the cte
-        var memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
+        const memberExpressionPathString = SqlQueryGenerator.#getMemberExpressionPathStringForPathWithUnnestingOperation(filterAxisItem);
         if (memberExpressionPathString) {
           // replace the original filter axis item with the one that substitutes the path prefix with the column name of the corresponding unnesting operation
           filterAxisItemsByNestingStage[filterPath] = filterAxisItem;
@@ -236,34 +234,30 @@ class SqlQueryGenerator {
   }
   
   static #getUnnestingStages(datasource, queryAxisItems, filterAxisItemsByNestingStage){
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    var alias = '__huey_data_foundation';
-    var fromClause = datasource.getFromClauseSql();
-    
-    var filterAxisItems = filterAxisItemsByNestingStage[''];
+    const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    let alias = '__huey_data_foundation';
+    const fromClause = datasource.getFromClauseSql();
+    const filterAxisItems = filterAxisItemsByNestingStage[''];
     delete filterAxisItemsByNestingStage[''];
-    
-    var currentItems = queryAxisItems;
-    var newItems;
-    
-    var cte = {
+    const currentItems = queryAxisItems;
+    let cte = {
       items: currentItems,
       from: `${fromClause} AS "${alias}"`,
       filters: filterAxisItems,
       alias: alias
     };
-    var ctes = [cte];
-    
-    var findIndexOfRowNumberItem = function(queryAxisItem){
+    const ctes = [cte];
+    const findIndexOfRowNumberItem = function(queryAxisItem){
       return queryAxisItem.derivation === 'row number';
     };
-    var indexOfRownumberItem = currentItems.findIndex(findIndexOfRowNumberItem);
+    let indexOfRownumberItem = currentItems.findIndex(findIndexOfRowNumberItem);
     
+    let newItems;
     if (indexOfRownumberItem !== -1){
       newItems = Object.assign([], currentItems);
       do {
-        var rowNumberItem = newItems[indexOfRownumberItem];
-        var newRowNumberItem = Object.assign({}, rowNumberItem);
+        const rowNumberItem = newItems[indexOfRownumberItem];
+        const newRowNumberItem = Object.assign({}, rowNumberItem);
         newRowNumberItem.columnName = QueryAxisItem.getSqlForQueryAxisItem(rowNumberItem);
         delete newRowNumberItem.derivation;
         newItems[indexOfRownumberItem] = newRowNumberItem;
@@ -280,28 +274,28 @@ class SqlQueryGenerator {
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
+   let unnestingItem = undefined;
     do {
       cte = ctes[ctes.length - 1];
       // at the start of a new stage, initialize
-      var unnestingDerivation = undefined;
-      var unnestingItem = undefined;
-      var unnestingOperationItem = undefined;
-      var memberPathExpressionElement;
-      var unnestingItemMemberExpressionPathIndex = undefined;
-      var unnestingItemMemberExpressionPathPrefix = undefined;
-      var unnestingItemMemberExpressionPathPrefixString = undefined;
-      var unnestingItemMemberExpression = undefined;
-      var unnestingItemMemberExpressionType = undefined;
+      let unnestingDerivation = undefined;
+      let unnestingOperationItem = undefined;
+      let memberPathExpressionElement;
+      let unnestingItemMemberExpressionPathIndex = undefined;
+      let unnestingItemMemberExpressionPathPrefix = undefined;
+      let unnestingItemMemberExpressionPathPrefixString = undefined;
+      let unnestingItemMemberExpression = undefined;
+      let unnestingItemMemberExpressionType = undefined;
       newItems = [];
-      var filters;
-      var currentItems = cte.items;
+      let filters;
+      const cteItems = cte.items;
       cte.items = [];
       // go over the items currently in scope
-      for (var i = 0; i < currentItems.length; i++){
+      for (let i = 0; i < cteItems.length; i++){
 
-        var currentItem = currentItems[i];
-        var derivationInfo = currentItem.derivation ? AttributeUi.getDerivationInfo(currentItem.derivation) : undefined;
-        var currentItemMemberExpressionPath = currentItem.memberExpressionPath;
+        const currentItem = cteItems[i];
+        const derivationInfo = currentItem.derivation ? AttributeUi.getDerivationInfo(currentItem.derivation) : undefined;
+        const currentItemMemberExpressionPath = currentItem.memberExpressionPath;
     
         // if there's no member expression path, this is a "normal" item (and certainly not an unnesting operation)
         if (!currentItemMemberExpressionPath) {
@@ -313,7 +307,7 @@ class SqlQueryGenerator {
         if (!unnestingItem) {
           // if we haven't found an unnesting operation yet, we go looking for
           // by examining each part of the member expression path.
-          for (var j = 0; j < currentItemMemberExpressionPath.length; j++) {
+          for (let j = 0; j < currentItemMemberExpressionPath.length; j++) {
             memberPathExpressionElement = currentItemMemberExpressionPath[j];
             unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
             if (unnestingDerivation === undefined) {
@@ -390,20 +384,19 @@ class SqlQueryGenerator {
         // we already added the unnesting operation to the current cte
         // so where we add the rewritten version of the item as items for the next cte.
         
-        var unnestingItemMemberExpressionPathPostfix = currentItemMemberExpressionPath.slice(unnestingItemMemberExpressionPathIndex + 1);
+        const unnestingItemMemberExpressionPathPostfix = currentItemMemberExpressionPath.slice(unnestingItemMemberExpressionPathIndex + 1);
         memberPathExpressionElement = currentItemMemberExpressionPath[unnestingItemMemberExpressionPathIndex];
         
         if (unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] === undefined){
           unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] = 0;
         }
         unnestingOperationItem.unnestingFunctions[memberPathExpressionElement] += 1;
-        
         unnestingDerivation = unnestingFunctions[memberPathExpressionElement];
         
-        var newColumn = [].concat(unnestingItemMemberExpressionPathPrefix);
+        const newColumn = [].concat(unnestingItemMemberExpressionPathPrefix);
         newColumn.unshift(unnestingItem.columnName);
         newColumn.push(memberPathExpressionElement);
-        var newItem = Object.assign({}, currentItem, {
+        const newItem = Object.assign({}, currentItem, {
           columnName: newColumn.join('.'),
           columnType: unnestingDerivation.columnType || unnestingOperationItem.elementType,
           memberExpressionPath: unnestingItemMemberExpressionPathPostfix
@@ -415,8 +408,8 @@ class SqlQueryGenerator {
           // the unnesting operation itself is a derivation, and since that was unnested in the previous cte,
           // it must not be unnested again at a later level, so we remove that info here.
           if (newItem.derivation) {
-            var derivationInfo = AttributeUi.getDerivationInfo(newItem.derivation);
-            if (derivationInfo.unnestingFunction) {
+            const newItemDerivationInfo = AttributeUi.getDerivationInfo(newItem.derivation);
+            if (newItemDerivationInfo.unnestingFunction) {
               delete newItem.derivation;
             }
           }
@@ -441,53 +434,50 @@ class SqlQueryGenerator {
   }
 
   static #getSqlSelectStatementForFinalStage(cte, options){
-    var queryAxisItems = options.queryAxisItems; 
-    var includeCountAll = options.includeCountAll;
-    var countAllAlias = options.countAllAlias;
-    var nullsSortOrder = options.nullsSortOrder;
-    var totalsPosition = options.totalsPosition;
-    var includeOrderBy = options.includeOrderBy === false ? false : true;
-    var useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
-    
-    var sql = '';
-    var columnExpressions = {};
-    cte.items.forEach(function(item, index){
-      var originalItem = queryAxisItems[index];
-      var caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
-      var selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
+    const queryAxisItems = options.queryAxisItems; 
+    const includeCountAll = options.includeCountAll;
+    let countAllAlias = options.countAllAlias;
+    const nullsSortOrder = options.nullsSortOrder;
+    const totalsPosition = options.totalsPosition;
+    const includeOrderBy = options.includeOrderBy === false ? false : true;
+    const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;    
+    const columnExpressions = {};
+    cte.items.forEach((item, index) => {
+      const originalItem = queryAxisItems[index];
+      const caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
+      const selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
       columnExpressions[caption] = selectListExpression;
     });
     
-    var selectListExpressions = [];
+    const selectListExpressions = [];
 
     // the group by expression includes expressons for all axis items.
-    var axisGroupByExpressions;
+    let axisGroupByExpressions;
     
-    var groupByExpressions = {};
+    const groupByExpressions = {};
     groupByExpressions[QueryModel.AXIS_ROWS] = [];
     groupByExpressions[QueryModel.AXIS_COLUMNS] = [];
     
     // the groupingSets are created when we find an axis item that has includeTotals
-    var axisGroupingSets;
+    let axisGroupingSets;
     
-    var groupingSets = {};
+    const groupingSets = {};
     groupingSets[QueryModel.AXIS_ROWS] = [];
     groupingSets[QueryModel.AXIS_COLUMNS] = [];
     
-    var groupingIdExpressions = [];
-    var orderByExpressions = [];
+    const groupingIdExpressions = [];
+    const orderByExpressions = [];
     
-    var columnIds = Object.keys(columnExpressions);
-    var queryAxisItem;
-    for (var i = 0; i < columnIds.length; i++) {
-      var columnId = columnIds[i];
-      var columnExpression = columnExpressions[columnId];
-      var columnAlias = quoteIdentifierWhenRequired(columnId);
+    const columnIds = Object.keys(columnExpressions);
+    for (let i = 0; i < columnIds.length; i++) {
+      const columnId = columnIds[i];
+      const columnExpression = columnExpressions[columnId];
+      const columnAlias = quoteIdentifierWhenRequired(columnId);
       
       // TODO: see https://github.com/rpbouman/huey/issues/401
       // we should check if it's safe to use a column alias. 
       // if the alias is identical to the name of a column, then we probably shouldn't use an alias
-      var columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
+      const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
       
       if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
@@ -498,21 +488,21 @@ class SqlQueryGenerator {
       }
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
-      var queryAxisItem = queryAxisItems[i];
-      var axisId = queryAxisItem.axis;
+      const queryAxisItem = queryAxisItems[i];
+      const axisId = queryAxisItem.axis;
       if (axisId === QueryModel.AXIS_CELLS){
         continue;
       }
       
-      var sortDirection = queryAxisItem.sortDirection || 'ASC';
-      var itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
+      const sortDirection = queryAxisItem.sortDirection || 'ASC';
+      let itemNullsSortOrder = queryAxisItem.nullsSortOrder || nullsSortOrder
       itemNullsSortOrder = itemNullsSortOrder ? ` NULLS ${itemNullsSortOrder}` : '';
       
       axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
         // make a grouping set for the group by expression up to this point
-        var groupingSet = [].concat(axisGroupByExpressions);
+        const groupingSet = [].concat(axisGroupByExpressions);
         axisGroupingSets = groupingSets[axisId];
         axisGroupingSets.push(groupingSet);
         
@@ -530,22 +520,22 @@ class SqlQueryGenerator {
       // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
       axisGroupByExpressions.push(columnExpression);
       
-      var orderByExpression = `${columnExpressionReference} ${sortDirection}`;
+      let orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
       orderByExpressions.push(orderByExpression);
     }
 
     if (includeCountAll) {
-      var countExpression = 'COUNT(*) OVER ()';
+      const countExpression = 'COUNT(*) OVER ()';
       countAllAlias = countAllAlias || countExpression;
       selectListExpressions.push(`${countExpression} AS "${countAllAlias}"`);
     }
     
-    var groupByClause = undefined;
+    let groupByClause = undefined;
     if (groupingSets[QueryModel.AXIS_ROWS].length || groupingSets[QueryModel.AXIS_COLUMNS].length){
       axisGroupingSets = [];
 
-      var rowsAxisGroupingSets = groupingSets[QueryModel.AXIS_ROWS];
+      const rowsAxisGroupingSets = groupingSets[QueryModel.AXIS_ROWS];
       axisGroupByExpressions = groupByExpressions[QueryModel.AXIS_ROWS];
       if (rowsAxisGroupingSets.length) {
         if (rowsAxisGroupingSets[rowsAxisGroupingSets.length - 1].length < axisGroupByExpressions.length){
@@ -558,7 +548,7 @@ class SqlQueryGenerator {
         rowsAxisGroupingSets.push(axisGroupByExpressions);
       }
 
-      var columnsAxisGroupingSets = groupingSets[QueryModel.AXIS_COLUMNS];
+      const columnsAxisGroupingSets = groupingSets[QueryModel.AXIS_COLUMNS];
       axisGroupByExpressions = groupByExpressions[QueryModel.AXIS_COLUMNS];
       if (columnsAxisGroupingSets.length){
         if (columnsAxisGroupingSets[columnsAxisGroupingSets.length - 1].length < axisGroupByExpressions.length){
@@ -573,8 +563,8 @@ class SqlQueryGenerator {
 
       if (rowsAxisGroupingSets.length && columnsAxisGroupingSets.length) {
         axisGroupingSets = [];
-        rowsAxisGroupingSets.forEach(function(rowsAxisGroupingSet){
-          columnsAxisGroupingSets.forEach(function(columnsAxisGroupingSet){
+        rowsAxisGroupingSets.forEach(rowsAxisGroupingSet => {
+          columnsAxisGroupingSets.forEach((columnsAxisGroupingSet) => {
             axisGroupingSets.push([].concat(rowsAxisGroupingSet, columnsAxisGroupingSet));
           });
         });
@@ -588,8 +578,8 @@ class SqlQueryGenerator {
         axisGroupingSets = columnsAxisGroupingSets;
       }
       
-      var groupingSetsSql = axisGroupingSets
-      .map(function(groupingSet){                     // generate SQL for grouping set
+      const groupingSetsSql = axisGroupingSets
+      .map(groupingSet => {                     // generate SQL for grouping set
         return [
           '  (',
           `    ${groupingSet.join('\n  , ')}`,
@@ -601,17 +591,17 @@ class SqlQueryGenerator {
 
       // if we have grouping sets, we need to add a GROUPING_ID expression 
       // over all grouping exprssions so we can identify which rows are super-aggregate rows
-      var groupingIdAlias = quoteIdentifierWhenRequired(TupleSet.groupingIdAlias);
-      var groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
+      const groupingIdAlias = quoteIdentifierWhenRequired(TupleSet.groupingIdAlias);
+      const groupingIdExpression = `\n GROUPING_ID(\n   ${groupingIdExpressions.join('\n , ')}\n  ) AS ${groupingIdAlias}`;
       selectListExpressions.unshift(groupingIdExpression);
 
       // for each column in the grouping id, 
       // insert an order by expression to keep the totals together with the items they are totalling
-      sortDirection = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
-      groupingIdExpressions.forEach(function(groupingIdExpression, groupingIdExpressionIndex){
+      let sortDir = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
+      groupingIdExpressions.forEach((groupingIdExpression, groupingIdExpressionIndex) => {
         var bitshift = groupingIdExpressions.length - groupingIdExpressionIndex - 1;
         bitshift = bitshift ? `(1 << ${bitshift})` : 1;
-        orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDirection}`;
+        const orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDir}`;
         var indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
         orderByExpressions[indexOfGroupingIdExpression] = `${orderByExpression}`;
       });
@@ -624,7 +614,7 @@ class SqlQueryGenerator {
       ).join('\n,');
     }
 
-    var sql = [
+    let sql = [
       `SELECT ${selectListExpressions.join('\n,')}`,
       cte.from
     ];
@@ -644,24 +634,23 @@ class SqlQueryGenerator {
   }
 
   static #getSqlSelectStatementForIntermediateStage(cte, sqlOptions){
-    var unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
-    var sql;
-    var selectListExpressions = {};
-    cte.items.forEach(function(item){
+    const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    const selectListExpressions = {};
+    cte.items.forEach(item => {
       if (item.isUnnestingExpression === true) {
-        var itemUnnestingFunctions = item.unnestingFunctions;
-        Object.keys(itemUnnestingFunctions).forEach(function(unnestingFunction){
-          var arrayDerivation = unnestingFunctions[unnestingFunction];
-          var expressionTemplate = arrayDerivation.expressionTemplate;
-          var columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
-          var unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
-          var alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
+        const itemUnnestingFunctions = item.unnestingFunctions;
+        Object.keys(itemUnnestingFunctions).forEach(unnestingFunction => {
+          const arrayDerivation = unnestingFunctions[unnestingFunction];
+          const expressionTemplate = arrayDerivation.expressionTemplate;
+          const columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
+          const unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
+          const alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
           selectListExpressions[alias] = unnestingExpression;
         });
       }
       else 
       if (item.derivation === 'row number') {
-        var rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
+        const rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
         selectListExpressions[rowNumberSql] = rowNumberSql;
       }
       else
@@ -669,72 +658,72 @@ class SqlQueryGenerator {
         return;
       }
       else {
-        var column = item.alias || item.columnName;
+        const column = item.alias || item.columnName;
         if (selectListExpressions[column] === undefined) {
           selectListExpressions[column] = getQualifiedIdentifier(cte.alias, item.columnName);
         }
       }
     });
-    var sqlSelectList = Object.keys(selectListExpressions).map(function(columnId){
+    const sqlSelectList = Object.keys(selectListExpressions).map(columnId => {
       return `${selectListExpressions[columnId]} AS ${quoteIdentifierWhenRequired(columnId)}`
     });
-    sql = [
+    const sql = [
       `SELECT ${sqlSelectList.join('\n,')}`,
       cte.from
     ];
     
     SqlQueryGenerator.#generateWhereClause(cte, sql);
     
-    var samplingConfig = sqlOptions.samplingConfig;
+    const samplingConfig = sqlOptions.samplingConfig;
     if (samplingConfig){
       sql.push( getUsingSampleClause(samplingConfig, true) );
     }
 
     sql.unshift(`"${cte.alias}" AS (`)
     sql.push(')');
-    sql = sql.join('\n');
-    return sql;
+    const sqlText = sql.join('\n');
+    return sqlText;
   }
   
   static #generateWhereClause(cte, sql){
-    var filterAxisItems = cte.filters;
+    const filterAxisItems = cte.filters;
     if (!filterAxisItems) {
       return;
     }
     if (!filterAxisItems.length){
       return;
     }
-    var whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
+    const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
     sql.push(`WHERE ${whereCondition}`);
   }
 
   static getSqlSelectStatementForAxisItems(options){
-    var queryAxisItems = options.queryAxisItems;
+    const queryAxisItems = options.queryAxisItems;
 
     if (!queryAxisItems.length) {
       return undefined;
     }
 
-    var datasource = options.datasource; 
-    var filterAxisItems = options.filterAxisItems;
-    var samplingConfig = options.samplingConfig
+    const datasource = options.datasource; 
+    const filterAxisItems = options.filterAxisItems;
+    const samplingConfig = options.samplingConfig
 
-    var sqlOptions = normalizeSqlOptions(options.sqlOptions);
+    const sqlOptions = normalizeSqlOptions(options.sqlOptions);
 
-    var filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
-    var ctes = SqlQueryGenerator.#getUnnestingStages(
+    const filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
+    const ctes = SqlQueryGenerator.#getUnnestingStages(
       datasource,
       queryAxisItems, 
       filterAxisItemsByNestingStage
     );
 
-    var cte = ctes.pop();
+    const cte = ctes.pop();
     options.samplingConfig = ctes.length ? undefined : samplingConfig;
-    var sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
+    let sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
-    var sqls = ctes.map(function(cte, index){
+    const sqls = ctes.map((cte, index) => {
       sqlOptions.samplingConfig = index === 0 ? samplingConfig : undefined;
-      var sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
+      const sql = SqlQueryGenerator.#getSqlSelectStatementForIntermediateStage(cte, sqlOptions);
       return sql;
     });
     
@@ -743,7 +732,7 @@ class SqlQueryGenerator {
       sqls.push(`${quoteIdentifierWhenRequired(options.cteName)} AS (\n  ${sql}\n)`);
       sql = '';
     }
-    var withSql = sqls.length ? `WITH ${sqls.join('\n,')}\n` : '';
+    const withSql = sqls.length ? `WITH ${sqls.join('\n,')}\n` : '';
     sql = withSql + sql;
     return sql;
   }
