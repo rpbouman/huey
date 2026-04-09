@@ -335,7 +335,7 @@ class DuckDbDataSource extends EventEmitter {
     };
 
     let response = await DuckDbDataSource.getResourceInfoForUrl(url, 'HEAD');
-    const contentType = response.headers['content-type'];
+    let contentType = response.headers['content-type'];
     if (contentType){
       config.contentType = contentType;
       const contentTypes = contentType.split(';');
@@ -569,7 +569,7 @@ class DuckDbDataSource extends EventEmitter {
     if (isQuotedIdentifier(localId)){
       unQuoted = unQuoteIdentifier(localId);
       try {
-        var url = new URL(unQuoted);
+        const url = new URL(unQuoted);
         isUrl = true;
       }
       catch(e){
@@ -616,7 +616,7 @@ class DuckDbDataSource extends EventEmitter {
       if (!(file instanceof File)){
         throw new Error(`Configuration error: datasource of type ${DuckDbDataSource.types.FILE} needs to have a file handle set in order to register it.`);
       }
-      var type = this.getType();
+      const type = this.getType();
       switch (type){
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.FILE:
@@ -912,7 +912,7 @@ class DuckDbDataSource extends EventEmitter {
     if (settings === undefined) {
       settings = this.#settings.getSettings();
     }
-    var duckdbReaderArguments = Object.assign({},
+    const duckdbReaderArguments = Object.assign({},
       DuckDbDataSource.duckdb_reader_arguments[duckdb_reader]
     );
     
