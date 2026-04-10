@@ -100,8 +100,8 @@ class DatasourceSettings extends SettingsBase {
     if (!settingKey.startsWith(settingsKey)){
       throw new Error(`Settingkey ${settingKey} does not start with settingskey ${settingsKey}`);
     }
-    var remainder = settingKey.substr(settingsKey.length);
-    var argumentName = remainder.replace(/([A-Z][a-z]+)/g, function(match){
+    const remainder = settingKey.substr(settingsKey.length);
+    let argumentName = remainder.replace(/([A-Z][a-z]+)/g, function(match){
       match = '_' + match.charAt(0).toLowerCase() + match.substring(1);
       return match;
     });
@@ -115,13 +115,13 @@ class DatasourceSettings extends SettingsBase {
       readerKey = DatasourceSettings.#reader_settings[readerKey];
     }
     
-    var readerArguments = {};
-    var readerSettings = this.getSettings(readerKey);
-    var templateSettings = DatasourceSettings.#template[readerKey];
-    for (var settingKey in readerSettings){
-      var value = readerSettings[settingKey];
-      var templateValue = templateSettings[settingKey];
-      var valueIsDefault;
+    const readerArguments = {};
+    const readerSettings = this.getSettings(readerKey);
+    const templateSettings = DatasourceSettings.#template[readerKey];
+    for (let settingKey in readerSettings){
+      let value = readerSettings[settingKey];
+      let templateValue = templateSettings[settingKey];
+      let valueIsDefault;
       switch (typeof(value)){
         case 'object':
           if (value.options){
@@ -134,7 +134,7 @@ class DatasourceSettings extends SettingsBase {
           valueIsDefault = value === templateValue;
       }
       if (!valueIsDefault) {
-        var argumentName = DatasourceSettings.#getDuckDbReaderArgumentName(readerKey, settingKey);
+        const argumentName = DatasourceSettings.#getDuckDbReaderArgumentName(readerKey, settingKey);
         readerArguments[argumentName] = value;
       }
     }
@@ -142,8 +142,8 @@ class DatasourceSettings extends SettingsBase {
   }
 
   static getReaderArgumentsSql(readerArguments){
-    return Object.keys(readerArguments).map(function(argumentName){
-      var argumentValue = readerArguments[argumentName];
+    return Object.keys(readerArguments).map(argumentName => {
+      let argumentValue = readerArguments[argumentName];
       switch (typeof(argumentValue)){
         case 'string':
           argumentValue = quoteStringLiteral(argumentValue);

@@ -3,9 +3,9 @@ class RejectsDatasource extends DuckDbDataSource {
   #delegateDatasource = undefined;
 
   constructor(){
-    var hueyDb = window.hueyDb;
-    var duckdb = hueyDb.duckdb;
-    var instance = hueyDb.instance;
+    const hueyDb = window.hueyDb;
+    const duckdb = hueyDb.duckdb;
+    const instance = hueyDb.instance;
     super(duckdb, instance, {
       type: DuckDbDataSource.types.SQLQUERY,
       sql: 'SELECT 1'
@@ -14,20 +14,20 @@ class RejectsDatasource extends DuckDbDataSource {
 
   setDelegateDatasource(datasource){
     this.#delegateDatasource = datasource;
-    var sql = datasource.getRejectsSql();
+    const sql = datasource.getRejectsSql();
     this.setSqlQuery(sql);
   }
 
   getManagedConnection(){
-    var delegateDatasource = this.#delegateDatasource;
-    var managedConnection = delegateDatasource.getManagedConnection();
+    const delegateDatasource = this.#delegateDatasource;
+    const managedConnection = delegateDatasource.getManagedConnection();
     return managedConnection;
   }
 
   getId(){
-    var delegateDatasource = this.#delegateDatasource;
-    var delegateDatasourceId = delegateDatasource.getId();
-    var id = `Rejects of ${delegateDatasourceId}`;
+    const delegateDatasource = this.#delegateDatasource;
+    const delegateDatasourceId = delegateDatasource.getId();
+    const id = `Rejects of ${delegateDatasourceId}`;
     return id;
   }
 
@@ -69,20 +69,20 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   async #autodetectCsvReaderSettings(event){
-    var datasource = this.#datasource;
+    const datasource = this.#datasource;
     if (datasource.getType() !== DuckDbDataSource.types.FILE){
       throw new Error(`Datasource is not of type ${DuckDbDataSource.types.FILE}`);
     }
-    var fileType = datasource.getFileType();
-    var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+    const fileType = datasource.getFileType();
+    const fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
     if (fileTypeInfo.duckdb_reader !== 'read_csv'){
       throw new Error(`Datasource is not a CSV file`);
     }
 
-    var datasourceSettings = datasource.getSettings();
-    var csvReaderArguments = datasourceSettings.getReaderArguments('csvReader');
+    const datasourceSettings = datasource.getSettings();
+    const csvReaderArguments = datasourceSettings.getReaderArguments('csvReader');
     //csvReaderArguments['ignore_errors'] = true;
-    var csvReaderArgumentsSql = DatasourceSettings.getReaderArgumentsSql(csvReaderArguments);
+    let csvReaderArgumentsSql = DatasourceSettings.getReaderArgumentsSql(csvReaderArguments);
     if (csvReaderArgumentsSql && csvReaderArgumentsSql.length) {
       csvReaderArgumentsSql = `, ${csvReaderArgumentsSql}`;
     }
@@ -90,16 +90,15 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       csvReaderArgumentsSql = '';
     }
 
-    var fileName = datasource.getFileName();
+    const sniffer = fileTypeInfo.duckdb_sniffer;
+    const fileName = datasource.getFileName();
+    const snifferSql = `SELECT * FROM ${sniffer}('${fileName}'${csvReaderArgumentsSql})`;
 
-    var sniffer = fileTypeInfo.duckdb_sniffer;
-    var snifferSql = `SELECT * FROM ${sniffer}('${fileName}'${csvReaderArgumentsSql})`;
-
-    var managedConnection = datasource.getManagedConnection();
+    const managedConnection = datasource.getManagedConnection();
     // TODO: show a busy spinner
-    var result = await managedConnection.query(snifferSql);
+    const result = await managedConnection.query(snifferSql);
     // TODO: hide the busy spinner
-    var row = result.get(0);
+    const row = result.get(0);
 
     function escapeDelimiter(delim){
       return delim.replace(/[\t\r\n\0]/g, function(ch){
@@ -121,7 +120,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       });
     }
 
-    var detectedSettings = {
+    const detectedSettings = {
       csvReaderDelim: escapeDelimiter(row.Delimiter),
       csvReaderQuote: escapeDelimiter(row.Quote),
       csvReaderEscape: escapeDelimiter(row.Escape),
@@ -152,9 +151,9 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   #initColumnsTab(){
-    var hueyDb = window.hueyDb;
-    var duckdb = hueyDb.duckdb;
-    var instance = hueyDb.instance;
+    const hueyDb = window.hueyDb;
+    const duckdb = hueyDb.duckdb;
+    const instance = hueyDb.instance;
     this.#columnsTabDatasource = DuckDbDataSource.createFromSql(
       duckdb,
       instance,
@@ -163,8 +162,8 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
 
     this.#columnsTabQueryModel = new QueryModel();
     
-    var tabId = 'datasourceSettingsDialogColumnsTab';
-    var columnsTabPanel = TabUi.getTabPanel(
+    const tabId = 'datasourceSettingsDialogColumnsTab';
+    const columnsTabPanel = TabUi.getTabPanel(
       DatasourceSettingsDialog.#tabListSelector,
       `#${tabId}`
     );
@@ -180,11 +179,11 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   async #downloadCsvReaderRejectsHandler(event){
-    var exportUiSettings = settings.getSettings('exportUi');
+    const exportUiSettings = settings.getSettings('exportUi');
     exportUiSettings.exportTitleTemplate = '${datasource}';
     exportUiSettings.exportResultShapePivot = true;
 
-    var ourSettings = new SettingsBase({
+    const ourSettings = new SettingsBase({
       template: {exportUi: exportUiSettings}
     });
     exportDialog.open({
@@ -214,12 +213,12 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     this.#rejectsDatasource = new RejectsDatasource();
     this.#rejectsTabQueryModel = new QueryModel();
 
-    var tabId = 'datasourceSettingsDialogCsvReaderRejectsTab';
-    var rejectsTabPanel = TabUi.getTabPanel(
+    const tabId = 'datasourceSettingsDialogCsvReaderRejectsTab';
+    const rejectsTabPanel = TabUi.getTabPanel(
       DatasourceSettingsDialog.#tabListSelector,
       `#${tabId}`
     );
-    var section = rejectsTabPanel.querySelector('section');
+    const section = rejectsTabPanel.querySelector('section');
     this.#rejectsTabPivotTableUi = new PivotTableUi({
       container: section,
       id: tabId + 'PivotTableUi',
@@ -229,13 +228,13 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   #updateColumnsTabData(){
-    var datasource = this.#datasource;
+    const datasource = this.#datasource;
 
     // first clean up the datasource
     this.#columnsTabQueryModel.setDatasource( null );
 
     // now prepare our column datasource
-    var sql = [
+    const sql = [
       'SELECT CAST(ROW_NUMBER() OVER () AS USMALLINT) AS "#"',
       ', ds_schema.*',
       `FROM (${datasource.getSqlForTableSchema()}) as ds_schema`
@@ -243,7 +242,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     this.#columnsTabDatasource.setSqlQuery(sql);
 
     // re-initialize the query model.
-    var axes = {};
+    const axes = {};
     axes[QueryModel.AXIS_ROWS] = [{column: '#', columnType: 'USMALLINT'}];
     axes[QueryModel.AXIS_CELLS] = [
       {caption: "Column Name", column: 'column_name', columnType: 'VARCHAR', aggregator: 'min'},
@@ -257,7 +256,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   #updateRejectsTabData(){
-    var datasource = this.#datasource;
+    const datasource = this.#datasource;
 
     // first clean up the datasource
     this.#rejectsTabQueryModel.setDatasource( null );
@@ -266,11 +265,11 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
       return;
     }
 
-    var rejectsDatasource = this.#rejectsDatasource;
+    const rejectsDatasource = this.#rejectsDatasource;
     rejectsDatasource.setDelegateDatasource(datasource);
 
     // re-initialize the query model.
-    var axes = {};
+    const axes = {};
     axes[QueryModel.AXIS_ROWS] = [{column: 'id', columnType: 'BIGINT'}];
     axes[QueryModel.AXIS_CELLS] = [
       {caption: "Scan", column: 'max_scan_id', columnType: 'BIGINT', aggregator: 'min'},
@@ -292,11 +291,11 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   async setDatasource(datasource){
     this.#datasource = datasource;
 
-    var datasourceType = datasource.getType();
+    const datasourceType = datasource.getType();
     byId('datasourceType').value = datasourceType;
     byId('datasourceName').value = DataSourcesUi.getCaptionForDatasource(datasource);
 
-    var fileType, fileSize;
+    let fileType, fileSize;
     switch(datasourceType){
       case DuckDbDataSource.types.FILE:
         fileSize = datasource.isUrl ? '' : datasource.getFileSize();
@@ -308,7 +307,7 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
         fileType = '';
         fileSize = '';
     }
-    var fileTypeControl = byId('datasourceFileType');
+    const fileTypeControl = byId('datasourceFileType');
     // we need to set the value property to update the output,
     // but we also need to set the value attribute because we use that in CSS to control visibility of reader param tabs.
     fileTypeControl.setAttribute('value', fileType);
@@ -327,12 +326,12 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
 
   open(datasource) {
     this.setDatasource(datasource);
-    var settings = datasource.getSettings();
+    const settings = datasource.getSettings();
     super.open(settings);
   }
 }
 
-var datasourceSettingsDialog;
+let datasourceSettingsDialog;
 function initDatasourceSettingsDialog(){
   datasourceSettingsDialog = new DatasourceSettingsDialog();
 }
