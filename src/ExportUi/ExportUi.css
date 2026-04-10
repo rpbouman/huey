@@ -6,6 +6,15 @@ dialog#exportDialog {
   width: 700px;
   height: 460px;
   resize: both;
+
+  &[aria-busy=true] > dialog[role=progressbar] {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  &[aria-busy=false] > dialog[role=progressbar] {
+    display: none;
+  }
   
   > header {
     > form {
@@ -45,37 +54,27 @@ form > fieldset {
   grid-column: span 1;
 }
 
-dialog#exportDialog[aria-busy=true] > dialog[role=progressbar] {
-  display: flex;
-  flex-direction: column;
-}
+menu[role=toolbar] {
+  > label[for=exportButton] { 
+    float: right;
 
-dialog#exportDialog[aria-busy=false] > dialog[role=progressbar] {
-  display: none;
-}
+    /* export is not available by default, ...  */
+    display: none;
+    
+    &::before {
+      content: var( --icon-download );
+    }
 
-
-menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
-  float: right;
-}
-
-menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton )::before {
-  content: var( --icon-download );
-}
-
-/* export is not available by default, ...  */
-menu[role=toolbar] > label[for=exportButton]:has( > button#exportButton ) {
-  display: none;
+  }
 }
 
 /* ...but one when either the columns, rows or cells axis has at least one item, the export button is available. */
-body > main:has( > #workarea > #queryUi > section[data-axis=columns] > ol > li ) > menu[role=toolbar] > label[for=exportButton],
-body > main:has( > #workarea > #queryUi > section[data-axis=rows] > ol > li ) > menu[role=toolbar] > label[for=exportButton],
-body > main:has( > #workarea > #queryUi > section[data-axis=cells] > ol > li ) > menu[role=toolbar] > label[for=exportButton]
+body > main:has( > #workarea > #queryUi > section:is( [data-axis=columns], [data-axis=rows], [data-axis=cells] ) > ol > li )
 {
-  display: block;
+  > menu[role=toolbar] > label[for=exportButton] {
+    display: block;
+  }
 }
-
 form#exportParquetSettings {
   > fieldset:has( > input#exportParquetCompressionLevel ) {
 
