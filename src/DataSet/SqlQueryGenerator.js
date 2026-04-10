@@ -274,8 +274,9 @@ class SqlQueryGenerator {
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
-   let unnestingItem = undefined;
-    do {
+   let unnestingItem;
+   do {
+      unnestingItem = undefined;
       cte = ctes[ctes.length - 1];
       // at the start of a new stage, initialize
       let unnestingDerivation = undefined;
