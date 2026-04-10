@@ -267,8 +267,7 @@ class SqlQueryGenerator {
       ctes.push({
         items: newItems,
         alias: alias,
-        from: `FROM ${cte.alias} AS "${alias}"`,
-        filters: filters
+        from: `FROM ${cte.alias} AS "${alias}"`
       });
     }
     
