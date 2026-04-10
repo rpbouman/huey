@@ -34,7 +34,7 @@ class TupleSet extends DataSetComponent {
     const filterAxis = queryModel.getFiltersAxis();
     const filterAxisItems = filterAxis.getItems();
 
-    const samplingConfig;
+    let samplingConfig;
     if (includeCountAll) {
       samplingConfig = queryModel.getSampling(axisId);
     }
@@ -260,7 +260,7 @@ class TupleSet extends DataSetComponent {
   async getTuples(count, offset){
 
     const data = this.#tuples;
-    const tuples = [];
+    let tuples = [];
 
     let firstIndexToFetch, lastIndexToFetch;
 
