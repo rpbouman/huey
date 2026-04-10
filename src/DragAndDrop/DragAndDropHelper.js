@@ -1,5 +1,5 @@
 class DragAndDropHelper {
-  
+
   /**
   * Utility for stuffing data into DataTransfer keys.
   *
@@ -8,7 +8,7 @@ class DragAndDropHelper {
   *
   * Data is stored using the setData(key, value) method
   * Stored data can be retrieved using the getData(key) method, but this only returns a useful value inside a drop hanlder.
-  * 
+  *
   * Any data that should be available during the drag, and which should be readable when handling dragEnter, dragOver, dragLeave events,
   * cannot be retrieved with getData(). During these events, handlers can inspect the keys held by the DataTransfer object.
   * So, we can abuse the keys and store data in there.
@@ -18,14 +18,14 @@ class DragAndDropHelper {
   *
   * For some reason, browsers will normalize the keys and only store lower cased letters.
   * So we must use some kind of encoding if we want to store arbitrary data in there.
-  * 
+  *
   * the encodeDataTransferKey function takes a string, and turns it into a comma-separated string of character codes.
   * the decodeDataTransferKey function takes a string created by encodeDataTransferKey and returns the decoded data.
-  * the setData function takes an event (or DataTransfer instance), and an object representing the data. 
+  * the setData function takes an event (or DataTransfer instance), and an object representing the data.
   */
-  
+
   /*
-  * pass in a string, returns it as a comma-separated string of character codes. 
+  * pass in a string, returns it as a comma-separated string of character codes.
   * for example:
   *
   * DragAndDropHelper.encodeDataTransferKey('ABC') === '65,66,67'
@@ -33,11 +33,11 @@ class DragAndDropHelper {
   static encodeDataTransferKey(string){
     return string.split('').map(function(ch){
       return ch.charCodeAt(0);
-    }).join(',');    
+    }).join(',');
   }
-  
+
   /*
-  * pass in a a comma-separated string of character codes. 
+  * pass in a a comma-separated string of character codes.
   * for example:
   *
   * DragAndDropHelper.decodeDataTransferKey('65,66,67') === 'ABC'
@@ -47,9 +47,9 @@ class DragAndDropHelper {
         return String.fromCharCode(charCode);
     }).join('');
   }
-  
+
   static #getDataTransferInstance(event){
-    var dataTransfer;
+    let dataTransfer;
     if (event instanceof Event) {
       dataTransfer = event.dataTransfer;
     }
@@ -62,43 +62,43 @@ class DragAndDropHelper {
     }
     return dataTransfer;
   }
-  
+
   static setData(event, data){
-    var dataTransfer = DragAndDropHelper.#getDataTransferInstance(event);
-    for (var property in data) {
+    const dataTransfer = DragAndDropHelper.#getDataTransferInstance(event);
+    for (let property in data) {
       if (property !== property.toLowerCase()){
         throw new Error(`Invalid property "${property}": name should be lower-case`);
       }
 
-      var value = data[property];
-      var keys;
+      let value = data[property];
+      let keys;
       if (value instanceof File){
         dataTransfer.setData(property, value);
         continue;
       }
       else
       if (
-        typeof value === 'object' && 
-        (keys = Object.keys(value)).length === 2 && 
-        keys.indexOf('key') !== -1 && 
+        typeof value === 'object' &&
+        (keys = Object.keys(value)).length === 2 &&
+        keys.indexOf('key') !== -1 &&
         keys.indexOf('value') !== -1
       ){
         if (property.indexOf('/') !== -1){
           throw new Error(`Invalid property value "${property}" for keyed values - the property should not contain a slash.`);
         }
-        var key = value['key'];
+        let key = value['key'];
         key = JSON.stringify(key);
         key = DragAndDropHelper.encodeDataTransferKey(key);
         property = `${property}/${key}`;
         value = value['value'];
       }
-      
+
       if (property.startsWith('text/')){
         if (typeof value !== 'string') {
           throw new Error(`Expected string type data for type ${property}`);
         }
         // noop. text types are passed as is.
-      } 
+      }
       else {
         value = JSON.stringify(value);
       }
@@ -106,31 +106,31 @@ class DragAndDropHelper {
     }
     return dataTransfer;
   }
-  
+
   static getData(event){
-    var dataTransfer = DragAndDropHelper.#getDataTransferInstance(event);
-    var types = dataTransfer.types;
-    var data = {};
-    for (var i = 0; i < types.length; i++){
-      var type = types[i];
-      var match = /^(?<property>[^\/]+)((\/(?<keydata>\d+(,\d+)*)?)|(?<noKeydata>.+))?$/.exec(type);
+    const dataTransfer = DragAndDropHelper.#getDataTransferInstance(event);
+    const types = dataTransfer.types;
+    const data = {};
+    for (let i = 0; i < types.length; i++){
+      const type = types[i];
+      const match = /^(?<property>[^\/]+)((\/(?<keydata>\d+(,\d+)*)?)|(?<noKeydata>.+))?$/.exec(type);
       if (match === null){
         throw new Error(`Invalid DataTransfer type key "${type}".`);
       }
-      var property = match.groups.property;
-      var keydata = match.groups.keydata;
-      var noKeydata = match.groups.noKeydata || '';
-      
-      var storedValue;
+      let property = match.groups.property;
+      const keydata = match.groups.keydata;
+      const noKeydata = match.groups.noKeydata || '';
+
+      let storedValue;
       switch(event.type){
         case 'dragstart':
         case 'drop':
-          var rawData = dataTransfer.getData(type);
+          const rawData = dataTransfer.getData(type);
           if (rawData instanceof File){
             // noop
             storedValue = rawData;
           }
-          else 
+          else
           if (property.startsWith('text') && noKeydata) {
             storedValue = rawData;
           }
@@ -141,8 +141,8 @@ class DragAndDropHelper {
         default:
           storedValue = undefined;
       }
-      
-      var value;
+
+      let value;
       if (keydata){
         var decodedKeydata = JSON.parse(DragAndDropHelper.decodeDataTransferKey(keydata));
         value = {
@@ -158,29 +158,29 @@ class DragAndDropHelper {
     }
     return data;
   }
-  
+
   static getEncodedQueryAxisItemId(queryAxisItem) {
-    var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    const id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
     return DragAndDropHelper.encodeDataTransferKey(id);
   }
-  
+
   static addTextDataForQueryItem(queryAxisItem, data) {
-    var csvData = [];
+    const csvConfig = [];
     for (var property in queryAxisItem){
       var value = queryAxisItem[property];
       var typeOfValue = typeof value;
       if(property === 'filter') {
         var filter = value;
         var filterType = filter.filterType;
-        csvData.push(['filterType', filterType]);
+        csvConfig.push(['filterType', filterType]);
         Object.keys(filter.values).forEach(function(key, index){
-          csvData.push(['filterValue' + (1 + index), key]);
+          csvConfig.push(['filterValue' + (1 + index), key]);
         });
         if (!FilterDialog.isRangeFilterType(filterType)) {
           continue
         }
         Object.keys(filter.toValues).forEach(function(key, index){
-          csvData.push(['toFilterValue' + (1 + index), key]);
+          csvConfig.push(['toFilterValue' + (1 + index), key]);
         });
       }
       else
@@ -194,15 +194,14 @@ class DragAndDropHelper {
         continue;
       }
       else {
-        csvData.push([property, value]);
+        csvConfig.push([property, value]);
       }
     }
-    csvData = getCsv(csvData);
-    
+    const csvData = getCsv(csvConfig);
+
     data['text/plain'] = csvData;
-    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    const itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
     data['text/csv'] = new File([csvData], `${itemId}.csv`);
-    
   }
-  
+
 }
