@@ -1,8 +1,7 @@
 class ExportUi {
 
   static downloadURL(url, fileName) {
-    var a;
-    a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     document.body.appendChild(a);
@@ -12,12 +11,11 @@ class ExportUi {
   }
 
   static downloadBlob(data, fileName, mimeType, timeout) {
-    var blob, url;
-    blob = new Blob(
+    const blob = new Blob(
       [data]
     , {type: mimeType}
     );
-    url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     ExportUi.downloadURL(url, fileName);
     timeout = timeout === undefined ? 1000 : timeout;
     setTimeout(function() {
@@ -30,49 +28,49 @@ class ExportUi {
       if (!queryModel) {
         queryModel = window.queryModel;
       }
-      var datasource = queryModel.getDatasource();
+      const datasource = queryModel.getDatasource();
       if (!datasource) {
         return '<no datasource>';
       }
-      var caption = DataSourcesUi.getCaptionForDatasource(datasource);
+      const caption = DataSourcesUi.getCaptionForDatasource(datasource);
       return caption;
     },
     'columns-items': function(queryModel){
       if (!queryModel) {
         queryModel = window.queryModel;
       }
-      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_COLUMNS);
+      const caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_COLUMNS);
       return caption;
     },
     'rows-items': function(queryModel){
       if (!queryModel) {
         queryModel = window.queryModel;
       }
-      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_ROWS);
+      const caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_ROWS);
       return caption;
     },
     'cells-items': function(queryModel){
       if (!queryModel) {
         queryModel = window.queryModel;
       }
-      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_CELLS);
+      const caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_CELLS);
       return caption;
     },
     'filters-items': function(queryModel){
       if (!queryModel) {
         queryModel = window.queryModel;
       }
-      var caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
+      const caption = queryModel.getCaptionForQueryAxis(QueryModel.AXIS_FILTERS);
       return caption;
     },
     'utc-timestamp': function(queryModel){
       return (new Date(Date.now())).toISOString().split('.')[0];
     },
     'timestamp': function(queryModel){
-      var date = new Date();
+      const date = new Date();
 
       function padDigit(digit) {
-        return digit < 10 ? '0' + digit : digit;
+        return String(digit).padStart(2, '0');
       }
 
       return [
@@ -93,74 +91,69 @@ class ExportUi {
       queryModel = window.queryModel;
     }
     if (titleTemplate === undefined){
-      var exportTemplate = byId('exportTitleTemplate')
+      const exportTemplate = byId('exportTitleTemplate')
       titleTemplate = exportTemplate.value;
     }
-    var replacedTemplate = titleTemplate.replace(/\$\{[^\}]+\}/g, function(fieldRef){
-      var fieldName = unQuote(fieldRef, '${', '}');
-      var func = ExportUi.#exportTitleFields[fieldName];
-      if (typeof func === 'function'){
-        return func(queryModel);
-      }
-      else {
-        return fieldRef;
-      }
+    const replacedTemplate = titleTemplate.replace(/\$\{[^\}]+\}/g, fieldRef => {
+      const fieldName = unQuote(fieldRef, '${', '}');
+      const func = ExportUi.#exportTitleFields[fieldName];
+      return typeof func === 'function' ? func(queryModel) : fieldRef;
     });
     return replacedTemplate;
   }
   
   static #getSqlForExport(queryModel, options){
-    var rowsAxisItems = queryModel.getRowsAxis().getItems();
-    var columnsAxisItems = queryModel.getColumnsAxis().getItems();
-    var cellsAxisItems = queryModel.getCellsAxis().getItems();
-    var axisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
-    var filterAxisItems = queryModel.getFiltersAxis().getItems();
+    const rowsAxisItems = queryModel.getRowsAxis().getItems();
+    const columnsAxisItems = queryModel.getColumnsAxis().getItems();
+    const cellsAxisItems = queryModel.getCellsAxis().getItems();
+    const axisItems = [].concat(rowsAxisItems, columnsAxisItems, cellsAxisItems);
+    const filterAxisItems = queryModel.getFiltersAxis().getItems();
 
-    var datasource = queryModel.getDatasource();
-    var opts = Object.assign({}, options, {
+    const datasource = queryModel.getDatasource();
+    const opts = Object.assign({}, options, {
       datasource: datasource,
       queryAxisItems: axisItems, 
       filterAxisItems: filterAxisItems,
     });
-    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(opts);
+    const sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems(opts);
     return sql
   }
 
   static getSqlForTabularExport(queryModel, sqlOptions){
-    var options = Object.assign({}, {
+    const options = Object.assign({}, {
       sqlOptions: sqlOptions
     });
-    var sql = ExportUi.#getSqlForExport(queryModel, options);
+    const sql = ExportUi.#getSqlForExport(queryModel, options);
     return sql;
   }
   
   static getSqlForPivotExport(queryModel, sqlOptions){
-    var columnsAxisItems = queryModel.getColumnsAxis().getItems();
+    const columnsAxisItems = queryModel.getColumnsAxis().getItems();
     if (!columnsAxisItems.length) {
       return ExportUi.getSqlForTabularExport(queryModel, sqlOptions);
     }
     
-    var options = Object.assign({}, {
+    const options = Object.assign({}, {
       sqlOptions: sqlOptions || {},
       includeOrderBy: false,
       finalStateAsCte: true,
       cteName: '__huey_cells'
     });
-    var sql = ExportUi.#getSqlForExport(queryModel, options);
+    let sql = ExportUi.#getSqlForExport(queryModel, options);
     
-    var columns = columnsAxisItems
+    const columns = columnsAxisItems
     .map(function(queryAxisItem){
-      var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+      const caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
       return quoteIdentifierWhenRequired(caption);
     })
     .join(getComma(options.sqlOptions.commaStyle));
     
-    var aggregates;
-    var cellsAxisItems = queryModel.getCellsAxis().getItems();
+    let aggregates;
+    const cellsAxisItems = queryModel.getCellsAxis().getItems();
     if (cellsAxisItems.length) {
       aggregates = cellsAxisItems
-      .map(function(queryAxisItem){
-        var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+      .map(queryAxisItem => {
+        let caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
         caption = quoteIdentifierWhenRequired(caption);
         return `FIRST( ${caption} ) AS ${caption}`;
       })
@@ -170,17 +163,17 @@ class ExportUi {
       aggregates = `FIRST( NULL ) AS _`
     }
 
-    var pivot = [
+    let pivot = [
       `PIVOT (FROM "__huey_cells")`,
       `ON (${columns})`,
       `USING ${aggregates}`
     ].join('\n')
     
-    var rowsAxisItems = queryModel.getRowsAxis().getItems();
+    const rowsAxisItems = queryModel.getRowsAxis().getItems();
     if (rowsAxisItems.length) {
-      var orderBy = rowsAxisItems
-      .map(function(queryAxisItem){
-        var caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+      const orderBy = rowsAxisItems
+      .map(queryAxisItem => {
+        caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
         return quoteIdentifierWhenRequired(caption);
       })
       .join(getComma(options.sqlOptions.commaStyle));
@@ -193,7 +186,13 @@ class ExportUi {
   
   static getExportSqlForQueryModel(queryModel, exportSettings, exportType){
     
-    var sql, structure;
+    const sqlOptions = {
+      keywordLettercase: exportSettings[exportType + 'KeywordLettercase'],
+      alwaysQuoteIdentifiers: exportSettings[exportType + 'AlwaysQuoteIdentifiers'],
+      commaStyle: exportSettings[exportType + 'CommaStyle']
+    };
+
+    let sql, structure;
     if (exportSettings.exportResultShapePivot){
       structure = 'pivot';
       sql = ExportUi.getSqlForPivotExport(queryModel, sqlOptions);
@@ -204,11 +203,7 @@ class ExportUi {
       sql = ExportUi.getSqlForTabularExport(queryModel, sqlOptions);
     }
 
-    var sqlOptions = {
-      keywordLettercase: exportSettings[exportType + 'KeywordLettercase'],
-      alwaysQuoteIdentifiers: exportSettings[exportType + 'AlwaysQuoteIdentifiers'],
-      commaStyle: exportSettings[exportType + 'CommaStyle']
-    };
+    
     if (sqlOptions) {
       sql = [
         `/***********************************`,
@@ -224,8 +219,8 @@ class ExportUi {
   }
 
   static async exportDataForQueryModel(queryModel, exportSettings, progressCallback){
-    var sql = ExportUi.getExportSqlForQueryModel(queryModel, exportSettings);
-    var datasource = queryModel.getDatasource();
+    const sql = ExportUi.getExportSqlForQueryModel(queryModel, exportSettings);
+    const datasource = queryModel.getDatasource();
     return ExportUi.exportData(datasource, sql, exportSettings, progressCallback);
   }
 
@@ -238,14 +233,13 @@ class ExportUi {
       }
       progressCallback('initSettings');
 
-      var title = exportSettings.exportTitle;
-      var exportType = exportSettings.exportType;
+      const exportType = exportSettings.exportType;
 
-      var mimeType, compression, includeHeaders,
+      let mimeType, compression, includeHeaders,
           dateFormat, timestampFormat, nullValueString,
           columnDelimiter, quote, escape, rowDelimiter
       ;
-      var fileExtension, data, copyStatementOptions;
+      let fileExtension, data, copyStatementOptions;
       switch (exportType) {
         case 'exportDelimited':
           columnDelimiter = exportSettings[exportType + 'ColumnDelimiter'];
@@ -318,16 +312,16 @@ class ExportUi {
             "HEADER": `${Boolean(exportSettings.exportXlsxIncludeHeaders)}`,
             "SHEET_ROW_LIMIT": exportSettings.exportXlsxSheetRowLimit,
           };
-          var sheetName = (exportSettings.exportXlsxSheet || '').trim();
+          let sheetName = (exportSettings.exportXlsxSheet || '').trim();
           if ( sheetName.length ) {
             sheetName = quoteStringLiteral(sheetName);
             copyStatementOptions["SHEET"] = sheetName;
           }
           break;
         case 'exportQuery':
-          var encodingSettings = exportSettings[exportType + 'Encoding'];
-          var encodingOption = encodingSettings.value;
-          var indent = exportSettings[exportType + 'Indentation'];
+          const encodingSettings = exportSettings[exportType + 'Encoding'];
+          const encodingOption = encodingSettings.value;
+          const indent = exportSettings[exportType + 'Indentation'];
           data = {
             queryModel: queryModel.getState()
           };
@@ -351,7 +345,7 @@ class ExportUi {
           console.error(`Don't know how to handle export type "${exportType}".`);
       }
 
-      var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileExtension);
+      const fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileExtension);
       if (fileTypeInfo) {
         if (!mimeType){
           mimeType = fileTypeInfo.mimeType;
@@ -384,13 +378,13 @@ class ExportUi {
       }
 
       if (copyStatementOptions){
-        var tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
+        const tmpFileName = [crypto.randomUUID(), fileExtension].join('.');
         progressCallback(`Preparing copy to ${tmpFileName}`);
-        var copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
-        var connection, result;
+        const copyStatement = getCopyToStatement(sql, tmpFileName, copyStatementOptions);
+        let connection;
         try {
           connection = datasource.getManagedConnection();
-          result = await connection.query(copyStatement);
+          const result = await connection.query(copyStatement);
           progressCallback(`Extracting from ${tmpFileName}`);
           data = await connection.copyFileToBuffer(tmpFileName);
           
@@ -409,7 +403,7 @@ class ExportUi {
         }
       }
 
-      var destination;
+      let destination;
       if (exportSettings.exportDestinationFile){
         destination = 'file';
       }
@@ -420,13 +414,13 @@ class ExportUi {
 
       switch (destination){
         case 'file':
-          var fileName = [exportSettings.exportTitle, fileExtension].join('.');
+          let fileName = [exportSettings.exportTitle, fileExtension].join('.');
           fileName = fileName.replace(/\"/g, "'");
           progressCallback(`Download as ${fileName}`);
           ExportUi.downloadBlob(data, fileName, mimeType);
           break;
         case 'clipboard':
-          var text;
+          let text;
           if (typeof data === 'string'){
             text = data;
           }
@@ -448,13 +442,13 @@ class ExportUi {
   }
 
   static async exportAxisData(queryModel, axisId, exportSettings, progressCallback){
-    var state = queryModel.getState();
-    var newAxes = {};
+    const state = queryModel.getState();
+    const newAxes = {};
     newAxes[QueryModel.AXIS_FILTERS] = state.axes[QueryModel.AXIS_FILTERS];
     newAxes[axisId] = state.axes[axisId];
     state.axes = newAxes;
     
-    var exportQueryModel = new QueryModel();
+    const exportQueryModel = new QueryModel();
     await exportQueryModel.setState(state);
 
     await ExportUi.exportDataForQueryModel(exportQueryModel, exportSettings, progressCallback);
@@ -480,30 +474,30 @@ class ExportDialog {
     byId('exportDialogExecuteButton')
     .addEventListener('click', this.#executeExport.bind(this));
 
-    var exportTitleTemplate = byId('exportTitleTemplate');
+    const exportTitleTemplate = byId('exportTitleTemplate');
     exportTitleTemplate.addEventListener('change', this.#titleTemplateChangedHandler.bind(this));
     exportTitleTemplate.addEventListener('input', this.#titleTemplateChangedHandler.bind(this));
 
   }
 
   #titleTemplateChangedHandler(event){
-    var exportTitleTemplate = byId('exportTitleTemplate');
+    const exportTitleTemplate = byId('exportTitleTemplate');
     this.#settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
     this.#updateExportTitle();
   }
 
   #updateExportTitle(){
-    var queryModel = this.#queryModel;
-    var exportTemplate = byId('exportTitleTemplate')
-    var titleTemplate = exportTemplate.value;
+    const queryModel = this.#queryModel;
+    const exportTemplate = byId('exportTitleTemplate')
+    const titleTemplate = exportTemplate.value;
 
-    var title = ExportUi.generateExportTitle(queryModel, titleTemplate);
+    const title = ExportUi.generateExportTitle(queryModel, titleTemplate);
     byId('exportTitle').textContent = title;
   }
 
   #updateDialog(){
-    var dialog = this.#getDialog();
-    var settings = this.#settings;
+    const dialog = this.#getDialog();
+    const settings = this.#settings;
 
     Settings.synchronize(
       dialog,
@@ -521,44 +515,43 @@ class ExportDialog {
     this.#queryModel = config.queryModel || queryModel;
     this.#settings = config.settings || settings;
     this.#updateDialog();
-    var dialog = this.#getDialog();
+    const dialog = this.#getDialog();
     dialog.showModal();
   }
 
   close(){
-    var dialog = this.#getDialog();
+    const dialog = this.#getDialog();
     dialog.close();
   }
 
   async #executeExport(){
+    const dialog = this.#getDialog();
     try {
-      var dialog = this.#getDialog();
       dialog.setAttribute('aria-busy', String(true));
 
-      var settings = this.#settings;
-      exportSettings = settings.getSettings('exportUi');
+      const settings = this.#settings;
+      const exportSettings = settings.getSettings('exportUi');
       Settings.synchronize(dialog, {"_": exportSettings}, 'settings');
       this.#settings.assignSettings('exportUi', exportSettings);
       
-      var progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
-      var progressCallback = function(text){
+      const progressMessageElement = dialog.querySelector('*[role=progressbar] *[role=status]');
+      const progressCallback = function(text){
         progressMessageElement.textContent = text;
       }
       progressCallback('Preparing export...');
 
-      var exportSettings = settings.getSettings('exportUi');
 
       exportSettings.exportTitle = byId('exportTitle').textContent;
-      var tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
+      const tabName = TabUi.getSelectedTab('#exportDialog').getAttribute('for');
 
       function copyUiSetting(setting, exportTypePrefix){
         exportTypePrefix = exportTypePrefix || '';
-        var typeOfSetting = typeof setting;
+        const typeOfSetting = typeof setting;
         switch (typeOfSetting) {
           case 'string':
-            var id = exportTypePrefix + setting;
-            var control = byId(id);
-            var valueProperty;
+            const id = exportTypePrefix + setting;
+            const control = byId(id);
+            let valueProperty;
             switch (control.type){
               case 'radio':
               case 'checkbox':
@@ -568,7 +561,7 @@ class ExportDialog {
               default:
                 valueProperty = 'value';
             }
-            var value = control[valueProperty];
+            const value = control[valueProperty];
             exportSettings[id] = control.tagName === 'SELECT' ? {value: value} : value;
             return;
           case 'object':
@@ -578,18 +571,13 @@ class ExportDialog {
           default:
             throw new Error(`Wrong type for setting "${setting}": should be string or array of strings, not "${typeOfSetting}".`);
         }
-        setting.forEach(function(setting){
+        setting.forEach(setting => {
           copyUiSetting(setting, exportTypePrefix);
         });
       }
 
       exportSettings.exportType = tabName;
 
-      var mimeType, compression, includeHeaders,
-          dateFormat, timestampFormat, nullValueString,
-          columnDelimiter, quote, escape, rowDelimiter
-      ;
-      var fileExtension, data, copyStatementOptions, sqlOptions;
       switch (tabName) {
         case 'exportDelimited':
           copyUiSetting([
@@ -631,7 +619,7 @@ class ExportDialog {
         'exportDestinationClipboard',
       ]);
 
-      var queryModel = this.#queryModel;
+      const queryModel = this.#queryModel;
       await ExportUi.exportDataForQueryModel(queryModel, exportSettings, progressCallback);
 
     }
@@ -645,11 +633,11 @@ class ExportDialog {
 
 }
 
-var exportDialog;
+let exportDialog;
 function initExportDialog(){
   exportDialog = new ExportDialog();
 
-  var exportButton = byId('exportButton');
+  const exportButton = byId('exportButton');
 
   exportButton.addEventListener('click', function(event){
     exportDialog.open({
@@ -658,7 +646,7 @@ function initExportDialog(){
     });
   });
 
-  var exportTitleTemplate = byId('exportTitleTemplate');
+  const exportTitleTemplate = byId('exportTitleTemplate');
   function titleTemplateChanged(){
     settings.assignSettings(['exportUi', 'exportTitleTemplate'], exportTitleTemplate.value);
     updateExportTitle();
