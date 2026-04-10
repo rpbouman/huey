@@ -22,7 +22,7 @@ class DragableDialogs {
   }
   
   #initEvents(){
-    var dom = this.getDom();
+    const dom = this.getDom();
 
     dom.addEventListener('dragstart', this.#handleDragStart.bind(this));
     dom.addEventListener('dragover', this.#handleDrag.bind(this));
@@ -38,7 +38,7 @@ class DragableDialogs {
         height: '0px'
       }
     });
-    var dom = this.getDom();
+    const dom = this.getDom();
     dom.appendChild(this.#dragImgEl);
   }
     
@@ -46,14 +46,14 @@ class DragableDialogs {
     if (event.eventPhase !== Event.BUBBLING_PHASE){
       return;
     }
-    var dialog = event.srcElement;
+    const dialog = event.srcElement;
     if (dialog.tagName !== 'DIALOG'){
       return;
     }
     
-    var header = dialog.querySelector(':scope > header');
+    const header = dialog.querySelector(':scope > header');
     if (header){
-      var headerBoundingRect = header.getBoundingClientRect();
+      const headerBoundingRect = header.getBoundingClientRect();
       if (
         event.x < headerBoundingRect.left || 
         event.x > headerBoundingRect.right || 
@@ -67,18 +67,18 @@ class DragableDialogs {
 
     this.#dialog = dialog;
 
-    var boundingRect = dialog.getBoundingClientRect();
+    const boundingRect = dialog.getBoundingClientRect();
     this.#dx = event.clientX - boundingRect.x;
     this.#dy = event.clientY - boundingRect.y;
     
-    var dataTransfer = event.dataTransfer;
+    const dataTransfer = event.dataTransfer;
     dataTransfer.setData('text', dialog.id);
     dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
     dataTransfer.setDragImage(this.#dragImgEl, 0, 0);
   }
 
   #handleDrag(event){
-    var dialog = this.#dialog;
+    const dialog = this.#dialog;
     if (!dialog){
       event.preventDefault();
       return;
@@ -90,7 +90,7 @@ class DragableDialogs {
   }
   
   #handleDragEnd(event){
-    var dialog = this.#dialog;
+    const dialog = this.#dialog;
     if (!dialog){
       event.preventDefault();
       return;
