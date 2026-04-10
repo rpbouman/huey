@@ -293,7 +293,7 @@ class TupleSet extends DataSetComponent {
     }
 
     lastIndexToFetch += 1;
-    const newCount = (lastIndexToFetch - firstIndexToFetch);
+    let newCount = (lastIndexToFetch - firstIndexToFetch);
     if (newCount < this.#pageSize && (offset + count === lastIndexToFetch) && lastIndexToFetch < this.#tupleCount) {
       newCount = this.#pageSize;
     }
