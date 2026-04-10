@@ -9,8 +9,8 @@ class DataSourcesUi extends EventEmitter {
     super(['change']);
     this.#id = id;
 
-    var dom = this.getDom();
-    var domParent = dom.parentNode;
+    const dom = this.getDom();
+    const domParent = dom.parentNode;
     domParent.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
     domParent.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
     domParent.addEventListener('dragover', this.#dragOverHandler.bind(this));
@@ -18,9 +18,9 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #dragEnterHandler(event) {
-    var valid = true;
+    let valid = true;
 
-    var dataTransfer = event.dataTransfer;
+    const dataTransfer = event.dataTransfer;
     dataTransfer.dropEffect = 'copy';
     return;
 
@@ -28,15 +28,15 @@ class DataSourcesUi extends EventEmitter {
     // instead, when dragging files, we see a list of items of type file, but for some reason we do not see the names of the files.
     // so this is pretty much useless, we cannot figure out in advance if the dragged items could be successfully loaded.
 
-    var files = dataTransfer.files;
+    const files = dataTransfer.files;
     valid = Boolean(files.length);
-    var fileTypes = DuckDbDataSource.fileTypes;
-    for (var i = 0; i < files.length; i++) {
-      var file = files[i];
-      var fileName = file.name;
-      var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
-      var fileExtension = fileNameParts.lowerCaseExtension;
-      var fileType = fileTypes[fileExtension];
+    const fileTypes = DuckDbDataSource.fileTypes;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name;
+      const fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+      const fileExtension = fileNameParts.lowerCaseExtension;
+      const fileType = fileTypes[fileExtension];
       valid = Boolean(fileType);
       if (!valid){
         break;
@@ -56,29 +56,24 @@ class DataSourcesUi extends EventEmitter {
   #dragOverHandler(event) {
     event.stopPropagation();
     event.preventDefault();
-
-    var dataTransfer = event.dataTransfer;
   }
 
   async #dropHandler(event) {
     event.preventDefault();
     event.stopPropagation();
-    var dataTransfer = event.dataTransfer;
-    var files = dataTransfer.files;
-    var items = dataTransfer.items;
-    var uploadResults;
+    const dataTransfer = event.dataTransfer;
+    const files = dataTransfer.files;
+    const items = dataTransfer.items;
+    let uploadResults;
     if (files.length) {
       uploadResults = await uploadUi.uploadFiles(files);
       afterUploaded(uploadResults);
     }
     else
     if (items.length){
-      for (var i = 0 ; i < items.length; i++) {
-        var item = items[i];
-        if (item.kind !== 'string') {
-          continue;
-        }
-        if (item.type !== 'text/uri-list'){
+      for (let i = 0 ; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind !== 'string' || item.type !== 'text/uri-list') {
           continue;
         }
 
@@ -106,11 +101,11 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #getLooseColumnType(columnType){
-    var datasourceSettings = settings.getSettings('datasourceSettings');
-    var looseColumnTypes = datasourceSettings.looseColumnTypes;
-    var comparisonColumnType = undefined;
-    for (var looseType in looseColumnTypes){
-      var columnTypes = looseColumnTypes[looseType];
+    const datasourceSettings = settings.getSettings('datasourceSettings');
+    const looseColumnTypes = datasourceSettings.looseColumnTypes;
+    let comparisonColumnType = undefined;
+    for (let looseType in looseColumnTypes){
+      const columnTypes = looseColumnTypes[looseType];
       if (columnTypes.indexOf(columnType) === -1) {
         continue;
       }
@@ -123,47 +118,45 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async #getTabularDatasourceTypeSignature(datasource){
-    var typeSignature;
-    var type  = datasource.getType();
-    var fileType = datasource.getFileExtension();
-    var columnMetadata = await datasource.getColumnMetadata();
-    var columnMetadataSerialized = {};
-    var datasourceSettings = settings.getSettings('datasourceSettings');
-    var useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
-    var looseColumnTypes = datasourceSettings.looseColumnTypes;
-    for (var i = 0; i < columnMetadata.numRows; i++){
-      var row = columnMetadata.get(i);
-
-      var columnType = row.column_type;
-      var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
+    const columnMetadata = await datasource.getColumnMetadata();
+    const columnMetadataSerialized = {};
+    const datasourceSettings = settings.getSettings('datasourceSettings');
+    const useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
+    for (let i = 0; i < columnMetadata.numRows; i++){
+      const row = columnMetadata.get(i);
+      const columnType = row.column_type;
+      const comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
       columnMetadataSerialized[row.column_name] = comparisonColumnType;
     }
-    var columnMetadataSerializedJSON = JSON.stringify(columnMetadataSerialized);
-    typeSignature = `${type}:${fileType}:${columnMetadataSerializedJSON}`;
+    const type  = datasource.getType();
+    const fileType = datasource.getFileExtension();
+    const columnMetadataSerializedJSON = JSON.stringify(columnMetadataSerialized);
+    const typeSignature = `${type}:${fileType}:${columnMetadataSerializedJSON}`;
     return typeSignature;
   }
 
   async #renderDatasources(){
     this.clear();
-    var node, group, potentialGroups = {};
-    var datasources = this.#datasources;
+    const potentialGroups = {};
+    const datasources = this.#datasources;
 
-    var groupingPromises = Object.keys(datasources).map(async function(datasourceId){
-      var datasource = datasources[datasourceId];
-      var type = datasource.getType();
+    const groupingPromises = Object.keys(datasources).map(async datasourceId => {
+      const datasource = datasources[datasourceId];
+      const datasourceType = datasource.getType();
 
-      var group = undefined;
-      switch (type){
+      let group = undefined;
+      switch (datasourceType){
         case DuckDbDataSource.types.FILE:
-          var typeSignature = await this.#getTabularDatasourceTypeSignature(datasource);
+          const typeSignature = await this.#getTabularDatasourceTypeSignature(datasource);
           group = potentialGroups[typeSignature];
           if (!group) {
-            potentialGroups[typeSignature] = group = {
+            group = {
               type: DuckDbDataSource.types.FILE,
               fileType: datasource.getFileExtension(),
               typeSignature: typeSignature,
               datasources: {}
             };
+            potentialGroups[typeSignature] = group;
           }
           break;
         case DuckDbDataSource.types.TABLE:
@@ -173,18 +166,18 @@ class DataSourcesUi extends EventEmitter {
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.SQLITE:
         default:
-          group = potentialGroups[type];
+          group = potentialGroups[datasourceType];
           if (!group){
-            potentialGroups[type] = group = {
-              type: type,
+            potentialGroups[datasourceType] = group = {
+              type: datasourceType,
               datasources: {}
             };
           }
       }
       group.datasources[datasourceId] = datasource;
       return true;
-    }.bind(this));
-    await Promise.all(groupingPromises);
+    });
+    const results = await Promise.all(groupingPromises);
 
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
     delete potentialGroups[DuckDbDataSource.types.DUCKDB];
@@ -192,15 +185,15 @@ class DataSourcesUi extends EventEmitter {
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
     delete potentialGroups[DuckDbDataSource.types.SQLITE];
 
-    for (var groupId in potentialGroups){
-      var group = potentialGroups[groupId];
-      var datasources = group.datasources;
-      var datasourceKeys = Object.keys(datasources);
+    for (let groupId in potentialGroups){
+      const group = potentialGroups[groupId];
+      const groupDatasources = group.datasources;
+      const datasourceKeys = Object.keys(groupDatasources);
       if (datasourceKeys.length === 1) {
-        var datasourceKey = datasourceKeys[0]
-        var datasource = datasources[datasourceKey];
-        var datasourceType = datasource.getType();
-        var miscGroup = potentialGroups[datasourceType];
+        const datasourceKey = datasourceKeys[0]
+        const datasource = groupDatasources[datasourceKey];
+        const datasourceType = datasource.getType();
+        let miscGroup = potentialGroups[datasourceType];
         if (!miscGroup) {
           miscGroup = potentialGroups[datasourceType] = {
             type: datasourceType,
@@ -223,7 +216,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   static getCaptionForDatasource(datasource){
-    var type = datasource.getType();
+    const type = datasource.getType();
     switch (type){
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
@@ -239,18 +232,20 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #renderDatasourceActionButton(config){
-    var actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
-    actionButton.setAttribute('class', config.className ? (typeof config.className instanceof Array ? config.className.join(' ') : config.className ) : '');
+    const actionButton = instantiateTemplate('dataSourceGroupNodeActionButton');
+    
+    const className = config.className instanceof Array ? config.className.join(' ') : config.className || '';
+    actionButton.setAttribute('class', className);
     actionButton.setAttribute('for', config.id);
     actionButton.setAttribute('title', config.title);
     
-    var button = actionButton.querySelector('button');
+    const button = actionButton.querySelector('button');
     button.setAttribute('id', config.id);
     
-    var events = config.events;
+    const events = config.events;
     if (events) {
-      for (var eventName in events) {
-        var handler = events[eventName];
+      for (let eventName in events) {
+        const handler = events[eventName];
         button.addEventListener(eventName, handler);
       }
     }
@@ -258,7 +253,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement){
-    var actionButton = this.#renderDatasourceActionButton({
+    const actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
@@ -275,7 +270,7 @@ class DataSourcesUi extends EventEmitter {
   }
   
   #createDatasourceNodeRemoveActionButton(datasourceId, summaryElement){
-    var actionButton = this.#renderDatasourceActionButton({
+    const actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_remove',
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
@@ -292,7 +287,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #createDatasourceNodeEditActionButton(datasourceId, summaryElement){
-    var actionButton = this.#renderDatasourceActionButton({
+    const actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_edit',
       "className": "editActionButton",
       popovertarget: 'uploadUi',
@@ -309,7 +304,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #createDatasourceNodeDownloadActionButton(datasourceId, summaryElement){
-    var actionButton = this.#renderDatasourceActionButton({
+    const actionButton = this.#renderDatasourceActionButton({
       id: datasourceId + '_download',
       "className": "downloadActionButton",
       popovertarget: 'uploadUi',
@@ -333,29 +328,27 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async #loadDatabaseDatasource(databaseDatasource){
-    var catalogName = databaseDatasource.getFileNameWithoutExtension();
-    var connection = window.hueyDb.connection;
-    var sql = `
+    const catalogName = databaseDatasource.getFileNameWithoutExtension();
+    const connection = window.hueyDb.connection;
+    const sql = `
       SELECT table_schema, table_name, table_type
       FROM information_schema.tables
       WHERE table_catalog = ?
       AND   table_schema NOT IN ('information_schema', 'pg_catalog')
       ORDER BY table_schema, table_name
     `;
-    var statement = await connection.prepare(sql);
-    var result = await statement.query(catalogName);
+    const statement = await connection.prepare(sql);
+    const result = await statement.query(catalogName);
     statement.close();
 
-    var datasourceId = databaseDatasource.getId();
-    var datasourceTreeNode = byId(datasourceId);
+    const datasourceId = databaseDatasource.getId();
+    const datasourceTreeNode = byId(datasourceId);
 
-    var schemaNodes = {};
-    for (var i = 0; i < result.numRows; i++){
-      var summary, label;
-
-      var row = result.get(i);
-      var schemaName = row.table_schema;
-      var schemaNode = schemaNodes[schemaName];
+    const schemaNodes = {};
+    for (let i = 0; i < result.numRows; i++){
+      const row = result.get(i);
+      const schemaName = row.table_schema;
+      let schemaNode = schemaNodes[schemaName];
       if (schemaNode === undefined) {
         schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
         schemaNode.setAttribute('title', schemaName);
@@ -365,9 +358,9 @@ class DataSourcesUi extends EventEmitter {
         schemaNodes[schemaName] = schemaNode;
         datasourceTreeNode.appendChild(schemaNode);
       }
-      var tableName = row.table_name;
-      var tableType = row.table_type;
-      var datasourcetype;
+      const tableName = row.table_name;
+      const tableType = row.table_type;
+      let datasourcetype;
       switch (tableType){
         case 'BASE TABLE':
           datasourcetype = DuckDbDataSource.types.TABLE;
@@ -377,10 +370,10 @@ class DataSourcesUi extends EventEmitter {
           break;
       }
 
-      var tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
-      var datasource = this.getDatasource(tableDatasourceId);
+      const tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
+      let datasource = this.getDatasource(tableDatasourceId);
       if (!datasource) {
-        var hueyDb = window.hueyDb;
+        const hueyDb = window.hueyDb;
         datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
           type: datasourcetype,
           catalogName: catalogName,
@@ -390,7 +383,7 @@ class DataSourcesUi extends EventEmitter {
         this.#addDatasource(datasource);
       }
 
-      var tableNode = this.#createDatasourceNode(datasource);
+      const tableNode = this.#createDatasourceNode(datasource);
       schemaNode.appendChild(tableNode);
     }
   }
@@ -410,92 +403,79 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #toggleDataSource(event){
-    var target = event.target;
+    const target = event.target;
 
-    var oldState = event.oldState;
-    var newState = event.newState;
-
-    if (oldState !== 'closed' || newState !== 'open' || target.getElementsByTagName('details').length !== 0) {
+    if (event.oldState !== 'closed' || event.newState !== 'open' || target.getElementsByTagName('details').length !== 0) {
       return;
     }
 
-    var datasource = this.#getDatasourceForTreeNode(target);
+    const datasource = this.#getDatasourceForTreeNode(target);
     this.#loadDatasource(datasource);
   }
 
   #createDatasourceNode(datasource, attributes){
-    var caption = DataSourcesUi.getCaptionForDatasource(datasource);
+    const caption = DataSourcesUi.getCaptionForDatasource(datasource);
 
-    var type = datasource.getType();
-    var datasourceId = datasource.getId();
+    const type = datasource.getType();
+    const datasourceId = datasource.getId();
     
-    var datasourceNode = instantiateTemplate('dataSourceNode', datasourceId);
+    const datasourceNode = instantiateTemplate('dataSourceNode', datasourceId);
     datasourceNode.setAttribute('data-datasourcetype', type);
     datasourceNode.setAttribute('title', caption);
     
-    var summary = datasourceNode.querySelector('summary');
-    var label = summary.querySelector('span.label');
+    const summary = datasourceNode.querySelector('summary');
+    const label = summary.querySelector('span.label');
     label.textContent = caption;
     
     if (attributes){
-      for (var attributeName in attributes){
+      for (let attributeName in attributes){
         datasourceNode.setAttribute(attributeName, attributes[attributeName]);
       }
     }
 
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
+        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
       case DuckDbDataSource.types.SQLITE:
         datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this));
-        break;
-      default:
-        // noop.
-    }
-
-    var extension;
-    if (type === DuckDbDataSource.types.FILE) {
-      extension = datasource.getFileExtension();
-      datasourceNode.setAttribute('data-filetype', extension);
-    }
-
-    
-    switch (type) {
-      case DuckDbDataSource.types.DUCKDB:
-        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
         break;
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.VIEW:
         this.#createDatasourceNodeAnalyzeActionButton(datasourceId, summary);
         this.#createDatasourceNodeDownloadActionButton(datasourceId, summary);
         break;
+      case DuckDbDataSource.types.FILE:
+        const extension = datasource.getFileExtension();
+        datasourceNode.setAttribute('data-filetype', extension);
       default:
         this.#createDatasourceNodeActionButtons(datasourceId, summary);
     }
+
     return datasourceNode;
   }
 
   #getTreeNodeFromClickEvent(event){
-    var button = event.target;
-    var label = button.parentNode;
-    var summary = label.parentNode;
-    var node = summary.parentNode;
+    const button = event.target;
+    const label = button.parentNode;
+    const summary = label.parentNode;
+    const node = summary.parentNode;
     return node;
   }
 
   #getDatasourceForTreeNode(datasourceTreeNode) {
-    var dataSourceId = datasourceTreeNode.id;
-    var datasource = this.getDatasource(dataSourceId);
+    const dataSourceId = datasourceTreeNode.id;
+    const datasource = this.getDatasource(dataSourceId);
     return datasource;
   }
 
   #rejectsDetectedHandler(event){
-    var eventData = event.eventData;
-    var datasource = event.currentTarget;
-    var id = datasource.getId();
-    var datasourceNode = document.getElementById(id);
-    var new_reject_balance = eventData.new_reject_balance;
-    var old_reject_balance = eventData.old_reject_balance;
-    var balanceAttribute;
+    let balanceAttribute;
+    const datasource = event.currentTarget;
+    const id = datasource.getId();
+    const datasourceNode = document.getElementById(id);
+    const eventData = event.eventData;
+    const new_reject_balance = eventData.new_reject_balance;
+    const old_reject_balance = eventData.old_reject_balance;
     if (new_reject_balance >= 0){
       balanceAttribute = new_reject_balance;
       datasourceNode.setAttribute('data-reject_count', balanceAttribute);
@@ -504,9 +484,9 @@ class DataSourcesUi extends EventEmitter {
       balanceAttribute = 0;
       datasourceNode.removeAttribute('data-reject_count');
     }
+    //TODO: I18N
     if (new_reject_balance > old_reject_balance){
-      var diff = new_reject_balance - old_reject_balance;
-      var title, description;
+      let title, description;
       if (old_reject_balance === 0n){
         title = 'Errors found in Data file';
         description = [
@@ -516,6 +496,7 @@ class DataSourcesUi extends EventEmitter {
       }
       else {
         title = 'New errors found in Data file';
+        const diff = new_reject_balance - old_reject_balance;
         description = [
           `${diff} new errors were encountered while executing the previous query and skipped from the results.`,
           `The total number of skipped records so far is ${new_reject_balance}.`
@@ -537,35 +518,28 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #getDatasourceFromClickEvent(event){
-    var node = this.#getTreeNodeFromClickEvent(event);
-    var nodeType = node.getAttribute('data-nodetype');
-
-    var hueyDb = window.hueyDb;
-    var duckdb = hueyDb.duckdb;
-    var instance = hueyDb.instance;
-
-    var datasource;
+    let datasource;
+    const node = this.#getTreeNodeFromClickEvent(event);
+    const nodeType = node.getAttribute('data-nodetype');
     switch (nodeType) {
       case 'datasource':
-        var datasource = this.#getDatasourceForTreeNode(node);
+        datasource = this.#getDatasourceForTreeNode(node);
         break;
       case 'datasourcegroup':
-        var groupType = node.getAttribute('data-grouptype');
+        const groupType = node.getAttribute('data-grouptype');
         switch (groupType){
           case DuckDbDataSource.types.FILE:
-            var datasourceIdsListJSON = node.getAttribute('data-datasourceids');
-            var datasourceIdsList = JSON.parse(datasourceIdsListJSON);
-            var fileNames = datasourceIdsList.map(function(datasourceId){
-              var datasource = this.#datasources[datasourceId];
-              var fileName = datasource.getFileName();
-              return fileName;
-            }.bind(this));
-            var fileType = node.getAttribute('data-filetype');
-
+            const datasourceIdsListJSON = node.getAttribute('data-datasourceids');
+            const datasourceIdsList = JSON.parse(datasourceIdsListJSON);
+            const fileNames = datasourceIdsList.map(datasourceId => this.#datasources[datasourceId].getFileName());
+            
+            const hueyDb = window.hueyDb;
+            const duckdb = hueyDb.duckdb;
+            const instance = hueyDb.instance;
             datasource = new DuckDbDataSource(duckdb, instance, {
               type: DuckDbDataSource.types.FILES,
               fileNames: fileNames,
-              fileType: fileType
+              fileType: node.getAttribute('data-filetype')
             });
             this.#attachRejectsDetection(datasource);
             break;
@@ -580,25 +554,25 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #analyzeDatasourceClicked(event){
-    var datasource = this.#getDatasourceFromClickEvent(event);
+    const datasource = this.#getDatasourceFromClickEvent(event);
     // todo: replace direct call to global analyze with fireEvent
     analyzeDatasource(datasource);
   }
 
   #removeDatasourceClicked(event){
-    var node = this.#getTreeNodeFromClickEvent(event);
-    var nodeType = node.getAttribute('data-nodetype');
-    var datasourceIdsList;
+    const node = this.#getTreeNodeFromClickEvent(event);
+    const nodeType = node.getAttribute('data-nodetype');
+    let datasourceIdsList;
     switch (nodeType) {
       case 'datasource':
-        var dataSourceId = node.id;
+        const dataSourceId = node.id;
         datasourceIdsList = [dataSourceId];
         break;
       case 'datasourcegroup':
-        var groupType = node.getAttribute('data-grouptype');
+        const groupType = node.getAttribute('data-grouptype');
         switch (groupType){
           case DuckDbDataSource.types.FILE:
-            var datasourceIdsListJSON = node.getAttribute('data-datasourceids');
+            const datasourceIdsListJSON = node.getAttribute('data-datasourceids');
             datasourceIdsList = JSON.parse(datasourceIdsListJSON);
             break;
           default:
@@ -610,13 +584,13 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #configureDatasourceClicked(event){
-    var datasource = this.#getDatasourceFromClickEvent(event);
+    const datasource = this.#getDatasourceFromClickEvent(event);
     datasourceSettingsDialog.open(datasource);
   }
   
   static #getDownloadMenuHTML(fromFileType, includeFromFileType){
-    var fileTypes = Object.keys(DuckDbDataSource.fileTypes)
-    .filter(function(fileType){
+    const fileTypes = Object.keys(DuckDbDataSource.fileTypes)
+    .filter(fileType => {
       if (Boolean(fromFileType)) { 
         switch (fileType){
           case fromFileType:
@@ -628,8 +602,8 @@ class DataSourcesUi extends EventEmitter {
       }
       return true;
     });
-    var menuItems = fileTypes.sort().map(function(fileType){
-      var id = `fileType-${fileType}`;
+    const menuItems = fileTypes.sort().map(fileType => {
+      const id = `fileType-${fileType}`;
       return `
         <li role="menuitem">
           <input 
@@ -642,7 +616,7 @@ class DataSourcesUi extends EventEmitter {
         </li>
       `;
     });
-    var menu = `
+    const menu = `
       <menu class="fileTypes" id="${DataSourcesUi.#datasourceExportMenuId}">
         ${menuItems.join('\n')}
       </menu>
@@ -651,8 +625,8 @@ class DataSourcesUi extends EventEmitter {
   }
   
   static async #promptExportDataFormat(fromFileType, includeFromFileType){
-    var menu = DataSourcesUi.#getDownloadMenuHTML(fromFileType, includeFromFileType);
-    var result = await PromptUi.show({
+    const menu = DataSourcesUi.#getDownloadMenuHTML(fromFileType, includeFromFileType);
+    const result = await PromptUi.show({
       title: 'Export Datasource',
       contents: menu
     });
@@ -660,23 +634,23 @@ class DataSourcesUi extends EventEmitter {
     if (result !== 'accept'){
       return undefined;
     }
-    var selectedItemCss = `menu#${DataSourcesUi.#datasourceExportMenuId} > li > input[type=radio]:checked`;
-    var selected = document.querySelector(selectedItemCss);
+    const selectedItemCss = `menu#${DataSourcesUi.#datasourceExportMenuId} > li > input[type=radio]:checked`;
+    const selected = document.querySelector(selectedItemCss);
     if (!selected) {
       return undefined;
     }
-    var fileType = selected.value;
+    const fileType = selected.value;
     return fileType;
   }
   
   static #getDatasourceExportSettings(targetFileType){
-    var fileTypeInfo = DuckDbDataSource.getFileTypeInfo(targetFileType);
-    var exportType = null;
-    var exportDelimited = false;
-    var exportJson = false;
-    var exportParquet = false;
-    var exportXlsx = false;
+    let exportType = null;
+    let exportDelimited = false;
+    let exportJson = false;
+    let exportParquet = false;
+    let exportXlsx = false;
     
+    const fileTypeInfo = DuckDbDataSource.getFileTypeInfo(targetFileType);
     switch (fileTypeInfo.duckdb_reader){
       case 'read_csv':
         exportType = 'exportDelimited';
@@ -709,13 +683,13 @@ class DataSourcesUi extends EventEmitter {
   }
   
   async #downloadDatasourceClicked(event) {
-    var button = event.target;
+    const button = event.target;
     if (button.getAttribute('aria-busy') === 'true'){
       return;
     }
     
-    var datasource = this.#getDatasourceFromClickEvent(event);
-    var datasourceFileType, includeFromFileType = false;
+    const datasource = this.#getDatasourceFromClickEvent(event);
+    let datasourceFileType, includeFromFileType = false;
     switch (datasource.getType()){
       case DuckDbDataSource.types.FILES:
         includeFromFileType = true;
@@ -723,17 +697,17 @@ class DataSourcesUi extends EventEmitter {
         datasourceFileType = datasource.getFileType();
     }
 
-    var targetFileType = await DataSourcesUi.#promptExportDataFormat(datasourceFileType, includeFromFileType);
+    const targetFileType = await DataSourcesUi.#promptExportDataFormat(datasourceFileType, includeFromFileType);
     if (!targetFileType) {
       return;
     }
     button.setAttribute('aria-busy', 'true');
     
-    var exportSettings = DataSourcesUi.#getDatasourceExportSettings(targetFileType);
-    var exportTitle = DataSourcesUi.getCaptionForDatasource(datasource);
+    const exportSettings = DataSourcesUi.#getDatasourceExportSettings(targetFileType);
+    const exportTitle = DataSourcesUi.getCaptionForDatasource(datasource);
     exportSettings.exportTitle = exportTitle;
     
-    var sql = `SELECT * ${datasource.getFromClauseSql()}`;
+    const sql = `SELECT * ${datasource.getFromClauseSql()}`;
     await ExportUi.exportData(datasource, sql, exportSettings);
     button.setAttribute('aria-busy', 'false');
   }
@@ -745,12 +719,12 @@ class DataSourcesUi extends EventEmitter {
       case DuckDbDataSource.types.SQLITE:
         return 'SQLite';
       case DuckDbDataSource.types.FILE:
-        var datasources = datasourceGroup.datasources;
+        const datasources = datasourceGroup.datasources;
         if (miscGroup) {
           return Internationalization.getText('Files');
         }
-        return Object.keys(datasources).map(function(datasourceId){
-          var datasource = datasources[datasourceId];
+        return Object.keys(datasources).map(datasourceId => {
+          const datasource = datasources[datasourceId];
           return datasource.getFileNameWithoutExtension();
         }).join(', ');
     }
@@ -760,11 +734,11 @@ class DataSourcesUi extends EventEmitter {
     if (datasourceGroup === undefined){
       return;
     }
-    var groupNode = instantiateTemplate('dataSourceGroupNode');
-    var groupType = datasourceGroup.type;
+    const groupNode = instantiateTemplate('dataSourceGroupNode');
+    const groupType = datasourceGroup.type;
     groupNode.setAttribute('data-grouptype', groupType)
 
-    var groupTitle;
+    let groupTitle;
     switch (groupType) {
       case DuckDbDataSource.types.FILE:
         if (miscGroup === true) {
@@ -783,10 +757,10 @@ class DataSourcesUi extends EventEmitter {
     }
     Internationalization.setAttributes(groupNode, 'title', groupTitle)
 
-    var summary = groupNode.querySelector('summary');
-    var label = summary.querySelector('span.label');
+    const summary = groupNode.querySelector('summary');
+    const label = summary.querySelector('span.label');
     // TODO: some group titels are translateable, some aren't
-    var caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
+    const caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
     label.textContent = caption;
 
     if (datasourceGroup.typeSignature) {
@@ -796,28 +770,27 @@ class DataSourcesUi extends EventEmitter {
       );
     }
 
-    var datasources = datasourceGroup.datasources;
-    datasources = DataSourcesUi.sortDatasources(datasources);
-    var datasourceKeys = Object.keys(datasources);
+    const datasources = DataSourcesUi.sortDatasources( datasourceGroup.datasources );
+    const datasourceKeys = Object.keys(datasources);
     groupNode.setAttribute('data-datasourceids', JSON.stringify(datasourceKeys));
 
-    datasourceKeys.forEach(function(datasourceId){
-      var datasource = datasources[datasourceId];
-      var datasourceNode = this.#createDatasourceNode(datasource);
+    datasourceKeys.forEach(datasourceId => {
+      const datasource = datasources[datasourceId];
+      const datasourceNode = this.#createDatasourceNode(datasource);
       groupNode.appendChild(datasourceNode);
-    }.bind(this));
+    });
 
-    var dom = this.getDom();
+    const dom = this.getDom();
     dom.appendChild(groupNode);
     return groupNode;
   }
   
   static sortDatasources(datasources){
-    var datasourceKeys = Object.keys(datasources);
+    const datasourceKeys = Object.keys(datasources);
     datasourceKeys
-    .sort(function(a, b){
-      var datasourceA = DataSourcesUi.getCaptionForDatasource( datasources[a] );
-      var datasourceB = DataSourcesUi.getCaptionForDatasource( datasources[b] );
+    .sort((a, b) => {
+      const datasourceA = DataSourcesUi.getCaptionForDatasource( datasources[a] );
+      const datasourceB = DataSourcesUi.getCaptionForDatasource( datasources[b] );
       if (datasourceA > datasourceB) {
         return 1;
       }
@@ -827,15 +800,15 @@ class DataSourcesUi extends EventEmitter {
       }
       return 0;
     });
-    return datasourceKeys.reduce(function(sortedDatasources, datasourceKey){
+    return datasourceKeys.reduce((sortedDatasources, datasourceKey) => {
       sortedDatasources[datasourceKey] = datasources[datasourceKey];
       return sortedDatasources;
     }, {});
   }
 
   #addDatasource(datasource) {
-    var id = datasource.getId();
     this.#attachRejectsDetection(datasource);
+    const id = datasource.getId();
     this.#datasources[id] = datasource;
   }
 
@@ -851,9 +824,9 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async destroyDatasources(datasourceIds) {
-    for (var i = 0; i < datasourceIds.length; i++){
-      var datasourceId = datasourceIds[i];
-      var datasource = this.getDatasource(datasourceId);
+    for (let i = 0; i < datasourceIds.length; i++){
+      const datasourceId = datasourceIds[i];
+      const datasource = this.getDatasource(datasourceId);
       if (!datasource) {
         continue;
       }
@@ -872,12 +845,15 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType){
-    var columnNames = Object.keys(columnsSpec || {});
+    if (!columnsSpec) {
+      return;
+    }
+    const columnNames = Object.keys(columnsSpec);
     if (columnNames.length === 0){
       return true;
     }
 
-    var columnName, columnSpec, columnType, searchColumnsSpec;
+    let columnName, columnSpec, columnType, searchColumnsSpec;
     if (useLooseColumnComparisonType) {
       searchColumnsSpec = {};
       for (columnName in columnsSpec) {
@@ -892,13 +868,13 @@ class DataSourcesUi extends EventEmitter {
       searchColumnsSpec = columnsSpec;
     }
 
-    var datasources = this.#datasources;
-    var datasource = datasources[datasourceId];
+    const datasources = this.#datasources;
+    const datasource = datasources[datasourceId];
     if (!datasource){
       return false;
     }
 
-    var columnMetadata;
+    let columnMetadata;
     var datasourceType = datasource.getType();
     switch (datasourceType) {
       case DuckDbDataSource.types.FILE:
@@ -915,9 +891,9 @@ class DataSourcesUi extends EventEmitter {
       return false;
     }
 
-    _columns: for (var i = 0; i < columnMetadata.numRows; i++){
-      var row = columnMetadata.get(i);
-      var columnName = row.column_name;
+    _columns: for (let i = 0; i < columnMetadata.numRows; i++){
+      const row = columnMetadata.get(i);
+      const columnName = row.column_name;
       columnSpec = searchColumnsSpec[columnName];
       if (!columnSpec) {
         continue _columns;
@@ -937,12 +913,12 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType){
-    var foundDatasources = {};
+    let foundDatasources = {};
 
-    var datasources = this.#datasources;
-    _datasources: for (var datasourceId in datasources){
-      var datasource = datasources[datasourceId];
-      var isCompatible = await this.isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType);
+    const datasources = this.#datasources;
+    _datasources: for (let datasourceId in datasources){
+      const datasource = datasources[datasourceId];
+      const isCompatible = await this.isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType);
       if (isCompatible === true){
         foundDatasources[datasourceId] = datasource;
       }
