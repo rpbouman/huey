@@ -64,10 +64,10 @@ class FilterDialog {
   }
   
   static getLabelForFilterType(filterType){
-    var selectElement = byId('filterType');
-    var options = selectElement.options;
-    for (var i = 0; i < options.length; i++){
-      var option = options.item(i);
+    const selectElement = byId('filterType');
+    const options = selectElement.options;
+    for (let i = 0; i < options.length; i++){
+      const option = options.item(i);
       if (option.value === filterType){
         return option.textContent;
       }
@@ -90,20 +90,20 @@ class FilterDialog {
   }
 
   #getValuePicklistPageSize(){
-    var settings = this.#settings;
+    const settings = this.#settings;
     if (!settings){
       return this.#defaultValuePicklistPageSize
     }
-    var valuePicklistPageSize = settings.getSettings(['querySettings', 'filterValuePicklistPageSize']);
+    const valuePicklistPageSize = settings.getSettings(['querySettings', 'filterValuePicklistPageSize']);
     return valuePicklistPageSize;
   }
 
   #getSearchAutoQueryTimeout(){
-    var settings = this.#settings;
+    const settings = this.#settings;
     if (!settings){
       return this.#defaultSearchAutoQueryTimeout;
     }
-    var searchAutoQueryTimeout = settings.getSettings(['querySettings', 'filterSearchAutoQueryTimeoutInMilliseconds']);
+    const searchAutoQueryTimeout = settings.getSettings(['querySettings', 'filterSearchAutoQueryTimeoutInMilliseconds']);
     return searchAutoQueryTimeout;
   }
 
@@ -114,128 +114,87 @@ class FilterDialog {
     this.#initEvents();
   }
 
-  #initEvents(){
-    var filterDialog = this.getDom();
-
-    // Ok button confirms the filter settings and stores them in the model
-    this.#getOkButton().addEventListener('click', function(event){
-      var dialogState = this.#getDialogState();
-      this.#queryModel.setQueryAxisItemFilter(this.#queryAxisItem, dialogState);
-      filterDialog.close();
-    }.bind(this));
-
-    this.#getRemoveFilterButton().addEventListener('click', function(event){
-      this.#queryModel.removeItem(this.#queryAxisItem);
-      filterDialog.close();
-    }.bind(this));
-
-    this.#getCancelButton().addEventListener('click', function(event){
-      filterDialog.close();
-    }.bind(this));
-
-    // Clear button clears the values lists
-    this.#getClearButton().addEventListener('click', function(event){
-      this.clearFilterValueLists();
-
-      this.#updateValueSelectionStatusText();
-    }.bind(this));
-
-    // clear selected button clears the selected values from the value lists
-    this.#getClearSelectedButton().addEventListener('click', this.#clearHighlightedValues.bind(this));
-
-    // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
-    this.#getValuePicklist().addEventListener('change', this.#handleValuePicklistChange.bind(this));
-
-    this.#initFilterValuesList();
-    this.#initToFilterValuesList();
-
-    this.#getFilterType().addEventListener('change', function(event){
-      var filterType = event.target;
-      var width, element;
-      var filterValuesList = this.#getFilterValuesList();
-      var isArrayFilterType;
-      if (FilterDialog.isRangeFilterType(filterType.value)){
-        isArrayFilterType = false;
-        if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
-          this.clearFilterValueLists();
-        }
-        width = '50%';
-        element = filterValuesList.parentNode;
-      }
-      else {
-        isArrayFilterType = FilterDialog.isArrayFilterType(filterType.value);
-        element = filterValuesList;
-        width = '';
-      }
-      element.style.width = width;
-
-      // reset the width again so the resizer can manage the width.
-      element.style.width = '';
-      this.#getValuePicklist().selectedIndex = -1;
-      this.#updateValueSelectionStatusText();
-      
-      if (isArrayFilterType !== this.#previousFilterTypeIsArrayFilterType) {
-        this.#updatePicklist();
-      }
-      this.#previousFilterTypeIsArrayFilterType = isArrayFilterType;
-    }.bind(this));
-
-    var includeAllFiltersCheckbox = this.#getIncludeAllFilters();
-    includeAllFiltersCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
-    includeAllFiltersCheckbox.addEventListener('change', function(event){
-      // TODO: check to see if there are any other filter items,
-      // and also if they have any filter condition set.
-      // If we can avoid a query, then return, if not, repopulate the list.
-      var target = event.target;
-      settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
-
-      this.#updatePicklist();
-    }.bind(this));
-
-    var autoWildcardsCheckbox = this.#getAutoWildChards();
-    autoWildcardsCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchAutoWildcards']);
-    autoWildcardsCheckbox.addEventListener('change', function(event){
-      var target = event.target;
-      settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
-
-      this.#updatePicklist();
-    }.bind(this));
-
-    var caseSensitive = this.#getCaseSensitive();
-    caseSensitive.addEventListener('change', function(event){
-      var target = event.target;
-      settings.assignSettings(['filterDialogSettings', 'filterSearchCaseSensitive'], target.checked);
-
-      this.#updatePicklist();
-    }.bind(this));
-
-    this.#initSearchQueryHandler();
-    this.#initAddFilterValueButton();
+  #handleOkButtonClick( event ) {
+    const dialogState = this.#getDialogState();
+    this.#queryModel.setQueryAxisItemFilter(this.#queryAxisItem, dialogState);
+    const filterDialog = this.getDom();
+    filterDialog.close();
   }
 
-  #clearHighlightedValues(){
-    this.#removeSelectedValues();
+  #handleCancelButtonClick( event ) {
+    const filterDialog = this.getDom();
+    filterDialog.close();
+  }
+  
+  #handleClearButtonClick( event ){
+    this.clearFilterValueLists();
     this.#updateValueSelectionStatusText();
   }
 
-  #initFilterValuesList(){
-    var filterValuesList = this.#getFilterValuesList();
-    filterValuesList.addEventListener('change', this.#handleFilterValuesListChange.bind(this));
-    filterValuesList.addEventListener('keydown', this.#handleFilterValuesListKeyDown.bind(this));
+  #handleRemoveFilterButtonClick( event ){
+    this.#queryModel.removeItem(this.#queryAxisItem);
+    const filterDialog = this.getDom();
+    filterDialog.close();
   }
 
-  #initToFilterValuesList(){
-    var toFilterValuesList = this.#getToFilterValuesList();
+  #handleFilterTypeChange( event ){
+    const filterType = event.target;
+    let width, element;
+    const filterValuesList = this.#getFilterValuesList();
+    let isArrayFilterType;
+    if (FilterDialog.isRangeFilterType(filterType.value)){
+      isArrayFilterType = false;
+      if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
+        this.clearFilterValueLists();
+      }
+      width = '50%';
+      element = filterValuesList.parentNode;
+    }
+    else {
+      isArrayFilterType = FilterDialog.isArrayFilterType(filterType.value);
+      element = filterValuesList;
+      width = '';
+    }
+    element.style.width = width;
 
-    toFilterValuesList.addEventListener('change', this.#handleToFilterValuesListChange.bind(this));
-    toFilterValuesList.addEventListener('keydown', this.#handleFilterValuesListKeyDown.bind(this));
+    // reset the width again so the resizer can manage the width.
+    element.style.width = '';
+    this.#getValuePicklist().selectedIndex = -1;
+    this.#updateValueSelectionStatusText();
+    
+    if (isArrayFilterType !== this.#previousFilterTypeIsArrayFilterType) {
+      this.#updatePicklist();
+    }
+    this.#previousFilterTypeIsArrayFilterType = isArrayFilterType;
+  }
+  
+  #handleIncludeAllFiltersCheckboxChange( event ) {
+    // TODO: check to see if there are any other filter items,
+    // and also if they have any filter condition set.
+    // If we can avoid a query, then return, if not, repopulate the list.
+    const target = event.target;
+    settings.assignSettings(['filterDialogSettings', 'filterSearchApplyAll'], target.checked);
 
+    this.#updatePicklist();
+  }
+  
+  #handleAutoWildcardsCheckboxChange( event ) {
+    const target = event.target;
+    settings.assignSettings(['filterDialogSettings', 'filterSearchAutoWildcards'], target.checked);
+    this.#updatePicklist();
+  }
+  
+  #handleCaseSensitiveChange( event ){
+    const target = event.target;
+    settings.assignSettings(['filterDialogSettings', 'filterSearchCaseSensitive'], target.checked);
+    this.#updatePicklist();
+  }
+
+  #handleToValuesListScroll(event){
     // When the filterType is set to a range type (BETWEEN/NOTBETWEEN), the two value lists share a scrollbar.
     // this handler ensures the scrolbar moves both lists.
-    toFilterValuesList.addEventListener('scroll', function(event){
-      var target = event.target;
-      this.#getFilterValuesList().scrollTop = target.scrollTop;
-    }.bind(this));
+    const target = event.target;
+    this.#getFilterValuesList().scrollTop = target.scrollTop;
   }
 
   #handleFilterValuesListKeyDown(event){
@@ -245,61 +204,99 @@ class FilterDialog {
     this.#clearHighlightedValues();
   }
 
-  #initSearchQueryHandler(){
-    var search = this.#getSearch();
-    search.addEventListener('keydown', function(event){
-      if (event.key === 'Enter'){
-        this.#addValueToFilterValues(event);
-        event.target.value = '';
-      }
-    }.bind(this));
-
-    search.addEventListener('paste', function(event){
-      event.preventDefault();
-      var pastedText = getPastedText(event);
-      pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
-      pastedText = pastedText
-      .split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
-      .reduce(function(arr, value){
-        if (arr.indexOf(value) === -1){
+  #handleSearchKeyDown(event){
+    if (event.key !== 'Enter'){
+      return;
+    }
+    this.#addValueToFilterValues(event);
+    event.target.value = '';
+  }
+  
+  #handleSearchPaste( event ) {
+    event.preventDefault();
+    let pastedText = getPastedText(event);
+    pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
+    pastedText = pastedText
+      .split( FilterDialog.MULTIPLE_VALUES_SEPARATOR )
+      .reduce( (arr, value) => {
+        if (!arr.includes( value )){
           arr.push(value);
         }
         return arr;
       }, [])
-      .join(FilterDialog.MULTIPLE_VALUES_SEPARATOR);
-      var currentValue = search.value;
-      var newValue = [
-        currentValue.slice(0, search.selectionStart),
-        pastedText,
-        currentValue.slice(search.selectionEnd)
-      ].join('');
-      search.value = newValue;
+      .join( FilterDialog.MULTIPLE_VALUES_SEPARATOR );
+    const currentValue = search.value;
+    const newValue = [
+      currentValue.slice(0, search.selectionStart),
+      pastedText,
+      currentValue.slice(search.selectionEnd)
+    ].join('');
+    search.value = newValue;
+    this.#updatePicklist();
+  }
+
+  #resetValueListsSelection(event){
+    if (event.target.selectedOptions.length){
+      this.#getValuePicklist().selectedIndex = -1;
+      this.#getToFilterValuesList().selectedIndex = -1;
+    }
+  }
+
+  #initEvents(){
+    const filterDialog = this.getDom();
+
+    // Ok button confirms the filter settings and stores them in the model
+    this.#getOkButton().addEventListener('click', event => this.#handleOkButtonClick( event ) );
+    this.#getRemoveFilterButton().addEventListener('click', event => this.#handleRemoveFilterButtonClick( event ) );
+    this.#getCancelButton().addEventListener('click', event => this.#handleCancelButtonClick( event ) );
+    // Clear button clears the values lists
+    this.#getClearButton().addEventListener('click', event => this.#handleClearButtonClick( event ) );
+    // clear selected button clears the selected values from the value lists
+    this.#getClearSelectedButton().addEventListener('click', event => this.#clearHighlightedValues( event ) );
+    // Selecting values in the picklist adds them to the value lists (behavior depends on the filter type)
+    this.#getValuePicklist().addEventListener('change', event => this.#handleValuePicklistChange( event ) );
+
+    const filterValuesList = this.#getFilterValuesList();
+    filterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
+    filterValuesList.addEventListener('keydown', event => this.#handleFilterValuesListKeyDown( event ) );
+
+    const toFilterValuesList = this.#getToFilterValuesList();
+    toFilterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
+    toFilterValuesList.addEventListener('keydown', event => this.#handleFilterValuesListKeyDown( event ) );
+    toFilterValuesList.addEventListener('scroll', event => this.#handleToValuesListScroll( event ) );
+
+    this.#getFilterType().addEventListener('change', event => this.#handleFilterTypeChange( event ) );
+
+    const includeAllFiltersCheckbox = this.#getIncludeAllFilters();
+    includeAllFiltersCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
+    includeAllFiltersCheckbox.addEventListener('change', event => this.#handleIncludeAllFiltersCheckboxChange( event ) );
+
+    const autoWildcardsCheckbox = this.#getAutoWildChards();
+    autoWildcardsCheckbox.checked = settings.getSettings(['filterDialogSettings', 'filterSearchAutoWildcards']);
+    autoWildcardsCheckbox.addEventListener('change', event => this.#handleAutoWildcardsCheckboxChange(event) );
+
+    this.#getCaseSensitive().addEventListener('change', event => this.#handleCaseSensitiveChange( event ) );
+
+    const search = this.#getSearch();
+    search.addEventListener('keydown', event => this.#handleSearchKeyDown( event ) );
+    search.addEventListener('paste', event => this.#handleSearchPaste( event ) );
+    bufferEvents(search, 'input', (event, count) => {
+      if (count !== undefined) {
+        return;
+      }
       this.#updatePicklist();
-    }.bind(this));
-
-    bufferEvents(
-      search,
-      'input',
-      function(event, count){
-        if (count === undefined) {
-          this.#updatePicklist();
-        }
-      },
-      this,
-      this.#getSearchAutoQueryTimeout.bind(this)
-    )
+    }, this, this.#getSearchAutoQueryTimeout.bind(this));
+    
+    this.#getAddFilterValueButton().addEventListener('click', event => this.#addValueToFilterValues( event ) );
   }
 
-
-  #initAddFilterValueButton(){
-    var addFilterValueButton = this.#getAddFilterValueButton();
-    addFilterValueButton.addEventListener('click', function(event){
-      this.#addValueToFilterValues(event);
-    }.bind(this));
-  }
+  #clearHighlightedValues(){
+    this.#removeSelectedValues();
+    this.#updateValueSelectionStatusText();
+  }  
 
   static #addWildcards(searchString){
-    var wildcard = '%';
+    const wildcard = '%';
     if (!searchString.startsWith('%')) {
       searchString = wildcard + searchString;
     }
@@ -311,35 +308,34 @@ class FilterDialog {
 
   #addValueToFilterValues(){
     // grab the value from the search input
-    var search = this.#getSearch();
-    var searchString = search.value;
-    searchString = searchString.trim();
-    // if there is no value (or empty string), do nothing
-    // (might have to revisit empty string behavior)
+    const search = this.#getSearch();
+    const searchString = search.value.trim();
     if (!searchString.length){
+      // if there is no value (or empty string), do nothing
+      // (might have to revisit empty string behavior)
       return;
     }
 
-    var searchStrings = FilterDialog.#splitSearchString(searchString);
+    const searchStrings = FilterDialog.#splitSearchString(searchString);
     if (!searchStrings.length){
       return;
     }
 
     // check the filter type (opearator)
-    var filterType = this.#getFilterType().value;
-    var isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
-    var isPatternFilterType = FilterDialog.isSimplePatternFilterType(filterType);
+    const filterType = this.#getFilterType().value;
+    const isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
+    const isPatternFilterType = FilterDialog.isSimplePatternFilterType(filterType);
 
-    var toFilterValuesList = this.#getToFilterValuesList();
-    var filterValuesList = this.#getFilterValuesList();
-    var autoWildcards = this.#getAutoWildChards().checked;
-    var literalWriter = this.#queryAxisItem.literalWriter;
-    var parser = this.#queryAxisItem.parser;
-    searchStrings.forEach(function(searchString){
+    const toFilterValuesList = this.#getToFilterValuesList();
+    const filterValuesList = this.#getFilterValuesList();
+    const autoWildcards = this.#getAutoWildChards().checked;
+    const literalWriter = this.#queryAxisItem.literalWriter;
+    const parser = this.#queryAxisItem.parser;
+    searchStrings.forEach( searchString => {
       if (isPatternFilterType && autoWildcards) {
         searchString = FilterDialog.#addWildcards(searchString);
       }
-      var label = searchString ;
+      const label = searchString ;
       if (parser) {
         try {
           searchString = parser(searchString);
@@ -349,10 +345,9 @@ class FilterDialog {
           return;
         }
       }
-      var literal = literalWriter ? literalWriter(searchString) : searchString;
+      const literal = literalWriter ? literalWriter(searchString) : searchString;
 
-      var options, option;
-
+      let options, option;
       if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
         option = toFilterValuesList.options[toFilterValuesList.selectedIndex];
         option.value = searchString;
@@ -363,9 +358,9 @@ class FilterDialog {
       }
 
       options = filterValuesList.options;
-      var sameValueOptions = [];
-      var valueAdded = false;
-      for (var i = 0; i < options.length; i++){
+      const sameValueOptions = [];
+      let valueAdded = false;
+      for (let i = 0; i < options.length; i++){
         option = options[i];
         if (option.selected) {
           option.value = searchString;
@@ -379,22 +374,15 @@ class FilterDialog {
         }
       }
 
-      if(valueAdded === true){
-        if (sameValueOptions.length) {
-          for (var i = 0; i < sameValueOptions.length; i++){
-            option = sameValueOptions[i];
-            option.parentNode.removeChild(option);
-          }
-        }
-      }
-      else
       if (sameValueOptions.length) {
-        for (var i = 1; i < sameValueOptions.length; i++){
+        const startIndex = valueAdded ? 0 : 1;
+        for (let i = startIndex; i < sameValueOptions.length; i++){
           option = sameValueOptions[i];
           option.parentNode.removeChild(option);
         }
       }
-      else {
+      else
+      if (!valueAdded){
         option = this.#createOptionElementFromValues({
           value: searchString,
           label: label,
@@ -407,32 +395,19 @@ class FilterDialog {
             label: label,
             literal: literal
           });
-          var selectedIndex = toFilterValuesList.options.length;
+          const selectedIndex = toFilterValuesList.options.length;
           toFilterValuesList.appendChild(option);
           toFilterValuesList.selectedIndex = selectedIndex;
         }
       }
-    }.bind(this));
+    });
     search.value = '';
     search.focus();
     this.#updatePicklist();
   }
 
-  #handleFilterValuesListChange(event){
-    if (event.target.selectedOptions.length){
-      this.#getValuePicklist().selectedIndex = -1;
-      this.#getToFilterValuesList().selectedIndex = -1;
-    }
-  }
-  #handleToFilterValuesListChange(){
-    if (event.target.selectedOptions.length){
-      this.#getValuePicklist().selectedIndex = -1;
-      this.#getFilterValuesList().selectedIndex = -1;
-    }
-  }
-
   #getNullsSortOrder(){
-    var nullsSortOrder = this.#settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
+    let nullsSortOrder = this.#settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
     if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
       console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
       nullsSortOrder = 'FIRST';
@@ -441,27 +416,27 @@ class FilterDialog {
   }
 
   #sortValueListKeys(valuesList) {
-    var dataTypeInfo;
-    var dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
+    let dataTypeInfo;
+    const dataType = QueryAxisItem.getQueryAxisItemDataType(this.#queryAxisItem);
     if (dataType){
       dataTypeInfo = getDataTypeInfo(dataType);
     }
-    var nullsSortOrder = this.#getNullsSortOrder();
-    var sortNull = ({
+    const nullsSortOrder = this.#getNullsSortOrder();
+    const sortNull = ({
       'FIRST': -1,
       'LAST': 1
     })[nullsSortOrder];
 
-    var keys = Object.keys(valuesList);
-    var thisColumnType = this.#queryAxisItem.columnType;
-    keys.sort(function(key1, key2){
-      var valueObject1 = valuesList[key1];
-      var literal1 = valueObject1.literal;
-      var valueObject2 = valuesList[key2];
-      var literal2 = valueObject2.literal;
+    const keys = Object.keys(valuesList);
+    const thisColumnType = this.#queryAxisItem.columnType;
+    keys.sort((key1, key2) => {
+      const valueObject1 = valuesList[key1];
+      let literal1 = valueObject1.literal;
+      const valueObject2 = valuesList[key2];
+      let literal2 = valueObject2.literal;
 
       if (literal1 === 'NULL' || literal1.startsWith('NULL::')) {
-        return literal2.startsWith('NULL::') ? 0 : sortNull
+        return literal2.startsWith('NULL::') ? 0 : sortNull;
       }
       else
       if (literal2 === 'NULL' || literal2.startsWith('NULL::')){
@@ -492,15 +467,14 @@ class FilterDialog {
       if ( literal1 < literal2) {
         return -1;
       }
-      
       return 0;
     });
     return keys;
   }
 
   #sortValueLists(valuesList, toValuesList){
-    var sortedList = {}, sortedToList = toValuesList ? {} : undefined;
-    var keys = this.#sortValueListKeys(valuesList);
+    const sortedList = {}, sortedToList = toValuesList ? {} : undefined;
+    const keys = this.#sortValueListKeys(valuesList);
     keys.forEach(function(key){
       sortedList[key] = valuesList[key];
       if (!toValuesList) {
@@ -508,7 +482,6 @@ class FilterDialog {
       }
       sortedToList[key] = toValuesList[key];
     });
-
     return {
       valuesList: sortedList,
       toValuesList: sortedToList
@@ -516,7 +489,7 @@ class FilterDialog {
   }
 
   #extractValueFromOption(option){
-    var valueObject = {
+    const valueObject = {
       value: option.value,
       label: option.label,
       literal: option.getAttribute('data-sql-literal')
@@ -528,17 +501,17 @@ class FilterDialog {
   }
 
   #extractValuesFromOptions(options){
-    var optionObjects = {};
-    for (var i = 0; i < options.length; i++){
-      var option = options[i];
-      var valueObject = this.#extractValueFromOption(option);
+    const optionObjects = {};
+    for (let i = 0; i < options.length; i++){
+      const option = options[i];
+      const valueObject = this.#extractValueFromOption(option);
       optionObjects[option.value] = valueObject;
     }
     return optionObjects;
   }
 
   #createOptionElementFromValues(valueObject){
-    var optionElement = createEl('option', {
+    const optionElement = createEl('option', {
       value: valueObject.value,
       label: valueObject.label,
       "data-sql-literal": valueObject.literal
@@ -550,8 +523,8 @@ class FilterDialog {
   }
 
   #extractOptionsFromSelectList(selectList, selected){
-    var options = selectList[ selected === true ? 'selectedOptions' : 'options'];
-    var values = this.#extractValuesFromOptions(options);
+    const options = selectList[ selected === true ? 'selectedOptions' : 'options'];
+    const values = this.#extractValuesFromOptions(options);
     return values;
   }
 
@@ -559,18 +532,17 @@ class FilterDialog {
     if (options === undefined) {
       return;
     }
-    var keys = this.#sortValueListKeys(options);
-
-    for (var i = 0; i < keys.length; i++){
-      var key = keys[i];
-      var valueObject = options[key];
-      var optionElement = this.#createOptionElementFromValues(valueObject);
+    const keys = this.#sortValueListKeys(options);
+    for (let i = 0; i < keys.length; i++){
+      const key = keys[i];
+      const valueObject = options[key];
+      const optionElement = this.#createOptionElementFromValues(valueObject);
       selectList.appendChild(optionElement);
     }
   }
   
   #compareValues(value1, value2){
-    var parser = this.#queryAxisItem.parser;
+    const parser = this.#queryAxisItem.parser;
     if (parser) {
       value1 = parser(value1);
       value2 = parser(value2);
@@ -587,86 +559,94 @@ class FilterDialog {
   }
 
   #handleValuePicklistChange(event){
-    var isSqlNull;
-    var valueSelectionStatusText = undefined;
-    var selectControl = event.target;
-    var options = selectControl.options;
-    var selectedOptions = selectControl.selectedOptions;
+    let isSqlNull;
+    let valueSelectionStatusText = undefined;
+    const selectControl = event.target;
+    const options = selectControl.options;
+    const selectedOptions = selectControl.selectedOptions;
 
     // first, check if this is a special "loader" option
-    var selectedOption;
+    let selectedOption;
     if (selectedOptions.length === 1) {
-      var selectedOption = selectedOptions[0];
+      selectedOption = selectedOptions[0];
       if (selectedOption.getAttribute('data-next-page-loader') === 'true') {
         // it is a loader option, so load more values and exit.
-        var offset = parseInt(selectedOption.getAttribute('data-offset'), 10);
-        var limit = parseInt(selectedOption.getAttribute('data-limit'), 10);
+        const offset = parseInt(selectedOption.getAttribute('data-offset'), 10);
+        const limit = parseInt(selectedOption.getAttribute('data-limit'), 10);
         this.#updatePicklist(offset, limit);
         return;
       }
     }
 
-    var filterType = this.#getFilterType().value;
-    var isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
+    const filterType = this.#getFilterType().value;
+    const isRangeFilterType = FilterDialog.isRangeFilterType(filterType);
 
-    var filterValuesList = this.#getFilterValuesList();
-    var filterValuesListOptions = filterValuesList.options;
-    var currentValues = this.#extractOptionsFromSelectList(filterValuesList);
+    const filterValuesList = this.#getFilterValuesList();
+    const currentValues = this.#extractOptionsFromSelectList(filterValuesList);
 
-    var toFilterValuesList, currentToValues;
-
+    let toFilterValuesList, currentToValues;
     // these are used to set a selection in either the values list or the values to list.
-    var restoreSelectionInValueList, restoreSelectionValue;
+    let restoreSelectionInValueList, restoreSelectionValue;
 
     // get the current selection and create new options out of it.
     if (isRangeFilterType) {
       toFilterValuesList = this.#getToFilterValuesList();
-      var toFilterValuesListOptions = toFilterValuesList.options;
+      const toFilterValuesListOptions = toFilterValuesList.options;
       currentToValues = this.#extractOptionsFromSelectList(toFilterValuesList);
 
-      var rangeStart, rangeEnd;
-
+      let rangeStart, rangeEnd;
       // The following condition captures the case where the user selected 1 option in the picklist,
       // and either the values list or the to values list also has 1 option selected.
       // In action is then to use the picklist value to update that end of a range.
       if (
-        selectedOptions.length === 1 && selectedOption.getAttribute('data-sql-null') !== String(true) && (
-          filterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions.length === 0 && filterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true) ||
-          filterValuesList.selectedOptions.length === 0 && toFilterValuesList.selectedOptions.length === 1 && toFilterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true)
+        selectedOptions.length === 1 && 
+        selectedOption.getAttribute('data-sql-null') !== String(true) 
+        && (
+          filterValuesList.selectedOptions.length === 1 && 
+          toFilterValuesList.selectedOptions.length === 0 && 
+          filterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true) ||
+          filterValuesList.selectedOptions.length === 0 && 
+          toFilterValuesList.selectedOptions.length === 1 && 
+          toFilterValuesList.selectedOptions[0].getAttribute('data-sql-null') !== String(true)
         )
       ){
 
-        var selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
-        var values = filterValuesList.selectedOptions.length ? currentValues : currentToValues;
+        const selectedList = filterValuesList.selectedOptions.length ? filterValuesList : toFilterValuesList;
+        const values = filterValuesList.selectedOptions.length ? currentValues : currentToValues;
 
-        var correspondingList = filterValuesList.selectedOptions.length ? toFilterValuesList : filterValuesList;
-        var correspondingValues = filterValuesList.selectedOptions.length ? currentToValues : currentValues;
+        const correspondingList = filterValuesList.selectedOptions.length ? toFilterValuesList : filterValuesList;
+        const correspondingValues = filterValuesList.selectedOptions.length ? currentToValues : currentValues;
 
-        var selectedIndex = selectedList.selectedIndex;
+        const selectedIndex = selectedList.selectedIndex;
+        const option = selectedList.options[selectedIndex];
+        const optionValue = option.value;
 
-        var option = selectedList.options[selectedIndex];
-        var optionValue = option.value;
-
-        var correspondingOption = correspondingList.options[selectedIndex];
-        var correspondingValue = correspondingOption.value;
+        const correspondingOption = correspondingList.options[selectedIndex];
+        const correspondingValue = correspondingOption.value;
 
         if (values[selectedOption.value]) {
           // invalid choice, range already exists
           valueSelectionStatusText = `Existing range collision.`;
         }
         else
-        if ( values === currentValues &&  this.#compareValues(selectedOption.value, correspondingValue) === 1) {
+        if ( 
+          values === currentValues && 
+          this.#compareValues(selectedOption.value, correspondingValue) === 1
+        ) {
           // noop, fromValue can't be bigger than toValue
           valueSelectionStatusText = `From Value exceeds to Value.`;
         }
         else
-        if ( values === currentToValues && this.#compareValues(selectedOption.value, correspondingValue) === -1) {
+        if ( 
+          values === currentToValues && 
+          this.#compareValues(selectedOption.value, correspondingValue) === -1
+        ) {
           // noop, toValue can't be smaller than fromValue
           valueSelectionStatusText = `To Value smaller than from Value.`;
         }
         else {
           delete values[option.value];
-          var correspondingOptionValueObject = correspondingValues[correspondingValue];
+          const correspondingOptionValueObject = correspondingValues[correspondingValue];
           delete correspondingValues[correspondingValue];
 
           values[selectedOption.value] = this.#extractValueFromOption(selectedOption);
@@ -684,8 +664,8 @@ class FilterDialog {
       }
       else {
         // go through the options, and add one pair of from/to values for a set of adjacent selected options
-        for (var i = 0; i < options.length; i++){
-          var option = options[i];
+        for (let i = 0; i < options.length; i++){
+          const option = options[i];
 
           if (option.selected) {
             // no range start, this is the start of a new range.
@@ -700,7 +680,10 @@ class FilterDialog {
           }
 
           // if the option is not selected, or if we are the last option, then add the current range.
-          if((option.selected !== true || i === options.length -1) && rangeStart){
+          if(
+            ( option.selected !== true || i === options.length - 1 ) && 
+            rangeStart
+          ){
             // check if we should add the new range
             if (
               currentValues[rangeStart.value] === undefined ||
@@ -724,7 +707,7 @@ class FilterDialog {
     }
     else {
       // go through the new options, and add them if they aren't already in the list.
-      for (var i = 0; i < selectedOptions.length; i++) {
+      for (let i = 0; i < selectedOptions.length; i++) {
         selectedOption = selectedOptions[i];
         if (currentValues[selectedOption.value] !== undefined) {
           continue;
@@ -751,8 +734,8 @@ class FilterDialog {
     }
 
     // finally, restore the selection in the value lists.
-    filterValuesListOptions = restoreSelectionInValueList.options;
-    for (var i = 0; i < filterValuesListOptions.length; i++){
+    const filterValuesListOptions = restoreSelectionInValueList.options;
+    for (let i = 0; i < filterValuesListOptions.length; i++){
       if (filterValuesListOptions[i].value !== restoreSelectionValue) {
         continue;
       }
@@ -764,14 +747,15 @@ class FilterDialog {
   }
 
   #removeSelectedValues(){
-    var selectControl = this.#getFilterValuesList();
-    var options = selectControl.options;
-    var toValuesList = this.#getToFilterValuesList();
-    var toValuesOptions = toValuesList.options;
-    var currentValues = {}, currentToValues = {};
-    for (var i = 0 ; i < options.length; i++){
-      var option = options[i];
-      var toOption;
+    const selectControl = this.#getFilterValuesList();
+    const options = selectControl.options;
+    const toValuesList = this.#getToFilterValuesList();
+    const toValuesOptions = toValuesList.options;
+    const currentValues = {};
+    const currentToValues = {};
+    for (let i = 0 ; i < options.length; i++){
+      const option = options[i];
+      let toOption;
       if (i < toValuesOptions.length){
         toOption = toValuesOptions[i];
       }
@@ -796,9 +780,9 @@ class FilterDialog {
   }
 
   #getDialogButtons(){
-    var filterDialog = this.getDom();
-    var footer = filterDialog.getElementsByTagName('footer').item(0);
-    var buttons = footer.getElementsByTagName('button');
+    const filterDialog = this.getDom();
+    const footer = filterDialog.getElementsByTagName('footer').item(0);
+    const buttons = footer.getElementsByTagName('button');
     return buttons;
   }
 
@@ -831,7 +815,7 @@ class FilterDialog {
   }
 
   #setBusy(trueOrFalse){
-    var dom = this.getDom();
+    const dom = this.getDom();
     dom.setAttribute('aria-busy', String(trueOrFalse));
   }
 
@@ -852,17 +836,14 @@ class FilterDialog {
   }
 
   #updateValueSelectionStatusText(){
-    var text;
-    var count = this.#getFilterValuesList().options.length;
-    
+    let text;
+    const count = this.#getFilterValuesList().options.length;
     if (count === 0) {
       text = Internationalization.getText('Select values from the picklist');
     }
     else {
-      var filterType = this.#getFilterType().value;
-      var verb = FilterDialog.isExclusiveFilterType(filterType) ? 'excluded' : 'included';
-      
-      var object = 'value';
+      const filterType = this.#getFilterType().value;
+      let object = 'value';
       if (FilterDialog.isRangeFilterType(filterType)){
         object += ' range';
       }
@@ -875,6 +856,7 @@ class FilterDialog {
         object += 's';
       }
       
+      const verb = FilterDialog.isExclusiveFilterType(filterType) ? 'excluded' : 'included';
       text = `{1} ${object} ${verb}.`;
       text = Internationalization.getText(text, count);
     }
@@ -927,8 +909,8 @@ class FilterDialog {
   }
 
   #positionFilterDialog(queryAxisItemUi){
-    var boundingRect = queryAxisItemUi.getBoundingClientRect();
-    var filterDialog = this.getDom();
+    const boundingRect = queryAxisItemUi.getBoundingClientRect();
+    const filterDialog = this.getDom();
     filterDialog.style.left = boundingRect.x + 'px'
     filterDialog.style.top = (boundingRect.y + boundingRect.height) + 'px';
   }
@@ -951,11 +933,11 @@ class FilterDialog {
     this.#updateDialogState();
 
     this.#positionFilterDialog(queryAxisItemUi);
-    var filterDialog = this.getDom();
+    const filterDialog = this.getDom();
     
-    var dataType;
+    let dataType;
     if (queryModelItem.derivation) {
-      var derivationInfo = AttributeUi.getDerivationInfo(queryModelItem.derivation);
+      const derivationInfo = AttributeUi.getDerivationInfo(queryModelItem.derivation);
       if (derivationInfo.dataValueTypeOverride) {
         dataType = derivationInfo.dataValueTypeOverride;
       }
@@ -967,16 +949,14 @@ class FilterDialog {
     filterDialog.setAttribute('data-query-model-item-datatype', dataType);
     
     filterDialog.showModal();
-    //filterDialog.show();
     this.#updatePicklist();
   }
 
   #updateDialogState(){
-    var queryAxisItem = this.#queryAxisItem;
-    var filter = queryAxisItem.filter;
+    const queryAxisItem = this.#queryAxisItem;
+    const filter = queryAxisItem.filter;
     if (filter){
       this.#getFilterType().value = filter.filterType;
-
       this.#renderOptionsToSelectList(filter.values, this.#getFilterValuesList());
       if (FilterDialog.isRangeFilterType(filter.filterType)){
         this.#renderOptionsToSelectList(filter.toValues, this.#getToFilterValuesList());
@@ -989,11 +969,11 @@ class FilterDialog {
   }
 
   #getDialogState(){
-    var filterValuesList = this.#getFilterValuesList();
-    var filterValues = this.#extractOptionsFromSelectList(filterValuesList);
-    var toFilterValuesList = this.#getToFilterValuesList();
-    var toFilterValues = this.#extractOptionsFromSelectList(toFilterValuesList);
-    var dialogState = {
+    const filterValuesList = this.#getFilterValuesList();
+    const filterValues = this.#extractOptionsFromSelectList(filterValuesList);
+    const toFilterValuesList = this.#getToFilterValuesList();
+    const toFilterValues = this.#extractOptionsFromSelectList(toFilterValuesList);
+    const dialogState = {
       filterType: this.#getFilterType().value,
       values: filterValues,
       toValues: toFilterValues,
@@ -1008,17 +988,18 @@ class FilterDialog {
     if (limit === undefined){
       limit = this.#getValuePicklistPageSize();
     }
-    var result = await this.#getPicklistValues(offset, limit);
+    const result = await this.#getPicklistValues(offset, limit);
     this.#populatePickList(result, offset, limit);
   }
 
   #getOtherFilterAxisItems(withFilterValues){
-    var filtersAxis = this.#queryModel.getFiltersAxis();
-    var filtersAxisItems = filtersAxis.getItems();
-    var otherFilterAxisItems = filtersAxisItems.filter(function(filterAxisItem){
+    const filtersAxis = this.#queryModel.getFiltersAxis();
+    const filtersAxisItems = filtersAxis.getItems();
+    const otherFilterAxisItems = filtersAxisItems.filter(filterAxisItem => {
       if (filterAxisItem === this.#queryAxisItem) {
         return false;
       }
+      
       if (
         filterAxisItem.columnName === this.#queryAxisItem.columnName &&
         filterAxisItem.derivation === this.#queryAxisItem.derivation &&
@@ -1026,12 +1007,9 @@ class FilterDialog {
       ){
         return false;
       }
+      
       if (withFilterValues){
-        if (!filterAxisItem.filter) {
-          return false;
-        }
-
-        if (!filterAxisItem.filter.values) {
+        if (!filterAxisItem.filter || !filterAxisItem.filter.values) {
           return false;
         }
 
@@ -1040,30 +1018,29 @@ class FilterDialog {
         }
       }
       return true;
-    }.bind(this));
+    });
     return otherFilterAxisItems;
   }
 
   static #splitSearchString(searchString){
-    return searchString.split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
-    .map(function(searchString){
+    return searchString
+    .split(FilterDialog.MULTIPLE_VALUES_SEPARATOR)
+    .map(searchString => {
       return searchString.trim();
     })
-    .filter(function(searchString){
+    .filter(searchString => {
       return Boolean(searchString.length);
     });
   }
 
   #getSqlSelectStatementForPickList(offset, limit){
-    var datasource = this.#queryModel.getDatasource();
-    var queryAxisItem = this.#queryAxisItem;
-    var filterType = this.#getFilterType().value;
+    let queryAxisItem = this.#queryAxisItem;
+    const filterType = this.#getFilterType().value;
     
     // for array filter operators, we need to unnest the array
     // so, we make a copy of the query axis item and modify it
     if (FilterDialog.isArrayFilterType(filterType)){
       queryAxisItem = Object.assign({}, queryAxisItem);
-
       if (!queryAxisItem.memberExpressionPath) {
         queryAxisItem.memberExpressionPath = [];
       }
@@ -1081,8 +1058,6 @@ class FilterDialog {
             break;
         }
       }
-      else {
-      }
       queryAxisItem.derivation = 'elements';
       queryAxisItem.memberExpressionPath.push('unnest()');
       delete queryAxisItem.literalWriter;
@@ -1094,27 +1069,20 @@ class FilterDialog {
       queryAxisItem = Object.assign({}, queryAxisItem);
       delete queryAxisItem.includeTotals;
     }
-    
-    var queryAxisItems = [
-      Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
-      Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
-    ];
 
-    var filterAxisItems = [];
-    var filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
+    let filterAxisItems = [];
+    const filterSearchApplyAll = settings.getSettings(['filterDialogSettings', 'filterSearchApplyAll']);
     if (filterSearchApplyAll) {
       filterAxisItems = filterAxisItems.concat(this.#getOtherFilterAxisItems(true));
     }
 
-    var search = this.#getSearch();
-    var searchStrings = FilterDialog.#splitSearchString(search.value);
-
+    const search = this.#getSearch();
+    const searchStrings = FilterDialog.#splitSearchString(search.value);
     if (searchStrings.length) {
-      
-      var filterValues = {};
-      var autoWildcards = this.#getAutoWildChards().checked;
-      var picklistFilterItem = Object.assign({}, queryAxisItem);
-      searchStrings.forEach(function(searchString){
+      const filterValues = {};
+      const autoWildcards = this.#getAutoWildChards().checked;
+      const picklistFilterItem = Object.assign({}, queryAxisItem);
+      searchStrings.forEach(searchString => {
         if (autoWildcards){
           searchString = FilterDialog.#addWildcards(searchString);
         }
@@ -1125,7 +1093,7 @@ class FilterDialog {
         };
       });
      
-      var caseSensitive = this.#getCaseSensitive();
+      const caseSensitive = this.#getCaseSensitive();
       picklistFilterItem.filter = {
         filterType: FilterDialog.filterTypes.LIKE,
         values: filterValues,
@@ -1134,8 +1102,13 @@ class FilterDialog {
       filterAxisItems.push(picklistFilterItem);
     }
 
-    var nullsSortOrder = this.#getNullsSortOrder();
-    var sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
+    const datasource = this.#queryModel.getDatasource();
+    const queryAxisItems = [
+      Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
+      Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
+    ];
+    const nullsSortOrder = this.#getNullsSortOrder();
+    const sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
       datasource: datasource,
       queryAxisItems: queryAxisItems,
       filterAxisItems: filterAxisItems,
@@ -1148,7 +1121,7 @@ class FilterDialog {
 
   async #getPicklistValues(offset, limit){
     this.#setBusy(true);
-    var sql = this.#getSqlSelectStatementForPickList(offset, limit);
+    let sql = this.#getSqlSelectStatementForPickList(offset, limit);
     if (limit === undefined) {
       limit = this.#getValuePicklistPageSize();
     }
@@ -1160,21 +1133,20 @@ class FilterDialog {
     // by filtering for values greater than the last value of the previous page-loader
     // However, I tried this and it didn't really seem to make a difference, at least not in plain duckdb.
     sql += `\nLIMIT ${limit} OFFSET ${offset}`;
-    var timeMessage = `Executing filter dialog picklist query.`;
+    const timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
-    var datasource = this.#queryModel.getDatasource();
-    var result = await datasource.query(sql);
+    const datasource = this.#queryModel.getDatasource();
+    const result = await datasource.query(sql);
     console.timeEnd(timeMessage);
     return result;
   }
 
   #updateSearchStatus(resultset){
-    var searchStatus = this.#getSearchStatus();
-    var count = resultset.numRows;
+    let count = resultset.numRows;
     if (count) {
       count = parseInt(String(resultset.get(0)[FilterDialog.#numRowsColumnName]), 10);
     }
-    var message;
+    let message;
     switch(count){
       case 0:
         message = 'No values found.'
@@ -1192,15 +1164,16 @@ class FilterDialog {
     if (count){
       message += ' ' + Internationalization.getText('Click to add to Filter values list');
     }
+    const searchStatus = this.#getSearchStatus();
     searchStatus.innerHTML = message;
   }
 
   #populatePickList(resultset, offset, limit){
-    var listOfValues = this.#getValuePicklist();
-    var exhausted = resultset.numRows < limit;
+    const listOfValues = this.#getValuePicklist();
+    const exhausted = resultset.numRows < limit;
 
-    var optionGroup, optionsContainer;
-    var optionGroupLabelText = `Values ${offset + 1} - ${offset + resultset.numRows}`;
+    let optionGroup, optionsContainer;
+    const optionGroupLabelText = `Values ${offset + 1} - ${offset + resultset.numRows}`;
 
     if (offset === 0) {
       this.#updateSearchStatus(resultset);
@@ -1228,11 +1201,10 @@ class FilterDialog {
       optionsContainer = optionGroup;
     }
 
-    var formatter = this.#queryAxisItem.formatter;
-    var valueField, labelField;
-    var fields = resultset.schema.fields;
-    for (var i = 0; i < fields.length; i++) {
-      var field = fields[i];
+    let valueField, labelField;
+    const fields = resultset.schema.fields;
+    for (let i = 0; i < fields.length; i++) {
+      const field = fields[i];
       switch (field.name) {
         case 'label':
           labelField = field;
@@ -1242,15 +1214,17 @@ class FilterDialog {
           break;
       }
     }
-    var option;
-    for (var i = 0; i < resultset.numRows; i++) {
-      var row = resultset.get(i);
-      var value = row.value === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value));
-      var label = row.label;
+    
+    const formatter = this.#queryAxisItem.formatter;
+    let option;
+    for (let i = 0; i < resultset.numRows; i++) {
+      const row = resultset.get(i);
+      const value = row.value === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value));
+      let label = row.label;
       if (formatter) {
         label = formatter(label, labelField);
       }
-      var literal = getDuckDbLiteralForValue(row.value, valueField.type);
+      const literal = getDuckDbLiteralForValue(row.value, valueField.type);
       option = createEl('option', {
         value: value,
         label: label,
@@ -1267,6 +1241,7 @@ class FilterDialog {
     if (exhausted){
       return;
     }
+    
     optionGroup = createEl('optgroup', {
       label: `${offset + resultset.numRows + 1} - ...`,
       "data-offset": offset + limit,
@@ -1293,7 +1268,7 @@ class FilterDialog {
   }
 }
 
-var filterDialog;
+let filterDialog;
 function initFilterUi(){
   filterDialog = new FilterDialog({
     id: 'filterDialog',
