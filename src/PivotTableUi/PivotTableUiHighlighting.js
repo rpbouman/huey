@@ -78,7 +78,7 @@ class PivotTableUiHighlighting {
   
   #initMouseOverHandler(){
     var dom = this.#pivotTableUi.getDom();
-    dom.addEventListener('mouseover', this.#mouseOverHandler.bind(this));
+    dom.addEventListener('mouseover', event => this.#mouseOverHandler( event ) );
   }
   
   #mouseOverHandler(event){
@@ -107,7 +107,7 @@ class PivotTableUiHighlighting {
   
   #initMouseLeaveHandler(){
     var dom = this.#pivotTableUi.getDom();
-    dom.addEventListener('mouseleave', this.#mouseLeaveHandler.bind(this));
+    dom.addEventListener('mouseleave', event => this.#mouseLeaveHandler( event ) );
   }
   
   #mouseLeaveHandler(event){

@@ -766,9 +766,9 @@ class AttributeUi {
     this.#queryModel = queryModel;
 
     const dom = this.getDom();
-    dom.addEventListener('click', this.#clickHandler.bind(this));
-    dom.addEventListener('dragstart', this.#dragStartHandler.bind(this));
-    this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
+    dom.addEventListener('click', event => this.#clickHandler(event) );
+    dom.addEventListener('dragstart', event => this.#dragStartHandler(event) );
+    this.#queryModel.addEventListener('change', event => this.#queryModelChangeHandler(event) );
   }
 
   async #queryModelChangeHandler(event){
@@ -818,9 +818,9 @@ class AttributeUi {
     }
     const input = target.getElementsByTagName('input').item(0);
     const axisId = target.getAttribute('data-axis');
-    setTimeout(function(){
+    setTimeout(() => {
       this.#axisButtonClicked(node, axisId, input.checked);
-    }.bind(this), 0);
+    }, 0);
   }
   
   #createQueryAxisItemForAttributeUiNode(node){
@@ -1101,7 +1101,7 @@ class AttributeUi {
     switch (config.type){
       case 'column':
       case 'member':
-        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+        node.addEventListener('toggle', event => this.#toggleNodeState( event ) );
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
@@ -1111,7 +1111,7 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', derivation);
-        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
+        node.addEventListener('toggle', event => this.#toggleNodeState( event ) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
@@ -1151,6 +1151,10 @@ class AttributeUi {
 
   clear(showBusy){
     const attributesUi = this.getDom();
+    const detailsNodes = attributesUi.querySelectorAll('details');
+    detailsNodes.forEach(node => {
+      node.removeEventListener('toggle', this.#toggleNodeState);
+    });
     let content;
     if (showBusy) {
       content = '<div class="loader loader-medium"></div>';
@@ -1216,7 +1220,7 @@ class AttributeUi {
   }
 
   #createFolders(itemsObject, node){
-    const folders = Object.keys(itemsObject).reduce(function(acc, curr){
+    const folders = Object.keys(itemsObject).reduce((acc, curr) => {
       const object = itemsObject[curr];
       const folder = object.folder;
       if (!folder) {
@@ -1239,7 +1243,7 @@ class AttributeUi {
         node.appendChild(folderNode);
       }
       return acc;
-    }.bind(this), {});
+    }, {});
     return folders;
   }
 

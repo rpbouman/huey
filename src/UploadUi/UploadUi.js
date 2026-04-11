@@ -11,14 +11,11 @@ class UploadUi {
   }
 
   init(){
-    this.#getCancelButton().addEventListener('click', async function(){
+    this.#getCancelButton().addEventListener('click', async event => {
       await this.#cancelUploads();
       this.getDialog().close();
-    }.bind(this));
-
-    this.#getOkButton().addEventListener('click', function(){
-      this.getDialog().close();
-    }.bind(this));
+    });
+    this.#getOkButton().addEventListener('click', event => this.getDialog().close() );
   }
 
   async #cancelUploads(){
@@ -311,7 +308,7 @@ class UploadUi {
   }
 
   loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
-    var extensionInstallationItems = requiredDuckDbExtensions.map(this.loadDuckDbExtension.bind(this));
+    var extensionInstallationItems = requiredDuckDbExtensions.map(extensionName => this.loadDuckDbExtension(extensionName) );
     return extensionInstallationItems;
   }
 

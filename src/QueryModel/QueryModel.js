@@ -819,7 +819,7 @@ class QueryModel extends EventEmitter {
     this.fireEvent('beforechange', eventData);
 
     if (oldDatasource) {
-      this.#datasource.removeEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+      this.#datasource.removeEventListener('destroy', event => this.#destroyDatasourceHandler( event ) );
     }
     
     if (dontClear !== true) {
@@ -829,7 +829,7 @@ class QueryModel extends EventEmitter {
     this.#datasource = datasource;
 
     if (datasource){
-      datasource.addEventListener('destroy', this.#destroyDatasourceHandler.bind(this));
+      datasource.addEventListener('destroy', event => this.#destroyDatasourceHandler( event ) );
     }
 
     this.fireEvent('change', eventData);
@@ -1462,14 +1462,14 @@ class QueryModel extends EventEmitter {
 
     var axisIds = this.getAxisIds().sort();
     var hasItems = false;
-    axisIds.forEach(function(axisId){
+    axisIds.forEach(axisId => {
       var axis = this.getQueryAxis(axisId);
       var items = axis.getItems();
       if (items.length === 0) {
         return '';
       }
       hasItems = true;
-      queryModelObject.axes[axisId] = items.map(function(axisItem){
+      queryModelObject.axes[axisId] = items.map(axisItem => {
         var strippedItem = {columnName: axisItem.columnName};
         strippedItem.columnType = axisItem.columnType;
         if (axisItem.memberExpressionPath){
@@ -1495,7 +1495,7 @@ class QueryModel extends EventEmitter {
 
         return strippedItem;
       });
-    }.bind(this));
+    });
     if (!hasItems){
       return null;
     }

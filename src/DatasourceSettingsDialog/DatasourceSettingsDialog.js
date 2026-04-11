@@ -138,16 +138,8 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   #initCsvReaderOptionsTab(){
-    byId('csvReaderRestoreDefaults')
-    .addEventListener(
-      'click',
-      this.restoreToDefaultHandler.bind(this)
-    );
-    byId('csvReaderDetectSettings')
-    .addEventListener(
-      'click',
-      this.#autodetectCsvReaderSettings.bind(this)
-    );
+    byId('csvReaderRestoreDefaults').addEventListener('click', event => this.restoreToDefaultHandler( event ) );
+    byId('csvReaderDetectSettings').addEventListener('click', event => this.#autodetectCsvReaderSettings( event ) );
   }
 
   #initColumnsTab(){
@@ -199,16 +191,8 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
 
   #initRejectsTab(){
 
-    byId('csvReaderDownloadRejects')
-    .addEventListener(
-      'click',
-      this.#downloadCsvReaderRejectsHandler.bind(this)
-    );
-    byId('csvReaderClearRejects')
-    .addEventListener(
-      'click',
-      this.#clearCsvReaderRejectsHandler.bind(this)
-    );
+    byId('csvReaderDownloadRejects').addEventListener('click', event => this.#downloadCsvReaderRejectsHandler( event ) );
+    byId('csvReaderClearRejects').addEventListener( 'click', event => this.#clearCsvReaderRejectsHandler( event ) );
 
     this.#rejectsDatasource = new RejectsDatasource();
     this.#rejectsTabQueryModel = new QueryModel();

@@ -328,9 +328,7 @@ class Settings extends EventEmitter {
     this.#loadFromLocalStorage();
     this.#initDialog();
 
-    window.addEventListener('beforeunload', function(){
-      this.#storeToLocalStorage();
-    }.bind(this));
+    window.addEventListener('beforeunload', event => this.#storeToLocalStorage( event ) );
   }
 
   #getSettings(path){
@@ -418,24 +416,22 @@ class Settings extends EventEmitter {
   #initDialog(){
     var settingsDialog = this.#getDialog();
 
-    byId('settingsDialogOkButton').addEventListener('click', function(event){
+    byId('settingsDialogOkButton').addEventListener('click', event => {
       event.cancelBubble = true;
       this.#updateSettingsFromDialog();
       this.#storeToLocalStorage();
-    }.bind(this));
+    });
 
-    byId('settingsDialogCancelButton').addEventListener('click', function(event){
+    byId('settingsDialogCancelButton').addEventListener('click', event => {
       event.cancelBubble = true;
-    }.bind(this));
+    });
 
-    byId('settingsDialogResetButton').addEventListener('click', function(event){
+    byId('settingsDialogResetButton').addEventListener('click', event => {
       this.#resetSettings();
       this.fireEvent('change', this);
-    }.bind(this));
+    });
 
-    byId('settingsButton').addEventListener('click', function(){
-      this.#updateDialogFromSettings();
-    }.bind(this));
+    byId('settingsButton').addEventListener('click', event => this.#updateDialogFromSettings() );
   }
 
   #resetSettings(){

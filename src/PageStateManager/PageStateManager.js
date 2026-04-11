@@ -6,11 +6,11 @@ class PageStateManager {
   }
 
   #initPopStateHandler(){
-    window.addEventListener('popstate', this.#popStateHandler.bind(this));
+    window.addEventListener('popstate', event => this.#popStateHandler( event ) );
   }
 
   #initHashChangeHandler(){
-    window.addEventListener('hashchange', this.#hashChangeHandler.bind(this));
+    window.addEventListener('hashchange', event => this.#hashChangeHandler( event ) );
   }
 
   // this basically means: load the query
@@ -28,7 +28,7 @@ class PageStateManager {
   }
 
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources, newDatasources){
-    return new Promise(async function(resolve, reject){
+    return new Promise(async (resolve, reject) => {
 
       // do we have the referenced datasource?
       var desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
@@ -123,7 +123,7 @@ class PageStateManager {
       var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
       if (compatibleDatasourceIds.length) {
         message += '<br/>' + Internationalization.getText('Choose any of the compatible datasources instead, or browse for a new one:');
-        list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
+        list += compatibleDatasourceIds.map((compatibleDatasourceId, index) => {
           var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
           datasourceType = compatibleDatasource.getType();
           switch (datasourceType) {
@@ -142,7 +142,7 @@ class PageStateManager {
             labelText: caption
           });
           return datasourceItem;
-        }.bind(this)).join('\n');
+        }).join('\n');
       }
 
       list += openNewDatasourceItem;
@@ -183,7 +183,7 @@ class PageStateManager {
       .catch(function(error){
         reject();
       });
-    }.bind(this));
+    });
   }
 
   async setPageState(newRoute, newUploadResults){
@@ -242,9 +242,7 @@ class PageStateManager {
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
     analyzeDatasource(datasource);
-    setTimeout(function(){
-      attributeUi.revealAllQueryAttributes();
-    }, 1000);
+    setTimeout(() => attributeUi.revealAllQueryAttributes(), 1000);
   }
 
 }

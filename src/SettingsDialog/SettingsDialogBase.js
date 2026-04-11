@@ -44,17 +44,17 @@ class SettingsDialogBase {
     var settingsDialog = this.getDialog();
     
     settingsDialog.querySelector('footer[role=toolbar] > button[value=Ok]')
-    .addEventListener('click', function(event){
+    .addEventListener('click', event => {
       event.cancelBubble = true;
       this.updateSettingsFromDialog();
       this.getDialog().close();
-    }.bind(this));
+    });
 
     settingsDialog.querySelector('footer[role=toolbar] > button[value=Cancel]')
-    .addEventListener('click', function(event){
+    .addEventListener('click', event => {
       event.cancelBubble = true;
       this.getDialog().close();
-    }.bind(this));
+    });
 
   }
   

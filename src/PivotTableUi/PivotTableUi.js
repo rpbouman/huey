@@ -47,7 +47,7 @@ class PivotTableUi extends EventEmitter {
     this.#initQueryModelChangeHandler()
     this.#initScrollHandler();
     this.#initResizeObserver();
-    this.#initCancelQueryButtonClickHandler();
+    byId('cancelQueryButton').addEventListener('click', event => this.#cancelQueryButtonClicked( event ) );
 
   }
 
@@ -74,11 +74,7 @@ class PivotTableUi extends EventEmitter {
   }
 
   #initCancelQueryButtonClickHandler(){
-    byId('cancelQueryButton')
-    .addEventListener(
-      'click',
-      this.#cancelQueryButtonClicked.bind(this)
-    );
+    byId('cancelQueryButton').addEventListener('click', event => this.#cancelQueryButtonClicked(event) );
   }
 
   async #cancelQueryButtonClicked(event){
@@ -139,7 +135,7 @@ class PivotTableUi extends EventEmitter {
   #initResizeObserver(){
     var dom = this.getDom();
 
-    this.#resizeObserver = new ResizeObserver(function(entries){
+    this.#resizeObserver = new ResizeObserver(entries => {
       for (var entry of entries){
         var target = entry.target;
         if (target === dom) {
@@ -150,7 +146,7 @@ class PivotTableUi extends EventEmitter {
           this.#handleColumnHeaderResized(entry);
         }
       }
-    }.bind(this));
+    });
 
     this.#resizeObserver.observe(dom);
   }
@@ -187,7 +183,7 @@ class PivotTableUi extends EventEmitter {
       clearTimeout(this.#resizeTimeoutId);
       this.#resizeTimeoutId = undefined;
     }
-    this.#resizeTimeoutId = setTimeout(async function(){
+    this.#resizeTimeoutId = setTimeout(async () => {
       // we have to check whether it's safe and appropriate to update
       // - if we're already busy, then it's not safe and we shouldn't
       var isSafe = !this.#getBusy();
@@ -201,7 +197,7 @@ class PivotTableUi extends EventEmitter {
       }
       clearTimeout(this.#resizeTimeoutId);
       this.#resizeTimeoutId = undefined;
-    }.bind(this), this.#resizeTimeout);
+    }, this.#resizeTimeout);
   }
 
   // this takes a column axis header cell and calculates the corresponding tuple index and cell axis item index
@@ -235,7 +231,7 @@ class PivotTableUi extends EventEmitter {
       clearTimeout(this.#columnHeaderResizeTimeoutId);
       this.#columnHeaderResizeTimeoutId = undefined;
     }
-    this.#columnHeaderResizeTimeoutId = setTimeout(function(){
+    this.#columnHeaderResizeTimeoutId = setTimeout(() => {
       var target = resizeEntry.target;
       var width = target.style.width;
       if (width.endsWith('px')) {
@@ -245,7 +241,7 @@ class PivotTableUi extends EventEmitter {
       }
       clearTimeout(this.#columnHeaderResizeTimeoutId);
       this.#columnHeaderResizeTimeoutId = undefined;
-    }.bind(this), this.#columnHeaderResizeTimeout);
+    }, this.#columnHeaderResizeTimeout);
   }
 
   #initSettings(settings){
@@ -374,12 +370,12 @@ class PivotTableUi extends EventEmitter {
       QueryModel.AXIS_ROWS,
       QueryModel.AXIS_COLUMNS,
       QueryModel.AXIS_CELLS
-    ].reduce(function(acc, curr){
+    ].reduce((acc, curr) => {
       var queryModel = this.getQueryModel();
       var queryAxis = queryModel.getQueryAxis(curr);
       var queryAxisItems = queryAxis.getItems();
       return acc + queryAxisItems.length;
-    }.bind(this), 0);
+    }, 0);
 
     if (countQueryAxisItems === 0) {
       needsClearing = true;
@@ -454,7 +450,7 @@ class PivotTableUi extends EventEmitter {
         });
       }
       finally {
-        setTimeout(this.#setBusy.bind(this), 1);
+        setTimeout(() => this.#setBusy, 1);
       }
     }
     else
@@ -1856,12 +1852,12 @@ class PivotTableUi extends EventEmitter {
 
       //await this.#updateCellData(0, 0);
       await this.#updateDataToScrollPosition();
-      setTimeout(function(){
+      setTimeout(() => {
         this.#removeExcessColumns();
         this.#updateHorizontalSizer();
         this.#removeExcessRows();
         this.#updateVerticalSizer();
-      }.bind(this), 1000)
+      }, 1000)
       this.#setNeedsUpdate(false);
       this.#fireUpdatedSuccess();
     }

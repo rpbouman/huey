@@ -18,9 +18,7 @@ class ExportUi {
     const url = window.URL.createObjectURL(blob);
     ExportUi.downloadURL(url, fileName);
     timeout = timeout === undefined ? 1000 : timeout;
-    setTimeout(function() {
-      return window.URL.revokeObjectURL(url);
-    }, timeout);
+    setTimeout( () => window.URL.revokeObjectURL(url), timeout);
   }
 
   static #exportTitleFields = {
@@ -468,15 +466,12 @@ class ExportDialog {
   }
 
   #initExportDialog(){
-    byId('exportDialogCloseButton')
-    .addEventListener('click', this.close.bind(this));
-
-    byId('exportDialogExecuteButton')
-    .addEventListener('click', this.#executeExport.bind(this));
+    byId('exportDialogCloseButton').addEventListener('click', event => this.close( event ) );
+    byId('exportDialogExecuteButton').addEventListener('click', event => this.#executeExport( event ) );
 
     const exportTitleTemplate = byId('exportTitleTemplate');
-    exportTitleTemplate.addEventListener('change', this.#titleTemplateChangedHandler.bind(this));
-    exportTitleTemplate.addEventListener('input', this.#titleTemplateChangedHandler.bind(this));
+    exportTitleTemplate.addEventListener('change', event => this.#titleTemplateChangedHandler( event ) );
+    exportTitleTemplate.addEventListener('input', event => this.#titleTemplateChangedHandler( event ) );
 
   }
 

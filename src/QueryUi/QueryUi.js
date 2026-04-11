@@ -120,9 +120,9 @@ class QueryUi {
     // in this case we need to wait a bit until the query ui is rendered
     // else the filter dialog will pop up at the entirely wrong position.
     if (queryAxisItemUi.clientWidth === 0){
-      setTimeout(function(){
+      setTimeout(() => {
         this.openFilterDialogForQueryModelItem(queryModelItem);
-      }.bind(this), 100);
+      }, 100);
     }
     else {
       //this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
@@ -213,9 +213,9 @@ class QueryUi {
     if (dom.clientHeight === 0) {
       return;
     }
-    setTimeout(function(){
+    setTimeout(() => {
       this.#checkOverflow();
-    }.bind(this), 100);
+    }, 100);
   }
 
   #checkOverflow(axisUi){
@@ -403,9 +403,9 @@ class QueryUi {
     if (filter.toggleState === 'open') {
       detailsElement.setAttribute('open', String(true) );
     }
-    setTimeout(function(){
-      detailsElement.addEventListener('toggle', this.#filterItemToggleHandler.bind(this));
-    }.bind(this), 1000)
+    setTimeout(() => {
+      detailsElement.addEventListener('toggle', event => this.#filterItemToggleHandler(event) );
+    }, 1000)
           
     var values = filter.values;
     var valueKeys = Object.keys(values);
@@ -447,7 +447,7 @@ class QueryUi {
       label.setAttribute('for', deleteValueId);
       var button = label.querySelector('button');
       button.setAttribute('id', deleteValueId);
-      button.addEventListener('click', this.#deleteFilterValueClickHandler.bind(this));
+      button.addEventListener('click', event => this.#deleteFilterValueClickHandler( event ) );
     }
     
   }
@@ -526,10 +526,10 @@ class QueryUi {
         clearTimeout(this.#updateTimeout);
         this.#updateTimeout = undefined;
       }
-      this.#updateTimeout = setTimeout(function(){
+      this.#updateTimeout = setTimeout(() => {
         this.#updateTimeout = undefined;
         this.#updateQueryUi();
-      }.bind(this), 100);
+      }, 100);
     }
     
     // if a filter was added by the user, then we want to pop up the filter Dialog
@@ -562,10 +562,10 @@ class QueryUi {
               clearTimeout(this.#openFilterUiTimeout);
               this.#openFilterUiTimeout = undefined;
             }
-            this.#openFilterUiTimeout = setTimeout(function(){
+            this.#openFilterUiTimeout = setTimeout(() => {
               this.#openFilterUiTimeout = undefined;
               this.openFilterDialogForQueryModelItem(lastFilterItem);
-            }.bind(this), 250);
+            }, 250);
           }
         }
       }
@@ -574,19 +574,16 @@ class QueryUi {
 
   #initEvents(){
     var dom = this.getDom();
-    dom.addEventListener('click', this.#queryUiClickHandler.bind(this));
-
-    this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
-    
+    dom.addEventListener('click', event => this.#queryUiClickHandler( event ) );
+    this.#queryModel.addEventListener('change', event => this.#queryModelChangeHandler( event ) );
     this.#initDragAndDrop();
-    
     this.#initFilterUiEvents();
   }
   
   #initFilterUiEvents(){
     var filterUi = this.#filterDialog;
     var filterDialog = filterUi.getDom();
-    filterDialog.addEventListener('close', this.#filterDialogStateChanged.bind(this));
+    filterDialog.addEventListener('close', event => this.#filterDialogStateChanged( event ) );
   }
   
   #filterDialogStateChanged(){
@@ -604,49 +601,42 @@ class QueryUi {
     }
   }
   
+  #handleDragStart(event) {
+    var queryAxisItemUi = event.target;
+    var queryAxisItemsUi = queryAxisItemUi.parentNode;
+    var axisUi = queryAxisItemsUi.parentNode;
+    var axisId = axisUi.getAttribute('data-axis');
+    
+    var queryAxisItem = this.#getQueryModelItem(queryAxisItemUi);
+    var data = {};
+    
+    if (queryAxisItem.aggregator){
+      data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
+    }
+
+    data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
+    data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
+    var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    data.id = {key: id, value: id};
+    
+    if (axisId === QueryModel.AXIS_FILTERS){
+      data.filters = {key: queryAxisItem.index, value: queryAxisItem.index};
+    }
+
+    data['application/json'] = queryAxisItem;
+    DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
+
+    DragAndDropHelper.setData(event, data);
+    var dataTransfer = event.dataTransfer;
+    dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
+    dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
+  }
+  
+  
+  #handleDragOver(event) {
+  }
+    
   #initDragAndDrop(){
-    this.#initDrag();
-    this.#initDrop();
-  }
-  
-  #initDrag(){
-    var dom = this.getDom();
-    
-    dom.addEventListener('dragstart', function(event){
-      var queryAxisItemUi = event.target;
-      var queryAxisItemsUi = queryAxisItemUi.parentNode;
-      var axisUi = queryAxisItemsUi.parentNode;
-      var axisId = axisUi.getAttribute('data-axis');
-      
-      var queryAxisItem = this.#getQueryModelItem(queryAxisItemUi);
-      var data = {};
-      
-      if (queryAxisItem.aggregator){
-        data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
-      }
-
-      data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
-      data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
-      var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
-      data.id = {key: id, value: id};
-      
-      if (axisId === QueryModel.AXIS_FILTERS){
-        data.filters = {key: queryAxisItem.index, value: queryAxisItem.index};
-      }
-
-      data['application/json'] = queryAxisItem;
-      DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
-
-      DragAndDropHelper.setData(event, data);
-      var dataTransfer = event.dataTransfer;
-      dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
-      dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
-      
-    }.bind(this));
-    
-  }
-  
-  #initDrop(){
     var dom = this.getDom();
     
     var prevElements = undefined;
@@ -663,13 +653,14 @@ class QueryUi {
       prevElements = undefined;
     }
     
+    dom.addEventListener('dragstart', event => this.#handleDragStart(event) );
     
-    dom.addEventListener('dragend', function(event){
+    dom.addEventListener('dragend', event => {
       event.preventDefault();
       cleanupPrevElements();
     });
 
-    dom.addEventListener('dragover', function(event){
+    dom.addEventListener('dragover', event => {
       event.preventDefault();
       var dataTransfer = event.dataTransfer;
       var queryUiElements = QueryUi.#findQueryUiElements(event);
@@ -783,9 +774,9 @@ class QueryUi {
       
       prevElements = queryUiElements;
 
-    }.bind(this));
+    });
     
-    dom.addEventListener('drop', function(event){
+    dom.addEventListener('drop', event => {
       event.preventDefault();
       var queryUiElements = QueryUi.#findQueryUiElements(event);
       if (!queryUiElements.axis){
@@ -848,7 +839,7 @@ class QueryUi {
       cleanupPrevElements();
       
       this.#queryModel.addItem(queryAxisItem);
-    }.bind(this));
+    });
   }
 
   #axisClearButtonClicked(axis){

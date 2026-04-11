@@ -24,9 +24,9 @@ class DragableDialogs {
   #initEvents(){
     const dom = this.getDom();
 
-    dom.addEventListener('dragstart', this.#handleDragStart.bind(this));
-    dom.addEventListener('dragover', this.#handleDrag.bind(this));
-    dom.addEventListener('dragend', this.#handleDragEnd.bind(this));
+    dom.addEventListener('dragstart', event => this.#handleDragStart(event) );
+    dom.addEventListener('dragover', event => this.#handleDrag(event) );
+    dom.addEventListener('dragend', event => this.#handleDragEnd(event) );
   }
   
   #initDragImage(){

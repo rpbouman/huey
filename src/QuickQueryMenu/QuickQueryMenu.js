@@ -5,13 +5,13 @@ class QuickQueryMenu {
   constructor(queryModel){
     this.#queryModel = queryModel;
     
-    this.#initFlipAxesButton();
-    this.#initCellHeadersOnColumnsButton();
-    this.#initCellHeadersOnRowsButton();
-    this.#initClearAllButton();
-    this.#initColumnStatisticsButton();
-    this.#initDataPreviewButton();
-    this.#initDestructuredDataPreviewButton();
+    byId('quickQueryFlipAxesButton').addEventListener('click', event => this.#flipAxesButtonClickHandler( event ) );
+    byId('quickQueryCellHeadersOnColumnsButton').addEventListener('click', event => this.#cellHeadersOnColumnsButtonClickHandler( event ) );
+    byId('quickQueryCellHeadersOnRowsButton').addEventListener('click', event => this.#cellHeadersOnRowsButtonClickHandler( event ) );
+    byId('quickQueryClearAllButton').addEventListener('click', event => this.#clearAllButtonClickHandler( event ) );
+    byId('quickQueryColumnStatisticsButton').addEventListener('click', event => this.#columnStatisticsButtonClickHandler( event ) );
+    byId('quickQueryDataPreviewButton').addEventListener('click', event => this.#dataPreviewButtonClickHandler( event ) );
+    byId('quickQueryDestructuredDataPreviewButton').addEventListener('click', event => this.#destructuredDataPreviewButtonClickHandler( event ) );
   }
   
   async #forEachColumn(callback, callbackScope){
@@ -42,30 +42,15 @@ class QuickQueryMenu {
       axes: {}
     }
   }
-    
-  #initFlipAxesButton(){
-    byId('quickQueryFlipAxesButton')
-    .addEventListener('click', this.#flipAxesButtonClickHandler.bind(this));
-  }
-  
+
   #flipAxesButtonClickHandler(event){
     var queryModel = this.#queryModel;
     queryModel.flipAxes();
   }
 
-  #initCellHeadersOnColumnsButton(){
-    byId('quickQueryCellHeadersOnColumnsButton')
-    .addEventListener('click', this.#cellHeadersOnColumnsButtonClickHandler.bind(this));
-  }
-  
   #cellHeadersOnColumnsButtonClickHandler(event){
     var queryModel = this.#queryModel;
     queryModel.setCellHeadersAxis(QueryModel.AXIS_COLUMNS);
-  }
-
-  #initCellHeadersOnRowsButton(){
-    byId('quickQueryCellHeadersOnRowsButton')
-    .addEventListener('click', this.#cellHeadersOnRowsButtonClickHandler.bind(this));
   }
   
   #cellHeadersOnRowsButtonClickHandler(event){
@@ -73,22 +58,12 @@ class QuickQueryMenu {
     queryModel.setCellHeadersAxis(QueryModel.AXIS_ROWS);
   }
 
-  #initClearAllButton(){
-    byId('quickQueryClearAllButton')
-    .addEventListener('click', this.#clearAllButtonClickHandler.bind(this));
-  }
-  
   async #clearAllButtonClickHandler(event){
     var queryModelState = this.#newQueryModelState();
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
-  
-  #initColumnStatisticsButton(){
-    byId('quickQueryColumnStatisticsButton')
-    .addEventListener('click', this.#columnStatisticsButtonClickHandler.bind(this));
-  }
-  
+    
   async #columnStatisticsButtonClickHandler(event){
     var queryModelState = this.#newQueryModelState();
     queryModelState.cellsHeaders = QueryModel.AXIS_ROWS;
@@ -112,12 +87,7 @@ class QuickQueryMenu {
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
-  
-  #initDataPreviewButton(){
-    byId('quickQueryDataPreviewButton')
-    .addEventListener('click', this.#dataPreviewButtonClickHandler.bind(this));
-  }
-  
+    
   async #dataPreviewButtonClickHandler(event){
     var queryModelState = this.#newQueryModelState();
     
@@ -157,12 +127,7 @@ class QuickQueryMenu {
     var queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
-  
-  #initDestructuredDataPreviewButton(){
-    byId('quickQueryDestructuredDataPreviewButton')
-    .addEventListener('click', this.#destructuredDataPreviewButtonClickHandler.bind(this));
-  }
-  
+    
   async #destructuredDataPreviewButtonClickHandler(event){
     // this should be like the data preview but,
     // - any STRUCT columns should be expanded to column.member items

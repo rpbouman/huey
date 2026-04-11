@@ -1145,8 +1145,8 @@ class DuckDbDataSource extends EventEmitter {
     if (this.#managedConnection === undefined){
       this.#managedConnection = this.createManagedConnection();
       if (this.supportsRejectsDetection()){
-        this.#managedConnection.addEventListener('beforequery', this.#queryExecutionListener.bind(this));
-        this.#managedConnection.addEventListener('afterquery', this.#queryExecutionListener.bind(this));
+        this.#managedConnection.addEventListener('beforequery', event => this.#queryExecutionListener( event ) );
+        this.#managedConnection.addEventListener('afterquery', event => this.#queryExecutionListener( event ) );
       }
     }
     return this.#managedConnection;

@@ -25,7 +25,7 @@ class DataSourceMenu {
       500
     );
     
-    datasourcesUi.addEventListener('change', this.#datasourcesChangedHandler.bind(this));
+    datasourcesUi.addEventListener('change', event => this.#datasourcesChangedHandler( event ) );
   }
   
   getDom(){
@@ -81,14 +81,8 @@ class DataSourceMenu {
   }
   
   static #getDatasourceMenuItem(config, instantiate){
-    var datasourceMenuItemTemplate = byId('datasource-menu-item');
-    var item;
-    if (instantiate ) {
-      item = datasourceMenuItemTemplate.content.cloneNode(true).children.item(0);
-    }
-    else {
-      item = datasourceMenuItemTemplate.content.children.item(0);
-    }
+    const datasourceMenuItemTemplate = byId('datasource-menu-item');
+    const item = instantiate ? datasourceMenuItemTemplate.content.cloneNode(true).children.item(0) : datasourceMenuItemTemplate.content.children.item(0);
     if (config.datasourceType) {
       item.setAttribute('data-datasourcetype', config.datasourceType);
     }
@@ -120,7 +114,7 @@ class DataSourceMenu {
     if (typeof config.clickHandler === 'function'){
       radio.removeAttribute('id')
       button.setAttribute('id', id);
-      button.addEventListener('click', config.clickHandler);
+      button.addEventListener('click', config.clickHandler );
     }
     else {
       button.removeAttribute('id')
@@ -177,7 +171,7 @@ class DataSourceMenu {
       return
     }
     
-    Object.keys(compatibleDatasources).forEach(function(datasourceKey, index){
+    Object.keys(compatibleDatasources).forEach((datasourceKey, index) => {
       var datasource = compatibleDatasources[datasourceKey];
       var datasourceId = datasource.getId();
       
@@ -204,7 +198,7 @@ class DataSourceMenu {
       };
       var item = DataSourceMenu.getDatasourceMenuItem(config);
       dom.appendChild(item);
-    }.bind(this));
+    });
   }
   
 }

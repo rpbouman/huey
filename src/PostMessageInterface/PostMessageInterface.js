@@ -5,7 +5,7 @@ class PostMessageInterface {
   }
 
   #init(){
-    window.addEventListener('message', this.#messageHandler.bind(this));
+    window.addEventListener('message', event => this.#messageHandler( event ) );
   }
   
   async #messageHandler(event){

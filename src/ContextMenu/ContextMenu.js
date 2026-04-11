@@ -10,7 +10,7 @@ class ContextMenu {
   
   #initEvents(menuHost){
     // add a handler to the menuHost's dom so the context menu can be opened when the user askes for it
-    menuHost.getDom().addEventListener('contextmenu', function(event){
+    menuHost.getDom().addEventListener('contextmenu', event => {
       // check of the host has a beforeShowContextMenu handler.
       // if it has one, call it, and pass the event and the context menu object (this)
       // this allows the menuHost to tweak the context menu before its actually presented to the user.
@@ -27,7 +27,7 @@ class ContextMenu {
       // instead, show our context menu.
       event.preventDefault();
       this.#showPopover(event);
-    }.bind(this));
+    });
     
     // initialize the items in the context menu so the context menu is closed when an item is activated.
     const dom = this.getDom();

@@ -11,10 +11,10 @@ class DataSourcesUi extends EventEmitter {
 
     const dom = this.getDom();
     const domParent = dom.parentNode;
-    domParent.addEventListener('dragenter', this.#dragEnterHandler.bind(this));
-    domParent.addEventListener('dragleave', this.#dragLeaveHandler.bind(this));
-    domParent.addEventListener('dragover', this.#dragOverHandler.bind(this));
-    domParent.addEventListener('drop', this.#dropHandler.bind(this));
+    domParent.addEventListener('dragenter', event => this.#dragEnterHandler( event ) );
+    domParent.addEventListener('dragleave', event => this.#dragLeaveHandler( event ) );
+    domParent.addEventListener('dragover', event => this.#dragOverHandler( event ) );
+    domParent.addEventListener('drop', event => this.#dropHandler( event ) );
   }
 
   #dragEnterHandler(event) {
@@ -93,11 +93,38 @@ class DataSourcesUi extends EventEmitter {
     return byId(this.#id);
   }
 
+  #freeEventHandlers(node) {
+    node.querySelectorAll('button').forEach( button => {
+      let handler;
+      if (button.id.endsWith('_analyze')){
+        handler = this.#analyzeDatasourceClicked;
+      }
+      else 
+      if (button.id.endsWith('_remove')){
+        handler = this.#removeDatasourceClicked;
+      }
+      else 
+      if (button.id.endsWith('_edit')){
+        handler = this.#configureDatasourceClicked;
+      }
+      else 
+      if (button.id.endsWith('_download')){
+        handler = this.#downloadDatasourceClicked;
+      }
+      if (handler){
+        button.removeEventListener('click', handler);
+      }
+    });
+    node.removeEventListener('toggle', this.#toggleDataSource);
+  }
+
   clear(content){
+    const dom = this.getDom();
+    dom.querySelectorAll('details').forEach(node => this.#freeEventHandlers(node) );
     if (!content){
       content = '';
     }
-    this.getDom().innerHTML = content;
+    dom.innerHTML = content;
   }
 
   #getLooseColumnType(columnType){
@@ -245,8 +272,8 @@ class DataSourcesUi extends EventEmitter {
     const events = config.events;
     if (events) {
       for (let eventName in events) {
-        const handler = events[eventName];
-        button.addEventListener(eventName, handler);
+        const handler = events[eventName].bind(this);
+        button.addEventListener(eventName, event => handler(event) );
       }
     }
     return actionButton;
@@ -260,7 +287,7 @@ class DataSourcesUi extends EventEmitter {
       popovertargetaction: 'hide',
       title: Internationalization.getText('Open {1} in the Query editor', datasourceId),
       events: {
-        click: this.#analyzeDatasourceClicked.bind(this)
+        click: this.#analyzeDatasourceClicked
       }
     });
     if (summaryElement) {
@@ -277,7 +304,7 @@ class DataSourcesUi extends EventEmitter {
       popovertargetaction: 'hide',
       title: Internationalization.getText('Remove datasource {1}', datasourceId),
       events: {
-        click: this.#removeDatasourceClicked.bind(this)
+        click: this.#removeDatasourceClicked
       }
     });
     if (summaryElement) {
@@ -294,7 +321,7 @@ class DataSourcesUi extends EventEmitter {
       popovertargetaction: 'hide',
       title: Internationalization.getText('Configure datasource details of {1}', datasourceId),
       events: {
-        click: this.#configureDatasourceClicked.bind(this)
+        click: this.#configureDatasourceClicked
       }
     });
     if (summaryElement) {
@@ -311,7 +338,7 @@ class DataSourcesUi extends EventEmitter {
       popovertargetaction: 'hide',
       title: Internationalization.getText('Download the contents of datasource {1} to a file.', datasourceId),
       events: {
-        click: this.#downloadDatasourceClicked.bind(this)
+        click: this.#downloadDatasourceClicked
       }
     });
     if (summaryElement) {
@@ -353,7 +380,7 @@ class DataSourcesUi extends EventEmitter {
         schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
         schemaNode.setAttribute('title', schemaName);
         schemaNode.setAttribute('data-catalog-name', catalogName);
-        schemaNode.setAttribute('data-schema-name', catalogName);
+        schemaNode.setAttribute('data-schema-name', schemaName);
         schemaNode.querySelector('span.label').textContent = schemaName;
         schemaNodes[schemaName] = schemaNode;
         datasourceTreeNode.appendChild(schemaNode);
@@ -435,9 +462,9 @@ class DataSourcesUi extends EventEmitter {
 
     switch (type) {
       case DuckDbDataSource.types.DUCKDB:
-        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
       case DuckDbDataSource.types.SQLITE:
-        datasourceNode.addEventListener('toggle', this.#toggleDataSource.bind(this));
+        this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
+        datasourceNode.addEventListener('toggle', event => this.#toggleDataSource( event ) );
         break;
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.VIEW:
@@ -514,7 +541,7 @@ class DataSourcesUi extends EventEmitter {
     if(!duckdbDataSource.supportsRejectsDetection()) {
       return;
     }
-    duckdbDataSource.addEventListener('rejectsdetected', this.#rejectsDetectedHandler.bind(this));
+    duckdbDataSource.addEventListener('rejectsdetected', event => this.#rejectsDetectedHandler( event ) );
   }
 
   #getDatasourceFromClickEvent(event){
@@ -580,6 +607,7 @@ class DataSourcesUi extends EventEmitter {
         }
         break;
     }
+    this.#freeEventHandlers(node);
     this.destroyDatasources(datasourceIdsList);
   }
 
@@ -813,9 +841,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async addDatasources(datasources){
-    datasources.forEach(function(datasource){
-      this.#addDatasource(datasource);
-    }.bind(this));
+    datasources.forEach( datasource => this.#addDatasource(datasource) );
     await this.#renderDatasources();
   }
 
