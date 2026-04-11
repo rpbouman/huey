@@ -1,37 +1,3 @@
-#filterDialogSpinner {
-  position:absolute;
-  left: 50%;
-  top: 250px;
-  zoom: 33%;
-}
-
-dialog#filterDialog[aria-busy=false] #filterDialogSpinner {
-  display: none;
-}
-
-dialog#filterDialog[aria-busy=true] #filterDialogSpinner {
-  display: block;
-}
-
-dialog#filterDialog[aria-busy=true] {
-  > section > header > section {
-
-    > header > search#filterSearch  {
-      color: transparent;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5);
-      background-color: var( --huey-medium-background-color ); 
-    }
-    
-    > section > select#filterPicklist {
-      color: transparent;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5);
-      overflow: auto;
-      background-color: var( --huey-medium-background-color ); 
-    }
-
-  }
-}
-
 dialog#filterDialog {
   resize: both;
   padding: 2px 0px 0px 2px;
@@ -39,7 +5,42 @@ dialog#filterDialog {
   min-width: 350px;
   height: 432px;
   width: 350px;
-  
+
+  #filterDialogSpinner {
+    position:absolute;
+    left: 50%;
+    top: 250px;
+    zoom: 33%;
+  }
+
+  &[aria-busy=false] #filterDialogSpinner {
+    display: none;
+  }
+
+  &[aria-busy=true] {
+
+    #filterDialogSpinner {
+      display: block;
+    }
+
+    > section > header > section {
+
+      > header > search#filterSearch  {
+        color: transparent;
+        text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        background-color: var( --huey-medium-background-color );
+      }
+
+      > section > select#filterPicklist {
+        color: transparent;
+        text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        overflow: auto;
+        background-color: var( --huey-medium-background-color );
+      }
+
+    }
+  }
+
   > header[role=toolbar] {
     padding-left: .5em;
   }
@@ -55,7 +56,7 @@ dialog#filterDialog {
     > header {
       flex-grow: 0;
     }
-    
+
     > footer {
       flex-grow: 0;
       padding-top: 4px;
@@ -69,9 +70,9 @@ dialog#filterDialog {
     > footer[role=status] {
       font-size: smaller;
     }
-    
+
   }
-  
+
   > section {
     flex-grow: .75;
     padding: 2px;
@@ -85,7 +86,7 @@ dialog#filterDialog {
 
       > li[role=menuitem],
       > li[role=menuitemcheckbox] {
-        
+
         display: inline-block;
 
         > label:has( > input[type=checkbox] ) > span::after{
@@ -99,30 +100,30 @@ dialog#filterDialog {
 
         > label:has( > input[type=checkbox] )::after {
           font-family: var( --huey-icon-font-family );
-          color: var(--huey-icon-color-subtle);  
+          color: var(--huey-icon-color-subtle);
           content: var( --icon-square );
         }
 
         > label:has( > input[type=checkbox]:checked )::after {
           content: var( --icon-checkbox );
           color: var( --huey-icon-color-highlight );
-        }    
+        }
 
         > label:has( > input[type=checkbox] ):hover::after {
           color: var( --huey-icon-color-highlight );
         }
       }
     }
-    
+
     > header {
       white-space: nowrap;
 
       > section {
 
-        > header { 
+        > header {
 
           > input[type=search]#filterSearch {
-            border-color: var( --huey-light-border-color ); 
+            border-color: var( --huey-light-border-color );
             width: calc( 100% - 40px );
             position:relative;
             height: 24px;
@@ -143,8 +144,8 @@ dialog#filterDialog {
             box-shadow: 0px 0px 0px transparent;
             width: calc( 100% - 10px );
             height: calc( 100% );
-            /* 
-              https://github.com/rpbouman/huey/issues/566 
+            /*
+              https://github.com/rpbouman/huey/issues/566
               ensure minheight is listsize (4) * height of option (ca 20px;
             */
             min-height: 80px;
@@ -167,12 +168,12 @@ dialog#filterDialog {
       margin-top: 4px;
       display: flex;
       flex-direction: row;
-      
+
       > label > select {
         width: 100%;
         height: calc( 100% - 20px);
       }
-      
+
       > div {
         flex-grow: 1;
         display: flex;
@@ -186,10 +187,10 @@ dialog#filterDialog {
         > select {
           flex-grow: 1;
           width: calc( 100% - 10px );
-          /* 
-            https://github.com/rpbouman/huey/issues/566 
+          /*
+            https://github.com/rpbouman/huey/issues/566
             ensure minheight is listsize (4) * height of option (ca 20px;
-          */          
+          */
           min-height: 80px;
         }
       }
@@ -209,155 +210,148 @@ dialog#filterDialog {
 
     }
 
-  }
+    &:not( section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
+      pointer-events: none;
+      color: var( --huey-placeholder-color );
+      background-color: var( --huey-medium-background-color );
+    }
 
-  > section:not( section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
-    pointer-events: none;
-    color: var( --huey-placeholder-color );
-    background-color: var( --huey-medium-background-color );
-  }
-  
-  > section:has( > section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
-    pointer-events: auto;
-    color: var( --huey-foreground-color );
-    background-color: var( --huey-dark-background-color );
-  }
-  
-  > section:not( section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
-    pointer-events: none;
-    color: var( --huey-placeholder-color );
-    background-color: var( --huey-medium-background-color );
-  }  
-  
-  > section:has( > section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
-    pointer-events: auto;
-    color: var( --huey-foreground-color );
-    background-color: var( --huey-dark-background-color );
+    &:has( > section > div > select > option:checked ) > footer[role=toolbar] > button#filterDialogClearSelectedButton {
+      pointer-events: auto;
+      color: var( --huey-foreground-color );
+      background-color: var( --huey-dark-background-color );
+    }
+
+    &:not( section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
+      pointer-events: none;
+      color: var( --huey-placeholder-color );
+      background-color: var( --huey-medium-background-color );
+    }
+
+    &:has( > section > div > select > option ) > footer[role=toolbar] > button#filterDialogClearButton {
+      pointer-events: auto;
+      color: var( --huey-foreground-color );
+      background-color: var( --huey-dark-background-color );
+    }
+
   }
 
   > footer {
-    
+
     margin-top: 2px;
     margin-bottom: 0px;
     padding: 4px 4px 0px 4px;
     height: 30px;
-    
+
     > button {
       width: 6em;
-    }  
+    }
   }
-}
+  
+  &:is(
+    [data-query-model-item-datatype^="DECIMAL"],
+    [data-query-model-item-datatype="DOUBLE"],
+    [data-query-model-item-datatype$="INT"],
+    [data-query-model-item-datatype="INTEGER"]
+  ) select[multiple] option {
+    padding-right: 1em;
+    text-align: right;
+    font-family: var( --huey-mono-font-family );
+  }
 
-dialog#filterDialog:is(
-  [data-query-model-item-datatype^="DECIMAL"],
-  [data-query-model-item-datatype="DOUBLE"],
-  [data-query-model-item-datatype$="INT"], 
-  [data-query-model-item-datatype="INTEGER"]
-) select[multiple] option {
-  padding-right: 1em;
-  text-align: right;
-  font-family: var( --huey-mono-font-family );
-}
+  &:not(
+    [data-query-model-item-datatype^="DECIMAL"],
+    [data-query-model-item-datatype="DOUBLE"],
+    [data-query-model-item-datatype$="INT"],
+    [data-query-model-item-datatype="INTEGER"]
+  ) > section:has(
+    > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked
+  ) select[multiple=true] option::after {
+    content: "\00a0\00a0(" attr( value ) ")";
+  }
+  
+  &:is(
+    [data-query-model-item-datatype^="DECIMAL"],
+    [data-query-model-item-datatype="DOUBLE"],
+    [data-query-model-item-datatype$="INT"],
+    [data-query-model-item-datatype="INTEGER"]
+  ) > section:has(
+    > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked
+  ) select[multiple=true] option::before {
+    content: "(" attr( value ) ")\00a0\00a0";
+  }
 
-dialog#filterDialog:not(
-  [data-query-model-item-datatype^="DECIMAL"],
-  [data-query-model-item-datatype="DOUBLE"],
-  [data-query-model-item-datatype$="INT"], 
-  [data-query-model-item-datatype="INTEGER"]
-) > section:has( 
-  > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
-) select[multiple=true] option::after {
-  content: "\00a0\00a0(" attr( value ) ")";
-}
+  &:has( 
+    > header > select#filterType > option:is( 
+      [value=between], [value=notbetween] 
+    ):checked 
+  ) {
+    
+    > section {
+      
+      > section {
 
-dialog#filterDialog:is(
-  [data-query-model-item-datatype^="DECIMAL"],
-  [data-query-model-item-datatype="DOUBLE"],
-  [data-query-model-item-datatype$="INT"], 
-  [data-query-model-item-datatype="INTEGER"]
-) > section:has( 
-  > menu[role=toolbar] > label[for=filterDialogShowRawCheckbox] > input#filterDialogShowRawCheckbox[type=checkbox]:checked 
-) select[multiple=true] option::before {
-  content: "(" attr( value ) ")\00a0\00a0";
-}
+        > div {
+          > select#filterValueList,
+          > select#toFilterValueList {
+            padding-top: .5em;
+            overflow: auto;
+          }
+        }
+        
+        > div:has( label[for=filterValueList] ){
+          flex-grow: 0;
+          max-width: calc( 100% - 86px );
+          z-index: 1;
+          
+          > select#filterValueList {
+            min-width: 130px;
+            resize: horizontal;
+            overflow-y: hidden;
+          }
+        }
+        
+        > div:has( label[for=toFilterValueList] ) {
+          display: flex;
+          flex-grow: 1;
+          
+          > select#toFilterValueList {
+            width: calc(100% - 10px);
+            min-width: 75px;
+            border-radius: 0px;
+          }
+        }
+        
+      }
+      
+    }
+  }
 
-/* panel with the toFilterValueList is hidden by default, but visible for between/notbetween operators. */
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ), 
-dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) {
-  display: flex;
-  flex-grow: 1;
-}
+  /*
+    If the data type  is not VARCHAR, then operator types LIKE and NOT LIKE aren't available.
+  */
+  &:not( 
+    [data-query-model-item-datatype='VARCHAR'],
+    [data-query-model-item-datatype='BLOB'],
+    [data-query-model-item-datatype='ENUM']
+  ) > header[role=toolbar] > select#filterType > option:is( 
+    [value=like], [value=notlike] 
+  ){
+    display: none;
+  }
 
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=toFilterValueList] ) > select#toFilterValueList, 
-dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=toFilterValueList] ) > select#toFilterValueList {
-  width: calc(100% - 10px);
-  min-width: 75px;
-}
+  /*
+    LIST/ARRAY operators hasany, hasall, nothasany, nothasall are hidden by default
+  */
+  &:not( 
+    [data-query-model-item-datatype$=']'] 
+  ) > header[role=toolbar] > select#filterType > option:is(
+    [value=hasany],
+    [value=hasall],
+    [value=nothasany],
+    [value=nothasall]
+  ){
+    display: none;
+  }
 
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ),
-dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ){
-  flex-grow: 0;
-  max-width: calc( 100% - 86px );
-  z-index: 1;
-}
-
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) > section > section > div:has( label[for=filterValueList] ) > #filterValueList,
-dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) > section > section > div:has( label[for=filterValueList] ) > #filterValueList {
-  min-width: 130px;
-}
-
-
-dialog#filterDialog #filterValueList,
-dialog#filterDialog #toFilterValueList {
-  padding-top: .5em;
-  overflow: auto;
-}
-
-dialog#filterDialog:has( > header > select#filterType > option[value=between]:checked ) #filterValueList,
-dialog#filterDialog:has( > header > select#filterType > option[value=notbetween]:checked ) #filterValueList {
-  resize: horizontal;
-  overflow-y: hidden;
-}
-
-#toFilterValueList{
-  border-radius: 0px;
-}
-
-#filterValueList, #toFilterValueList {
-}
-
-/* 
-  Operators LIKE and NOT LIKE are hidden by default
-*/
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=like],
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=notlike] {
-  display: none;
-}
-
-/* 
-  Operators LIKE and NOT LIKE are available when the filter item data type is VARCHAR
-*/
-dialog#filterDialog[data-query-model-item-datatype='VARCHAR'] > header[role=toolbar] > select#filterType > option[value=like],
-dialog#filterDialog[data-query-model-item-datatype='VARCHAR'] > header[role=toolbar] > select#filterType > option[value=notlike] {
-  display: block;
-}
-
-/*
-  LIST/ARRAY operators hasany, hasall, nothasany, nothasall are hidden by default
-*/
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=hasany],
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=hasall],
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=nothasany],
-dialog#filterDialog > header[role=toolbar] > select#filterType > option[value=nothasall] {
-  display: none;
-}
-
-/*
-  LIST/ARRAY operators hasany, hasall, nothasany, nothasall are available when the filter axis item data type is an array type. 
-*/
-dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=hasany],
-dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=hasall],
-dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=nothasany],
-dialog#filterDialog[data-query-model-item-datatype$='[]'] > header[role=toolbar] > select#filterType > option[value=nothasall] {
-  display: block;
 }
