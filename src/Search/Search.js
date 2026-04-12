@@ -1,47 +1,48 @@
 function clearSearch(){
   byId('searchAttribute').value = '';
-  var attributeUi = byId('attributeUi');
-  var attributeNodes = attributeUi.getElementsByTagName('details');
-  for (var i = 0; i < attributeNodes.length; i++){
-    var attributeNode = attributeNodes.item(i);
+  const attributeUi = byId('attributeUi');
+  const attributeNodes = attributeUi.querySelectorAll('details');
+  attributeNodes.forEach( attributeNode => {
     attributeNode.setAttribute('data-matches-searchstring', '');
-  }
+  });
 }
 
 function handleAttributeSearch(event, count){
   if (count !== undefined) {
     return;
   }
-  var highlightName = 'HueyAttributeSearchHighlights';
-  var highlight = CSS.highlights.get(highlightName);
+  const highlightName = 'HueyAttributeSearchHighlights';
+  
+  let highlight = CSS.highlights.get(highlightName);
   if (!highlight){
     highlight = new Highlight();
     CSS.highlights.set(highlightName, highlight);
   }
+  
   if (highlight){
     highlight.clear();
   }
   
-  var searchElement = event.target;
-  var searchString = searchElement.value.trim();
-  var searchPattern = searchString.replace(/([(){}\[\]^$+*?.\\])/g, '\\$&');
+  const searchElement = event.target;
+  const searchString = searchElement.value.trim();
+  let searchPattern = searchString.replace(/([(){}\[\]^$+*?.\\])/g, '\\$&');
   searchPattern = searchPattern.replace(/%/g, '.+');
-  var regex = new RegExp(searchPattern, 'i');
-  var attributeUi = byId('attributeUi');
+  const regex = new RegExp(searchPattern, 'i');
+  const attributeUi = byId('attributeUi');
   
-  var attributeNodes = attributeUi.querySelectorAll(`details`);
-  var matchingAttributeNodes = [];
-  for (var i = 0; i < attributeNodes.length; i++){
-    var attributeNode = attributeNodes.item(i);
-    var match;
+  const attributeNodes = attributeUi.querySelectorAll(`details`);
+  const matchingAttributeNodes = [];
+  for (let i = 0; i < attributeNodes.length; i++){
+    const attributeNode = attributeNodes.item(i);
+    let match;
     if (searchString === '') {
       match = '';
     }
     else {
-      var label = attributeNode.querySelector('summary > span.label');
+      const label = attributeNode.querySelector('summary > span.label');
       label.normalize();
-      var labelTextNode = label.firstChild;
-      var caption = label.textContent;
+      const labelTextNode = label.firstChild;
+      const caption = label.textContent;
       match = regex.test(caption);
       if (!match) {
         match = false;
@@ -50,13 +51,13 @@ function handleAttributeSearch(event, count){
       else {
         regex.lastIndex = 0;
         do {
-          var match = regex.exec(caption);
+          match = regex.exec(caption);
           if (match === null || match.index < regex.lastIndex) {
             break;
           }
-          var range = new Range();
+          const range = new Range();
           range.setStart(labelTextNode, match.index);
-          var rangeEnd = match.index + match[0].length;
+          const rangeEnd = match.index + match[0].length;
           range.setEnd(labelTextNode, rangeEnd);
           regex.lastIndex = rangeEnd;
           highlight.add(range);
@@ -71,8 +72,8 @@ function handleAttributeSearch(event, count){
   }
   
   // ensure the ancestors of the matching nodes are visible too
-  for (var i = 0; i < matchingAttributeNodes.length; i++){
-    var parentNode = matchingAttributeNodes[i];
+  for (let j = 0; j < matchingAttributeNodes.length; j++){
+    const parentNode = matchingAttributeNodes[i];
     while (
       (parentNode = parentNode.parentNode) && 
       parentNode.nodeName === 'DETAILS' && 

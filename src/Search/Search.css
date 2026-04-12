@@ -18,7 +18,11 @@ search#searchAttributeUi {
 }
 
 /* if there are attributes in the attribute ui, then the search panel is visible */
-main > nav#sidebar > div:has( > label[role=tab][for=attributesTab] ) > div[role=tabpanel]:has( > #attributeUi[role=tree] > details[role=treeitem] ) > search#searchAttributeUi {
+main > nav#sidebar > div:has( 
+  > label[role=tab][for=attributesTab] 
+) > div[role=tabpanel]:has( 
+  > #attributeUi[role=tree] > details[role=treeitem] 
+) > search#searchAttributeUi {
   display: block;
 }
 
