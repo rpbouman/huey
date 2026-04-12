@@ -3,16 +3,16 @@ class PromptUi {
   static {
 
     byId('promptDialogAcceptButton')
-    .addEventListener('click', function(event){
-      var dialog = byId('promptUi');
+    .addEventListener('click', event => {
+      const dialog = byId('promptUi');
       dialog.returnValue = 'accept';
       // firefox seems to forget the returnValue
       dialog.setAttribute('data-returnValue', dialog.returnValue);
     });
 
     byId('promptDialogRejectButton')
-    .addEventListener('click', function(event){
-      var dialog = byId('promptUi');
+    .addEventListener('click', event => {
+      const dialog = byId('promptUi');
       dialog.returnValue = 'reject';
       // firefox seems to forget the returnValue
       dialog.setAttribute('data-returnValue', dialog.returnValue);
@@ -21,18 +21,17 @@ class PromptUi {
   }
 
   static show(config){
-    return new Promise(function(resolve, reject){
-      var promptDialog = byId( 'promptUi');
-      var ariaLabel = promptDialog.querySelector('#' + promptDialog.getAttribute('aria-labelledby'))
+    return new Promise((resolve, reject) => {
+      const promptDialog = byId( 'promptUi');
+      const ariaLabel = promptDialog.querySelector('#' + promptDialog.getAttribute('aria-labelledby'))
       ariaLabel.textContent = config.title;
-      var section = promptDialog.querySelector('section')
+      const section = promptDialog.querySelector('section')
       section.innerHTML = config.contents;
 
-      var closeHandler = function(event){
+      promptDialog.addEventListener('close', event => {
         byId('promptUi').removeEventListener('close', closeHandler);
         resolve(byId('promptUi').getAttribute('data-returnValue'));
-      };
-      promptDialog.addEventListener('close', closeHandler);
+      });
       promptDialog.showModal();
     });
   }
