@@ -18,13 +18,13 @@ class QuickQueryMenu {
     if (!callbackScope) {
       callbackScope = this;
     }
-    var queryModel = this.#queryModel;
-    var datasource = queryModel.getDatasource();
-    var columnsMetadata = await datasource.getColumnMetadata();
+    const queryModel = this.#queryModel;
+    const datasource = queryModel.getDatasource();
+    const columnsMetadata = await datasource.getColumnMetadata();
     
-    var callbackResults = [];
-    for (var i = 0; i < columnsMetadata.numRows; i++){
-      var columnMetadata = columnsMetadata.get(i);
+    const callbackResults = [];
+    for (let i = 0; i < columnsMetadata.numRows; i++){
+      const columnMetadata = columnsMetadata.get(i);
       callbackResults.push( callback.call(callbackScope, columnMetadata, i) );
     }
     
@@ -32,9 +32,9 @@ class QuickQueryMenu {
   }
   
   #newQueryModelState(){
-    var queryModel = this.#queryModel;
-    var datasource = queryModel.getDatasource();
-    var datasourceId = datasource.getId();
+    const queryModel = this.#queryModel;
+    const datasource = queryModel.getDatasource();
+    const datasourceId = datasource.getId();
     
     return {
       datasourceId: datasourceId,
@@ -44,38 +44,38 @@ class QuickQueryMenu {
   }
 
   #flipAxesButtonClickHandler(event){
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
     queryModel.flipAxes();
   }
 
   #cellHeadersOnColumnsButtonClickHandler(event){
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
     queryModel.setCellHeadersAxis(QueryModel.AXIS_COLUMNS);
   }
   
   #cellHeadersOnRowsButtonClickHandler(event){
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
     queryModel.setCellHeadersAxis(QueryModel.AXIS_ROWS);
   }
 
   async #clearAllButtonClickHandler(event){
-    var queryModelState = this.#newQueryModelState();
-    var queryModel = this.#queryModel;
+    const queryModelState = this.#newQueryModelState();
+    const queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
     
   async #columnStatisticsButtonClickHandler(event){
-    var queryModelState = this.#newQueryModelState();
+    const queryModelState = this.#newQueryModelState();
     queryModelState.cellsHeaders = QueryModel.AXIS_ROWS;
-    var items = queryModelState.axes[QueryModel.AXIS_CELLS] = [];
-    var aggregators = ['min', 'max', 'count', 'distinct count'];
+    const items = queryModelState.axes[QueryModel.AXIS_CELLS] = [];
+    const aggregators = ['min', 'max', 'count', 'distinct count'];
     
     await this.#forEachColumn(function(columnMetadata,columnIndex){
-      var columnName = columnMetadata.column_name;
-      var columnType = columnMetadata.column_type;
-      for (var i = 0; i < aggregators.length; i++) {
-        var aggregator = aggregators[i];
-        var item = {
+      const columnName = columnMetadata.column_name;
+      const columnType = columnMetadata.column_type;
+      for (let i = 0; i < aggregators.length; i++) {
+        const aggregator = aggregators[i];
+        const item = {
           column: columnName,
           columnType: columnType,
           aggregator: aggregator
@@ -84,12 +84,12 @@ class QuickQueryMenu {
       }
     });
 
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
     
   async #dataPreviewButtonClickHandler(event){
-    var queryModelState = this.#newQueryModelState();
+    const queryModelState = this.#newQueryModelState();
     
     var rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
     rowsAxisItems.push({
@@ -97,12 +97,12 @@ class QuickQueryMenu {
       caption: '#'
     });
     
-    var cellsAxisItems = queryModelState.axes[QueryModel.AXIS_CELLS] = [];
+    const cellsAxisItems = queryModelState.axes[QueryModel.AXIS_CELLS] = [];
     
     await this.#forEachColumn(function(columnMetadata,columnIndex){
-      var columnName = columnMetadata.column_name;
-      var columnType = columnMetadata.column_type;
-      var item = {
+      const columnName = columnMetadata.column_name;
+      const columnType = columnMetadata.column_type;
+      const item = {
         column: columnName,
         columnType: columnType,
         caption: columnName,
@@ -124,7 +124,7 @@ class QuickQueryMenu {
     queryModelState.sampling[QueryModel.AXIS_ROWS] = samplingConfig;
     queryModelState.sampling[QueryModel.AXIS_CELLS] = samplingConfig;
 
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
     await queryModel.setState(queryModelState);
   }
     
@@ -138,7 +138,7 @@ class QuickQueryMenu {
 
 }
 
-var quickQueryMenu;
+let quickQueryMenu;
 function initQuickQueryMenu(){
   quickQueryMenu = new QuickQueryMenu(queryModel);
 }
