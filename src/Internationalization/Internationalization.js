@@ -1,39 +1,38 @@
 class Internationalization {
-  
+
   static #texts;
   static #languageIndex = undefined;
   static #hueyNativeLanguage = 'en';
   static #currentLocale = undefined;
-  
+
   static #translateableAttributes = [
     'alt',
     'placeholder',
-    'title', 
+    'title',
     'aria-braillelabel',
     'aria-brailleroledescription',
     'aria-description',
-    'aria-label', 
+    'aria-label',
     'aria-placeholder',
     'aria-roledescription',
     'aria-valuenow',
     'aria-valuetext'
   ];
-  
+
   static {
     document.addEventListener('DOMContentLoaded', Internationalization.#init);
-    window.addEventListener('languagechange', Internationalization.#languageChanged)
+    window.addEventListener('languagechange', event => Internationalization.#languageChanged( event ) )
   }
-    
+
   static #init(event){
     if (Internationalization.#currentLocale === undefined){
       Internationalization.#setCurrentLocale(Internationalization.#hueyNativeLanguage);
     }
-    var languages = navigator.languages;
     Internationalization.#loadTexts();
   }
-  
+
   static #setCurrentLocale(localeName){
-    var locale = new Intl.Locale(localeName);
+    const locale = new Intl.Locale(localeName);
     Internationalization.#currentLocale = locale;
     document.documentElement.setAttribute('lang', Internationalization.getCurrentLanguage());
   }
@@ -48,11 +47,11 @@ class Internationalization {
     Internationalization.#texts = {};
     Internationalization.#init();
   }
-  
+
   static #getScriptElement(){
-    var elementName = 'script';
-    var elementId = 'InterationalizationTexts';
-    var scripElement = document.querySelector(`${elementName}#${elementId}`);
+    const elementName = 'script';
+    const elementId = 'InterationalizationTexts';
+    let scripElement = document.querySelector(`${elementName}#${elementId}`);
     if (!scripElement){
       scripElement = document.createElement(elementName);
       scripElement.setAttribute('id', elementId);
@@ -61,51 +60,51 @@ class Internationalization {
     }
     return scripElement;
   }
-  
+
   static #loadTexts(){
     if (Internationalization.#languageIndex === undefined) {
       Internationalization.#languageIndex = 0;
     }
-    var languages = navigator.languages;
+    const languages = navigator.languages;
     if (Internationalization.#languageIndex >= languages.length){
       console.log(`Internationalization: No more languages to attempt.`);
     }
-    var language = languages[ Internationalization.#languageIndex++ ];
+    const language = languages[ Internationalization.#languageIndex++ ];
     if (language === Internationalization.#hueyNativeLanguage){
       console.log(`No need to load Internationalization texts for Huey native language "${Internationalization.#hueyNativeLanguage}".`);
       Internationalization.#applyTexts(true);
       Internationalization.#setCurrentLocale(language);
       return;
     }
-    
-    var url = `Internationalization/i18n/${language}.js`;
-    console.log(`Attempt to load Internationzalization texts from "${url}"`);    
-    var scriptElement = Internationalization.#getScriptElement();
+
+    const url = `Internationalization/i18n/${language}.js`;
+    console.log(`Attempt to load Internationzalization texts from "${url}"`);
+    const scriptElement = Internationalization.#getScriptElement();
     scriptElement.src = url;
   }
-  
+
   static textsLoaded(event){
-    var scriptElement = event.target;
-    var message = `Attempt to load Internationzalization texts from "${scriptElement.src}"`;
+    const scriptElement = event.target;
+    const message = `Attempt to load Internationzalization texts from "${scriptElement.src}"`;
     if (Internationalization.#texts === undefined){
       console.log(message + ' failed.');
       Internationalization.#loadTexts();
     }
     else {
-      var src = scriptElement.src;
-      var parts = src.split('/');
-      var resource = parts.pop();
+      const src = scriptElement.src;
+      let parts = src.split('/');
+      const resource = parts.pop();
       parts = resource.split('.');
-      var language = parts[0];
+      const language = parts[0];
       Internationalization.#setCurrentLocale(language);
       console.log(message + ' succeeded.');
       Internationalization.#applyTexts();
     }
   }
-  
+
   static setTexts(texts){
     console.log('setTexts');
-    var textObject;
+    let textObject;
     switch (typeof(texts)){
       case 'object':
         // stringify as safety measure
@@ -117,7 +116,7 @@ class Internationalization {
     Internationalization.#texts = textObject;
     Internationalization.#applyTexts();
   }
-    
+
   static #copyElements(nodeList, elements){
     if (elements === undefined) {
       elements = [];
@@ -126,55 +125,53 @@ class Internationalization {
       elements.push(nodeList.item(i));
     }
     return elements;
-  }    
-    
-  static #getTextContentElements(){    
-    var selector = '*:not( [translate=no] ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )';
-    
-    var textContentElements = document.querySelectorAll(selector);
-    var elements = Internationalization.#copyElements(textContentElements);
-    
-    // template elements themselves will be picked up by the selector. 
+  }
+
+  static #getTextContentElements(){
+    const selector = '*:not( [translate=no] ):not( :is(style, script, link) ):not( :has( > * ) ):not( :empty )';
+    const textContentElements = document.querySelectorAll(selector);
+    const elements = Internationalization.#copyElements(textContentElements);
+
+    // template elements themselves will be picked up by the selector.
     // but, their content will not be.
     // so, we need a separate loop to apply the selector on their content
-    var templateElements = document.querySelectorAll('template');
-    for (var i = 0; i < templateElements.length; i++){
-      var templateElement = templateElements.item(i);
-      var templateContent = templateElement.content.querySelectorAll(selector);
+    const templateElements = document.querySelectorAll('template');
+    for (let i = 0; i < templateElements.length; i++){
+      const templateElement = templateElements.item(i);
+      const templateContent = templateElement.content.querySelectorAll(selector);
       Internationalization.#copyElements(templateContent, elements);
     }
-    
+
     return elements;
   }
-  
+
   static #getAttributeElements(){
-    var attributeNames = Internationalization.#translateableAttributes;
-    var templateElements = document.querySelectorAll('template');
-    
-    var selection = {};
-    for (var i = 0; i < attributeNames.length; i++){
-      var attributeName = attributeNames[i];
-      var selector = `*:not( [translate=no] )[${attributeName}]`;
-      var elements = document.querySelectorAll(selector);
+    const attributeNames = Internationalization.#translateableAttributes;
+    const templateElements = document.querySelectorAll('template');
+
+    const selection = {};
+    for (let i = 0; i < attributeNames.length; i++){
+      const attributeName = attributeNames[i];
+      const selector = `*:not( [translate=no] )[${attributeName}]`;
+      const elements = document.querySelectorAll(selector);
       selection[attributeName] = Internationalization.#copyElements(elements);
-      
+
       // also add template content with the attribute.
-      for (var j = 0; j < templateElements.length; j++){
-        var templateElement = templateElements.item(j);
-        var templateContent = templateElement.content.querySelectorAll(selector);
+      for (let j = 0; j < templateElements.length; j++){
+        const templateElement = templateElements.item(j);
+        const templateContent = templateElement.content.querySelectorAll(selector);
         Internationalization.#copyElements(templateContent, selection[attributeName]);
       }
     }
     return selection;
   }
-  
-  static #visitAllTexts(callback){
-    var textContentElements = Internationalization.#getTextContentElements();
-    var i18nNativeAttributeName = 'data-i18n-native-text';
-    for (var i = 0; i < textContentElements.length; i++){
-      var element = textContentElements[i];
-      var key, value;
 
+  static #visitAllTexts(callback){
+    const textContentElements = Internationalization.#getTextContentElements();
+    const i18nNativeAttributeName = 'data-i18n-native-text';
+    for (let i = 0; i < textContentElements.length; i++){
+      const element = textContentElements[i];
+      let key, value;
       if (element.hasAttribute(i18nNativeAttributeName)){
         key = element.getAttribute(i18nNativeAttributeName);
       }
@@ -185,27 +182,27 @@ class Internationalization {
         }
       }
       value = Internationalization.getText(key);
-            
+
       callback({
         element: element,
         i18nNativeAttributeName: i18nNativeAttributeName,
         key: key,
         value: value
-      });      
+      });
     }
-      
-    var attributeElements = Internationalization.#getAttributeElements();
-    for (var attributeName in attributeElements){
-      var elements = attributeElements[attributeName];
-      var key, value;
-      
-      for (var j = 0; j < elements.length; j++){
-        var element = elements[j];
+
+    const attributeElements = Internationalization.#getAttributeElements();
+    for (let attributeName in attributeElements){
+      const elements = attributeElements[attributeName];
+      let key, value;
+
+      for (let j = 0; j < elements.length; j++){
+        const element = elements[j];
         if (!element.hasAttribute(attributeName)){
           continue;
         }
-        
-        var i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
+
+        const i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
         if (element.hasAttribute(i18nNativeAttributeName)){
           key = element.getAttribute(i18nNativeAttributeName);
         }
@@ -222,17 +219,17 @@ class Internationalization {
           attributeName: attributeName,
           key: key,
           value: value
-        });      
+        });
       }
     }
   }
-  
+
   static #applyTexts(toNative){
     Internationalization.#visitAllTexts(function(object){
       var element = object.element;
       var key = object.key;
       var value = object.value;
-      
+
       var text = toNative === true ? key : value || object.key;
       var attributeName = object.attributeName;
       if (attributeName){
@@ -241,28 +238,27 @@ class Internationalization {
       else {
         element.textContent = text;
       }
-      
+
       var i18nNativeAttributeName = object.i18nNativeAttributeName;
       if (!element.hasAttribute(i18nNativeAttributeName)){
         element.setAttribute(i18nNativeAttributeName, key);
       }
     });
   }
-    
+
   static getTextsTemplate(){
-    var allTexts = {};
-    
-    Internationalization.#visitAllTexts(function(object){
-      var element = object.element;
-      var key = object.key;
-      var value = object.value;
+    const allTexts = {};
+
+    Internationalization.#visitAllTexts(object => {
+      const key = object.key;
+      const value = object.value;
       allTexts[key] = value || null;
     });
-    
+
     return Object.keys(allTexts)
-    .sort(function(a, b){
-      var A = a.toUpperCase();
-      var B = b.toUpperCase();
+    .sort( (a, b) => {
+      const A = a.toUpperCase();
+      const B = b.toUpperCase();
       if (A > B) {
         return 1;
       }
@@ -284,54 +280,54 @@ class Internationalization {
       return acc;
     },{});
   }
-  
+
   static getText(key){
-    var text = Internationalization.getCurrentLanguage() === Internationalization.#hueyNativeLanguage ? key : Internationalization.#texts[key];
+    const text = Internationalization.getCurrentLanguage() === Internationalization.#hueyNativeLanguage ? key : Internationalization.#texts[key];
     if (text === undefined){
       //console.warn(`Translation for content "${key}" not found`);
       return undefined;
     }
-    var args = arguments;
+    const args = arguments;
     return text.replace(/\{[1-9]\d*\}/g, function(match){
-      var index = match.slice(1, -1);
+      let index = match.slice(1, -1);
       index = parseInt(index, 10);
       return args[index];
     });
   }
-  
+
   static setTextContent(element, key){
-    var args = [];
-    for (var i = 0; i < arguments.length; i++){
+    const args = [];
+    for (let i = 0; i < arguments.length; i++){
       if (i === 0) {
         continue;
       }
       args.push(arguments[i]);
     }
-    var i18nNativeAttributeName = 'data-i18n-native-text';
+    const i18nNativeAttributeName = 'data-i18n-native-text';
     element.setAttribute(i18nNativeAttributeName, key);
     if (args.length > 1){
-      var i18nNativeArgsAttributeName = i18nNativeAttributeName + '-args';
+      const i18nNativeArgsAttributeName = i18nNativeAttributeName + '-args';
       element.setAttribute(i18nNativeArgsAttributeName, JSON.stringify(args.slice(1)));
     }
-    var translatedText = Internationalization.getText.apply(Internationalization, args) || key;
+    const translatedText = Internationalization.getText.apply(Internationalization, args) || key;
     element.textContent = translatedText;
   }
-  
+
   static setAttributes(element, attributes, key){
     if (typeof attributes === 'string'){
       attributes = [attributes];
     }
-    var args = [];
-    for (var i = 2; i < arguments.length; i++){
+    const args = [];
+    for (let i = 2; i < arguments.length; i++){
       args.push(arguments[i]);
     }
-    
-    for (var i = 0; i < attributes.length; i++){
-      var attributeName = attributes[i];
+
+    for (let i = 0; i < attributes.length; i++){
+      const attributeName = attributes[i];
       if (Internationalization.#translateableAttributes.indexOf(attributeName) === -1){
         element.setAttribute(attributeName, key);
       }
-      var i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
+      const i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
       if (element.hasAttribute(i18nNativeAttributeName)){
       }
       else {
@@ -340,10 +336,10 @@ class Internationalization {
           element.setAttribute(i18nNativeAttributeName + '-args', JSON.stringify(args.slice(1)));
         }
       }
-      var attributeValue = Internationalization.getText.apply(Internationalization, args) || key;
+      const attributeValue = Internationalization.getText.apply(Internationalization, args) || key;
       element.setAttribute(attributeName, attributeValue);
     }
-    
+
   }
-  
+
 }
