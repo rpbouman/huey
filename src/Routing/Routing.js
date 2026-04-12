@@ -1,12 +1,11 @@
-
 class Routing {
  
   static getQueryModelStateFromRoute(route){
     try {
-      var base64 = route;
-      var ascii = atob( base64 ); 
-      var json = decodeURIComponent( ascii );
-      var state = JSON.parse( json );
+      const base64 = route;
+      const ascii = atob( base64 ); 
+      const json = decodeURIComponent( ascii );
+      const state = JSON.parse( json );
             
       return state;
     }
@@ -16,7 +15,7 @@ class Routing {
   }
       
   static getRouteForQueryModel(queryModel){
-    var queryModelState;
+    let queryModelState;
     if (queryModel instanceof QueryModel) {
       queryModelState = queryModel.getState();
     }
@@ -32,19 +31,18 @@ class Routing {
       return undefined;
     }
     
-    var routeObject = queryModelState.queryModel ? queryModelState : {
+    const routeObject = queryModelState.queryModel ? queryModelState : {
       queryModel: queryModelState 
     };
-    var json = JSON.stringify( routeObject );
-    var ascii = encodeURIComponent( json );
-    var base64 = btoa( ascii ); 
-    var route = base64;
+    const json = JSON.stringify( routeObject );
+    const ascii = encodeURIComponent( json );
+    const base64 = btoa( ascii ); 
+    const route = base64;
     return route;
   }
 
   static getCurrentRoute(){
-    var hash = document.location.hash;
-
+    let hash = document.location.hash;
     if (hash.startsWith('#')){
       hash = hash.substring(1);
     }
@@ -57,17 +55,17 @@ class Routing {
   }
   
   static isSynced(queryModel) {
-    var route = Routing.getRouteForQueryModel(queryModel);
-    var currentRoute = Routing.getCurrentRoute();
+    const route = Routing.getRouteForQueryModel(queryModel);
+    const currentRoute = Routing.getCurrentRoute();
     return route === currentRoute;
   }
 
   static updateRouteFromQueryModel(queryModel){
-    var newRoute = Routing.getRouteForQueryModel(queryModel);
+    const newRoute = Routing.getRouteForQueryModel(queryModel);
     //if (currentRoute === newRoute && Boolean(newRoute)) {
     //  return;
    // }
-    var hash = newRoute ? `#${newRoute}` : '';
+    const hash = newRoute ? `#${newRoute}` : '';
     //document.location.hash = hash;
     if (history.state === newRoute && Routing.getCurrentRoute() === newRoute){
       return;
