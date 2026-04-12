@@ -176,6 +176,7 @@ Internationalization.setTexts({
   "Download the contents of datasource {1} to a file.": "Baixar o conteúdo da fonte de dados {1} para um arquivo.",
   "Download the export data and save it to a local file.": "Baixar os dados de exportação e salvar em um arquivo local.",
   "Drop some files here, or click the Upload button:": "Arraste alguns arquivos aqui, ou clique no botão Upload:",
+  "Or, upload from URL:": "Ou faça o upload a partir de um URL:",
   "element indices": "índices de elementos",
   "elements": "elementos",
   "Enable this to create a highlight effect when hovering the mouse pointer over a column. This makes it easier to identify a cell's column headers.": "Ative para criar um efeito de destaque ao passar o mouse sobre uma coluna. Isso facilita a identificação dos cabeçalhos da coluna de uma célula.",

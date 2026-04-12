@@ -177,6 +177,7 @@ Internationalization.setTexts({
   "Download the contents of datasource {1} to a file.": "Download een bestand met data van {1}",
   "Download the export data and save it to a local file.": "Download de uitvoergegevens en sla ze op in een lokaal bestand.",
   "Drop some files here, or click the Upload button:": "Sleep bestanden hier naartoe, of klik op de Upload knop:",
+  "Or, upload from URL:": "Of, gebruik een URL:",
   "element indices": "indices",
   "elements": "elementen",
   "Enable this to create a highlight effect when hovering the mouse pointer over a column. This makes it easier to identify a cell's column headers.": "Schakel dit in om een highlight-effect te creëren wanneer de muiscursor over een kolom beweegt. Dit maakt het gemakkelijker om kolomkoppen van een cel te identificeren.",
