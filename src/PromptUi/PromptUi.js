@@ -28,10 +28,12 @@ class PromptUi {
       const section = promptDialog.querySelector('section')
       section.innerHTML = config.contents;
 
-      promptDialog.addEventListener('close', event => {
+      const closeHandler = function(event){
         byId('promptUi').removeEventListener('close', closeHandler);
         resolve(byId('promptUi').getAttribute('data-returnValue'));
-      });
+      }
+
+      promptDialog.addEventListener('close', closeHandler);
       promptDialog.showModal();
     });
   }
