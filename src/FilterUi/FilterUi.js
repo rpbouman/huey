@@ -213,6 +213,7 @@ class FilterDialog {
   }
   
   #handleSearchPaste( event ) {
+    const search = event.target;
     event.preventDefault();
     let pastedText = getPastedText(event);
     pastedText = pastedText.replace(/[\f\n\r\t\v]+/g, FilterDialog.MULTIPLE_VALUES_SEPARATOR);
