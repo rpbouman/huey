@@ -2,34 +2,34 @@ class SettingsDialogBase {
 
   #id = undefined;
   #settings = undefined;
-  
+
   constructor(config){
     this.#id = config.id;
     this.#initDialog();
   }
 
   restoreToDefaultHandler(event){
-    this.#settings.restoreToDefault();    
+    this.#settings.restoreToDefault();
     this.updateDialogFromSettings();
   }
-  
+
   getDialog(){
-    var settingsDialog = byId(this.#id);
+    const settingsDialog = byId(this.#id);
     return settingsDialog;
   }
-  
+
   updateSettingsFromDialog(){
     this.#synchronize('settings');
   }
-  
+
   updateDialogFromSettings(){
     this.#synchronize('dialog');
   }
-    
+
   #synchronize(settingsOrDialog){
-    var dialog = this.getDialog();
-    var settings = this.#settings;
-    var settingsObject;
+    const dialog = this.getDialog();
+    let settings = this.#settings;
+    let settingsObject;
     if (settings instanceof SettingsBase){
       settingsObject = settings;
       settings = settings.getSettings();
@@ -39,10 +39,10 @@ class SettingsDialogBase {
       settingsObject.assignSettings([], settings);
     }
   }
-    
+
   #initDialog(){
-    var settingsDialog = this.getDialog();
-    
+    const settingsDialog = this.getDialog();
+
     settingsDialog.querySelector('footer[role=toolbar] > button[value=Ok]')
     .addEventListener('click', event => {
       event.cancelBubble = true;
@@ -57,20 +57,19 @@ class SettingsDialogBase {
     });
 
   }
-  
+
   open(settings){
     this.#settings = settings;
     this.updateDialogFromSettings();
-    var dialog = this.getDialog();
+    const dialog = this.getDialog();
     dialog.showModal();
   }
-    
+
   static synchronize(dialog, settings, settingsOrDialog){
-    var settingsCopy = Object.assign({}, settings);
-    for (var sectionName in settings) {
-      var section = settings[sectionName];
-      for (var property in section) {
-        var control = byId(property);
+    for (let sectionName in settings) {
+      const section = settings[sectionName];
+      for (let property in section) {
+        const control = byId(property);
         if (!control){
           continue;
         }
@@ -91,10 +90,10 @@ class SettingsDialogBase {
       }
     }
   }
-  
+
   static #synchronizeInput(settingsOrDialog, settings, property, control){
-    var valueProperty = 'value';
-    var defaultValueGetter, defaultValueSetter;
+    let valueProperty = 'value';
+    let defaultValueGetter, defaultValueSetter;
     switch (control.type) {
       case 'radio':
       case 'checkbox':
@@ -109,19 +108,19 @@ class SettingsDialogBase {
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
         break;
     }
-    
-    var value;
+
+    let value;
     switch (settingsOrDialog){
       case 'settings':
         if (control.validityState && control.valid === false){
           break;
         }
-        var valueGetter = control.getAttribute('data-value-getter');
+        let valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
           value = valueGetter.call(null, control, this);
         }
-        else 
+        else
         if (defaultValueGetter) {
           value = defaultValueGetter.call(null, control, this);
         }
@@ -132,12 +131,12 @@ class SettingsDialogBase {
         break;
       case 'dialog':
         value = settings[property];
-        var valueSetter = control.getAttribute('data-value-setter');
+        let valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
           valueSetter = eval(valueSetter);
           valueSetter.call(null, control, value, this);
         }
-        else 
+        else
         if (defaultValueSetter) {
           value = defaultValueSetter.call(null, control, value, this);
         }
@@ -149,24 +148,25 @@ class SettingsDialogBase {
   }
 
   static #synchronizeSelect(settingsOrDialog, settings, property, control){
+    let optionsFromSettings;
     switch (settingsOrDialog) {
       case 'settings':
-        var optionsFromSettings = [];
-        var optionsFromControl = control.options;
-        
-        var valueGetter = control.getAttribute('data-value-getter');
+        optionsFromSettings = [];
+        const optionsFromControl = control.options;
+
+        let valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
         }
-        
-        for (var i = 0; i < optionsFromControl.length; i++){
-          var optionFromControl = optionsFromControl[i];
-          var value = optionFromControl.value;
-          var label = optionFromControl.label || value;
+
+        for (let i = 0; i < optionsFromControl.length; i++){
+          const optionFromControl = optionsFromControl[i];
+          let value = optionFromControl.value;
+          const label = optionFromControl.label || value;
           if (valueGetter){
             value = valueGetter.call(null, optionFromControl, this);
           }
-          optionsFromSettings.push({value: value, label: label}); 
+          optionsFromSettings.push({value: value, label: label});
         }
         settings[property].options = optionsFromSettings;
         if (valueGetter) {
@@ -174,10 +174,10 @@ class SettingsDialogBase {
         }
         else
         if (control.multiple) {
-          var value = [];
-          for (var i = 0; i < optionsFromControl.length; i++){
-            var optionFromControl = optionsFromControl[i];
-            var selected = optionFromControl.selected;
+          const value = [];
+          for (let i = 0; i < optionsFromControl.length; i++){
+            const optionFromControl = optionsFromControl[i];
+            const selected = optionFromControl.selected;
             if (selected) {
               value.push(optionFromControl.value);
             }
@@ -189,25 +189,25 @@ class SettingsDialogBase {
         }
         break;
       case 'dialog':
-        var optionsFromSettings = settings[property].options;
-        var valueFromSettings = settings[property].value;
+        optionsFromSettings = settings[property].options;
+        const valueFromSettings = settings[property].value;
 
-        var valueSetter = control.getAttribute('data-value-setter');
+        let valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
-          valueSetter = eval(valueSetter);          
+          valueSetter = eval(valueSetter);
         }
-        
+
         control.options.length = 0;
-        for (var i = 0; i < optionsFromSettings.length; i++){
-          var optionFromSettings = optionsFromSettings[i];
-          var value = optionFromSettings.value;
-          var label = optionFromSettings.label || value;
-          var title = optionFromSettings.title || label;
+        for (let i = 0; i < optionsFromSettings.length; i++){
+          const optionFromSettings = optionsFromSettings[i];
+          const value = optionFromSettings.value;
+          const label = optionFromSettings.label || value;
+          const title = optionFromSettings.title || label;
           var option = createEl('option', {
             label: label,
             title: title
           }, label);
-          
+
           if (valueSetter) {
             valueSetter.call(null, option, value, this);
           }
@@ -216,17 +216,17 @@ class SettingsDialogBase {
           }
           control.appendChild(option);
         }
-        
+
         if (valueSetter) {
           valueSetter.call(null, control, valueFromSettings, this);
         }
         else {
           if (control.multiple && valueFromSettings instanceof Array) {
-            for (var i = 0; i < control.options.length; i++){
-              var optionFromSettings = control.options[i];
-              var value = optionFromSettings.value;
-              var index = valueFromSettings.indexOf(value);
-              var selected = index !== -1;
+            for (let i = 0; i < control.options.length; i++){
+              const optionFromSettings = control.options[i];
+              const value = optionFromSettings.value;
+              const index = valueFromSettings.indexOf(value);
+              const selected = index !== -1;
               optionFromSettings.selected = selected;
             }
           }
@@ -234,9 +234,9 @@ class SettingsDialogBase {
             control.value = valueFromSettings;
           }
         }
-        
+
         break;
     }
-  }  
+  }
 
 }
