@@ -1,7 +1,7 @@
 class TabUi {
 
   static #getTablist(element){
-    var tablist;
+    let tablist;
     switch (typeof element){
       case 'string':
         tablist = document.querySelector(element);
@@ -23,7 +23,7 @@ class TabUi {
 
   static #getTablistItem(tablist, tab){
     tablist = TabUi.#getTablist(tablist);
-    var tabToBeReturned = tablist.querySelector(`*[role=tab]:has( + ${tab}[type=radio] + *[role=tabpanel] ) + ${tab}[type=radio]`);
+    const tabToBeReturned = tablist.querySelector(`*[role=tab]:has( + ${tab}[type=radio] + *[role=tabpanel] ) + ${tab}[type=radio]`);
     if (!tabToBeReturned) {
       throw new Error(`Can't find tab ${tab}`);
     }
@@ -32,12 +32,12 @@ class TabUi {
 
   static getSelectedTab(tablist){
     tablist = TabUi.#getTablist(tablist);
-    var selectedTab = tablist.querySelector('*:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ) > label[role=tab]:has( + input[type=radio]:checked + *[role=tabpanel] )');
+    const selectedTab = tablist.querySelector('*:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ) > label[role=tab]:has( + input[type=radio]:checked + *[role=tabpanel] )');
     return selectedTab;
   }
 
   static setSelectedTab(tablist, tab){
-    var item = TabUi.#getTablistItem(tablist, tab);
+    const item = TabUi.#getTablistItem(tablist, tab);
 
     item.checked = true;
     return true;
@@ -45,7 +45,7 @@ class TabUi {
   
   static getTabPanel(tablist, tab){
     tablist = TabUi.#getTablist(tablist);
-    var tabToBeReturned = tablist.querySelector(`*[role=tab]:has( + ${tab}[type=radio] + *[role=tabpanel] ) + ${tab}[type=radio] + *[role=tabpanel]`);
+    const tabToBeReturned = tablist.querySelector(`*[role=tab]:has( + ${tab}[type=radio] + *[role=tabpanel] ) + ${tab}[type=radio] + *[role=tabpanel]`);
     if (!tabToBeReturned) {
       throw new Error(`Can't find tab ${tab}`);
     }
