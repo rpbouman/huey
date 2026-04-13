@@ -6,7 +6,7 @@ function initLaunchQueue(){
         return;
       }
       // unwrap file system handle (given by pwa) to plain old web api File objects
-      files = FileUtils.unwrapFileSystemHandleToFile( files );
+      files = await FileUtils.unwrapFileSystemHandleToFile( files );
       uploadResults = await uploadUi.uploadFiles(files);
       afterUploaded(uploadResults);
     });
