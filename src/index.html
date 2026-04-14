@@ -2020,7 +2020,11 @@
       class="layout"
     >
       <menu role="toolbar">
-        <label for="uploader" title="Register local data files to explore their contents with Huey">
+        <label 
+          for="uploader" 
+          title="Register local data files to explore their contents with Huey"
+          accesskey="O"
+        >
           <input
             id="uploader"
             type="file"
@@ -2028,7 +2032,11 @@
             accept=".csv,.duckdb,.json,.jsonl,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
         </label>
-        <label for="loadFromUrl" title="Load data from URL">
+        <label 
+          for="loadFromUrl" 
+          title="Load data from URL"
+          accesskey="U"
+        >
           <button
             id="loadFromUrl"
           >Data from URL</button>
@@ -2233,6 +2241,7 @@
             for="datasourcesTab"
             role="tab"
             title="Files, database tables and so on that provide data you'd like to explore."
+            accesskey="D"
           >Datasources</label>
           <input
             id="datasourcesTab"
@@ -2314,6 +2323,7 @@
             for="attributesTab"
             role="tab"
             title="Columns, formulas and aggregates to query and pivot"
+            accesskey="A"
           >Attributes</label>
           <input
             id="attributesTab"
@@ -2333,6 +2343,7 @@
                   title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
                   aria-labelledby="searchAttributesLabel"
                   autofocus="true"
+                  accesskey="F"
                 />
               </fieldset>
             </search>
