@@ -102,7 +102,10 @@ class SettingsDialogBase {
       case 'text':
         break;
       case 'number':
-        defaultValueGetter = function(control){var num = parseFloat(control.value, 10); return isNaN(num) ? undefined : num;}
+        defaultValueGetter = function(control){
+          const num = parseFloat(control.value, 10); 
+          return isNaN(num) ? undefined : num;
+        }
         break;
       default:
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
@@ -203,7 +206,7 @@ class SettingsDialogBase {
           const value = optionFromSettings.value;
           const label = optionFromSettings.label || value;
           const title = optionFromSettings.title || label;
-          var option = createEl('option', {
+          const option = createEl('option', {
             label: label,
             title: title
           }, label);

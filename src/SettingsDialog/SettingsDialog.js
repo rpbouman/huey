@@ -386,7 +386,7 @@ class Settings extends EventEmitter {
       settings[property] = value;
     }
     else {
-      var currentValue = settings[property];
+      const currentValue = settings[property];
       switch (typeof(currentValue)) {
         case 'object':
           if (currentValue === null){
@@ -508,7 +508,10 @@ class Settings extends EventEmitter {
       case 'text':
         break;
       case 'number':
-        defaultValueGetter = function(control){var num = parseFloat(control.value, 10); return isNaN(num) ? undefined : num;}
+        defaultValueGetter = function(control){
+          const num = parseFloat(control.value, 10); 
+          return isNaN(num) ? undefined : num;
+        }
         break;
       default:
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
@@ -521,7 +524,7 @@ class Settings extends EventEmitter {
         if (control.validityState && control.valid === false){
           break;
         }
-        var valueGetter = control.getAttribute('data-value-getter');
+        let valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
           value = valueGetter.call(null, control, this);
@@ -537,7 +540,7 @@ class Settings extends EventEmitter {
         break;
       case 'dialog':
         value = settings[property];
-        var valueSetter = control.getAttribute('data-value-setter');
+        let valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
           valueSetter = eval(valueSetter);
           valueSetter.call(null, control, value, this);
