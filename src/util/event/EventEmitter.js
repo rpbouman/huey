@@ -32,7 +32,7 @@ class EventEmitter {
   }
   
   checkListenerType(listener){
-    var typeOfListener = typeof listener;
+    const typeOfListener = typeof listener;
     if (typeOfListener !== 'function'){
       throw new Error(`Listener should be of type 'function', not '${typeOfListener}'`);
     }
@@ -42,7 +42,7 @@ class EventEmitter {
     this.checkEventType(eventType);
     this.checkListenerType(listener);    
     
-    var eventListeners = this.#eventListeners[eventType];
+    let eventListeners = this.#eventListeners[eventType];
     if (!eventListeners) {
       this.#eventListeners[eventType] = eventListeners = [];
     }
@@ -57,13 +57,13 @@ class EventEmitter {
     this.checkEventType(eventType);
     this.checkListenerType(listener);    
     
-    var eventListeners = this.#eventListeners[eventType];
+    const eventListeners = this.#eventListeners[eventType];
     if (!eventListeners) {
       return 0;
     }
     
-    var count = 0;
-    var index;
+    let count = 0;
+    let index;
     while ((index = eventListeners.indexOf(listener)) !== -1){
       eventListeners.splice(index, 1);
       count += 1;
@@ -72,14 +72,14 @@ class EventEmitter {
   }
   
   fireEvent(eventType, eventData, target) {
-    var eventListeners = this.#eventListeners[eventType];
+    const eventListeners = this.#eventListeners[eventType];
     if (!eventListeners) {
       return;
     }
-    var target = target || this;
-    var event = new Event(eventType);
+    target = target || this;
+    const event = new Event(eventType);
     //https://stackoverflow.com/questions/37456443/how-set-the-eventtarget-of-an-event
-    var targetPropertyDefinition = {
+    const targetPropertyDefinition = {
       writable: false,
       value: target
     };
@@ -89,7 +89,7 @@ class EventEmitter {
     eventData.emitter = target;
     
     if (this.#emitEvents) {
-      eventListeners.forEach(function(listener){
+      eventListeners.forEach(listener => {
         listener.call(null, event);
       });
     }
