@@ -38,7 +38,6 @@ class TabUi {
 
   static setSelectedTab(tablist, tab){
     const item = TabUi.#getTablistItem(tablist, tab);
-
     item.checked = true;
     return true;
   }
