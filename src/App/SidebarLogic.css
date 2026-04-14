@@ -1,4 +1,4 @@
-  nav#sidebar[role=tablist] {
+nav#sidebar[role=tablist] {
 
   height: calc(100vh - 40px);
   max-width: calc(100vw - 14px);
@@ -12,6 +12,10 @@
   
   &::-webkit-scrollbar-corner{
     background-color: var( --huey-medium-background-color );
+  }
+  
+  > div > div[role=tabpanel] {
+    height: calc( 100% - 40px );
   }
 
   /**
