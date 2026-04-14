@@ -91,7 +91,7 @@ class QuickQueryMenu {
   async #dataPreviewButtonClickHandler(event){
     const queryModelState = this.#newQueryModelState();
     
-    var rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
+    const rowsAxisItems = queryModelState.axes[QueryModel.AXIS_ROWS] = [];
     rowsAxisItems.push({
       derivation: 'row number',
       caption: '#'
@@ -114,7 +114,7 @@ class QuickQueryMenu {
       cellsAxisItems.push(item);
     });
     
-    var samplingConfig = {
+    const samplingConfig = {
       size: 100,
       unit: 'ROWS',
       method: 'LIMIT',
