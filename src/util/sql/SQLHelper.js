@@ -131,7 +131,7 @@ function createNumberFormatter(fractionDigits){
   }
   
   function formatArrowDecimal(value, type){
-    var decimalString = getArrowDecimalAsString(value, type);
+    const decimalString = getArrowDecimalAsString(value, type);
     return formatter.format(decimalString);
   }    
   
@@ -188,13 +188,13 @@ function createTimestampFormatter(withTimeZone){
     if (value === null ){
       return getNullString();
     }
-    let date = new Date(value);
+    const date = new Date(value);
     let parts = String(value).split('.');
-    var micros;
+    let micros;
     if (parts.length === 2) {
       micros = parseInt( parts[1], 10 );
     }
-    var dateTimeString = formatter.format(date);
+    const dateTimeString = formatter.format(date);
     
     if (!micros) {
       return dateTimeString;
@@ -236,11 +236,11 @@ function createTimeFormatter(withTimeZone){
     value = parseInt(value, 10) / 1000;
     let date = new Date(value);
     let parts = String(value).split('.');
-    var micros;
+    let micros;
     if (parts.length === 2) {
       micros = parseInt( parts[1], 10 );
     }
-    var dateTimeString = formatter.format(date);
+    const dateTimeString = formatter.format(date);
     
     if (!micros) {
       return dateTimeString;
@@ -313,7 +313,7 @@ function createDecimalLiteralWriter(precision, scale){
     throw new Error(`Cannot specify scale without specifying precision`);
   }
   
-  var formatter = new Intl.NumberFormat(undefined, {
+  const formatter = new Intl.NumberFormat(undefined, {
     useGrouping: false,
     signDisplay: 'negative',
     minimumIntegerDigits: 1,
@@ -650,7 +650,7 @@ function getDuckDbLiteralForValue(value, type){
   return literal;
 }
 
-var dataTypes = {
+const dataTypes = {
   'DECIMAL': {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
@@ -1254,7 +1254,7 @@ function getQualifiedIdentifier(){
       sqlOptions = normalizeSqlOptions(sqlOptions);
       
       const args = [];
-      for (var i = 0; i < n; i++){
+      for (let i = 0; i < n; i++){
         const identifier = arguments[i];
         args.push(identifier);
       }
@@ -1272,7 +1272,7 @@ async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repository
     return;
   }
 
-  var row = result.get(0);
+  let row = result.get(0);
   const loaded = row.loaded;
   const installed = row.installed;
   
@@ -1441,7 +1441,7 @@ function getMapKeyValueType(mapType){
   let i;
   const elementTypes = unQuote(mapType, 'MAP(', ')');
   _loop: for (i = 0; i < elementTypes.length; i++){
-    var ch = elementTypes.charAt(i);
+    const ch = elementTypes.charAt(i);
     switch (ch){
       case '(':
         level += 1;
@@ -1549,7 +1549,7 @@ function getMemberExpressionType(type, memberExpressionPath){
             memberExpressionType = getArrayType(memberExpressionType);
             break;
           default:
-            var typeDescriptor = getStructTypeDescriptor(type);
+            const typeDescriptor = getStructTypeDescriptor(type);
             memberExpressionType = typeDescriptor[memberExpression];
         }
         return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
