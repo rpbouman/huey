@@ -3,7 +3,7 @@ function byId(id){
 }
 
 function createEl(tagName, attributes, content){
-  var el = document.createElement(tagName);
+  const el = document.createElement(tagName);
   if (content) {
     switch (typeof content){
       case 'string':
@@ -19,14 +19,14 @@ function createEl(tagName, attributes, content){
 }
 
 function instantiateTemplate(templateId, idOrAttributes) {
-  var template = byId(templateId);
-  var clone = template.content.cloneNode(true);
-  var index = 0, node;
+  const template = byId(templateId);
+  const clone = template.content.cloneNode(true);
+  let index = 0, node;
   do {
     node = clone.childNodes.item(index++);
   } while (node && node.nodeType !== node.ELEMENT_NODE);
     
-  var typeOfIdOrAttributes = typeof idOrAttributes;
+  const typeOfIdOrAttributes = typeof idOrAttributes;
   switch (typeOfIdOrAttributes) {
     case 'undefined':
       break;
@@ -100,18 +100,18 @@ function setClass(dom, classNames){
 }
 
 function setAttributes(dom, attributes){
-  for (var attName in attributes) {
-    var attValue = attributes[attName];
+  for (let attName in attributes) {
+    const attValue = attributes[attName];
     setAttribute(dom, attName, attValue);
   }
 }
 
 function getClassNames(dom){
-  var className = dom.className;
+  const className = dom.className;
   if (!className) {
     return undefined;
   }
-  var classNames = className.split(/\s+/);
+  const classNames = className.split(/\s+/);
   return classNames.length ? classNames : undefined;
 }
 
@@ -122,12 +122,12 @@ function hasClass(dom, classNames, allOrSome){
   if (! (classNames instanceof Array) ) {
     throw new Error(`Invalid classname argument`);
   }
-  var domClassNames = getClassNames(dom);
+  const domClassNames = getClassNames(dom);
   if (domClassNames === undefined) {
     return false;
   }
-  var noMatch;
-  for (var i = 0; i < classNames.length; i++){
+  let noMatch;
+  for (let i = 0; i < classNames.length; i++){
     noMatch = domClassNames.indexOf(classNames[i]) === -1;
     
     if (allOrSome && noMatch) {
@@ -142,12 +142,12 @@ function hasClass(dom, classNames, allOrSome){
 }
 
 function replaceClass(dom, oldClass, newClass){
-  var classNames = getClassNames(dom);
-  var indexOfOldClass = classNames.indexOf(oldClass);
+  const classNames = getClassNames(dom);
+  const indexOfOldClass = classNames.indexOf(oldClass);
   if (indexOfOldClass === -1){
     return;
   }
-  var args = [indexOfOldClass, 1];
+  const args = [indexOfOldClass, 1];
   if (classNames.indexOf(newClass) === -1) {
     args.push(newClass);
   }
@@ -165,7 +165,7 @@ function getAncestorWithTagName(dom, tagName, includeSelf){
   }
 
   tagName = tagName.toUpperCase();
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
     if (node.tagName === tagName){
       return node;
@@ -184,7 +184,7 @@ function getAncestorWithClassName(dom, classNames, allOrSome, includeSelf){
     includeSelf = true;
   }
   
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
     if (hasClass(node, classNames, allOrSome)){
       return node;
@@ -203,9 +203,9 @@ function getAncestorWithAttributeValue(dom, attributeName, attributeValue, inclu
     includeSelf = true;
   }
   
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
-    var value = node.getAttribute(attributeName);
+    const value = node.getAttribute(attributeName);
     if (value === attributeValue) {
       return node;
     }
@@ -219,9 +219,9 @@ function isEl(node){
 }
 
 function getChildWithClassName(dom, className){
-  var childNodes = dom.childNodes;
-  for (var i = 0; i < childNodes.length; i++){
-    var childNode = childNodes.item(i);
+  const childNodes = dom.childNodes;
+  for (let i = 0; i < childNodes.length; i++){
+    const childNode = childNodes.item(i);
     if (!isEl(childNode)) {
       continue;
     }
