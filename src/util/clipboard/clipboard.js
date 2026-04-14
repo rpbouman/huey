@@ -1,17 +1,17 @@
 function createClipboardItem(blob, mimeType){
-  var conf = {};
+  const conf = {};
   conf[mimeType || blob.type] = blob;
   return new ClipboardItem(conf);
 }
 
 async function copyToClipboard(data, mimeType) {
-  var clipboard = navigator.clipboard, method, arg;
+  const clipboard = navigator.clipboard, method, arg;
   if (typeof data === 'string') {
     if (mimeType) {
       if (!ClipboardItem.supports(mimeType)){
         console.warn(`Clipboard does not support preferred mimeType ${mimeType}, downgrading to text/plain.`);
         mimeType = 'text/plain';
-      }      
+      }
       data = new Blob([data], {type: mimeType});
     }
     else {
@@ -23,7 +23,7 @@ async function copyToClipboard(data, mimeType) {
     method = clipboard.write;
     arg = [createClipboardItem(data, mimeType)];
   }
-  var result;
+  let result;
   try {
     result = await method.call(clipboard, arg);
   }
@@ -45,18 +45,16 @@ async function copyToClipboard(data, mimeType) {
 }
 
 function getPastedText(domClipboardEvent){
-  var target = domClipboardEvent.target;
-  var value = target.value;
-  
-  var selectionStart = domClipboardEvent.selectionStart === undefined ? value.length : domClipboardEvent.selectionStart;
-  var prefix = value.substr(0, selectionStart);
-  
-  var selectionEnd = domClipboardEvent.selectionEnd === undefined ? value.length : domClipboardEvent.selectionEnd;
-  var postfix = value.substr(selectionEnd);
+  const target = domClipboardEvent.target;
+  const value = target.value;
 
-  var data = domClipboardEvent.clipboardData;
-  var mimeType = 'text/plain';
-  var rawPasteText = data.getData(mimeType);
+  const selectionStart = domClipboardEvent.selectionStart === undefined ? value.length : domClipboardEvent.selectionStart;
+
+  const selectionEnd = domClipboardEvent.selectionEnd === undefined ? value.length : domClipboardEvent.selectionEnd;
+
+  const data = domClipboardEvent.clipboardData;
+  const mimeType = 'text/plain';
+  const rawPasteText = data.getData(mimeType);
 
   return rawPasteText;
 }
