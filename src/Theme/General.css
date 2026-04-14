@@ -212,6 +212,11 @@ dialog {
     background-color: var( --huey-medium-background-color );
     padding: .5em 0em .5em 0em;
     z-index: 1;
+
+    & :is(h1, h2, h3, h4, h5, h6) {
+      margin-block-start: 0px;
+      margin-block-end: 0px;
+    }
   }
   
   /* this is used as dialog contents section */
@@ -248,11 +253,6 @@ dialog {
       display: flex;
       flex-direction: row;
     }
-  }
-
-  &:is(h1, h2, h3, h4, h5, h6):first-child {
-    margin-block-start: 0px;
-    margin-block-end: 0px;
   }
 
 }
