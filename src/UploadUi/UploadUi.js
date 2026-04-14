@@ -95,7 +95,7 @@ class UploadUi {
         }
       }
 
-      var tryResult, isAccessible;
+      let tryResult, isAccessible;
       if (duckDbDataSource) {
         tryResult = await duckDbDataSource.tryAccess(100);
         isAccessible = tryResult.success;
@@ -108,14 +108,14 @@ class UploadUi {
 
       if (isAccessible !== true) {
         destroyDatasource = true;
-        var errorMessage = tryResult.lastAttempt.message;
+        const errorMessage = tryResult.lastAttempt.message;
         throw new Error(`Error uploading file ${file.name}: ${errorMessage}.`);
       }
 
       if (duckDbDataSource) {
         switch (duckDbDataSource.getType()){
           case DuckDbDataSource.types.FILE:
-            var columnMetadata = await duckDbDataSource.getColumnMetadata();
+            const columnMetadata = await duckDbDataSource.getColumnMetadata();
             break;
           case DuckDbDataSource.types.DUCKDB:
           case DuckDbDataSource.types.SQLITE:
@@ -211,7 +211,7 @@ class UploadUi {
       }
 
       if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
-        var extensionRepository = fileType.duckdb_extension_repository;
+        const extensionRepository = fileType.duckdb_extension_repository;
         requiredExtensions.push({
           extensionName: requiredDuckDbExtension,
           extensionRepository: extensionRepository
@@ -424,8 +424,8 @@ class UploadUi {
       else 
       if (uploadResult instanceof DuckDbDataSource ) {
         datasources.push(uploadResult);
-        var type = uploadResult.getType();
-        var ofTypeCount = datasourceTypes[type];
+        const type = uploadResult.getType();
+        let ofTypeCount = datasourceTypes[type];
         if (ofTypeCount === undefined) {
           ofTypeCount = 0;
         }
@@ -535,8 +535,6 @@ class UploadUi {
   }
 }
 
-var uploadUi;
-
 function afterUploaded(uploadResults){
   const currentRoute = Routing.getCurrentRoute();
   if (!Routing.isSynced(queryModel)) {
@@ -579,6 +577,7 @@ function afterUploaded(uploadResults){
   }
 }
 
+let uploadUi;
 function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');
 
