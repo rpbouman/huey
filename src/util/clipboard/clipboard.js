@@ -5,7 +5,8 @@ function createClipboardItem(blob, mimeType){
 }
 
 async function copyToClipboard(data, mimeType) {
-  const clipboard = navigator.clipboard, method, arg;
+  const clipboard = navigator.clipboard
+  let method, arg;
   if (typeof data === 'string') {
     if (mimeType) {
       if (!ClipboardItem.supports(mimeType)){
