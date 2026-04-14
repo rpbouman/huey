@@ -104,10 +104,12 @@ select[multiple] {
   border-radius: 14px 0px 0px 14px;
 }
 
-input[type=text], 
-input[type=search],
-input[type=checkbox], 
-input[type=number],
+input:is( 
+  [type=text],  
+  [type=search],
+  [type=checkbox],
+  [type=number]
+),
 select {
   border-color: var( --huey-light-border-color );
   background-color: var( --huey-light-background-color );
@@ -118,12 +120,16 @@ input::placeholder {
   color: var( --huey-placeholder-color );
 }
 
-select:focus, 
-select:focus-visible, 
-select:active, 
-input:focus, 
-input:focus-visible, 
-input:active {
+select:is( 
+  :focus, 
+  :focus-visible, 
+  :active
+),
+input:is( 
+  :focus, 
+  :focus-visible, 
+  :active
+) {
   border-color: var( --huey-dark-border-color );
   border-width: 1px;
   box-shadow: 0 0 3px var( --huey-dark-border-color );  
@@ -184,76 +190,76 @@ dialog {
   border-radius: 18px;
   padding: 0em 1em 0em 1em;
   color: var( --huey-foreground-color );
-}
+  box-shadow: 8px 8px 8px var( --huey-dark-background-color );  
+  
+  &::-webkit-scrollbar-corner,
+  *::-webkit-scrollbar-corner {
+    background-color: var( --huey-medium-background-color );
+  }
+  
+  &:popover-open,
+  &[open] {
+    display: flex;
+    flex-direction: column;
+  }
 
-dialog::-webkit-scrollbar-corner,
-dialog *::-webkit-scrollbar-corner {
-  background-color: var( --huey-medium-background-color );
-}
+  /* this is used as dialog title section */
+  > header {
+    flex-grow: 0;
+    color: var( --huey-foreground-color );
+    position: sticky;
+    top: 0px;
+    background-color: var( --huey-medium-background-color );
+    padding: .5em 0em .5em 0em;
+    z-index: 1;
+  }
+  
+  /* this is used as dialog contents section */
+  > section,
+  > form {
+    flex-grow: 1;
+  }
 
-dialog:popover-open,
-dialog[open] {
-  display: flex;
-  flex-direction: column;
-}
+  > section[role=tablist],
+  > form[role=tablist] {
+    margin-top: 12px;
+  }
 
-/* this is used as dialog title section */
-dialog > header {
-  flex-grow: 0;
-  color: var( --huey-foreground-color );
-  position: sticky;
-  top: 0px;
-  background-color: var( --huey-medium-background-color );
-  padding: .5em 0em .5em 0em;
-  z-index: 1;
-}
+  /* this is used as dialog buttons section */
+  > footer {
+    flex-grow: 0;
+    text-align: center;
+    position: sticky;
+    bottom: 0px;
+    background-color: var( --huey-medium-background-color );
+    padding: .5em 0em .5em 0em;
 
-/* this is used as dialog contents section */
-dialog > section,
-dialog > form {
-  flex-grow: 1;
-}
+    button {
+      width: 6em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var( --huey-foreground-color );
+      margin-left:.5em;
+      margin-right:.5em;
+    }
+    
+    > form[role=toolbar][method=dialog] {
+      display: flex;
+      flex-direction: row;
+    }
+  }
 
-dialog > section[role=tablist],
-dialog > form[role=tablist] {
-  margin-top: 12px;
-}
+  &:is(h1, h2, h3, h4, h5, h6):first-child {
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+  }
 
-/* this is used as dialog buttons section */
-dialog > footer {
-  flex-grow: 0;
-  text-align: center;
-  position: sticky;
-  bottom: 0px;
-  background-color: var( --huey-medium-background-color );
-  padding: .5em 0em .5em 0em;
-}
-
-dialog > footer button {
-  width: 6em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var( --huey-foreground-color );
-  margin-left:.5em;
-  margin-right:.5em;
 }
 
 *[role=toolbar],
 *[role=toolbar] > button {
   user-select: none;
-}
-
-dialog h1:first-child,
-dialog h2:first-child,
-dialog h3:first-child,
-dialog h4:first-child,
-dialog h5:first-child,
-dialog h6:first-child,
-dialog h7:first-child 
-{
-  margin-block-start: 0px;
-  margin-block-end: 0px;
 }
 
 form, form > fieldset {
@@ -264,21 +270,40 @@ form, form > fieldset {
   padding-top: 0.75em;
 }
 
-dialog > footer > form[role=toolbar][method=dialog] {
-  display: flex;
-  flex-direction: row;
-}
+form {
+  > fieldset {
+    grid-column: span 2;
+  }
+  
+  > fieldset > label,
+  > label {
+    grid-column: labels;
+    grid-row: auto;
+    margin-top: 4px;
+    justify-self: end;
+  }
 
-form > fieldset {
-  grid-column: span 2;  
-}
+  > label::after, 
+  > fieldset > label::after {
+    content: ":"
+  }
+  
+  > output {
+    margin-top: 2px;
+  }
 
-form > fieldset > label,
-form > label {
-  grid-column: labels;
-  grid-row: auto;
-  margin-top: 4px;
-  justify-self: end;
+  > output, 
+  > fieldset > output, 
+  > input,
+  > fieldset > input,
+  > select,
+  > fieldset > select{
+    grid-column: controls;
+    grid-row: auto;
+    justify-self:start;
+    margin-top: 2px;
+  }
+  
 }
 
 label {
@@ -286,38 +311,80 @@ label {
   white-space: nowrap;
 }
 
-form > label::after, 
-form > fieldset > label::after {
-  content: ":"
+menu {
+  
+  &[role=menubar], 
+  &[role=toolbar] {
+    list-style-type: none;
+    margin-block: 0px;
+    margin-inline: 0px;
+    padding-inline-start: 0px;
+    padding: 6px 0px 0px 4px;
+    height: 32px;
+    grid-column: 1/ span 2;
+    grid-row: 1/1;
+    overflow: hidden;
+  }
+  
+  &[role=menu] {
+    list-style-type: none;
+    margin-block: 0px;
+    margin-inline: 0px;
+    padding-inline-start: 0px;
+    border-collapse: collapse;
+    
+    &[popover] {
+      box-shadow: 8px 8px 8px var( --huey-dark-background-color );
+      position:absolute;
+      padding: 0px;
+      margin: 0px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: 
+        var( --huey-light-border-color ) 
+        var( --huey-dark-border-color ) 
+        var( --huey-dark-border-color ) 
+        var( --huey-light-border-color )
+      ;
+      background-color: var( --huey-medium-background-color );
+    }
+
+    > li {
+      &[role=menuitem] {
+        line-height: 24px;
+        padding: 2px 4px 2px 4px;
+        white-space: nowrap;
+        border-width: 1px;
+        border-color: var(--huey-light-border-color);
+        
+        &:has( menu[role=menu] )::after {
+          font-family: var(--huey-icon-font-family);
+          font-size: var(--huey-icon-normal);
+          vertical-align: bottom;
+          color: var(--huey-icon-color-subtle);
+          margin: 0px 4px 0px 0px;
+          display: inline-block;
+          content: var( --icon-chevron-right );
+          position: relative;
+        }
+      }
+      
+      &[role=separator] {
+        border-width: 1px;
+        border-bottom-style: solid;
+        border-bottom-color: var(--huey-light-border-color);
+        margin-left: 4px;
+      }
+    }
+    
+  }
 }
 
-form > output {
-  margin-top: 2px;
-}
-
-form > output, 
-form > fieldset > output, 
-form > input,
-form > fieldset > input,
-form > select,
-form > fieldset > select{
-  grid-column: controls;
-  grid-row: auto;
-  justify-self:start;
-  margin-top: 2px;
-}
-
-menu[role=menubar],
-menu[role=toolbar] {
-  list-style-type: none;
-  margin-block: 0px;
-  margin-inline: 0px;
-  padding-inline-start: 0px;
-  padding: 6px 0px 0px 4px;
-  height: 32px;
-  grid-column: 1/ span 2;
-  grid-row: 1/1;
-  overflow: hidden;
+/**
+* menu items with a popovertarget get ... to indicate there is an action that requires user interaction.
+**/
+menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popovertargetaction] )::after {
+  content: '...';
 }
 
 header[role=toolbar] > label > button,
@@ -326,33 +393,29 @@ menu[role=menu] > li[role=menuitem] > label > button {
   display: none;
 }
 
-menu[role=menu] > li[role=menuitem] {
-  line-height: 24px;
-  padding: 2px 4px 2px 4px;
-  border-width: 1px;
-  white-space: nowrap;
-}
-
 /**
 * make the labels take the entire width of the menu.
 * this is to ensure that if the user clicks somewhere on the item, it will register as a click on the button inside the label.
 * if you don't do this, user has to click inside the label.
 */
-menu[role=menu] > li[role=menuitem] > label:has( > button ),
-menu[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] ),
-ol[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )
-{
+
+*[role=menu] > li[role=menuitem] > label:has(
+  > button,
+  > input[type=checkbox]
+) {
   display: inline-block;
   width: 72%
 }
 
-header[role=toolbar] > label:has( > button )::before,
-menu[role=toolbar] > label:has( > button )::before,
-menu[role=toolbar] > label:has( > input[type=file] )::before,
-menu[role=toolbar] > label:has( > input[type=checkbox] )::before,
-menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
-*[role=menu] > li[role=menuitem] > label:has( > input[type=checkbox] )::before 
-{  
+*[role=toolbar] > label:has( 
+  > button, 
+  > input[type=file], 
+  > input[type=checkbox]
+)::before,
+*[role=menu] > li[role=menuitem] > label:has( 
+  > button,
+  > input[type=checkbox]
+)::before {
   font-family: var( --huey-icon-font-family );
   font-size: var( --huey-icon-normal );
   vertical-align: bottom;
@@ -361,13 +424,15 @@ menu[role=menu] > li[role=menuitem] > label:has( > button)::before,
   display: inline-block;
 }
 
-header[role=toolbar] > label:hover:has( > button )::before,
-menu[role=toolbar] > label:hover:has( > button )::before,
-menu[role=toolbar] > label:hover:has( > input[type=file] )::before,
-menu[role=toolbar] > label:hover:has( > input[type=checkbox] )::before,
-menu[role=menu] > li[role=menuitem]:hover > label:has( > button)::before,
-*[role=menu] > li[role=menuitem]:hover > label:has( > input[type=checkbox] )::before
-{
+*[role=toolbar] > label:hover:has( 
+  > button,
+  > input[type=file],
+  > input[type=checkbox]
+)::before,
+*[role=menu] > li[role=menuitem]:hover > label:has(
+  > button,
+  > input[type=checkbox]
+)::before {
   color: var( --huey-icon-color-highlight );
 }
 
@@ -404,65 +469,4 @@ label[role=menuitem]:hover,
 menu[role=menu] > li[role=menuitem]:hover {
   background-color: var( --huey-light-background-color );
   border-color: var( --huey-light-border-color );
-}
-
-menu[role=menu] {
-  list-style-type: none;
-  margin-block: 0px;
-  margin-inline: 0px;
-  padding-inline-start: 0px;
-  border-collapse: collapse;
-}
-
-dialog,
-menu[role=menu][popover] {
-  box-shadow: 8px 8px 8px var( --huey-dark-background-color );
-}
-
-menu[role=menu][popover] {
-  position:absolute;
-  padding: 0px;
-  margin: 0px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: 
-    var( --huey-light-border-color ) 
-    var( --huey-dark-border-color ) 
-    var( --huey-dark-border-color ) 
-    var( --huey-light-border-color )
-  ;
-  background-color: var( --huey-medium-background-color );
-}
-
-menu[role=menu] > li[role=menuitem]:has( menu[role=menu] )::after {
-  font-family: var(--huey-icon-font-family);
-  font-size: var(--huey-icon-normal);
-  vertical-align: bottom;
-  color: var(--huey-icon-color-subtle);
-  margin: 0px 4px 0px 0px;
-  display: inline-block;
-  content: var( --icon-chevron-right );
-  position: relative;
-}
-
-menu > li[role=separator] {
-  border-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: var(--huey-light-border-color);
-  margin-left: 4px;
-}
-
-/**
-* menu items with a popovertarget get ... to indicate there is an action that requires user interaction.
-**/
-menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popovertargetaction] )::after {
-  content: '...';
-}
-
-menu[role="menu"] {
-  
-  > li[role=menuitem] {
-    border-width: 1px;
-    border-color: var(--huey-light-border-color);
-  }
 }
