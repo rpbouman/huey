@@ -121,7 +121,7 @@ class Internationalization {
     if (elements === undefined) {
       elements = [];
     }
-    for (var i = 0; i < nodeList.length; i++){
+    for (let i = 0; i < nodeList.length; i++){
       elements.push(nodeList.item(i));
     }
     return elements;
@@ -226,12 +226,12 @@ class Internationalization {
 
   static #applyTexts(toNative){
     Internationalization.#visitAllTexts(function(object){
-      var element = object.element;
-      var key = object.key;
-      var value = object.value;
+      const element = object.element;
+      const key = object.key;
+      const value = object.value;
 
-      var text = toNative === true ? key : value || object.key;
-      var attributeName = object.attributeName;
+      const text = toNative === true ? key : value || object.key;
+      const attributeName = object.attributeName;
       if (attributeName){
         element.setAttribute(attributeName, text);
       }
@@ -239,7 +239,7 @@ class Internationalization {
         element.textContent = text;
       }
 
-      var i18nNativeAttributeName = object.i18nNativeAttributeName;
+      const i18nNativeAttributeName = object.i18nNativeAttributeName;
       if (!element.hasAttribute(i18nNativeAttributeName)){
         element.setAttribute(i18nNativeAttributeName, key);
       }
