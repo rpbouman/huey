@@ -16,7 +16,7 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'AVG( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
+        const formatter = createNumberFormatter(true);
         return function(value, field){
           return formatter.format(value, field);
         };
@@ -58,7 +58,7 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'GEOMEAN( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
+        const formatter = createNumberFormatter(true);
         return function(value, field){
           return formatter.format(value, field);
         };
@@ -103,11 +103,10 @@ class AttributeUi {
       expressionTemplate: 'MEDIAN( ${columnExpression} )',
       getReturnDataTypeForArgumentDataType: getMedianReturnDataTypeForArgumentDataType,
       createFormatter: function(axisItem){
-        var columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var formatter;
+        const columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+        const dataTypeInfo = getDataTypeInfo(columnType);
         if (dataTypeInfo.isNumeric) {
-          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+          const formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
           return function(value, field){
             return formatter.format(value, field);
           };
@@ -155,10 +154,10 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var columnType = axisItem.columnType;
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var isInteger = dataTypeInfo.isInteger;
-        var formatter = createNumberFormatter(isInteger !== true);
+        const columnType = axisItem.columnType;
+        const dataTypeInfo = getDataTypeInfo(columnType);
+        const isInteger = dataTypeInfo.isInteger;
+        const formatter = createNumberFormatter(isInteger !== true);
 
         return function(value, field){
           return formatter.format(value, field);
@@ -597,7 +596,7 @@ class AttributeUi {
     
     const needHashDerivations = stringType || objectType;
 
-    var applicableDerivations = Object.assign({},
+    const applicableDerivations = Object.assign({},
       hasDateFields ? AttributeUi.dateFields : undefined,
       hasTimeFields ? AttributeUi.timeFields : undefined,
       hasTimestampFields ? AttributeUi.timestampFields : undefined,
@@ -639,7 +638,7 @@ class AttributeUi {
     const isNumeric = Boolean(typeInfo.isNumeric);
 
     const applicableAggregators = {};
-    for (var aggregationName in AttributeUi.aggregators) {
+    for (let aggregationName in AttributeUi.aggregators) {
       const aggregator = AttributeUi.aggregators[aggregationName];
       if (aggregator.forNumeric && !isNumeric) {
         continue;
@@ -679,8 +678,8 @@ class AttributeUi {
         caption = config.profile.column_name;
         break;
       case 'member':
-        var memberExpressionPath = config.profile.memberExpressionPath;
-        var tmp = [].concat(memberExpressionPath);
+        const memberExpressionPath = config.profile.memberExpressionPath;
+        const tmp = [].concat(memberExpressionPath);
         caption = tmp.pop();
         break;
       case 'derived':
@@ -785,7 +784,7 @@ class AttributeUi {
       const newDatasource = eventData.propertiesChanged.datasource.newValue;
       if (newDatasource) {
         this.clear(true);
-        var columnMetadata = await newDatasource.getColumnMetadata();
+        const columnMetadata = await newDatasource.getColumnMetadata();
         this.render(columnMetadata);
       }
       else {
@@ -835,7 +834,7 @@ class AttributeUi {
     const derivation = node.getAttribute('data-derivation');
     const aggregator = node.getAttribute('data-aggregator');
 
-    var itemConfig = {
+    const itemConfig = {
       columnName: columnName,
       columnType: columnType,
       derivation: derivation,
@@ -860,7 +859,7 @@ class AttributeUi {
       case QueryModel.AXIS_COLUMNS:
       case QueryModel.AXIS_CELLS:
         // implement mutual exclusive axes (either rows or columns, not both)
-        for (var i = 0; i < inputs.length; i++){
+        for (let i = 0; i < inputs.length; i++){
           const input = inputs.item(i);
           const inputAxis = input.getAttribute('data-axis');
           if (input.checked && inputAxis !== axis) {
@@ -1338,7 +1337,6 @@ class AttributeUi {
       const derivation = mapDerivations[derivationName];
       let nodeProfile; 
       let memberExpressionType = profile.memberExpressionType || profile.column_type;
-      var memberExpressionPath;
       switch (derivationName) {
         case 'entries':
         case 'entry keys':
