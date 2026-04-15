@@ -87,7 +87,7 @@ class TupleSet extends DataSetComponent {
   
   #getTotalsPosition(){
     const settings = this.getSettings();
-    var totalsPosition;
+    let totalsPosition;
     if (typeof settings.getSettings === 'function'){
       totalsPosition = settings.getSettings([
         'pivotSettings', 

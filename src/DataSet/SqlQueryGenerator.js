@@ -599,10 +599,10 @@ class SqlQueryGenerator {
       // insert an order by expression to keep the totals together with the items they are totalling
       let sortDir = totalsPosition === 'AFTER' ? 'ASC' : 'DESC';
       groupingIdExpressions.forEach((groupingIdExpression, groupingIdExpressionIndex) => {
-        var bitshift = groupingIdExpressions.length - groupingIdExpressionIndex - 1;
+        let bitshift = groupingIdExpressions.length - groupingIdExpressionIndex - 1;
         bitshift = bitshift ? `(1 << ${bitshift})` : 1;
         const orderByExpression = `${groupingIdAlias} & ${bitshift} ${sortDir}`;
-        var indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
+        const indexOfGroupingIdExpression = orderByExpressions.indexOf(groupingIdExpression);
         orderByExpressions[indexOfGroupingIdExpression] = `${orderByExpression}`;
       });
     }
