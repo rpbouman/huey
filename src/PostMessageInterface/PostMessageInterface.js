@@ -9,11 +9,11 @@ class PostMessageInterface {
   }
   
   async #messageHandler(event){
-    var request = event.data;    
-    var requestType = request.messageType;
+    const request = event.data;
+    const requestType = request.messageType;
     
-    var requestId = request.requestId;
-    var response = {
+    const requestId = request.requestId;
+    const response = {
       messageType: PostMessageProtocol.RESPONSE,
       request: {
         messageType: requestType,
@@ -75,8 +75,7 @@ class PostMessageInterface {
   
   #handleSetRouteRequest(request, response){
     try{
-      var body;
-      var route;
+      let body, route;
       try {
         body = request.body;
         if (typeof body !== 'object' || body === null) {
@@ -103,17 +102,16 @@ class PostMessageInterface {
   
   async #handleCreateDatasourceRequest(request, response){
     try {
-      var body;
-      var duckDbDataSource;
+      let body, duckDbDataSource;
       try {
         body = request.body;
         if (typeof body !== 'object' || body === null) {
           throw new Error('Request body is mandatory', {cause: 'body is null or not an object'});
         }
         
-        var duckdb = window.hueyDb.duckdb;
-        var duckDbInstance = window.hueyDb.instance;
-        var datasourceConfig = body.datasourceConfig;
+        const duckdb = window.hueyDb.duckdb;
+        const duckDbInstance = window.hueyDb.instance;
+        const datasourceConfig = body.datasourceConfig;
         duckDbDataSource = new DuckDbDataSource(duckdb, duckDbInstance, datasourceConfig);
 
       }
@@ -122,7 +120,7 @@ class PostMessageInterface {
         return;
       }
       
-      var datasources = [duckDbDataSource];
+      const datasources = [duckDbDataSource];
       await datasourcesUi.addDatasources(datasources);
       
       if (body.selectForAnalysis === true){
@@ -164,19 +162,8 @@ class PostMessageInterface {
       return;
     }
     
-    var search = window.location.search;
-    var params = {};
-    if (search && search.length){
-      search = search.substring(1).split('&').reduce(function(params, param){
-        var nameValue = param.split('=');
-        var name = nameValue[0];
-        var value = nameValue[1];
-        params[name] = value;
-        return params;
-      }, params);
-    }
-    
-    var hostingWindow = PostMessageInterface.getHostingWindow();
+    const params = getSearchParams();
+    const hostingWindow = PostMessageInterface.getHostingWindow();
     
     hostingWindow.postMessage({
       status: {
@@ -192,7 +179,7 @@ class PostMessageInterface {
   
 }
 
-var postMessageInterface = undefined;
+let postMessageInterface = undefined;
 function initPostMessageInterface(skipHostingWindowCheck){
   if (!skipHostingWindowCheck && !PostMessageInterface.getHostingWindow()) {
     return;

@@ -1,30 +1,6 @@
-const queryParams = document
-  .location
-  .search
-  .substr(1)
-  .split('&')
-  .reduce((acc, nameValue) => {
-    nameValue = nameValue.split('=');
-    const name = nameValue[0];
-    let value = nameValue[1];
-    const existingValue = acc[name];
-    switch (typeof existingValue){
-      case 'undefined':
-        break;
-      case 'object':
-        existingValue.push(value);
-        value = existingValue;
-        break;
-      default:
-        value = [existingValue, value];
-    }
-    acc[name] = value;
-    return acc;
-  }, {});
-
 function getDuckDbLogLevel(duckdb){
   let loglevel;
-  const paramLoglevel = queryParams.loglevel;
+  const paramLoglevel = getSearchParams().loglevel;
   if (paramLoglevel){
     loglevel = duckdb.LogLevel[paramLoglevel];
     if (typeof loglevel !== 'number'){

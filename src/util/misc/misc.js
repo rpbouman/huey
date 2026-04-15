@@ -27,3 +27,22 @@ function getCsv(data, options) {
     }).join(fieldSeparator);
   }).join(lineSeparator);
 }
+
+function getSearchParams(urlStringOrLocationObject){
+  
+  urlStringOrLocationObject = urlStringOrLocationObject || window.location;
+  
+  if (urlStringOrLocationObject && urlStringOrLocationObject.href){
+    urlStringOrLocationObject = urlStringOrLocationObject.href;
+  }
+  
+  const params = {};
+  if (typeof urlStringOrLocationObject === 'string'){
+    const searchParams = (new URL(urlStringOrLocationObject)).searchParams;
+    for (const key of new Set(searchParams.keys())) {
+      const values = searchParams.getAll(key);
+      params[key] = values.length === 1 ? values[0] : values;
+    }
+  }
+  return params;
+}
