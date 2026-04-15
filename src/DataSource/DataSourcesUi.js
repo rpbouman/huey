@@ -697,7 +697,7 @@ class DataSourcesUi extends EventEmitter {
         exportXlsx = true;
         break;
     }
-    var exportSettings = Object.assign(
+    const exportSettings = Object.assign(
       {}, settings.getSettings('exportUi'), {
       exportDestinationFile: true,
       exportDestinationClipboard: false,
@@ -901,7 +901,7 @@ class DataSourcesUi extends EventEmitter {
     }
 
     let columnMetadata;
-    var datasourceType = datasource.getType();
+    const datasourceType = datasource.getType();
     switch (datasourceType) {
       case DuckDbDataSource.types.FILE:
       case DuckDbDataSource.types.FILES:
@@ -926,7 +926,7 @@ class DataSourcesUi extends EventEmitter {
       }
 
       columnType = row.column_type;
-      var comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
+      const comparisonColumnType = useLooseColumnComparisonType ? this.#getLooseColumnType(columnType) : columnType;
       if (columnSpec.columnType !== comparisonColumnType) {
         return false;
       }
@@ -958,7 +958,7 @@ class DataSourcesUi extends EventEmitter {
   }
 }
 
-var datasourcesUi;
+let datasourcesUi;
 function initDataSourcesUi(){
   datasourcesUi = new DataSourcesUi('datasourcesUi');
 }
