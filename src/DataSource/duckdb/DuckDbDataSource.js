@@ -350,35 +350,35 @@ class DuckDbDataSource extends EventEmitter {
           }
         }
       }
-      // if we couldn't identify a file type then we can try to examine the file to read a magic number.
-      if (!config.fileType){
-        switch (response.headers['accept-ranges']) {
-          case 'bytes':
-            response = await DuckDbDataSource.getResourceInfoForUrl(url, 'GET', {
-              "Accept": contentType,
-              "Range": 'bytes=0-16'
-            });
-            const responseText = response.responseText;
-            const guessedType = await FileUtils.checkMagicBytes(responseText);
-            switch (guessedType) {
-              case 'duckdb':
-                config.type = DuckDbDataSource.types.DUCKDB;
-                break;
-              case 'sqlite':
-                config.type = DuckDbDataSource.types.SQLITE;
-                break;
-              default:
-            }
+    }
+    // if we couldn't identify a file type then we can try to examine the file to read a magic number.
+    if (!config.fileType){
+      const headers = { "Accept": contentType };
+      
+      switch (response.headers['accept-ranges']) {
+        case 'bytes':
+          headers['Range'] = 'bytes=0-16';
+          break;
+        case 'none':
+        case undefined:
+        default:
+          // alas
+      }
+      response = await DuckDbDataSource.getResourceInfoForUrl(url, 'GET', headers);
+      const responseText = response.responseText;
+      const guessedType = await FileUtils.checkMagicBytes(responseText);
+      switch (guessedType) {
+        case 'duckdb':
+          config.type = DuckDbDataSource.types.DUCKDB;
+          break;
+        case 'sqlite':
+          config.type = DuckDbDataSource.types.SQLITE;
+          break;
+        default:
+      }
 
-            if (config.type) {
-              delete config.url;
-            }
-            break;
-          case 'none':
-          case undefined:
-          default:
-            // alas
-        }
+      if (config.type) {
+        delete config.url;
       }
     }
 

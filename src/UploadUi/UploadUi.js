@@ -582,17 +582,17 @@ function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');
 
   const uploader = byId('uploader');
-  let acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(function(fileType){
+  let acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(fileType => {
     return `.${fileType}`;
   }).join(', ');
+  
   acceptFileTypes = [].concat(acceptFileTypes, [
     '.hueyq',
     '.hueyqh'
   ]);
   uploader.setAttribute('accept', acceptFileTypes);
   
-  uploader
-  .addEventListener('change', async function(event){
+  uploader.addEventListener('change', async event => {
     const fileControl = event.target;
     const files = fileControl.files;
     const uploadResults = await uploadUi.uploadFiles(files);
@@ -601,8 +601,7 @@ function initUploadUi(){
   }, false);  // third arg is 'useCapture'
 
 
-  byId('loadFromUrl')
-  .addEventListener('click', async function(event){
+  byId('loadFromUrl').addEventListener('click', async event => {
     const url = prompt('Enter URL');
     if (!url || !url.length){
       return;
