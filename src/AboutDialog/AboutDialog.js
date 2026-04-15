@@ -1,18 +1,16 @@
 function initAboutDialog(){
-  var el;
+  const logoVersion  = byId('logoVersion');
+  logoVersion.textContent = `v ${hueyVersionNumber} (${hueyVersionName})` ;
 
-  el = byId('logoVersion');
-  el.textContent = `v ${hueyVersionNumber} (${hueyVersionName})` ;
+  const hueyVersion = byId('hueyVersion');
+  hueyVersion.textContent = `Huey version ${hueyVersionNumber} - ${hueyVersionName}`;
 
-  el = byId('hueyVersion');
-  el.textContent = `Huey version ${hueyVersionNumber} - ${hueyVersionName}`;
-
-  el = byId('tablerIconsUrl');
-  el.textContent = `Tabler Icons v${tablerIconsFontVersion}`;
+  const iconsUrl = byId('tablerIconsUrl');
+  iconsUrl.textContent = `Tabler Icons v${tablerIconsFontVersion}`;
   
-  el = byId('duckDbLibraryUrl');
-  el.setAttribute('href', duckDbLibraryUrl);
-  el.textContent = `DuckDB WASM ${duckdbLibraryVersion}`;
+  const libUrl = byId('duckDbLibraryUrl');
+  libUrl.setAttribute('href', duckDbLibraryUrl);
+  libUrl.textContent = `DuckDB WASM ${duckdbLibraryVersion}`;
 }
 
 initAboutDialog();
