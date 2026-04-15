@@ -144,7 +144,7 @@ class DragAndDropHelper {
 
       let value;
       if (keydata){
-        var decodedKeydata = JSON.parse(DragAndDropHelper.decodeDataTransferKey(keydata));
+        const decodedKeydata = JSON.parse(DragAndDropHelper.decodeDataTransferKey(keydata));
         value = {
           key: decodedKeydata,
           value: storedValue
@@ -166,35 +166,36 @@ class DragAndDropHelper {
 
   static addTextDataForQueryItem(queryAxisItem, data) {
     const csvConfig = [];
-    for (var property in queryAxisItem){
-      var value = queryAxisItem[property];
-      var typeOfValue = typeof value;
-      if(property === 'filter') {
-        var filter = value;
-        var filterType = filter.filterType;
+    for (let property in queryAxisItem){
+      let value = queryAxisItem[property];
+      const typeOfValue = typeof value;
+      if (property === 'filter') {
+        const filter = value;
+        const filterType = filter.filterType;
         csvConfig.push(['filterType', filterType]);
-        Object.keys(filter.values).forEach(function(key, index){
+        Object.keys(filter.values).forEach((key, index) => {
           csvConfig.push(['filterValue' + (1 + index), key]);
         });
         if (!FilterDialog.isRangeFilterType(filterType)) {
           continue
         }
-        Object.keys(filter.toValues).forEach(function(key, index){
+        Object.keys(filter.toValues).forEach((key, index) => {
           csvConfig.push(['toFilterValue' + (1 + index), key]);
         });
       }
-      else
-      if (
-        value === null || [
-          'function',
-          'object',
-          'undefined'
-        ].indexOf(typeOfValue) !== -1
-      ){
-        continue;
-      }
-      else {
-        csvConfig.push([property, value]);
+      else{
+        switch(typeOfValue){
+          case 'undefined':
+          case 'function':
+            continue;
+          case 'object':
+            if (value === null || property !== 'memberExpressionPath'){
+              continue;
+            }
+            value = value.join('.');
+          default:
+            csvConfig.push([property, value]);
+        }
       }
     }
     const csvData = getCsv(csvConfig);
