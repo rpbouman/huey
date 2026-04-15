@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v28';
+const CACHE_VERSION = 'v30';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -45,8 +45,6 @@ git ls-files '*.js' '*.css' '*.json' '*.png'
 */
 
 const APP_SHELL = [
-  './',
-  './index.html',
   'AboutDialog/AboutDialog.css',
   'AboutDialog/AboutDialog.js',
   'App/App.css',
@@ -79,6 +77,9 @@ const APP_SHELL = [
   'FilterUi/FilterUi.css',
   'FilterUi/FilterUi.js',
   'Internationalization/Internationalization.js',
+  'Internationalization/huey.i18n.labels.template.js',
+  'Internationalization/i18n/nl.js',
+  'Internationalization/i18n/pt-BR.js',
   'PageStateManager/PageStateManager.js',
   'PivotTableUi/PivotTableUi.css',
   'PivotTableUi/PivotTableUi.js',
@@ -112,11 +113,13 @@ const APP_SHELL = [
   'UploadUi/UploadUi.css',
   'UploadUi/UploadUi.js',
   'huey-pwa-service-worker.js',
+  'manifest.json',
   'pwa/icon-192.png',
   'pwa/icon-512.png',
   'pwa/icon-maskable-192.png',
   'pwa/icon-maskable-512.png',
   'pwa/pwa.js',
+  'pwa/screenshot.png',
   'spinner/spinner.css',
   'spinner/timer.css',
   'util/clipboard/clipboard.js',
