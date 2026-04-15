@@ -14,7 +14,7 @@ class FileUtils {
       const minLength = data.offset + data.magic.length;
       
       if (typeof text === 'string') {
-        if (textLength < minLength) {
+        if (text.length < minLength) {
           return false;
         }
         const textSlice = text.slice(data.offset, minLength);
