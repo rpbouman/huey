@@ -18,7 +18,7 @@ class PivotTableUiHighlighting {
   }
   
   #initColumnHighlightingRuleText(){
-    var id = this.#getPivotTableUiId();
+    const id = this.#getPivotTableUiId();
     this.#columnHighlightingRuleText = [`#${id}.pivotTableUiContainer[data-hover-column-highlighting=true] {
       > .pivotTableUiInnerContainer {
         > .pivotTableUiTable {
@@ -35,36 +35,36 @@ class PivotTableUiHighlighting {
   }
   
   #getColumnHighlightingCssText(columnIndex){
-    var ruleText = this.#columnHighlightingRuleText;
+    const ruleText = this.#columnHighlightingRuleText;
     return `${ruleText[0]}${columnIndex}${ruleText[1]}`;
   }
 
   #getPivotTableUiId(){
-    var pivotTableUiDom = this.#pivotTableUi.getDom();
-    var id = pivotTableUiDom.getAttribute('id');
+    const pivotTableUiDom = this.#pivotTableUi.getDom();
+    const id = pivotTableUiDom.getAttribute('id');
     return id;
   }
   
   #initStylesheet(){
-    var styleEl = createEl('style');
-    var id = this.#getStylesheetId();
+    const styleEl = createEl('style');
+    const id = this.#getStylesheetId();
     styleEl.setAttribute('id', id);
     document.head.appendChild(styleEl);
   }
 
   #getStylesheetId(){
-    var id = this.#getPivotTableUiId();
+    const id = this.#getPivotTableUiId();
     return `${id}-PivotTableUiHighlighting`;
   }
   
   #getStylesheet(){
-    var id = this.#getStylesheetId();
+    const id = this.#getStylesheetId();
     return byId(id);
   }
   
   #updateStylesheet(cssText){
-    var stylesheet = this.#getStylesheet();
-    var oldContent = stylesheet.textContent;
+    const stylesheet = this.#getStylesheet();
+    const oldContent = stylesheet.textContent;
     if (oldContent === cssText){
       return;
     }
@@ -77,25 +77,25 @@ class PivotTableUiHighlighting {
   }
   
   #initMouseOverHandler(){
-    var dom = this.#pivotTableUi.getDom();
+    const dom = this.#pivotTableUi.getDom();
     dom.addEventListener('mouseover', event => this.#mouseOverHandler( event ) );
   }
   
   #mouseOverHandler(event){
-    var target = event.target;
+    let target = event.target;
     while (target && target.classList) {
       if (target.classList.contains('pivotTableUiCell')){
         break;
       }
       target = target.parentNode;
     }
-    var cssText;
+    let cssText;
     if (!target || !target.classList){
       cssText = '';
     }
     else {
-      var prev = target;
-      var count = 0;
+      let prev = target;
+      let count = 0;
       do {
         prev = prev.previousSibling;
         count += 1;
@@ -106,7 +106,7 @@ class PivotTableUiHighlighting {
   }
   
   #initMouseLeaveHandler(){
-    var dom = this.#pivotTableUi.getDom();
+    const dom = this.#pivotTableUi.getDom();
     dom.addEventListener('mouseleave', event => this.#mouseLeaveHandler( event ) );
   }
   
@@ -115,17 +115,17 @@ class PivotTableUiHighlighting {
   }
 
   enableAlternatingRowColors(enabled){
-    var dom = this.#pivotTableUi.getDom();
+    const dom = this.#pivotTableUi.getDom();
     dom.setAttribute('data-alternating-row-colors', enabled);
   }
   
   enableHoverRowHighlighting(enabled){
-    var dom = this.#pivotTableUi.getDom();
+    const dom = this.#pivotTableUi.getDom();
     dom.setAttribute('data-hover-row-highlighting', enabled);
   }
 
   enableHoverColumnHighlighting(enabled){
-    var dom = this.#pivotTableUi.getDom();
+    const dom = this.#pivotTableUi.getDom();
     dom.setAttribute('data-hover-column-highlighting', enabled);
   }
   
