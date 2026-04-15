@@ -2490,8 +2490,11 @@
         document.body.getElementsByTagName('main')[0].style.display = 'none';
         showErrorDialog(e);
       })
-      .finally(function(){
+      .finally(error => {
         document.body.setAttribute('aria-busy', false);
+        if (error) {
+          console.error( error );
+        }
       });
     </script>
 
