@@ -283,7 +283,7 @@ class ExportUi {
           break;
         case 'exportParquet':
           compression = exportSettings[exportType + 'Compression'];
-          var parquetVersion = exportSettings[exportType + 'Version'];
+          const parquetVersion = exportSettings[exportType + 'Version'];
           copyStatementOptions = {
             "FORMAT": 'PARQUET',
             "ROW_GROUP_SIZE": exportSettings['exportParquetRowGroupSize'],
@@ -293,7 +293,7 @@ class ExportUi {
             "PARQUET_VERSION": parquetVersion.value
           };
           if (compression.value === 'ZSTD') {
-            var compressionLevel = exportSettings[exportType + 'CompressionLevel'];
+            const compressionLevel = exportSettings[exportType + 'CompressionLevel'];
             copyStatementOptions['COMPRESSION_LEVEL'] = compressionLevel;
           }
           fileExtension = 'parquet';
