@@ -359,8 +359,8 @@ class DataSourcesUi extends EventEmitter {
     const connection = window.hueyDb.connection;
     const sql = `
       SELECT table_schema, table_name, table_type
-      FROM information_schema.tables
-      WHERE table_catalog = ?
+      FROM    main. information_schema.tables
+      WHERE table_catalog = '${catalogName}'
       AND   table_schema NOT IN ('information_schema', 'pg_catalog')
       ORDER BY table_schema, table_name
     `;

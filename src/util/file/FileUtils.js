@@ -1,35 +1,34 @@
 class FileUtils {
 
-  static magicBytes = {
+  static #magicBytes = {
     'duckdb': {offset: 7, magic: 'DUCK'},
     'parquet': {offset: 0, magic: 'PAR1'},
     'sqlite': {offset: 0, magic: 'SQLite format 3\0'}
   };
   
   static async checkMagicBytes(text){
-    const keys = Object.keys(FileUtils.magicBytes);
-    
-    return await keys.find(async key => {
-      const data = FileUtils.magicBytes[key];
+    const keys = Object.keys(FileUtils.#magicBytes);
+    if (text instanceof File){
+      const file = text;
+      
+      const maxLength = Math.max.apply(null, 
+        keys.map(key => {
+          const magicByes = FileUtils.#magicBytes[key];
+          return magicByes.offset + magicByes.magic.length
+        })
+      );
+      const fileSlice = file.slice(0, maxLength);
+      text = await fileSlice.text();
+    }
+    return keys.find(key => {
+      const data = FileUtils.#magicBytes[key];
       const minLength = data.offset + data.magic.length;
       
-      if (typeof text === 'string') {
-        if (text.length < minLength) {
-          return false;
-        }
-        const textSlice = text.slice(data.offset, minLength);
-        return textSlice === data.magic;
+      if (text.length < minLength) {
+        return false;
       }
-      
-      if (text instanceof File){
-        const file = text;
-        if (file.size < minLength) {
-          return false;
-        }
-        const fileSlice = file.slice(data.offset, minLength);
-        const fileText = await fileSlice.text();
-        return fileText === data.magic;
-      }
+      const textSlice = text.slice(data.offset, minLength);
+      return textSlice === data.magic;
     });
   }
 
