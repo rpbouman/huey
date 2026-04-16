@@ -803,6 +803,9 @@ class AttributeUi {
   #clickHandler(event){
     event.stopPropagation();
     const target = event.target;
+    if (target.tagName !== 'LABEL'){
+      return; 
+    }
     const node = getAncestorWithTagName(target, 'details');
     if (!node) {
       return;
