@@ -769,7 +769,7 @@ class DuckDbDataSource extends EventEmitter {
     try{
       const connection = await this.getConnection();
       const type = this.getType();
-      let sql;
+      let sql, alias, quotedAlias, fileName;
       switch (type){
         case DuckDbDataSource.types.FILE:
         case DuckDbDataSource.types.TABLE:
@@ -780,9 +780,9 @@ class DuckDbDataSource extends EventEmitter {
           break;
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.SQLITE:
-          const fileName = this.getFileName();
-          const alias = this.#alias || this.getFileNameWithoutExtension();
-          const quotedAlias = getQuotedIdentifier(alias);
+          fileName = this.getFileName();
+          alias = this.#alias || this.getFileNameWithoutExtension();
+          quotedAlias = getQuotedIdentifier(alias);
           sql = `ATTACH '${fileName}' AS ${quotedAlias}`;
           if (type === DuckDbDataSource.types.SQLITE){
             sql += ` (TYPE SQLITE)`;
@@ -790,6 +790,22 @@ class DuckDbDataSource extends EventEmitter {
       }
       await this.registerFile();
       const resultSet = await connection.query(sql);
+      const detectDucklakeSql = [
+        'SELECT *',
+        'FROM information_schema.tables',
+        'WHERE table_catalog = ?',
+        'AND table_schema = \'main\'',
+        'AND table_name = \'ducklake_metadata\''
+      ].join('\n');
+      const statement = await connection.prepare(detectDucklakeSql);
+      const ducklake_metadata_result = await statement.query(alias);
+      if (ducklake_metadata_result.numRows > 0){ 
+        const detachSql = `DETACH ${quotedAlias}`;
+        await connection.query(detachSql);
+        const attachSql = `ATTACH '${fileName}' AS ${quotedAlias} (TYPE ducklake)`;
+        await connection.query(attachSql);
+      }
+      
       result = true;
     }
     catch(error){

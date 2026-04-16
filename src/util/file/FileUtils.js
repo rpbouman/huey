@@ -1,13 +1,14 @@
 class FileUtils {
 
   static #magicBytes = {
-    'duckdb': {offset: 7, magic: 'DUCK'},
+    'duckdb': {offset: 8, magic: 'DUCK'},
     'parquet': {offset: 0, magic: 'PAR1'},
     'sqlite': {offset: 0, magic: 'SQLite format 3\0'}
   };
   
   static async checkMagicBytes(text){
     const keys = Object.keys(FileUtils.#magicBytes);
+    let bytes;
     if (text instanceof File){
       const file = text;
       
@@ -18,16 +19,27 @@ class FileUtils {
         })
       );
       const fileSlice = file.slice(0, maxLength);
-      text = await fileSlice.text();
+      bytes = await fileSlice.bytes();
     }
     return keys.find(key => {
       const data = FileUtils.#magicBytes[key];
       const minLength = data.offset + data.magic.length;
       
-      if (text.length < minLength) {
+      if (bytes && bytes.length < minLength || text.length < minLength) {
         return false;
       }
-      const textSlice = text.slice(data.offset, minLength);
+      let textSlice;
+      if (bytes && bytes.length) {
+        const byteSlice = bytes.slice(data.offset, minLength);
+        textSlice = ''
+        byteSlice.forEach(byte => {
+          const ch = String.fromCharCode(byte);
+          textSlice += ch;
+        });
+      }
+      else {
+        textSlice = text.slice(data.offset, minLength);
+      }
       return textSlice === data.magic;
     });
   }
