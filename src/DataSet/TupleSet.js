@@ -164,10 +164,6 @@ class TupleSet extends DataSetComponent {
     return this.#tuples[index];
   }
 
-  async getTupleCount(){
-    return new Promise( (resolve, reject) => resolve(this.#tupleCount) );
-  }
-
   #loadTuples(resultSet, offset) {
     const numRows = resultSet.numRows;
     const fields = resultSet.schema.fields;

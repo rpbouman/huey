@@ -450,7 +450,7 @@ class PivotTableUi extends EventEmitter {
         });
       }
       finally {
-        setTimeout(() => this.#setBusy, 1);
+        setTimeout(() => this.#setBusy(false), 1);
       }
     }
     else
