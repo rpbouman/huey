@@ -652,7 +652,7 @@ class AttributeUi {
   }
 
   static getArrayDerivations(typeName){
-    const arrayDerivations = Object.assign(AttributeUi.arrayDerivations);
+    const arrayDerivations = Object.assign({}, AttributeUi.arrayDerivations);
     const arrayStatisticsDerivations = AttributeUi.arrayStatisticsDerivations;
     const applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
     Object.keys(applicableAggregators).forEach(function(aggregator){
