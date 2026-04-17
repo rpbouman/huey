@@ -767,6 +767,7 @@ class AttributeUi {
     const dom = this.getDom();
     dom.addEventListener('click', event => this.#clickHandler(event) );
     dom.addEventListener('dragstart', event => this.#dragStartHandler(event) );
+    dom.addEventListener('toggle', event => this.#toggleNodeState(event), { capture: true });
     this.#queryModel.addEventListener('change', event => this.#queryModelChangeHandler(event) );
   }
 
@@ -1103,7 +1104,6 @@ class AttributeUi {
     switch (config.type){
       case 'column':
       case 'member':
-        node.addEventListener('toggle', event => this.#toggleNodeState( event ) );
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
@@ -1113,7 +1113,6 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', derivation);
-        node.addEventListener('toggle', event => this.#toggleNodeState( event ) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
@@ -1153,17 +1152,7 @@ class AttributeUi {
 
   clear(showBusy){
     const attributesUi = this.getDom();
-    const detailsNodes = attributesUi.querySelectorAll('details');
-    detailsNodes.forEach(node => {
-      node.removeEventListener('toggle', this.#toggleNodeState);
-    });
-    let content;
-    if (showBusy) {
-      content = '<div class="loader loader-medium"></div>';
-    }
-    else {
-      content = '';
-    }
+    const content = showBusy ? '<div class="loader loader-medium"></div>' : '';
     attributesUi.innerHTML = content;
   }
 
@@ -1489,6 +1478,10 @@ class AttributeUi {
 
   #toggleNodeState(event){
     const node = event.target;
+    const nodeType = node.getAttribute?.('data-nodetype');
+    if (!['column', 'member', 'derived'].includes( nodeType )) {
+      return;
+    }  
     if (event.newState !== 'open'){
       return;
     }
