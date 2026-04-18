@@ -1,0 +1,180 @@
+/**
+ * Shared derivation and aggregator icon assignments.
+ *
+ * Sets --item-icon on any element carrying data-derivation or data-aggregator.
+ * Components consume this with a single rule that reads:
+ *   content: var(--item-icon)
+ * on their respective icon pseudo-elements.
+ *
+ * See AttributeUi.css (details[data-nodetype] > summary > span.label::before)
+ * and QueryUi.css    (li[data-derivation|data-aggregator] > span:before)
+ * for the consumer rules.
+ *
+ */
+
+
+[data-derivation='row number']{ --item-icon: var( --icon-hash ); }
+
+/* ─── Date derivations ────────────────────────────────────────────────────── */
+
+[data-derivation="iso-date"],
+[data-derivation="local-date"]{ --item-icon: var( --icon-calendar ); }
+
+[data-derivation="iso-year"],
+[data-derivation=year]{ --item-icon: var( --icon-letter-y ); }
+
+[data-derivation=quarter]{ --item-icon: var( --icon-letter-q ); }
+
+[data-derivation="month name"],
+[data-derivation="month shortname"],
+[data-derivation="month num"]{ --item-icon: var( --icon-letter-m ); }
+
+[data-derivation="week num"]{ --item-icon: var( --icon-calendar-week ); }
+
+[data-derivation="day of year"]{ --item-icon: var( --icon-letter-d ); }
+
+[data-derivation="day of month"]{ --item-icon: var( --icon-calendar-month ); }
+
+[data-derivation="day of week shortname"],
+[data-derivation="day of week name"],
+[data-derivation="iso-day of week"],
+[data-derivation="day of week num"]{ --item-icon: var( --icon-letter-d-small ); }
+
+/* ─── Time derivations ────────────────────────────────────────────────────── */
+
+[data-derivation="iso-time"]{ --item-icon: var( --icon-clock ); }
+
+[data-derivation=hour]{ --item-icon: var( --icon-letter-h ); }
+[data-derivation=minute]{ --item-icon: var( --icon-letter-m-small ); }
+[data-derivation=second]{ --item-icon: var( --icon-letter-s ); }
+
+[data-derivation='timestamp (secs)'],
+[data-derivation='timestamp (millis)'],
+[data-derivation='timestamp (micros)'],
+[data-derivation='timestamp (nanos)']{ --item-icon: var( --icon-stopwatch ); }
+
+/* ─── UUID derivations ────────────────────────────────────────────────────── */
+
+[data-derivation='UUIDv7 timestamp']{ --item-icon: var( --icon-calendar-clock ); }
+[data-derivation='UUID version']{ --item-icon: var( --icon-letter-v-small ); }
+
+/* ─── String derivations ──────────────────────────────────────────────────── */
+
+[data-derivation=lowercase]{ --item-icon: var( --icon-letter-case-lower ); }
+[data-derivation=uppercase]{ --item-icon: var( --icon-letter-case-upper ); }
+[data-derivation=NOACCENT]{ --item-icon: var( --icon-letter-case ); }
+[data-derivation=NOCASE]{ --item-icon: var( --icon-letter-case ); }
+[data-derivation='first letter']{ --item-icon: var( --icon-sort-a-z ); }
+
+/* ─── Size / length derivations ───────────────────────────────────────────── */
+
+[data-derivation='entry count'],
+[data-derivation='cardinality'],
+[data-derivation='unique values length'],
+[data-derivation='length'],
+[data-derivation='octet-length']{ --item-icon: var( --icon-ruler-3 ); }
+
+/* ─── Index derivations ───────────────────────────────────────────────────── */
+
+[data-derivation='entry indices'],
+[data-derivation='element indices']{ --item-icon: var( --icon-list-numbers ); }
+
+/* ─── Hash / fingerprint derivations ─────────────────────────────────────── */
+
+[data-derivation='hash'],
+[data-derivation='md5'],
+[data-derivation='md5 low'],
+[data-derivation='md5 high']{ --item-icon: var( --icon-number-123 ); }
+
+[data-derivation='md5 (hex)'],
+[data-derivation='sha-1'],
+[data-derivation='sha-256']{ --item-icon: var( --icon-fingerprint ); }
+
+/* ─── Encoding derivations ────────────────────────────────────────────────── */
+
+[data-derivation=base64]{ --item-icon: var( --icon-number-64-small ); }
+[data-derivation=hex]{ --item-icon: var( --icon-number-16-small ); }
+
+/* ─── Key / value derivations ─────────────────────────────────────────────── */
+
+/* keyset (AttributeUi) and keys (QueryUi) are both mapped here */
+[data-derivation='keyset'],
+[data-derivation='keys']{ --item-icon: var( --icon-key ); }
+
+[data-derivation='valuelist']{ --item-icon: var( --icon-shopping-cart ); }
+
+/* ─── Collection derivations ──────────────────────────────────────────────── */
+
+[data-derivation='unique values'],
+[data-aggregator='unique values']{ --item-icon: var( --icon-letter-u-small ); }
+
+[data-derivation='sort values']{ --item-icon: var( --icon-sort-ascending-letters ); }
+
+/* ─── Count ───────────────────────────────────────────────────────────────── */
+
+[data-derivation=count],
+[data-derivation="count if true"],
+[data-derivation="count if false"],
+[data-aggregator=count],
+[data-aggregator="count if true"],
+[data-aggregator="count if false"]{ --item-icon: var( --icon-tallymarks ); }
+
+[data-derivation="distinct count"],
+[data-aggregator="distinct count"]{ --item-icon: var( --icon-tallymark-4 ); }
+
+/* ─── Min / max ───────────────────────────────────────────────────────────── */
+
+[data-derivation=max],
+[data-aggregator=max]{ --item-icon: var( --icon-math-max ); }
+
+[data-derivation=min],
+[data-aggregator=min]{ --item-icon: var( --icon-math-min ); }
+
+/* ─── Collection aggregators ──────────────────────────────────────────────── */
+
+[data-aggregator=list]{ --item-icon: var( --icon-list ); }
+
+[data-aggregator=histogram]{ --item-icon: var( --icon-chart-bar ); }
+
+/* ─── Sum / averages ──────────────────────────────────────────────────────── */
+
+[data-derivation=sum],
+[data-aggregator=sum]{ --item-icon: var( --icon-sum ); }
+
+[data-derivation=avg],
+[data-derivation=geomean],
+[data-aggregator=avg],
+[data-aggregator=geomean]{ --item-icon: var( --icon-math-avg ); }
+
+/* ─── Statistical aggregators ─────────────────────────────────────────────── */
+
+[data-derivation=mad],
+[data-derivation=median],
+[data-aggregator=mad],
+[data-aggregator=median]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=mode],
+[data-aggregator=mode]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=stdev],
+[data-aggregator=stdev]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=variance],
+[data-aggregator=variance]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=entropy],
+[data-aggregator=entropy]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=kurtosis],
+[data-aggregator=kurtosis]{ --item-icon: var( --icon-calculator ); }
+
+[data-derivation=skewness],
+[data-aggregator=skewness]{ --item-icon: var( --icon-calculator ); }
+
+/* ─── Boolean aggregators ─────────────────────────────────────────────────── */
+
+[data-derivation=and],
+[data-aggregator=and]{ --item-icon: var( --icon-logical-and ); }
+
+[data-derivation=or],
+[data-aggregator=or]{ --item-icon: var( --icon-logical-or ); }

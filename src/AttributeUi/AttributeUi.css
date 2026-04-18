@@ -1,3 +1,5 @@
+@import './derivation-aggregator-icons.css';
+
 /**
 * Prevent the Attribute UI events when the pivot table is busy:
 */
@@ -156,20 +158,22 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     &[data-nodetype=folder][open] > summary > span.label::before {
       content: var( --icon-folder-open );
     }
+
+    /**
+    * Icon consumer for derivations and aggregators.
+    * The --item-icon custom property is assigned in derivation-aggregator-icons.css.
+    * Compound rules below (keyed on data-column_type / data-member_expression_type)
+    * have higher specificity and override this where the icon depends on the type context.
+    */
+    &:is([data-nodetype=derived], [data-nodetype=aggregate]) > summary > span.label::before {
+      content: var( --item-icon );
+    }
     
     /**
     *
-    * Data type icons & derivations
+    * Data type icons
     *
     */
-    &[data-nodetype=derived] {
-
-      &[data-derivation='row number'] > summary > span.label::before {
-        content: var( --icon-hash );
-      }
-      
-    }
-    
     &:is(
       [data-column_type=VARCHAR][data-nodetype=column],
       [data-member_expression_type=VARCHAR]:is(
@@ -241,8 +245,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       ):is(
         [data-nodetype=member],
         [data-nodetype=derived][data-derivation='elements']
-      ),
-      [data-nodetype=derived][data-derivation=base64]
+      )
     ) > summary > span.label::before {
       content: var( --icon-number-64-small );
     }
@@ -278,8 +281,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       ):is(
         [data-nodetype=member],
         [data-nodetype=derived][data-derivation='elements']
-      ),
-      [data-nodetype=derived][data-derivation=hex]
+      )
     ) > summary > span.label::before {
       content: var( --icon-number-16-small );
     }
@@ -302,20 +304,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       content: var( --icon-number-8-small );
     }
         
-    &:is(
-      [data-nodetype=derived][data-derivation='keyset']
-    ) 
-    > summary > span.label::before {
-      content: var( --icon-key );
-    }
-
-    &:is(
-      [data-nodetype=derived][data-derivation='valuelist']
-    ) 
-    > summary > span.label::before {
-      content: var( --icon-shopping-cart );
-    }
-
     &:is(
       &:is(
         [data-column_type^=STRUCT][data-nodetype=column]
@@ -399,18 +387,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     ) > summary > span.label::before {
       content: var( --icon-decimal );
     }
-    
-
-    &:is( 
-      [data-derivation='UUID version'][data-nodetype=derived] 
-    ) > summary > span.label::before {
-      content: var( --icon-letter-v-small );
-    }
 
     &:is(
       [data-column_type^=TIMESTAMP][data-nodetype=column],
-      [data-member_expression_type^=TIMESTAMP][data-nodetype=member],
-      [data-derivation='UUIDv7 timestamp'][data-nodetype=derived]
+      [data-member_expression_type^=TIMESTAMP][data-nodetype=member]
     ) > summary > span.label::before {
       content: var( --icon-calendar-clock );
     }
@@ -460,302 +440,93 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     }
 
     &:is(
-      [data-derivation="hash"],
-      [data-derivation="md5"],
-      [data-derivation="md5 low"],
-      [data-derivation="md5 high"]
-    ):is(
-      [data-nodetype=derived]
-    ) > summary > span.label::before {
-      content: var( --icon-number-123 );
-    }
-    
-    &:is(
-      &:is(
-        [data-column_type=UUID][data-nodetype=column],
-        [data-member_expression_type=UUID][data-nodetype=member]
-      ),
-      &:is(
-        [data-derivation="md5 (hex)"],
-        [data-derivation="sha-1"],
-        [data-derivation="sha-256"],
-      ):is(
-        [data-nodetype=derived]
-      )
+      [data-column_type=UUID][data-nodetype=column],
+      [data-member_expression_type=UUID][data-nodetype=member]
     ) > summary > span.label::before {
       content: var( --icon-fingerprint );
     }
 
     /**
     *
-    * Derivation icons
+    * Aggregator axis-button hover icons.
+    * These cannot use the --item-icon approach because the aggregator identity
+    * is on the nested input element, not on the ancestor details element.
+    * The node-label icon for each aggregator is handled by the consumer rule above
+    * together with derivation-aggregator-icons.css.
     *
     */
-    &[data-nodetype=derived] {
-      
-      &:is(
-        [data-derivation="iso-date"],
-        [data-derivation="local-date"] 
-      ) > summary > span.label::before {
-        content: var( --icon-calendar );
-      }
-
-      &:is(
-        [data-derivation="iso-year"],
-        [data-derivation=year]
-      ) > summary > span.label::before {
-        content: var( --icon-letter-y );
-      }
-      
-      &[data-derivation=quarter] > summary > span.label::before {
-        content: var( --icon-letter-q );
-      }
-
-      &:is(
-        [data-derivation="month name"],
-        [data-derivation="month shortname"],
-        [data-derivation="month num"]
-      )  > summary > span.label::before {
-        content: var( --icon-letter-m );
-      }
-      
-      &[data-derivation="week num"] > summary > span.label::before {
-        content: var( --icon-calendar-week );
-      }
-
-      &[data-derivation="day of year"] > summary > span.label::before {
-        content: var( --icon-letter-d );
-      }
-
-      &[data-derivation="day of month"] > summary > span.label::before {
-        content: var( --icon-calendar-month );
-      }
-
-      &:is(
-        [data-derivation="day of week shortname"],
-        [data-derivation="day of week name"],
-        [data-derivation="iso-day of week"],
-        [data-derivation="day of week num"]
-      )  > summary > span.label::before {
-        content: var( --icon-letter-d-small );
-      }
-      
-      &[data-derivation="iso-time"] > summary > span.label::before {
-        content: var( --icon-clock );
-      }
-
-      &[data-derivation=hour] > summary > span.label::before {
-        content: var( --icon-letter-h );
-      }
-
-      &[data-derivation=minute] > summary > span.label::before {
-        content: var( --icon-letter-m-small );
-      }
-
-      &[data-derivation=second] > summary > span.label::before {
-        content: var( --icon-letter-s );
-      }
-  
-      &:is(
-        [data-derivation='timestamp (secs)'], 
-        [data-derivation='timestamp (millis)'],
-        [data-derivation='timestamp (micros)'],
-        [data-derivation='timestamp (nanos)']
-      ) > summary > span.label::before {
-        content: var( --icon-stopwatch );
-      }
-
-      &[data-derivation=lowercase] > summary > span.label::before {
-        content: var( --icon-letter-case-lower );
-      }
-
-      &[data-derivation=uppercase] > summary > span.label::before {
-        content: var( --icon-letter-case-upper );
-      }
-
-      &[data-derivation=NOACCENT] > summary > span.label::before {
-        content: var( --icon-letter-case );
-      }
-
-      &[data-derivation=NOCASE] > summary > span.label::before {
-        content: var( --icon-letter-case );
-      }
-
-      &[data-derivation='first letter'] > summary > span.label::before {
-        content: var( --icon-sort-a-z );
-      }
-
-      &:is(
-        [data-derivation='entry count'],
-        [data-derivation='unique values length'],
-        [data-derivation='length'],
-        [data-derivation='octet-length'] 
-      ) > summary > span.label::before {
-        content: var( --icon-ruler-3 );
-      }
-
-      &:is(
-        [data-derivation='entry indices'],
-        [data-derivation='element indices'] 
-      ) > summary > span.label::before {
-        content: var( --icon-list-numbers );
-      }
-
-    }
-        
-    /**
-    *
-    * Aggregator icons
-    *
-    */
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^=count] ):hover::before,
-    &:is(
-      [data-derivation^=count][data-nodetype=derived],
-      [data-aggregator^=count][data-nodetype=aggregate]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^=count] ):hover::before {
       content: var( --icon-tallymarks );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^="distinct count"] ):hover::before,
-    &:is(
-      [data-derivation^="distinct count"][data-nodetype=derived],
-      [data-aggregator^="distinct count"][data-nodetype=aggregate] 
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator^="distinct count"] ):hover::before {
       content: var( --icon-tallymark-4 );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before,
-    &:is(
-      [data-derivation=max][data-nodetype=derived],
-      [data-aggregator=max][data-nodetype=aggregate]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=max] ):hover::before {
       content: var( --icon-math-max );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=min] ):hover::before,
-    &:is(
-      [data-derivation=min][data-nodetype=derived],
-      [data-aggregator=min][data-nodetype=aggregate]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=min] ):hover::before {
       content: var( --icon-math-min );
     }
     
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=list] ):hover::before,
-    &[data-aggregator=list][data-nodetype=aggregate] > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=list] ):hover::before {
       content: var( --icon-list );
     }
     
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="unique values"] ):hover::before,
-    &:is(
-      [data-derivation="unique values"][data-nodetype=derived],
-      [data-aggregator="unique values"][data-nodetype=aggregate] 
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator="unique values"] ):hover::before {
       content: var( --icon-letter-u-small );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=histogram] ):hover::before,
-    &[data-aggregator=histogram][data-nodetype=aggregate] > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=histogram] ):hover::before {
       content: var( --icon-chart-bar );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=sum] ):hover::before,
-    &:is(
-      [data-derivation=sum][data-nodetype=derived],
-      [data-aggregator=sum][data-nodetype=aggregate]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=sum] ):hover::before {
       content: var( --icon-sum );
     }
 
-    &[data-nodetype=derived][data-derivation="sort values"] > summary > span.label::before {
-      content: var( --icon-sort-ascending-letters );
-    }
-
-    
     > summary > label.attributeUiAxisButton[data-axis=cells]:has( 
       input[type=checkbox][data-aggregator=avg],
       input[type=checkbox][data-aggregator=geomean]
-    ):hover::before,
-    &:is(
-      [data-nodetype=derived][data-derivation=avg],
-      [data-nodetype=aggregate]:is(
-        [data-aggregator=geomean],
-        [data-aggregator=avg]
-      )
-    ) > summary > span.label::before {
+    ):hover::before {
       content: var( --icon-math-avg );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before,
-    &:is(
-      [data-nodetype=derived][data-derivation=mad],
-      [data-nodetype=derived][data-derivation=median],
-      [data-nodetype=aggregate][data-aggregator=mad],
-      [data-nodetype=aggregate][data-aggregator=median] 
-    ) > summary > span.label::before {
-      content: var( --icon-calculator );
-    }
-    
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=mode] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=mode],
-      &[data-nodetype=aggregate][data-aggregator=mode]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=median] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=stdev] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=stdev],
-      &[data-nodetype=aggregate][data-aggregator=stdev]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=mode] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=variance] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=variance],
-      &[data-nodetype=aggregate][data-aggregator=variance]
-    )  > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=stdev] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=entropy] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=entropy],
-      &[data-nodetype=aggregate][data-aggregator=entropy]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=variance] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=kurtosis] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=kurtosis],
-      &[data-nodetype=aggregate][data-aggregator=kurtosis]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=entropy] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=skewness] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=skewness],
-      &[data-nodetype=aggregate][data-aggregator=skewness]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=kurtosis] ):hover::before {
       content: var( --icon-calculator );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=and] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=and],
-      &[data-nodetype=aggregate][data-aggregator=and]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=skewness] ):hover::before {
+      content: var( --icon-calculator );
+    }
+
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=and] ):hover::before {
       content: var( --icon-logical-and );
     }
 
-    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=or] ):hover::before,
-    &:is(
-      &[data-nodetype=derived][data-derivation=or],
-      &[data-nodetype=aggregate][data-aggregator=or]
-    ) > summary > span.label::before {
+    > summary > label.attributeUiAxisButton[data-axis=cells]:has( input[type=checkbox][data-aggregator=or] ):hover::before {
       content: var( --icon-logical-or );
     }
 
