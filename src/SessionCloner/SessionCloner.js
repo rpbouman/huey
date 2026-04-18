@@ -62,7 +62,9 @@ class SessionCloner {
   #initCloneHueySession(){
     byId('cloneHueySession').addEventListener('click', event => {
       const location = document.location;
-      const url = `${location.protocol}//${location.hostname}${location.pathname}?cloneHueySession=true`;
+      const params = new URLSearchParams(location.search);
+      params.set('cloneHueySession', 'true');
+      const url = `${location.protocol}//${location.hostname}${location.pathname}?${params.toString()}`;
       
       if (!postMessageInterface) {
         initPostMessageInterface(true);
