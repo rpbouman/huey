@@ -62,13 +62,7 @@
       }
     }
 
-    
-    > ol::-webkit-scrollbar-corner{
-      background-color: var( --huey-light-background-color );
-      border-style: none;
-    }
-    
-    
+        
     > ol {
       flex-grow: 1;
       list-style-type: none;
@@ -93,6 +87,11 @@
       border-style: solid;
       border-width: 1px;
       border-radius: 15px;
+
+      &::-webkit-scrollbar-corner{
+        background-color: var( --huey-light-background-color );
+        border-style: none;
+      }
 
       /* query ui axis item */
       > li {
@@ -149,518 +148,608 @@
           }
         }
 
-      }
-
-      > li:first-child {
-        > label:first-child:has( > button )::after {
-          visibility: hidden;
-          display: none;
-        }
-
-        /* label holding the item caption */
-        > details,
-        > span {
-          margin-left: 8px;
-        }
-      }
-
-      > li:last-child {
-        > label:last-child:has( > button )::after {
-          visibility: hidden;
-          display: none;
-        }
-
-        /* label holding the item caption */
-        > menu {
-          margin-right: 6px;
-        }
-      }
-
-      > li[data-derivation] > span:before,
-      > li[data-aggregator] > span:before {
-        width: 20px;
-        font-family: var( --huey-icon-font-family ) !important;
-        font-size: var( --huey-icon-medium );
-        color: var( --huey-icon-color );
-        vertical-align: -15%;
-        display: inline-block;
-      }
-
-      /**
-      *
-      * Derivation icons
-      *
-      */
-      > li[data-derivation='row number'] > span:before {
-        content: var( --icon-hash );
-      }
-
-      > li[data-derivation="iso-date"] > span:before {
-        content: var( --icon-calendar );
-      }
-
-      > li[data-derivation="iso-year"] > span:before,
-      > li[data-derivation=year] > span:before {
-        content: var( --icon-letter-y );
-      }
-
-      > li[data-derivation=quarter] > span:before {
-        content: var( --icon-letter-q );
-      }
-      > li[data-derivation="month shortname"] > span:before,
-      > li[data-derivation="month name"] > span:before,
-      > li[data-derivation="month num"] > span:before {
-        content: var( --icon-letter-m );
-      }
-
-      > li[data-derivation="week num"] > span:before {
-        content: var( --icon-calendar-week );
-      }
-
-      > li[data-derivation="day of year"] > span:before {
-        content: var( --icon-letter-d);
-      }
-
-      > li[data-derivation="day of month"] > span:before {
-        content: var( --icon-calendar-month );
-      }
-
-      > li[data-derivation="day of week shortname"] > span:before,
-      > li[data-derivation="day of week name"] > span:before,
-      > li[data-derivation="iso-day of week"] > span:before,
-      > li[data-derivation="day of week num"] > span:before {
-        content: var( --icon-letter-d-small );
-      }
-
-      > li[data-derivation="iso-time"] > span:before {
-        content: var( --icon-clcck );
-      }
-
-      > li[data-derivation=hour] > span:before {
-        content: var( --icon-letter-h );
-      }
-
-      > li[data-derivation=minute] > span:before {
-        content: var( --icon-letter-m-small );
-      }
-
-      > li[data-derivation=second] > span:before {
-        content: var( --icon-letter-s );
-      }
-      
-      > li[data-derivation='UUIDv7 timestamp'] > span:before {
-        content: var( --icon-calendar-clock );
-      }
-      > li[data-derivation='UUID version'] > span:before {
-        content: var( --icon-letter-v-small );
-      }
-
-      > li[data-derivation='timestamp (secs)'] > span:before,
-      > li[data-derivation='timestamp (millis)'] > span:before,
-      > li[data-derivation='timestamp (micros)'] > span:before,
-      > li[data-derivation='timestamp (nanos)'] > span:before 
-      {
-        content: var( --icon-stopwatch );
-      }
-
-      > li[data-derivation=lowercase] > span:before {
-        content: var( --icon-letter-case-lower );
-      }
-
-      > li[data-derivation=uppercase] > span:before {
-        content: var( --icon-letter-case-upper );
-      }
-
-      > li[data-derivation=NOACCENT] > span:before {
-        content: var( --icon-letter-case );
-      }
-
-      > li[data-derivation=NOCASE] > span:before {
-        content: var( --icon-letter-case );
-      }
-
-      > li[data-derivation='first letter'] > span:before {
-        content: var( --icon-sort-a-z );
-      }
-
-      > li[data-derivation='keys'] > span:before {
-        content: var( --icon-key );
-      }
-
-      > li[data-derivation='cardinality'] > span:before,
-      > li[data-derivation='unique values length'] > span:before,
-      > li[data-derivation='length'] > span:before {
-        content: var( --icon-ruler-3 );
-      }
-
-      > li[data-derivation='unique values'] > span:before {
-        content: var( --icon-letter-u-small );
-      }
-
-      > li[data-derivation='sort values'] > span:before {
-        content: var( --icon-sort-ascending-letters );
-      }
-
-      > li[data-derivation='element indices'] > span:before {
-        content: var( --icon-list-numbers );
-      }
-
-      > li[data-derivation='hash'] > span:before,
-      > li[data-derivation='md5'] > span:before,
-      > li[data-derivation='md5 low'] > span:before,
-      > li[data-derivation='md5 high'] > span:before {
-        content: var( --icon-number-123 );
-      }
-
-      > li[data-derivation='md5 (hex)'] > span:before,
-      > li[data-derivation='sha-1'] > span:before,
-      > li[data-derivation='sha-256'] > span:before {
-        content: var( --icon-binary );
-      }
-
-      /**
-      *
-      * Aggregator icons
-      *
-      */
-      > li[data-derivation="count if true"] > span:before,
-      > li[data-derivation="count if false"] > span:before,
-      > li[data-derivation=count] > span:before,
-      > li[data-aggregator="count if true"] > span:before,
-      > li[data-aggregator="count if false"] > span:before,
-      > li[data-aggregator=count] > span:before {
-        content: var( --icon-tallymarks );
-      }
-
-      > li[data-derivation="distinct count"] > span:before,
-      > li[data-aggregator="distinct count"] > span:before {
-        content: var( --icon-tallymark-4 );
-      }
-
-      > li[data-derivation=max] > span:before,
-      > li[data-aggregator=max] > span:before {
-        content: var( --icon-math-max );
-      }
-
-      > li[data-derivation=min] > span:before,
-      > li[data-aggregator=min] > span:before {
-        content: var( --icon-math-min );
-      }
-
-      > li[data-aggregator=list] > span:before {
-        content: var( --icon-list );
-      }
-
-      > li[data-derivation="unique values"] > span:before,
-      > li[data-aggregator="unique values"] > span:before {
-        content: var( --icon-letter-u-small );
-      }
-
-      > li[data-derivation=sum] > span:before,
-      > li[data-aggregator=sum] > span:before {
-        content: var( --icon-sum );
-      }
-
-      > li[data-derivation=geomean] > span:before,
-      > li[data-derivation=avg] > span:before,
-      > li[data-aggregator=geomean] > span:before,
-      > li[data-aggregator=avg] > span:before {
-        content: var( --icon-math-avg );
-      }
-
-      > li[data-derivation=mad] > span:before,
-      > li[data-derivation=median] > span:before,
-      > li[data-aggregator=mad] > span:before,
-      > li[data-aggregator=median] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=mode] > span:before,
-      > li[data-aggregator=mode] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=stdev] > span:before,
-      > li[data-aggregator=stdev] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=variance] > span:before,
-      > li[data-aggregator=variance] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=entropy] > span:before,
-      > li[data-aggregator=entropy] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=kurtosis] > span:before,
-      > li[data-aggregator=kurtosis] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=skewness] > span:before,
-      > li[data-aggregator=skewness] > span:before {
-        content: var( --icon-calculator );
-      }
-
-      > li[data-derivation=or] > span:before,
-      > li[data-aggregator=or] > span:before {
-        content: var( --icon-logical-or );
-      }
-
-      > li[data-derivation=and] > span:before,
-      > li[data-aggregator=and] > span:before {
-        content: var( --icon-logical-and );
-      }
-
-      > li[data-is-being-edited-by-filter-dialog=true] {
-        background-color: var( --huey-dark-background-color );
-        border-color: var( --huey-dark-border-color );
-        > details {
-          > summary {
-            font-weight: bold;
+        &:first-child {
+          > label:first-child:has( > button )::after {
+            visibility: hidden;
+            display: none;
+          }
+          
+          /* label holding the item caption */
+          > details,
+          > span {
+            margin-left: 8px;
           }
         }
-      }
 
-    }
-  }
-  
-  /* item separators for d */
-  > section[data-axis] > ol::after, 
-  > section[data-axis] > ol > li::before {
-    width: 3px;
-    height: 20px;
-    background-color: transparent;
-    display:inline-block;
-    content: '';
-  }
-  
-  > section[data-axis] > ol::after {
-    top: 2px;
-    position: relative;
-  }
-  
-  > section[data-axis] > ol > li::before {
-    float: left;
-  }
+        &:last-child {
+          
+          > label:last-child:has( > button )::after {
+            visibility: hidden;
+            display: none;
+          }
 
-  > section[data-axis][data-dragover] > ol:empty::after,
-  > section[data-axis][data-dragover] > ol:has( > li[data-dragoverside=right]:last-child )::after,
-  > section[data-axis][data-dragover='0'] > ol::after,
-  > section[data-axis]> ol > li[data-dragoverside=left]::before,
-  > section[data-axis]> ol > li[data-dragoverside=right] + li::before {
-    background-color: var( --huey-dark-background-color) ;
-  }  
-  
-  /* end of item separatores */
-
-
-  > section[data-axis]:last-child {
-    margin-bottom: 1px;
-  }
-
-  > section[data-axis]:has( > ol:empty ) > header > label,
-  > section[data-axis]:has( > ol:empty ) > footer > label {
-    pointer-events: none;
-  }
-
-  /* filter axis header icon */
-  > section[data-axis=filters] > header > label:has( > button )::after {
-    content: var( --icon-filter );
-  }
-
-  > section[data-axis=columns] > header {
-    /* Columns axis header icon */
-    > label:has( > button )::after {
-      content: var( --icon-table-row );
-    }
-
-    /* axis icon is a button to flip the non-cells axes */
-    > label:has( > button ):hover::after {
-      content: var( --icon-table-column );
-    }
-
-  }
-
-  > section[data-axis=rows] > header  {
-    /* Rows axis header icon */
-    > label:has( > button )::after {
-      content: var( --icon-table-column );
-    }
-
-    /* axis icon is a button to flip the non-cells axes */
-    > label:has( > button ):hover::after {
-      content: var( --icon-table-row );
-    }
-  }
-
-  /* Cells axis header icon */
-  > section[data-axis=cells] > header > label:has( > button )::after {
-    content: var( --icon-layout-grid );
-  }
-
-
-  /*  */
-  > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after,
-  > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox] )::after {
-    content: var( --icon-abacus );
-  }
-
-  /*  */
-  > section[data-axis=rows] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after,
-  > section[data-axis=columns] > ol > li > menu > label:nth-child(1):has( > input[type=checkbox]:checked )::after {
-    color: var( --huey-icon-highlight );
-  }
-
-
-  /* axis item action to move item to other axis */
-  > section[data-axis=rows] > ol > li > menu > label:nth-child(2):has( > button )::after {
-    content: var( --icon-table-row );
-  }
-
-  > section[data-axis=columns] > ol > li > menu > label:nth-child(2):has( > button )::after {
-    content: var( --icon-table-column );
-  }
-
-  > section[data-axis=filters] > ol {
-    > li {
-
-      /* filter with no items does not have expandable element */
-      > details:has( > ol:empty ) > summary {
-        list-style: none;
-      }
-      
-      > details {
-        
-        > summary::marker {
+          /* label holding the item caption */
+          > menu {
+            margin-right: 6px;
+          }
         }
         
-        > ol[role=menu] {
+        &:is( 
+          [data-derivation], 
+          [data-aggregator]
+        ) > span:before {
+          width: 20px;
+          font-family: var( --huey-icon-font-family ) !important;
+          font-size: var( --huey-icon-medium );
+          color: var( --huey-icon-color );
+          vertical-align: -15%;
+          display: inline-block;
+        }
+
+        /**
+        *
+        * Derivation icons
+        *
+        */
+        &:is( [data-derivation='row number'] ) > span:before {
+          content: var( --icon-hash );
+        }
+        
+        &:is( [data-derivation="iso-date"] ) > span:before {
+          content: var( --icon-calendar );
+        }
+
+        &:is(
+          [data-derivation="iso-year"],
+          [data-derivation=year]
+        ) > span:before {
+          content: var( --icon-letter-y );
+        }
+        
+        &:is( [data-derivation=quarter] ) > span:before {
+          content: var( --icon-letter-q );
+        }
+      
+        &:is(
+          [data-derivation="month shortname"],
+          [data-derivation="month name"],
+          [data-derivation="month num"] 
+        ) > span:before {
+          content: var( --icon-letter-m );
+        }
+
+        &:is( [data-derivation="week num"] ) > span:before {
+          content: var( --icon-calendar-week );
+        }
+
+        &:is( [data-derivation="day of year"] ) > span:before {
+          content: var( --icon-letter-d);
+        }
+
+        &:is( [data-derivation="day of month"] ) > span:before {
+          content: var( --icon-calendar-month );
+        }
+
+        &:is( 
+          [data-derivation="day of week shortname"],
+          [data-derivation="day of week name"],
+          [data-derivation="iso-day of week"],
+          [data-derivation="day of week num"]
+        ) > span:before {
+          content: var( --icon-letter-d-small );
+        }
+        
+        &:is( [data-derivation="iso-time"] ) > span:before {
+          content: var( --icon-clcck );
+        }
+
+        &:is( [data-derivation=hour] ) > span:before {
+          content: var( --icon-letter-h );
+        }
+
+        &:is( [data-derivation=minute] ) > span:before {
+          content: var( --icon-letter-m-small );
+        }
+
+        &:is( [data-derivation=second] ) > span:before {
+          content: var( --icon-letter-s );
+        }
+        
+        &:is( [data-derivation='UUIDv7 timestamp'] ) > span:before {
+          content: var( --icon-calendar-clock );
+        }
+        
+        &:is( [data-derivation='UUID version'] ) > span:before {
+          content: var( --icon-letter-v-small );
+        }
+
+        &:is(
+          [data-derivation='timestamp (secs)'],
+          [data-derivation='timestamp (millis)'],
+          [data-derivation='timestamp (micros)'],
+          [data-derivation='timestamp (nanos)']
+        ) > span:before {
+          content: var( --icon-stopwatch );
+        }
+
+        &:is( [data-derivation=lowercase] ) > span:before {
+          content: var( --icon-letter-case-lower );
+        }
+
+        &:is( [data-derivation=uppercase] ) > span:before {
+          content: var( --icon-letter-case-upper );
+        }
+
+        &:is( [data-derivation=NOACCENT] ) > span:before {
+          content: var( --icon-letter-case );
+        }
+
+        &:is( [data-derivation=NOCASE] ) > span:before {
+          content: var( --icon-letter-case );
+        }
+
+        &:is( [data-derivation='first letter'] ) > span:before {
+          content: var( --icon-sort-a-z );
+        }
+
+        &:is( [data-derivation='keys'] ) > span:before {
+          content: var( --icon-key );
+        }
+
+        &:is( 
+          [data-derivation='cardinality'],
+          [data-derivation='unique values length'],
+          [data-derivation='length'] 
+        ) > span:before {
+          content: var( --icon-ruler-3 );
+        }
+
+        &:is( [data-derivation='unique values'] ) > span:before {
+          content: var( --icon-letter-u-small );
+        }
+
+        &:is( [data-derivation='sort values'] ) > span:before {
+          content: var( --icon-sort-ascending-letters );
+        }
+
+        &:is( li[data-derivation='element indices'] ) > span:before {
+          content: var( --icon-list-numbers );
+        }
+
+        &:is( 
+          [data-derivation='hash'],
+          [data-derivation='md5'],
+          [data-derivation='md5 low'],
+          [data-derivation='md5 high']
+        ) > span:before {
+          content: var( --icon-number-123 );
+        }
+
+        &:is( 
+          [data-derivation='md5 (hex)'],
+          [data-derivation='sha-1'],
+          [data-derivation='sha-256']
+        ) > span:before {
+          content: var( --icon-binary );
+        }
+
+        /**
+        *
+        * Aggregator icons
+        *
+        */
+        &:is( 
+          [data-derivation="count if true"],
+          [data-derivation="count if false"],
+          [data-derivation=count],
+          [data-aggregator="count if true"],
+          [data-aggregator="count if false"],
+          [data-aggregator=count]
+        ) > span:before {
+          content: var( --icon-tallymarks );
+        }
+
+        &:is( 
+          [data-derivation="distinct count"],
+          [data-aggregator="distinct count"]
+        ) > span:before {
+          content: var( --icon-tallymark-4 );
+        }
+
+        &:is( 
+          [data-derivation=max],
+          [data-aggregator=max]
+        )  > span:before {
+          content: var( --icon-math-max );
+        }
+
+        &:is(
+          [data-derivation=min],
+          [data-aggregator=min]
+        ) > span:before {
+          content: var( --icon-math-min );
+        }
+
+        &:is( [data-aggregator=list] ) > span:before {
+          content: var( --icon-list );
+        }
+
+        &:is(
+          [data-derivation="unique values"],
+          [data-aggregator="unique values"]
+        ) > span:before {
+          content: var( --icon-letter-u-small );
+        }
+
+        &:is( 
+          [data-derivation=sum],
+          [data-aggregator=sum]
+        ) > span:before {
+          content: var( --icon-sum );
+        }
+
+        &:is( 
+          [data-derivation=geomean],
+          [data-derivation=avg],
+          [data-aggregator=geomean],
+          [data-aggregator=avg]
+        ) > span:before {
+          content: var( --icon-math-avg );
+        }
+
+        &:is( 
+          [data-derivation=mad],
+          [data-derivation=median],
+          [data-aggregator=mad],
+          [data-aggregator=median]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is( 
+          [data-derivation=mode],
+          [data-aggregator=mode]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is( 
+          [data-derivation=stdev],
+          [data-aggregator=stdev]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is(
+          [data-derivation=variance],
+          [data-aggregator=variance]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is(
+          [data-derivation=entropy],
+          [data-aggregator=entropy]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is(
+          [data-derivation=kurtosis],
+          [data-aggregator=kurtosis]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is(
+          [data-derivation=skewness],
+          [data-aggregator=skewness]
+        ) > span:before {
+          content: var( --icon-calculator );
+        }
+
+        &:is(
+          [data-derivation=or],
+          [data-aggregator=or]
+        ) > span:before {
+          content: var( --icon-logical-or );
+        }
+
+        &:is(
+          [data-derivation=and],
+          [data-aggregator=and] 
+        )  > span:before {
+          content: var( --icon-logical-and );
+        }
+
+        &[data-is-being-edited-by-filter-dialog=true] {
+          background-color: var( --huey-dark-background-color );
+          border-color: var( --huey-dark-border-color );
+          > details {
+            > summary {
+              font-weight: bold;
+            }
+          }
+        }
+
+      }
+
+    }
+  }
+  
+  > section {
+    
+    &[data-axis] {
+      
+      > ol {
+        
+        /* item separators for d */
+        &::after, 
+        > li::before {
+          width: 3px;
+          height: 20px;
+          background-color: transparent;
+          display: inline-block;
+          content: '';
+        }
+        
+        &::after {
+          top: 2px;
+          position: relative;
+        }
+        
+        > li {
           
-          > li[role=menuitem] {
-            
-            display: list-item;
-            width: 100%;
-            
-            > label:has( > input[type=checkbox] ) {
-              display: inline-block;
-              width: 100%; 
-              > span {
-                display: inline-block;
-                width: 100%;
-                position: relative;
-                left: -10px;
-                top: -2px;                
+          &::before {
+            float: left;
+          }
+          
+        }
+      }
+      
+      &:last-child {
+        margin-bottom: 1px;
+      }
+      
+      /* end of item separatores */
+      &:has( > ol:empty ) {
+        
+        > *:is(header, footer) {
+          > label {
+            pointer-events: none;
+          }
+        }
+        
+      }
+      
+      &[data-dragover] > ol:empty::after,
+      &[data-dragover] > ol:has( > li[data-dragoverside=right]:last-child )::after,
+      &[data-dragover='0'] > ol::after,
+      > ol > li[data-dragoverside=left]::before,
+      > ol > li[data-dragoverside=right] + li::before {
+        background-color: var( --huey-highlight-background-color ) ;
+      }
+      
+      /* filter axis header icon */
+      &[data-axis=filters] > header > label:has( > button )::after {
+        content: var( --icon-filter );
+      }
+
+      &[data-axis=columns] {
+        > header {
+          > label {
+            &:has( > button ) {
+              
+              /* Columns axis header icon */
+              &::after {
+                content: var( --icon-table-row );
+              }
+              
+              /* axis icon is a button to flip the non-cells axes */
+              &:hover::after {
+                content: var( --icon-table-column );
               }
             }
-            
-            > label:has( > input[type=checkbox] ):before,
-            > label:has( > button ):before {
-              display: inline-block;
-              width: 24px;
-              padding: 0px 2px 0px 2px;
-              font-family: var( --huey-icon-font-family ) !important;
-              font-size: var( --huey-icon-medium );
-            }
-            
-            > label:has( > input[type=checkbox] ):before {
-              content: var( --icon-square );
-              color: var( --huey-icon-color-subtle );
-            }
-            
-            > label:has( > input[type=checkbox]:checked ):before {
-              content: var( --icon-checkbox );
-              color: var( --huey-icon-color );
-            }            
-            
-            > label:has( > button ) {
-              display: inline-block;
-              width: 24px;
-              position: relative;
-              right: -6px;
-            }
-            
-            > label:has( > button ):before {
-              width: 24px;
-              content: var( --icon-trash );
-              color: var( --huey-icon-color-subtle );
-            }
-                        
           }
-          
-          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover
-          {
-            background-color: var( --huey-light-background-color );
-          }
-
-          > li[role=menuitem]:has( > label > input[type=checkbox] ):hover > label::before,
-          > li[role=menuitem]:has( > label > button ):hover > label::before 
-          {
-            color: var( --huey-icon-color-highlight );
-          }
-          
         }
         
+        /* axis item action to move item to other axis */
+        > ol > li > menu > label:nth-child(2):has( > button )::after {
+          content: var( --icon-table-column );
+        }
       }
       
-      > menu {
-        > label:nth-child(1):has( > button )::after {
-          content: var( --icon-filter-check);
+      &[data-axis=rows] {
+        > header {
+          > label {
+            &:has( > button ) {
+              
+              /* Rows axis header icon */
+              &::after {
+                content: var( --icon-table-column );
+              }
+              
+              /* axis icon is a button to flip the non-cells axes */
+              &:hover::after {
+                content: var( --icon-table-row );
+              }
+            }
+          }
         }
 
-        > label:nth-child(2):has( > button )::after {
-          content: var( --icon-trash);
+        /* axis item action to move item to other axis */
+        > ol > li > menu > label:nth-child(2):has( > button )::after {
+          content: var( --icon-table-row );
+        }
+      }
+
+      /* Cells axis header icon */
+      &[data-axis=cells] > header > label:has( > button )::after {
+        content: var( --icon-layout-grid );
+      }
+
+      &:is(
+        [data-axis=rows],
+        [data-axis=columns]
+      ) > ol > li > menu > label:nth-child(1) {
+        
+        &:has( 
+          > input[type=checkbox] 
+        )::after {
+          content: var( --icon-abacus );
+        }
+
+        &:has( 
+          > input[type=checkbox]:checked
+        )::after {
+          color: var( --huey-icon-highlight );
+        }
+      }
+      
+      &[data-axis=filters] > ol {
+        > li {
+
+          > details {
+            
+            /* filter without items does not have expandable element */
+            &:has( > ol:empty ) > summary {
+              list-style: none;
+            }
+
+            > summary::marker {
+            }
+            
+            > ol[role=menu] {
+              
+              > li[role=menuitem] {
+                
+                display: list-item;
+                width: 100%;
+                
+                > label:has( > input[type=checkbox] ) {
+                  display: inline-block;
+                  width: 100%; 
+                  > span {
+                    display: inline-block;
+                    width: 100%;
+                    position: relative;
+                    left: -10px;
+                    top: -2px;
+                  }
+                }
+                
+                > label:has( > input[type=checkbox] ):before,
+                > label:has( > button ):before {
+                  display: inline-block;
+                  width: 24px;
+                  padding: 0px 2px 0px 2px;
+                  font-family: var( --huey-icon-font-family ) !important;
+                  font-size: var( --huey-icon-medium );
+                }
+                
+                > label:has( > input[type=checkbox] ):before {
+                  content: var( --icon-square );
+                  color: var( --huey-icon-color-subtle );
+                }
+                
+                > label:has( > input[type=checkbox]:checked ):before {
+                  content: var( --icon-checkbox );
+                  color: var( --huey-icon-color );
+                }            
+                
+                > label:has( > button ) {
+                  display: inline-block;
+                  width: 24px;
+                  position: relative;
+                  right: -6px;
+                }
+                
+                > label:has( > button ):before {
+                  width: 24px;
+                  content: var( --icon-trash );
+                  color: var( --huey-icon-color-subtle );
+                }
+                
+                &:has( > label > input[type=checkbox] ):hover {
+                  background-color: var( --huey-light-background-color );
+                }
+
+                &:has( 
+                  > label > input[type=checkbox], 
+                  > label > button 
+                ):hover > label::before {
+                  color: var( --huey-icon-color-highlight );
+                }
+              }
+            }
+          }
+
+          > menu {
+            > label:nth-child(1):has( > button )::after {
+              content: var( --icon-filter-check);
+            }
+
+            > label:nth-child(2):has( > button )::after {
+              content: var( --icon-trash);
+            }
+          }
+          
+          /* Filter axis item filter icon */
+          &:has( > details > ol > li ) > menu > label:nth-child(1):has( > button )::after {
+            color: var( --huey-icon-highlight );
+          }
+
+          &[data-filterType] {
+            > details > header{
+              /* 
+              * issue https://github.com/rpbouman/huey/issues/245: 
+              * label text indicating the filter type.
+              */
+              margin: .5em 0em .5em 0em;
+              font-weight: bold;
+            }
+            
+            &[data-filterType=like] > menu > label:nth-child(1):has( > button )::after {
+              content: var( --icon-filter-question);
+            }
+
+            &[data-filterType=between] > menu > label:nth-child(1):has( > button )::after {
+              content: var( --icon-filter-code );
+            }
+
+            &[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {
+              content: var( --icon-filter-exclamation );
+            }
+          }
+          
         }
       }
     }
-    
-    /* Filter axis item filter icon */
-    > li:has( > details > ol > li ) > menu > label:nth-child(1):has( > button )::after {
-      color: var( --huey-icon-highlight );
-    }
+  }
 
-    > li[data-filterType=like] > menu > label:nth-child(1):has( > button )::after {
-      content: var( --icon-filter-question);
-    }
+  label {
 
-    > li[data-filterType=between] > menu > label:nth-child(1):has( > button )::after {
-      content: var( --icon-filter-code );
-    }
-
-    > li[data-filterType^=not] > menu > label:nth-child(1):has( > button )::after {
-      content: var( --icon-filter-exclamation );
+    > button,
+    > input[type=checkbox] {
+      display: none;
     }
     
-    /* 
-    * issue https://github.com/rpbouman/huey/issues/245: 
-    * label text indicating the filter type.
-    */
-    > li[data-filterType] > details > header{
-      margin: .5em 0em .5em 0em;
-      font-weight: bold;
+    &:has( 
+      > input[type=checkbox], 
+      > button
+    )::after {
+      width: 24px;
+      font-family: var( --huey-icon-font-family ) !important;
+      font-size: var( --huey-icon-medium );
+      color: var( --huey-icon-color-subtle );
     }
-        
-  }
-
-  label > button,
-  label > input[type=checkbox] {
-    display: none;
-  }
-
-  label:has( > input[type=checkbox] )::after,
-  label:has( > button )::after {
-    width: 24px;
-    font-family: var( --huey-icon-font-family ) !important;
-    font-size: var( --huey-icon-medium );
-    color: var( --huey-icon-color-subtle );
-  }
-
-  label:has( > input[type=checkbox] ):hover::after,
-  label:has( > button ):hover::after {
-    color: var( --huey-icon-color-highlight );
+    
+    &:has( 
+      > input[type=checkbox],
+      > button
+    ):hover::after {
+      color: var( --huey-icon-color-highlight );
+    }
   }
 
 }
