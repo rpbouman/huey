@@ -31,7 +31,7 @@ class PageStateManager {
     return new Promise(async (resolve, reject) => {
 
       // do we have the referenced datasource?
-      const desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
+      let desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
       if (desiredDataSource){
         // yes! we're done.
         resolve(desiredDataSource);
