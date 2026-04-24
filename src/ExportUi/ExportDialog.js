@@ -171,7 +171,7 @@ class ExportUi {
     if (rowsAxisItems.length) {
       const orderBy = rowsAxisItems
       .map(queryAxisItem => {
-        caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
+        let caption = QueryAxisItem.getCaptionForQueryAxisItem(queryAxisItem);
         return quoteIdentifierWhenRequired(caption);
       })
       .join(getComma(options.sqlOptions.commaStyle));
