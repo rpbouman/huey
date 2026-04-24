@@ -1266,7 +1266,7 @@ async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repository
   const connection = hueyDb.connection;
   let sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
   const statement = await connection.prepare(sql);
-  const result = await statement.query(extensionName);
+  let result = await statement.query(extensionName);
   statement.close();
   if (result.numRows === 0) {
     return;
