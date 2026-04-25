@@ -320,6 +320,29 @@ class AttributeUi {
     }
   };
   
+  static geometryDerivations = {
+    'Dim. qualifier': {
+      folder: 'Geometry',
+      expressionTemplate: 'regexp_extract( ST_asWKT( ${columnExpression} ), \'^[^ ]+ ?([ZM]+)? ?\', 1)',
+      columnType: 'VARCHAR'
+    },
+    'Geo Type': {
+      folder: 'Geometry',
+      expressionTemplate: 'regexp_extract( ST_asWKT( ${columnExpression} ), \'^[^ ]+\' )',
+      columnType: 'VARCHAR'
+    },
+    WKB: {
+      folder: 'Geometry',
+      expressionTemplate: 'ST_AsWKB( ${columnExpression} )',
+      columnType: 'BLOB'
+    },
+    WKT: {
+      folder: 'Geometry',
+      expressionTemplate: 'ST_AsWKT( ${columnExpression} )',
+      columnType: 'VARCHAR'
+    }
+  };
+  
   static timestampFields = {
     'timestamp (secs)': {
       folder: 'timestamps',
@@ -567,6 +590,7 @@ class AttributeUi {
     
     const hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
     
+    const geometryType = typeName === 'GEOMETRY';
     const arrayType = typeName === 'ARRAY';
     const mapType = typeName === 'MAP';
     const structType = typeName === 'STRUCT';
@@ -595,6 +619,7 @@ class AttributeUi {
       Boolean(typeInfo.hasBlobDerivations) ? AttributeUi.blobDerivations : undefined,
       Boolean(typeInfo.hasEnumDerivations) ? AttributeUi.enumDerivations : undefined,
       Boolean(typeInfo.hasUUIDDerivations) ? AttributeUi.uuidDerivations : undefined,
+      geometryType ? AttributeUi.geometryDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
@@ -613,7 +638,8 @@ class AttributeUi {
       AttributeUi.uuidDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
-      AttributeUi.mapDerivations
+      AttributeUi.mapDerivations,
+      AttributeUi.geometryDerivations
     );
     const derivationInfo = derivations[derivationName];
     return derivationInfo;

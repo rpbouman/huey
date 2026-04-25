@@ -185,7 +185,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
           [data-derivation='elements'] 
         )
       ),
-      [data-column_type=BLOB][data-nodetype=derived][data-derivation=string]
+      [data-column_type=BLOB][data-nodetype=derived][data-derivation=string],
+      
     ) > summary > span.label::before {
       content: var( --icon-txt );
     }
@@ -210,8 +211,7 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         [data-nodetype=derived][data-derivation='elements'],
         [data-nodetype=member]
       )
-    ) 
-    > summary > span.label::before {
+    ) > summary > span.label::before {
       content: var( --icon-square-check );
     }
     
@@ -320,7 +320,6 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       content: var( --icon-code-dots );
     }
 
-    
     &:is(
       [data-column_type^=MAP][data-nodetype=column],
       [data-member_expression_type^=MAP]:is(
@@ -445,6 +444,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     ) > summary > span.label::before {
       content: var( --icon-fingerprint );
     }
+
+    &:is(
+      [data-column_type=GEOMETRY][data-nodetype=column],
+      [data-member_expression_type=GEOMETRY][data-nodetype=member]
+    ) > summary > span.label::before {
+      content: var( --icon-map-pin-2 );
+    }    
 
     /**
     *
