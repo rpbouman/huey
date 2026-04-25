@@ -563,15 +563,7 @@ class AttributeUi {
   };
     
   static getApplicableDerivations(typeName){
-    const typeInfo = getDataTypeInfo(typeName);
-
-    const hasTimeFields = Boolean(typeInfo.hasTimeFields);
-    const hasDateFields = Boolean(typeInfo.hasDateFields);
-    const hasTimestampFields = Boolean(typeInfo.hasTimestampFields);
-    const hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
-    const hasBlobDerivations = Boolean(typeInfo.hasBlobDerivations);
-    const hasEnumDerivations = Boolean(typeInfo.hasEnumDerivations);
-    const hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
+    const typeInfo = getDataTypeInfo(typeName) || {};
     
     const hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
     
@@ -595,15 +587,14 @@ class AttributeUi {
     }
     
     const needHashDerivations = stringType || objectType;
-
     const applicableDerivations = Object.assign({},
-      hasDateFields ? AttributeUi.dateFields : undefined,
-      hasTimeFields ? AttributeUi.timeFields : undefined,
-      hasTimestampFields ? AttributeUi.timestampFields : undefined,
-      hasTextDerivations ? AttributeUi.textDerivations : undefined,
-      hasBlobDerivations ? AttributeUi.blobDerivations : undefined,
-      hasEnumDerivations ? AttributeUi.enumDerivations : undefined,
-      hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
+      Boolean(typeInfo.hasDateFields) ? AttributeUi.dateFields : undefined,
+      Boolean(typeInfo.hasTimeFields) ? AttributeUi.timeFields : undefined,
+      Boolean(typeInfo.hasTimestampFields) ? AttributeUi.timestampFields : undefined,
+      Boolean(typeInfo.hasTextDerivations) ? AttributeUi.textDerivations : undefined,
+      Boolean(typeInfo.hasBlobDerivations) ? AttributeUi.blobDerivations : undefined,
+      Boolean(typeInfo.hasEnumDerivations) ? AttributeUi.enumDerivations : undefined,
+      Boolean(typeInfo.hasUUIDDerivations) ? AttributeUi.uuidDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
@@ -634,7 +625,7 @@ class AttributeUi {
   }
 
   static getApplicableAggregators(typeName) {
-    const typeInfo = getDataTypeInfo(typeName);
+    const typeInfo = getDataTypeInfo(typeName) || {};
     const isNumeric = Boolean(typeInfo.isNumeric);
 
     const applicableAggregators = {};
