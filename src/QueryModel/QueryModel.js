@@ -67,7 +67,7 @@ class QueryAxisItem {
       return null;
     }
     const dataTypeInfo = getDataTypeInfo(dataType);
-    if (typeof dataTypeInfo.createLiteralWriter === 'function') {
+    if (dataTypeInfo && typeof dataTypeInfo.createLiteralWriter === 'function') {
       return dataTypeInfo.createLiteralWriter(dataTypeInfo, dataType);
     }
     return null;
