@@ -103,6 +103,12 @@
 
 [data-derivation='valuelist']{ --item-icon: var( --icon-shopping-cart ); }
 
+/* ─── GEOMETRY derivations ─────────────────────────────────────────────────── */
+[data-derivation='Dim. qualifier']{ --item-icon: var( --icon-gizmo ); }
+[data-derivation='Geo Type']{ --item-icon: var( --icon-triangle-square-circle ); }
+[data-derivation='WKB']{ --item-icon: var( --icon-binary ); }
+[data-derivation='WKT']{ --item-icon: var( --icon-txt ); }
+
 /* ─── Collection derivations ──────────────────────────────────────────────── */
 
 [data-derivation='unique values'],
@@ -178,3 +184,4 @@
 
 [data-derivation=or],
 [data-aggregator=or]{ --item-icon: var( --icon-logical-or ); }
+

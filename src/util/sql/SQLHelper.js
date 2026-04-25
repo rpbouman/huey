@@ -1076,7 +1076,7 @@ const dataTypes = {
   },
   'STRUCT': {
     defaultAnalyticalRole: 'attribute',
-    createLiteralWriter: function(dataTypeInfo, dataType){      
+    createLiteralWriter: function(dataTypeInfo, dataType){
       return function(value, field){
         const type = field.type;
         const duckdbValue = getDuckDbLiteralForValue(value, type);
@@ -1095,12 +1095,32 @@ const dataTypes = {
   },
   'UNION': {
     defaultAnalyticalRole: 'attribute'
+  },
+  'GEOMETRY': {
+    defaultAnalyticalRole: 'attribute',
+    createLiteralWriter: function(dataTypeInfo, dataType){
+      const crs = getCRSFromGeometryType(dataType);
+      return function(value, field){
+        if (value === null){
+          return `NULL::${dataType}`;
+        }
+        const hex = value.toHex().replace(/../g, '\\x$&');
+        let expression = `ST_GeomFromWKB('${hex}')`;
+        if (crs){
+          expression += `::${dataType}`;
+        }
+        return expression;
+      }
+    }
   }
 };
 
 function getDataTypeInfo(columnType){
   if (isArrayType(columnType)) {
     return dataTypes['ARRAY'];
+  }
+  if (isGeometryType(columnType)){
+    return dataTypes['GEOMETRY'];
   }
   const columnTypeUpper = columnType.toUpperCase();
   const typeNames = Object.keys(dataTypes).filter(function(dataTypeName){
@@ -1501,6 +1521,14 @@ function getArrayType(elementType){
 
 function isArrayType(dataType){
   return /\[\d*\]$/.test( dataType );
+}
+
+function isGeometryType(dataType){
+  return /^GEOMETRY(?:\('[^']+'\))?$/.test(dataType);
+}
+
+function getCRSFromGeometryType(dataType){
+  return /^GEOMETRY(?:\('(?<crs>[^']+)'\))?$/.exec(dataType).groups.crs;
 }
 
 function isMapType(dataType) {
