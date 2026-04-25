@@ -264,7 +264,7 @@ class DataSourcesUi extends EventEmitter {
     const className = config.className instanceof Array ? config.className.join(' ') : config.className || '';
     actionButton.setAttribute('class', className);
     actionButton.setAttribute('for', config.id);
-    actionButton.setAttribute('title', config.title);
+    Internationalization.setAttributes(actionButton, 'title', config.title, config.datasourceId);
     
     const button = actionButton.querySelector('button');
     button.setAttribute('id', config.id);
@@ -281,14 +281,13 @@ class DataSourcesUi extends EventEmitter {
 
   #createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement){
     const actionButton = this.#renderDatasourceActionButton({
+      datasourceId: datasourceId,
       id: datasourceId + '_analyze',
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: Internationalization.getText('Open {1} in the Query editor', datasourceId),
-      events: {
-        click: this.#analyzeDatasourceClicked
-      }
+      title: 'Open {1} in the Query editor',
+      events: { click: this.#analyzeDatasourceClicked }
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -298,14 +297,13 @@ class DataSourcesUi extends EventEmitter {
   
   #createDatasourceNodeRemoveActionButton(datasourceId, summaryElement){
     const actionButton = this.#renderDatasourceActionButton({
+      datasourceId: datasourceId,
       id: datasourceId + '_remove',
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: Internationalization.getText('Remove datasource {1}', datasourceId),
-      events: {
-        click: this.#removeDatasourceClicked
-      }
+      title: 'Remove datasource {1}',
+      events: { click: this.#removeDatasourceClicked }
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -315,14 +313,13 @@ class DataSourcesUi extends EventEmitter {
 
   #createDatasourceNodeEditActionButton(datasourceId, summaryElement){
     const actionButton = this.#renderDatasourceActionButton({
+      datasourceId: datasourceId,
       id: datasourceId + '_edit',
       "className": "editActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: Internationalization.getText('Configure datasource details of {1}', datasourceId),
-      events: {
-        click: this.#configureDatasourceClicked
-      }
+      title: 'Configure datasource details of {1}',
+      events: { click: this.#configureDatasourceClicked }
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -332,14 +329,13 @@ class DataSourcesUi extends EventEmitter {
 
   #createDatasourceNodeDownloadActionButton(datasourceId, summaryElement){
     const actionButton = this.#renderDatasourceActionButton({
+      datasourceId: datasourceId,
       id: datasourceId + '_download',
       "className": "downloadActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: Internationalization.getText('Download the contents of datasource {1} to a file.', datasourceId),
-      events: {
-        click: this.#downloadDatasourceClicked
-      }
+      title: 'Download the contents of datasource {1} to a file.',
+      events: { click: this.#downloadDatasourceClicked }
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -740,21 +736,26 @@ class DataSourcesUi extends EventEmitter {
     button.setAttribute('aria-busy', 'false');
   }
 
-  #getCaptionForDataSourceGroup(datasourceGroup, miscGroup){
+  #setCaptionForDataSourceGroup(label, datasourceGroup, miscGroup){
     switch (datasourceGroup.type) {
       case DuckDbDataSource.types.DUCKDB:
-        return 'DuckDB';
+        label.textContent = 'DuckDB';
+        break;
       case DuckDbDataSource.types.SQLITE:
-        return 'SQLite';
+        label.textContent = 'SQLite';
+        break;
       case DuckDbDataSource.types.FILE:
         const datasources = datasourceGroup.datasources;
+        let caption
         if (miscGroup) {
-          return Internationalization.getText('Files');
+          Internationalization.setTextContent(label, 'Files');
         }
-        return Object.keys(datasources).map(datasourceId => {
+        else {
+          label.textContent = Object.keys(datasources).map(datasourceId => {
           const datasource = datasources[datasourceId];
           return datasource.getFileNameWithoutExtension();
         }).join(', ');
+        }
     }
   }
 
@@ -783,13 +784,11 @@ class DataSourcesUi extends EventEmitter {
       default:
         groupTitle = `${groupType}`;
     }
-    Internationalization.setAttributes(groupNode, 'title', groupTitle)
+    Internationalization.setAttributes(groupNode, 'title', groupTitle);
 
     const summary = groupNode.querySelector('summary');
     const label = summary.querySelector('span.label');
-    // TODO: some group titels are translateable, some aren't
-    const caption = this.#getCaptionForDataSourceGroup(datasourceGroup, miscGroup);
-    label.textContent = caption;
+    const caption = this.#setCaptionForDataSourceGroup(label, datasourceGroup, miscGroup);
 
     if (datasourceGroup.typeSignature) {
       this.#createDatasourceNodeActionButtons(
