@@ -336,7 +336,7 @@ class Internationalization {
 
     for (let i = 0; i < attributes.length; i++){
       const attributeName = attributes[i];
-      if (Internationalization.#translateableAttributes.indexOf(attributeName) === -1){
+      if ( !Internationalization.#translateableAttributes.includes(attributeName) ){
         element.setAttribute(attributeName, key);
       }
       const i18nNativeAttributeName = `data-i18n-native-${attributeName}`;

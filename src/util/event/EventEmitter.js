@@ -26,7 +26,7 @@ class EventEmitter {
   }
   
   checkEventType(eventType){
-    if (this.#supportedEvents.indexOf(eventType) === -1) {
+    if (!this.#supportedEvents.includes(eventType)) {
       throw new Error(`Unrecognized event type ${eventType}`);
     }
   }
@@ -47,7 +47,7 @@ class EventEmitter {
       this.#eventListeners[eventType] = eventListeners = [];
     }
     
-    if (eventListeners.indexOf(listener) !== -1) {
+    if ( eventListeners.includes(listener) ) {
       return;
     }
     eventListeners.push(listener);

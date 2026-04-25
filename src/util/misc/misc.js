@@ -10,9 +10,9 @@ function getCsv(data, options) {
       switch (typeof value) {
         case 'string':
           if (
-            value.indexOf(fieldSeparator) !== -1 || 
-            value.indexOf(lineSeparator) !== -1 || 
-            value.indexOf(quoteChar) !== -1
+            value.includes(fieldSeparator) || 
+            value.includes(lineSeparator) || 
+            value.includes(quoteChar)
           ){
             value = value.replaceAll(escapeChar, escapeChar + escapeChar);
             if (quoteChar !== escapeChar) {

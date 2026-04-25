@@ -78,7 +78,7 @@ class TupleSet extends DataSetComponent {
     if (!nullsSortOrder) {
       nullsSortOrder = 'FIRST';
     }
-    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+    if ( !['FIRST','LAST'].includes(nullsSortOrder) ) {
       console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
       nullsSortOrder = 'FIRST';
     }
@@ -98,7 +98,7 @@ class TupleSet extends DataSetComponent {
     if (!totalsPosition){
       totalsPosition = 'AFTER';
     }
-    if (['AFTER','BEFORE'].indexOf(totalsPosition) === -1) {
+    if ( !['AFTER','BEFORE'].includes(totalsPosition) ) {
       console.warn(`Wrong value for totalsPosition "${totalsPosition}"`);
       totalsPosition = 'AFTER';
     }

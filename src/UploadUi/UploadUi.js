@@ -210,7 +210,7 @@ class UploadUi {
         continue;
       }
 
-      if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
+      if ( requiredExtensions.includes(requiredDuckDbExtension) ) {
         const extensionRepository = fileType.duckdb_extension_repository;
         requiredExtensions.push({
           extensionName: requiredDuckDbExtension,

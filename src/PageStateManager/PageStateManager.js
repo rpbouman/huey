@@ -92,7 +92,7 @@ class PageStateManager {
               continue;
             }
             isCompatible.forEach(function(columnName){
-              if (mismatchedColumns.indexOf(columnName) === -1) {
+              if ( !mismatchedColumns.includes(columnName) ) {
                 mismatchedColumns.push(columnName);
               }
             })

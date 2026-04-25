@@ -133,7 +133,7 @@ class DataSourcesUi extends EventEmitter {
     let comparisonColumnType = undefined;
     for (let looseType in looseColumnTypes){
       const columnTypes = looseColumnTypes[looseType];
-      if (columnTypes.indexOf(columnType) === -1) {
+      if ( !columnTypes.includes(columnType) ) {
         continue;
       }
       comparisonColumnType = looseType;

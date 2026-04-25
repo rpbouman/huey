@@ -126,7 +126,10 @@ class DuckDbDataSource extends EventEmitter {
     .reduce((acc, curr, index) => {
       const fileType = fileTypes[curr];
       const reader = fileType.duckdb_reader;
-      if (reader !== undefined && acc.indexOf(reader) === -1){
+      if (
+        reader !== undefined && 
+        !acc.includes(reader) 
+      ){
         acc.push(reader);
       }
       return acc;

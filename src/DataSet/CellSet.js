@@ -452,7 +452,7 @@ class CellSet extends DataSetComponent {
           cell = undefined;
 
           // if we aren't already querying this aggregate, then we add it too.
-          if (cellsAxisItemsToFetch.indexOf(cellsAxisItem) === -1) {
+          if ( !cellsAxisItemsToFetch.includes(cellsAxisItem) ) {
             cellsAxisItemsToFetch.push(cellsAxisItem);
           }
         }

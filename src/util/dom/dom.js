@@ -128,7 +128,7 @@ function hasClass(dom, classNames, allOrSome){
   }
   let noMatch;
   for (let i = 0; i < classNames.length; i++){
-    noMatch = domClassNames.indexOf(classNames[i]) === -1;
+    noMatch = !domClassNames.includes(classNames[i]);
     
     if (allOrSome && noMatch) {
       return false;
@@ -148,7 +148,7 @@ function replaceClass(dom, oldClass, newClass){
     return;
   }
   const args = [indexOfOldClass, 1];
-  if (classNames.indexOf(newClass) === -1) {
+  if ( !classNames.includes(newClass) ) {
     args.push(newClass);
   }
   Array.prototype.splice.apply(classNames, args);

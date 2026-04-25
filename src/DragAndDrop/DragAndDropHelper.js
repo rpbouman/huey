@@ -80,10 +80,10 @@ class DragAndDropHelper {
       if (
         typeof value === 'object' &&
         (keys = Object.keys(value)).length === 2 &&
-        keys.indexOf('key') !== -1 &&
-        keys.indexOf('value') !== -1
+        keys.includes('key') &&
+        keys.includes('value')
       ){
-        if (property.indexOf('/') !== -1){
+        if ( property.includes('/') ){
           throw new Error(`Invalid property value "${property}" for keyed values - the property should not contain a slash.`);
         }
         let key = value['key'];

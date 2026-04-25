@@ -35,7 +35,7 @@ class FilterDialog {
   )
   
   static #isFilterTypeInObject(filterTypeObject, filterType){
-    return Object.values(filterTypeObject).indexOf(filterType) !== -1;
+    return Object.values(filterTypeObject).includes(filterType);
   }
   
   static isRangeFilterType(filterType){
@@ -409,7 +409,7 @@ class FilterDialog {
 
   #getNullsSortOrder(){
     let nullsSortOrder = this.#settings.getSettings(['localeSettings', 'nullsSortOrder', 'value']) || 'FIRST';
-    if (['FIRST','LAST'].indexOf(nullsSortOrder) === -1) {
+    if ( !['FIRST','LAST'].includes(nullsSortOrder) ) {
       console.warn(`Wrong value for nullsSortOrder "${nullsSortOrder}"`);
       nullsSortOrder = 'FIRST';
     }

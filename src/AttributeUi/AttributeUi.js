@@ -816,7 +816,7 @@ class AttributeUi {
     if (!classNames) {
       return;
     }
-    if (classNames.indexOf('attributeUiAxisButton') === -1){
+    if ( !classNames.includes('attributeUiAxisButton') ){
       return;
     }
     const input = target.getElementsByTagName('input').item(0);
@@ -1128,7 +1128,7 @@ class AttributeUi {
     let typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
-        if (['elements'].indexOf(derivation) === -1) {
+        if ( derivation !== 'elements' ) {
           break;
         }
         typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
@@ -1443,7 +1443,7 @@ class AttributeUi {
 
     if (
       nodeType !== 'derived' ||
-      ['elements'].indexOf(derivation) !== -1
+      derivation === 'elements'
     ){
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
@@ -1461,7 +1461,7 @@ class AttributeUi {
 
     switch (nodeType){
       case 'derived':
-        if (['elements'].indexOf(derivation) === -1){
+        if (derivation !== 'elements'){
           break;
         }
       case 'column':

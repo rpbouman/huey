@@ -1270,7 +1270,7 @@ class QueryModel extends EventEmitter {
       const propertyNames = getPropertyNames(oldState, newState);
       for (let i = 0; i < propertyNames.length; i++){
         const propertyName = propertyNames[i];
-        if (ignoreProperties && ignoreProperties.indexOf(propertyName) !== -1){
+        if (ignoreProperties && ignoreProperties.includes(propertyName) ){
           continue;
         }
         const oldValue = oldState[propertyName];
