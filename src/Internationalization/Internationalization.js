@@ -181,7 +181,13 @@ class Internationalization {
           continue;
         }
       }
-      value = Internationalization.getText(key);
+      let args = [];
+      const argsAttribute = element.getAttribute(i18nNativeAttributeName + '-args');
+      if (argsAttribute) {
+        args = JSON.parse(argsAttribute);
+      }
+      args.unshift(key);
+      value = Internationalization.getText.apply(Internationalization, args);
 
       callback({
         element: element,
@@ -212,7 +218,13 @@ class Internationalization {
             continue;
           }
         }
-        value = Internationalization.getText(key);
+        let args = [];
+        const argsAttribute = element.getAttribute(i18nNativeAttributeName + '-args');
+        if (argsAttribute) {
+          args = JSON.parse(argsAttribute);
+        }
+        args.unshift(key);
+        value = Internationalization.getText.apply(Internationalization, args);
         callback({
           element: element,
           i18nNativeAttributeName: i18nNativeAttributeName,
@@ -328,13 +340,9 @@ class Internationalization {
         element.setAttribute(attributeName, key);
       }
       const i18nNativeAttributeName = `data-i18n-native-${attributeName}`;
-      if (element.hasAttribute(i18nNativeAttributeName)){
-      }
-      else {
-        element.setAttribute(i18nNativeAttributeName, key);
-        if (args.length > 1){
-          element.setAttribute(i18nNativeAttributeName + '-args', JSON.stringify(args.slice(1)));
-        }
+      element.setAttribute(i18nNativeAttributeName, key);
+      if (args.length > 1){
+        element.setAttribute(i18nNativeAttributeName + '-args', JSON.stringify(args.slice(1)));
       }
       const attributeValue = Internationalization.getText.apply(Internationalization, args) || key;
       element.setAttribute(attributeName, attributeValue);

@@ -578,7 +578,7 @@ class AttributeUi {
     const arrayType = typeName === 'ARRAY';
     const mapType = typeName === 'MAP';
     const structType = typeName === 'STRUCT';
-    // note: for this purpose, JSON is treated as string.
+    // note: for this purpose, the JSON data type is treated as string.
     const stringType = isStringType(typeName) || typeName === 'JSON';
     let objectType;
     if (!stringType) {
@@ -850,8 +850,12 @@ class AttributeUi {
 
   #updateAxisButtonTitle(input){
     const label = input.parentNode;
-    const title = label.getAttribute(`data-title-${input.checked ? '' : 'un'}checked`);
-    label.setAttribute('title', title);
+    const argsAttribute = label.getAttribute('data-i18n-native-title-args');
+    const args = JSON.parse(argsAttribute);
+    const titleTemplate = label.getAttribute(`data-title-${input.checked ? '' : 'un'}checked`);
+    args.unshift(titleTemplate)
+    const translatedTitle = Internationalization.getText.apply(Internationalization, args);
+    label.setAttribute( 'title', translatedTitle );
   }
 
   async #axisButtonClicked(node, axis, checked){
@@ -963,14 +967,12 @@ class AttributeUi {
     const translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
     
     const checkedTitleKey = `Click to remove {1} from the ${axisId}-axis`;
-    const checkedTitle = Internationalization.getText(checkedTitleKey, translatedAttributeCaption);
-    axisButton.setAttribute('data-title-checked', checkedTitle);
+    axisButton.setAttribute('data-title-checked', checkedTitleKey);
     
     const uncheckedTitleKey = `Click to add {1} to the ${axisId}-axis`;
-    const uncheckedTitle = Internationalization.getText(uncheckedTitleKey, translatedAttributeCaption);
-    axisButton.setAttribute('data-title-unchecked', uncheckedTitle);
-    
-    axisButton.setAttribute('title', uncheckedTitle);
+    axisButton.setAttribute('data-title-unchecked', uncheckedTitleKey);
+
+    Internationalization.setAttributes(axisButton, 'title', uncheckedTitleKey, attributeCaption);
 
     axisButton.setAttribute('for', id);
     const axisButtonInput = axisButton.querySelector('input');

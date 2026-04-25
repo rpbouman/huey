@@ -51,7 +51,7 @@
         return;
       }
       const item = document.createElement('li');
-      item.className = 'i18nIgnore';
+      item.setAttribute('translate', 'no');
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
       item.textContent = url;
@@ -2306,7 +2306,7 @@
                 open="true"
               >
                 <summary>
-                  <span translate="no" class="label i18nIgnore">${caption}</span>
+                  <span translate="no" class="label">${caption}</span>
                 </summary>
               </details>
             </template>
