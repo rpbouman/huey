@@ -1422,6 +1422,8 @@
         >
           <button id="restoreCurrentSecret">Restore Current</button>
         </label>
+        <input type="checkbox" id="secretEditingActive" /> 
+        <input type="checkbox" id="secretUnsavedChanges" />
       </menu>
       <section>
         <nav>
@@ -1431,84 +1433,111 @@
             title="Select a secret to edit or remove it."
           ></select>
         </nav>
-        <form>
-          <input type="checkbox" id="secretEditingActive" /> 
-          <input type="checkbox" id="secretUnsavedChanges" />
-          <p id="secretsDialogUsageHint">Click the <label for="createNewSecret"><span>create secret button</span></label> to create a new secret<span>, or select an existing secreted from the list to edit or remove it</span>.</p>
-          <header>
-            <fieldset>
-              <legend>Name and Type</legend>
-              <label for="secretName">Name</label>
-              <input 
-                id="secretName" 
-                type="text"
-                pattern="[A-Za-z][A-Za-z0-9_]*"
-                required="true"
-                autocomplete="true"
-                spellcheck="false"
-                title="The unique name of the secret"
-                autofocus="true"
-              />
-              <label for="secretType">Type</label>
-              <input 
-                id="secretType"
-                type="text"
-                pattern="[A-Za-z][A-Za-z0-9_]*"
-                required="true"
-                list="secret-types"
-                autocomplete="true"
-                spellcheck="false"
-                title="The secret type"
-              />
-            </fieldset>
-          </header>
-          <fieldset>
-            <legend>Key/Value Pairs</legend>
-            <!-- key/value pair UI template -->
-            <template id="secretKeyValueUi">
-              <div>
-                <span>
-                  <menu role="toolbar">
-                    <label title="Add new field"><button value="add">Add new Field</button></label>
-                    <label title="Remove field"><button value="remove">Remove Field</button></label>
-                    <label title="Move field up"><button value="up">Move field up</button></label>
-                    <label title="Move field down"><button value="down">Move field down</button></label>
-                    <label title="Toggle subfield"><input type="checkbox" value="indent"/></label>
-                  </menu>
-                </span>
-                <span>
+        <section role="tablist">
+          <div>
+            <label
+              role="tab"
+              for="secretFormTab"
+            >
+              Form
+            </label>
+            <input
+              id="secretFormTab"
+              type="radio"
+              name="secretTabs"
+              checked="true"
+            />
+            <form role="tabpanel" id="secretForm">
+              <header>
+                <fieldset id="secretHeaderFieldset">
+                  <legend>Name and Type</legend>
+                  <label for="secretName">Name</label>
                   <input 
-                    type="text" 
-                    list="secret-keys"
-                    title="Key field"
+                    id="secretName" 
+                    type="text"
+                    pattern="[A-Za-z][A-Za-z0-9_]*"
                     required="true"
                     autocomplete="true"
                     spellcheck="false"
+                    title="The unique name of the secret"
                     autofocus="true"
                   />
-                </span>
-                <span>
-                  <select title="Select the field data type (input method) for the value field">
-                    <option value="checkbox" title="Boolean"><span translate="no">&#xeba6;</span></option>
-                    <option value="list" title="List"><span translate="no">&#xebcd;</span></option>
-                    <option value="text" title="Plaintext" selected="true"><span translate="no">&#xf3b1;</span></option>
-                    <option value="password" title="Encrypted"><span translate="no">&#xf4ca;</span></option> 
-                    <option value="map" title="Map"><span translate="no">&#xebcc;</span></option>
-                  </select>
-                </span>
-                <span>
+                  <label for="secretType">Type</label>
                   <input 
+                    id="secretType"
                     type="text"
-                    title="Value field"
+                    pattern="[A-Za-z][A-Za-z0-9_]*"
                     required="true"
+                    list="secret-types"
                     autocomplete="true"
                     spellcheck="false"
+                    title="The secret type"
                   />
-                </span>
-              </div>
-            </template>
-          </fieldset>
-        </form>
+                </fieldset>
+              </header>
+              <fieldset id="secretKeyValueFieldset">
+                <legend>Key/Value Pairs</legend>
+                <!-- key/value pair UI template -->
+                <template id="secretKeyValueUi">
+                  <div>
+                    <span>
+                      <menu role="toolbar">
+                        <label title="Add new field"><button value="add">Add new Field</button></label>
+                        <label title="Remove field"><button value="remove">Remove Field</button></label>
+                        <label title="Move field up"><button value="up">Move field up</button></label>
+                        <label title="Move field down"><button value="down">Move field down</button></label>
+                        <label title="Toggle subfield"><input type="checkbox" value="indent"/></label>
+                      </menu>
+                    </span>
+                    <span>
+                      <input 
+                        type="text" 
+                        list="secret-keys"
+                        title="Key field"
+                        required="true"
+                        autocomplete="true"
+                        spellcheck="false"
+                        autofocus="true"
+                      />
+                    </span>
+                    <span>
+                      <select title="Select the field data type (input method) for the value field">
+                        <option value="checkbox" title="Boolean"><span translate="no">&#xeba6;</span></option>
+                        <option value="list" title="List"><span translate="no">&#xebcd;</span></option>
+                        <option value="text" title="Plaintext" selected="true"><span translate="no">&#xf3b1;</span></option>
+                        <option value="password" title="Encrypted"><span translate="no">&#xf4ca;</span></option> 
+                        <option value="map" title="Map"><span translate="no">&#xebcc;</span></option>
+                      </select>
+                    </span>
+                    <span>
+                      <input 
+                        type="text"
+                        title="Value field"
+                        required="true"
+                        autocomplete="true"
+                        spellcheck="false"
+                      />
+                    </span>
+                  </div>
+                </template>
+              </fieldset>
+            </form>
+          </div>
+          <div>
+            <label
+              role="tab"
+              for="secretCodeTab"
+            >
+              Code
+            </label>
+            <input
+              id="secretCodeTab"
+              type="radio"
+              name="secretTabs"
+            />
+            <pre role="tabpanel" id="secretCode"></pre>
+          </div>
+        </section>
       </section>
       <footer role="toolbar">
         <form id="secretsButtonForm" method="dialog">

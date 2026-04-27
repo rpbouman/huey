@@ -3,74 +3,67 @@ class SecretsDialog {
   static #secretsDialogId = 'secretsDialog';
 
   get dialog(){
-    return document.getElementById( SecretsDialog.#secretsDialogId );
+    return byId( SecretsDialog.#secretsDialogId );
   }
   
   get #secretKeyValueUiTemplate(){
-    return this.dialog.querySelector('#secretKeyValueUi');
+    return byId('secretKeyValueUi');
   }
 
   get #secretEditingActiveCheckbox(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#secretEditingActive' );
+    return byId('secretEditingActive');
   }
   
   get #secretUnsavedChangesCheckbox(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#secretUnsavedChanges' );
+    return byId('secretUnsavedChanges');
   }
 
   get #createNewSecretButton(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#createNewSecret' );
+    return byId('createNewSecret');
   }
 
   get #removeCurrentSecretButton(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#removeCurrentSecret' );
+    return byId('removeCurrentSecret');
   }
 
   get #saveCurrentSecretButton(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#saveCurrentSecret' );
+    return byId('saveCurrentSecret');
   }
 
   get #restoreCurrentSecretButton(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#restoreCurrentSecret' );
+    return byId('restoreCurrentSecret');
   }
 
   get #secretsList(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#secretsList' );
+    return byId('secretsList');
   }
 
-  get #fieldsFieldset(){
-    const dialog = this.dialog;
-    return dialog.querySelector( 'section > form > fieldset' );
+  get #keyValuesFieldset(){
+    return byId('secretKeyValueFieldset');
   }  
   
   get #secretNameInput(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#secretName' );
+    return byId('secretName');
   }
 
   get #secretTypeInput(){
-    const dialog = this.dialog;
-    return dialog.querySelector( '#secretType' );
+    return byId('secretType');
   }
 
   get #formElement(){
-    const dialog = this.dialog;
-    return dialog.querySelector( 'section > form' );
+    return byId( 'secretForm' );
+  }
+  
+  get #secretCode(){
+    return byId('secretCode');
   }
   
   static get #secretTypesDatalist(){
-    return document.getElementById('secret-types');
+    return byId('secret-types');
   }
 
   static get #secretKeysDatalist(){
-    return document.getElementById('secret-keys');
+    return byId('secret-keys');
   }
   
   #getDefaultDataypeForSecretKey(secretKey){
@@ -101,7 +94,7 @@ class SecretsDialog {
     const form = this.#formElement;
     if (form.reportValidity()) {
       const fields = [];
-      const fieldSet = this.#fieldsFieldset;
+      const fieldSet = this.#keyValuesFieldset;
       const fieldDivs = fieldSet.querySelectorAll('div');
       for (let fieldDiv of fieldDivs) {
         const checkbox = fieldDiv.querySelector('span > menu > input[type=checkbox]');
@@ -333,8 +326,8 @@ class SecretsDialog {
     this.#saveCurrentSecretButton.addEventListener('click', event => this.#handleSaveCurrentSecretClicked(event) );
     this.#restoreCurrentSecretButton.addEventListener('click', event => this.#handleRestoreCurrentSecretClicked(event) );
     this.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
-    this.#fieldsFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
-    this.#fieldsFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
+    this.#keyValuesFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
+    this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
   }
   
   constructor(){
