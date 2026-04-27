@@ -105,7 +105,8 @@ select[multiple] {
 }
 
 input:is( 
-  [type=text],  
+  [type=text],
+  [type=password],
   [type=search],
   [type=checkbox],
   [type=number]
@@ -262,7 +263,9 @@ dialog {
   user-select: none;
 }
 
-form, form > fieldset {
+form, 
+form > fieldset, 
+form > header > fieldset {
   display: grid;
   grid-template-columns: [labels] auto [controls] 1fr;
   grid-auto-flow: row;
@@ -284,7 +287,8 @@ form {
   }
 
   > label::after, 
-  > fieldset > label::after {
+  > fieldset > label::after, 
+  > header > fieldset > label::after  {
     content: ":"
   }
   

@@ -97,6 +97,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SecretsManager/SecretsManager.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
@@ -200,6 +201,56 @@
       — „ — 
       <!-- ditto mark: 〃-->
       <option value="&#x3003;" translate="no">&#x3003;</option>
+    </datalist>
+    
+    <!-- https://duckdb.org/docs/lts/configuration/secrets_manager#types-of-secrets -->
+    <datalist id="secret-types">
+      <option value="azure" label="Azure Blob Storage" data-duckdb-extension="azure"></option>
+      <option value="s3" label="AWS S3" data-duckdb-extension="httpfs"></option>
+      <option value="r2" label="Cloudflare R2" data-duckdb-extension="httpfs"></option>
+      <option value="ducklake" label="Ducklake" data-duckdb-extension="ducklake"></option>
+      <option value="gcs" label="Google Cloud Storage" data-duckdb-extension="httpfs"></option>
+      <option value="http" label="HTTP and HTTPS" data-duckdb-extension="httpfs"></option>
+      <option value="huggingface" label="Hugging Face" data-duckdb-extension="httpfs"></option>
+      <option value="iceberg" label="Iceberg REST Catalog" data-duckdb-extension="iceberg"></option>
+      <option value="unity_catalog" label="Unity Catalog" data-duckdb-extension="unity_catalog"></option>
+    </datalist>
+    
+    <datalist id="secret-keys">
+      <option value="ACCOUNT_ID" data-default-type="text" data-associated-secret-types="r2"></option>
+      <option value="ACCOUNT_NAME" data-default-type="text" data-associated-secret-types="azure"></option>
+      <option value="ASSUME_ROLE_ARN" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="AWS_REGION" data-default-type="text" data-associated-secret-types="s3,unity_catalog"></option>
+      <option value="BEARER_TOKEN" data-default-type="password" data-associated-secret-types="http,iceberg"></option>
+      <option value="CHAIN" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="CLIENT_ID" data-default-type="text" data-associated-secret-types="azure,iceberg"></option>
+      <option value="CLIENT_SECRET" data-default-type="password" data-associated-secret-types="azure,iceberg"></option>
+      <option value="CONNECTION_STRING" data-default-type="text" data-associated-secret-types="azure"></option>
+      <option value="ENDPOINT" data-default-type="text" data-associated-secret-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="ENDPOINT_TYPE" data-default-type="text" data-associated-secret-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="EXTRA_HTTP_HEADERS" data-default-type="map" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY" data-default-type="text" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY_USERNAME" data-default-type="text" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY_PASSWORD" data-default-type="password" data-associated-secret-types="http"></option>
+      <option value="KEY_ID" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="KMS_KEY_ID" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="OAUTH2_GRANT_TYPE" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="OAUTH2_SCOPE" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="OAUTH2_SERVER_URI" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="PROFILE" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="PROVIDER" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="REGION" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="REQUESTER_PAYS" data-default-type="checkbox" data-associated-secret-types="s3"></option>
+      <option value="SCOPE" data-default-type="text" data-associated-secret-types="s3,http"></option>
+      <option value="SECRET" data-default-type="password" data-associated-secret-types="s3,gcs,r2,iceberg"></option>
+      <option value="SESSION_TOKEN" data-default-type="password" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="TENANT_ID" data-default-type="password" data-associated-secret-types="azure"></option>
+      <option value="TOKEN" data-default-type="password" data-associated-secret-types="http,huggingface,iceberg,unity_catalog"></option>
+      <option value="URL_COMPATIBILITY_MODE" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="URL_STYLE" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="USE_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="VALIDATION" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="VERIFY_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2,http"></option>
     </datalist>
   </head>
 
@@ -1336,6 +1387,147 @@
         >Cancel</button>
       </footer>
     </dialog>
+    
+    <dialog 
+      id="secretsDialog"
+      draggable="true"
+      aria-labelledby="secretsDialogTitle"
+      popover="auto"
+    >
+      <header>
+        <h3 id="secretsDialogTitle">Secrets Manager</h3>
+      </header>
+      <menu role="toolbar">
+        <label 
+          for="createNewSecret" 
+          title="Create new Secret"
+        >
+          <button id="createNewSecret">Create New</button>
+        </label>
+        <label 
+          for="removeCurrentSecret" 
+          title="Remove current Secret"
+        >
+          <button id="removeCurrentSecret">Remove Current</button>
+        </label>
+        <label 
+          for="saveCurrentSecret" 
+          title="Save current Secret"
+        >
+          <button id="saveCurrentSecret">Save Current</button>
+        </label>
+        <label 
+          for="restoreCurrentSecret" 
+          title="Restore current Secret"
+        >
+          <button id="restoreCurrentSecret">Restore Current</button>
+        </label>
+      </menu>
+      <section>
+        <nav>
+          <select 
+            id="secretsList"
+            multiple="true"
+            title="Select a secret to edit or remove it."
+          ></select>
+        </nav>
+        <form>
+          <input type="checkbox" id="secretEditingActive" /> 
+          <input type="checkbox" id="secretUnsavedChanges" />
+          <p id="secretsDialogUsageHint">Click the <label for="createNewSecret"><span>create secret button</span></label> to create a new secret<span>, or select an existing secreted from the list to edit or remove it</span>.</p>
+          <header>
+            <fieldset>
+              <legend>Name and Type</legend>
+              <label for="secretName">Name</label>
+              <input 
+                id="secretName" 
+                type="text"
+                pattern="[A-Za-z][A-Za-z0-9_]*"
+                required="true"
+                autocomplete="true"
+                spellcheck="false"
+                title="The unique name of the secret"
+                autofocus="true"
+              />
+              <label for="secretType">Type</label>
+              <input 
+                id="secretType"
+                type="text"
+                pattern="[A-Za-z][A-Za-z0-9_]*"
+                required="true"
+                list="secret-types"
+                autocomplete="true"
+                spellcheck="false"
+                title="The secret type"
+              />
+            </fieldset>
+          </header>
+          <fieldset>
+            <legend>Key/Value Pairs</legend>
+            <!-- key/value pair UI template -->
+            <template id="secretKeyValueUi">
+              <div>
+                <span>
+                  <menu role="toolbar">
+                    <label title="Add new field"><button value="add">Add new Field</button></label>
+                    <label title="Remove field"><button value="remove">Remove Field</button></label>
+                    <label title="Move field up"><button value="up">Move field up</button></label>
+                    <label title="Move field down"><button value="down">Move field down</button></label>
+                    <label title="Toggle subfield"><input type="checkbox" value="indent"/></label>
+                  </menu>
+                </span>
+                <span>
+                  <input 
+                    type="text" 
+                    list="secret-keys"
+                    title="Key field"
+                    required="true"
+                    autocomplete="true"
+                    spellcheck="false"
+                    autofocus="true"
+                  />
+                </span>
+                <span>
+                  <select title="Select the field data type (input method) for the value field">
+                    <option value="checkbox" title="Boolean"><span translate="no">&#xeba6;</span></option>
+                    <option value="list" title="List"><span translate="no">&#xebcd;</span></option>
+                    <option value="text" title="Plaintext" selected="true"><span translate="no">&#xf3b1;</span></option>
+                    <option value="password" title="Encrypted"><span translate="no">&#xf4ca;</span></option> 
+                    <option value="map" title="Map"><span translate="no">&#xebcc;</span></option>
+                  </select>
+                </span>
+                <span>
+                  <input 
+                    type="text"
+                    title="Value field"
+                    required="true"
+                    autocomplete="true"
+                    spellcheck="false"
+                  />
+                </span>
+              </div>
+            </template>
+          </fieldset>
+        </form>
+      </section>
+      <footer role="toolbar">
+        <form id="secretsButtonForm" method="dialog">
+          <button
+            id="secretsDialogAcceptButton"
+            form="secretsUiForm"
+            autofocus="true" 
+            popovertarget="secretsDialog"
+            popovertargetaction="hide"
+          >Ok</button>
+          <button
+            id="secretsDialogCancelButton"
+            form="secretsUiForm"
+            popovertarget="secretsDialog"
+            popovertargetaction="hide"
+          >Cancel</button>
+        </form>
+      </footer>
+    </dialog>
 
     <dialog
       id="promptUi"
@@ -2219,6 +2411,14 @@
           >Settings...</button>
         </label>
 
+        <label for="secretsButton" title="Open the Huey Secrets Manager dialog.">
+          <button
+            id="secretsButton"
+            popovertarget="secretsDialog"
+            popovertargetaction="show"
+          >Secrets...</button>
+        </label>
+
         <label
           for="exportButton"
           title="Export &amp; Download queries and/or result data..."
@@ -2450,6 +2650,7 @@
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
     <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
     <script onload="resourceLoaded(this)" src="QuickQueryMenu/QuickQueryMenu.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/SecretsDialog.js"></script>
 
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageProtocol.js"></script>
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageInterface.js"></script>

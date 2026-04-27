@@ -10,7 +10,8 @@
   --icon-chart-bar: '\ea59';
   --icon-chevron-left: '\ea60';
   --icon-chevron-right: '\ea61';
-  --icon-clock: '\ea70';
+  --icon-chevron-down: '\ea5f';
+  --icon-chevron-up: '\ea62';
   --icon-database: '\ea88';
   --icon-download: '\ea96';
   --icon-folder: '\eaad';
@@ -87,7 +88,6 @@
   --icon-file-type-js: '\fb0e';
   --icon-file-type-sql: '\fb15';
   --icon-file-type-txt: '\fb19';
-  --icon-chevron-down: '\ea5f';
   --icon-filter-check: '\fb7e';
   --icon-filter-code: '\fb7f';
   --icon-filter-exclamation: '\fb82';
@@ -96,6 +96,7 @@
   --icon-letter-d-small: '\fcca';
   --icon-letter-m-small: '\fcd3';
   --icon-letter-u-small: '\fcdb';
+  --icon-clock: '\ea70';
   --icon-calendar-clock: '\fd2e';
   --icon-calendar-month: '\fd2f';
   --icon-calendar-week: '\fd30';
@@ -109,4 +110,15 @@
   --icon-map-pin-2: '\fc48';
   --icon-gizmo: '\f02b';
   --icon-triangle-square-circle: '\ece8';
+  --icon-triangle-square-circle: '\ece8';
+  --icon-lock: '\eae2';
+  --icon-lock-cog: '\f928';
+  --icon-lock-plus: '\f930';
+  --icon-lock-cancel: '\f925';
+  --icon-lock-x: '\f936';
+  --icon-device-floppy: '\eb62';
+  --icon-arrow-back-up: '\eb77';
+  --icon-input-x: '\fc5c';
+  --icon-input-spark: '\ffb4';
+  --icon-plus: '\eb0b';
 }
