@@ -109,31 +109,14 @@ function initExecuteQuery(){
   });
 }
 
-function initApplication(){
-  initDragableDialogs();
-  initDuckdbVersion();
-  initDataSourcesUi();
-  initQueryModel();
-  initExportDialog();
-  initAttributeUi();
-  initSearch();
-  initFilterUi();
-  initQueryUi();
-  initPivotTableUi();
-  initExecuteQuery();
-  initPageStateManager();
-  initUploadUi();
-  initDatasourceSettingsDialog();
-  initSessionCloner();
-  initQuickQueryMenu();
-  initDataSourceMenu();
-  initPwa();
-
+function initAppPageState(){
   const currentRoute = Routing.getCurrentRoute();
   if (currentRoute){
     pageStateManager.setPageState(currentRoute);
   }
+}
 
+function initAppQueryModelEvents(){
   bufferEvents(queryModel, 'change', (event, count) => {
     if (count !== undefined) {
       return;
@@ -159,7 +142,9 @@ function initApplication(){
 
     Routing.updateRouteFromQueryModel(queryModel);
   }, null, 50);
+}
 
+function initAppPivotTableEvents(){
   const tupleNumberFormatter = createNumberFormatter(0).format;
   pivotTableUi.addEventListener('updated', async event => {
     const eventData = event.eventData;
@@ -202,6 +187,31 @@ function initApplication(){
     const busyDialog = byId('visualizationProgressDialog');
     busyDialog[busy ? 'showModal' : 'close']();
   });
+}
+
+function initApplication(){
+  initDragableDialogs();
+  initDuckdbVersion();
+  initDataSourcesUi();
+  initQueryModel();
+  initExportDialog();
+  initAttributeUi();
+  initSearch();
+  initFilterUi();
+  initQueryUi();
+  initPivotTableUi();
+  initExecuteQuery();
+  initPageStateManager();
+  initUploadUi();
+  initDatasourceSettingsDialog();
+  initSessionCloner();
+  initQuickQueryMenu();
+  initDataSourceMenu();
+  initPwa();
+
+  initAppPageState();
+  initAppQueryModelEvents();
+  initAppPivotTableEvents();
 
   initPostMessageInterface();
   if (postMessageInterface) {
