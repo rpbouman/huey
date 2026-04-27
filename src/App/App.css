@@ -1,6 +1,5 @@
 html {
   > body {
-    
 
     &:is( [aria-busy=true] ) {
       > main#layout {
