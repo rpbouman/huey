@@ -58,6 +58,14 @@ class SecretsDialog {
     return byId('secretCode');
   }
   
+  get #secretCodeTab(){
+    return byId('secretCodeTab');
+  }
+
+  get #secretFormTab(){
+    return byId('secretFormTab');
+  }
+  
   static get #secretTypesDatalist(){
     return byId('secret-types');
   }
@@ -91,42 +99,75 @@ class SecretsDialog {
   }
 
   get #secretDocument(){
-    const form = this.#formElement;
-    if (form.reportValidity()) {
-      const fields = [];
-      const fieldSet = this.#keyValuesFieldset;
-      const fieldDivs = fieldSet.querySelectorAll('div');
-      for (let fieldDiv of fieldDivs) {
-        const checkbox = fieldDiv.querySelector('span > menu > input[type=checkbox]');
-        const keyField = fieldDiv.querySelector('span > input[type=text]');
-        const typeField = fieldDiv.querySelector('span > select');
-        const valueField = fieldDiv.querySelector('span > select + input');
-        const record = {
-          indented: checkbox.checked,
-          key: keyField.value,
-          type: typeField.value,
-          valueField: valueField.type === 'checkox' ? valueField.checked  :  valueField.value
-        };
-        fields.push( record );
+    const secretName = this.#secretNameInput.value;
+    const secretType = this.#secretTypeInput.value;
+    const secretDocument = {
+      name: secretName,
+      type: secretType,
+      fields: []
+    };
+    const fieldSet = this.#keyValuesFieldset;
+    const fieldContainers = fieldSet.querySelectorAll('div');
+    for (let i = 0; i < fieldContainers.length; i++){
+      let fieldContainer = fieldContainers[i];
+      let isMultivalue;
+      let indented = SecretsDialog.#isFieldIndented(fieldContainer);
+      if (indented) {
+        throw new Error(`unexpected`);
+      }
+      let fieldType = SecretsDialog.#getFieldType(fieldContainer);
+      let fieldKey = SecretsDialog.#getFieldKey(fieldContainer);
+      let fieldValue = SecretsDialog.#getFieldValue(fieldContainer);
+      let value;
+      switch (fieldType) {
+        case 'checkbox':
+        case 'password':
+        case 'text':
+          isMultivalue = false;
+          value = fieldValue;
+          break;
+        case 'list':
+        case 'map':
+          isMultivalue = true;
+          value = [];
+          break;
+      }
+      secretDocument.fields.push({
+        key: fieldKey,
+        type: fieldType,
+        value: value
+      });
+      
+      if (isMultivalue) {
+        continue;
       }
       
-      const document = {
-        name: this.#secretNameInput().value,
-        type: this.#secretTypeInput().value,
-        fields: fields
-      };
-      return document;
-    }
-    else {
-      const invalidElements = [];
-      for (let input of form.elements) {
-        if (input.reportValidity()) {
-          break;
+      for (let j = i+1; j < fieldContainser.length; j++){
+        fieldContainer = fieldContainers[j];
+        indented = SecretsDialog.#isFieldIndented(fieldContainer);
+        if (!indented) {
+          continue;
         }
-        invalidElements.push(input);
+        i = j;
+        const subValue = SecretsDialog.#getFieldValue(fieldContainer);
+        const subType = SecretsDialog.#getFieldType(fieldContainer);
+        let subKey;
+        switch(fieldType){
+          case 'list':
+            subKey = value.length;
+            break;
+          case 'map':
+            subKey = SecretsDialog.#getFieldKey(fieldContainer);
+            break;
+        }
+        values.push({
+          key: subKey, 
+          type: subType,
+          value: subValue
+        })
       }
-      throw new Error();
     }
+    return secretDocument;
   }
 
   #setCheckboxState(checkbox, state){
@@ -172,10 +213,13 @@ class SecretsDialog {
   
   #handleSaveCurrentSecretClicked(event){
     try {
-      const document = this.#secretDocument;
+      const secretDocument = this.#secretDocument;
+      
       this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     catch (error) {
+      alert(error);
+      console.log(error.stack);
     }
   }
   
@@ -191,7 +235,7 @@ class SecretsDialog {
     SecretsDialog.#getFieldIndentCheckbox(fieldContainer).checked = Boolean(indent);
   }
   
-  static #getFieldValueType(fieldContainer) {
+  static #getFieldType(fieldContainer) {
     return fieldContainer.querySelector('span > select ').value;
   }
 
@@ -234,7 +278,7 @@ class SecretsDialog {
         const newKeyValueId = this.#newKeyValueUi( fieldContainer.nextSibling );
         if (
           SecretsDialog.#isFieldIndented( fieldContainer ) || 
-          ['list', 'map'].includes( SecretsDialog.#getFieldValueType( fieldContainer ) ) 
+          ['list', 'map'].includes( SecretsDialog.#getFieldType( fieldContainer ) ) 
         ) {
           SecretsDialog.#indentField( newKeyValueId, true );
         }
@@ -318,6 +362,14 @@ class SecretsDialog {
     }
   }
   
+  #secretCodeTabChanged(event) {
+    const target = event.target;
+  }
+
+  #secretFormTabChanged(event) {
+    const target = event.target;
+  }
+  
   #initEvents(){
     const dialog = this.dialog;
     this.#secretTypeInput.addEventListener('change', event => this.#secretTypeInputChanged(event) );
@@ -328,6 +380,8 @@ class SecretsDialog {
     this.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
     this.#keyValuesFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
     this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
+    this.#secretCodeTab.addEventListener('change', event => this.#secretCodeTabChanged(event) );
+    this.#secretFormTab.addEventListener('change', event => this.#secretFormTabChanged(event) );
   }
   
   constructor(){
