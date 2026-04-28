@@ -108,7 +108,8 @@ class SecretsDialog {
     };
     const fieldSet = this.#keyValuesFieldset;
     const fieldContainers = fieldSet.querySelectorAll('div');
-    for (let i = 0; i < fieldContainers.length; i++){
+    const n = fieldContainers.length;
+    for (let i = 0; i < n; i++){
       let fieldContainer = fieldContainers[i];
       let isMultivalue;
       let indented = SecretsDialog.#isFieldIndented(fieldContainer);
@@ -142,7 +143,7 @@ class SecretsDialog {
         continue;
       }
       
-      for (let j = i+1; j < fieldContainser.length; j++){
+      for (let j = i+1; j < n; j++){
         fieldContainer = fieldContainers[j];
         indented = SecretsDialog.#isFieldIndented(fieldContainer);
         if (!indented) {

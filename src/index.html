@@ -1484,16 +1484,17 @@
                   <div>
                     <span>
                       <menu role="toolbar">
-                        <label title="Add new field"><button value="add">Add new Field</button></label>
-                        <label title="Remove field"><button value="remove">Remove Field</button></label>
-                        <label title="Move field up"><button value="up">Move field up</button></label>
-                        <label title="Move field down"><button value="down">Move field down</button></label>
-                        <label title="Toggle subfield"><input type="checkbox" value="indent"/></label>
+                        <label title="Add new field"><button name="add" value="add">Add new Field</button></label>
+                        <label title="Remove field"><button name="remove" value="remove">Remove Field</button></label>
+                        <label title="Move field up"><button name="up" value="up">Move field up</button></label>
+                        <label title="Move field down"><button name="down" value="down">Move field down</button></label>
+                        <label title="Toggle subfield"><input name="indent" type="checkbox" value="indent"/></label>
                       </menu>
                     </span>
                     <span>
                       <input 
                         type="text" 
+                        name="key"
                         list="secret-keys"
                         title="Key field"
                         required="true"
@@ -1503,17 +1504,21 @@
                       />
                     </span>
                     <span>
-                      <select title="Select the field data type (input method) for the value field">
-                        <option value="checkbox" title="Boolean"><span translate="no">&#xeba6;</span></option>
-                        <option value="list" title="List"><span translate="no">&#xebcd;</span></option>
-                        <option value="text" title="Plaintext" selected="true"><span translate="no">&#xf3b1;</span></option>
-                        <option value="password" title="Encrypted"><span translate="no">&#xf4ca;</span></option> 
-                        <option value="map" title="Map"><span translate="no">&#xebcc;</span></option>
+                      <select 
+                        title="Select the field data type (input method) for the value field"
+                        name="type"
+                      >
+                        <option value="checkbox" title="Boolean">&#x2611;</option>
+                        <option value="list" title="List">[]</option>
+                        <option value="text" title="Plaintext" selected="true">txt</option>
+                        <option value="password" title="Encrypted">***</option> 
+                        <option value="map" title="Map">{}</option>
                       </select>
                     </span>
                     <span>
                       <input 
                         type="text"
+                        name="value"
                         title="Value field"
                         required="true"
                         autocomplete="true"
