@@ -1,6 +1,7 @@
 class SecretsDialog {
   
   static #secretsDialogId = 'secretsDialog';
+  static #secretsStore = undefined;
 
   get dialog(){
     return byId( SecretsDialog.#secretsDialogId );
@@ -111,7 +112,6 @@ class SecretsDialog {
     const n = fieldContainers.length;
     for (let i = 0; i < n; i++){
       let fieldContainer = fieldContainers[i];
-      let isMultivalue;
       let indented = SecretsDialog.#isFieldIndented(fieldContainer);
       if (indented) {
         throw new Error(`unexpected`);
@@ -124,12 +124,10 @@ class SecretsDialog {
         case 'checkbox':
         case 'password':
         case 'text':
-          isMultivalue = false;
           value = fieldValue;
           break;
         case 'list':
         case 'map':
-          isMultivalue = true;
           value = [];
           break;
       }
@@ -139,7 +137,7 @@ class SecretsDialog {
         value: value
       });
       
-      if (isMultivalue) {
+      if (typeof value !== 'object') {
         continue;
       }
       
@@ -161,7 +159,7 @@ class SecretsDialog {
             subKey = SecretsDialog.#getFieldKey(fieldContainer);
             break;
         }
-        values.push({
+        value.push({
           key: subKey, 
           type: subType,
           value: subValue
@@ -169,6 +167,56 @@ class SecretsDialog {
       }
     }
     return secretDocument;
+  }
+  
+  static #fieldValueAsSQL(field){
+    let value;
+    switch (field.type) {
+      case 'checkbox':
+        value = field.value;
+        break;
+      case 'text':
+      case 'password':
+        value = quoteStringLiteral(field.value);
+        break;
+      case 'list':
+        const arrayValue = value.map(
+          subField => SecretsDialog.#fieldValueAsSQL(subField)
+        ).join('')
+        value = `[${arrayValue}]`;
+        break;
+      case 'map':
+        const objectValue = value.map(
+          subField => SecretsDialog.#fieldValuePairAsSQL(subField)
+        ).join('\n, ');
+        value = `MAP { 
+          ${objectValue} 
+        }`;
+        break;
+    }
+    return value;
+  }
+  
+  static #fieldValuePairAsSQL(field){
+    return `${quoteIdentifierWhenRequired(field.key)} ${SecretsDialog.#fieldValueAsSQL(field)}`
+  }
+
+  #getCreateSecretSQL(){
+    const secretDocument = this.#secretDocument;
+    const fields = secretDocument.fields.map(field => {
+      const key = field.key;
+      const value = SecretsDialog.#fieldValueAsSQL(field);
+      return `
+      , ${SecretsDialog.#fieldValuePairAsSQL(field)}`
+    });
+    
+    return `
+      CREATE OR REPLACE 
+      TEMPORARY SECRET 
+      IF NOT EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}(
+        TYPE ${secretDocument.type}${fields.join('')}
+      )
+    `;
   }
 
   #setCheckboxState(checkbox, state){
@@ -215,7 +263,7 @@ class SecretsDialog {
   #handleSaveCurrentSecretClicked(event){
     try {
       const secretDocument = this.#secretDocument;
-      
+      const sql = this.#getCreateSecretSQL();
       this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     catch (error) {
@@ -245,7 +293,8 @@ class SecretsDialog {
   }
 
   static #getFieldValue(fieldContainer) {
-    return fieldContainer.querySelector('span > input:not( [list=secret-keys] )').value;
+    const element = fieldContainer.querySelector('span > input:not( [list=secret-keys] )');
+    return element.type === 'checkbox' ? element.checked : element.value;
   }
   
   #handleFieldClicked(event) {
@@ -387,6 +436,43 @@ class SecretsDialog {
   
   constructor(){
     this.#initEvents();
+    SecretsStore.store
+    .list()
+    .then(documents => {
+      const items = [];
+      let type;
+      documents.sort( (a,b) => {
+        if (a.type > b.type) {
+          return 1;
+        }
+        if (a.type < b.type) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
+      }).map( doc => {
+        if (doc.type !== type) {
+          if (items.length) {
+            items.push('</optgroup>');
+          }
+          type = doc.type;
+          items.push(`<optgroup label="${type}">`);
+        }
+        items.push(`<option>${doc.name}</option>`);
+      });
+      if (items.length) {
+        items.push('</optgroup>');
+      }
+      this.#secretsList.innerHTML = items.join('\n');
+    })
+    .catch(err => {
+      showErrorDialog(err);
+    });
   }
     
 }
