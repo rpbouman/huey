@@ -1,0 +1,104 @@
+section.hilited {
+  display: inline-grid;
+  grid-template-columns: 8ch 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    ".       footer";
+
+  background-color: var( --huey-medium-background-color );
+
+  > menu[role=toolbar] {
+
+    list-style-type: none;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    padding-inline-start: 0px;
+    font-family: system-ui;
+
+    > li {
+      display: inline-block;
+      padding-left: .2em;
+    }
+
+    &:first-child {
+      grid-area: header;
+    }
+
+    &:last-child {
+      grid-area: footer;
+
+      > li {
+
+        > label::after {
+          content: ': ';
+        }
+
+        > output {
+          text-align: right;
+          font-family: ui-monospace;
+          display: inline-block;
+          
+          &:is( [name=line], [name=lines] ) {
+            width: 6ch;
+          }
+          
+          &:is( [name=position], [name=length] ) {
+            width: 8ch;
+          }
+          
+          &:is( [name=column] ){
+            width: 4ch;
+          }
+          
+        }
+
+        &:not( :first-child ) {
+          border-left-style: solid;
+          border-left-color: buttonborder;
+          border-left-width: 1px;
+          content: '';
+        }
+      }
+    }
+  }
+
+
+  &:has( .hilited-editor ) {
+
+    counter-reset: linenumber var( --linenumber );
+
+    > .hilited-gutter {
+
+      > div::before {
+        counter-increment: linenumber;
+        content: counter( linenumber );
+      }
+    }
+  }
+
+  > .hilited-gutter {
+    grid-area: sidebar;
+    text-align: right;
+    margin: 0px;
+    padding: 2px;
+    font-family: monospace;
+    white-space: nowrap;
+  }
+
+  > .hilited-editor {
+    grid-area: main;
+    tab-size:2;
+    height: calc( 100% - 6px);
+    margin: 0px;
+    padding: 2px;
+    border-style: dashed;
+    border-width: 1px;
+    overflow: scroll;
+    background-color: Canvas;
+    font-family: monospace;
+    white-space: pre;
+  }
+
+}

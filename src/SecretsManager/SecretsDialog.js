@@ -1,7 +1,9 @@
 class SecretsDialog {
   
   static #secretsDialogId = 'secretsDialog';
-  static #secretsStore = undefined;
+  #highlited = undefined;
+  #hilitedPerhipherals = undefined;
+  #resizeObserver = undefined;
 
   get dialog(){
     return byId( SecretsDialog.#secretsDialogId );
@@ -74,7 +76,7 @@ class SecretsDialog {
   static get #secretKeysDatalist(){
     return byId('secret-keys');
   }
-  
+    
   #getDefaultDataypeForSecretKey(secretKey){
     const listElement = SecretsDialog.#secretKeysDatalist;
     for (let option of listElement.options) {
@@ -154,6 +156,7 @@ class SecretsDialog {
         switch(fieldType){
           case 'list':
             subKey = value.length;
+            SecretsDialog.#setFieldKey(fieldContainer,  String.fromCharCode( 65 + subKey ) );
             break;
           case 'map':
             subKey = SecretsDialog.#getFieldKey(fieldContainer);
@@ -180,13 +183,13 @@ class SecretsDialog {
         value = quoteStringLiteral(field.value);
         break;
       case 'list':
-        const arrayValue = value.map(
+        const arrayValue = field.value.map(
           subField => SecretsDialog.#fieldValueAsSQL(subField)
-        ).join('')
+        ).join(', ')
         value = `[${arrayValue}]`;
         break;
       case 'map':
-        const objectValue = value.map(
+        const objectValue = field.value.map(
           subField => SecretsDialog.#fieldValuePairAsSQL(subField)
         ).join('\n, ');
         value = `MAP { 
@@ -200,23 +203,27 @@ class SecretsDialog {
   static #fieldValuePairAsSQL(field){
     return `${quoteIdentifierWhenRequired(field.key)} ${SecretsDialog.#fieldValueAsSQL(field)}`
   }
+  
+  #getDropSecretSQL(){
+    const secretDocument = this.#secretDocument;
+    return `DROP SECRET  EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}`;
+  }
 
   #getCreateSecretSQL(){
     const secretDocument = this.#secretDocument;
     const fields = secretDocument.fields.map(field => {
       const key = field.key;
       const value = SecretsDialog.#fieldValueAsSQL(field);
-      return `
-      , ${SecretsDialog.#fieldValuePairAsSQL(field)}`
+      return `\r\n, ${SecretsDialog.#fieldValuePairAsSQL(field)}`;
     });
     
-    return `
-      CREATE OR REPLACE 
-      TEMPORARY SECRET 
-      IF NOT EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}(
-        TYPE ${secretDocument.type}${fields.join('')}
-      )
-    `;
+    return [
+      'CREATE OR REPLACE',
+      'TEMPORARY SECRET',
+      `IF NOT EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}(`,
+      `  TYPE ${secretDocument.type}${fields.join('')}`,
+      ')'
+    ].join('\r\n');
   }
 
   #setCheckboxState(checkbox, state){
@@ -242,7 +249,8 @@ class SecretsDialog {
   }
   
   #handleSecretsListChanged(event){
-    
+    // there is no selection, clean up the form
+    // if there is a selection, then sync the form with the associated document.
   }
   
   #handleCreateNewSecretClicked(event){
@@ -257,13 +265,25 @@ class SecretsDialog {
   }
   
   #handleRestoreCurrentSecretClicked(event){
+    // todo: 
+    // - if there is a secret selected in the list, then retrieve it and sync the form with the (old) stored version
+    // - if there is no selection in the list, then clean up the form
+    // (after changing the form, update the code.)
     this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
-  #handleSaveCurrentSecretClicked(event){
+  async #handleSaveCurrentSecretClicked(event){
     try {
-      const secretDocument = this.#secretDocument;
-      const sql = this.#getCreateSecretSQL();
+      const connection = window.hueyDb.connection;
+
+      const dropSql = this.#getDropSecretSQL();
+      await connection.query( dropSql ); 
+
+      const createSql = this.#getCreateSecretSQL();
+      await connection.query( createSql ); 
+      
+      
+      
       this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     catch (error) {
@@ -273,7 +293,7 @@ class SecretsDialog {
   }
   
   static #getFieldIndentCheckbox(fieldContainer) {
-    return fieldContainer.querySelector('span > menu > label > input[type=checkbox][value=indent]');
+    return fieldContainer.querySelector('span > menu > label > input[name=indent]');
   }
 
   static #isFieldIndented(fieldContainer){
@@ -285,18 +305,23 @@ class SecretsDialog {
   }
   
   static #getFieldType(fieldContainer) {
-    return fieldContainer.querySelector('span > select ').value;
+    return fieldContainer.querySelector('span > select[name=type] ').value;
   }
 
   static #getFieldKey(fieldContainer) {
-    return fieldContainer.querySelector('span > input[list=secret-keys] ').value;
+    return fieldContainer.querySelector('span > input[name=key] ').value;
   }
 
   static #getFieldValue(fieldContainer) {
-    const element = fieldContainer.querySelector('span > input:not( [list=secret-keys] )');
+    const element = fieldContainer.querySelector('span > input[name=value]');
     return element.type === 'checkbox' ? element.checked : element.value;
   }
-  
+
+  static #setFieldKey(fieldContainer, value) {
+    const element = fieldContainer.querySelector('span > input[name=key]');
+    element.value = value;
+  }
+
   #handleFieldClicked(event) {
     const target = event.target;
     if (target.tagName !== 'BUTTON'){
@@ -318,6 +343,7 @@ class SecretsDialog {
         }
         break;
     }
+    
     if (referenceFieldContainer && referenceFieldContainer.tagName !== 'DIV'){
       referenceFieldContainer = null;
     }
@@ -326,9 +352,13 @@ class SecretsDialog {
     switch (target.value) {
       case 'add':
         const newKeyValueId = this.#newKeyValueUi( fieldContainer.nextSibling );
+        const fieldType = SecretsDialog.#getFieldType( fieldContainer );
+        
+        // if the field from where we're creating the new field is indented, or is a composite, 
+        // then the new field is automatically indented (i.e. it becomes an item of the previous composite)
         if (
           SecretsDialog.#isFieldIndented( fieldContainer ) || 
-          ['list', 'map'].includes( SecretsDialog.#getFieldType( fieldContainer ) ) 
+          ['list', 'map'].includes( fieldType ) 
         ) {
           SecretsDialog.#indentField( newKeyValueId, true );
         }
@@ -341,6 +371,7 @@ class SecretsDialog {
     }
     
     if (move) {
+      // TODO: keep items of composites together when moving
       if (referenceFieldContainer) {
         fieldsContainer.insertBefore(fieldContainer, referenceFieldContainer);
       }
@@ -414,12 +445,28 @@ class SecretsDialog {
   
   #secretCodeTabChanged(event) {
     const target = event.target;
+    if (target.checked) {
+      this.#syncSecretCode();
+    }
   }
 
   #secretFormTabChanged(event) {
     const target = event.target;
   }
   
+  #syncCodeInterval = undefined;
+  #syncCodeIntervalFrequency = 100;
+
+  #syncSecretCode(){
+    const sql = this.#getCreateSecretSQL();
+    //this.#secretCode.textContent = sql;
+    this.#highlited.setText(sql);
+  }
+    
+  #handleResize(entries){
+    this.#hilitedPerhipherals.resetGutter();
+  }
+    
   #initEvents(){
     const dialog = this.dialog;
     this.#secretTypeInput.addEventListener('change', event => this.#secretTypeInputChanged(event) );
@@ -432,9 +479,24 @@ class SecretsDialog {
     this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
     this.#secretCodeTab.addEventListener('change', event => this.#secretCodeTabChanged(event) );
     this.#secretFormTab.addEventListener('change', event => this.#secretFormTabChanged(event) );
+    
+    this.#resizeObserver = new ResizeObserver(this.#handleResize.bind(this));
+    this.#resizeObserver.observe(dialog);
+    
   }
   
   constructor(){
+    this.#highlited = new Hilited({
+      element: '#secretCode',
+      text: '',
+      hardTabs: false,
+      highlighterPrefix: 'hilited-duckdb',
+      regexp: window.hueyDb.duckdbTokenizer
+    });
+    this.#hilitedPerhipherals = new HilitedPeripherals({
+      hilited: this.#highlited
+    });
+    
     this.#initEvents();
     SecretsStore.store
     .list()
@@ -477,4 +539,8 @@ class SecretsDialog {
     
 }
 
-const secretsDialog = new SecretsDialog();
+let secretsDialog;
+
+function initSecretsDialog(){
+  secretsDialog = new SecretsDialog();
+}

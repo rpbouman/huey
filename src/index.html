@@ -91,6 +91,8 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/Hilited.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/duckdbsql.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DragableDialogs.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
@@ -230,8 +232,8 @@
       <option value="ENDPOINT_TYPE" data-default-type="text" data-associated-secret-types="s3,gcs,r2,iceberg,unity_catalog"></option>
       <option value="EXTRA_HTTP_HEADERS" data-default-type="map" data-associated-secret-types="http"></option>
       <option value="HTTP_PROXY" data-default-type="text" data-associated-secret-types="http"></option>
-      <option value="HTTP_PROXY_USERNAME" data-default-type="text" data-associated-secret-types="http"></option>
       <option value="HTTP_PROXY_PASSWORD" data-default-type="password" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY_USERNAME" data-default-type="text" data-associated-secret-types="http"></option>
       <option value="KEY_ID" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="KMS_KEY_ID" data-default-type="text" data-associated-secret-types="s3"></option>
       <option value="OAUTH2_GRANT_TYPE" data-default-type="text" data-associated-secret-types="iceberg"></option>
@@ -241,10 +243,10 @@
       <option value="PROVIDER" data-default-type="text" data-associated-secret-types="s3"></option>
       <option value="REGION" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="REQUESTER_PAYS" data-default-type="checkbox" data-associated-secret-types="s3"></option>
-      <option value="SCOPE" data-default-type="text" data-associated-secret-types="s3,http"></option>
+      <option value="SCOPE" data-default-type="list" data-associated-secret-types="s3,http"></option>
       <option value="SECRET" data-default-type="password" data-associated-secret-types="s3,gcs,r2,iceberg"></option>
       <option value="SESSION_TOKEN" data-default-type="password" data-associated-secret-types="s3,gcs,r2"></option>
-      <option value="TENANT_ID" data-default-type="password" data-associated-secret-types="azure"></option>
+      <option value="TENANT_ID" data-default-type="text" data-associated-secret-types="azure"></option>
       <option value="TOKEN" data-default-type="password" data-associated-secret-types="http,huggingface,iceberg,unity_catalog"></option>
       <option value="URL_COMPATIBILITY_MODE" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="URL_STYLE" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
@@ -1399,6 +1401,12 @@
       </header>
       <menu role="toolbar">
         <label 
+          for="changePassword" 
+          title="Change password"
+        >
+          <button id="changePassword">Change Password</button>
+        </label>
+        <label 
           for="createNewSecret" 
           title="Create new Secret"
         >
@@ -1497,6 +1505,7 @@
                         name="key"
                         list="secret-keys"
                         title="Key field"
+                        pattern="[A-Za-z][A-Za-z0-9_]*"
                         required="true"
                         autocomplete="true"
                         spellcheck="false"
@@ -1509,10 +1518,10 @@
                         name="type"
                       >
                         <option value="checkbox" title="Boolean">&#x2611;</option>
-                        <option value="list" title="List">[...]</option>
+                        <option value="list" title="List">[&#x2026;]</option>
                         <option value="text" title="Plaintext" selected="true">txt</option>
                         <option value="password" title="Encrypted">***</option> 
-                        <option value="map" title="Map">{...}</option>
+                        <option value="map" title="Map">{&#x2026;}</option>
                       </select>
                     </span>
                     <span>
@@ -1521,6 +1530,7 @@
                         name="value"
                         title="Value field"
                         required="true"
+                        pattern="^(?!\s+).+(?<!\s+)$"
                         autocomplete="true"
                         spellcheck="false"
                       />
@@ -1542,7 +1552,53 @@
               type="radio"
               name="secretTabs"
             />
-            <pre role="tabpanel" id="secretCode"></pre>
+            <div
+                role="tabpanel" 
+            >
+              <section 
+                id="secretCodeEditor"
+                class="hilited"
+              >
+                <pre
+                  class="hilited-gutter"
+                  style="
+                    display: inline-block;
+                    position: relative;
+                    width: 8ch;
+                  "
+                >
+                </pre>
+                <code
+                  id="secretCode"
+                  class="hilited-editor"
+                  style="
+                    tab-size:2;
+                  "
+                ></code>
+                <menu role="toolbar">
+                  <li>
+                    <labe>length</label>
+                    <output name="length"></output>
+                  </li>
+                  <li>
+                    <label>lines</label>
+                    <output name="lines"></output>
+                  </li>
+                  <li>
+                    <label>Ln</label>
+                    <output name="line"></output>
+                  </li>
+                  <li>
+                    <label>Col</label>
+                    <output name="column"></output>
+                  </li>
+                  <li>
+                    <label>Pos</label>
+                    <output name="position"></output>
+                  </li>
+                </menu>
+              </section>
+            </div>
           </div>
         </section>
       </section>
@@ -2644,11 +2700,15 @@
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="util/file/FileUtils.js"></script>
+    <script onload="resourceLoaded(this)" src="util/regex/RegXpChef.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
     <script onload="resourceLoaded(this)" src="Internationalization/Internationalization.js"></script>
 
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/Hilited.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/HilitedPeripherals.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/SelectionHelper.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsBase.js"></script>
