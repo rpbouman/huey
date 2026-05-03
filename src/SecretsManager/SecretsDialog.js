@@ -204,23 +204,23 @@ class SecretsDialog {
     return `${quoteIdentifierWhenRequired(field.key)} ${SecretsDialog.#fieldValueAsSQL(field)}`
   }
   
-  #getDropSecretSQL(){
-    const secretDocument = this.#secretDocument;
-    return `DROP SECRET  EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}`;
+  #getDropSecretSQL(name){
+    if (!name){
+      const secretDocument = this.#secretDocument;
+      name = secretDocument.name;
+    }
+    return `DROP SECRET IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
   }
 
   #getCreateSecretSQL(){
     const secretDocument = this.#secretDocument;
     const fields = secretDocument.fields.map(field => {
-      const key = field.key;
-      const value = SecretsDialog.#fieldValueAsSQL(field);
       return `\r\n, ${SecretsDialog.#fieldValuePairAsSQL(field)}`;
     });
     
     return [
       'CREATE OR REPLACE',
-      'TEMPORARY SECRET',
-      `IF NOT EXISTS ${quoteIdentifierWhenRequired(secretDocument.name)}(`,
+      `TEMPORARY SECRET ${quoteIdentifierWhenRequired(secretDocument.name)} (`,
       `  TYPE ${secretDocument.type}${fields.join('')}`,
       ')'
     ].join('\r\n');
@@ -272,23 +272,191 @@ class SecretsDialog {
     this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
+  async #promptOverwriteExistingSecret(){
+    return await PromptUi.show({
+      title: Internationalization.getText('Overwrite Existing Secret'),
+      contents: Internationalization.getText('Another secret with that name already exists. Do you want to overwrite it?')
+    });
+  }
+  
+  async #promptRenameOrCreateSecret(oldName, newName){
+    return await PromptUi.show({
+      title: Internationalization.getText('Rename or Create'),
+      contents: Internationalization.getText(
+        'Secret name changed. Do you want to rename secret "{0}" to "{1}" or create a new one?',
+        oldName,
+        newName
+      )
+    });
+  }
+  
+  async #getPassword(){
+    try {
+      const secretsStore = SecretsStore.store;      
+      const id = 'secretsManagerPassword' + Date.now();
+      const hint = Internationalization.getText('Password must be at least 12 characters long and include uppercase, lowercase, digit, and special character.');
+      const invalidPassword = Internationalization.getText('Wrong password. Try again');
+      const passwordHTML = `<input
+        type="password"
+        id="${id}"
+        minlength="12"
+        required
+        pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
+        title="${hint}"
+        autofocus="true"
+      />`;
+      const config = {
+        title: Internationalization.getText('Enter Password'),
+        contents: passwordHTML
+      };
+
+      const isInitialized = await secretsStore.isInitialized();
+      do {
+        if (!isInitialized) {
+          initialPasswordInfo = [
+            Internationalization.getText('Enter a password to initialize the Huey secrets manager.'),
+            hint,
+            Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your duckdb secret.'),
+            Internationalization.getText('After initialization of the secrets manager, you can only access your secrets by entering the same password.'),
+            Internationalization.getText('You can change your password later on, but doing so also requires you to enter your previous password, so make sure you remember it!')
+          ].join('<br/>');
+          config.contents = `${initialPasswordInfo}<br/>${passwordHTML}`;
+        }
+        const result = await PromptUi.show(config);
+        if (result === PromptUi.REJECT) {
+          return null;
+        }
+
+        const password = byId(id).value;
+        if (!secretsStore.isValidPassword(password)) {
+          config.contents = `${hint}<br/>${passwordHTML}`;
+        }
+        
+        if (isInitialized){
+          if (await secretsStore.verifyPassword(password)){
+            return password;
+          }
+          config.contents = `${invalidPassword}<br/>${passwordHTML}`;
+        }
+        else {
+          await secretsStore.init(password);
+          return password;
+        }
+      } while(true);
+    } 
+    catch(error){
+      console.error(error);
+    }
+    finally {
+      PromptUi.clear();
+    }
+  }
+  
+  async #createDuckDbSecret(){
+    const extensions = [];
+    const connection = window.hueyDb.connection;    
+    do {
+      try {
+        const createSecretSql = this.#getCreateSecretSQL();
+        await connection.query( createSecretSql ); 
+        return true;
+      }
+      catch(error){
+        const message = error.message;
+        const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
+        const match = regexp.exec(message);
+        
+        if (!match) {
+          throw error;
+        }
+        
+        const secretType = match.groups['secretType'];
+        const extensionName = match.groups['extensionName'];
+        
+        if (extensions.includes(extensionName)){
+          throw error;
+        }
+        
+        extensions.push(extensionName);
+        try{
+          await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
+        }
+        catch(e) {
+          console.error(e);
+          showErrorDialog({
+            title: Internationalization.getText('Error loading the ${0} extension', extensionName),
+            description: Internationalization.getText('The secret type ${0} requires installation of the ${1} extension, but an attempt to load the extension failed.', secretType, extensionName)
+          });
+          return false;
+        }
+      }
+    } while(true);
+  }
+  
   async #handleSaveCurrentSecretClicked(event){
     try {
+      const secretsStore = SecretsStore.store;
+      const list = this.#secretsList;
+      const selectedIndex = list.selectedIndex;
+      const existingItem = list.options[selectedIndex];
+      const secretDocument = this.#secretDocument;
+      
+      const updating = Boolean(existingItem);
+      
+      const newName = secretDocument.name;
+      const oldName = updating ? existingItem.value : secretDocument.name; 
+      
+      const nameChanged = newName !== oldName;
+      const exists = !updating || nameChanged ? await secretsStore.exists( newName ) : false;
+
+      if (exists){
+        const result = await this.#promptOverwriteExistingSecret();
+        if (result === PromptUi.REJECT) {
+          return;
+        }
+      }
+      
+      let removeOldSecret = false;
+      if (nameChanged){
+        const result = await this.#promptRenameOrCreateSecret(oldName, newName);
+        removeOldSecret = result === PromptUi.ACCEPT;
+      }
+
+      const password = await this.#getPassword();
+      if (!password) {
+        return;
+      }
+      
       const connection = window.hueyDb.connection;
-
-      const dropSql = this.#getDropSecretSQL();
-      await connection.query( dropSql ); 
-
-      const createSql = this.#getCreateSecretSQL();
-      await connection.query( createSql ); 
       
+      if (nameChanged && removeOldSecret || exists){
+        const dropSecretSql = this.#getDropSecretSQL();
+        await connection.query( dropSecretSql ); 
+      }
+
+      const success = await this.#createDuckDbSecret();
+      if (!success) {
+        return;
+      }
       
+      await secretsStore.store(secretDocument, password);
+      if (removeOldSecret === true) {
+        try {
+          const dropSecretSql = this.#getDropSecretSQL(oldName);
+          await connection.query( dropSecretSql ); 
+        }
+        catch(e) {
+        }
+        await secretsStore.remove(oldName);
+      }
+      await this.#updateSecretsList(newName);
       
       this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     catch (error) {
-      alert(error);
-      console.log(error.stack);
+      console.error(error);
+      console.error(error.stack);
+      showErrorDialog(error);
     }
   }
   
@@ -397,7 +565,7 @@ class SecretsDialog {
     }
     target.parentNode.nextElementSibling.firstElementChild.type = inputType;
   }
-  
+    
   #handleKeyFieldChanged(event){
     const keyField = event.target;
     const key = keyField.value;
@@ -412,6 +580,10 @@ class SecretsDialog {
   }
   
   #handleFieldChanged(event) {
+    // TODO: 
+    // woudld be really nice if we could focus the value control if the user selected a value from the list.
+    // unfortunately thee does not appear to be a reliable way (either through change events or input events) 
+    // to detect this.
     const target = event.target;
     switch (target.tagName){
       case 'INPUT':
@@ -449,6 +621,16 @@ class SecretsDialog {
       this.#syncSecretCode();
     }
   }
+  
+  #secretCodeInput(event){
+    const enteredText = event.target.textContent;
+    const sqlText = this.#getCreateSecretSQL();
+    // TODO: simple naive case: 
+    //  - check if enteredText matches sqlText; 
+    //  - if it doesn't, parse entered text to a document 
+    //  - compare it to the document extracted from the form.
+    //  - if there's a difference, parse the code
+  }
 
   #secretFormTabChanged(event) {
     const target = event.target;
@@ -479,26 +661,15 @@ class SecretsDialog {
     this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
     this.#secretCodeTab.addEventListener('change', event => this.#secretCodeTabChanged(event) );
     this.#secretFormTab.addEventListener('change', event => this.#secretFormTabChanged(event) );
+    this.#secretCode.addEventListener('input', event => this.#secretCodeInput(event));
     
     this.#resizeObserver = new ResizeObserver(this.#handleResize.bind(this));
     this.#resizeObserver.observe(dialog);
     
   }
   
-  constructor(){
-    this.#highlited = new Hilited({
-      element: '#secretCode',
-      text: '',
-      hardTabs: false,
-      highlighterPrefix: 'hilited-duckdb',
-      regexp: window.hueyDb.duckdbTokenizer
-    });
-    this.#hilitedPerhipherals = new HilitedPeripherals({
-      hilited: this.#highlited
-    });
-    
-    this.#initEvents();
-    SecretsStore.store
+  async #updateSecretsList(selectedSecret){
+    await SecretsStore.store
     .list()
     .then(documents => {
       const items = [];
@@ -525,7 +696,8 @@ class SecretsDialog {
           type = doc.type;
           items.push(`<optgroup label="${type}">`);
         }
-        items.push(`<option>${doc.name}</option>`);
+        const selected = doc.name === selectedSecret ? ' selected="true"' : '';
+        items.push(`<option ${selected}>${doc.name}</option>`);
       });
       if (items.length) {
         items.push('</optgroup>');
@@ -535,6 +707,22 @@ class SecretsDialog {
     .catch(err => {
       showErrorDialog(err);
     });
+  }
+  
+  constructor(){
+    this.#highlited = new Hilited({
+      element: '#secretCode',
+      text: '',
+      hardTabs: false,
+      highlighterPrefix: 'hilited-duckdb',
+      regexp: window.hueyDb.duckdbTokenizer
+    });
+    this.#hilitedPerhipherals = new HilitedPeripherals({
+      hilited: this.#highlited
+    });
+    
+    this.#initEvents();
+    this.#updateSecretsList();
   }
     
 }

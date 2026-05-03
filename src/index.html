@@ -1394,7 +1394,7 @@
       id="secretsDialog"
       draggable="true"
       aria-labelledby="secretsDialogTitle"
-      popover="auto"
+      popover="manual"
     >
       <header>
         <h3 id="secretsDialogTitle">Secrets Manager</h3>
@@ -2775,7 +2775,6 @@
 
         await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
         const connection = await db.connect();
-
         window.hueyDb = {
           duckdb: duckdb,
           instance: db,
