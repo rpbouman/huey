@@ -4,6 +4,7 @@ class SecretsDialog {
   #highlited = undefined;
   #hilitedPerhipherals = undefined;
   #resizeObserver = undefined;
+  #password = undefined;
 
   get dialog(){
     return byId( SecretsDialog.#secretsDialogId );
@@ -19,6 +20,10 @@ class SecretsDialog {
   
   get #secretUnsavedChangesCheckbox(){
     return byId('secretUnsavedChanges');
+  }
+
+  get #changePasswordButton(){
+    return byId('changePassword');
   }
 
   get #createNewSecretButton(){
@@ -226,7 +231,7 @@ class SecretsDialog {
     ].join('\r\n');
   }
 
-  #setCheckboxState(checkbox, state){
+  static #setCheckboxState(checkbox, state){
     if (checkbox.checked !== Boolean(state)){
       checkbox.click();
     }
@@ -248,28 +253,131 @@ class SecretsDialog {
     return newKeyValueUi;
   }
   
-  #handleSecretsListChanged(event){
+  async #handleSecretsListChanged(event){
     // there is no selection, clean up the form
     // if there is a selection, then sync the form with the associated document.
+    const list = event.target;
+    const selectedIndex = list.selectedIndex;
+    if (selectedIndex === -1){
+      SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, false);
+      SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
+    }
+    else {
+      const option = list.options[selectedIndex];
+      const name = option.value;
+      await this.#loadSecret(name);
+    }
+  }
+  
+  #resetForm(){
+    this.#secretNameInput.value = '';
+    this.#secretTypeInput.value = '';
+    const keyValuesFieldset = this.#keyValuesFieldset;
+    const secretKeyValueUiTemplate = this.#secretKeyValueUiTemplate;
+    while (keyValuesFieldset.lastChild !== secretKeyValueUiTemplate) {
+      keyValuesFieldset.removeChild( keyValuesFieldset.lastChild );
+    };
+  }
+  
+  async #loadSecret(name){
+    const secretsStore = SecretsStore.store;
+    const password = await this.#getPassword();
+    if (!password){
+      return;
+    }
+    const secretDocument = await secretsStore.get(name, password);
+    this.#resetForm();
+    this.#secretNameInput.value = secretDocument.name;
+    this.#secretTypeInput.value = secretDocument.type;
+    const fields = secretDocument.fields;
+    const n = fields.length;
+    const keyValuesFieldset = this.#keyValuesFieldset;
+    for (let i = 0; i < n; i++){
+      const field = fields[i];
+      const keyValueUi = this.#newKeyValueUi();
+      keyValuesFieldset.appendChild(keyValueUi);
+      const keyInput = SecretsDialog.#getFieldKeyEl(keyValueUi);
+      keyInput.value = field.key;
+      const typeInput = SecretsDialog.#getFieldTypeEl(keyValueUi);
+      typeInput.value = field.type;
+      const valueInput = SecretsDialog.#getFieldValueEl(keyValueUi);
+      switch (field.type) {
+        case 'checkbox':
+          valueInput.type = field.type;
+          valueInput.checked = field.value;
+          break;
+        case 'text':
+        case 'password':
+          valueInput.type = field.type;
+          valueInput.value = field.value;
+          break;
+        case 'map': 
+        case 'list': {
+          for (let j = 0; j < field.value.length; j++){
+            const field = field.value[j];
+            const keyValueUi = this.#newKeyValueUi();
+            keyValuesFieldset.appendChild(keyValueUi);
+            const indentCheckbox = SecretsDialog.#getFieldIndentCheckbox(keyValueUi);
+            indentCheckbox.checked = true;
+            const keyInput = SecretsDialog.#getFieldKeyEl(keyValueUi);
+            keyInput.value = field.key;
+            const typeInput = SecretsDialog.#getFieldTypeEl(keyValueUi);
+            typeInput.value = field.type;
+            const valueInput = SecretsDialog.#getFieldValueEl(keyValueUi);
+            valueInput = field.value;
+          }
+          break;
+        } 
+      }
+    }
+    SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
   #handleCreateNewSecretClicked(event){
     this.#newKeyValueUi();
-    this.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
-    this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+    SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
   }
   
-  #handlerRemoveCurrentSecretClicked(event){
-    this.#setCheckboxState(this.#secretEditingActiveCheckbox, false);
-    this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+  async #handlerRemoveCurrentSecretClicked(event){
+    const selectedSecretOption = this.#selectedSecretOption;
+    if (!Boolean(selectedSecretOption)) {
+      return;
+    }
+    const secretName = selectedSecretOption.value;
+    const secretsStore = SecretsStore.store;
+    
+    const exists = await secretsStore.exists(secretName);
+    if (!exists){
+      await this.#updateSecretsList();
+      return;
+    }
+
+    const confirmation = await PromptUi.show({
+      title: Internationalization.getText('Confirm remove secret'),
+      contents: Internationalization.getText(
+        'Are you sure you want to delete secret "{1}"? If you conform, it will be permanently removed. This action cannot be undone.', 
+        secretName
+      )
+    });
+    if (confirmation === PromptUi.REJECT) {
+      return;
+    }
+    await secretsStore.remove(secretName);
+    await this.#updateSecretsList();
+    
+    SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, false);
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
   }
   
-  #handleRestoreCurrentSecretClicked(event){
-    // todo: 
-    // - if there is a secret selected in the list, then retrieve it and sync the form with the (old) stored version
-    // - if there is no selection in the list, then clean up the form
-    // (after changing the form, update the code.)
-    this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
+  async #handleRestoreCurrentSecretClicked(event){
+    this.#resetForm();
+    const existingItem = this.#selectedSecretOption;
+    if (existingItem) {
+      await this.#loadSecret(existingItem.value);
+    }
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
   async #promptOverwriteExistingSecret(){
@@ -283,28 +391,50 @@ class SecretsDialog {
     return await PromptUi.show({
       title: Internationalization.getText('Rename or Create'),
       contents: Internationalization.getText(
-        'Secret name changed. Do you want to rename secret "{0}" to "{1}" or create a new one?',
+        'Secret name changed. Do you want to rename secret "{1}" to "{2}" or create a new one?',
         oldName,
         newName
       )
     });
   }
   
-  async #getPassword(){
+  async #handleChangePasswordClicked(){
+    const secretsStore = SecretsStore.store;
+    const config = {
+      title: Internationalization.getText('Enter Password'),
+      contents: passwordHTML
+    };
+  }
+  
+  static get #passwordHint(){
+    const hint = Internationalization.getText('Password must be at least 12 characters long and include uppercase, lowercase, digit, and special character.');
+    return hint;
+  }
+  
+  static #getPasswordHTML(id) {
+    const hint = SecretsDialog.#passwordHint;
+    const passwordHTML = `<input
+      type="password"
+      id="${id}"
+      minlength="12"
+      required
+      pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
+      title="${hint}"
+      autofocus="true"
+    />`;
+    return passwordHTML;
+  }
+  
+  async #getPassword(changePassword){
+    if (this.#password) {
+      return this.#password;
+    }
     try {
-      const secretsStore = SecretsStore.store;      
+      const secretsStore = SecretsStore.store;
       const id = 'secretsManagerPassword' + Date.now();
-      const hint = Internationalization.getText('Password must be at least 12 characters long and include uppercase, lowercase, digit, and special character.');
+      const hint = SecretsDialog.#passwordHint;
       const invalidPassword = Internationalization.getText('Wrong password. Try again');
-      const passwordHTML = `<input
-        type="password"
-        id="${id}"
-        minlength="12"
-        required
-        pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
-        title="${hint}"
-        autofocus="true"
-      />`;
+      const passwordHTML = SecretsDialog.#getPasswordHTML(id);
       const config = {
         title: Internationalization.getText('Enter Password'),
         contents: passwordHTML
@@ -313,7 +443,7 @@ class SecretsDialog {
       const isInitialized = await secretsStore.isInitialized();
       do {
         if (!isInitialized) {
-          initialPasswordInfo = [
+          const initialPasswordInfo = [
             Internationalization.getText('Enter a password to initialize the Huey secrets manager.'),
             hint,
             Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your duckdb secret.'),
@@ -334,12 +464,14 @@ class SecretsDialog {
         
         if (isInitialized){
           if (await secretsStore.verifyPassword(password)){
+            this.#password = password;
             return password;
           }
           config.contents = `${invalidPassword}<br/>${passwordHTML}`;
         }
         else {
           await secretsStore.init(password);
+          this.#password = password;
           return password;
         }
       } while(true);
@@ -384,8 +516,8 @@ class SecretsDialog {
         catch(e) {
           console.error(e);
           showErrorDialog({
-            title: Internationalization.getText('Error loading the ${0} extension', extensionName),
-            description: Internationalization.getText('The secret type ${0} requires installation of the ${1} extension, but an attempt to load the extension failed.', secretType, extensionName)
+            title: Internationalization.getText('Error loading the ${1} extension', extensionName),
+            description: Internationalization.getText('The secret type ${1} requires installation of the ${2} extension, but an attempt to load the extension failed.', secretType, extensionName)
           });
           return false;
         }
@@ -393,12 +525,17 @@ class SecretsDialog {
     } while(true);
   }
   
+  get #selectedSecretOption(){
+    const list = this.#secretsList;
+    const selectedIndex = list.selectedIndex;
+    const existingItem = list.options[selectedIndex];
+    return existingItem;
+  }
+  
   async #handleSaveCurrentSecretClicked(event){
     try {
       const secretsStore = SecretsStore.store;
-      const list = this.#secretsList;
-      const selectedIndex = list.selectedIndex;
-      const existingItem = list.options[selectedIndex];
+      const existingItem = this.#selectedSecretOption;
       const secretDocument = this.#secretDocument;
       
       const updating = Boolean(existingItem);
@@ -451,7 +588,7 @@ class SecretsDialog {
       }
       await this.#updateSecretsList(newName);
       
-      this.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
+      SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     catch (error) {
       console.error(error);
@@ -472,22 +609,33 @@ class SecretsDialog {
     SecretsDialog.#getFieldIndentCheckbox(fieldContainer).checked = Boolean(indent);
   }
   
+  static #getFieldTypeEl(fieldContainer){
+    return fieldContainer.querySelector('span > select[name=type] ')
+  }
+  
   static #getFieldType(fieldContainer) {
-    return fieldContainer.querySelector('span > select[name=type] ').value;
+    return this.#getFieldTypeEl(fieldContainer).value;
+  }
+
+  static #getFieldKeyEl(fieldContainer){
+    return fieldContainer.querySelector('span > input[name=key] ')
   }
 
   static #getFieldKey(fieldContainer) {
-    return fieldContainer.querySelector('span > input[name=key] ').value;
+    return this.#getFieldKeyEl(fieldContainer).value;
+  }
+
+  static #getFieldValueEl(fieldContainer){
+    return fieldContainer.querySelector('span > input[name=value] ')
   }
 
   static #getFieldValue(fieldContainer) {
-    const element = fieldContainer.querySelector('span > input[name=value]');
+    const element = this.#getFieldValueEl(fieldContainer);
     return element.type === 'checkbox' ? element.checked : element.value;
   }
 
   static #setFieldKey(fieldContainer, value) {
-    const element = fieldContainer.querySelector('span > input[name=key]');
-    element.value = value;
+    return this.#getFieldKeyEl(fieldContainer).value = value;
   }
 
   #handleFieldClicked(event) {
@@ -595,9 +743,13 @@ class SecretsDialog {
         this.#handleFieldTypeChanged(event);
         break;
     }
+    if (this.#secretUnsavedChangesCheckbox.checked){
+      return;
+    }
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
   }
   
-  #secretTypeInputChanged(event){
+  #handleSecretTypeChanged(event){
     const secretTypeInput = event.target;
     const secretType = secretTypeInput.value;
     const secretKeysDatalist = SecretsDialog.#secretKeysDatalist;
@@ -612,6 +764,17 @@ class SecretsDialog {
       else {
         option.setAttribute('disabled', true);
       }
+    }
+  }
+  
+  #handleSecretNameInput(event){
+    const secretNameInput = event.target;
+    const selectedSecretOption = this.#selectedSecretOption;
+    if (
+      !this.#secretUnsavedChangesCheckbox.checked &&
+      secretNameInput.value !== selectedSecretOption.value
+    ){
+      SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
     }
   }
   
@@ -634,6 +797,7 @@ class SecretsDialog {
 
   #secretFormTabChanged(event) {
     const target = event.target;
+    this.#secretUnsavedChangesCheckbox.checked = true;
   }
   
   #syncCodeInterval = undefined;
@@ -649,9 +813,17 @@ class SecretsDialog {
     this.#hilitedPerhipherals.resetGutter();
   }
     
+  #handleDialogClose(event) {
+    this.#password = undefined;
+    this.#resetForm();
+  }
+  
   #initEvents(){
     const dialog = this.dialog;
-    this.#secretTypeInput.addEventListener('change', event => this.#secretTypeInputChanged(event) );
+    dialog.addEventListener('close', event => this.#handleDialogClose(event) );
+    this.#secretNameInput.addEventListener('input', event => this.#handleSecretNameInput(event) );
+    this.#secretTypeInput.addEventListener('change', event => this.#handleSecretTypeChanged(event) );
+    this.#changePasswordButton.addEventListener('click', event => this.#handleChangePasswordClicked(event) );
     this.#createNewSecretButton.addEventListener('click', event => this.#handleCreateNewSecretClicked(event) );
     this.#removeCurrentSecretButton.addEventListener('click', event => this.#handlerRemoveCurrentSecretClicked(event) );
     this.#saveCurrentSecretButton.addEventListener('click', event => this.#handleSaveCurrentSecretClicked(event) );
