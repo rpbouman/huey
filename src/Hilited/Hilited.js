@@ -753,6 +753,7 @@ class Hilited {
     const selection = document.getSelection();
     selection.setBaseAndExtent(this.#element, 0, this.#element, 0);
     this.#text = text;
+    this.#tokens = [];
     this.#element.textContent = '';
     this.#insertText(text);
     this.#parseLines();
