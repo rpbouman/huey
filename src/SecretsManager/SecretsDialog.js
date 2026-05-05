@@ -265,7 +265,11 @@ class SecretsDialog {
     else {
       const option = list.options[selectedIndex];
       const name = option.value;
-      await this.#loadSecret(name);
+      const loaded = await this.#loadSecret(name);
+      if (!loaded){
+        event.preventDefault();
+        list.selectedIndex = -1;
+      }
     }
   }
   
@@ -283,7 +287,7 @@ class SecretsDialog {
     const secretsStore = SecretsStore.store;
     const password = await this.#getPassword();
     if (!password){
-      return;
+      return false;
     }
     const secretDocument = await secretsStore.get(name, password);
     this.#resetForm();
@@ -330,11 +334,17 @@ class SecretsDialog {
         } 
       }
     }
+    this.#syncSecretCode();
     SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
+    return true;
   }
   
   #handleCreateNewSecretClicked(event){
+    if (this.#secretsList.selectedIndex !== -1){
+      this.#secretsList.selectedIndex = -1;
+    }
+    this.#resetForm();
     this.#newKeyValueUi();
     SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
@@ -375,8 +385,9 @@ class SecretsDialog {
     this.#resetForm();
     const existingItem = this.#selectedSecretOption;
     if (existingItem) {
-      await this.#loadSecret(existingItem.value);
+      const loaded = await this.#loadSecret(existingItem.value);
     }
+    this.#syncSecretCode();
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
@@ -549,6 +560,9 @@ class SecretsDialog {
       if (exists){
         const result = await this.#promptOverwriteExistingSecret();
         if (result === PromptUi.REJECT) {
+          const secretName = this.#secretNameInput;
+          secretName.select();
+          secretName.focus();
           return;
         }
       }
@@ -749,6 +763,13 @@ class SecretsDialog {
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
   }
   
+  #handleFieldInput(event){
+    if (this.#secretUnsavedChangesCheckbox.checked){
+      return;
+    }
+    SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+  }
+  
   #handleSecretTypeChanged(event){
     const secretTypeInput = event.target;
     const secretType = secretTypeInput.value;
@@ -770,19 +791,20 @@ class SecretsDialog {
   #handleSecretNameInput(event){
     const secretNameInput = event.target;
     const selectedSecretOption = this.#selectedSecretOption;
-    if (
-      !this.#secretUnsavedChangesCheckbox.checked &&
-      secretNameInput.value !== selectedSecretOption.value
-    ){
+    if (!this.#secretUnsavedChangesCheckbox.checked ){
       SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
     }
   }
   
   #secretCodeTabChanged(event) {
     const target = event.target;
-    if (target.checked) {
-      this.#syncSecretCode();
+    if (!target.checked) {
+      return;
     }
+    if (!this.#secretEditingActiveCheckbox.checked) {
+      return;
+    }
+    this.#syncSecretCode();
   }
   
   #secretCodeInput(event){
@@ -797,7 +819,9 @@ class SecretsDialog {
 
   #secretFormTabChanged(event) {
     const target = event.target;
-    this.#secretUnsavedChangesCheckbox.checked = true;
+    if (target.checked) {
+      this.#syncSecretCode();
+    }
   }
   
   #syncCodeInterval = undefined;
@@ -805,7 +829,6 @@ class SecretsDialog {
 
   #syncSecretCode(){
     const sql = this.#getCreateSecretSQL();
-    //this.#secretCode.textContent = sql;
     this.#highlited.setText(sql);
   }
     
@@ -831,6 +854,7 @@ class SecretsDialog {
     this.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
     this.#keyValuesFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
     this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
+    this.#keyValuesFieldset.addEventListener('input', event => this.#handleFieldInput(event) ); 
     this.#secretCodeTab.addEventListener('change', event => this.#secretCodeTabChanged(event) );
     this.#secretFormTab.addEventListener('change', event => this.#secretFormTabChanged(event) );
     this.#secretCode.addEventListener('input', event => this.#secretCodeInput(event));
@@ -840,7 +864,22 @@ class SecretsDialog {
     
   }
   
+  async #getDuckDbSecrets(){
+    const obj = {};
+    const connection = window.hueyDb.connection;
+    const result = connection.query('SELECT * FROM duckdb_secrets()');
+    const n = result.numRows;
+    for (let i = 0; i < n; i++){
+      const row = result.get(i);
+      const name = row['name'];
+      const type = row['type'];
+      obj[name] = type;
+    }
+    return obj;
+  }
+  
   async #updateSecretsList(selectedSecret){
+    const duckdbSecrets = await this.#getDuckDbSecrets();
     await SecretsStore.store
     .list()
     .then(documents => {
@@ -868,8 +907,9 @@ class SecretsDialog {
           type = doc.type;
           items.push(`<optgroup label="${type}">`);
         }
+        const loaded = duckdbSecrets[doc.name] !== undefined;
         const selected = doc.name === selectedSecret ? ' selected="true"' : '';
-        items.push(`<option ${selected}>${doc.name}</option>`);
+        items.push(`<option data-loaded="${loaded}" ${selected}>${doc.name}</option>`);
       });
       if (items.length) {
         items.push('</optgroup>');
