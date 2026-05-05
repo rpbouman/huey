@@ -387,7 +387,11 @@ class SecretsDialog {
     if (existingItem) {
       const loaded = await this.#loadSecret(existingItem.value);
     }
+    else {
+      SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, false);
+    }
     this.#syncSecretCode();
+    
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
@@ -651,6 +655,30 @@ class SecretsDialog {
   static #setFieldKey(fieldContainer, value) {
     return this.#getFieldKeyEl(fieldContainer).value = value;
   }
+  
+  static #getParentFieldContainer(fieldContainer){
+    if ( !SecretsDialog.#isFieldIndented(fieldContainer) ) {
+      throw new Error(`Getting parent field container requires an indented field.`);
+    }
+    
+    do {
+      let prev = fieldContainer.previousSibling;
+      if (!prev) {
+        throw new Error('Expected a previous sibling for an indented field.');
+      }
+      if ( SecretsDialog.#isFieldIndented(fieldContainer) ) {
+        fieldContainer = prev;
+        continue;
+      }
+      break;
+    } while (true);
+    return fieldContainer;
+  }
+
+  static #getParentFieldContainerType(fieldContainer){
+    const parentFieldContainer = SecretsDialog.#getParentFieldContainer(fieldContainer);
+    return SecretsDialog.#getFieldType( parentFieldContainer );
+  }
 
   #handleFieldClicked(event) {
     const target = event.target;
@@ -691,6 +719,10 @@ class SecretsDialog {
           ['list', 'map'].includes( fieldType ) 
         ) {
           SecretsDialog.#indentField( newKeyValueId, true );
+          if ( fieldType === 'list' || SecretsDialog.#getParentFieldContainerType( fieldContainer ) === 'list') {
+            const subKeyField = SecretsDialog.#getFieldKeyEl( newKeyValueId );
+            subKeyField.removeAttribute('required');
+          }
         }
         break;
       case 'up':
@@ -749,8 +781,13 @@ class SecretsDialog {
     const target = event.target;
     switch (target.tagName){
       case 'INPUT':
-        if (target.list && target.list.id === 'secret-keys'){
-          this.#handleKeyFieldChanged(event);
+        switch (target.name) {
+          case 'indent':
+            this.#handleIndentChanged(event);
+            break;
+          case 'key':
+            this.#handleKeyFieldChanged(event);
+            break;
         }
         break;
       case 'SELECT':
@@ -761,6 +798,23 @@ class SecretsDialog {
       return;
     }
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+  }
+  
+  #handleIndentChanged(event){
+    const target = event.target;
+    if (target.checked) {
+      return;
+    }
+    const fieldContainer = target.parentNode.parentNode.parentNode.parentNode;
+    const previousFieldContainer = fieldContainer.previousSibling;
+    if (
+      SecretsDialog.#getFieldType( previousFieldContainer ) === 'map' || 
+      SecretsDialog.#getParentFieldContainerType( previousFieldContainer ) !== 'list'
+    ) {
+      return;
+    }
+    const subKeyField = SecretsDialog.#getFieldKeyEl( fieldContainer );
+    subKeyField.setAttribute('required', true);
   }
   
   #handleFieldInput(event){
