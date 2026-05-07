@@ -1430,6 +1430,18 @@
         >
           <button id="restoreCurrentSecret">Restore Current</button>
         </label>
+        <label
+          for="activateCurrentSecret" 
+          title="Activate the current secret so it can be used to access a remote resource"
+        >
+          <input id="activateCurrentSecret" type="radio" name="secretActivation"/>
+        </label>
+        <label
+          for="deactivateCurrentSecret" 
+          title="De-activate the current secret"
+        >
+          <input type="radio" id="deactivateCurrentSecret" name="secretActivation" checked="true"/>
+        </label>
         <input type="checkbox" id="secretEditingActive" /> 
         <input type="checkbox" id="secretUnsavedChanges" />
         <span id="secretsDialogUsageHint"><label for="createNewSecret">Create a new secret</label><span>, or select a secret from the list to edit or remove it</span>.</span>
@@ -1482,6 +1494,12 @@
                     autocomplete="true"
                     spellcheck="false"
                     title="The secret type"
+                  />
+                  <label for="secretAutoload">Autoload</label>
+                  <input
+                    id="secretAutoload"
+                    type="checkbox"
+                    title="Run CREATE SECRET automatically when opening Huey?"
                   />
                 </fieldset>
               </header>

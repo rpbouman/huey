@@ -42,6 +42,14 @@ class SecretsDialog {
     return byId('restoreCurrentSecret');
   }
 
+  get #activateCurrentSecretRadio(){
+    return byId('activateCurrentSecret');
+  }
+
+  get #deactivateCurrentSecretRadio(){
+    return byId('deactivateCurrentSecret');
+  }
+
   get #secretsList(){
     return byId('secretsList');
   }
@@ -50,12 +58,16 @@ class SecretsDialog {
     return byId('secretKeyValueFieldset');
   }  
   
-  get #secretNameInput(){
+  get #secretNameEl(){
     return byId('secretName');
   }
 
-  get #secretTypeInput(){
+  get #secretTypeEl(){
     return byId('secretType');
+  }
+
+  get #secretAutoloadEl(){
+    return byId('secretAutoload');
   }
 
   get #formElement(){
@@ -107,11 +119,13 @@ class SecretsDialog {
   }
 
   get #secretDocument(){
-    const secretName = this.#secretNameInput.value;
-    const secretType = this.#secretTypeInput.value;
+    const secretName = this.#secretNameEl.value;
+    const secretType = this.#secretTypeEl.value;
+    const autoload = this.#secretAutoloadEl.checked;
     const secretDocument = {
       name: secretName,
       type: secretType,
+      autoload: autoload,
       fields: []
     };
     const fieldSet = this.#keyValuesFieldset;
@@ -217,8 +231,8 @@ class SecretsDialog {
     return `DROP SECRET IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
   }
 
-  #getCreateSecretSQL(){
-    const secretDocument = this.#secretDocument;
+  #getCreateSecretSQL(secretDocument){
+    secretDocument = secretDocument || this.#secretDocument;
     const fields = secretDocument.fields.map(field => {
       return `\r\n, ${SecretsDialog.#fieldValuePairAsSQL(field)}`;
     });
@@ -259,11 +273,18 @@ class SecretsDialog {
     const list = event.target;
     const selectedIndex = list.selectedIndex;
     if (selectedIndex === -1){
+      this.#activateCurrentSecretRadio.checked = true;
       SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, false);
       SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
     }
     else {
       const option = list.options[selectedIndex];
+      if (option.getAttribute('data-loaded') === 'true') {
+        this.#activateCurrentSecretRadio.checked = true;
+      }
+      else {
+        this.#deactivateCurrentSecretRadio.checked = true;
+      }
       const name = option.value;
       const loaded = await this.#loadSecret(name);
       if (!loaded){
@@ -274,8 +295,9 @@ class SecretsDialog {
   }
   
   #resetForm(){
-    this.#secretNameInput.value = '';
-    this.#secretTypeInput.value = '';
+    this.#secretNameEl.value = '';
+    this.#secretTypeEl.value = '';
+    this.#secretAutoloadEl.checked = false;
     const keyValuesFieldset = this.#keyValuesFieldset;
     const secretKeyValueUiTemplate = this.#secretKeyValueUiTemplate;
     while (keyValuesFieldset.lastChild !== secretKeyValueUiTemplate) {
@@ -291,8 +313,9 @@ class SecretsDialog {
     }
     const secretDocument = await secretsStore.get(name, password);
     this.#resetForm();
-    this.#secretNameInput.value = secretDocument.name;
-    this.#secretTypeInput.value = secretDocument.type;
+    this.#secretNameEl.value = secretDocument.name;
+    this.#secretTypeEl.value = secretDocument.type;
+    this.#secretAutoloadEl.checked = Boolean(secretDocument.autoload);
     const fields = secretDocument.fields;
     const n = fields.length;
     const keyValuesFieldset = this.#keyValuesFieldset;
@@ -328,7 +351,7 @@ class SecretsDialog {
             const typeInput = SecretsDialog.#getFieldTypeEl(keyValueUi);
             typeInput.value = field.type;
             const valueInput = SecretsDialog.#getFieldValueEl(keyValueUi);
-            valueInput = field.value;
+            valueInput.value = field.value;
           }
           break;
         } 
@@ -337,6 +360,7 @@ class SecretsDialog {
     this.#syncSecretCode();
     SecretsDialog.#setCheckboxState(this.#secretEditingActiveCheckbox, true);
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
+    this.#secretNameEl.focus();
     return true;
   }
   
@@ -395,10 +419,10 @@ class SecretsDialog {
     SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, false);
   }
   
-  async #promptOverwriteExistingSecret(){
+  async #promptOverwriteExistingSecret(name){
     return await PromptUi.show({
       title: Internationalization.getText('Overwrite Existing Secret'),
-      contents: Internationalization.getText('Another secret with that name already exists. Do you want to overwrite it?')
+      contents: Internationalization.getText('Another secret named "{1}" already exists. Do you want to overwrite it?', name)
     });
   }
   
@@ -415,6 +439,7 @@ class SecretsDialog {
   
   async #handleChangePasswordClicked(){
     const secretsStore = SecretsStore.store;
+    //TODO: implement
     const config = {
       title: Internationalization.getText('Enter Password'),
       contents: passwordHTML
@@ -499,12 +524,29 @@ class SecretsDialog {
     }
   }
   
-  async #createDuckDbSecret(){
+  async #dropDuckDbSecret(name){
+    const dropSecretSql = this.#getDropSecretSQL(name);
+    try {
+      const connection = window.hueyDb.connection;
+      await connection.query( dropSecretSql ); 
+      return true;
+    }
+    catch(e){
+      console.error(e);
+      showErrorDialog({
+        title: Internationalization.getText('Error dropping secret'),
+        description: Internationalization.getText('The DROP SECRET statement failed.')
+      });
+      return false;
+    }
+  }
+  
+  async #createDuckDbSecret(secretDocument){
     const extensions = [];
-    const connection = window.hueyDb.connection;    
+    const connection = window.hueyDb.connection;
     do {
       try {
-        const createSecretSql = this.#getCreateSecretSQL();
+        const createSecretSql = this.#getCreateSecretSQL(secretDocument);
         await connection.query( createSecretSql ); 
         return true;
       }
@@ -531,8 +573,12 @@ class SecretsDialog {
         catch(e) {
           console.error(e);
           showErrorDialog({
-            title: Internationalization.getText('Error loading the ${1} extension', extensionName),
-            description: Internationalization.getText('The secret type ${1} requires installation of the ${2} extension, but an attempt to load the extension failed.', secretType, extensionName)
+            title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
+            description: Internationalization.getText(
+              'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.', 
+              secretType, 
+              extensionName
+            )
           });
           return false;
         }
@@ -562,9 +608,9 @@ class SecretsDialog {
       const exists = !updating || nameChanged ? await secretsStore.exists( newName ) : false;
 
       if (exists){
-        const result = await this.#promptOverwriteExistingSecret();
+        const result = await this.#promptOverwriteExistingSecret(newName);
         if (result === PromptUi.REJECT) {
-          const secretName = this.#secretNameInput;
+          const secretName = this.#secretNameEl;
           secretName.select();
           secretName.focus();
           return;
@@ -585,8 +631,7 @@ class SecretsDialog {
       const connection = window.hueyDb.connection;
       
       if (nameChanged && removeOldSecret || exists){
-        const dropSecretSql = this.#getDropSecretSQL();
-        await connection.query( dropSecretSql ); 
+        await this.#dropDuckDbSecret();
       }
 
       const success = await this.#createDuckDbSecret();
@@ -596,13 +641,8 @@ class SecretsDialog {
       
       await secretsStore.store(secretDocument, password);
       if (removeOldSecret === true) {
-        try {
-          const dropSecretSql = this.#getDropSecretSQL(oldName);
-          await connection.query( dropSecretSql ); 
-        }
-        catch(e) {
-        }
         await secretsStore.remove(oldName);
+        await this.#dropDuckDbSecret(oldName);
       }
       await this.#updateSecretsList(newName);
       
@@ -719,9 +759,14 @@ class SecretsDialog {
           ['list', 'map'].includes( fieldType ) 
         ) {
           SecretsDialog.#indentField( newKeyValueId, true );
+          
+          // if the new field is a subfield of a list, special logic applies.
           if ( fieldType === 'list' || SecretsDialog.#getParentFieldContainerType( fieldContainer ) === 'list') {
             const subKeyField = SecretsDialog.#getFieldKeyEl( newKeyValueId );
+            // the key is not required (and the css will hide it)
+            // #handleIndentChanged will re-add the attribute if a field below a list is un-indented (= becomes a normal field not owned by the list)
             subKeyField.removeAttribute('required');
+            SecretsDialog.#getFieldValueEl( newKeyValueId ).focus();
           }
         }
         break;
@@ -815,6 +860,7 @@ class SecretsDialog {
     }
     const subKeyField = SecretsDialog.#getFieldKeyEl( fieldContainer );
     subKeyField.setAttribute('required', true);
+    subKeyField.focus();
   }
   
   #handleFieldInput(event){
@@ -840,11 +886,20 @@ class SecretsDialog {
         option.setAttribute('disabled', true);
       }
     }
+    if (!this.#secretUnsavedChangesCheckbox.checked ){
+      SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+    }
   }
   
   #handleSecretNameInput(event){
     const secretNameInput = event.target;
     const selectedSecretOption = this.#selectedSecretOption;
+    if (!this.#secretUnsavedChangesCheckbox.checked ){
+      SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
+    }
+  }
+  
+  #handleSecretAutoloadChanged(event){
     if (!this.#secretUnsavedChangesCheckbox.checked ){
       SecretsDialog.#setCheckboxState(this.#secretUnsavedChangesCheckbox, true);
     }
@@ -895,17 +950,52 @@ class SecretsDialog {
     this.#resetForm();
   }
   
+  async #handleActivateCurrentSecretChanged(event){
+    const secretCreated = await this.#createDuckDbSecret();
+    if (!secretCreated){
+      event.preventDefault();
+      return;
+    }
+    const existingItem = this.#selectedSecretOption;
+    if (existingItem) {
+      existingItem.setAttribute('data-loaded', true);
+    }
+  }
+
+  async #handleDeactivateCurrentSecretChanged(event){
+    const secretDropped = await this.#dropDuckDbSecret();
+    if (!secretDropped){
+      event.preventDefault();
+      return;
+    }
+    const existingItem = this.#selectedSecretOption;
+    if (existingItem) {
+      existingItem.setAttribute('data-loaded', false);
+    }
+  }
+  
   #initEvents(){
     const dialog = this.dialog;
     dialog.addEventListener('close', event => this.#handleDialogClose(event) );
-    this.#secretNameInput.addEventListener('input', event => this.#handleSecretNameInput(event) );
-    this.#secretTypeInput.addEventListener('change', event => this.#handleSecretTypeChanged(event) );
+
+    // toolbar buttons
     this.#changePasswordButton.addEventListener('click', event => this.#handleChangePasswordClicked(event) );
     this.#createNewSecretButton.addEventListener('click', event => this.#handleCreateNewSecretClicked(event) );
     this.#removeCurrentSecretButton.addEventListener('click', event => this.#handlerRemoveCurrentSecretClicked(event) );
     this.#saveCurrentSecretButton.addEventListener('click', event => this.#handleSaveCurrentSecretClicked(event) );
     this.#restoreCurrentSecretButton.addEventListener('click', event => this.#handleRestoreCurrentSecretClicked(event) );
+    this.#activateCurrentSecretRadio.addEventListener('change', event => this.#handleActivateCurrentSecretChanged(event) );
+    this.#deactivateCurrentSecretRadio.addEventListener('change', event => this.#handleDeactivateCurrentSecretChanged(event) );
+
+    // list (left sidebar)
     this.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
+
+    // header fields
+    this.#secretNameEl.addEventListener('input', event => this.#handleSecretNameInput(event) );
+    this.#secretTypeEl.addEventListener('change', event => this.#handleSecretTypeChanged(event) );
+    this.#secretAutoloadEl.addEventListener('change', event => this.#handleSecretAutoloadChanged(event) );
+
+    // header key/value collection
     this.#keyValuesFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
     this.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
     this.#keyValuesFieldset.addEventListener('input', event => this.#handleFieldInput(event) ); 
@@ -921,7 +1011,7 @@ class SecretsDialog {
   async #getDuckDbSecrets(){
     const obj = {};
     const connection = window.hueyDb.connection;
-    const result = connection.query('SELECT * FROM duckdb_secrets()');
+    const result = await connection.query('SELECT * FROM duckdb_secrets()');
     const n = result.numRows;
     for (let i = 0; i < n; i++){
       const row = result.get(i);
@@ -936,10 +1026,10 @@ class SecretsDialog {
     const duckdbSecrets = await this.#getDuckDbSecrets();
     await SecretsStore.store
     .list()
-    .then(documents => {
+    .then(secretDocuments => {
       const items = [];
       let type;
-      documents.sort( (a,b) => {
+      secretDocuments.sort( (a,b) => {
         if (a.type > b.type) {
           return 1;
         }
@@ -953,17 +1043,17 @@ class SecretsDialog {
           return -1;
         }
         return 0;
-      }).map( doc => {
-        if (doc.type !== type) {
+      }).map( secretDocument => {
+        if (secretDocument.type !== type) {
           if (items.length) {
             items.push('</optgroup>');
           }
-          type = doc.type;
+          type = secretDocument.type;
           items.push(`<optgroup label="${type}">`);
         }
-        const loaded = duckdbSecrets[doc.name] !== undefined;
-        const selected = doc.name === selectedSecret ? ' selected="true"' : '';
-        items.push(`<option data-loaded="${loaded}" ${selected}>${doc.name}</option>`);
+        const loaded = duckdbSecrets[secretDocument.name] !== undefined;
+        const selected = secretDocument.name === selectedSecret ? ' selected="true"' : '';
+        items.push(`<option data-loaded="${loaded}" ${selected}>${secretDocument.name}</option>`);
       });
       if (items.length) {
         items.push('</optgroup>');
@@ -974,7 +1064,29 @@ class SecretsDialog {
       showErrorDialog(err);
     });
   }
-  
+ 
+  async #activateAutoloadedSecrets(){
+    const secretsStore = SecretsStore.store;
+    const list = await secretsStore.list();
+    const autoloadEntries = list.filter(secretDocument => secretDocument.autoload);
+    const n = autoloadEntries.length;
+    if (!n) {
+      return;
+    }
+    const password = await this.#getPassword();
+    for (let i = 0; i < n; i++){
+      const secretDocEntry = list[i];
+      const name = secretDocEntry.name;
+      const secretDocument = await secretsStore.get(name, password);
+      const loaded = await this.#createDuckDbSecret(secretDocument);
+      if (loaded) {
+        continue;
+      }
+      console.warn(`Secret "${name}" failed to autoload.`);
+    }
+    this.#password = undefined;
+  }
+ 
   constructor(){
     this.#highlited = new Hilited({
       element: '#secretCode',
@@ -988,7 +1100,10 @@ class SecretsDialog {
     });
     
     this.#initEvents();
-    this.#updateSecretsList();
+    this.#activateAutoloadedSecrets()
+    .then(() => {
+      this.#updateSecretsList();
+    });
   }
     
 }

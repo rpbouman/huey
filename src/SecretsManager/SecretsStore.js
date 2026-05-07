@@ -473,7 +473,7 @@ class SecretsStore {
    */
   async list() {
     const docs = await this.#getAllRaw();
-    return docs.map(({ name, type }) => ({ name, type }));
+    return docs.map(({ name, type, autoload }) => ({ name, type, autoload }));
   }
 
   /**
