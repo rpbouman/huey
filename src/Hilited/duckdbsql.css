@@ -1,0 +1,34 @@
+.hilited {
+
+  &::highlight(hilited-duckdb-identifier),
+  &::highlight(hilited-duckdb-quotedIdentifier) {
+    color: green;
+  }
+
+  &::highlight(hilited-duckdb-keyword) {
+    color: blue;
+    /* 
+      faux bold effect. 
+      (font-weight is not supported for css ::highlight pseudo element, but text shadow is)
+    */
+    text-shadow: currentColor 0.4px 0,
+                 currentColor 0px 0.4px;
+  }
+
+  &::highlight(hilited-duckdb-number),
+  &::highlight(hilited-duckdb-string){
+    color: red;
+  }
+
+  &::highlight(hilited-duckdb-multiLineComment),
+  &::highlight(hilited-duckdb-singleLineComment){
+    color: gray;
+  }
+
+  &::highlight(hilited-duckdb-__other__){
+    text-decoration-line: spelling-error;
+    text-decoration-color: red;
+  }
+
+}
+

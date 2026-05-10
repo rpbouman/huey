@@ -105,7 +105,8 @@ select[multiple] {
 }
 
 input:is( 
-  [type=text],  
+  [type=text],
+  [type=password],
   [type=search],
   [type=checkbox],
   [type=number]
@@ -151,7 +152,8 @@ input[type=file]::file-selector-button {
 }
 
 input:invalid {
-  color: red;
+  background-color: red;
+  color: white;
   border-color: red;
 }
 
@@ -262,7 +264,9 @@ dialog {
   user-select: none;
 }
 
-form, form > fieldset {
+form, 
+form > fieldset, 
+form > header > fieldset {
   display: grid;
   grid-template-columns: [labels] auto [controls] 1fr;
   grid-auto-flow: row;
@@ -284,7 +288,8 @@ form {
   }
 
   > label::after, 
-  > fieldset > label::after {
+  > fieldset > label::after, 
+  > header > fieldset > label::after  {
     content: ":"
   }
   
@@ -387,8 +392,9 @@ menu[role=toolbar] > label[role=menuitem]:has( > button[popovertarget][popoverta
   content: '...';
 }
 
-header[role=toolbar] > label > button,
-menu[role=toolbar] > label > button,
+
+
+*[role=toolbar] > label > *:is( button, input),
 menu[role=menu] > li[role=menuitem] > label > button {
   display: none;
 }
@@ -409,8 +415,7 @@ menu[role=menu] > li[role=menuitem] > label > button {
 
 *[role=toolbar] > label:has( 
   > button, 
-  > input[type=file], 
-  > input[type=checkbox]
+  > input:is( [type=file], [type=checkbox], [type=radio] )
 )::before,
 *[role=menu] > li[role=menuitem] > label:has( 
   > button,
@@ -426,12 +431,11 @@ menu[role=menu] > li[role=menuitem] > label > button {
 
 *[role=toolbar] > label:hover:has( 
   > button,
-  > input[type=file],
-  > input[type=checkbox]
+  > input:is( [type=file], [type=checkbox], [type=radio] )
 )::before,
 *[role=menu] > li[role=menuitem]:hover > label:has(
   > button,
-  > input[type=checkbox]
+  > input:is( [type=file], [type=checkbox], [type=radio] )
 )::before {
   color: var( --huey-icon-color-highlight );
 }

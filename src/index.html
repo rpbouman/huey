@@ -21,7 +21,7 @@
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    const tablerIconsFontVersion = '3.41.0';
+    const tablerIconsFontVersion = '3.44.0';
     
     const tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     const preloadLink = document.createElement('link');
@@ -91,12 +91,15 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/Hilited.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/duckdbsql.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DragableDialogs.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SecretsManager/SecretsManager.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
@@ -200,6 +203,56 @@
       — „ — 
       <!-- ditto mark: 〃-->
       <option value="&#x3003;" translate="no">&#x3003;</option>
+    </datalist>
+    
+    <!-- https://duckdb.org/docs/lts/configuration/secrets_manager#types-of-secrets -->
+    <datalist id="secret-types">
+      <option value="azure" label="Azure Blob Storage" data-duckdb-extension="azure"></option>
+      <option value="s3" label="AWS S3" data-duckdb-extension="httpfs"></option>
+      <option value="r2" label="Cloudflare R2" data-duckdb-extension="httpfs"></option>
+      <option value="ducklake" label="Ducklake" data-duckdb-extension="ducklake"></option>
+      <option value="gcs" label="Google Cloud Storage" data-duckdb-extension="httpfs"></option>
+      <option value="http" label="HTTP and HTTPS" data-duckdb-extension="httpfs"></option>
+      <option value="huggingface" label="Hugging Face" data-duckdb-extension="httpfs"></option>
+      <option value="iceberg" label="Iceberg REST Catalog" data-duckdb-extension="iceberg"></option>
+      <option value="unity_catalog" label="Unity Catalog" data-duckdb-extension="unity_catalog"></option>
+    </datalist>
+    
+    <datalist id="secret-keys">
+      <option value="ACCOUNT_ID" data-default-type="text" data-associated-secret-types="r2"></option>
+      <option value="ACCOUNT_NAME" data-default-type="text" data-associated-secret-types="azure"></option>
+      <option value="ASSUME_ROLE_ARN" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="AWS_REGION" data-default-type="text" data-associated-secret-types="s3,unity_catalog"></option>
+      <option value="BEARER_TOKEN" data-default-type="password" data-associated-secret-types="http,iceberg"></option>
+      <option value="CHAIN" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="CLIENT_ID" data-default-type="text" data-associated-secret-types="azure,iceberg"></option>
+      <option value="CLIENT_SECRET" data-default-type="password" data-associated-secret-types="azure,iceberg"></option>
+      <option value="CONNECTION_STRING" data-default-type="text" data-associated-secret-types="azure"></option>
+      <option value="ENDPOINT" data-default-type="text" data-associated-secret-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="ENDPOINT_TYPE" data-default-type="text" data-associated-secret-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="EXTRA_HTTP_HEADERS" data-default-type="map" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY" data-default-type="text" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY_PASSWORD" data-default-type="password" data-associated-secret-types="http"></option>
+      <option value="HTTP_PROXY_USERNAME" data-default-type="text" data-associated-secret-types="http"></option>
+      <option value="KEY_ID" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="KMS_KEY_ID" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="OAUTH2_GRANT_TYPE" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="OAUTH2_SCOPE" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="OAUTH2_SERVER_URI" data-default-type="text" data-associated-secret-types="iceberg"></option>
+      <option value="PROFILE" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="PROVIDER" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="REGION" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="REQUESTER_PAYS" data-default-type="checkbox" data-associated-secret-types="s3"></option>
+      <option value="SCOPE" data-default-type="list" data-associated-secret-types="s3,http"></option>
+      <option value="SECRET" data-default-type="password" data-associated-secret-types="s3,gcs,r2,iceberg"></option>
+      <option value="SESSION_TOKEN" data-default-type="password" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="TENANT_ID" data-default-type="text" data-associated-secret-types="azure"></option>
+      <option value="TOKEN" data-default-type="password" data-associated-secret-types="http,huggingface,iceberg,unity_catalog"></option>
+      <option value="URL_COMPATIBILITY_MODE" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="URL_STYLE" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="USE_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
+      <option value="VALIDATION" data-default-type="text" data-associated-secret-types="s3"></option>
+      <option value="VERIFY_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2,http"></option>
     </datalist>
   </head>
 
@@ -1336,6 +1389,264 @@
         >Cancel</button>
       </footer>
     </dialog>
+    
+    <dialog 
+      id="secretsDialog"
+      draggable="true"
+      aria-labelledby="secretsDialogTitle"
+      popover="manual"
+    >
+      <header>
+        <h3 id="secretsDialogTitle">Secrets Manager</h3>
+      </header>
+      <menu role="toolbar">
+        <label 
+          for="createNewSecret" 
+          title="Create new Secret"
+        >
+          <button id="createNewSecret">Create New</button>
+        </label>
+        <label 
+          for="removeCurrentSecret" 
+          title="Remove current Secret"
+        >
+          <button id="removeCurrentSecret">Remove Current</button>
+        </label>
+        <label 
+          for="saveCurrentSecret" 
+          title="Save current Secret"
+        >
+          <button id="saveCurrentSecret">Save Current</button>
+        </label>
+        <label 
+          for="restoreCurrentSecret" 
+          title="Restore current Secret"
+        >
+          <button id="restoreCurrentSecret">Restore Current</button>
+        </label>
+        <label
+          for="activateCurrentSecret" 
+          title="Activate the current secret so it can be used to access a remote resource"
+        >
+          <input id="activateCurrentSecret" type="radio" name="secretActivation"/>
+        </label>
+        <label
+          for="deactivateCurrentSecret" 
+          title="De-activate the current secret"
+        >
+          <input type="radio" id="deactivateCurrentSecret" name="secretActivation" checked="true"/>
+        </label>
+        <input type="checkbox" id="secretEditingActive" /> 
+        <input type="checkbox" id="secretUnsavedChanges" />
+        <span id="secretsDialogUsageHint"><label for="createNewSecret">Create a new secret</label><span>, or select a secret from the list to edit or remove it</span>.</span>
+        <span id="secretFormInvalidHint">Fill out all required fields to save the secret.</span>
+        <label 
+          for="changePassword" 
+          title="Change password"
+        >
+          <button id="changePassword">Change Password</button>
+        </label>
+        <label 
+          for="resetSecretsStore" 
+          title="Reset the secrets store"
+        >
+          <button id="resetSecretsStore">Reset Secrets Store</button>
+        </label>
+      </menu>
+      <section>
+        <nav>
+          <select 
+            id="secretsList"
+            multiple="true"
+            title="Select a secret to edit or remove it."
+          ></select>
+        </nav>
+        <section role="tablist">
+          <div>
+            <label
+              role="tab"
+              for="secretFormTab"
+            >
+              Form
+            </label>
+            <input
+              id="secretFormTab"
+              type="radio"
+              name="secretTabs"
+              checked="true"
+            />
+            <form role="tabpanel" id="secretForm">
+              <header>
+                <fieldset id="secretHeaderFieldset">
+                  <legend>Name and Type</legend>
+                  <label for="secretName">Name</label>
+                  <input 
+                    id="secretName"
+                    placeholder="Enter the secret's identifier"
+                    type="text"
+                    pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+                    required="true"
+                    autocomplete="true"
+                    spellcheck="false"
+                    title="The unique name of the secret"
+                  />
+                  <label for="secretType">Type</label>
+                  <input 
+                    id="secretType"
+                    placeholder="Enter the secret's type"
+                    type="text"
+                    pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+                    required="true"
+                    list="secret-types"
+                    autocomplete="true"
+                    spellcheck="false"
+                    title="The secret type"
+                  />
+                  <label for="secretAutoload">Autoload</label>
+                  <input
+                    id="secretAutoload"
+                    type="checkbox"
+                    title="Run CREATE SECRET automatically when opening Huey?"
+                  />
+                </fieldset>
+              </header>
+              <fieldset id="secretKeyValueFieldset">
+                <legend>Key/Value Pairs</legend>
+                <!-- key/value pair UI template -->
+                <template id="secretKeyValueUi">
+                  <div>
+                    <span>
+                      <menu role="toolbar">
+                        <label title="Add new field"><button name="add" value="add">Add new Field</button></label>
+                        <label title="Remove field"><button name="remove" value="remove">Remove Field</button></label>
+                        <label title="Move field up"><button name="up" value="up">Move field up</button></label>
+                        <label title="Move field down"><button name="down" value="down">Move field down</button></label>
+                        <label title="Toggle subfield"><input name="indent" type="checkbox" value="indent"/></label>
+                      </menu>
+                    </span>
+                    <span>
+                      <input 
+                        type="text" 
+                        placeholder="Enter a key"
+                        name="key"
+                        list="secret-keys"
+                        title="Key field"
+                        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+                        required="true"
+                        autocomplete="true"
+                        spellcheck="false"
+                        autofocus="true"
+                      />
+                    </span>
+                    <span>
+                      <select 
+                        title="Select the field data type (input method) for the value field"
+                        name="type"
+                      >
+                        <option value="checkbox" title="Boolean">&#x2611;</option>
+                        <option value="list" title="List">[&#x2026;]</option>
+                        <option value="text" title="Plaintext" selected="true">txt</option>
+                        <option value="password" title="Encrypted">***</option> 
+                        <option value="map" title="Map">{&#x2026;}</option>
+                      </select>
+                    </span>
+                    <span>
+                      <input 
+                        type="text"
+                        placeholder="Enter the key's value"
+                        name="value"
+                        title="Value field"
+                        required="true"
+                        pattern="^(?!\s+).+(?<!\s+)$"
+                        autocomplete="true"
+                        spellcheck="false"
+                      />
+                    </span>
+                  </div>
+                </template>
+              </fieldset>
+            </form>
+          </div>
+          <div>
+            <label
+              role="tab"
+              for="secretCodeTab"
+            >
+              Code
+            </label>
+            <input
+              id="secretCodeTab"
+              type="radio"
+              name="secretTabs"
+            />
+            <div
+                role="tabpanel" 
+            >
+              <section 
+                id="secretCodeEditor"
+                class="hilited"
+              >
+                <pre
+                  class="hilited-gutter"
+                  style="
+                    display: inline-block;
+                    position: relative;
+                    width: 8ch;
+                  "
+                >
+                </pre>
+                <code
+                  id="secretCode"
+                  class="hilited-editor"
+                  style="
+                    tab-size:2;
+                  "
+                ></code>
+                <menu role="toolbar">
+                  <li>
+                    <label>length</label>
+                    <output name="length"></output>
+                  </li>
+                  <li>
+                    <label>lines</label>
+                    <output name="lines"></output>
+                  </li>
+                  <li>
+                    <label>Ln</label>
+                    <output name="line"></output>
+                  </li>
+                  <li>
+                    <label>Col</label>
+                    <output name="column"></output>
+                  </li>
+                  <li>
+                    <label>Pos</label>
+                    <output name="position"></output>
+                  </li>
+                </menu>
+              </section>
+            </div>
+          </div>
+        </section>
+      </section>
+      <footer role="toolbar">
+        <form id="secretsButtonForm" method="dialog">
+          <button
+            id="secretsDialogAcceptButton"
+            form="secretsUiForm"
+            autofocus="true" 
+            popovertarget="secretsDialog"
+            popovertargetaction="hide"
+          >Ok</button>
+          <button
+            id="secretsDialogCancelButton"
+            form="secretsUiForm"
+            popovertarget="secretsDialog"
+            popovertargetaction="hide"
+          >Cancel</button>
+        </form>
+      </footer>
+    </dialog>
 
     <dialog
       id="promptUi"
@@ -2219,6 +2530,14 @@
           >Settings...</button>
         </label>
 
+        <label for="secretsButton" title="Open the Huey Secrets Manager dialog.">
+          <button
+            id="secretsButton"
+            popovertarget="secretsDialog"
+            popovertargetaction="show"
+          >Secrets...</button>
+        </label>
+
         <label
           for="exportButton"
           title="Export &amp; Download queries and/or result data..."
@@ -2408,11 +2727,15 @@
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
     <script onload="resourceLoaded(this)" src="util/file/FileUtils.js"></script>
+    <script onload="resourceLoaded(this)" src="util/regex/RegXpChef.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
     <script onload="resourceLoaded(this)" src="Internationalization/Internationalization.js"></script>
 
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/Hilited.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/HilitedPeripherals.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/SelectionHelper.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsBase.js"></script>
@@ -2450,6 +2773,9 @@
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
     <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
     <script onload="resourceLoaded(this)" src="QuickQueryMenu/QuickQueryMenu.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/SecretsStore.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/CreateSecretParser.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/SecretsDialog.js"></script>
 
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageProtocol.js"></script>
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageInterface.js"></script>
@@ -2477,7 +2803,6 @@
 
         await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
         const connection = await db.connect();
-
         window.hueyDb = {
           duckdb: duckdb,
           instance: db,

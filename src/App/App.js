@@ -54,6 +54,40 @@ function initDuckdbVersion(){
     const api = row[apiColumn];
     const reservedWords = String( row[reservedWordsColumn] ).slice(1, -1).split(',');
     window.hueyDb.reservedWords = reservedWords;
+    
+    //(?<number>(?:\d+(\.\d*)?|\.\d+))|(?<string>(?<!')'(?:''|''|[^'])*'(?!'))|(?<multiLineComment>\/\*(?:(?!\*\/)[\s\S])*\*\/)|(?<singleLineComment>--(?:(?!\n)[\s\S])*(?=\n))|(?<punctuation>[\(\)\{\}\.\:;,\-\+<>=\*])|(?<quotedIdentifier>(?<!")"(?:""|""|[^"])+"(?!"))|(?<identifier>\w+)|(?<whitespace>\s+))
+    
+    const duckdbTokenizer = RegXpChef.compile(
+      { $flags: 'gysi' }, 
+      {
+        keyword: reservedWords,
+        number: /\d+(\.\d*)?|\.\d+/,
+        string: {
+          $begin: '\'',
+          $end: '\'',
+          $escape: '\\'
+        },
+        multiLineComment: {
+          $begin: '/*',
+          $end: '*/'
+        },
+        singleLineComment: {
+          $begin: '--',
+          $end: /\r\n|\n|\r/,
+          $endExclusive: true
+        },
+        punctuation: /[\(\)\{\}\.\:;,\-\+<>=\*]/,
+        quotedIdentifier: {
+          $begin: '"',
+          $end: '"',
+          $escape: '"'
+        },
+        identifier: /\b\w+\b/,
+        whitespace: /\s+/
+      }
+    );
+    window.hueyDb.duckdbTokenizer = duckdbTokenizer;
+    initSecretsDialog();
 
     const duckdbVersionLabel = byId('duckdbVersionLabel');
     duckdbVersionLabel.textContent = `DuckDB ${version}, API: ${api}`;
