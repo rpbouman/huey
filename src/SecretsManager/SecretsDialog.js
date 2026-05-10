@@ -932,7 +932,9 @@ class SecretsDialog {
     if (count !== undefined){
       return;
     }
-    const enteredText = event.target.textContent;
+    const target = event.target;
+    const enteredText = target.textContent;
+    const selection = SelectionHelper.get(target);
     let error;
     try {
       const parsedSecretDocument = CreateSecretParser.parseCreateSecretSQL(enteredText);
@@ -940,7 +942,9 @@ class SecretsDialog {
       if (!this.#compareSecretDocuments(parsedSecretDocument, secretDocument)){
         this.#loadSecretDocument(parsedSecretDocument);
         SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
+        SelectionHelper.create(target, selection.start, selection.end, selection.direction);
       }
+      
     }
     catch(error) {
       console.error(error);
