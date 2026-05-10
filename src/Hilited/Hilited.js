@@ -77,6 +77,19 @@ class Hilited {
   }
   #thisHandleResize = this.#handleResize.bind(this);
 
+  get editingEnabled(){
+    return this.#element.getAttribute('contenteditable') === 'plaintext-only';
+  }
+  
+  set editingEnabled(onOff){
+    if (onOff){
+      this.#element.setAttribute('contenteditable', 'plaintext-only');
+    }
+    else {
+      this.#element.removeAttribute('contenteditable');
+    }
+  }
+
   #handleTab(shiftKey){
     const hardTabs = this.#options.hardTabs;
     const tabSize = this.#tabSize;
@@ -822,8 +835,8 @@ class Hilited {
 
     this.#options = Object.assign(Hilited.#defaultOptions, options);
     this.#updateElementDimension();
+    this.editingEnabled = true;
     this.#element.setAttribute('autocorrect', 'off');
-    this.#element.setAttribute('contenteditable', 'plaintext-only');
     this.#element.setAttribute('spellcheck', 'false');
     this.#element.setAttribute('translate', 'no');
     this.#element.setAttribute('writingsuggestions', 'false');

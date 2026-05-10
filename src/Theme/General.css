@@ -152,7 +152,8 @@ input[type=file]::file-selector-button {
 }
 
 input:invalid {
-  color: red;
+  background-color: red;
+  color: white;
   border-color: red;
 }
 

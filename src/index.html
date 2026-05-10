@@ -1475,20 +1475,21 @@
                   <legend>Name and Type</legend>
                   <label for="secretName">Name</label>
                   <input 
-                    id="secretName" 
+                    id="secretName"
+                    placeholder="Enter the secret's identifier"
                     type="text"
-                    pattern="[A-Za-z][A-Za-z0-9_]*"
+                    pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
                     required="true"
                     autocomplete="true"
                     spellcheck="false"
                     title="The unique name of the secret"
-                    autofocus="true"
                   />
                   <label for="secretType">Type</label>
                   <input 
                     id="secretType"
+                    placeholder="Enter the secret's type"
                     type="text"
-                    pattern="[A-Za-z][A-Za-z0-9_]*"
+                    pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
                     required="true"
                     list="secret-types"
                     autocomplete="true"
@@ -1520,10 +1521,11 @@
                     <span>
                       <input 
                         type="text" 
+                        placeholder="Enter a key"
                         name="key"
                         list="secret-keys"
                         title="Key field"
-                        pattern="[A-Za-z][A-Za-z0-9_]*"
+                        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
                         required="true"
                         autocomplete="true"
                         spellcheck="false"
@@ -1545,6 +1547,7 @@
                     <span>
                       <input 
                         type="text"
+                        placeholder="Enter the key's value"
                         name="value"
                         title="Value field"
                         required="true"
@@ -2765,6 +2768,7 @@
     <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
     <script onload="resourceLoaded(this)" src="QuickQueryMenu/QuickQueryMenu.js"></script>
     <script onload="resourceLoaded(this)" src="SecretsManager/SecretsStore.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/CreateSecretParser.js"></script>
     <script onload="resourceLoaded(this)" src="SecretsManager/SecretsDialog.js"></script>
 
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageProtocol.js"></script>
