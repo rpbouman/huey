@@ -339,17 +339,17 @@ class SecretsDialog {
         case 'map': 
         case 'list': {
           for (let j = 0; j < field.value.length; j++){
-            const field = field.value[j];
-            const keyValueUi = this.#newKeyValueUi();
-            keyValuesFieldset.appendChild(keyValueUi);
-            const indentCheckbox = SecretsDialog.#getFieldIndentCheckbox(keyValueUi);
+            const entry = field.value[j];
+            const subKeyValueUi = this.#newKeyValueUi();
+            keyValuesFieldset.appendChild(subKeyValueUi);
+            const indentCheckbox = SecretsDialog.#getFieldIndentCheckbox(subKeyValueUi);
             indentCheckbox.checked = true;
-            const keyInput = SecretsDialog.#getFieldKeyEl(keyValueUi);
-            keyInput.value = field.key;
-            const typeInput = SecretsDialog.#getFieldTypeEl(keyValueUi);
-            typeInput.value = field.type;
-            const valueInput = SecretsDialog.#getFieldValueEl(keyValueUi);
-            valueInput.value = field.value;
+            const keyInput = SecretsDialog.#getFieldKeyEl(subKeyValueUi);
+            keyInput.value = entry.key;
+            const typeInput = SecretsDialog.#getFieldTypeEl(subKeyValueUi);
+            typeInput.value = entry.type;
+            const valueInput = SecretsDialog.#getFieldValueEl(subKeyValueUi);
+            valueInput.value = entry.value;
           }
           break;
         } 
@@ -446,12 +446,59 @@ class SecretsDialog {
   }
   
   async #handleChangePasswordClicked(){
+    const now = Date.now();
+    const oldPasswordId = `old_password_${now}`;
+    const newPasswordId = `new_password_${now}`;
+    
+    const hint = SecretsDialog.#passwordHint;
+    const invalidPassword = '<div>'  + SecretsDialog.#wrongPasswordHint + '</div>';
+    
+    const passwordForm = `
+      <form>
+        <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
+        ${SecretsDialog.#getPasswordHTML(oldPasswordId, 'password')}
+        <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
+        ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
+      </form>
+    `;
     const secretsStore = SecretsStore.store;
-    //TODO: implement
     const config = {
-      title: Internationalization.getText('Enter Password'),
-      contents: passwordHTML
+      title: Internationalization.getText('Change Password'),
+      contents: passwordForm
     };
+    while (true) {
+      let result = await PromptUi.show(config);
+      if (result === PromptUi.REJECT) {
+        return;
+      }
+      const oldPasswordInput = byId(oldPasswordId);
+      const oldPassword = oldPasswordInput.value;
+
+      const newPasswordInput = byId(newPasswordId);
+      const newPassword = newPasswordInput.value;
+
+      const oldPasswordVerified = await secretsStore.verifyPassword(oldPassword);
+      if (!oldPasswordVerified) {
+        result = false;
+        config.contents = invalidPassword + passwordForm
+      }
+      if (result){
+        const newPasswordValid = secretsStore.isValidPassword(newPassword);
+        if (!newPasswordValid){
+          config.contents = hint + passwordForm
+          result = false;
+        }
+      }
+
+      if (!result){
+        oldPasswordInput.value = '';
+        newPasswordInput.value = '';
+        continue;
+      }
+      await secretsStore.changePassword(oldPassword, newPassword);
+      this.#password = newPassword;
+      break;
+    }
   }
   
   static get #passwordHint(){
@@ -459,10 +506,16 @@ class SecretsDialog {
     return hint;
   }
   
-  static #getPasswordHTML(id) {
+  static get #wrongPasswordHint(){
+    const invalidPassword = Internationalization.getText('Wrong password. Try again');
+    return invalidPassword;
+  }
+  
+  static #getPasswordHTML(id, name) {
     const hint = SecretsDialog.#passwordHint;
     const passwordHTML = `<input
       type="password"
+      name="${name || 'password'}"
       id="${id}"
       minlength="12"
       required
@@ -481,7 +534,7 @@ class SecretsDialog {
       const secretsStore = SecretsStore.store;
       const id = 'secretsManagerPassword' + Date.now();
       const hint = SecretsDialog.#passwordHint;
-      const invalidPassword = Internationalization.getText('Wrong password. Try again');
+      const invalidPassword = SecretsDialog.#wrongPasswordHint;
       const passwordHTML = SecretsDialog.#getPasswordHTML(id);
       const config = {
         title: Internationalization.getText('Enter Password'),
