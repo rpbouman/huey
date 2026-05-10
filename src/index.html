@@ -21,7 +21,7 @@
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    const tablerIconsFontVersion = '3.41.0';
+    const tablerIconsFontVersion = '3.44.0';
     
     const tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     const preloadLink = document.createElement('link');
@@ -1401,12 +1401,6 @@
       </header>
       <menu role="toolbar">
         <label 
-          for="changePassword" 
-          title="Change password"
-        >
-          <button id="changePassword">Change Password</button>
-        </label>
-        <label 
           for="createNewSecret" 
           title="Create new Secret"
         >
@@ -1446,6 +1440,18 @@
         <input type="checkbox" id="secretUnsavedChanges" />
         <span id="secretsDialogUsageHint"><label for="createNewSecret">Create a new secret</label><span>, or select a secret from the list to edit or remove it</span>.</span>
         <span id="secretFormInvalidHint">Fill out all required fields to save the secret.</span>
+        <label 
+          for="changePassword" 
+          title="Change password"
+        >
+          <button id="changePassword">Change Password</button>
+        </label>
+        <label 
+          for="resetSecretsStore" 
+          title="Reset the secrets store"
+        >
+          <button id="resetSecretsStore">Reset Secrets Store</button>
+        </label>
       </menu>
       <section>
         <nav>

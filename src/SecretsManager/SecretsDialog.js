@@ -27,6 +27,10 @@ class SecretsDialog {
     return byId('changePassword');
   }
 
+  static get #resetSecretsStoreButton(){
+    return byId('resetSecretsStore');
+  }
+
   static get #createNewSecretButton(){
     return byId('createNewSecret');
   }
@@ -444,60 +448,86 @@ class SecretsDialog {
       )
     });
   }
-  
-  async #handleChangePasswordClicked(){
-    const now = Date.now();
-    const oldPasswordId = `old_password_${now}`;
-    const newPasswordId = `new_password_${now}`;
-    
-    const hint = SecretsDialog.#passwordHint;
-    const invalidPassword = '<div>'  + SecretsDialog.#wrongPasswordHint + '</div>';
-    
-    const passwordForm = `
-      <form>
-        <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
-        ${SecretsDialog.#getPasswordHTML(oldPasswordId, 'password')}
-        <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
-        ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
-      </form>
-    `;
-    const secretsStore = SecretsStore.store;
+
+  async #handleResetSecretsStoreClicked(event){
     const config = {
-      title: Internationalization.getText('Change Password'),
-      contents: passwordForm
-    };
-    while (true) {
-      let result = await PromptUi.show(config);
-      if (result === PromptUi.REJECT) {
-        return;
-      }
-      const oldPasswordInput = byId(oldPasswordId);
-      const oldPassword = oldPasswordInput.value;
-
-      const newPasswordInput = byId(newPasswordId);
-      const newPassword = newPasswordInput.value;
-
-      const oldPasswordVerified = await secretsStore.verifyPassword(oldPassword);
-      if (!oldPasswordVerified) {
-        result = false;
-        config.contents = invalidPassword + passwordForm
-      }
-      if (result){
-        const newPasswordValid = secretsStore.isValidPassword(newPassword);
-        if (!newPasswordValid){
-          config.contents = hint + passwordForm
-          result = false;
+      title: Internationalization.getText('Reset Secrets Store'),
+      contents: [
+        Internationalization.getText('This action will completely reset the Secrets Store.'),
+        Internationalization.getText('All your stored secrets will be lost, and the passowrd will be reset.'),
+        Internationalization.getText('If you confirm, this action cannot be undone. Proceed?'),
+      ].join('<br/>')
+    }
+    const result = await PromptUi.show(config);
+    if (result === PromptUi.REJECT) {
+      return;
+    }
+    const secretsStore = SecretsStore.store;
+    await secretsStore.reset();
+    this.#updateSecretsList();
+  }
+  
+  async #handleChangePasswordClicked(event){
+    try{ 
+      const now = Date.now();
+      const oldPasswordId = `old_password_${now}`;
+      const newPasswordId = `new_password_${now}`;
+      
+      const hint = SecretsDialog.#passwordHint;
+      const invalidPassword = '<div>'  + SecretsDialog.#wrongPasswordHint + '</div>';
+      
+      const passwordForm = `
+        <form>
+          <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
+          ${SecretsDialog.#getPasswordHTML(oldPasswordId, 'password')}
+          <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
+          ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
+        </form>
+      `;
+      const secretsStore = SecretsStore.store;
+      const config = {
+        title: Internationalization.getText('Change Password'),
+        contents: passwordForm
+      };
+      while (true) {
+        let result = await PromptUi.show(config);
+        if (result === PromptUi.REJECT) {
+          return;
         }
-      }
+        const oldPasswordInput = byId(oldPasswordId);
+        const oldPassword = oldPasswordInput.value;
 
-      if (!result){
-        oldPasswordInput.value = '';
-        newPasswordInput.value = '';
-        continue;
+        const newPasswordInput = byId(newPasswordId);
+        const newPassword = newPasswordInput.value;
+
+        const oldPasswordVerified = await secretsStore.verifyPassword(oldPassword);
+        if (!oldPasswordVerified) {
+          result = false;
+          config.contents = invalidPassword + passwordForm
+        }
+        if (result){
+          const newPasswordValid = secretsStore.isValidPassword(newPassword);
+          if (!newPasswordValid){
+            config.contents = hint + passwordForm
+            result = false;
+          }
+        }
+
+        if (!result){
+          oldPasswordInput.value = '';
+          newPasswordInput.value = '';
+          continue;
+        }
+        await secretsStore.changePassword(oldPassword, newPassword);
+        this.#password = newPassword;
+        break;
       }
-      await secretsStore.changePassword(oldPassword, newPassword);
-      this.#password = newPassword;
-      break;
+    }
+    catch(error){
+      console.error(error);
+    }
+    finally {
+      PromptUi.clear();
     }
   }
   
@@ -1063,13 +1093,15 @@ class SecretsDialog {
     dialog.addEventListener('close', event => this.#handleDialogClose(event) );
 
     // toolbar buttons
-    SecretsDialog.#changePasswordButton.addEventListener('click', event => this.#handleChangePasswordClicked(event) );
     SecretsDialog.#createNewSecretButton.addEventListener('click', event => this.#handleCreateNewSecretClicked(event) );
     SecretsDialog.#removeCurrentSecretButton.addEventListener('click', event => this.#handlerRemoveCurrentSecretClicked(event) );
     SecretsDialog.#saveCurrentSecretButton.addEventListener('click', event => this.#handleSaveCurrentSecretClicked(event) );
     SecretsDialog.#restoreCurrentSecretButton.addEventListener('click', event => this.#handleRestoreCurrentSecretClicked(event) );
     SecretsDialog.#activateCurrentSecretRadio.addEventListener('change', event => this.#handleActivateCurrentSecretChanged(event) );
     SecretsDialog.#deactivateCurrentSecretRadio.addEventListener('change', event => this.#handleDeactivateCurrentSecretChanged(event) );
+
+    SecretsDialog.#changePasswordButton.addEventListener('click', event => this.#handleChangePasswordClicked(event) );
+    SecretsDialog.#resetSecretsStoreButton.addEventListener('click', event => this.#handleResetSecretsStoreClicked(event) );
 
     // list (left sidebar)
     SecretsDialog.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
