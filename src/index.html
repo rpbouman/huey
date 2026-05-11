@@ -119,6 +119,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUiContextMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PromptUi/PromptUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/SidebarLogic.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PageStateManager/PageState.css"/>
     
     <meta name="theme-color" content="rgb(250,250,250)"/>
 
@@ -2513,6 +2514,19 @@
         <label for="queryResultColumnsInfo" title="The total number of tuples on the columns axis.">
           <output id="queryResultColumnsInfo"></output>
         </label>
+
+        <!-- back/forward navigation -->
+        <label for="navigateBack" title="Navigate backward (undo)...">
+          <button
+            id="navigateBack"
+          >Navigate back (undo)</button>
+        </label>
+        <label for="navigateForward" title="Navigate forward (redo)...">
+          <button
+            id="navigateForward"
+          >Navigate forward (redo)</button>
+        </label>
+        
 
         <label for="aboutButton" title="About Huey...">
           <button

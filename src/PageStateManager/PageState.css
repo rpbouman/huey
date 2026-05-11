@@ -1,0 +1,26 @@
+html {
+  > body {
+    > main.layout {
+      > menu[role=toolbar] {
+        > label {
+          
+          &:is( [for=navigateBack] ) {
+            position: absolute;
+            left: calc( 50% - 10px );
+            &::before {
+              content: var( --icon-arrow-narrow-left );
+            }
+          }
+
+          &:is( [for=navigateForward] ) {
+            position: absolute;
+            left: calc( 50% + 10px );
+            &::before {
+              content: var( --icon-arrow-narrow-right );
+            }
+          }
+        }
+      }
+    }
+  }
+}

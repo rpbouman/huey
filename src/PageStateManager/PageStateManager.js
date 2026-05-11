@@ -2,6 +2,7 @@ class PageStateManager {
 
   constructor(){
     this.#initPopStateHandler();
+    this.#initNavigationButtons();
     //this.#initHashChangeHandler();
   }
 
@@ -11,6 +12,11 @@ class PageStateManager {
 
   #initHashChangeHandler(){
     window.addEventListener('hashchange', event => this.#hashChangeHandler( event ) );
+  }
+
+  #initNavigationButtons(){
+    byId('navigateBack').addEventListener('click', event => window.history.back());
+    byId('navigateForward').addEventListener('click', event => window.history.forward());
   }
 
   // this basically means: load the query
