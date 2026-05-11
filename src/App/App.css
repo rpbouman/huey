@@ -43,14 +43,14 @@ html {
       }
       
       > menu[role=toolbar] {
-
         > label {
           
           &:is( 
             [for=autoRunQuery], 
             [for=cloneHueySession],
             [for=quickQueryMenuButton],
-            [for=currentDatasourceMenuButton]
+            [for=currentDatasourceMenuButton],
+            [for=loadFromUrl]
           )::after {
             border-right-width: 1px;
             border-right-style: solid;
@@ -67,14 +67,22 @@ html {
             content: var( --icon-upload );
             }
           }
+
+          &:is( [for=loadFromUrl] ){
+            &::before {
+              content: var( --icon-cloud-upload );
+            }
+            
+            &::after{
+              content: '';
+            }
+          }
           
-          &:is( [for=loadFromUrl] )::before {
-            content: var( --icon-cloud-upload );
-          } 
-          
-          &:is( [for=cloneHueySession] )::before {
-            content: var( --icon-copy );
-            padding-left: 8px;
+          &:is( [for=cloneHueySession] ){
+            &::before {
+              content: var( --icon-copy );
+              padding-left: 8px;
+            }
           }
           
           &:is( [for=cloneHueySession] )::before {
@@ -82,25 +90,38 @@ html {
             padding-left: 8px;
           }
 
-          &:is( [for=autoRunQuery] )::after {
-            font-family: var( --huey-icon-font-family );
-            font-size: var(--huey-icon-normal);
-            vertical-align: sub;
-            color: var(--huey-icon-color-subtle);
-            margin: 0px 4px 0px 4px;
-            display: inline-block;
-            content: var( --icon-square );
+          &:is( [for=autoRunQuery] ){
+
+            &::before {
+              border-left-width: 1px;
+              border-left-style: solid;
+              border-left-color: var(--huey-light-border-color);
+              content: '';
+              margin-right: 8px;
+            }
+
+            &::after {
+              font-family: var( --huey-icon-font-family );
+              font-size: var(--huey-icon-normal);
+              vertical-align: sub;
+              color: var(--huey-icon-color-subtle);
+              margin: 0px 4px 0px 4px;
+              display: inline-block;
+              content: var( --icon-square );
+            }
+
+            &:hover::after {
+              color: var( --huey-icon-color-highlight );
+            }
+
           }
           
-          &:is( [for=autoRunQuery] ):hover::after {
-            color: var( --huey-icon-color-highlight );
-          }
-
+          &:is( [for=autoRunQuery] )
           &:is( [for=runQueryButton] )::before {
             margin-left: 0px;
           }
           
-          &:is( 
+          &:has( 
             [for=cloneHueySession], 
             [for=quickQueryMenuButton] 
           ) ::before {
@@ -113,15 +134,12 @@ html {
             display: none;
           }
 
-          &:is( [for=currentDatasourceMenuButton] ) {
+          &:is( [for=currentDatasourceMenuButton] ){
             display: inline-block;
             max-width: calc( 100vw - 650px );
             vertical-align: bottom;
             overflow: hidden;
             text-overflow: ellipsis;
-          }
-          
-          &:is( [for=currentDatasourceMenuButton] ){
             
             &:has( > menu#dataSourceMenu:empty ) {
               pointer-events: none;
@@ -149,7 +167,6 @@ html {
           
           
           &:is( [for=queryResultRowsInfo] ) {
-            
             &:has( > output#queryResultRowsInfo:empty ) {
               display: none;
             }
@@ -168,7 +185,6 @@ html {
           }
           
           &:is( [for=queryResultColumnsInfo] ) {
-            
             &:has( > output#queryResultColumnsInfo:empty ) {
               display: none;
             }
@@ -179,6 +195,8 @@ html {
               content: var( --icon-table-row );
             }
           }
+          
+          
           
         }
 

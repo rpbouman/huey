@@ -1,9 +1,11 @@
 {
   "name": "Huey Local ROLAP",
   "short_name": "Huey",
+  "version": "1.0.16",
   "description": "Browser-based ROLAP pivot tables powered by DuckDB/WASM. Analyze CSV, Excel xlsx, Parquet, JSON and DuckDB files locally – no server required.",
   "start_url": "index.html",
   "scope": ".",
+  "display_override": ["window-controls-overlay", "minimal-ui", "standalone"], 
   "display": "standalone",
   "orientation": "any",
   "background_color": "#1a1a2e",

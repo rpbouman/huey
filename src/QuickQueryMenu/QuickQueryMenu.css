@@ -2,10 +2,8 @@ html {
   > body {
     > main {
       > menu[role=toolbar] {
-
         > label#quickQueryMenuLabel {
           anchor-name: --quick-query-menu-label;
-          
           > menu#quickQueryMenu {
 
             position: fixed;

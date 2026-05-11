@@ -1,0 +1,53 @@
+html {
+  > body {
+    > main.layout {
+      > menu[role=toolbar] {
+        > label {
+          
+          &:is( [for=navigateBack] ) {
+            display: none;
+            position: absolute;
+            left: calc( 50% - 10px );
+            &::before {
+              content: var( --icon-arrow-narrow-left );
+            }
+          }
+
+          &:is( [for=navigateForward] ) {
+            display: none;
+            position: absolute;
+            left: calc( 50% + 10px );
+            &::before {
+              content: var( --icon-arrow-narrow-right );
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+@media 
+  (display-mode: fullscreen),
+  (display-mode: standalone),
+  (display-mode: minimal-ui),
+  (display-mode: window-controls-overlay)
+ {
+  html > body {
+    > main {
+      > menu[role=toolbar] {
+        > label {
+          
+          &:is( [for=navigateBack] ) {
+            display:inline;
+          }
+
+          &:is( [for=navigateForward] ) {
+            display:inline;
+          }
+        }
+      }
+    }
+  }
+}
