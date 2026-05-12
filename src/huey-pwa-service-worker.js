@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v37';
+const CACHE_VERSION = 'v38';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -45,6 +45,7 @@ git ls-files '*.js' '*.css' '*.json' '*.png'
 */
 
 const APP_SHELL = [
+  'src/index.html',
   'src/AboutDialog/AboutDialog.css',
   'src/AboutDialog/AboutDialog.js',
   'src/App/App.css',
