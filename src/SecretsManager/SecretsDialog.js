@@ -578,10 +578,13 @@ class SecretsDialog {
             Internationalization.getText('Enter a password to initialize the Huey secrets manager.'),
             hint,
             Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your duckdb secret.'),
+            '',
+            passwordHTML,
+            '',
             Internationalization.getText('After initialization of the secrets manager, you can only access your secrets by entering the same password.'),
-            Internationalization.getText('You can change your password later on, but doing so also requires you to enter your previous password, so make sure you remember it!')
+            Internationalization.getText('You can change your password later on but also requires you to enter your previous password, so make sure you remember it!')
           ].join('<br/>');
-          config.contents = `${initialPasswordInfo}<br/>${passwordHTML}`;
+          config.contents = initialPasswordInfo;
         }
         const result = await PromptUi.show(config);
         if (result === PromptUi.REJECT) {

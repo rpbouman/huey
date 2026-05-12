@@ -433,12 +433,12 @@ The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for 
 - **Activate / deactivate** - Load a secret into the active DuckDB session or unload it without deleting it from the store.
 - **Full secret lifecycle** - Create, save, restore unsaved changes, and remove secrets from a single dialog.
 
-### How to open it
+### How to Use
 
-Click the **Secrets** button <img width="27" height="37" alt="image" src="https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6" /> in the toolbar to open the dialog. 
+- Click the **Secrets** button ![Secrets icon](https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6") in the toolbar to open the dialog. 
+- Click the **create secret** button  to create a new secret.
 
-
-### Initiaization
+### Initialization
 
 The secrets store needs to be initialized for first use. 
 
