@@ -1,28 +1,20 @@
-html {
-  > body {
-    > main.layout {
-      > menu[role=toolbar] {
-        > label {
-          
-          &:is( [for=navigateBack] ) {
-            display: none;
-            position: absolute;
-            left: calc( 50% - 10px );
-            &::before {
-              content: var( --icon-arrow-narrow-left );
-            }
-          }
+html > body > main > menu[role=toolbar] > label {
 
-          &:is( [for=navigateForward] ) {
-            display: none;
-            position: absolute;
-            left: calc( 50% + 10px );
-            &::before {
-              content: var( --icon-arrow-narrow-right );
-            }
-          }
-        }
-      }
+  &[for=navigateBack] {
+    display: none;
+    position: absolute;
+    left: calc( 50% - 10px );
+    &::before {
+      content: var( --icon-arrow-narrow-left );
+    }
+  }
+
+  &[for=navigateForward] {
+    display: none;
+    position: absolute;
+    left: calc( 50% + 10px );
+    &::before {
+      content: var( --icon-arrow-narrow-right );
     }
   }
 }
@@ -34,20 +26,11 @@ html {
   (display-mode: minimal-ui),
   (display-mode: window-controls-overlay)
  {
-  html > body {
-    > main {
-      > menu[role=toolbar] {
-        > label {
-          
-          &:is( [for=navigateBack] ) {
-            display:inline;
-          }
+  html > body > main > menu[role=toolbar] > label {
 
-          &:is( [for=navigateForward] ) {
-            display:inline;
-          }
-        }
-      }
+    &[for=navigateBack],
+    &[for=navigateForward] {
+      display:inline;
     }
   }
 }
