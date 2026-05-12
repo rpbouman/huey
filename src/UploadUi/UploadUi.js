@@ -181,11 +181,21 @@ class UploadUi {
 
   getRequiredDuckDbExtensions(files){
     const requiredExtensions = []
+    const addRequiredExtension = function(extensionName, repositoryName){
+      if ( !requiredExtensions.find(item => item.extensionName === extensionName) ) {
+        requiredExtensions.push({
+          extensionName: extensionName,
+          extensionRepository: repositoryName
+        });
+      }
+    }
+    
     for (let i = 0; i < files.length; i++){
       const file = files[i];
 
       let fileName;
-      if (typeof file === 'string') {
+      const isString = typeof file === 'string';
+      if (isString) {
         fileName = file;
       }
       else
@@ -196,27 +206,47 @@ class UploadUi {
         const typeOfFile = typeof file;
         throw new Error(`Don't know how to handle item of type ${typeOfFile === 'object' ? file.constructor.name : typeOfFile}.`);
       }
-
+      
       const fileNameParts = FileUtils.getFileNameParts(fileName);
-      const fileExtension = fileNameParts.lowerCaseExtension;
+      let fileType;
+      if (fileNameParts) {
+        const fileExtension = fileNameParts.lowerCaseExtension;
 
-      const fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
-      if (!fileType){
-        continue;
+        fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+        if (!fileType){
+          continue;
+        }
+        if (!fileType.duckdb_extension){
+          continue;
+        }
+        addRequiredExtension(fileType.duckdb_extension, fileType.duckdb_extension_repository);
+      }
+      else
+      if ( isString ) {
+        const parsedUrl = URL.parse(fileName);
+        let extensionName = undefined;
+        switch (parsedUrl.protocol) {
+          // azure
+          case 'az':
+            extensionName = 'azure';
+            break;
+          // huggingface
+          case 'hf':
+          case 'http':
+          case 'https':
+            extensionName = 'httpfs';
+            break;
+          // AWS S3
+          case 's3':
+            extensionName = 'aws';
+            break;
+        }
+        if (extensionName) {
+          addRequiredExtension(extensionName);
+        }
+        
       }
 
-      const requiredDuckDbExtension = fileType.duckdb_extension;
-      if (!requiredDuckDbExtension){
-        continue;
-      }
-
-      if ( requiredExtensions.includes(requiredDuckDbExtension) ) {
-        const extensionRepository = fileType.duckdb_extension_repository;
-        requiredExtensions.push({
-          extensionName: requiredDuckDbExtension,
-          extensionRepository: extensionRepository
-        });
-      }
     }
     return requiredExtensions;
   }
