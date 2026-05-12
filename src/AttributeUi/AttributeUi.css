@@ -303,9 +303,8 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     }
         
     &:is(
-      &:is(
-        [data-column_type^=STRUCT][data-nodetype=column]
-      ),
+      &[data-column_type^=STRUCT][data-nodetype=column],
+      &[data-member_expression_type^=STRUCT],
       &:is(
         [data-member_expression_type^=STRUCT]
       ):is(
