@@ -418,21 +418,33 @@ Settings that control the appearance and behavior of the Pivot Table
 
 Huey now includes a built-in GUI for [DuckDB's Secrets Manager](https://duckdb.org/docs/current/configuration/secrets_manager), making it easy to configure credentials for cloud storage and other external services — no SQL required.
 
+<img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
+
 ### What it does
 
 The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more — all without writing a `CREATE SECRET` statement by hand.
 
 **Key features:**
 
-- **Form & code views** — Edit secrets using a guided form with typed fields, or switch to a live SQL code view that updates as you type. Both views stay in sync.
-- **Secure local storage** — Secrets are stored encrypted in your browser using a password you set. They are never sent to any server.
-- **Autoload** — Mark secrets to load automatically when Huey starts, so your cloud sources are ready without any manual steps.
-- **Activate / deactivate** — Load a secret into the active DuckDB session or unload it without deleting it from the store.
-- **Full secret lifecycle** — Create, save, restore unsaved changes, and remove secrets from a single dialog.
+- **Form view** - Edit secrets using a guided form with typed fields
+- **Code view** - Alternatively, create a secret by entering its `CREATE SECRET` SQL
+- **Secure local storage** - Secrets are stored encrypted in your browser using a password you set. They are never sent to any server.
+- **Autoload** - Mark secrets to load automatically when Huey starts, so your cloud sources are ready without any manual steps.
+- **Activate / deactivate** - Load a secret into the active DuckDB session or unload it without deleting it from the store.
+- **Full secret lifecycle** - Create, save, restore unsaved changes, and remove secrets from a single dialog.
 
 ### How to open it
 
-Click the **Secrets** button in the toolbar to open the dialog.
+Click the **Secrets** button <img width="27" height="37" alt="image" src="https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6" /> in the toolbar to open the dialog. 
+
+
+### Initiaization
+
+The secrets store needs to be initialized for first use. 
+
+<img width="432" height="306" alt="image" src="https://github.com/user-attachments/assets/05016dfd-4098-4d3f-b45e-bc00a246bf2a" />
+
+Initialization happens automatically if you first try to store a secret.
 
 ### Notes
 
