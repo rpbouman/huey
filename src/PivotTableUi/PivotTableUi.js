@@ -1870,7 +1870,7 @@ class PivotTableUi extends EventEmitter {
       this.fireEvent('updated', eventData);
     }
     finally {
-      tableDom.style.width = '99.99%';
+      tableDom.style.width = 'calc( 100% - 2px )';
       this.#setBusy(false);
     }
   }
