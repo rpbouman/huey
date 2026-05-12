@@ -414,6 +414,34 @@ Settings that control the appearance and behavior of the Pivot Table
 ### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
 
+## Secrets Manager
+
+Huey now includes a built-in GUI for [DuckDB's Secrets Manager](https://duckdb.org/docs/current/configuration/secrets_manager), making it easy to configure credentials for cloud storage and other external services — no SQL required.
+
+### What it does
+
+The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more — all without writing a `CREATE SECRET` statement by hand.
+
+**Key features:**
+
+- **Form & code views** — Edit secrets using a guided form with typed fields, or switch to a live SQL code view that updates as you type. Both views stay in sync.
+- **Secure local storage** — Secrets are stored encrypted in your browser using a password you set. They are never sent to any server.
+- **Autoload** — Mark secrets to load automatically when Huey starts, so your cloud sources are ready without any manual steps.
+- **Activate / deactivate** — Load a secret into the active DuckDB session or unload it without deleting it from the store.
+- **Full secret lifecycle** — Create, save, restore unsaved changes, and remove secrets from a single dialog.
+
+### How to open it
+
+Click the **Secrets** button in the toolbar to open the dialog.
+
+### Notes
+
+> [!WARNING]  
+> Secrets are stored locally in your browser, encrypted with a password of your choosing. To change the password or wipe the store, use the **Change Password** / **Reset Store** controls in the dialog.
+
+> [!NOTE]  
+> Secrets loaded into DuckDB are temporary (session-scoped) and are not written to disk by DuckDB itself.
+
 ## Integrating and/or Embedding Huey
 
 You can embed huey inside a frame on your own webpage and control the application by sending it commands using the [`postMessage()`-method](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
