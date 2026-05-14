@@ -839,7 +839,7 @@ class AttributeUi {
     const input = target.getElementsByTagName('input').item(0);
     const axisId = target.getAttribute('data-axis');
     setTimeout(() => {
-      this.#axisButtonClicked(node, axisId, input.checked);
+      this.#axisButtonClicked(node, axisId, input.type === 'button' || input.checked);
     }, 0);
   }
   
@@ -887,15 +887,15 @@ class AttributeUi {
         for (let i = 0; i < inputs.length; i++){
           const input = inputs.item(i);
           const inputAxis = input.getAttribute('data-axis');
-          if (input.checked && inputAxis !== axis) {
-            input.checked = false;
+          if (input.type === 'checkbox'){
+            if (input.checked && inputAxis !== axis) {
+              input.checked = false;
+            }
+    
+            this.#updateAxisButtonTitle(input);
           }
   
-          this.#updateAxisButtonTitle(input);
-  
-          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
-            aggregator = input.getAttribute('data-aggregator');
-          }
+          aggregator = input.getAttribute('data-aggregator');
         }
         break;
     }
@@ -905,6 +905,10 @@ class AttributeUi {
 
     if (aggregator) {
       itemConfig.aggregator = aggregator;
+      if (axis !== QueryModel.AXIS_CELLS) {
+        // every preceding non-window functino item on this axis.
+        itemConfig.partitionBy = '';
+      }
     }
 
     const queryModel = this.#queryModel;
@@ -962,11 +966,20 @@ class AttributeUi {
         if (analyticalRole === 'measure' && config.type === 'column'){
           aggregator = aggregator || 'sum';
         }
+        
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
             axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
+          case QueryModel.AXIS_FILTERS:
+          case QueryModel.AXIS_COLUMNS:
+          case QueryModel.AXIS_ROWS:
+            if (config.type === 'aggregate'){
+              id += `_${axisId}`;
+              axisButtonTemplate = 'attribute-node-axis-button';
+              break;
+            }
           default:
         }
         break;
@@ -996,7 +1009,7 @@ class AttributeUi {
     axisButtonInput.setAttribute('id', id);
     axisButtonInput.setAttribute('data-axis', axisId);
 
-    if (aggregator && axisId === QueryModel.AXIS_CELLS) {
+    if (aggregator) {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
 

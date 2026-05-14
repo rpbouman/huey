@@ -46,7 +46,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
       *
       */
       > span.attributeUiAxisButton,
-      > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+      > label.attributeUiAxisButton:has( 
+        > input[type=checkbox], 
+        > input[type=button] 
+      ) {
         display: inline-block;
         position: absolute;
         width: 24px;
@@ -57,18 +60,16 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         color: var( --huey-icon-color-subtle );
         /* set the background to fix https://github.com/rpbouman/huey/issues/397 */
         background-color: var( --huey-medium-background-color );
-      }
-
-      > label.attributeUiAxisButton:has( > input[type=checkbox]):hover {
-        color: var( --huey-icon-color-highlight );
-      }
-
-      .attributeUiAxisButton {
         
-        > input[type=checkbox] {
+        &:hover {
+          color: var( --huey-icon-color-highlight );
+        }
+
+        > input[type=checkbox],
+        > input[type=button]
+        {
           display: none;
         }
-        
       }
 
       > .attributeUiAxisButton {
@@ -136,7 +137,10 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
 
       &:hover {
         > span.attributeUiAxisButton,
-        > label.attributeUiAxisButton:has( > input[type=checkbox] ) {
+        > label.attributeUiAxisButton:has( 
+          > input[type=button],
+          > input[type=checkbox] 
+        ) {
           background-color: var( --huey-light-background-color );
         }
 
