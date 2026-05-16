@@ -727,6 +727,9 @@ class QueryModel extends EventEmitter {
         }
         if (axisItem.aggregator){
           strippedItem.aggregator = axisItem.aggregator;
+          if (axisItem.partitionByItems){
+            strippedItem.partitionByItems = axisItem.partitionByItems;
+          }
         }
         if (axisItem.includeTotals === true) {
           strippedItem.includeTotals = true;

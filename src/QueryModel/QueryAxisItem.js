@@ -152,6 +152,13 @@ class QueryAxisItem {
       else {
         caption = translatedAggregator;
       }
+      if (Boolean(axisItem.partitionByItems)){
+        const partitionByItemCaptions = axisItem.partitionByItems
+          .map(item => QueryAxisItem.getCaptionForQueryAxisItem(item))
+          .join(',')
+        ;
+        caption += ` OVER (${partitionByItemCaptions})`;
+      }
     }
     return caption;
   }
@@ -603,7 +610,7 @@ class QueryAxisItem {
       if (partitionByItems2.length !== n){
         return false;
       }
-      if (partitionByItems1.some( item => indexOfItem(item, partitionByItems2) === -1 ) ){
+      if (partitionByItems1.some( item => QueryAxisItem.indexOfItem(item, partitionByItems2) === -1 ) ){
         return false;
       }
     }

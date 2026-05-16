@@ -257,7 +257,8 @@ class QueryUi {
       columnName: queryAxisItemUi.getAttribute('data-column_name'),
       memberExpressionPath: queryAxisItemUi.getAttribute('data-member_expression_path'),
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
-      aggregator: queryAxisItemUi.getAttribute('data-aggregator')
+      aggregator: queryAxisItemUi.getAttribute('data-aggregator'),
+      partitionByItems: JSON.parse(queryAxisItemUi.getAttribute('data-partition-by-items'))
     };
 
     const axisUi = queryAxisItemUi.parentNode.parentNode;
@@ -268,7 +269,9 @@ class QueryUi {
 
     const item = this.#queryModel.findItem(searchItem);
     if (!item) {
-      throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      const error = new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      console.error(error);
+      throw error;
     }
     return item;
   }
@@ -345,8 +348,13 @@ class QueryUi {
     const aggregator = axisItem.aggregator;
     if (aggregator) {
       itemUi.setAttribute('data-aggregator', aggregator);
-    }
 
+      if (axisId !== QueryModel.AXIS_CELLS){
+        const partitionByItems = axisItem.partitionByItems;
+        itemUi.setAttribute('data-partition-by-items', JSON.stringify(partitionByItems));
+      }
+    }
+    
     const captionUi = this.#getCaptionUi(itemUi);
     captionUi.textContent = this.#getQueryAxisItemUiCaption(axisItem);
 

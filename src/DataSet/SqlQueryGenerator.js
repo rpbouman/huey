@@ -697,6 +697,10 @@ class SqlQueryGenerator {
     sql.push(`WHERE ${whereCondition}`);
   }
 
+  static #addStageForAxisAggregates(ctes){
+    // TODO: add stage that rewrites the window functions in the last cte to plain column items
+  }
+
   static getSqlSelectStatementForAxisItems(options){
     const queryAxisItems = options.queryAxisItems;
 
@@ -717,7 +721,11 @@ class SqlQueryGenerator {
       filterAxisItemsByNestingStage
     );
 
-    const cte = ctes.pop();
+    let cte = ctes[0];
+    if (cte.items.some(item => item.aggregator && Boolean(item.partitionByItems))) {
+      SqlQueryGenerator.#addStageForAxisAggregates(ctes);
+    }
+    cte = ctes.pop();
     options.samplingConfig = ctes.length ? undefined : samplingConfig;
     let sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
