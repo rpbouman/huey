@@ -210,6 +210,18 @@ class QueryAxisItem {
     const aggregatorInfo = AttributeUi.aggregators[aggregator];
     const expressionTemplate = aggregatorInfo.expressionTemplate;
     columnExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
+    
+    const partitionByItems = item.partitionByItems;
+    if (Boolean(partitionByItems)){
+      let windowClause = 'OVER (';
+      if (partitionByItems.length) {
+        windowClause += ' PARTITION BY ';
+        windowClause += partitionByItems.map(item => QueryAxisItem.getSqlForQueryAxisItem( item ) ).join(', ');
+      }
+      windowClause += ' )';
+      columnExpression += ' ' + windowClause;
+    }
+    
     return columnExpression;
   }
 
@@ -226,7 +238,12 @@ class QueryAxisItem {
     sqlOptions = normalizeSqlOptions(sqlOptions);
     let sqlExpression;
     if (item.aggregator) {
-      sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
+      if (item.partitionByItems) {
+        sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
+      }
+      else {
+        sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
+      }
     }
     else
     if (item.derivation) {
@@ -530,5 +547,79 @@ class QueryAxisItem {
       sql = `( ${sql} )`;
     }
     return sql;
+  }
+  
+  static indexOfItem(needle, haystack){
+    return haystack.findIndex(item => QueryAxisItem.equals(needle, item) );
+  }
+  
+  static equals(item1, item2){
+    if ( (item1.columnName || '') !== (item2.columnName || '') ){
+      return false;
+    }
+
+    if (item1.memberExpressionPath) {
+      if (!item2.memberExpressionPath){
+        return false;
+      }
+      if ( JSON.stringify(item1.memberExpressionPath) !== JSON.stringify(item2.memberExpressionPath) ) {
+        return false;
+      }
+    }
+    else
+    if (item2.memberExpressionPath) {
+      return false;
+    }
+
+    if (item1.derivation) {
+      if (item1.derivation !== item2.derivation) {
+        return false;
+      }
+    }
+    else
+    if (item2.derivation){
+      return false;
+    }
+
+    if (item1.aggregator) {
+      if (item1.aggregator !== item2.aggregator){
+        return false;
+      }
+    }
+    else
+    if (item2.aggregator){
+      return false;
+    }
+    
+    const partitionByItems1 = item1.partitionByItems;
+    const partitionByItems2 = item2.partitionByItems;
+    if (partitionByItems1){
+      if (!partitionByItems2){
+        return false;
+      }
+      const n = partitionByItems1.length;
+      if (partitionByItems2.length !== n){
+        return false;
+      }
+      for (let i = 0; i < n; i++){
+        partitionByItem1 = partitionByItems1[i];
+        let partitionByItemFound = false;
+        for (let j = 0; j < n; j++){
+          partitionByItem2 = partitionByItems2[j];
+          if (QueryAxisItem.equals(partitionByItem1, partitionByItem2)) {
+            partitionByItemFound = true;
+            break;
+          }
+        }
+        if (!partitionByItemFound) {
+          return false;
+        }
+      }
+    }
+    else
+    if (partitionByItems2){
+      return false;
+    }
+    return true;
   }
 }

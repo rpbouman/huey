@@ -757,8 +757,8 @@ class AttributeUi {
     return title;
   }
   
-  static #getAttributeCaptionForAxisButton(config, aggregator){
-    if (aggregator && !config.aggregator) {
+  static #getAttributeCaptionForAxisButton(config, aggregator, axisId){
+    if (axisId === QueryModel.AXIS_CELLS && aggregator && !config.aggregator) {
       const aggregatorInfo = AttributeUi.aggregators[aggregator];
       config = Object.assign({}, config);
       config.aggregator = aggregator;
@@ -875,11 +875,12 @@ class AttributeUi {
     label.setAttribute( 'title', translatedTitle );
   }
 
-  async #axisButtonClicked(node, axis, checked){
+  async #axisButtonClicked(node, axisId, checked){
+    const queryModel = this.#queryModel;
     const head = node.querySelector('summary');
     const inputs = head.querySelectorAll('input');
     let aggregator;
-    switch (axis){
+    switch (axisId){
       case QueryModel.AXIS_ROWS:
       case QueryModel.AXIS_COLUMNS:
       case QueryModel.AXIS_CELLS:
@@ -888,30 +889,40 @@ class AttributeUi {
           const input = inputs.item(i);
           const inputAxis = input.getAttribute('data-axis');
           if (input.type === 'checkbox'){
-            if (input.checked && inputAxis !== axis) {
+            if (input.checked && inputAxis !== axisId) {
               input.checked = false;
             }
     
             this.#updateAxisButtonTitle(input);
           }
   
-          aggregator = input.getAttribute('data-aggregator');
+          if (axisId === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
+            aggregator = input.getAttribute('data-aggregator');
+          }
         }
         break;
     }
 
     const itemConfig = this.#createQueryAxisItemForAttributeUiNode(node);
-    itemConfig.axis = axis;
+    itemConfig.axis = axisId;
 
     if (aggregator) {
       itemConfig.aggregator = aggregator;
-      if (axis !== QueryModel.AXIS_CELLS) {
-        // every preceding non-window functino item on this axis.
-        itemConfig.partitionBy = '';
-      }
     }
 
-    const queryModel = this.#queryModel;
+    // axis aggregate (window functions)
+    if (axisId !== QueryModel.AXIS_CELLS && Boolean(itemConfig.aggregator)) {
+      const axis = queryModel.getQueryAxis(axisId);
+      const axisItems = axis.getItems()
+        .filter(item => !Boolean(item.aggregator))
+        .map(item => Object.assign({}, item))
+      ;
+      // ideally we would like to assign this dynamically 
+      // so that it adjusts when the item moves position.
+      // but that's too complex right now 
+      itemConfig.partitionByItems = axisItems;
+    }
+
     if (checked) {
       await queryModel.addItem(itemConfig);
     }
@@ -992,7 +1003,7 @@ class AttributeUi {
       return axisButton;
     }
 
-    const attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator);
+    const attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator, axisId);
     
     const translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
     
@@ -1009,7 +1020,7 @@ class AttributeUi {
     axisButtonInput.setAttribute('id', id);
     axisButtonInput.setAttribute('data-axis', axisId);
 
-    if (aggregator) {
+    if (aggregator && axisId === QueryModel.AXIS_CELLS || config.type === 'aggregate') {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
 

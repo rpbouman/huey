@@ -4,6 +4,11 @@ class QueryModel extends EventEmitter {
   static AXIS_ROWS = 'rows';
   static AXIS_COLUMNS = 'columns';
   static AXIS_CELLS = 'cells';
+  
+  // these are "macros" to denote subsets of items on the current axis
+  // this can be used in window function items to parameterize the partitionBy and orderBy spec
+  static AXIS_ITEMS_PRECEDING = 'preceding';
+  static AXIS_ITEMS_FOLLOWING = 'following';
 
   static #defaultConfig = {};
 
@@ -136,27 +141,31 @@ class QueryModel extends EventEmitter {
 
   findItem(config){
     const aggregator = config.aggregator;
+    const columnName = config.columnName;
+    const memberExpressionPath = config.memberExpressionPath;
+    const derivation = config.derivation;
+    const partitionByItems = config.partitionByItems;
+
     let axisIds, axisId = config.axis;
     if (axisId) {
       axisIds = [axisId];
     }
     else
-    if (aggregator){
+    if (aggregator && !Boolean(partitionByItems)){
       axisIds = ['cells'];
     }
     else {
-      axisIds = Object.keys(this.#axes).filter(axisId => axisId !== QueryModel.AXIS_FILTERS);
+      axisIds = Object.keys(this.#axes).filter( axisId => axisId !== QueryModel.AXIS_FILTERS );
     }
 
-    const columnName = config.columnName;
-    const memberExpressionPath = config.memberExpressionPath;
-    const derivation = config.derivation;
     const findConfig = {
-      columnName: config.columnName,
-      memberExpressionPath: memberExpressionPath,
-      derivation: config.derivation,
-      aggregator: config.aggregator
+      columnName,
+      memberExpressionPath,
+      derivation,
+      aggregator,
+      partitionByItems
     };
+    
     let axis, item;
     for (let i = 0; i < axisIds.length; i++){
       axisId = axisIds[i];

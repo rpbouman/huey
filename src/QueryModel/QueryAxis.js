@@ -21,57 +21,8 @@ class QueryAxis {
   }
 
   findItem(config){
-    const columnName = config.columnName || '';
-    const derivation = config.derivation;
-    const aggregator = config.aggregator;
-    let memberExpressionPath = config.memberExpressionPath;
-    if (memberExpressionPath instanceof Array){
-      memberExpressionPath = JSON.stringify(memberExpressionPath);
-    }
-
     const items = this.#items;
-    const itemIndex = items.findIndex(item => {
-      // check column name
-      if ((item.columnName || '') !== columnName){
-        return false;
-      }
-      // check member expression path
-      if (memberExpressionPath) {
-        if (!item.memberExpressionPath){
-          return false;
-        }
-        if (memberExpressionPath !== JSON.stringify(item.memberExpressionPath)) {
-          return false;
-        }
-      }
-      else
-      if (item.memberExpressionPath) {
-        return false;
-      }
-      // check derivation
-      if (derivation) {
-        if (item.derivation !== derivation) {
-          return false;
-        }
-      }
-      else
-      if (item.derivation){
-        return false;
-      }
-      // check aggregator
-      if (aggregator) {
-        if (item.aggregator !== aggregator){
-          return false;
-        }
-      }
-      else
-      if (item.aggregator){
-        return false;
-      }
-      // all checks passed
-      return true;
-    });
-
+    const itemIndex = QueryAxisItem.indexOfItem(config, items);
     if (itemIndex === -1) {
       return undefined;
     }
