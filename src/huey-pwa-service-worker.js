@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v40';
+const CACHE_VERSION = 'v41';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -40,12 +40,11 @@ const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
 
 or
 
-git ls-files '*.js' '*.css' '*.json' '*.png'
+git ls-files '*.js' '*.css' '*.json' '*.png' '*.html'
 
 */
 
 const APP_SHELL = [
-  'src/index.html',
   'src/AboutDialog/AboutDialog.css',
   'src/AboutDialog/AboutDialog.js',
   'src/App/App.css',
@@ -87,8 +86,8 @@ const APP_SHELL = [
   'src/Internationalization/huey.i18n.labels.template.js',
   'src/Internationalization/i18n/nl.js',
   'src/Internationalization/i18n/pt-BR.js',
-  'src/PageStateManager/PageStateManager.js',
   'src/PageStateManager/PageState.css',
+  'src/PageStateManager/PageStateManager.js',
   'src/PivotTableUi/PivotTableUi.css',
   'src/PivotTableUi/PivotTableUi.js',
   'src/PivotTableUi/PivotTableUiContextMenu.css',
@@ -96,8 +95,11 @@ const APP_SHELL = [
   'src/PivotTableUi/PivotTableUiHighlighting.js',
   'src/PostMessageInterface/PostMessageInterface.js',
   'src/PostMessageInterface/PostMessageProtocol.js',
+  'src/PostMessageInterface/PostMessageTestbed.html',
   'src/PromptUi/PromptUi.css',
   'src/PromptUi/PromptUi.js',
+  'src/QueryModel/QueryAxis.js',
+  'src/QueryModel/QueryAxisItem.js',
   'src/QueryModel/QueryModel.js',
   'src/QueryUi/QueryUi.css',
   'src/QueryUi/QueryUi.js',
@@ -125,6 +127,7 @@ const APP_SHELL = [
   'src/UploadUi/UploadUi.css',
   'src/UploadUi/UploadUi.js',
   'src/huey-pwa-service-worker.js',
+  'src/index.html',
   'src/manifest.json',
   'src/pwa/icon-192.png',
   'src/pwa/icon-512.png',
