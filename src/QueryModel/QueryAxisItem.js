@@ -562,7 +562,9 @@ class QueryAxisItem {
       if (!item2.memberExpressionPath){
         return false;
       }
-      if ( JSON.stringify(item1.memberExpressionPath) !== JSON.stringify(item2.memberExpressionPath) ) {
+      const memberExpressionPath1 = item1.memberExpressionPath instanceof Array ? JSON.stringify(item1.memberExpressionPath) : item1.memberExpressionPath;
+      const memberExpressionPath2 = item2.memberExpressionPath instanceof Array ? JSON.stringify(item2.memberExpressionPath) : item2.memberExpressionPath;
+      if ( memberExpressionPath1 !== memberExpressionPath2 ) {
         return false;
       }
     }
@@ -601,19 +603,8 @@ class QueryAxisItem {
       if (partitionByItems2.length !== n){
         return false;
       }
-      for (let i = 0; i < n; i++){
-        partitionByItem1 = partitionByItems1[i];
-        let partitionByItemFound = false;
-        for (let j = 0; j < n; j++){
-          partitionByItem2 = partitionByItems2[j];
-          if (QueryAxisItem.equals(partitionByItem1, partitionByItem2)) {
-            partitionByItemFound = true;
-            break;
-          }
-        }
-        if (!partitionByItemFound) {
-          return false;
-        }
+      if (partitionByItems1.some( item => indexOfItem(item, partitionByItems2) === -1 ) ){
+        return false;
       }
     }
     else
