@@ -797,13 +797,27 @@ class Hilited {
   }
   #thisEmitSelectionChange = this.#emitSelectionChange.bind(this);
 
+  #handleElementFocus(event){
+    this.#selectionInterval = setInterval(this.#thisEmitSelectionChange, 250);
+  }
+  #thisHandleElementFocus = this.#handleElementFocus.bind(this);
+
+  #handleElementBlur(event){
+    clearInterval( this.#selectionInterval );
+  }
+  #thisHandleElementBlur = this.#handleElementBlur.bind(this);
+
   #eventHandlers = {
     'beforeinput': this.#thisHandleBeforeInput,
     'input': this.#thisHandleInput,
     'scroll': this.#thisHandleScroll,
     'scrollend': this.#thisHandleScrollEnd,
-    'keydown': this.#thisHandleKeydown
+    'keydown': this.#thisHandleKeydown,
+    'focus': this.#thisHandleElementFocus,
+    'blur': this.#thisHandleElementBlur
   }
+
+
 
   #wireEvents(onOff){
     const element = this.#element;
@@ -844,7 +858,6 @@ class Hilited {
 
     this.#wireEvents(true);
     document.addEventListener('selectionchange', this.#thisHandleDocumentSelectionChange);
-    this.#selectionInterval = setInterval(this.#thisEmitSelectionChange, 250);
 
     this.#resizeObserver = new ResizeObserver(this.#thisHandleResize);
     this.#resizeObserver.observe(this.#element);
