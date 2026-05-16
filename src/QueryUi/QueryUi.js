@@ -253,20 +253,26 @@ class QueryUi {
   }
 
   #getQueryModelItem(queryAxisItemUi){
+    const aggregator = queryAxisItemUi.getAttribute('data-aggregator');
     const searchItem = {
       columnName: queryAxisItemUi.getAttribute('data-column_name'),
       memberExpressionPath: queryAxisItemUi.getAttribute('data-member_expression_path'),
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
-      aggregator: queryAxisItemUi.getAttribute('data-aggregator'),
-      partitionByItems: JSON.parse(queryAxisItemUi.getAttribute('data-partition-by-items'))
+      aggregator: aggregator,
     };
 
     const axisUi = queryAxisItemUi.parentNode.parentNode;
     const axisId = axisUi.getAttribute('data-axis');
-    if (axisId === QueryModel.AXIS_FILTERS){
-      searchItem.axis = axisId;
+    switch (axisId){
+      case QueryModel.AXIS_FILTERS:
+        searchItem.axis = axisId;
+      case QueryModel.COLUMNS:
+      case QueryModel.ROWS:
+        if (aggregator) {
+          const partitionByItems = JSON.parse(queryAxisItemUi.getAttribute('data-partition-by-items'));
+          searchItem.partitionByItems = partitionByItems;
+        }
     }
-
     const item = this.#queryModel.findItem(searchItem);
     if (!item) {
       const error = new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
@@ -287,6 +293,9 @@ class QueryUi {
     }
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
+      if (queryModelAxisItem.partitionByItems){
+        cssSelector += `[data-partition-by-items="${JSON.stringify(queryModelAxisItem.partitionByItems)}"]`;
+      }
     }
     return document.querySelector(cssSelector);
   }

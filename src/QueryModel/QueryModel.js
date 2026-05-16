@@ -806,6 +806,9 @@ class QueryModel extends EventEmitter {
           config.columnType = item.columnType;
           config.derivation = item.derivation;
           config.aggregator = item.aggregator;
+          if (config.aggregator) {
+            config.partitionByItems = item.partitionByItems;
+          }
           config.memberExpressionPath = item.memberExpressionPath;
           config.caption = item.caption;
           
@@ -842,14 +845,22 @@ class QueryModel extends EventEmitter {
     }
     const axes = queryModelState.axes;
     const referencedColumns = Object.keys(axes).reduce((acc, curr) => {
-      const items = axes[curr];
-      items.forEach((item, index) => {
+      const items = [].concat(axes[curr]);
+      for (let i = 0; i < items.length; i++){
+        const item = items[i];
         const columnName = item.column || item.columnName;
         if (columnName === undefined || columnName === '*'){
           return;
         }
         acc[columnName] = { columnType: item.columnType };
-      });
+        if (item.partitionByItems && item.partitionByItems instanceof Array){
+          item.partitionByItems.forEach(partitionByItem => {
+            if (!items.includes(partitionByItem)){
+              items.push(partitionByItem);
+            }
+          });
+        }
+      }
       return acc;
     },{});
     return referencedColumns;
