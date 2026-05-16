@@ -850,7 +850,7 @@ class QueryModel extends EventEmitter {
         const item = items[i];
         const columnName = item.column || item.columnName;
         if (columnName === undefined || columnName === '*'){
-          return;
+          continue;
         }
         acc[columnName] = { columnType: item.columnType };
         if (item.partitionByItems && item.partitionByItems instanceof Array){

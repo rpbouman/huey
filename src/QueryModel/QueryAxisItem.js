@@ -223,7 +223,7 @@ class QueryAxisItem {
       let windowClause = 'OVER (';
       if (partitionByItems.length) {
         windowClause += ' PARTITION BY ';
-        windowClause += partitionByItems.map(item => QueryAxisItem.getSqlForQueryAxisItem( item ) ).join(', ');
+        windowClause += partitionByItems.map(item => QueryAxisItem.getSqlForQueryAxisItem( item, alias ) ).join(', ');
       }
       windowClause += ' )';
       columnExpression += ' ' + windowClause;

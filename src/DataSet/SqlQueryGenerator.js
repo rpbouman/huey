@@ -440,10 +440,12 @@ class SqlQueryGenerator {
     const nullsSortOrder = options.nullsSortOrder;
     const totalsPosition = options.totalsPosition;
     const includeOrderBy = options.includeOrderBy === false ? false : true;
-    const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;    
+    const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
+    let hasAxisAggregates = false;
     const columnExpressions = {};
     cte.items.forEach((item, index) => {
       const originalItem = queryAxisItems[index];
+      hasAxisAggregates = hasAxisAggregates ? true : Boolean(originalItem.aggregator) && Boolean(originalItem.partitionByItems);
       const caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
       const selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
       columnExpressions[caption] = selectListExpression;
@@ -639,22 +641,23 @@ class SqlQueryGenerator {
     cte.items.forEach(item => {
       if (item.isUnnestingExpression === true) {
         const itemUnnestingFunctions = item.unnestingFunctions;
-        Object.keys(itemUnnestingFunctions).forEach(unnestingFunction => {
+        Object.keys( itemUnnestingFunctions )
+        .forEach( unnestingFunction => {
           const arrayDerivation = unnestingFunctions[unnestingFunction];
           const expressionTemplate = arrayDerivation.expressionTemplate;
           const columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
           const unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
           const alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
           selectListExpressions[alias] = unnestingExpression;
-        });
+        } );
       }
       else 
-      if (item.derivation === 'row number') {
+      if (item.derivation === 'row number') {                         // special case, the built-in row number
         const rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
         selectListExpressions[rowNumberSql] = rowNumberSql;
       }
       else
-      if (item.aggregator === 'count' && item.columnName === '*'){
+      if (item.aggregator === 'count' && item.columnName === '*'){   // special case, the built-in aggregate
         return;
       }
       else {
@@ -697,10 +700,6 @@ class SqlQueryGenerator {
     sql.push(`WHERE ${whereCondition}`);
   }
 
-  static #addStageForAxisAggregates(ctes){
-    // TODO: add stage that rewrites the window functions in the last cte to plain column items
-  }
-
   static getSqlSelectStatementForAxisItems(options){
     const queryAxisItems = options.queryAxisItems;
 
@@ -721,11 +720,7 @@ class SqlQueryGenerator {
       filterAxisItemsByNestingStage
     );
 
-    let cte = ctes[0];
-    if (cte.items.some(item => item.aggregator && Boolean(item.partitionByItems))) {
-      SqlQueryGenerator.#addStageForAxisAggregates(ctes);
-    }
-    cte = ctes.pop();
+    const cte = ctes.pop();
     options.samplingConfig = ctes.length ? undefined : samplingConfig;
     let sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
