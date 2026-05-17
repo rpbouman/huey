@@ -266,8 +266,8 @@ class QueryUi {
     switch (axisId){
       case QueryModel.AXIS_FILTERS:
         searchItem.axis = axisId;
-      case QueryModel.COLUMNS:
-      case QueryModel.ROWS:
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
         if (aggregator) {
           const partitionByItems = JSON.parse(queryAxisItemUi.getAttribute('data-partition-by-items'));
           searchItem.partitionByItems = partitionByItems;
