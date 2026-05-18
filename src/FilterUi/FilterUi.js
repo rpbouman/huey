@@ -3,6 +3,8 @@ class FilterDialog {
   static MULTIPLE_VALUES_SEPARATOR = ';';
 
   static #numRowsColumnName = '__huey_numrows';
+  static #labelColumnName = '__huey_filter_value_label';
+  static #valueColumnName = '__huey_filter_value';
   
   static equalityFilterTypes = {
     INCLUDE: 'in',
@@ -1105,8 +1107,8 @@ class FilterDialog {
 
     const datasource = this.#queryModel.getDatasource();
     const queryAxisItems = [
-      Object.assign({}, queryAxisItem, {caption: 'value', axis: QueryModel.AXIS_ROWS}),
-      Object.assign({}, queryAxisItem, {caption: 'label', axis: QueryModel.AXIS_ROWS})
+      Object.assign({}, queryAxisItem, {caption: FilterDialog.#valueColumnName, axis: QueryModel.AXIS_ROWS}),
+      Object.assign({}, queryAxisItem, {caption: FilterDialog.#labelColumnName, axis: QueryModel.AXIS_ROWS})
     ];
     const nullsSortOrder = this.#getNullsSortOrder();
     const sql = SqlQueryGenerator.getSqlSelectStatementForAxisItems({
@@ -1207,10 +1209,10 @@ class FilterDialog {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       switch (field.name) {
-        case 'label':
+        case FilterDialog.#labelColumnName:
           labelField = field;
           break;
-        case 'value':
+        case FilterDialog.#valueColumnName:
           valueField = field;
           break;
       }
@@ -1220,18 +1222,19 @@ class FilterDialog {
     let option;
     for (let i = 0; i < resultset.numRows; i++) {
       const row = resultset.get(i);
-      const value = row.value === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(row.value, valueField.type) : String(row.value));
-      let label = row.label;
+      const rawValue = row[valueField.name]
+      const value = rawValue === null ? 'NULL' : (valueField.type.typeId === 7 ? getArrowDecimalAsString(rawValue, valueField.type) : String(rawValue));
+      let label = row[labelField.name];
       if (formatter) {
         label = formatter(label, labelField);
       }
-      const literal = getDuckDbLiteralForValue(row.value, valueField.type);
+      const literal = getDuckDbLiteralForValue(rawValue, valueField.type);
       option = createEl('option', {
         value: value,
         label: label,
         "data-sql-literal": literal
       });
-      if (value === null){
+      if (rawValue === null){
         option.setAttribute('data-sql-null', true);
       }
       optionsContainer.appendChild(option);
