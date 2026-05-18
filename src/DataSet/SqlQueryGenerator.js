@@ -273,6 +273,8 @@ class SqlQueryGenerator {
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
+    
+    // TODO: prompote the partitionByItems if present
    let unnestingItem;
    do {
       unnestingItem = undefined;
@@ -441,11 +443,9 @@ class SqlQueryGenerator {
     const totalsPosition = options.totalsPosition;
     const includeOrderBy = options.includeOrderBy === false ? false : true;
     const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
-    let hasAxisAggregates = false;
     const columnExpressions = {};
     cte.items.forEach((item, index) => {
       const originalItem = queryAxisItems[index];
-      hasAxisAggregates = hasAxisAggregates ? true : Boolean(originalItem.aggregator) && Boolean(originalItem.partitionByItems);
       const caption = QueryAxisItem.getCaptionForQueryAxisItem(originalItem);
       const selectListExpression = QueryAxisItem.getSqlForQueryAxisItem(item, cte.alias);
       columnExpressions[caption] = selectListExpression;
@@ -476,11 +476,6 @@ class SqlQueryGenerator {
       const columnExpression = columnExpressions[columnId];
       const columnAlias = quoteIdentifierWhenRequired(columnId);
       
-      // TODO: see https://github.com/rpbouman/huey/issues/401
-      // we should check if it's safe to use a column alias. 
-      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
-      const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
-      
       if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
         // we need that count all to figure out how many tuples there are on the axis in total
@@ -490,6 +485,12 @@ class SqlQueryGenerator {
       }
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
+
+      // TODO: see https://github.com/rpbouman/huey/issues/401
+      // we should check if it's safe to use a column alias. 
+      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
+      const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
+
       const queryAxisItem = queryAxisItems[i];
       const axisId = queryAxisItem.axis;
       if (axisId === QueryModel.AXIS_CELLS){
@@ -503,7 +504,7 @@ class SqlQueryGenerator {
       axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
-        // make a grouping set for the group by expression up to this point
+        // make a grouping set for the GROUP BY expression up to this point
         const groupingSet = [].concat(axisGroupByExpressions);
         axisGroupingSets = groupingSets[axisId];
         axisGroupingSets.push(groupingSet);
@@ -512,7 +513,8 @@ class SqlQueryGenerator {
         // so we can figure out which result rows are totals (and for what group).
         
         // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
-        groupingIdExpressions.push(columnExpression);
+        //groupingIdExpressions.push(columnExpression);
+        groupingIdExpressions.push(columnExpressionReference);
         
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
@@ -520,7 +522,8 @@ class SqlQueryGenerator {
       }
       
       // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
-      axisGroupByExpressions.push(columnExpression);
+      // axisGroupByExpressions.push(columnExpression);
+      axisGroupByExpressions.push(columnExpressionReference);
       
       let orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
@@ -623,6 +626,7 @@ class SqlQueryGenerator {
     SqlQueryGenerator.#generateWhereClause(cte, sql);
 
     if (groupByClause) {
+
       groupByClause = `GROUP BY ${groupByClause}`;
       sql.push(groupByClause);
     }
@@ -659,6 +663,12 @@ class SqlQueryGenerator {
       else
       if (item.aggregator === 'count' && item.columnName === '*'){   // special case, the built-in aggregate
         return;
+      }
+      else 
+      if ( Boolean( item.aggregator ) && Boolean( item.partitionByItems ) ){
+        const caption = QueryAxisItem.getCaptionForQueryAxisItem( item );
+        const expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
+        selectListExpressions[caption] = expression;
       }
       else {
         const column = item.alias || item.columnName;
@@ -699,6 +709,20 @@ class SqlQueryGenerator {
     const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
     sql.push(`WHERE ${whereCondition}`);
   }
+  
+  static #createAxisAggregateStage(ctes){
+    const cte = ctes[ctes.length - 1];
+    const newItems = cte.items.map( item => { 
+      return {
+        columnName: QueryAxisItem.getCaptionForQueryAxisItem(item) 
+      };
+    });
+    const axisAggregateCte = {
+      items: newItems,
+      from: `FROM ${cte.alias}`
+    };
+    ctes.push(axisAggregateCte);
+  }
 
   static getSqlSelectStatementForAxisItems(options){
     const queryAxisItems = options.queryAxisItems;
@@ -719,8 +743,13 @@ class SqlQueryGenerator {
       queryAxisItems, 
       filterAxisItemsByNestingStage
     );
+    
+    let cte = ctes[ctes.length -1];
+    if (cte.items.some(item => Boolean(item.aggregator) && Boolean(item.partitionByItems))) {
+      SqlQueryGenerator.#createAxisAggregateStage(ctes);
+    }
+    cte = ctes.pop();
 
-    const cte = ctes.pop();
     options.samplingConfig = ctes.length ? undefined : samplingConfig;
     let sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     
