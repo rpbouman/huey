@@ -608,6 +608,9 @@ class QueryUi {
     
     if (queryAxisItem.aggregator){
       data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
+      if  (queryAxisItem.partitionByItems){
+        data.partitionbyitems = { key: 'paritionByItems', value: queryAxisItem.partitionByItems};
+      }
     }
 
     data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
@@ -698,6 +701,7 @@ class QueryUi {
       
       let dropEffect;
       const isAggregator = Boolean(info.aggregator);
+      const hasPartionByItems = Boolean(info.partitionbyitems);
       const isDefaultAggregator = Boolean(info.defaultaggregator);
       if (isCellsAxis){
         if (! (isAggregator || isDefaultAggregator) ){
@@ -706,7 +710,7 @@ class QueryUi {
         }
       }
       else
-      if (isAggregator) {
+      if (isAggregator && !hasPartionByItems) {
         // if this is not the cells axis, but the item is an aggregator, drop is forbidden
         dropEffect = 'none';
       }
