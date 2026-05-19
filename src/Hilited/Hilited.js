@@ -300,7 +300,7 @@ class Hilited {
         }.bind(this), 0);
         event.preventDefault();
       default:
-        console.log(`handleKeyDown: ${key}`);
+        //console.log(`handleKeyDown: ${key}`);
     }
   }
   #thisHandleKeydown = this.#handleKeydown.bind(this);
@@ -323,12 +323,12 @@ class Hilited {
       case 'historyRedo':
       case 'historyUndo':
     }
-    console.log(`before: ${event.inputType}`);
+    //console.log(`before: ${event.inputType}`);
   }
   #thisHandleBeforeInput = this.#handleBeforeInput.bind(this);
 
   #handleInput(event){
-    console.log(`after: ${event.inputType}`);
+    //console.log(`after: ${event.inputType}`);
     this.#checkTextChange();
     switch (event.inputType){
       case 'insertLineBreak':
@@ -342,10 +342,10 @@ class Hilited {
   #thisHandleInput = this.#handleInput.bind(this);
 
   #checkTextChange(){
-    console.time('#checkTextChange');
+    //console.time('#checkTextChange');
     const text = this.#getTextContent();
     if (text === this.#text){
-      console.timeEnd('#checkTextChange');
+      //console.timeEnd('#checkTextChange');
       return;
     }
     this.#text = text;
@@ -367,7 +367,7 @@ class Hilited {
       this.#tokens = this.#tokens.slice(0, i - (i > 0 ? 1 : 0) );
     }
     this.#textValueChanged();
-    console.timeEnd('#checkTextChange');
+    //console.timeEnd('#checkTextChange');
   }
 
   #textValueChanged(){
@@ -402,7 +402,7 @@ class Hilited {
   }
 
   #getTextContent(){
-    console.time('#getTextContent');
+    //console.time('#getTextContent');
     const childNodes = this.#element.childNodes;
     const chunks = [];
     for (let i = 0; i < childNodes.length; i++){
@@ -424,16 +424,16 @@ class Hilited {
       }
     }
     const textContent = chunks.join('');
-    console.timeEnd('#getTextContent');
+    //console.timeEnd('#getTextContent');
     return textContent;
   }
 
   #parseLines(){
-    console.time('#parseLines');
+    //console.time('#parseLines');
     const lines = Hilited.#getLinesFromText(this.#text);
     this.#lineCount = lines.length;
     this.#lines = lines;
-    console.timeEnd('#parseLines');
+    //console.timeEnd('#parseLines');
   }
 
   #getLines(){
@@ -449,7 +449,7 @@ class Hilited {
   }
 
   #getLineForPosition(position, lines, currentLine, minLine, maxLine){
-    console.time('#getLineForPosition');
+    //console.time('#getLineForPosition');
     if (lines === undefined){
       lines = this.#lines;
     }
@@ -476,7 +476,7 @@ class Hilited {
         minLine = currentLine + 1;
       }
       else {
-        console.timeEnd('#getLineForPosition');
+        //console.timeEnd('#getLineForPosition');
         return line;
       }
       let skip;
@@ -488,12 +488,12 @@ class Hilited {
         }
       }
       else {
-        console.timeEnd('#getLineForPosition');
+        //console.timeEnd('#getLineForPosition');
         return lines[maxLine];
       }
       currentLine += skip;
     } while (true);
-    console.timeEnd('#getLineForPosition');
+    //console.timeEnd('#getLineForPosition');
   }
 
   getVisibleLines(){
@@ -797,13 +797,27 @@ class Hilited {
   }
   #thisEmitSelectionChange = this.#emitSelectionChange.bind(this);
 
+  #handleElementFocus(event){
+    this.#selectionInterval = setInterval(this.#thisEmitSelectionChange, 250);
+  }
+  #thisHandleElementFocus = this.#handleElementFocus.bind(this);
+
+  #handleElementBlur(event){
+    clearInterval( this.#selectionInterval );
+  }
+  #thisHandleElementBlur = this.#handleElementBlur.bind(this);
+
   #eventHandlers = {
     'beforeinput': this.#thisHandleBeforeInput,
     'input': this.#thisHandleInput,
     'scroll': this.#thisHandleScroll,
     'scrollend': this.#thisHandleScrollEnd,
-    'keydown': this.#thisHandleKeydown
+    'keydown': this.#thisHandleKeydown,
+    'focus': this.#thisHandleElementFocus,
+    'blur': this.#thisHandleElementBlur
   }
+
+
 
   #wireEvents(onOff){
     const element = this.#element;
@@ -844,7 +858,6 @@ class Hilited {
 
     this.#wireEvents(true);
     document.addEventListener('selectionchange', this.#thisHandleDocumentSelectionChange);
-    this.#selectionInterval = setInterval(this.#thisEmitSelectionChange, 250);
 
     this.#resizeObserver = new ResizeObserver(this.#thisHandleResize);
     this.#resizeObserver.observe(this.#element);
