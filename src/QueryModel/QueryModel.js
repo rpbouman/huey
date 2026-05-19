@@ -151,7 +151,7 @@ class QueryModel extends EventEmitter {
       axisIds = [axisId];
     }
     else
-    if (aggregator && !Boolean(partitionByItems)){
+    if ( aggregator && !Boolean(partitionByItems) ){
       axisIds = ['cells'];
     }
     else {

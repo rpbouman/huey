@@ -152,7 +152,7 @@ class QueryAxisItem {
       else {
         caption = translatedAggregator;
       }
-      if (Boolean(axisItem.partitionByItems)){
+      if ( QueryAxisItem.isAxisAggregate( axisItem ) ) {
         const partitionByItemCaptions = axisItem.partitionByItems
           .map(item => QueryAxisItem.getCaptionForQueryAxisItem(item))
           .join(',')
@@ -218,8 +218,8 @@ class QueryAxisItem {
     const expressionTemplate = aggregatorInfo.expressionTemplate;
     columnExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
     
-    const partitionByItems = item.partitionByItems;
-    if (Boolean(partitionByItems)){
+    if ( QueryAxisItem.isAxisAggregate(item) ){
+      const partitionByItems = item.partitionByItems;
       let windowClause = 'OVER (';
       if (partitionByItems.length) {
         windowClause += ' PARTITION BY ';
@@ -245,12 +245,7 @@ class QueryAxisItem {
     sqlOptions = normalizeSqlOptions(sqlOptions);
     let sqlExpression;
     if (item.aggregator) {
-      if (item.partitionByItems) {
-        sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
-      }
-      else {
-        sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
-      }
+      sqlExpression = QueryAxisItem.getSqlForAggregatedQueryAxisItem(item, alias, sqlOptions);
     }
     else
     if (item.derivation) {
@@ -619,5 +614,9 @@ class QueryAxisItem {
       return false;
     }
     return true;
+  }
+  
+  static isAxisAggregate(item){
+    return Boolean(item.aggregator) && Boolean(item.partitionByItems);
   }
 }

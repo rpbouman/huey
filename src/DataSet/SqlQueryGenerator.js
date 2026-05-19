@@ -274,7 +274,6 @@ class SqlQueryGenerator {
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
     
-    // TODO: prompote the partitionByItems if present
    let unnestingItem;
    do {
       unnestingItem = undefined;
@@ -665,7 +664,7 @@ class SqlQueryGenerator {
         return;
       }
       else 
-      if ( Boolean( item.aggregator ) && Boolean( item.partitionByItems ) ){
+      if ( QueryAxisItem.isAxisAggregate( item ) ){
         const caption = QueryAxisItem.getCaptionForQueryAxisItem( item );
         const expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
         selectListExpressions[caption] = expression;
@@ -700,10 +699,7 @@ class SqlQueryGenerator {
   
   static #generateWhereClause(cte, sql){
     const filterAxisItems = cte.filters;
-    if (!filterAxisItems) {
-      return;
-    }
-    if (!filterAxisItems.length){
+    if (!filterAxisItems || !filterAxisItems.length){
       return;
     }
     const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
@@ -711,16 +707,51 @@ class SqlQueryGenerator {
   }
   
   static #createAxisAggregateStage(ctes){
+    // the original query with the axis aggregages is the current last stage.
+    // this can mostly stay in place, we just need to generate a stage on top to which the GROUP BY is applied.
+    // this new stage is simply a projection on the stage with the axis aggregates
     const cte = ctes[ctes.length - 1];
-    const newItems = cte.items.map( item => { 
+    const oldItems = cte.items;
+    const newItems = oldItems.map( item => { 
       return {
-        columnName: QueryAxisItem.getCaptionForQueryAxisItem(item) 
+        columnName: QueryAxisItem.getCaptionForQueryAxisItem( item ) 
       };
     });
     const axisAggregateCte = {
       items: newItems,
-      from: `FROM ${cte.alias}`
+      from: `FROM ${cte.alias}`,
     };
+    // axis aggregates that appear in a filter also need to be moved to this new stage.
+    const filterItems = cte.filters;
+    if (filterItems && filterItems.length){
+      const oldFilterItems = [];
+      const newFilterItems = [];
+      filterItems.forEach( oldFilterItem => {
+        if ( QueryAxisItem.isAxisAggregate( oldFilterItem ) ) {
+          const filter = oldFilterItem.filter;
+          delete oldFilterItem['axis'];
+          delete oldFilterItem['caption'];
+          delete oldFilterItem['filter'];
+          const newFilterItem = {
+            columnName: QueryAxisItem.getCaptionForQueryAxisItem( oldFilterItem ),
+          };
+          // if the axis aggregate item appears only on the filter axis, then we have to add it to the items of the previous stage, 
+          // in order for this stage to apply the filter condition on it.
+          if (QueryAxisItem.indexOfItem(oldFilterItem, oldItems) === -1){
+            oldItems.push( oldFilterItem );
+          }
+          newFilterItem.filter = filter;
+          newFilterItems.push( newFilterItem );
+        }
+        else {
+          oldFilterItems.push(filterItem);
+        }
+      });
+      if ( newFilterItems.length ) {
+        cte.filters = oldFilterItems;
+        axisAggregateCte.filters = newFilterItems;
+      }
+    }
     ctes.push(axisAggregateCte);
   }
 
@@ -745,7 +776,7 @@ class SqlQueryGenerator {
     );
     
     let cte = ctes[ctes.length -1];
-    if (cte.items.some(item => Boolean(item.aggregator) && Boolean(item.partitionByItems))) {
+    if ( cte.items.some( item => QueryAxisItem.isAxisAggregate( item ) ) ) {
       SqlQueryGenerator.#createAxisAggregateStage(ctes);
     }
     cte = ctes.pop();
