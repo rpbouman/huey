@@ -294,7 +294,7 @@ class QueryUi {
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
       if (queryModelAxisItem.partitionByItems){
-        cssSelector += `[data-partition-by-items="${JSON.stringify(queryModelAxisItem.partitionByItems)}"]`;
+        cssSelector += `[data-partition-by-items='${JSON.stringify(queryModelAxisItem.partitionByItems)}']`;
       }
     }
     return document.querySelector(cssSelector);
