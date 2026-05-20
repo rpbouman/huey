@@ -27,10 +27,7 @@ class QueryAxis {
       return undefined;
     }
     const item = items[itemIndex];
-    const copyOfItem = Object.assign({}, item);
-    if (item.filter) {
-      copyOfItem.filter = JSON.parse(JSON.stringify(item.filter));
-    }
+    const copyOfItem = JSON.parse(JSON.stringify(item));
     copyOfItem.index = itemIndex;
     return copyOfItem;
   }

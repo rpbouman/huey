@@ -109,7 +109,6 @@ class QueryUi {
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
-    this.#filterDialogStateChanged();
   }
 
   openFilterDialogForQueryModelItem(queryModelItem){
@@ -269,7 +268,8 @@ class QueryUi {
       case QueryModel.AXIS_COLUMNS:
       case QueryModel.AXIS_ROWS:
         if (aggregator) {
-          const partitionByItems = JSON.parse(queryAxisItemUi.getAttribute('data-partition-by-items'));
+          const partitionByItemsAttValue = queryAxisItemUi.getAttribute('data-partition-by-items');
+          const partitionByItems = JSON.parse(partitionByItemsAttValue);
           searchItem.partitionByItems = partitionByItems;
         }
     }
@@ -310,7 +310,7 @@ class QueryUi {
       title = Internationalization.getText(title) || title;
     }
     else {
-      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem, true);
     }
     return title;
   }
@@ -357,8 +357,7 @@ class QueryUi {
     const aggregator = axisItem.aggregator;
     if (aggregator) {
       itemUi.setAttribute('data-aggregator', aggregator);
-
-      if (axisId !== QueryModel.AXIS_CELLS){
+      if (QueryAxisItem.isAxisAggregate(axisItem)){
         const partitionByItems = axisItem.partitionByItems;
         itemUi.setAttribute('data-partition-by-items', JSON.stringify(partitionByItems));
       }
@@ -391,6 +390,7 @@ class QueryUi {
     if (filter.toggleState === 'open') {
       detailsElement.setAttribute('open', String(true) );
     }
+    // TODO: remove this and create 1 single toggle handler for the entire query ui.
     setTimeout(() => detailsElement.addEventListener('toggle', event => this.#filterItemToggleHandler(event) ), 1000)
           
     const values = filter.values;
@@ -434,6 +434,7 @@ class QueryUi {
       label.setAttribute('for', deleteValueId);
       const button = label.querySelector('button');
       button.setAttribute('id', deleteValueId);
+      // TODO: handle this from the central click handler
       button.addEventListener('click', event => this.#deleteFilterValueClickHandler( event ) );
     }
   }
@@ -579,6 +580,7 @@ class QueryUi {
   #initFilterUiEvents(){
     const filterUi = this.#filterDialog;
     const filterDialog = filterUi.getDom();
+    filterDialog.addEventListener('open', event => this.#filterDialogStateChanged( event ) );
     filterDialog.addEventListener('close', event => this.#filterDialogStateChanged( event ) );
   }
   

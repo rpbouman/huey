@@ -82,16 +82,15 @@ class QueryAxisItem {
     return literalWriter;
   }
 
-  static getCaptionForQueryAxisItem(axisItem){
+  static getCaptionForQueryAxisItem(axisItem, includeFilterCaption){
     let caption = axisItem.caption;
     if (caption){
       return caption;
     }
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
-    if (axisItem.axis !== QueryModel.AXIS_FILTERS) {
+    if (axisItem.axis !== QueryModel.AXIS_FILTERS || includeFilterCaption !== true) {
       return caption;
     }
-
     let filterItemCaption = `: No filters set.`;
     const filter = axisItem.filter;
     if (filter) {
