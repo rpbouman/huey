@@ -727,6 +727,7 @@ class SqlQueryGenerator {
       const oldFilterItems = [];
       const newFilterItems = [];
       filterItems.forEach( oldFilterItem => {
+        oldFilterItem = JSON.parse(JSON.stringify(oldFilterItem));
         if ( QueryAxisItem.isAxisAggregate( oldFilterItem ) ) {
           const filter = oldFilterItem.filter;
           delete oldFilterItem['axis'];
