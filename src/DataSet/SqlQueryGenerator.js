@@ -42,6 +42,9 @@ class SqlQueryGenerator {
     return memberExpressionPathString;
   }
 
+  // TODO: we have to correctly stage and unwrap an axis aggregate filter items
+  // By that I mean, unwrap the subject of the aggregate as well as its partition columns from any nesting (if applicable)
+  // and carry axis aggregates on the unnested values all the way to the last stage.
   static #getFilterItemsByNestingStage(filterAxisItems){
     const filterAxisItemsByNestingStage = {};
     if (!filterAxisItems){
@@ -54,17 +57,21 @@ class SqlQueryGenerator {
       if (!filter){
         return false;
       }
+      
       const values = filter.values;
       if (!values){
         return false;
       }
+      
       const keys = Object.keys(values).filter(key => {
         const valueObject = values[key];
         return valueObject.enabled !== false;
       });
+      
       if (!keys.length){
         return false;
       }
+      
       return true;
     });
     
@@ -763,12 +770,42 @@ class SqlQueryGenerator {
       return undefined;
     }
 
+    // analyze the items to see what axes they are on.
+    // we need to know to correctly evaluate aggregate axis filter items
+    const itemAxes = {};
+    queryAxisItems.forEach( queryAxisItemm => {
+      const axisId = queryAxisItemm.axis;
+      if ( itemAxes[ axisId ] === undefined ) {
+        itemAxes[ axisId ] = [];
+      }
+      itemAxes[ axisId ].push( queryAxisItemm );
+    });
+    
     const datasource = options.datasource; 
-    const filterAxisItems = options.filterAxisItems;
     const samplingConfig = options.samplingConfig
-
     const sqlOptions = normalizeSqlOptions(options.sqlOptions);
 
+    let filterAxisItems = options.filterAxisItems;
+    if ( filterAxisItems && filterAxisItems.length ) {
+      const axisIds = Object.keys(itemAxes);
+      if (axisIds.length) {
+        // don't take axis aggregates into account that doe 
+        switch (axisIds.length) {
+          case 1:
+            filterAxisItems = filterAxisItems.filter( filterAxisItem => {
+              if ( !QueryAxisItem.isAxisAggregate( filterAxisItem ) ){
+                return true;
+              }
+              const partitionByItems = filterAxisItem.partitionByItems;
+              if ( partitionByItems.some( partitionByItem => partitionByItem.axis !== axisIds[0] ) ) {
+                return false;
+              }
+              return true;
+            });
+            break;
+        }
+      }
+    }
     const filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
     const ctes = SqlQueryGenerator.#getUnnestingStages(
       datasource,
@@ -777,7 +814,11 @@ class SqlQueryGenerator {
     );
     
     let cte = ctes[ctes.length -1];
-    if ( cte.items.some( item => QueryAxisItem.isAxisAggregate( item ) ) ) {
+    if ( 
+      cte.items.some( item => QueryAxisItem.isAxisAggregate( item ) ) ||
+      filterAxisItems && 
+      filterAxisItems.some( filterAxisItem => QueryAxisItem.isAxisAggregate(filterAxisItem) )
+    ) {
       SqlQueryGenerator.#createAxisAggregateStage(ctes);
     }
     cte = ctes.pop();
