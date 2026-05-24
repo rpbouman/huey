@@ -180,6 +180,7 @@ class CellSet extends DataSetComponent {
   // https://github.com/rpbouman/huey/issues/134
   // idea is to use the tuples to come up with a more clever/optimized query condition 
   // to be pushed down to the lowest level of the cellset.
+  // right now it is not implemented.
   #getFilterAxisItemsForCells(
     // object keyed by cellindex, with an array of tuples as value.
     tuplesToQuery,
@@ -191,7 +192,7 @@ class CellSet extends DataSetComponent {
     const tupleSets = this.#tupleSets;
     const queryModel = this.getQueryModel();
     const filterAxis = queryModel.getFiltersAxis();
-    const originalFilterAxisItems = filterAxis.getItems();
+    const originalFilterAxisItems = filterAxis.getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
     
     return originalFilterAxisItems;
   }
@@ -207,8 +208,8 @@ class CellSet extends DataSetComponent {
     const queryModel = this.getQueryModel();
     const datasource = queryModel.getDatasource();
 
-    const rowsAxisItems = queryModel.getRowsAxis().getItems();
-    const columnsAxisItems = queryModel.getColumnsAxis().getItems();
+    const rowsAxisItems = queryModel.getRowsAxis().getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
+    const columnsAxisItems = queryModel.getColumnsAxis().getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
     const axisItems = [].concat(rowsAxisItems, columnsAxisItems);
     const allItems = [].concat(axisItems, cellsAxisItemsToFetch || []);
     const filterAxisItems = this.#getFilterAxisItemsForCells(
