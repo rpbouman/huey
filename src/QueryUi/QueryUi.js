@@ -618,7 +618,7 @@ class QueryUi {
     if (queryAxisItem.aggregator){
       data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
       if  (queryAxisItem.partitionByItems){
-        data.partitionbyitems = { key: 'paritionByItems', value: queryAxisItem.partitionByItems};
+        data.partitionbyitems = { key: 'partitionbyitems', value: queryAxisItem.partitionByItems};
       }
     }
 
@@ -718,10 +718,8 @@ class QueryUi {
           dropEffect = 'none';
         }
       }
-      else
-      if (isAggregator && !hasPartionByItems) {
-        // if this is not the cells axis, but the item is an aggregator, drop is forbidden
-        dropEffect = 'none';
+      else {
+        dropEffect = 'move';
       }
       
       // if we're dragging over an existing query ui item
@@ -811,7 +809,7 @@ class QueryUi {
         case QueryModel.AXIS_ROWS:
         case QueryModel.AXIS_COLUMNS:
           delete queryAxisItem.filter;
-          if (info.axis.key !== axisId) {
+          if (info.axis && info.axis.key !== QueryModel.AXIS_CELLS && info.axis.key !== axisId) {
             this.#queryModel.removeItem(queryAxisItem);
           }
           break;
