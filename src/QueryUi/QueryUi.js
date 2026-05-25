@@ -129,19 +129,17 @@ class QueryUi {
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     delete queryModelItem.index;
     let hasAggregator = Boolean(queryModelItem.aggregator);
-    let axis, axisId;
+    let axisId;
     switch (queryModelItem.axis) {
       case QueryModel.AXIS_COLUMNS:
-        axis = this.#queryModel.getColumnsAxis();
         axisId = QueryModel.AXIS_ROWS;
         break;
       case QueryModel.AXIS_ROWS:
-        axis = this.#queryModel.getRowsAxis();
         axisId = QueryModel.AXIS_COLUMNS;
         break;
       default:
     }
-    if (axis && hasAggregator) {
+    if (axisId && hasAggregator) {
       this.#queryModel.removeItem(queryModelItem);
     }
     queryModelItem.axis = axisId;
@@ -813,6 +811,9 @@ class QueryUi {
         case QueryModel.AXIS_ROWS:
         case QueryModel.AXIS_COLUMNS:
           delete queryAxisItem.filter;
+          if (info.axis.key !== axisId) {
+            this.#queryModel.removeItem(queryAxisItem);
+          }
           break;
         default:
       }

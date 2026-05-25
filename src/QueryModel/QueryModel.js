@@ -319,8 +319,8 @@ class QueryModel extends EventEmitter {
     this.fireEvent('beforechange', eventData);
 
     let removedItem;
-    if (foundItem) {
-      // if the item already exits in this model, we first remove it.
+    if (foundItem && (axisId !== QueryModel.AXIS_FILTERS || foundItem.axis === axisId) ) {
+      // if the item already exists in this model, we first remove it.
       removedItem = this.#removeItem(foundItem);
       axesChangeInfo[removedItem.axis].removed = [removedItem];
     }
