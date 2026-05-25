@@ -629,7 +629,7 @@ class SqlQueryGenerator {
       `SELECT ${selectListExpressions.join('\n,')}`,
       cte.from
     ];
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
+    SqlQueryGenerator.#generateSqlClausesForFilterItems(cte, sql);
 
     if (groupByClause) {
 
@@ -691,7 +691,7 @@ class SqlQueryGenerator {
       cte.from
     ];
     
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
+    SqlQueryGenerator.#generateSqlClausesForFilterItems(cte, sql);
     
     const samplingConfig = sqlOptions.samplingConfig;
     if (samplingConfig){
@@ -703,14 +703,23 @@ class SqlQueryGenerator {
     const sqlText = sql.join('\n');
     return sqlText;
   }
-  
-  static #generateWhereClause(cte, sql){
+
+  static #generateSqlClausesForFilterItems(cte, sql){
     const filterAxisItems = cte.filters;
     if (!filterAxisItems || !filterAxisItems.length){
       return;
     }
-    const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
-    sql.push(`WHERE ${whereCondition}`);
+    const whereClauseItems = [];
+    const qualifyClauseItems = [];
+    filterAxisItems.forEach( filterAxisItem => ( QueryAxisItem.isAxisAggregate(filterAxisItem) ? qualifyClauseItems : whereClauseItems ).push(filterAxisItem) );
+    if (whereClauseItems.length) {
+      const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(whereClauseItems, cte.alias);
+      sql.push(`WHERE ${whereCondition}`);
+    }
+    if (qualifyClauseItems.length) {
+      const qualifyCondition = SqlQueryGenerator.#getConditionForFilterItems(qualifyClauseItems, cte.alias);
+      sql.push(`QUALIFY ${qualifyCondition}`);
+    }
   }
   
   static #createAxisAggregateStage(ctes){
@@ -729,6 +738,7 @@ class SqlQueryGenerator {
       from: `FROM ${cte.alias}`,
     };
     // axis aggregates that appear in a filter also need to be moved to this new stage.
+    /*
     const filterItems = cte.filters;
     if (filterItems && filterItems.length){
       const oldFilterItems = [];
@@ -760,6 +770,7 @@ class SqlQueryGenerator {
         axisAggregateCte.filters = newFilterItems;
       }
     }
+    */
     ctes.push(axisAggregateCte);
   }
 
@@ -816,8 +827,7 @@ class SqlQueryGenerator {
     let cte = ctes[ctes.length -1];
     if ( 
       cte.items.some( item => QueryAxisItem.isAxisAggregate( item ) ) ||
-      filterAxisItems && 
-      filterAxisItems.some( filterAxisItem => QueryAxisItem.isAxisAggregate(filterAxisItem) )
+      filterAxisItems && filterAxisItems.some( filterAxisItem => QueryAxisItem.isAxisAggregate(filterAxisItem) )
     ) {
       SqlQueryGenerator.#createAxisAggregateStage(ctes);
     }

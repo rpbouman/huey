@@ -31,6 +31,17 @@ class QueryAxis {
     copyOfItem.index = itemIndex;
     return copyOfItem;
   }
+  
+  getDependentItems(config){
+    const items = this.#items;
+    return items.filter(axisItem => {
+      const partitionByItems = axisItem.partitionByItems;
+      if (!partitionByItems) {
+        return false;
+      }
+      return partitionByItems.some(partitionByItem => QueryAxisItem.equals(config, partitionByItem) );
+    });
+  }
 
   addItem(config){
     const copyOfConfig = Object.assign({}, config);

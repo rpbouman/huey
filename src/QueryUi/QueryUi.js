@@ -128,14 +128,23 @@ class QueryUi {
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     delete queryModelItem.index;
+    let hasAggregator = Boolean(queryModelItem.aggregator);
+    let axis, axisId;
     switch (queryModelItem.axis) {
       case QueryModel.AXIS_COLUMNS:
-        queryModelItem.axis = QueryModel.AXIS_ROWS;
+        axis = this.#queryModel.getColumnsAxis();
+        axisId = QueryModel.AXIS_ROWS;
         break;
       case QueryModel.AXIS_ROWS:
-        queryModelItem.axis = QueryModel.AXIS_COLUMNS;
+        axis = this.#queryModel.getRowsAxis();
+        axisId = QueryModel.AXIS_COLUMNS;
         break;
+      default:
     }
+    if (axis && hasAggregator) {
+      this.#queryModel.removeItem(queryModelItem);
+    }
+    queryModelItem.axis = axisId;
     this.#queryModel.addItem(queryModelItem);
   }
 

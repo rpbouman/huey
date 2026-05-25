@@ -910,19 +910,6 @@ class AttributeUi {
       itemConfig.aggregator = aggregator;
     }
 
-    // axis aggregate (window functions)
-    if (axisId !== QueryModel.AXIS_CELLS && Boolean(itemConfig.aggregator)) {
-      const axis = queryModel.getQueryAxis(axisId);
-      const axisItems = axis.getItems()
-        .filter(item => !Boolean(item.aggregator))
-        .map(item => Object.assign({}, item))
-      ;
-      // ideally we would like to assign this dynamically 
-      // so that it adjusts when the item moves position.
-      // but that's too complex right now 
-      itemConfig.partitionByItems = axisItems;
-    }
-
     if (checked) {
       await queryModel.addItem(itemConfig);
     }

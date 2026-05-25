@@ -178,6 +178,27 @@ class QueryModel extends EventEmitter {
     }
     return item;
   }
+  
+  getDependentItems(config){
+    if (QueryAxisItem.aggregator) {
+      return undefined;
+    }
+    const findConfig = {
+      columnName: config.columnName,
+      memberExpressionPath: config.memberExpressionPath,
+      derivation: config.derivation
+    };
+    
+    let dependentItems = [];
+    const axisIds = Object.keys(this.#axes);
+    for (let i = 0; i < axisIds.length; i++){
+      const axisId = axisIds[i];
+      const axis = this.getQueryAxis(axisId);
+      const axisDependentItems = axis.getDependentItems(findConfig);
+      dependentItems = dependentItems.concat(axisDependentItems);
+    }
+    return dependentItems.length ? dependentItems : undefined;
+  }
 
   #addItem(config){
     const axisId = config.axis;
@@ -196,11 +217,11 @@ class QueryModel extends EventEmitter {
   }
 
   async addItem(config){
-    let axis = config.axis;
+    let axisId = config.axis;
 
-    if (!axis) {
+    if (!axisId) {
       if (config.aggregator) {
-        axis = QueryModel.AXIS_CELLS;
+        axisId = QueryModel.AXIS_CELLS;
       }
       else {
         // todo: find some way to figure out the most appropriate default axis.
@@ -212,10 +233,20 @@ class QueryModel extends EventEmitter {
     const copyOfConfig = Object.assign({}, config);
     // filter items are special because they can appear on multiple axes.
     // if the item is a filter axis item, we should not remove the axis.
-    if (axis !== QueryModel.AXIS_FILTERS){
-      delete copyOfConfig['axis'];
+    switch (axisId) {
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        if (config.aggregator) {
+          if (config.partitionByItems) {
+            const newPartitionByItems = config.partitionByItems.filter( partitionByItem => partitionByItem.axis === axisId);
+            config.partitionByItems = newPartitionByItems.length ? newPartitionByItems : undefined;
+          }
+          break;
+        }
+      case QueryModel.AXIS_FILTERS:
+        delete copyOfConfig['axis'];
     }
-    const foundItem = this.findItem(copyOfConfig);
+    let foundItem = this.findItem(copyOfConfig);
 
     if (!config.columnType) {
       if (foundItem && foundItem.columnType) {
@@ -269,7 +300,7 @@ class QueryModel extends EventEmitter {
       }
     }
 
-    if (axis === QueryModel.AXIS_FILTERS && !config.filter && foundItem && foundItem.filter){
+    if (axisId === QueryModel.AXIS_FILTERS && !config.filter && foundItem && foundItem.filter){
       config.filter = foundItem.filter;
     }
 
@@ -294,17 +325,43 @@ class QueryModel extends EventEmitter {
       axesChangeInfo[removedItem.axis].removed = [removedItem];
     }
     const addedItem = this.#addItem(config);
+    
     axesChangeInfo[addedItem.axis].added = [addedItem];
 
-    this.getQueryAxis(axis).syncItemIndices();
-    if (foundItem && foundItem.axis !== axis){
+    this.getQueryAxis(axisId).syncItemIndices();
+    if (foundItem && foundItem.axis !== axisId){
       this.getQueryAxis(foundItem.axis).syncItemIndices();
+    }
+    if (
+      addedItem.aggregator && 
+      addedItem.axis !== QueryModel.AXIS_CELLS && 
+      !addedItem.partitionByItems
+    ) {
+      let axis, partitionByItems;
+      switch (addedItem.axis){
+        case QueryModel.AXIS_COLUMNS:
+          axis = this.getColumnsAxis();
+          break;
+        case QueryModel.AXIS_ROWS:
+          axis = this.getRowsAxis();
+          break;
+      }
+      if (axis) {
+        partitionByItems = axis
+          .getItems()
+          .slice(0, addedItem.index)
+          .filter(item => !QueryAxisItem.isAxisAggregate(item) );
+      }
+      else {
+        partitionByItems = [];
+      }
+      addedItem.partitionByItems = partitionByItems;
     }
 
     this.fireEvent('change', eventData);
     return addedItem;
   }
-
+  
   removeItem(config){
     const copyOfConfig = Object.assign({}, config);
 
@@ -317,17 +374,41 @@ class QueryModel extends EventEmitter {
     if (!item){
       return undefined;
     }
-
+    
     const axesChangeInfo = {};
     const eventData = { axesChanged: axesChangeInfo };
 
     const oldAxisId = item.axis;
     axesChangeInfo[oldAxisId] = { removed: [item] };
+
+    const dependentItems = this.getDependentItems(item);
+    if (dependentItems) {
+      dependentItems.forEach( dependentItem => {
+        const axisId = dependentItem.axis;
+        let axisChangeInfo = axesChangeInfo[axisId];
+        if (!axisChangeInfo){
+          axisChangeInfo = axesChangeInfo[axisId] = {};
+        }
+        let changedItems = axisChangeInfo['changed'];
+        if (!changedItems) {
+          changedItems = axisChangeInfo['changed'] = [];
+        }
+        changedItems.push( dependentItem );
+      });
+    }
+
     this.fireEvent('beforechange', eventData);
 
     const axis = this.getQueryAxis(oldAxisId);
     const removedItem = axis.removeItem(item);
     axis.syncItemIndices();
+    if (dependentItems && dependentItems.length) {
+      dependentItems.forEach(dependentItem => {
+        const partitionByItems = dependentItem.partitionByItems;
+        const index = QueryAxisItem.indexOfItem(config, partitionByItems);
+        partitionByItems.splice(index, 1);
+      });
+    }
 
     axesChangeInfo[oldAxisId] = { removed: [removedItem] };
 
@@ -448,11 +529,21 @@ class QueryModel extends EventEmitter {
 
     if (axis1Items.length) {
       axesChangeInfo[axisId1].removed = axis1Items;
-      axesChangeInfo[axisId2].added = axis1Items.map(axisItem => Object.assign( {}, axisItem, { axis: axisId2 } ) );
+      axesChangeInfo[axisId2].added = axis1Items.map( axisItem => {
+        if ( axisItem.partitionByItems ) {
+          axisItem.partitionByItems.forEach( partitionByItem => partitionByItem.axis = axisId2 )
+        }
+        return Object.assign( {}, axisItem, { axis: axisId2 } );
+      });
     }
     if (axis2Items.length) {
       axesChangeInfo[axisId2].removed = axis2Items;
-      axesChangeInfo[axisId1].added = axis2Items.map(axisItem => Object.assign( {}, axisItem, { axis: axisId1 } ) );
+      axesChangeInfo[axisId1].added = axis2Items.map( axisItem => {
+        if ( axisItem.partitionByItems ) {
+          axisItem.partitionByItems.forEach( partitionByItem => partitionByItem.axis = axisId1 )
+        }
+        return Object.assign( {}, axisItem, { axis: axisId1 } );
+      });
     }
 
     this.fireEvent('beforechange', eventData);
