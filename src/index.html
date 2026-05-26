@@ -40,7 +40,7 @@
       }
     `);
     
-    const duckdbLibraryVersion = '1.33.1-dev53.0';
+    const duckdbLibraryVersion = '1.33.1-dev55.0';
     const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
@@ -216,6 +216,7 @@
       <option value="http" label="HTTP and HTTPS" data-duckdb-extension="httpfs"></option>
       <option value="huggingface" label="Hugging Face" data-duckdb-extension="httpfs"></option>
       <option value="iceberg" label="Iceberg REST Catalog" data-duckdb-extension="iceberg"></option>
+      <option value="quack" label="DuckDB Quack Server" data-duckdb-extension="quack"></option>
       <option value="unity_catalog" label="Unity Catalog" data-duckdb-extension="unity_catalog"></option>
     </datalist>
     
@@ -248,7 +249,7 @@
       <option value="SECRET" data-default-type="password" data-associated-secret-types="s3,gcs,r2,iceberg"></option>
       <option value="SESSION_TOKEN" data-default-type="password" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="TENANT_ID" data-default-type="text" data-associated-secret-types="azure"></option>
-      <option value="TOKEN" data-default-type="password" data-associated-secret-types="http,huggingface,iceberg,unity_catalog"></option>
+      <option value="TOKEN" data-default-type="password" data-associated-secret-types="http,huggingface,iceberg,quack,unity_catalog"></option>
       <option value="URL_COMPATIBILITY_MODE" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="URL_STYLE" data-default-type="text" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="USE_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
