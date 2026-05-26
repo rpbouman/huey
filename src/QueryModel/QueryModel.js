@@ -183,6 +183,9 @@ class QueryModel extends EventEmitter {
     if (QueryAxisItem.aggregator) {
       return undefined;
     }
+    if (config.axis && config.axis === QueryModel.AXIS_FILTERS) {
+      return undefined;
+    }
     const findConfig = {
       columnName: config.columnName,
       memberExpressionPath: config.memberExpressionPath,
@@ -337,20 +340,22 @@ class QueryModel extends EventEmitter {
       addedItem.axis !== QueryModel.AXIS_CELLS && 
       !addedItem.partitionByItems
     ) {
-      let axis, partitionByItems;
+      let axisItems, partitionByItems;
+      const rowsItems = this.getRowsAxis().getItems();
+      const columnsItems = this.getColumnsAxis().getItems();
       switch (addedItem.axis){
         case QueryModel.AXIS_COLUMNS:
-          axis = this.getColumnsAxis();
+          axisItems = columnsItems.slice(0, addedItem.index);
           break;
         case QueryModel.AXIS_ROWS:
-          axis = this.getRowsAxis();
+          axisItems = rowsItems.slice(0, addedItem.index);
+          break;
+        case QueryModel.AXIS_FILTERS:
+          axisItems = [].concat(rowsItems, columnsItems);
           break;
       }
-      if (axis) {
-        partitionByItems = axis
-          .getItems()
-          .slice(0, addedItem.index)
-          .filter(item => !QueryAxisItem.isAxisAggregate(item) );
+      if (axisItems) {
+        partitionByItems = axisItems.filter(item => !QueryAxisItem.isAxisAggregate(item) );
       }
       else {
         partitionByItems = [];
