@@ -740,7 +740,7 @@ class PivotTableUi extends EventEmitter {
           }
         }
         else
-        if (doCellHeaders && cellsAxisItems.length) {
+        if (j === (numRows -1) && doCellHeaders && cellsAxisItems.length) {
           var cellsAxisItem = cellsAxisItems[cellsAxisItemIndex];
           this.#setCellItemId(cell, cellsAxisItem, cellsAxisItemIndex);
           titleText = labelText = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
@@ -1125,10 +1125,13 @@ class PivotTableUi extends EventEmitter {
 
     var cellsAxisItemIndex;
 
-    var cellsSet = this.#cellsSet;
-    var cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
-
-    var cellIndex;
+    var cellIndex, cells, cellsSet = this.#cellsSet;
+    if (rowsTupleRange && rowsTupleRange[0] === -1 || columnsTupleRange && columnsTupleRange[0] === -1) {
+      cells = [];
+    }
+    else {
+      cells = await cellsSet.getCells([rowsTupleRange, columnsTupleRange]);
+    }
 
     for (var i = 0; i < tableBodyRows.length - 1; i++){
       var tableRow = tableBodyRows.item(i);
@@ -1930,7 +1933,7 @@ class PivotTableUi extends EventEmitter {
         throw new Error(`Invalid axis id ${axisId}.`);
     }
     var tupleCount = tupleSet.getTupleCountSync();
-    if (tupleCount === undefined) {
+    if (tupleCount === undefined || tupleCount === 0) {
       tupleCount = 1;
     }
     var numberOfPhysicalRows = tupleCount * factor;

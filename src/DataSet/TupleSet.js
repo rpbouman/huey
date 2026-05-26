@@ -216,6 +216,9 @@ class TupleSet extends DataSetComponent {
   }
 
   async #executeAxisQuery(limit, offset){
+    if (offset < 0 ) {
+      offset = 0;
+    }
     const includeCountExpression = offset === 0;
 
     let axisSql = this.#getSqlSelectStatement(includeCountExpression);
