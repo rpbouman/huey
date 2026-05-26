@@ -109,7 +109,6 @@ class QueryUi {
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
-    this.#filterDialogStateChanged();
   }
 
   openFilterDialogForQueryModelItem(queryModelItem){
@@ -129,14 +128,21 @@ class QueryUi {
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     delete queryModelItem.index;
+    let hasAggregator = Boolean(queryModelItem.aggregator);
+    let axisId;
     switch (queryModelItem.axis) {
       case QueryModel.AXIS_COLUMNS:
-        queryModelItem.axis = QueryModel.AXIS_ROWS;
+        axisId = QueryModel.AXIS_ROWS;
         break;
       case QueryModel.AXIS_ROWS:
-        queryModelItem.axis = QueryModel.AXIS_COLUMNS;
+        axisId = QueryModel.AXIS_COLUMNS;
         break;
+      default:
     }
+    if (axisId && hasAggregator) {
+      this.#queryModel.removeItem(queryModelItem);
+    }
+    queryModelItem.axis = axisId;
     this.#queryModel.addItem(queryModelItem);
   }
 
@@ -253,22 +259,32 @@ class QueryUi {
   }
 
   #getQueryModelItem(queryAxisItemUi){
+    const aggregator = queryAxisItemUi.getAttribute('data-aggregator');
     const searchItem = {
       columnName: queryAxisItemUi.getAttribute('data-column_name'),
       memberExpressionPath: queryAxisItemUi.getAttribute('data-member_expression_path'),
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
-      aggregator: queryAxisItemUi.getAttribute('data-aggregator')
+      aggregator: aggregator,
     };
 
     const axisUi = queryAxisItemUi.parentNode.parentNode;
     const axisId = axisUi.getAttribute('data-axis');
-    if (axisId === QueryModel.AXIS_FILTERS){
-      searchItem.axis = axisId;
+    switch (axisId){
+      case QueryModel.AXIS_FILTERS:
+        searchItem.axis = axisId;
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        if (aggregator) {
+          const partitionByItemsAttValue = queryAxisItemUi.getAttribute('data-partition-by-items');
+          const partitionByItems = JSON.parse(partitionByItemsAttValue);
+          searchItem.partitionByItems = partitionByItems;
+        }
     }
-
     const item = this.#queryModel.findItem(searchItem);
     if (!item) {
-      throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      const error = new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      console.error(error);
+      throw error;
     }
     return item;
   }
@@ -284,6 +300,9 @@ class QueryUi {
     }
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
+      if (queryModelAxisItem.partitionByItems){
+        cssSelector += `[data-partition-by-items='${JSON.stringify(queryModelAxisItem.partitionByItems)}']`;
+      }
     }
     return document.querySelector(cssSelector);
   }
@@ -298,7 +317,7 @@ class QueryUi {
       title = Internationalization.getText(title) || title;
     }
     else {
-      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem, true);
     }
     return title;
   }
@@ -345,8 +364,12 @@ class QueryUi {
     const aggregator = axisItem.aggregator;
     if (aggregator) {
       itemUi.setAttribute('data-aggregator', aggregator);
+      if (QueryAxisItem.isAxisAggregate(axisItem)){
+        const partitionByItems = axisItem.partitionByItems;
+        itemUi.setAttribute('data-partition-by-items', JSON.stringify(partitionByItems));
+      }
     }
-
+    
     const captionUi = this.#getCaptionUi(itemUi);
     captionUi.textContent = this.#getQueryAxisItemUiCaption(axisItem);
 
@@ -374,6 +397,7 @@ class QueryUi {
     if (filter.toggleState === 'open') {
       detailsElement.setAttribute('open', String(true) );
     }
+    // TODO: remove this and create 1 single toggle handler for the entire query ui.
     setTimeout(() => detailsElement.addEventListener('toggle', event => this.#filterItemToggleHandler(event) ), 1000)
           
     const values = filter.values;
@@ -417,6 +441,7 @@ class QueryUi {
       label.setAttribute('for', deleteValueId);
       const button = label.querySelector('button');
       button.setAttribute('id', deleteValueId);
+      // TODO: handle this from the central click handler
       button.addEventListener('click', event => this.#deleteFilterValueClickHandler( event ) );
     }
   }
@@ -562,6 +587,7 @@ class QueryUi {
   #initFilterUiEvents(){
     const filterUi = this.#filterDialog;
     const filterDialog = filterUi.getDom();
+    filterDialog.addEventListener('open', event => this.#filterDialogStateChanged( event ) );
     filterDialog.addEventListener('close', event => this.#filterDialogStateChanged( event ) );
   }
   
@@ -591,6 +617,9 @@ class QueryUi {
     
     if (queryAxisItem.aggregator){
       data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
+      if  (queryAxisItem.partitionByItems){
+        data.partitionbyitems = { key: 'partitionbyitems', value: queryAxisItem.partitionByItems};
+      }
     }
 
     data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
@@ -681,6 +710,7 @@ class QueryUi {
       
       let dropEffect;
       const isAggregator = Boolean(info.aggregator);
+      const hasPartionByItems = Boolean(info.partitionbyitems);
       const isDefaultAggregator = Boolean(info.defaultaggregator);
       if (isCellsAxis){
         if (! (isAggregator || isDefaultAggregator) ){
@@ -688,10 +718,8 @@ class QueryUi {
           dropEffect = 'none';
         }
       }
-      else
-      if (isAggregator) {
-        // if this is not the cells axis, but the item is an aggregator, drop is forbidden
-        dropEffect = 'none';
+      else {
+        dropEffect = 'move';
       }
       
       // if we're dragging over an existing query ui item
@@ -781,6 +809,9 @@ class QueryUi {
         case QueryModel.AXIS_ROWS:
         case QueryModel.AXIS_COLUMNS:
           delete queryAxisItem.filter;
+          if (info.axis && info.axis.key !== QueryModel.AXIS_CELLS && info.axis.key !== axisId) {
+            this.#queryModel.removeItem(queryAxisItem);
+          }
           break;
         default:
       }

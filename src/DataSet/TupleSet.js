@@ -2,7 +2,6 @@ class TupleSet extends DataSetComponent {
 
   static groupingIdAlias = '__huey_grouping_id';
 
-  //
   static getSqlSelectExpressions(queryModel, axisId, includeCountAll){
     const queryAxis = queryModel.getQueryAxis(axisId);
     const queryAxisItems = queryAxis.getItems();

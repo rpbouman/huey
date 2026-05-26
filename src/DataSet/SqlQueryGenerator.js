@@ -42,6 +42,9 @@ class SqlQueryGenerator {
     return memberExpressionPathString;
   }
 
+  // TODO: we have to correctly stage and unwrap an axis aggregate filter items
+  // By that I mean, unwrap the subject of the aggregate as well as its partition columns from any nesting (if applicable)
+  // and carry axis aggregates on the unnested values all the way to the last stage.
   static #getFilterItemsByNestingStage(filterAxisItems){
     const filterAxisItemsByNestingStage = {};
     if (!filterAxisItems){
@@ -54,17 +57,21 @@ class SqlQueryGenerator {
       if (!filter){
         return false;
       }
+      
       const values = filter.values;
       if (!values){
         return false;
       }
+      
       const keys = Object.keys(values).filter(key => {
         const valueObject = values[key];
         return valueObject.enabled !== false;
       });
+      
       if (!keys.length){
         return false;
       }
+      
       return true;
     });
     
@@ -273,6 +280,7 @@ class SqlQueryGenerator {
     
     // go over ctes to detect unnesting operations
     // add new cte for each new level of unnesting operation
+    
    let unnestingItem;
    do {
       unnestingItem = undefined;
@@ -440,7 +448,7 @@ class SqlQueryGenerator {
     const nullsSortOrder = options.nullsSortOrder;
     const totalsPosition = options.totalsPosition;
     const includeOrderBy = options.includeOrderBy === false ? false : true;
-    const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;    
+    const useLateralColumnAlias = options.useLateralColumnAlias === false ? false : true;
     const columnExpressions = {};
     cte.items.forEach((item, index) => {
       const originalItem = queryAxisItems[index];
@@ -474,11 +482,6 @@ class SqlQueryGenerator {
       const columnExpression = columnExpressions[columnId];
       const columnAlias = quoteIdentifierWhenRequired(columnId);
       
-      // TODO: see https://github.com/rpbouman/huey/issues/401
-      // we should check if it's safe to use a column alias. 
-      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
-      const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
-      
       if (includeCountAll && i >= queryAxisItems.length) {
         // when includeCountAll is true, we generate one extra count() over () expression
         // we need that count all to figure out how many tuples there are on the axis in total
@@ -488,6 +491,12 @@ class SqlQueryGenerator {
       }
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
+
+      // TODO: see https://github.com/rpbouman/huey/issues/401
+      // we should check if it's safe to use a column alias. 
+      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
+      const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
+
       const queryAxisItem = queryAxisItems[i];
       const axisId = queryAxisItem.axis;
       if (axisId === QueryModel.AXIS_CELLS){
@@ -501,7 +510,7 @@ class SqlQueryGenerator {
       axisGroupByExpressions = groupByExpressions[axisId];
       
       if (queryAxisItem.includeTotals){
-        // make a grouping set for the group by expression up to this point
+        // make a grouping set for the GROUP BY expression up to this point
         const groupingSet = [].concat(axisGroupByExpressions);
         axisGroupingSets = groupingSets[axisId];
         axisGroupingSets.push(groupingSet);
@@ -510,7 +519,8 @@ class SqlQueryGenerator {
         // so we can figure out which result rows are totals (and for what group).
         
         // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
-        groupingIdExpressions.push(columnExpression);
+        //groupingIdExpressions.push(columnExpression);
+        groupingIdExpressions.push(columnExpressionReference);
         
         // store a placeholder for the groupingId expression in the order by expressions.
         // we will replace these later with expressions to sort the totals.
@@ -518,7 +528,8 @@ class SqlQueryGenerator {
       }
       
       // adding columnExpression rather than reference, see https://github.com/rpbouman/huey/issues/401 
-      axisGroupByExpressions.push(columnExpression);
+      // axisGroupByExpressions.push(columnExpression);
+      axisGroupByExpressions.push(columnExpressionReference);
       
       let orderByExpression = `${columnExpressionReference} ${sortDirection}`;
       orderByExpression += itemNullsSortOrder;
@@ -618,9 +629,10 @@ class SqlQueryGenerator {
       `SELECT ${selectListExpressions.join('\n,')}`,
       cte.from
     ];
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
+    SqlQueryGenerator.#generateSqlClausesForFilterItems(cte, sql);
 
     if (groupByClause) {
+
       groupByClause = `GROUP BY ${groupByClause}`;
       sql.push(groupByClause);
     }
@@ -639,22 +651,29 @@ class SqlQueryGenerator {
     cte.items.forEach(item => {
       if (item.isUnnestingExpression === true) {
         const itemUnnestingFunctions = item.unnestingFunctions;
-        Object.keys(itemUnnestingFunctions).forEach(unnestingFunction => {
+        Object.keys( itemUnnestingFunctions )
+        .forEach( unnestingFunction => {
           const arrayDerivation = unnestingFunctions[unnestingFunction];
           const expressionTemplate = arrayDerivation.expressionTemplate;
           const columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
           const unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
           const alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
           selectListExpressions[alias] = unnestingExpression;
-        });
+        } );
       }
       else 
-      if (item.derivation === 'row number') {
+      if (item.derivation === 'row number') {                         // special case, the built-in row number
         const rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
         selectListExpressions[rowNumberSql] = rowNumberSql;
       }
+      else 
+      if ( QueryAxisItem.isAxisAggregate( item ) ){
+        const caption = QueryAxisItem.getCaptionForQueryAxisItem( item );
+        const expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
+        selectListExpressions[caption] = expression;
+      }
       else
-      if (item.aggregator === 'count' && item.columnName === '*'){
+      if (item.aggregator === 'count' && item.columnName === '*' ){   // special case, the built-in aggregate
         return;
       }
       else {
@@ -672,7 +691,7 @@ class SqlQueryGenerator {
       cte.from
     ];
     
-    SqlQueryGenerator.#generateWhereClause(cte, sql);
+    SqlQueryGenerator.#generateSqlClausesForFilterItems(cte, sql);
     
     const samplingConfig = sqlOptions.samplingConfig;
     if (samplingConfig){
@@ -684,17 +703,75 @@ class SqlQueryGenerator {
     const sqlText = sql.join('\n');
     return sqlText;
   }
-  
-  static #generateWhereClause(cte, sql){
+
+  static #generateSqlClausesForFilterItems(cte, sql){
     const filterAxisItems = cte.filters;
-    if (!filterAxisItems) {
+    if (!filterAxisItems || !filterAxisItems.length){
       return;
     }
-    if (!filterAxisItems.length){
-      return;
+    const whereClauseItems = [];
+    const qualifyClauseItems = [];
+    filterAxisItems.forEach( filterAxisItem => ( QueryAxisItem.isAxisAggregate(filterAxisItem) ? qualifyClauseItems : whereClauseItems ).push(filterAxisItem) );
+    if (whereClauseItems.length) {
+      const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(whereClauseItems, cte.alias);
+      sql.push(`WHERE ${whereCondition}`);
     }
-    const whereCondition = SqlQueryGenerator.#getConditionForFilterItems(filterAxisItems, cte.alias);
-    sql.push(`WHERE ${whereCondition}`);
+    if (qualifyClauseItems.length) {
+      const qualifyCondition = SqlQueryGenerator.#getConditionForFilterItems(qualifyClauseItems, cte.alias);
+      sql.push(`QUALIFY ${qualifyCondition}`);
+    }
+  }
+  
+  static #createAxisAggregateStage(ctes){
+    // the original query with the axis aggregages is the current last stage.
+    // this can mostly stay in place, we just need to generate a stage on top to which the GROUP BY is applied.
+    // this new stage is simply a projection on the stage with the axis aggregates
+    const cte = ctes[ctes.length - 1];
+    const oldItems = cte.items;
+    const newItems = oldItems.map( item => { 
+      return {
+        columnName: QueryAxisItem.getCaptionForQueryAxisItem( item ) 
+      };
+    });
+    const axisAggregateCte = {
+      items: newItems,
+      from: `FROM ${cte.alias}`,
+    };
+    // axis aggregates that appear in a filter also need to be moved to this new stage.
+    /*
+    const filterItems = cte.filters;
+    if (filterItems && filterItems.length){
+      const oldFilterItems = [];
+      const newFilterItems = [];
+      filterItems.forEach( oldFilterItem => {
+        oldFilterItem = JSON.parse(JSON.stringify(oldFilterItem));
+        if ( QueryAxisItem.isAxisAggregate( oldFilterItem ) ) {
+          const filter = oldFilterItem.filter;
+          delete oldFilterItem['axis'];
+          delete oldFilterItem['caption'];
+          delete oldFilterItem['filter'];
+          const newFilterItem = {
+            columnName: QueryAxisItem.getCaptionForQueryAxisItem( oldFilterItem ),
+          };
+          // if the axis aggregate item appears only on the filter axis, then we have to add it to the items of the previous stage, 
+          // in order for this stage to apply the filter condition on it.
+          if (QueryAxisItem.indexOfItem(oldFilterItem, oldItems) === -1){
+            oldItems.push( oldFilterItem );
+          }
+          newFilterItem.filter = filter;
+          newFilterItems.push( newFilterItem );
+        }
+        else {
+          oldFilterItems.push(filterItem);
+        }
+      });
+      if ( newFilterItems.length ) {
+        cte.filters = oldFilterItems;
+        axisAggregateCte.filters = newFilterItems;
+      }
+    }
+    */
+    ctes.push(axisAggregateCte);
   }
 
   static getSqlSelectStatementForAxisItems(options){
@@ -704,20 +781,58 @@ class SqlQueryGenerator {
       return undefined;
     }
 
+    // analyze the items to see what axes they are on.
+    // we need to know to correctly evaluate aggregate axis filter items
+    const itemAxes = {};
+    queryAxisItems.forEach( queryAxisItemm => {
+      const axisId = queryAxisItemm.axis;
+      if ( itemAxes[ axisId ] === undefined ) {
+        itemAxes[ axisId ] = [];
+      }
+      itemAxes[ axisId ].push( queryAxisItemm );
+    });
+    
     const datasource = options.datasource; 
-    const filterAxisItems = options.filterAxisItems;
     const samplingConfig = options.samplingConfig
-
     const sqlOptions = normalizeSqlOptions(options.sqlOptions);
 
+    let filterAxisItems = options.filterAxisItems;
+    if ( filterAxisItems && filterAxisItems.length ) {
+      const axisIds = Object.keys(itemAxes);
+      if (axisIds.length) {
+        // don't take axis aggregates into account that doe 
+        switch (axisIds.length) {
+          case 1:
+            filterAxisItems = filterAxisItems.filter( filterAxisItem => {
+              if ( !QueryAxisItem.isAxisAggregate( filterAxisItem ) ){
+                return true;
+              }
+              const partitionByItems = filterAxisItem.partitionByItems;
+              if ( partitionByItems.some( partitionByItem => partitionByItem.axis !== axisIds[0] ) ) {
+                return false;
+              }
+              return true;
+            });
+            break;
+        }
+      }
+    }
     const filterAxisItemsByNestingStage = SqlQueryGenerator.#getFilterItemsByNestingStage(filterAxisItems);
     const ctes = SqlQueryGenerator.#getUnnestingStages(
       datasource,
       queryAxisItems, 
       filterAxisItemsByNestingStage
     );
+    
+    let cte = ctes[ctes.length -1];
+    if ( 
+      cte.items.some( item => QueryAxisItem.isAxisAggregate( item ) ) ||
+      filterAxisItems && filterAxisItems.some( filterAxisItem => QueryAxisItem.isAxisAggregate(filterAxisItem) )
+    ) {
+      SqlQueryGenerator.#createAxisAggregateStage(ctes);
+    }
+    cte = ctes.pop();
 
-    const cte = ctes.pop();
     options.samplingConfig = ctes.length ? undefined : samplingConfig;
     let sql = SqlQueryGenerator.#getSqlSelectStatementForFinalStage(cte, options);
     

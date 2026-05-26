@@ -180,6 +180,7 @@ class CellSet extends DataSetComponent {
   // https://github.com/rpbouman/huey/issues/134
   // idea is to use the tuples to come up with a more clever/optimized query condition 
   // to be pushed down to the lowest level of the cellset.
+  // right now it is not implemented.
   #getFilterAxisItemsForCells(
     // object keyed by cellindex, with an array of tuples as value.
     tuplesToQuery,
@@ -191,77 +192,7 @@ class CellSet extends DataSetComponent {
     const tupleSets = this.#tupleSets;
     const queryModel = this.getQueryModel();
     const filterAxis = queryModel.getFiltersAxis();
-    const originalFilterAxisItems = filterAxis.getItems();
-    
-    /*
-    // most basic optimization: IN clause for all non-derived items (=columns)
-    // we will make a special tuple filter item for this:
-    // - a filter item that combines multiple axis items, and a array of tuple value arrays
-    var first = true;
-    var columnItems = [];
-    var fields = [];
-    var tupleValues = [];
-    var tuplesFilterItem;
-    for (var tupleIndex in tuplesToQuery){
-      var filterTupleValues = [];
-      var tupleToQuery = tuplesToQuery[tupleIndex];
-      for (var i = 0; i < tupleSets.length; i++){
-        var tuple = tupleToQuery[i];
-        if (!tuple) {
-          continue;
-        }
-        var tupleFields = tuplesFields[i];
-        var tupleValues = tuple.values;
-
-        var tupleSet = tupleSets[i];
-        var queryAxisItems = tupleSet.getQueryAxisItems();
-        
-        for (var j = 0; j < queryAxisItems.length; j++){
-          var queryAxisItem = queryAxisItems[j];
-          if (queryAxisItem.derivation) {
-            continue;
-          }
-          // check if this tuple item appears in the filters axis
-          var sqlForQueryAxisItem = QueryAxisItem.getSqlForQueryAxisItem(queryAxisItem);
-          var originalFilterAxisItemIndex = originalFilterAxisItems.findIndex(function(filterAxisItem){
-            return QueryAxisItem.getSqlForQueryAxisItem(filterAxisItem) === sqlForQueryAxisItem;
-          });
-          // If it exists as fitler axis item, we can now remove it since the condition we're generating is stronger
-          if (originalFilterAxisItemIndex !== -1) {
-            originalFilterAxisItems.splice(originalFilterAxisItemIndex, 1);
-          }
-            
-          if (first){
-            columnItems.push(queryAxisItem);
-            var tupleField = tupleFields[j];
-            fields.push(tupleField);
-          }
-          var tupleValue = tupleValues[j];
-          filterTupleValues.push(tupleValue);
-        }
-      }
-      
-      if (first) {
-        first = false;
-        if (!columnItems.length) {
-          break;
-        }
-        tuplesFilterItem = {
-          queryAxisItems: columnItems,
-          fields: fields,
-          filter: {
-            filterType: FilterDialog.filterTypes.INCLUDE,
-            values: []
-          }
-        }
-      }
-      tuplesFilterItem.filter.values.push(filterTupleValues)
-    }
-    
-    if (tuplesFilterItem) {
-      originalFilterAxisItems.unshift(tuplesFilterItem);
-    }
-    */
+    const originalFilterAxisItems = filterAxis.getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
     
     return originalFilterAxisItems;
   }
@@ -277,8 +208,8 @@ class CellSet extends DataSetComponent {
     const queryModel = this.getQueryModel();
     const datasource = queryModel.getDatasource();
 
-    const rowsAxisItems = queryModel.getRowsAxis().getItems();
-    const columnsAxisItems = queryModel.getColumnsAxis().getItems();
+    const rowsAxisItems = queryModel.getRowsAxis().getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
+    const columnsAxisItems = queryModel.getColumnsAxis().getItems().filter( item => !QueryAxisItem.isAxisAggregate(item) );
     const axisItems = [].concat(rowsAxisItems, columnsAxisItems);
     const allItems = [].concat(axisItems, cellsAxisItemsToFetch || []);
     const filterAxisItems = this.#getFilterAxisItemsForCells(
