@@ -666,15 +666,15 @@ class SqlQueryGenerator {
         const rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
         selectListExpressions[rowNumberSql] = rowNumberSql;
       }
-      else
-      if (item.aggregator === 'count' && item.columnName === '*'){   // special case, the built-in aggregate
-        return;
-      }
       else 
       if ( QueryAxisItem.isAxisAggregate( item ) ){
         const caption = QueryAxisItem.getCaptionForQueryAxisItem( item );
         const expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
         selectListExpressions[caption] = expression;
+      }
+      else
+      if (item.aggregator === 'count' && item.columnName === '*' ){   // special case, the built-in aggregate
+        return;
       }
       else {
         const column = item.alias || item.columnName;
