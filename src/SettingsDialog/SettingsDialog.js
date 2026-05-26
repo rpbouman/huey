@@ -54,7 +54,7 @@ class Settings extends EventEmitter {
       commaStyle: 'newlineBefore'
     },
     querySettings: {
-      autoRunQuery: false,
+      autoRunQuery: true,
       autoRunQueryTimeout: 1000,
       filterValuePicklistPageSize: 100,
       filterSearchAutoQueryTimeoutInMilliseconds: 1000,
