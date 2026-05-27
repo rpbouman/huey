@@ -22,8 +22,8 @@ class PromptUi {
     return dialog.querySelector('section');
   }
   
-  static set #contents(html){
-    PromptUi.#section.innerHTML = html;
+  static set #contents(text){
+    PromptUi.#section.textContent = text;
   }
   
   static {
