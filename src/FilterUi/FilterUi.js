@@ -130,6 +130,7 @@ class FilterDialog {
   
   #handleClearButtonClick( event ){
     this.clearFilterValueLists();
+    this.#updatePicklistOptionInValuesListAttributes();
     this.#updateValueSelectionStatusText();
   }
 
@@ -674,11 +675,13 @@ class FilterDialog {
             // no range start, this is the start of a new range.
             if (rangeStart === undefined) {
               rangeStart = this.#extractValueFromOption(option);
+              option.setAttribute('data-in-values-list', true);
             }
 
             // update the end of the current range (we keep updating it as long as the options are selected)
             if (rangeStart !== undefined) {
               rangeEnd = this.#extractValueFromOption(option);
+              option.setAttribute('data-in-to-values-list', true);
             }
           }
 
@@ -716,6 +719,7 @@ class FilterDialog {
           continue;
         }
         currentValues[selectedOption.value] = this.#extractValueFromOption(selectedOption);
+        selectedOption.setAttribute('data-in-values-list', true);
       }
     }
 
@@ -751,7 +755,7 @@ class FilterDialog {
 
   #removeSelectedValues(){
     const selectControl = this.#getFilterValuesList();
-    const options = selectControl.options;
+    let options = selectControl.options;
     const toValuesList = this.#getToFilterValuesList();
     const toValuesOptions = toValuesList.options;
     const currentValues = {};
@@ -779,7 +783,29 @@ class FilterDialog {
     this.#renderOptionsToSelectList(currentValues, selectControl);
     this.#renderOptionsToSelectList(currentToValues, toValuesList);
 
-    this.#getValuePicklist().selectedIndex = -1;
+    this.#updatePicklistOptionInValuesListAttributes(currentValues, currentToValues);
+    const valuePickList = this.#getValuePicklist();
+    valuePickList.selectedIndex = -1;
+  }
+  
+  #updatePicklistOptionInValuesListAttributes(currentValues, currentToValues){
+    const valuePickList = this.#getValuePicklist();
+    const options = valuePickList.options;
+    for (let i = 0; i < options.length; i++){
+      const option = options[i];
+      if (
+        option.getAttribute('data-in-values-list') === 'true' && 
+        (currentValues === undefined || currentValues[option.value] === undefined)
+      ){
+        option.removeAttribute('data-in-values-list');
+      }
+      if (
+        option.getAttribute('data-in-to-values-list') === 'true' && 
+        (currentToValues === undefined || currentToValues[option.value] === undefined)
+      ){
+        option.removeAttribute('data-in-to-values-list');
+      }
+    }
   }
 
   #getDialogButtons(){
@@ -1217,6 +1243,8 @@ class FilterDialog {
           break;
       }
     }
+
+    const dialogState = this.#getDialogState();
     
     const formatter = this.#queryAxisItem.formatter;
     let option;
@@ -1236,6 +1264,12 @@ class FilterDialog {
       });
       if (rawValue === null){
         option.setAttribute('data-sql-null', true);
+      }
+      if (dialogState.values[option.value]){
+        option.setAttribute('data-in-values-list', true);
+      }
+      if (dialogState.toValues[option.value]){
+        option.setAttribute('data-in-to-values-list', true);
       }
       optionsContainer.appendChild(option);
     }

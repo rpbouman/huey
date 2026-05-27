@@ -156,6 +156,11 @@ dialog#filterDialog {
               color: var( --huey-placeholder-color );
               font-style: italic;
             }
+            
+            option[data-in-values-list=true],
+            option[data-in-to-values-list=true] {
+              color: var( --huey-placeholder-color )
+            }
           }
 
         }
