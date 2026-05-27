@@ -123,6 +123,10 @@
     
     <meta name="theme-color" content="rgb(250,250,250)"/>
 
+  </head>
+
+  <body aria-busy="true">
+
     <datalist id="commonCsvFieldDelimiters">
       <option data-auto="true" value="(default)">(default)</option>
       <option value=",">Comma</option>
@@ -256,9 +260,7 @@
       <option value="VALIDATION" data-default-type="text" data-associated-secret-types="s3"></option>
       <option value="VERIFY_SSL" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2,http"></option>
     </datalist>
-  </head>
 
-  <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
       <header id="logo" translate="no">Huey</header>
