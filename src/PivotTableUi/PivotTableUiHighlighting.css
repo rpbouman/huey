@@ -1,4 +1,6 @@
-.pivotTableUiContainer[data-alternating-row-colors=true] {
+html > body:has( 
+  > dialog#settingsDialog input#alternatingRowColors[type=checkbox]:checked 
+) > main > #workarea > .pivotTableUiContainer {
 
   > .pivotTableUiInnerContainer {
     
@@ -12,17 +14,50 @@
             filter: brightness( var( --huey-alternating-rows-brightness ) );
           }
         }
-
       }
-      
     }
-    
   }
+}
+
+html > body:has( 
+  > dialog#settingsDialog select#hoverHighlightHeaderStyle > option[value=fill]:checked 
+) {
+  
+  --huey-hover-highlight-header-background-color: var( --huey-highlight-background-color );
+  --huey-hover-highlight-header-color: var( --huey-highlight-color );
+  --huey-hover-highlight-header-border-color: var( --huey-light-border-color );
+}
+
+html > body:has( 
+  > dialog#settingsDialog select#hoverHighlightHeaderStyle > option[value=outline]:checked 
+) {
+  --huey-hover-highlight-header-background-color: var( --huey-medium-background-color );
+  --huey-hover-highlight-header-color: var( --huey-foreground-color );
+  --huey-hover-highlight-header-border-color: var( --huey-highlight-background-color );
+}
+
+html > body:has( 
+  > dialog#settingsDialog select#hoverHighlightCellStyle > option[value=fill]:checked 
+) {
+  
+  --huey-hover-highlight-cell-background-color: var( --huey-highlight-background-color );
+  --huey-hover-highlight-cell-color: var( --huey-highlight-color );
+  --huey-hover-highlight-cell-border-color: var( --huey-light-border-color );
   
 }
 
+html > body:has( 
+  > dialog#settingsDialog select#hoverHighlightCellStyle > option[value=outline]:checked 
+) {
+  --huey-hover-highlight-cell-background-color: var( --huey-light-background-color );
+  --huey-hover-highlight-cell-color: var( --huey-foreground-color );
+  --huey-hover-highlight-cell-border-color: var( --huey-highlight-background-color );
+}
 
-.pivotTableUiContainer[data-hover-row-highlighting=true] {
+
+html > body:has( 
+  > dialog#settingsDialog input#hoverRowHighlight[type=checkbox]:checked 
+) > main > #workarea > .pivotTableUiContainer {
 
   > .pivotTableUiInnerContainer {
     
@@ -30,16 +65,32 @@
 
       > .pivotTableUiTableBody {
 
-        /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
-        > .pivotTableUiRow:hover > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
-          
-          background-color: var( --huey-highlight-background-color );
-          color: var( --huey-highlight-color );
+        > .pivotTableUiRow:hover {
+
+          > .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+
+            border-top-style: solid;
+            border-top-width: 1px;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            
+            &.pivotTableUiHeaderCell {
+              background-color: var( --huey-hover-highlight-header-background-color );
+              color: var( --huey-hover-highlight-header-color );
+              border-top-color: var( --huey-hover-highlight-header-border-color );
+              border-bottom-color: var( --huey-hover-highlight-header-border-color );
+            }
+            
+            &.pivotTableUiValueCell {
+              background-color: var( --huey-hover-highlight-cell-background-color );
+              color: var( --huey-hover-highlight-cell-color );
+              border-top-color: var( --huey-hover-highlight-cell-border-color );
+              border-bottom-color: var( --huey-hover-highlight-cell-border-color );
+            }
+          }
         }
       }
-      
     }
-    
   }
-  
 }
+

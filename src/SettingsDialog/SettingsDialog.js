@@ -73,7 +73,21 @@ class Settings extends EventEmitter {
       dittoMark: '〃',
       alternatingRowColors: true,
       hoverRowHighlight: true,
-      hoverColumnHighlight: true
+      hoverColumnHighlight: true,
+      hoverHighlightHeaderStyle: {
+        value: 'fill',
+        options: [
+          { value: 'fill', label: 'fill' },
+          { value: 'outline', label: 'outline' }
+        ]
+      },
+      hoverHighlightCellStyle: {
+        value: 'outline',
+        options: [
+          { value: 'fill', label: 'fill' },
+          { value: 'outline', label: 'outline' }
+        ]
+      }
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',
@@ -432,6 +446,7 @@ class Settings extends EventEmitter {
     });
 
     byId('settingsButton').addEventListener('click', event => this.#updateDialogFromSettings() );
+    this.#updateDialogFromSettings();
   }
 
   #resetSettings(){
