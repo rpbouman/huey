@@ -19,24 +19,48 @@ class PivotTableUiHighlighting {
   
   #initColumnHighlightingRuleText(){
     const id = this.#getPivotTableUiId();
-    this.#columnHighlightingRuleText = [`#${id}.pivotTableUiContainer[data-hover-column-highlighting=true] {
-      > .pivotTableUiInnerContainer {
-        > .pivotTableUiTable {
-          .pivotTableUiRow { 
-            > .pivotTableUiCell:not( .pivotTableUiStufferCell ):nth-child(`, `) {
-              background-color: var( --huey-highlight-background-color );
-              color: var( --huey-highlight-color );
+    this.#columnHighlightingRuleText = [`
+      html > body:has( 
+        > dialog#settingsDialog input#hoverColumnHighlight[type=checkbox]:checked 
+      ) > main > #workarea > .pivotTableUiContainer {
+        > .pivotTableUiInnerContainer {
+          > .pivotTableUiTable {
+            .pivotTableUiRow { 
+              > .pivotTableUiCell:not( .pivotTableUiStufferCell ):nth-child(`, `) {
+                
+                &.pivotTableUiHeaderCell {
+                  border-right-color: var( --huey-hover-highlight-header-border-color );
+                }
+                
+                &.pivotTableUiValueCell {
+                  border-right-color: var( --huey-hover-highlight-cell-border-color );
+                }
+                
+                & + .pivotTableUiCell:not( .pivotTableUiStufferCell ) {
+                
+                  &.pivotTableUiHeaderCell {
+                    background-color: var( --huey-hover-highlight-header-background-color );
+                    color: var( --huey-hover-highlight-header-color );
+                    border-right-color: var( --huey-hover-highlight-header-border-color );
+                  }
+                  
+                  &.pivotTableUiValueCell {
+                    background-color: var( --huey-hover-highlight-cell-background-color );
+                    color: var( --huey-hover-highlight-cell-color );
+                    border-right-color: var( --huey-hover-highlight-cell-border-color );
+                  }
+                }
+              }
             }
           }
         }
       }
-    }
     `];
   }
   
   #getColumnHighlightingCssText(columnIndex){
     const ruleText = this.#columnHighlightingRuleText;
-    return `${ruleText[0]}${columnIndex}${ruleText[1]}`;
+    return `${ruleText[0]}${columnIndex - 1}${ruleText[1]}`;
   }
 
   #getPivotTableUiId(){
