@@ -729,48 +729,16 @@ class SqlQueryGenerator {
     const cte = ctes[ctes.length - 1];
     const oldItems = cte.items;
     const newItems = oldItems.map( item => { 
+      const column = item.alias || item.columnName;
       return {
-        columnName: QueryAxisItem.getCaptionForQueryAxisItem( item ) 
+        columnName: column,
+        caption: QueryAxisItem.getCaptionForQueryAxisItem( item )
       };
     });
     const axisAggregateCte = {
       items: newItems,
       from: `FROM ${cte.alias}`,
     };
-    // axis aggregates that appear in a filter also need to be moved to this new stage.
-    /*
-    const filterItems = cte.filters;
-    if (filterItems && filterItems.length){
-      const oldFilterItems = [];
-      const newFilterItems = [];
-      filterItems.forEach( oldFilterItem => {
-        oldFilterItem = JSON.parse(JSON.stringify(oldFilterItem));
-        if ( QueryAxisItem.isAxisAggregate( oldFilterItem ) ) {
-          const filter = oldFilterItem.filter;
-          delete oldFilterItem['axis'];
-          delete oldFilterItem['caption'];
-          delete oldFilterItem['filter'];
-          const newFilterItem = {
-            columnName: QueryAxisItem.getCaptionForQueryAxisItem( oldFilterItem ),
-          };
-          // if the axis aggregate item appears only on the filter axis, then we have to add it to the items of the previous stage, 
-          // in order for this stage to apply the filter condition on it.
-          if (QueryAxisItem.indexOfItem(oldFilterItem, oldItems) === -1){
-            oldItems.push( oldFilterItem );
-          }
-          newFilterItem.filter = filter;
-          newFilterItems.push( newFilterItem );
-        }
-        else {
-          oldFilterItems.push(filterItem);
-        }
-      });
-      if ( newFilterItems.length ) {
-        cte.filters = oldFilterItems;
-        axisAggregateCte.filters = newFilterItems;
-      }
-    }
-    */
     ctes.push(axisAggregateCte);
   }
 
@@ -800,7 +768,6 @@ class SqlQueryGenerator {
     if ( filterAxisItems && filterAxisItems.length ) {
       const axisIds = Object.keys(itemAxes);
       if (axisIds.length) {
-        // don't take axis aggregates into account that doe 
         switch (axisIds.length) {
           case 1:
             filterAxisItems = filterAxisItems.filter( filterAxisItem => {
