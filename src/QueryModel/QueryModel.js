@@ -246,8 +246,8 @@ class QueryModel extends EventEmitter {
           }
           break;
         }
-      case QueryModel.AXIS_FILTERS:
         delete copyOfConfig['axis'];
+      case QueryModel.AXIS_FILTERS:
     }
     let foundItem = this.findItem(copyOfConfig);
 
