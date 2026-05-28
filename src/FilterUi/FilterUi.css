@@ -86,7 +86,13 @@ dialog#filterDialog {
 
       > li[role=menuitem],
       > li[role=menuitemcheckbox] {
-
+        
+        &:not( :first-of-type ) {
+          border-left-style: solid;
+          border-left-width: 1px;
+          border-left-color: var( --huey-light-border-color );
+          padding-left: .25em;
+        }
         display: inline-block;
 
         > label:has( > input[type=checkbox] ) > span::after{
