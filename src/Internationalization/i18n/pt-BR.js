@@ -74,7 +74,7 @@ Internationalization.setTexts({
   "Check this to include a header row with column names.": "Marque isto para incluir uma linha de cabeçalho com nomes de colunas.",
   "Check to automatically apply LIKE wildcards": "Marque para aplicar automaticamente curingas LIKE",
   "Check to copy the data to the clipboard in order to paste it in other applications": "Marque para copiar os dados para a área de transferência para colar em outros aplicativos",
-  "Check to display raw values. Uncheck to display formatter values.": "Marque para exibir valores brutos. Desmarque para exibir valores formatados.",
+  "Check to display raw values. Uncheck to display formatted values.": "Marque para exibir valores brutos. Desmarque para exibir valores formatados.",
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "Marque para incluir os outros itens de filtro (além da string de busca) para preencher a lista de seleção",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "Marque para usar a localidade padrão do navegador, desmarque para inserir uma localidade personalizada.",
   "Checking extension {1}": "Verificando extensão {1}",
