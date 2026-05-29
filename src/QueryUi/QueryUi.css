@@ -183,7 +183,12 @@
         &:is( 
           [data-derivation], 
           [data-aggregator]
-        ) > span:before {
+        ) > span:before,
+        &:is( 
+          [data-derivation], 
+          [data-aggregator]
+        ) > details > summary > span:before 
+        {
           width: 20px;
           font-family: var( --huey-icon-font-family ) !important;
           font-size: var( --huey-icon-medium );
