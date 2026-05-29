@@ -645,43 +645,60 @@ class SqlQueryGenerator {
     return sql;
   }
 
+  static #getSqlSelectItemExpressionForIntermediateStage(cte, item, sqlOptions){
+    const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
+    const selectListExpressions = {};
+    let alias, expression;
+    
+    if (item.isUnnestingExpression === true) {
+      const itemUnnestingFunctions = item.unnestingFunctions;
+      Object.keys( itemUnnestingFunctions )
+      .forEach( unnestingFunction => {
+        const arrayDerivation = unnestingFunctions[unnestingFunction];
+        const expressionTemplate = arrayDerivation.expressionTemplate;
+        const columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
+        expression = extrapolateColumnExpression(expressionTemplate, columnExpression);
+        alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
+        selectListExpressions[alias] = expression;
+      } );
+    }
+    else 
+    if (item.derivation === 'row number') {                         // special case, the built-in row number
+      expression = QueryAxisItem.getSqlForQueryAxisItem(item);
+      alias = expression;
+      selectListExpressions[alias] = expression;
+    }
+    else 
+    if ( QueryAxisItem.isAxisAggregate( item ) ){
+      alias = QueryAxisItem.getCaptionForQueryAxisItem( item );
+      expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
+      selectListExpressions[alias] = expression;
+    }
+    else
+    if (item.aggregator === 'count' && item.columnName === '*' ){   // special case, the built-in aggregate
+      return;
+    }
+    else {
+      alias = item.alias || item.columnName;
+      expression = getQualifiedIdentifier(cte.alias, item.columnName);
+      if (selectListExpressions[alias] === undefined) {
+        selectListExpressions[alias] = expression;
+      }
+    }
+    
+    return {
+      selectListExpressions: selectListExpressions,
+      alias: alias, 
+      expression: expression
+    };
+  }
+
   static #getSqlSelectStatementForIntermediateStage(cte, sqlOptions){
     const unnestingFunctions = SqlQueryGenerator.#getUnnestingFunctions();
     const selectListExpressions = {};
     cte.items.forEach(item => {
-      if (item.isUnnestingExpression === true) {
-        const itemUnnestingFunctions = item.unnestingFunctions;
-        Object.keys( itemUnnestingFunctions )
-        .forEach( unnestingFunction => {
-          const arrayDerivation = unnestingFunctions[unnestingFunction];
-          const expressionTemplate = arrayDerivation.expressionTemplate;
-          const columnExpression = QueryAxisItem.getSqlForColumnExpression(item, cte.alias, sqlOptions);
-          const unnestingExpression = extrapolateColumnExpression(expressionTemplate, columnExpression);
-          const alias = [item.columnName].concat(item.memberExpressionPath, [unnestingFunction]).join('.');
-          selectListExpressions[alias] = unnestingExpression;
-        } );
-      }
-      else 
-      if (item.derivation === 'row number') {                         // special case, the built-in row number
-        const rowNumberSql = QueryAxisItem.getSqlForQueryAxisItem(item);
-        selectListExpressions[rowNumberSql] = rowNumberSql;
-      }
-      else 
-      if ( QueryAxisItem.isAxisAggregate( item ) ){
-        const caption = QueryAxisItem.getCaptionForQueryAxisItem( item );
-        const expression = QueryAxisItem.getSqlForQueryAxisItem( item, cte.alias );
-        selectListExpressions[caption] = expression;
-      }
-      else
-      if (item.aggregator === 'count' && item.columnName === '*' ){   // special case, the built-in aggregate
-        return;
-      }
-      else {
-        const column = item.alias || item.columnName;
-        if (selectListExpressions[column] === undefined) {
-          selectListExpressions[column] = getQualifiedIdentifier(cte.alias, item.columnName);
-        }
-      }
+      const result = SqlQueryGenerator.#getSqlSelectItemExpressionForIntermediateStage(cte, item, sqlOptions);
+      Object.assign(selectListExpressions, result.selectListExpressions);
     });
     const sqlSelectList = Object.keys(selectListExpressions).map(columnId => {
       return `${selectListExpressions[columnId]} AS ${quoteIdentifierWhenRequired(columnId)}`
@@ -729,9 +746,9 @@ class SqlQueryGenerator {
     const cte = ctes[ctes.length - 1];
     const oldItems = cte.items;
     const newItems = oldItems.map( item => { 
-      const column = item.alias || item.columnName;
+      const result = SqlQueryGenerator.#getSqlSelectItemExpressionForIntermediateStage(cte, item);
       return {
-        columnName: column,
+        columnName: result.alias,
         caption: QueryAxisItem.getCaptionForQueryAxisItem( item )
       };
     });
