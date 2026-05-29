@@ -74,7 +74,7 @@ dialog#filterDialog {
   }
 
   > section {
-    flex-grow: .75;
+    flex-grow: 1;
     padding: 2px;
 
     menu[role=menubar] {
@@ -129,6 +129,7 @@ dialog#filterDialog {
         > header {
 
           > input[type=search]#filterSearch {
+            
             border-color: var( --huey-light-border-color );
             width: calc( 100% - 40px );
             position:relative;
@@ -137,10 +138,19 @@ dialog#filterDialog {
             padding-left: .5em;
           }
 
-          > button#addFilterValueButton::before {
-            font-family: var( --huey-icon-font-family );
-            font-size: var( --huey-icon-medium );
-            content: var( --icon-filter-plus );
+          > button#addFilterValueButton {
+            background-color: var( --huey-medium-background-color );
+            
+            &::before {
+              font-family: var( --huey-icon-font-family );
+              font-size: var( --huey-icon-medium );
+              content: var( --icon-filter-plus );
+              color: var( --huey-icon-color-subtle );
+            }
+            
+            &:hover::before {
+              color: var( --huey-icon-color-highlight );
+            }
           }
 
         }

@@ -74,7 +74,7 @@ Internationalization.setTexts({
   "Check this to include a header row with column names.": "Vink dit aan om een headerrij met kolomnamen toe te voegen.",
   "Check to automatically apply LIKE wildcards": "Vink aan om automatisch LIKE-wildcards toe te passen",
   "Check to copy the data to the clipboard in order to paste it in other applications": "Vink aan om de gegevens naar het klembord te kopiëren om ze in andere applicaties te plakken",
-  "Check to display raw values. Uncheck to display formatter values.": "Vink aan om ruwe waarden weer te geven. Vink af om formatterwaarden weer te geven.",
+  "Check to display raw values. Uncheck to display formatted values.": "Vink aan om ruwe waarden weer te geven. Vink af om formatterwaarden weer te geven.",
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "Vink aan om de andere filteritems (naast de zoekstring) op te nemen om de keuzelijst te vullen",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "Vink aan om de standaard locatie van de browser te gebruiken, vink af om een aangepaste locatie in te voeren.",
   "Checking extension {1}": "Extensie {1} controleren",

@@ -333,7 +333,11 @@ class FilterDialog {
     const toFilterValuesList = this.#getToFilterValuesList();
     const filterValuesList = this.#getFilterValuesList();
     const autoWildcards = this.#getAutoWildChards().checked;
-    const literalWriter = this.#queryAxisItem.literalWriter;
+    let literalWriter = this.#queryAxisItem.literalWriter;
+    if (!literalWriter){
+      literalWriter = QueryAxisItem.createLiteralWriter( this.#queryAxisItem );
+      this.#queryAxisItem.literalWriter = literalWriter;
+    }
     const parser = this.#queryAxisItem.parser;
     searchStrings.forEach( searchString => {
       if (isPatternFilterType && autoWildcards) {
@@ -500,6 +504,7 @@ class FilterDialog {
     }
     if (option.getAttribute('data-sql-null') === String(true)) {
       valueObject.isSqlNull = true;
+      valueObject.label = getNullString();
     }
     return valueObject;
   }
@@ -522,6 +527,7 @@ class FilterDialog {
     });
     if (valueObject.isSqlNull){
       optionElement.setAttribute('data-sql-null', true);
+      optionElement.label = getNullString();
     }
     return optionElement;
   }
@@ -999,9 +1005,9 @@ class FilterDialog {
 
   #getDialogState(){
     const filterValuesList = this.#getFilterValuesList();
-    const filterValues = this.#extractOptionsFromSelectList(filterValuesList);
+    const filterValues = this.#extractOptionsFromSelectList( filterValuesList );
     const toFilterValuesList = this.#getToFilterValuesList();
-    const toFilterValues = this.#extractOptionsFromSelectList(toFilterValuesList);
+    const toFilterValues = this.#extractOptionsFromSelectList( toFilterValuesList );
     const dialogState = {
       filterType: this.#getFilterType().value,
       values: filterValues,
@@ -1089,7 +1095,7 @@ class FilterDialog {
       }
       queryAxisItem.derivation = 'elements';
       queryAxisItem.memberExpressionPath.push('unnest()');
-      delete queryAxisItem.literalWriter;
+      //delete queryAxisItem.literalWriter;
     }
     
     // https://github.com/rpbouman/huey/issues/553
@@ -1264,6 +1270,7 @@ class FilterDialog {
       });
       if (rawValue === null){
         option.setAttribute('data-sql-null', true);
+        option.label = getNullString();
       }
       if (dialogState.values[option.value]){
         option.setAttribute('data-in-values-list', true);
