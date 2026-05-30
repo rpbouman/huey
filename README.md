@@ -523,12 +523,13 @@ Your contributions are welcome!
 You can contribute in many ways:
 - filing an issue: If something isn't working, or not working the way it's supposed to, please [file an issue](https://github.com/rpbouman/huey/issues/new/choose)!
   To ensure maximum effectivity, clearly describe the component that is having an issue, describe the observed behavior, describe the expected behavior, and describe how this issue may be reproduced. Please include your browserversion and operating system too. If your issue relies on a dataset, and you are at liberty to share that, then please include that too. Please label your issue as "bug".
-- suggest a feature. You may also file issues to request or suggest features. If you're looking for a feature you know from other tools which Huey doesn't have, then its typically helpful if you name the product and its feature name.
-- fork the repo and send a pull request. If you filed and issue or feature request, or you found an existing issue and feature request, you can also consider picking it up and send a pull request. There is no guarantee that your PR would be accepted, but in general these would be welcome. Just make sure there is an issue filed already that can be referenced, so that it is clear what the PR is attempting to fix or what feature the PR aims to deliver.
+- Suggest a feature. You may also file issues to request or suggest features. If you're looking for a feature you know from other tools which Huey doesn't have, then its typically helpful if you name the product and its feature name.
+- Fork the repo and send a pull request. If you filed and issue or feature request, or you found an existing issue and feature request, you can also consider picking it up and send a pull request. There is no guarantee that your PR would be accepted, but in general these would be welcome. Just make sure there is an issue filed already that can be referenced, so that it is clear what the PR is attempting to fix or what feature the PR aims to deliver.
 - Become an advocate. If you like Huey, spread the word! Share it with your friends and colleagues, and help them get set up. If Huey was of some help to you in your daily work, consider writing a blog about it, or maybe present your use case at a meeting.
 - Become a sponsor. Just click the "Sponsor" button at the top of the huey github project page:
 
- ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
+  ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
 
- Alternatively, you can sponsor Huey by [making a donation](https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84). 
- - Commission a feature or consultation: if need help using, installing or deploying Huey, you can always ask for help. Same if you need custom developments. Contact me with such a request and we'll negotiate the details.
+  Alternatively, you can sponsor Huey by [making a donation](https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84).
+- Consultatancy: if need help using, installing or deploying Huey, you can always ask for help. If you require professional support, we can work something out too. 
+- Commission a feature. If you need custom development, or would like help building your own custom developement, then contact me with and we'll negotiate the details.
