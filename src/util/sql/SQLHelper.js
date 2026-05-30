@@ -98,16 +98,19 @@ function createStringTypeFormatter(){
   }
 }
 
-function createNumberFormatter(fractionDigits){
+function createNumberFormatter(hasFractionDigits, minFractionDigits, maxFractionDigits){
   const localeSettings = settings.getSettings('localeSettings');
   let options = {
     minimumIntegerDigits: localeSettings.minimumIntegerDigits,
   };
   
   let locales = getLocales();
-  if (fractionDigits){
-    options.minimumFractionDigits = localeSettings.minimumFractionDigits;
-    options.maximumFractionDigits = localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits;
+  if (hasFractionDigits){
+    if (maxFractionDigits === undefined){
+      minFractionDigits = maxFractionDigits;
+    }
+    options.minimumFractionDigits = minFractionDigits === undefined ? localeSettings.minimumFractionDigits : minFractionDigits;
+    options.maximumFractionDigits = maxFractionDigits === undefined ? (localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits) : maxFractionDigits;
     if (options.maximumFractionDigits < options.minimumFractionDigits) {
       options.maximumFractionDigits = options.minimumFractionDigits;
     }
@@ -123,7 +126,7 @@ function createNumberFormatter(fractionDigits){
     console.error(e);
     locales = navigator.languages;
     options = {};
-    if (!fractionDigits){
+    if (!hasFractionDigits){
       options.minimumFractionDigits = 0;
     }
     console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
