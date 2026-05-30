@@ -640,10 +640,6 @@ class QueryUi {
     dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
   }
   
-  
-  #handleDragOver(event) {
-  }
-
   #initDragAndDrop(){
     const dom = this.getDom();
     
@@ -713,8 +709,9 @@ class QueryUi {
       const hasPartionByItems = Boolean(info.partitionbyitems);
       const isDefaultAggregator = Boolean(info.defaultaggregator);
       if (isCellsAxis){
-        if (! (isAggregator || isDefaultAggregator) ){
+        if (! (isAggregator || isDefaultAggregator) || hasPartionByItems ){
           // if this is the cells axis, but this item cannot be an aggregator, then drop is forbidden.
+          // also, if this is an axis aggregate, then it can't be dropped on the cells axis.
           dropEffect = 'none';
         }
       }
