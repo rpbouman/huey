@@ -2,8 +2,8 @@
 Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
-There's a recording available of me [demoing Huey](https://www.youtube.com/watch?v=qCx4hG9J3O8) at the 3rd DuckDB Meetup.
-Or, if you like some more background, checkout my [DataZen talk on youtube](https://www.youtube.com/watch?v=1A0r4CbLSaI).
+There's a recording available of me <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">demoing Huey</a> at the 3rd DuckDB Meetup.
+Or, if you like some more background, checkout my <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk on youtube</a>.
 
 Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey?tab=readme-ov-file#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
@@ -12,25 +12,27 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
 ## Key features
-- Supports reading and writing .parquet, .csv, .json, .xlsx (MS Excel). Huey can also read DuckDB database files.
+- Supports reading and writing ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel). Huey can also read DuckDB database files.
 - Comprehensive Attribute menu to explore the structure of your dataset
 - Intuitive query builder that supports projection, aggregation, filtering, and (sub)totals
 - A pivot table to present analysis results
 - Many different aggregate functions for reporting and data exploration
 - Automatic breakdown of date/time columns to temporal hierarchy (year, month, quarter etc)
-- Extensive support for array and STRUCT data types to allow immediate ad-hoc analysis of complex, nested data (typical for JSON data)
+- Extensive support for array and ```STRUCT``` data types to allow immediate ad-hoc analysis of complex, nested data (typical for JSON data)
 - Export of result data and SQL queries to file or clipboard. 
-- Blazing fast, even for large files - courtesy of [DuckDB](https://duckdb.org)
+- Blazing fast, even for large files - courtesy of <a href="https://duckdb.org" target="_blank" rel="noopener noreferrer">DuckDB</a>
 - Truly light-weight. Huey depends on DuckDb-WASM, and Tabler Icons, but nothing more. (Dependencies may be added in the future, but only when strictly necessary.)
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
 - Run it your way! 
   - Huey is a static webapp: you can simply download or checkout the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
   - The latest stable release is availabe online as [Live demo site](https://rpbouman.github.io/huey/src/index.html). One click and you're up and running! Even in this setup, any data you process with Huey remains local and private. There is no active server-side process.
-  - Huey is also a [progressive web app](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-huey-on-your-device-as-progressive-web-app-pwa).
+  - Huey is also a <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps" target="_blank" rel="noopener noreferrer">progressive web app</a> (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-huey-on-your-device-as-progressive-web-app-pwa).
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
 
 ### Limitations
-- Huey is based on DuckDB WASM. DuckDB is awesome! However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. That said, DuckDB WASM is still incredibly fast when compared to any in-browser alternative. 
+- Huey is based on DuckDB WASM. DuckDB is awesome! 
+  However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. 
+  That said, DuckDB WASM is still incredibly fast when compared to any in-browser alternative. 
 
 ## Getting started
 For a super quick start, the following sections present sample reports using the [live demo](https://rpbouman.github.io/huey/src/index.html).
@@ -40,8 +42,8 @@ All these examples use a URL to a publicly available dataset as datasource.
 
 ### CSV Examples
 - **Los Angeles International Airport**: [Number of Flight operations, by flight type and reporting period](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmRhdGEubGFjaXR5Lm9yZyUyRmFwaSUyRnZpZXdzJTJGYWppdi11YzYzJTJGcm93cy5jc3YlM0ZhY2Nlc3NUeXBlJTNERE9XTkxPQUQlNUMlMjIlMjIlMkMlMjJjZWxsc0hlYWRlcnMlMjIlM0ElMjJjb2x1bW5zJTIyJTJDJTIyYXhlcyUyMiUzQSU3QiUyMmNlbGxzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkZsaWdodE9wc0NvdW50JTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkJJR0lOVCUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkZsaWdodFR5cGUlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVkFSQ0hBUiUyMiUyQyUyMmluY2x1ZGVUb3RhbHMlMjIlM0F0cnVlJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkFycml2YWxfRGVwYXJ0dXJlJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlMkMlMjJmaWx0ZXJzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkRvbWVzdGljX0ludGVybmF0aW9uYWwlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVkFSQ0hBUiUyMiUyQyUyMmZpbHRlciUyMiUzQSU3QiUyMmZpbHRlclR5cGUlMjIlM0ElMjJpbiUyMiUyQyUyMnZhbHVlcyUyMiUzQSU3QiUyMkRvbWVzdGljJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJEb21lc3RpYyUyMiUyQyUyMmxhYmVsJTIyJTNBJTIyRG9tZXN0aWMlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ0RvbWVzdGljJyUyMiU3RCUyQyUyMkludGVybmF0aW9uYWwlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMkludGVybmF0aW9uYWwlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMkludGVybmF0aW9uYWwlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ0ludGVybmF0aW9uYWwnJTIyJTdEJTdEJTJDJTIydG9WYWx1ZXMlMjIlM0ElN0IlN0QlMkMlMjJ0b2dnbGVTdGF0ZSUyMiUzQSUyMm9wZW4lMjIlN0QlN0QlNUQlMkMlMjJyb3dzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMlJlcG9ydFBlcmlvZCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIyeWVhciUyMiUyQyUyMmluY2x1ZGVUb3RhbHMlMjIlM0F0cnVlJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMlJlcG9ydFBlcmlvZCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIybW9udGglMjBzaG9ydG5hbWUlMjIlMkMlMjJpbmNsdWRlVG90YWxzJTIyJTNBdHJ1ZSU3RCU1RCU3RCU3RCU3RA==).
-  This is from an open data set "[Los Angeles International Airport - Flight Operations By Month](https://data.lacity.org/Transportation/Los-Angeles-International-Airport-Flight-Operation/ajiv-uc63/about_data)" provided by the city of Los Angeles.
-  The [raw CSV data](https://data.lacity.org/api/views/ajiv-uc63/rows.csv?accessType=DOWNLOAD) provides the number of flight operations, as well as a timestamp and various attributes that describe the flight, such as whether it is an arrival or departure; a charter or a scheduled flight, and whether it is a domestic or an international flight.
+  This is from an open data set "<a href="https://data.lacity.org/Transportation/Los-Angeles-International-Airport-Flight-Operation/ajiv-uc63/about_data" target="_blank" rel="noopener noreferrer">Los Angeles International Airport - Flight Operations By Month</a>" provided by the city of Los Angeles.
+  The <a href="https://data.lacity.org/api/views/ajiv-uc63/rows.csv?accessType=DOWNLOAD" target="_blank" rel="noopener noreferrer">raw CSV data</a> provides the number of flight operations, as well as a timestamp and various attributes that describe the flight, such as whether it is an arrival or departure; a charter or a scheduled flight, and whether it is a domestic or an international flight.
   The report demonstrates the following Huey features:
   - Reporting Period timestamp is correctly detected from the CSV data as `TIMESTAMP` type by the DuckDB CSV reader
   - Huey year and month derivations are applied on the row axis to produce a clear temporal breakdown
@@ -50,16 +52,16 @@ All these examples use a URL to a publicly available dataset as datasource.
   - The sum of the flight operations appears in the cells
   - (Sub)totals are included at the year, month and flight type level
 - **City of Chicago Energy Benchmarking**: [Use of electricity, gas and steam by district over years 2018 - 2022](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmRhdGEuY2l0eW9mY2hpY2Fnby5vcmclMkZhcGklMkZ2aWV3cyUyRnhxODMtanI4YyUyRnJvd3MuY3N2JTNGYWNjZXNzVHlwZSUzRERPV05MT0FEJTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJFbGVjdHJpY2l0eSUyMFVzZSUyMChrQnR1KSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJET1VCTEUlMjIlMkMlMjJhZ2dyZWdhdG9yJTIyJTNBJTIyc3VtJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMk5hdHVyYWwlMjBHYXMlMjBVc2UlMjAoa0J0dSklMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyRE9VQkxFJTIyJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMnN1bSUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJEaXN0cmljdCUyMFN0ZWFtJTIwVXNlJTIwKGtCdHUpJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkRhdGElMjBZZWFyJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkJJR0lOVCUyMiU3RCU1RCUyQyUyMmZpbHRlcnMlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyRGF0YSUyMFllYXIlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyQklHSU5UJTIyJTJDJTIyZmlsdGVyJTIyJTNBJTdCJTIyZmlsdGVyVHlwZSUyMiUzQSUyMmJldHdlZW4lMjIlMkMlMjJ2YWx1ZXMlMjIlM0ElN0IlMjIyMDE0JTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDE0JTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDE0JTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMTQlMjIlN0QlMkMlMjIyMDE3JTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDE3JTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDE3JTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMTclMjIlN0QlMkMlMjIyMDIxJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDIxJTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDIxJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMjElMjIlN0QlN0QlMkMlMjJ0b1ZhbHVlcyUyMiUzQSU3QiUyMjIwMTYlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMTYlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTYlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxNiUyMiU3RCUyQyUyMjIwMjAlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMjAlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMCUyMiU3RCUyQyUyMjIwMjMlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMjMlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjMlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMyUyMiU3RCU3RCUyQyUyMnRvZ2dsZVN0YXRlJTIyJTNBJTIyb3BlbiUyMiU3RCU3RCU1RCUyQyUyMnJvd3MlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyQ29tbXVuaXR5JTIwQXJlYSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMmZpcnN0JTIwbGV0dGVyJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkNvbW11bml0eSUyMEFyZWElMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVkFSQ0hBUiUyMiU3RCU1RCU3RCU3RCU3RA==).
-  This is from the [Chicago Energy Benchmarking](https://data.cityofchicago.org/Environment-Sustainable-Development/Chicago-Energy-Benchmarking/xq83-jr8c/about_data) dataset provided by the Chicago Data Portal.
-  The [raw CSV data](https://data.cityofchicago.org/api/views/xq83-jr8c/rows.csv?accessType=DOWNLOAD) contains metrics for different kinds of energy and water consumption, along with the year and many columns identifying the location.
+  This is from the <a href="https://data.cityofchicago.org/Environment-Sustainable-Development/Chicago-Energy-Benchmarking/xq83-jr8c/about_data" target="_blank" rel="noopener noreferrer">Chicago Energy Benchmarking</a> dataset provided by the Chicago Data Portal.
+  The <a href="https://data.cityofchicago.org/api/views/xq83-jr8c/rows.csv?accessType=DOWNLOAD" target="_blank" rel="noopener noreferrer">raw CSV data</a> contains metrics for different kinds of energy and water consumption, along with the year and many columns identifying the location.
   The Huey report places the Community area on the rows axis (along with the first letter of the community area for quick alphabetic browsing), the year on the columns axis, and the sum of various energy consumption metrics in the cells.
   In addition, the report has an IN BETWEEN filter, allowing the data to be sliced in 3-year periods.
 - **Montgomery County of Maryland**: [Warehouse and Retail Sales](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmRhdGEubW9udGdvbWVyeWNvdW50eW1kLmdvdiUyRmFwaSUyRnZpZXdzJTJGdjc2aC1yN2JyJTJGcm93cy5jc3YlM0ZhY2Nlc3NUeXBlJTNERE9XTkxPQUQlNUMlMjIlMjIlMkMlMjJjZWxsc0hlYWRlcnMlMjIlM0ElMjJjb2x1bW5zJTIyJTJDJTIyYXhlcyUyMiUzQSU3QiUyMmNlbGxzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMlJFVEFJTCUyMFNBTEVTJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyUkVUQUlMJTIwVFJBTlNGRVJTJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyV0FSRUhPVVNFJTIwU0FMRVMlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyRE9VQkxFJTIyJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMnN1bSUyMiU3RCU1RCUyQyUyMmNvbHVtbnMlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyWUVBUiUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJCSUdJTlQlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyTU9OVEglMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyQklHSU5UJTIyJTdEJTVEJTJDJTIyZmlsdGVycyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJZRUFSJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkJJR0lOVCUyMiUyQyUyMmZpbHRlciUyMiUzQSU3QiUyMmZpbHRlclR5cGUlMjIlM0ElMjJpbiUyMiUyQyUyMnZhbHVlcyUyMiUzQSU3QiUyMjIlMkMwMTclMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTclMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTclMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxNyUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMjIlMkMwMTglMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTglMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTglMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxOCUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMjIlMkMwMTklMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTklMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTklMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxOSUyMiU3RCUyQyUyMjIlMkMwMjAlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMCUyMiU3RCU3RCUyQyUyMnRvVmFsdWVzJTIyJTNBJTdCJTdEJTJDJTIydG9nZ2xlU3RhdGUlMjIlM0ElMjJvcGVuJTIyJTdEJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMklURU0lMjBUWVBFJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlMkMlMjJmaWx0ZXIlMjIlM0ElN0IlMjJmaWx0ZXJUeXBlJTIyJTNBJTIyaW4lMjIlMkMlMjJ2YWx1ZXMlMjIlM0ElN0IlMjJCRUVSJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJCRUVSJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJCRUVSJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidCRUVSJyUyMiU3RCUyQyUyMkRVTk5BR0UlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMkRVTk5BR0UlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMkRVTk5BR0UlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ0RVTk5BR0UnJTIyJTdEJTJDJTIyS0VHUyUyMiUzQSU3QiUyMnZhbHVlJTIyJTNBJTIyS0VHUyUyMiUyQyUyMmxhYmVsJTIyJTNBJTIyS0VHUyUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInS0VHUyclMjIlN0QlMkMlMjJMSVFVT1IlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMkxJUVVPUiUyMiUyQyUyMmxhYmVsJTIyJTNBJTIyTElRVU9SJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidMSVFVT1InJTIyJTdEJTJDJTIyTk9OLUFMQ09IT0wlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMk5PTi1BTENPSE9MJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJOT04tQUxDT0hPTCUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInTk9OLUFMQ09IT0wnJTIyJTdEJTJDJTIyUkVGJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJSRUYlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMlJFRiUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInUkVGJyUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMlNUUl9TVVBQTElFUyUyMiUzQSU3QiUyMnZhbHVlJTIyJTNBJTIyU1RSX1NVUFBMSUVTJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJTVFJfU1VQUExJRVMlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ1NUUl9TVVBQTElFUyclMjIlN0QlMkMlMjJXSU5FJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJXSU5FJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJXSU5FJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidXSU5FJyUyMiU3RCU3RCUyQyUyMnRvVmFsdWVzJTIyJTNBJTdCJTdEJTJDJTIydG9nZ2xlU3RhdGUlMjIlM0ElMjJvcGVuJTIyJTdEJTdEJTVEJTJDJTIycm93cyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJTVVBQTElFUiUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMklURU0lMjBUWVBFJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIySVRFTSUyMERFU0NSSVBUSU9OJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlN0QlN0QlN0Q=).
 
 ### JSON Examples
 - **Github Events**: [Actors agasint repo and time and event type](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmFwaS5naXRodWIuY29tJTJGZXZlbnRzJTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJhY3RvciUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjBsb2dpbiUyMFZBUkNIQVIlMkMlMjBkaXNwbGF5X2xvZ2luJTIwVkFSQ0hBUiUyQyUyMGdyYXZhdGFyX2lkJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIlMkMlMjBhdmF0YXJfdXJsJTIwVkFSQ0hBUiklMjIlMkMlMjJtZW1iZXJFeHByZXNzaW9uUGF0aCUyMiUzQSU1QiUyMmxvZ2luJTIyJTVEJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMmxpc3QlMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMmNyZWF0ZWRfYXQlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVElNRVNUQU1QJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMnllYXIlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIybW9udGglMjBudW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIyZGF5JTIwb2YlMjBtb250aCUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJjcmVhdGVkX2F0JTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlRJTUVTVEFNUCUyMiUyQyUyMmRlcml2YXRpb24lMjIlM0ElMjJpc28tdGltZSUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJ0eXBlJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlMkMlMjJyb3dzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnJlcG8lMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyU1RSVUNUKGlkJTIwQklHSU5UJTJDJTIwJTVDJTIybmFtZSU1QyUyMiUyMFZBUkNIQVIlMkMlMjB1cmwlMjBWQVJDSEFSKSUyMiUyQyUyMm1lbWJlckV4cHJlc3Npb25QYXRoJTIyJTNBJTVCJTIyaWQlMjIlNUQlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIycmVwbyUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjAlNUMlMjJuYW1lJTVDJTIyJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIpJTIyJTJDJTIybWVtYmVyRXhwcmVzc2lvblBhdGglMjIlM0ElNUIlMjJuYW1lJTIyJTVEJTdEJTVEJTdEJTdEJTdE).
-  This sample uses "[github's public events endpoint](https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events)".
-  The [raw JSON data](https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events) is an array of objects representing github events. 
+  This sample uses "<a href="https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events" target="_blank" rel="noopener noreferrer">github's public events endpoint</a>".
+  The <a href="https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events" target="_blank" rel="noopener noreferrer">raw JSON data</a> is an array of objects representing github events. 
   The event object itself has scalar properties like `id`, `type`, and `created_at` timestamp, as well object-typed properties `repo`, `actor` and `payload`.
   The report demonstrates the following Huey features:
   - The DuckDB JSON reader correctly extracts the `created_at` string to a `TIMESTAMP` type.
@@ -71,7 +73,7 @@ All these examples use a URL to a publicly available dataset as datasource.
 ### Parquet examples
 
 - **Train Services** [count across stations and service types](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmJsb2JzLmR1Y2tkYi5vcmclMkZ0cmFpbl9zZXJ2aWNlcy5wYXJxdWV0JTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjIqJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMklOVEVHRVIlMjIlMkMlMjJhZ2dyZWdhdG9yJTIyJTNBJTIyY291bnQlMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnR5cGUlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVkFSQ0hBUiUyMiUyQyUyMmRlcml2YXRpb24lMjIlM0ElMjJOT0NBU0UlMjIlN0QlNUQlMkMlMjJyb3dzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnN0YXRpb25fY29kZSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMmZpcnN0JTIwbGV0dGVyJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnN0YXRpb25fY29kZSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnN0YXRpb25fbmFtZSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTdEJTVEJTdEJTdEJTdE) 
-  The [raw dataset](https://blobs.duckdb.org/train_services.parquet) contains trips from the Dutch train network.
+  The <a href="https://blobs.duckdb.org/train_services.parquet" target="_blank" rel="noopener noreferrer">raw dataset</a> contains trips from the Dutch train network.
   The huey report presents the stations on the rows and the train types on the columns, with the number of trips as cell values.
   It demonstrates the following Huey features:
   - on the columns, the first letter derivation is used to produce an alphabetic index for the train stations
@@ -90,15 +92,19 @@ Alternatively, you can download or checkout the Huey source files and resources 
 After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button:
 <img width="777" height="728" alt="image" src="https://github.com/user-attachments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
 
-Huey will cache itself automatically, and the app should still work even when you're not connected to the internet.
+The Huey PWA caches itself automatically. 
+This means the app should still work even when you're not connected to the internet.
 
-The Huey PWA explicitly advertises the ability to open certain data files. 
-Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser.
+The Huey PWA explicitly advertises the ability to open certain data files.
+Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser:
+
 This way, you don't even need to locate the app anymore - you just right click on a file you want to analyze, and choose "Open with Huey".
 
 ### Running Huey from a folder on your device
 1) Use git to check out the [Huey github repository](https://github.com/rpbouman/huey.git) to a local folder, or [download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) the repository as a .zip file and extract it to a folder.
-2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. Note that although Huey runs locally, it depends on DuckDB WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. Once these resources are downloaded, they are typically cached by your browser, often allowing you to run Huey even without an internet connection. 
+2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. 
+   Note that although Huey runs locally, it depends on DuckDB WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. 
+   Once these resources are downloaded, they are typically cached by your browser, often allowing you to run Huey even without an internet connection. 
 
 With either approach, the Huey files and resources are available in a folder of your choosing.
 Of course, if you checked out the repository you can use `git pull` to update too. 
@@ -106,7 +112,7 @@ Of course, if you checked out the repository you can use `git pull` to update to
 ## Registering and Analyzing Files with Huey
 
 ### Registering Files
-Huey uses [DuckDb WASM](https://duckdb.org/docs/archive/0.9.2/api/wasm/overview) to read and analyze data files. 
+Huey uses <a href="https://duckdb.org/docs/archive/0.9.2/api/wasm/overview" target="_blank" rel="noopener noreferrer">DuckDb WASM</a> to read and analyze data files. 
 General browser security policies prevent web applications from autonomously accessing files on the local file system. 
 Web application users need to explicitly select the files they want to analyze. 
 Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
@@ -127,7 +133,8 @@ Items that encountered an error are indicated by red progressbars. In case of er
 
 Successful actions are indicated by green progressbars. Succesfully loaded files are available in the Datasources tab, from where you can start exploring their contents by clicking the explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). As a convenience, the explore button is also present in the upload dialog.
 
-Huey will attempt to group files having similar column signature. The group appears as a separate top-level node in the Datasources tab, with its individual files indented below it. A file group has its own explore button, so that you can not only explore the individual files, but also the UNION of all Files in the group:
+Huey will attempt to group files having similar column signature. The group appears as a separate top-level node in the Datasources tab, with its individual files indented below it. 
+A file group has its own explore button, so that you can not only explore the individual files, but also the UNION of all Files in the group:
 
 ![image](https://github.com/rpbouman/huey/assets/647315/0ad057e0-e4ab-4bd8-b996-d3f50542853d)
 
@@ -135,21 +142,24 @@ Files that cannot be grouped appear in a separate Miscellanous Files group.
 
 ### Using Remote Datasets
 
-In addition to local files, you can also register URLs. To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-attachments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be)
-. You will be prompted to enter the URL:
+In addition to local files, you can also register URLs. 
+To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-attachments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be). 
+You will be prompted to enter the URL:
 
 ![URL prompt](https://github.com/user-attachments/assets/2a11e0ca-a3c1-4b55-9bf9-8cc404332400)
 
 After confirming, the upload dialog appears just like when uploading local files.
 
-Note that loading data from URL is subject to certain restrictions due to browser security policies. Typically the URL needs to be either in the same domain as from where Huey is served, or the remote server needs to pass CORS headers to overcome the same-origin policy. 
+Note that loading data from URL is subject to certain restrictions due to browser security policies. 
+Typically the URL needs to be either in the same domain as from where Huey is served, or the remote server needs to pass CORS headers to overcome the same-origin policy. 
 
 ### Opening DuckDb files
 Apart from reading data files directly, Huey can also open existing duckdb files and access its tables and views. The process for accessing duckdb files is exactly the same as for accessing data files. Just make sure you give your duckdb file a '.duckdb' extension - that's how Huey knows it's a duckdb file. (DuckDB data files are not required to have any particular name or extension, but Huey currently cannot detect that, so it relies on a file extension convention instead.) Successfully loaded .duckdb files will appear in the DuckDb Folder, which appears at the top of the DataSources tab. 
 
 ![image](https://github.com/rpbouman/huey/assets/647315/c7ca5ed7-7454-4783-8dbc-493244f8bb28)
 
-The schemas in the duckdb database file are presented as folders below the duckdb file entry, and any tables or views in the schema are presented below the schema folder. Each table or view has an explore button which you can click to explore the data.   
+The schemas in the duckdb database file are presented as folders below the duckdb file entry, and any tables or views in the schema are presented below the schema folder. 
+Each table or view has an explore button which you can click to explore the data.   
 
 Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
 But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
@@ -311,7 +321,7 @@ Immediately after placing a new item on the Filters axis, the Filter Dialog pops
 The Filter type dropdown appears in the top of the Filter Dialog. Here you choose the operator that should be used to filter the data. The options are:
 - __Include__: the values in the data must match any of the filter values exactly
 - __Exclude__: rows from the data appear only when the value from the respective item does not match any of the filter values. (Negated include)
-- __Like__: the values in the data must match the pattern of one or more filter values. The pattern is a simple [SQL LIKE pattern](https://duckdb.org/docs/sql/functions/pattern_matching.html#like) which supports % (percent sign) as wildcard for zero or more arbitrary characters, and _ (underscore) as wildcard for a single arbitrary character. 
+- __Like__: the values in the data must match the pattern of one or more filter values. The pattern is a simple <a href="https://duckdb.org/docs/sql/functions/pattern_matching.html#like" target="_blank" rel="noopener noreferrer">SQL LIKE pattern</a> which supports % (percent sign) as wildcard for zero or more arbitrary characters, and _ (underscore) as wildcard for a single arbitrary character. 
 - __Not Like__: the values in the data must not match the pattern of any of the filter values. (Negated Like)
 - __Between__: the values of the data must be between the filter value-ranges.
 - __Not Between__: the values of the data must not be between any of the filter value-ranges (Negated Between)
@@ -457,7 +467,7 @@ Settings that control the appearance and behavior of the Pivot Table
 
 ## Secrets Manager
 
-Huey now includes a built-in GUI for [DuckDB's Secrets Manager](https://duckdb.org/docs/current/configuration/secrets_manager), making it easy to configure credentials for cloud storage and other external services — no SQL required.
+Huey now includes a built-in GUI for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>, making it easy to configure credentials for cloud storage and other external services — no SQL required.
 
 <img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
 
@@ -498,7 +508,7 @@ Initialization happens automatically if you first try to store a secret.
 
 ## Integrating and/or Embedding Huey
 
-You can embed huey inside a frame on your own webpage and control the application by sending it commands using the [`postMessage()`-method](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+You can embed huey inside a frame on your own webpage and control the application by sending it commands using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">`postMessage()`-method</a>.
 Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
 
 # Development, Releases, and contributions 
@@ -542,6 +552,6 @@ You can contribute in many ways:
 
   ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
 
-  Alternatively, you can sponsor Huey by [making a donation](https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84).
+  Alternatively, you can sponsor Huey by <a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_blank" rel="noopener noreferrer">making a donation</a>.
 - Consultatancy: if need help using, installing or deploying Huey, you can always ask for help. If you require professional support, we can work something out too. 
 - Commission a feature. If you need custom development, or would like help building your own custom developement, then contact me with and we'll negotiate the details.
