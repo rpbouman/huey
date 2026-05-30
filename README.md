@@ -92,15 +92,21 @@ Alternatively, you can download or checkout the Huey source files and resources 
 After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button:
 <img width="777" height="728" alt="image" src="https://github.com/user-attachments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
 
-The Huey PWA caches itself automatically. 
-This means the app should still work even when you're not connected to the internet.
+#### PWA Offline
+The Huey PWA caches itself automatically using your browser's [caching API](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage).
+This requires a modest amount of storage, but the benefit is that this allows Huey to be used even when you're completely disconnected from the internet.
 
+#### PWA File Handler
 The Huey PWA explicitly advertises the ability to open certain data files.
 Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser:
 
 <img width="1103" height="742" alt="image" src="https://github.com/user-attachments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
 
 This way, you don't even need to locate the app anymore - you just right click on a file you want to analyze, and choose "Open with Huey".
+
+#### Uninstalling the PWA
+If you decide the PWA is not for you, that's fine - you can always uninstall it using your operating system's uninstall feature.
+Note that 
 
 ### Running Huey from a folder on your device
 1) Use git to check out the [Huey github repository](https://github.com/rpbouman/huey.git) to a local folder, or [download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) the repository as a .zip file and extract it to a folder.
