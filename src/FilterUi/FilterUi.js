@@ -504,7 +504,7 @@ class FilterDialog {
     }
     if (option.getAttribute('data-sql-null') === String(true)) {
       valueObject.isSqlNull = true;
-      valueObject.label = getNullString();
+      //valueObject.label = getNullString();
     }
     return valueObject;
   }
@@ -527,7 +527,7 @@ class FilterDialog {
     });
     if (valueObject.isSqlNull){
       optionElement.setAttribute('data-sql-null', true);
-      optionElement.label = getNullString();
+      //optionElement.label = getNullString();
     }
     return optionElement;
   }
@@ -1262,6 +1262,10 @@ class FilterDialog {
       if (formatter) {
         label = formatter(label, labelField);
       }
+      else
+      if (value === null) {
+        label = getNullString();
+      }
       const literal = getDuckDbLiteralForValue(rawValue, valueField.type);
       option = createEl('option', {
         value: value,
@@ -1270,7 +1274,6 @@ class FilterDialog {
       });
       if (rawValue === null){
         option.setAttribute('data-sql-null', true);
-        option.label = getNullString();
       }
       if (dialogState.values[option.value]){
         option.setAttribute('data-in-values-list', true);

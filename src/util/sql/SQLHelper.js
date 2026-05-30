@@ -137,9 +137,8 @@ function createNumberFormatter(fractionDigits){
   
   return {
     format: function(value, field){
-      switch (value) {
-        case null:
-          return getNullString();
+      if (value === null) {
+        return getNullString();
       }
       
       switch (typeof value){
@@ -1621,6 +1620,10 @@ function getUsingSampleClause(samplingConfig, useTableSample){
   return sampleClause;
 }
 
+/* arg type descriptions.
+  TODO we really ought to get this info from duckdb_functions dynamically
+ */
+
 function getMedianReturnDataTypeForArgumentDataType(argumentDataType){
   const argumentTypeInfo = getDataTypeInfo(argumentDataType);
   let returnDataType;
@@ -1631,4 +1634,20 @@ function getMedianReturnDataTypeForArgumentDataType(argumentDataType){
     returnDataType = argumentDataType;
   }
   return returnDataType;
+}
+
+function getSumReturnDataTypeForArgumentDataType(argumentDataType){
+  switch (argumentDataType){
+    case 'BIGNUM':
+    case 'DOUBLE':
+    case 'DOUBLE':
+      return argumentDataType;
+    case 'BOOLEAN':
+    case 'HUGEINT':
+    case 'INTEGER':
+    case 'SMALLINT':
+    case 'TINYINT':
+      return 'HUGEINT';
+    default:
+  }
 }
