@@ -153,6 +153,7 @@ class AttributeUi {
       isNumeric: true,
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnExpression} )',
+      getReturnDataTypeForArgumentDataType: getSumReturnDataTypeForArgumentDataType,
       createFormatter: function(axisItem){
         const columnType = axisItem.columnType;
         const dataTypeInfo = getDataTypeInfo(columnType);
