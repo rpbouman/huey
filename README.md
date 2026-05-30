@@ -84,9 +84,12 @@ Alternatively, you can download or checkout the Huey source files and resources 
 
 ### Running Huey on your Device as Progressive Web App (PWA)
 1) Visit the [live demo](https://rpbouman.github.io/huey/src/index.html)
-2) Use your browser's capabilities to install Huey on your local device. Typically this manifests itself as an installation icon in your browser's URL bar.
+2) Use your browser's capabilities to install Huey on your local device. Typically this manifests itself as an installation icon in your browser's URL bar:
+   <img width="773" height="522" alt="image" src="https://github.com/user-attachments/assets/1352db5c-96ee-4a8e-b0c6-e406907670fc" />
 
-After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button.
+After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button:
+<img width="777" height="728" alt="image" src="https://github.com/user-attachments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
+
 Huey will cache itself automatically, and the app should still work even when you're not connected to the internet.
 
 The Huey PWA explicitly advertises the ability to open certain data files. 
