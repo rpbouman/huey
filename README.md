@@ -98,6 +98,8 @@ This means the app should still work even when you're not connected to the inter
 The Huey PWA explicitly advertises the ability to open certain data files.
 Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser:
 
+<img width="1103" height="742" alt="image" src="https://github.com/user-attachments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
+
 This way, you don't even need to locate the app anymore - you just right click on a file you want to analyze, and choose "Open with Huey".
 
 ### Running Huey from a folder on your device
