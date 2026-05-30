@@ -378,6 +378,9 @@ class DuckDbDataSource extends EventEmitter {
           config.type = DuckDbDataSource.types.SQLITE;
           break;
         default:
+          if (Object.keys(DuckDbDataSource.fileTypes).includes(guessedType)) {
+            config.fileType = guessedType;
+          }
       }
 
       if (config.type) {
@@ -491,7 +494,7 @@ class DuckDbDataSource extends EventEmitter {
               throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
           }
           const parts = FileUtils.getFileNameParts(this.#objectName);
-          this.#fileType = parts.lowerCaseExtension;
+          this.#fileType = config.fileType || parts.lowerCaseExtension;
         }
         break;
       case DuckDbDataSource.types.FILES:
@@ -608,7 +611,7 @@ class DuckDbDataSource extends EventEmitter {
             this.#fileType = fileTypes[0];
           }
           else {
-            console.warn(`Found multiple possible filetypes for url "${url}": ${fileTypes.join(';')}`);
+            console.warn(`Found multiple possible file types for url "${url}": ${fileTypes.join(';')}`);
             this.#fileType = fileTypes[0];
           }
         }
