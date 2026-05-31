@@ -119,6 +119,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SecretsManager/SecretsManager.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttachToRemote/AttachDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
@@ -270,6 +271,15 @@
       <option value="USE_SSL" translate="no" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2"></option>
       <option value="VALIDATION" translate="no" data-default-type="text" data-associated-secret-types="s3"></option>
       <option value="VERIFY_SSL" translate="no" data-default-type="checkbox" data-associated-secret-types="s3,gcs,r2,http"></option>
+    </datalist>
+    
+    <datalist id="attachToRemoteTypes">
+      <option value="delta" translate="no" data-duckdb-extension="delta">Delta</option>
+      <option value="duckdb" translate="no" >DuckDB</option>
+      <option value="ducklake" translate="no" data-duckdb-extension="ducklake">DuckLake</option>
+      <option value="iceberg" translate="no" data-duckdb-extension="iceberg">Iceberg</option>
+      <option value="sqlite" translate="no" data-duckdb-extension="sqlite">SQLite</option>
+      <option value="unity_catalog" translate="no" data-duckdb-extension="unity_catalog">Unity Catalog</option>
     </datalist>
 
     <div id="spinner">
@@ -1671,6 +1681,8 @@
           <button
             id="secretsDialogAcceptButton"
             form="secretsUiForm"
+            name="ok"
+            value="ok"
             autofocus="true" 
             popovertarget="secretsDialog"
             popovertargetaction="hide"
@@ -1678,6 +1690,8 @@
           <button
             id="secretsDialogCancelButton"
             form="secretsUiForm"
+            name="cancel"
+            value="cancel"
             popovertarget="secretsDialog"
             popovertargetaction="hide"
           >Cancel</button>
@@ -1756,6 +1770,66 @@
           onclick="window.open('https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84', '_donate')"
           style="width: 7em"
         >Donate...</button>
+      </footer>
+    </dialog>
+
+    <dialog 
+      id="attachDialog"
+      draggable="true"
+      aria-labelledby"attachDialogTitle"
+      popover="auto"
+    >
+      <header>
+        <h3 id="attachDialogTitle">Attach to a remote Catalog or Database</h3>
+      </header>
+      <section>
+        <form>
+          <header>
+          </header>
+          <fieldset>
+            <legend>Name and Type</legend>
+            <label
+              for="attachToRemoteUrl"
+            >Url</label>
+            <input 
+              id="attachToRemoteUrl" 
+              type="text"
+              required="true"
+            >
+            <label
+              for="attachToRemoteType"
+            >Type</label>
+            <input 
+              id="attachToRemoteType" 
+              type="text" 
+              list="attachToRemoteTypes"
+              required="true"
+            />
+          </fieldset>
+          <fieldset>
+            <label
+              for="attachToRemoteSecret"
+            >Secret</label>
+            <select id="attachToRemoteSecret"></select>
+          </fieldset>          
+        </form>
+      </section>
+      <footer role="toolbar">
+        <form id="attachDialogButtonForm" method="dialog">
+          <button
+            id="attachDialogAcceptButton"
+            form="attachForm"
+            autofocus="true" 
+            popovertarget="attachDialog"
+            popovertargetaction="hide"
+          >Ok</button>
+          <button
+            id="attachDialogCancelButton"
+            form="attachForm"
+            popovertarget="attachDialog"
+            popovertargetaction="hide"
+          >Cancel</button>
+        </form>
       </footer>
     </dialog>
 
@@ -2390,6 +2464,16 @@
             id="loadFromUrl"
           >Data from URL</button>
         </label>
+        <label 
+          for="attachRemote" 
+          title="Attach to a remote Catalog or Database"
+          accesskey="U"
+        >
+          <button
+            id="attachRemote"
+            popovertarget="attachDialog"
+          >Attach</button>
+        </label>
 
         <label for="cloneHueySession" title="Open a new Huey browser tab including the currently loaded datasources and query">
           <button
@@ -2809,6 +2893,8 @@
     <script onload="resourceLoaded(this)" src="AboutDialog/AboutDialog.js"></script>
 
     <script onload="resourceLoaded(this)" src="util/sql/SQLHelper.js"></script>
+    <script onload="resourceLoaded(this)" src="DocumentStore/DocumentStore.js"></script>
+    <script onload="resourceLoaded(this)" src="DocumentStore/AppDocumentStore.js"></script>
 
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbConnection.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
@@ -2838,7 +2924,6 @@
     <script onload="resourceLoaded(this)" src="PromptUi/PromptUi.js"></script>
     <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
     <script onload="resourceLoaded(this)" src="QuickQueryMenu/QuickQueryMenu.js"></script>
-    <script onload="resourceLoaded(this)" src="SecretsManager/SecretsStore.js"></script>
     <script onload="resourceLoaded(this)" src="SecretsManager/CreateSecretParser.js"></script>
     <script onload="resourceLoaded(this)" src="SecretsManager/SecretsDialog.js"></script>
 

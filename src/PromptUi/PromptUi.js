@@ -46,6 +46,14 @@ class PromptUi {
 
   }
 
+  static accept(){
+    byId('promptDialogAcceptButton').click();
+  }
+
+  static reject(){
+    byId('promptDialogRejectButton').click();
+  }
+
   static show(config){
     return new Promise( (resolve, reject) => {
       const dialog = PromptUi.#dialog;

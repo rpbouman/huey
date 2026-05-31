@@ -1,6 +1,7 @@
 class SecretsDialog {
   
   static #secretsDialogId = 'secretsDialog';
+  static #secretsObjectStore = AppDocumentStore.STORE_SECRETS;
   #highlited = undefined;
   #hilitedPerhipherals = undefined;
   #resizeObserver = undefined;
@@ -367,12 +368,12 @@ class SecretsDialog {
   }
   
   async #loadSecret(name){
-    const secretsStore = SecretsStore.store;
+    const store = AppDocumentStore.store;
     const password = await this.#getPassword();
     if (!password){
       return false;
     }
-    const secretDocument = await secretsStore.get(name, password);
+    const secretDocument = await store.get(SecretsDialog.#secretsObjectStore, name, password);
     return this.#loadSecretDocument(secretDocument);
   }
   
@@ -392,9 +393,9 @@ class SecretsDialog {
       return;
     }
     const secretName = selectedSecretOption.value;
-    const secretsStore = SecretsStore.store;
+    const store = AppDocumentStore.store;
     
-    const exists = await secretsStore.exists(secretName);
+    const exists = await store.exists(SecretsDialog.#secretsObjectStore, secretName);
     if (!exists){
       await this.#updateSecretsList();
       return;
@@ -410,7 +411,7 @@ class SecretsDialog {
     if (confirmation === PromptUi.REJECT) {
       return;
     }
-    await secretsStore.remove(secretName);
+    await store.remove(SecretsDialog.#secretsObjectStore, secretName);
     await this.#updateSecretsList();
     
     SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
@@ -462,8 +463,8 @@ class SecretsDialog {
     if (result === PromptUi.REJECT) {
       return;
     }
-    const secretsStore = SecretsStore.store;
-    await secretsStore.reset();
+    const store = AppDocumentStore.store;
+    await store.resetCrypto();
     this.#updateSecretsList();
   }
   
@@ -484,7 +485,7 @@ class SecretsDialog {
           ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
         </form>
       `;
-      const secretsStore = SecretsStore.store;
+      const store = AppDocumentStore.store;
       const config = {
         title: Internationalization.getText('Change Password'),
         contents: passwordForm
@@ -500,13 +501,13 @@ class SecretsDialog {
         const newPasswordInput = byId(newPasswordId);
         const newPassword = newPasswordInput.value;
 
-        const oldPasswordVerified = await secretsStore.verifyPassword(oldPassword);
+        const oldPasswordVerified = await store.verifyPassword(oldPassword);
         if (!oldPasswordVerified) {
           result = false;
           config.contents = invalidPassword + passwordForm
         }
         if (result){
-          const newPasswordValid = secretsStore.isValidPassword(newPassword);
+          const newPasswordValid = store.isValidPassword(newPassword);
           if (!newPasswordValid){
             config.contents = hint + passwordForm
             result = false;
@@ -518,7 +519,7 @@ class SecretsDialog {
           newPasswordInput.value = '';
           continue;
         }
-        await secretsStore.changePassword(oldPassword, newPassword);
+        await store.changePassword(oldPassword, newPassword);
         this.#password = newPassword;
         break;
       }
@@ -561,7 +562,7 @@ class SecretsDialog {
       return this.#password;
     }
     try {
-      const secretsStore = SecretsStore.store;
+      const store = AppDocumentStore.store;
       const id = 'secretsManagerPassword' + Date.now();
       const hint = SecretsDialog.#passwordHint;
       const invalidPassword = SecretsDialog.#wrongPasswordHint;
@@ -571,7 +572,7 @@ class SecretsDialog {
         contents: passwordHTML
       };
 
-      const isInitialized = await secretsStore.isInitialized();
+      const isInitialized = await store.isInitialized();
       do {
         if (!isInitialized) {
           const initialPasswordInfo = [
@@ -592,19 +593,19 @@ class SecretsDialog {
         }
 
         const password = byId(id).value;
-        if (!secretsStore.isValidPassword(password)) {
+        if (!store.isValidPassword(password)) {
           config.contents = `${hint}<br/>${passwordHTML}`;
         }
         
         if (isInitialized){
-          if (await secretsStore.verifyPassword(password)){
+          if (await store.verifyPassword(password)){
             this.#password = password;
             return password;
           }
           config.contents = `${invalidPassword}<br/>${passwordHTML}`;
         }
         else {
-          await secretsStore.init(password);
+          await store.init(password);
           this.#password = password;
           return password;
         }
@@ -689,7 +690,7 @@ class SecretsDialog {
   
   async #handleSaveCurrentSecretClicked(event){
     try {
-      const secretsStore = SecretsStore.store;
+      const store = AppDocumentStore.store;
       const existingItem = this.#selectedSecretOption;
       const secretDocument = this.#secretDocument;
       
@@ -699,7 +700,7 @@ class SecretsDialog {
       const oldName = updating ? existingItem.value : secretDocument.name; 
       
       const nameChanged = newName !== oldName;
-      const exists = !updating || nameChanged ? await secretsStore.exists( newName ) : false;
+      const exists = !updating || nameChanged ? await store.exists( SecretsDialog.#secretsObjectStore, newName ) : false;
 
       if (exists){
         const result = await this.#promptOverwriteExistingSecret(newName);
@@ -733,9 +734,9 @@ class SecretsDialog {
         return;
       }
       
-      await secretsStore.store(secretDocument, password);
+      await store.store(SecretsDialog.#secretsObjectStore, secretDocument, password);
       if (removeOldSecret === true) {
-        await secretsStore.remove(oldName);
+        await store.remove(SecretsDialog.#secretsObjectStore, oldName);
         await this.#dropDuckDbSecret(oldName);
       }
       await this.#updateSecretsList(newName);
@@ -1056,10 +1057,20 @@ class SecretsDialog {
   #handleResize(entries){
     this.#hilitedPerhipherals.resetGutter();
   }
+
+  async #handleBeforeToggle(event){
+    if (event.newState === 'open') {
+      return;
+    }
+    this.#cleanupDialog();
+  }
     
-  #handleDialogClose(event) {
+  #cleanupDialog(){
     this.#password = undefined;
     this.#resetForm();
+    SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
+    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
+    SecretsDialog.#secretsList.selectedIndex = -1;
   }
   
   async #handleActivateCurrentSecretChanged(event){
@@ -1093,7 +1104,7 @@ class SecretsDialog {
   
   #initEvents(){
     const dialog = SecretsDialog.dialog;
-    dialog.addEventListener('close', event => this.#handleDialogClose(event) );
+    dialog.addEventListener('beforetoggle', event => this.#handleBeforeToggle(event) );
 
     // toolbar buttons
     SecretsDialog.#createNewSecretButton.addEventListener('click', event => this.#handleCreateNewSecretClicked(event) );
@@ -1145,50 +1156,48 @@ class SecretsDialog {
   
   async #updateSecretsList(selectedSecret){
     const duckdbSecrets = await this.#getDuckDbSecrets();
-    await SecretsStore.store
-    .list()
-    .then(secretDocuments => {
-      const items = [];
-      let type;
-      secretDocuments.sort( (a,b) => {
-        if (a.type > b.type) {
-          return 1;
-        }
-        if (a.type < b.type) {
-          return -1;
-        }
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
-      }).map( secretDocument => {
-        if (secretDocument.type !== type) {
-          if (items.length) {
-            items.push('</optgroup>');
-          }
-          type = secretDocument.type;
-          items.push(`<optgroup label="${type}">`);
-        }
-        const loaded = duckdbSecrets[secretDocument.name] !== undefined;
-        const selected = secretDocument.name === selectedSecret ? ' selected="true"' : '';
-        items.push(`<option data-loaded="${loaded}" ${selected}>${secretDocument.name}</option>`);
-      });
-      if (items.length) {
-        items.push('</optgroup>');
+    const store = AppDocumentStore.store;
+    
+    let secrets = await store.list( SecretsDialog.#secretsObjectStore );
+    secrets = secrets.sort((a,b) => {
+      if (a.type > b.type) {
+        return 1;
       }
-      SecretsDialog.#secretsList.innerHTML = items.join('\n');
-    })
-    .catch(err => {
-      showErrorDialog(err);
+      if (a.type < b.type) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0;
     });
+    
+    const items = [];
+    let type;
+    secrets.forEach( secretDocument => {
+      if (secretDocument.type !== type) {
+        if (items.length) {
+          items.push('</optgroup>');
+        }
+        type = secretDocument.type;
+        items.push(`<optgroup label="${type}">`);
+      }
+      const loaded = duckdbSecrets[secretDocument.name] !== undefined;
+      const selected = secretDocument.name === selectedSecret ? ' selected="true"' : '';
+      items.push(`<option data-loaded="${loaded}" ${selected}>${secretDocument.name}</option>`);
+    });
+    if (items.length) {
+      items.push('</optgroup>');
+    }
+    SecretsDialog.#secretsList.innerHTML = items.join('\n');
   }
  
   async #activateAutoloadedSecrets(){
-    const secretsStore = SecretsStore.store;
-    const list = await secretsStore.list();
+    const store = AppDocumentStore.store;
+    const list = await store.list(SecretsDialog.#secretsObjectStore);
     const autoloadEntries = list.filter(secretDocument => secretDocument.autoload);
     const n = autoloadEntries.length;
     if (!n) {
@@ -1198,7 +1207,7 @@ class SecretsDialog {
     for (let i = 0; i < n; i++){
       const secretDocEntry = list[i];
       const name = secretDocEntry.name;
-      const secretDocument = await secretsStore.get(name, password);
+      const secretDocument = await store.get(SecretsDialog.#secretsObjectStore, name, password);
       const loaded = await this.#createDuckDbSecret(secretDocument);
       if (loaded) {
         continue;

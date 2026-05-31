@@ -50,7 +50,7 @@ html {
             [for=cloneHueySession],
             [for=quickQueryMenuButton],
             [for=currentDatasourceMenuButton],
-            [for=loadFromUrl]
+            [for=attachRemote]
           )::after {
             border-right-width: 1px;
             border-right-style: solid;
@@ -71,6 +71,16 @@ html {
           &:is( [for=loadFromUrl] ){
             &::before {
               content: var( --icon-cloud-upload );
+            }
+            
+            &::after{
+              content: '';
+            }
+          }
+
+          &:is( [for=attachRemote] ){
+            &::before {
+              content: var( --icon-database );
             }
             
             &::after{
