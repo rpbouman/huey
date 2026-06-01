@@ -400,9 +400,12 @@ class DuckDbDataSource extends EventEmitter {
     const fileName = file.name;
     const fileNameParts = FileUtils.getFileNameParts(fileName);
     const fileExtension = fileNameParts.lowerCaseExtension;
-    let fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
-
-    if (!fileType){
+    let fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileExtension);
+    let fileType;
+    if (fileTypeInfo){
+      fileType = fileExtension;
+    }
+    else {
       const guessedType = await FileUtils.checkMagicBytes(file);
       
       switch (guessedType) {
@@ -419,11 +422,11 @@ class DuckDbDataSource extends EventEmitter {
           throw new Error(`Could not determine filetype of file "${fileName}".`);
       }
       
-      fileType = DuckDbDataSource.getFileTypeInfo(fileType);
+      fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
       
     }
     const config = {
-      type: fileType.datasourceType,
+      type: fileTypeInfo.datasourceType,
       file: file,
       fileType: fileType
     };
@@ -494,6 +497,7 @@ class DuckDbDataSource extends EventEmitter {
               throw new Error(`Could not initialize the datasource of type ${type}: either file or filename must be specified`);
           }
           const parts = FileUtils.getFileNameParts(this.#objectName);
+          //
           this.#fileType = config.fileType || parts.lowerCaseExtension;
         }
         break;
@@ -1127,9 +1131,12 @@ class DuckDbDataSource extends EventEmitter {
       default:
         return false;
     }
-    const fileExtension = this.#fileType;
-    const fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
-    const duckdb_reader = fileType.duckdb_reader;
+    const fileType = this.#fileType;
+    const fileTypeInfo = DuckDbDataSource.getFileTypeInfo(fileType);
+    if (!fileTypeInfo) {
+      return false;
+    }
+    const duckdb_reader = fileTypeInfo.duckdb_reader;
     const reader_arguments = DuckDbDataSource.duckdb_reader_arguments[duckdb_reader];
     if (!reader_arguments){
       return false;
