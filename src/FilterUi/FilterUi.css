@@ -315,7 +315,6 @@ dialog#filterDialog {
         > div {
           > select#filterValueList,
           > select#toFilterValueList {
-            padding-top: .5em;
             overflow: auto;
           }
         }
