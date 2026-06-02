@@ -148,6 +148,7 @@ class FilterDialog {
     if (FilterDialog.isRangeFilterType(filterType.value)){
       isArrayFilterType = false;
       if (this.#getFilterValuesList().options.length !== this.#getToFilterValuesList().options.length){
+        this.#updatePicklistOptionInValuesListAttributes();
         this.clearFilterValueLists();
       }
       width = '50%';
