@@ -806,7 +806,10 @@ class QueryUi {
         case QueryModel.AXIS_ROWS:
         case QueryModel.AXIS_COLUMNS:
           delete queryAxisItem.filter;
-          if (info.axis && info.axis.key !== QueryModel.AXIS_CELLS && info.axis.key !== axisId) {
+          if (
+            info.axis && 
+            ![axisId, QueryModel.AXIS_CELLS, QueryModel.AXIS_FILTERS].includes(info.axis.key)
+          ) {
             this.#queryModel.removeItem(queryAxisItem);
           }
           break;
