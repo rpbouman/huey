@@ -262,11 +262,11 @@ class FilterDialog {
     this.#getValuePicklist().addEventListener('change', event => this.#handleValuePicklistChange( event ) );
 
     const filterValuesList = this.#getFilterValuesList();
-    filterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
+    //filterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
     filterValuesList.addEventListener('keydown', event => this.#handleFilterValuesListKeyDown( event ) );
 
     const toFilterValuesList = this.#getToFilterValuesList();
-    toFilterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
+    //toFilterValuesList.addEventListener('change', event => this.#resetValueListsSelection( event ) );
     toFilterValuesList.addEventListener('keydown', event => this.#handleFilterValuesListKeyDown( event ) );
     toFilterValuesList.addEventListener('scroll', event => this.#handleToValuesListScroll( event ) );
 
