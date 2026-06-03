@@ -688,7 +688,6 @@ class FilterDialog {
             // update the end of the current range (we keep updating it as long as the options are selected)
             if (rangeStart !== undefined) {
               rangeEnd = this.#extractValueFromOption(option);
-              option.setAttribute('data-in-to-values-list', true);
             }
           }
 
@@ -704,6 +703,9 @@ class FilterDialog {
             ){
               currentValues[rangeStart.value] = rangeStart;
               currentToValues[rangeStart.value] = rangeEnd;
+              if (option.previousSlibling){
+                option.previousSlibling.setAttribute('data-in-to-values-list', true);
+              }
             }
 
             // save the value so we can select it in the toValues list.
@@ -742,6 +744,8 @@ class FilterDialog {
       this.#updateValueSelectionStatusText();
     }
 
+    this.#updatePicklistOptionInValuesListAttributes(currentValues, currentToValues);
+
     //no need to restore a selection
     if (restoreSelectionInValueList === undefined) {
       return ;
@@ -756,7 +760,7 @@ class FilterDialog {
       filterValuesListOptions.selectedIndex = i;
       break;
     }
-
+    
     // the end.
   }
 
@@ -800,16 +804,17 @@ class FilterDialog {
     const options = valuePickList.options;
     for (let i = 0; i < options.length; i++){
       const option = options[i];
-      if (
-        option.getAttribute('data-in-values-list') === 'true' && 
-        (currentValues === undefined || currentValues[option.value] === undefined)
-      ){
+      const value = option.value;
+      if (currentValues && currentValues[value]) {
+        option.setAttribute('data-in-values-list', 'true');
+      }
+      else {
         option.removeAttribute('data-in-values-list');
       }
-      if (
-        option.getAttribute('data-in-to-values-list') === 'true' && 
-        (currentToValues === undefined || currentToValues[option.value] === undefined)
-      ){
+      if (currentToValues && currentToValues[value]) {
+        option.setAttribute('data-in-to-values-list', 'true');
+      }
+      else {
         option.removeAttribute('data-in-to-values-list');
       }
     }
