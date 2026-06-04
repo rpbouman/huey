@@ -698,7 +698,9 @@ class SqlQueryGenerator {
     const selectListExpressions = {};
     cte.items.forEach(item => {
       const result = SqlQueryGenerator.#getSqlSelectItemExpressionForIntermediateStage(cte, item, sqlOptions);
-      Object.assign(selectListExpressions, result.selectListExpressions);
+      if (result){
+        Object.assign(selectListExpressions, result.selectListExpressions);
+      }
     });
     const sqlSelectList = Object.keys(selectListExpressions).map(columnId => {
       return `${selectListExpressions[columnId]} AS ${quoteIdentifierWhenRequired(columnId)}`
@@ -747,6 +749,9 @@ class SqlQueryGenerator {
     const oldItems = cte.items;
     const newItems = oldItems.map( item => { 
       const result = SqlQueryGenerator.#getSqlSelectItemExpressionForIntermediateStage(cte, item);
+      if (!result) {
+        return item;
+      }
       return {
         columnName: result.alias,
         caption: QueryAxisItem.getCaptionForQueryAxisItem( item )
