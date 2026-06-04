@@ -756,9 +756,8 @@ const dataTypes = {
     }
   },
   'HUGEINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
-    defaultAnalyticalRole: 'attribute',
     isInteger: true,
     createFormatter: function(){
       const formatter = createNumberFormatter(false);
@@ -771,7 +770,7 @@ const dataTypes = {
     }    
   },
   'INTEGER': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "BIGINT",
@@ -786,7 +785,7 @@ const dataTypes = {
     }    
   },
   'SMALLINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "INTEGER",
@@ -801,7 +800,7 @@ const dataTypes = {
     }    
   },
   'TINYINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     greaterPrecisionAlternative: "SMALLINT",
@@ -832,7 +831,7 @@ const dataTypes = {
     }    
   },
   'UHUGEINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     createFormatter: function(){
@@ -846,7 +845,7 @@ const dataTypes = {
     }    
   },
   'UINTEGER': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -862,7 +861,7 @@ const dataTypes = {
     }    
   },
   'USMALLINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
@@ -878,7 +877,7 @@ const dataTypes = {
     }    
   },
   'UTINYINT': {
-    defaultAnalyticalRole: 'attribute',
+    defaultAnalyticalRole: 'measure',
     isNumeric: true,
     isInteger: true,
     isUnsigned: true,
