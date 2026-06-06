@@ -5,10 +5,9 @@
   
   > * {
     flex-grow: 0;
-
-    &:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] ) {
+    &:has( > label[role=tab] ):has( > *[role=tabpanel] ) {
+      > label[role=tab] > input[type=radio],
       > input[type=radio] {
-        appearance: none;
         display: none;
       }
       
@@ -41,7 +40,7 @@
         margin-top: 19px;
       }
       
-      > label[role=tab]:has( + input[type=radio] + *[role=tabpanel] ) {
+      > label[role=tab] {
         border-style: solid;
         border-color: var( --huey-light-border-color );
         border-width: 2px;
@@ -49,7 +48,7 @@
         padding: 2px 4px 2px 4px;
         background-color: var( --huey-dark-background-color );
         white-space: nowrap;
-        text-overflow: 'ellipsis';
+        text-overflow: ellipsis;
         color: var( --huey-foreground-color );
         
         &:hover {
@@ -68,7 +67,9 @@
         overflow: auto;  
       }
 
-      &:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ) {
+      &:has( > label[role=tab] + input[type=radio]:checked ),
+      &:has( > label[role=tab] > input[type=radio]:checked ) 
+      {
         > label[role=tab] {
           border-bottom-color: var( --huey-medium-background-color );
           background-color: var( --huey-medium-background-color );
@@ -84,7 +85,8 @@
       
     }
 
-    &:has( > label[role=tab] + input[type=radio]:checked + *[role=tabpanel] ):last-child::after {
+    &:has( > label[role=tab] + input[type=radio]:checked ):last-child::after,
+    &:has( > label[role=tab] > input[type=radio]:checked ):last-child::after  {
       margin-top: 0px;
     }
 
