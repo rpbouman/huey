@@ -167,7 +167,8 @@ class CreateSecretParser {
     }
 
     if (dataType === undefined || dataType === 'text'){
-      const defaultDataType = SecretsDialog.getDefaultDataypeForSecretKey(key);
+      // TODO: depends on global secretsDialog
+      const defaultDataType = secretsDialog.getDefaultDataypeForSecretKey(key);
       dataType = defaultDataType;
     }
     fields.push({
@@ -178,7 +179,7 @@ class CreateSecretParser {
     return match;
   }
 
-  static parseCreateSecretSQL(createSecretSql) {
+  static parse(createSecretSql) {
     const secretDocument = {};
     let match, slice = createSecretSql, position = 0;
 

@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v42';
+const CACHE_VERSION = 'v43';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -50,9 +50,14 @@ const APP_SHELL = [
   'src/App/App.css',
   'src/App/App.js',
   'src/App/SidebarLogic.css',
+  'src/AttachToRemote/AttachDialog.css',
+  'src/AttachToRemote/AttachDialog.js',
   'src/AttributeUi/AttributeUi.css',
   'src/AttributeUi/AttributeUi.js',
   'src/AttributeUi/derivation-aggregator-icons.css',
+  'src/CatalogsManager/AttachParser.js',
+  'src/CatalogsManager/CatalogsDialog.js',
+  'src/CatalogsManager/CatalogsManager.css',
   'src/ContextMenu/ContextMenu.js',
   'src/DataSet/CellSet.js',
   'src/DataSet/DataSetComponent.js',
@@ -68,6 +73,10 @@ const APP_SHELL = [
   'src/DatasourceSettingsDialog/DatasourceSettingsDialog.css',
   'src/DatasourceSettingsDialog/DatasourceSettingsDialog.js',
   'src/DatasourceSettingsDialog/DatasourceSettingsDialogLogic.css',
+  'src/DocumentStore/AppDocumentStore.js',
+  'src/DocumentStore/DocumentStore.js',
+  'src/DocumentStore/DocumentsDialog.css',
+  'src/DocumentStore/DocumentsDialog.js',
   'src/DragAndDrop/DragAndDropHelper.js',
   'src/DragAndDrop/DragableDialogs.css',
   'src/DragAndDrop/DragableDialogs.js',
@@ -111,7 +120,6 @@ const APP_SHELL = [
   'src/SecretsManager/CreateSecretParser.js',
   'src/SecretsManager/SecretsDialog.js',
   'src/SecretsManager/SecretsManager.css',
-  'src/SecretsManager/SecretsStore.js',
   'src/SessionCloner/SessionCloner.js',
   'src/SettingsDialog/SettingsBase.js',
   'src/SettingsDialog/SettingsDialog.css',

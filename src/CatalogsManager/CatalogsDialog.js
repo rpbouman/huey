@@ -1,39 +1,45 @@
-class SecretsDialog extends DocumentsDialog {
+class CatalogsDialog extends DocumentsDialog {
   
-  get changePasswordButton(){
-    return this.getMainToolbarControl( 'button[name=changePassword]' );
+  parseDocumentSQL(sql){
+    return AttachParser.parse(sql);
   }
 
-  get resetSecretsStoreButton(){
-    return this.getMainToolbarControl( 'button[name=resetSecretsStore]' );
-  }
-    
-  parseDocumentSQL(sql){
-    return CreateSecretParser.parse(sql);
-  }
-     
   getDropDocumentSQL(name){
     if (!name){
       const documentObject = this.documentObject;
       name = documentObject.name;
     }
-    return `DROP SECRET IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
+    return `DETACH DATABASE IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
+  }
+
+  async createDuckDbDocument(documentObject){
+    const fieldsPath = this.fieldsPath;
+    const fields = documentObject[fieldsPath];
+    const secretField = fields.filter(field => field.key === 'SECRET');
+    if (secretField.length) {
+      const secretName = secretField[0].value;
+      
+    }
+    return await super.createDuckDbDocument(documentObject);
   }
 
   getCreateDocumentSQL(documentObject){
     documentObject = documentObject || this.documentObject;
-    const fields = documentObject.fields.map(field => {
-      return `\r\n, ${this.fieldValuePairAsSQL(field)}`;
+    const fieldsPath = this.fieldsPath;
+    const fields = documentObject[fieldsPath].map(field => {
+      const pair = this.fieldValuePairAsSQL(field)
+      if (!pair || !pair.length) return '';
+      return `\r\n, ${pair}`;
     });
     
     return [
-      'CREATE OR REPLACE',
-      `TEMPORARY SECRET ${quoteIdentifierWhenRequired(documentObject.name)} (`,
+      `ATTACH ${quoteStringLiteral(documentObject.url)}`,
+      `AS ${quoteIdentifierWhenRequired(documentObject.name)} (`,
       `  TYPE ${documentObject.type}${fields.join('')}`,
       ')'
     ].join('\r\n');
   }
-  
+
   async handleCreateDuckDbDocumentError(error){
     const message = error.message;
     const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
@@ -63,23 +69,23 @@ class SecretsDialog extends DocumentsDialog {
     }
     return true;
   }
-
-  async getDuckDbSecrets(){
+   
+  async getDuckDbDatabases(){
     const obj = {};
     const connection = window.hueyDb.connection;
-    const result = await connection.query('SELECT * FROM duckdb_secrets()');
+    const result = await connection.query(`SELECT * FROM duckdb_databases() WHERE database_name != 'memory' AND internal != TRUE`);
     const n = result.numRows;
     for (let i = 0; i < n; i++){
       const row = result.get(i);
-      const name = row['name'];
+      const name = row['database_name'];
       const type = row['type'];
       obj[name] = type;
     }
     return obj;
   }
-   
+
   async updateDocumentsList(selectedDocument){
-    const duckdbSecrets = await this.getDuckDbSecrets();
+    const duckdbDatabases = await this.getDuckDbDatabases();
     const store = AppDocumentStore.store;
     
     let docs = await store.list( this.objectStoreName );
@@ -109,7 +115,7 @@ class SecretsDialog extends DocumentsDialog {
         type = documentObject.type;
         items.push(`<optgroup label="${type}">`);
       }
-      const loaded = duckdbSecrets[documentObject.name] !== undefined;
+      const loaded = duckdbDatabases[documentObject.name] !== undefined;
       const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';
       items.push(`<option data-loaded="${loaded}" ${selected}>${documentObject.name}</option>`);
     });
@@ -118,29 +124,29 @@ class SecretsDialog extends DocumentsDialog {
     }
     this.documentsList.innerHTML = items.join('\n');
   }
-
-  initEvents(){
-    super.initEvents();
-    this.changePasswordButton.addEventListener('click', event => this.handleChangePasswordClicked(event) );
-    this.resetSecretsStoreButton.addEventListener('click', event => this.handleResetSecretsStoreClicked(event) );
+  
+  async handleCreateDuckDbDocumentError(error){
+    const message = error.message;
+    return false;
   }
+  
 
   constructor(config){
     config = Object.assign({}, config, {
-      dialogId: 'secretsDialog',
-      objectStoreName: AppDocumentStore.STORE_SECRETS,
-      title: 'Secrets Manager',
-      toolsTemplateId: 'secretsDialogToolsTemplate',
-      headerTemplateId: 'secretHeaderTemplate',
-      keyValueTemplateId: 'secretKeyValueUiTemplate'
+      dialogId: 'catalogsDialog',
+      objectStoreName: AppDocumentStore.STORE_CATALOGS,
+      title: 'Catalogs Manager',
+      toolsTemplateId: 'catalogsDialogToolsTemplate',
+      headerTemplateId: 'catalogHeaderTemplate',
+      keyValueTemplateId: 'catalogKeyValueUiTemplate'
     });
     super(config);
   }
     
 }
 
-let secretsDialog;
+let catalogsDialog;
 
-function initSecretsDialog(){
-  secretsDialog = new SecretsDialog();
+function initCatalogsDialog(){
+  catalogsDialog = new CatalogsDialog();
 }

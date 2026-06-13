@@ -215,6 +215,16 @@ dialog {
     padding: .5em 0em .5em 0em;
     z-index: 1;
 
+    &::before {
+      font-family: var(--huey-icon-font-family);
+      font-size: var(--huey-icon-normal);
+      vertical-align: bottom;
+      color: var( --huey-icon-color-highlight );
+      margin: 0px 4px 0px 0px;
+      float: left;
+    }
+
+
     & :is(h1, h2, h3, h4, h5, h6) {
       margin-block-start: 0px;
       margin-block-end: 0px;
