@@ -62,7 +62,11 @@ function initDuckdbVersion(){
     const duckdbTokenizer = RegXpChef.compile(
       { $flags: 'gysi' }, 
       {
-        keyword: reservedWords,
+        keyword: {
+          $begin: /\b/,
+          $content: reservedWords,
+          $end: /\b/
+        },
         number: /\d+(\.\d*)?|\.\d+/,
         string: {
           $begin: '\'',

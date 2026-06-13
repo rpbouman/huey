@@ -566,7 +566,7 @@ class DocumentStore {
     const hasPasswordFields = DocumentStoreUtils.hasPasswordFields(doc, fieldsPath);
     if (hasPasswordFields) {
       if (!password) {
-        DocumentStore.#throwNewPasswordRequiredError(`Store '${storeName}' is encrypted — password required`);
+        DocumentStore.#throwNewPasswordRequiredError(`Document for store "${objectStoreConf.name}" has encrypted fields — password required.`);
       }
       const key = await this.#getKey(password);
       if (!await this.#verifySentinel(key)) {

@@ -154,6 +154,7 @@ const APP_SHELL = [
   'src/util/regex/RegXpChef.js',
   'src/util/resize/resize.css',
   'src/util/sql/SQLHelper.js'
+  'src/SpecialPurposeParser/SpecialPurposeParser.js'
 ];
 
 // ─── CDN entry-points to pre-fetch at install time ────────────────────────────

@@ -373,7 +373,7 @@ class DocumentsDialog {
       return '';
     }
     const needsQuotes = this.keyValueNeedsQuotes(key);
-    key = quoteIdentifierWhenRequired(field.key);
+    key = field.key;
     if (needsQuotes){
       value = this.fieldValueAsSQL(field);
     }
@@ -1007,15 +1007,15 @@ class DocumentsDialog {
       const oldPasswordId = `old_password_${now}`;
       const newPasswordId = `new_password_${now}`;
       
-      const hint = SecretsDialog.#passwordHint;
-      const invalidPassword = '<div>'  + SecretsDialog.#wrongPasswordHint + '</div>';
+      const hint = DocumentsDialog.#passwordHint;
+      const invalidPassword = '<div>'  + DocumentsDialog.#wrongPasswordHint + '</div>';
       
       const passwordForm = `
         <form>
           <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
-          ${SecretsDialog.#getPasswordHTML(oldPasswordId, 'password')}
+          ${DocumentsDialog.#getPasswordHTML(oldPasswordId, 'password')}
           <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
-          ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
+          ${DocumentsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
         </form>
       `;
       const store = AppDocumentStore.store;
@@ -1076,7 +1076,7 @@ class DocumentsDialog {
   }
   
   static #getPasswordHTML(id, name) {
-    const hint = SecretsDialog.#passwordHint;
+    const hint = DocumentsDialog.#passwordHint;
     const passwordHTML = `<input
       type="password"
       name="${name || 'password'}"
@@ -1097,9 +1097,9 @@ class DocumentsDialog {
     try {
       const store = AppDocumentStore.store;
       const id = 'secretsManagerPassword' + Date.now();
-      const hint = SecretsDialog.#passwordHint;
-      const invalidPassword = SecretsDialog.#wrongPasswordHint;
-      const passwordHTML = SecretsDialog.#getPasswordHTML(id);
+      const hint = DocumentsDialog.#passwordHint;
+      const invalidPassword = DocumentsDialog.#wrongPasswordHint;
+      const passwordHTML = DocumentsDialog.#getPasswordHTML(id);
       const config = {
         title: Internationalization.getText('Enter Password'),
         contents: passwordHTML
