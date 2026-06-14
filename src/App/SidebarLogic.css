@@ -91,7 +91,7 @@ nav#sidebar[role=tablist] {
     *
     */
     &:has( 
-      > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+      > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > *
     )  {
       display: block;
     }
@@ -113,7 +113,7 @@ nav#sidebar[role=tablist] {
     &:has( 
       > label[role=tab][for=datasourcesTab]
     ):has( 
-      + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > details
+      + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > *
     ) {
       flex-grow: 0;
     }
