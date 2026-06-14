@@ -6,7 +6,9 @@ class DocumentsDialog {
   dialogId = undefined;
   headerTemplateId = undefined;
   toolsTemplateId = undefined;
-  keyValueTemplateId = undefined;
+  keyValueTemplateId = 'keyValueUiTemplate';
+  keyValuePairsRequired = false;
+  keysDataListId = undefined;
   hilited = undefined;
   hilitedPerhipherals = undefined;
   resizeObserver = undefined;
@@ -20,7 +22,9 @@ class DocumentsDialog {
     const titleId = `${dialogId}-title`;
     this.dialogId = dialogId;
     this.objectStoreName = config.objectStoreName;
-    this.keyValueTemplateId = config.keyValueTemplateId;
+    this.keyValueTemplateId = config.keyValueTemplateId || this.keyValueTemplateId;
+    this.keyValuePairsRequired = config.keyValuePairsRequired || this.keyValuePairsRequired;
+    this.keysDataListId = config.keysDataListId;
     this.toolsTemplateId = config.toolsTemplateId;
     this.headerTemplateId = config.headerTemplateId;
 
@@ -198,10 +202,12 @@ class DocumentsDialog {
   }  
   
   get keysDatalist(){
-    const keyValuesTemplate = this.keyValuesTemplate;
-    const keyEl = keyValuesTemplate.content.querySelector('input[name=key]');
-    const dataListId = keyEl.getAttribute('list');
-    return byId( dataListId );
+    if (!this.keysDataListId) {
+      const keyValuesTemplate = this.keyValuesTemplate;
+      const keyEl = keyValuesTemplate.content.querySelector('input[name=key]');
+      this.keysDataListId = keyEl.getAttribute('list');
+    }
+    return byId( this.keysDataListId );
   }
   
   getOptionFromKeysDatalist(key){
@@ -223,6 +229,15 @@ class DocumentsDialog {
     }
     const defaultType = option.getAttribute('data-default-type');
     return defaultType;
+  }
+
+  getValuesListIdForKey(key){
+    const option = this.getOptionFromKeysDatalist(key);
+    if (!option) {
+      return undefined;
+    }
+    const valuesListId = option.getAttribute('data-values-list');
+    return valuesListId;
   }
 
   keyValueNeedsQuotes(key){
@@ -383,12 +398,24 @@ class DocumentsDialog {
   newKeyValueUi(beforeElement){
     const newKeyValueUi = this.instantiateKeyValueUi();
     const keyEl = this.getFieldKeyEl(newKeyValueUi);
+    if ( keyEl.getAttribute('list') === null ) {
+      keyEl.setAttribute('list', this.keysDataListId);
+    }
     const container = this.keyValuesFieldset;
     if (beforeElement){
       container.insertBefore(newKeyValueUi, beforeElement);
     }
     else {
       container.appendChild(newKeyValueUi);
+    }
+    const valueEl = this.getFieldValueEl(newKeyValueUi);
+    if (this.keyValuePairsRequired){
+      keyEl.setAttribute('required', true);
+      valueEl.setAttribute('required', true);
+    }
+    else {
+      keyEl.removeAttribute('required');
+      valueEl.removeAttribute('required');
     }
     return newKeyValueUi;
   }
@@ -597,6 +624,10 @@ class DocumentsDialog {
     return existingItem;
   }
   
+  getFieldContainer(descendantEl) {
+    return descendantEl.closest('div');
+  }
+  
   getFieldIndentCheckbox(fieldContainer) {
     return fieldContainer.querySelector('span > menu > label > input[name=indent]');
   }
@@ -749,15 +780,25 @@ class DocumentsDialog {
     
   handleKeyFieldChanged(event){
     const keyField = event.target;
+    const fieldContainer = this.getFieldContainer(keyField);
+    
     const key = keyField.value;
-    const dataType = this.getDefaultDataypeForKey(key);
-    if (!dataType) {
-      return;
+    const valueListId = this.getValuesListIdForKey(key);
+
+    const valueEl = this.getFieldValueEl(fieldContainer);
+    if (valueListId) {
+      valueEl.setAttribute('list', valueListId);
     }
-    const fieldDiv = keyField.parentNode.parentNode;
-    const fieldTypeSelect = fieldDiv.querySelector('SELECT');
-    this.selectOption(fieldTypeSelect, dataType);
-    this.handleFieldTypeChanged({target: fieldTypeSelect});
+    else {
+      valueEl.removeAttribute('list');
+    }
+
+    const dataType = this.getDefaultDataypeForKey(key);
+    if (dataType) {
+      const fieldTypeSelect = this.getFieldTypeEl(fieldContainer);
+      this.selectOption(fieldTypeSelect, dataType);
+      this.handleFieldTypeChanged({target: fieldTypeSelect});
+    }
   }
   
   handleFieldChanged(event) {
@@ -805,7 +846,10 @@ class DocumentsDialog {
     subKeyField.focus();
   }
   
+  
+  
   handleFieldInput(event){
+    const target = event.target;
     if (this.unsavedChangesCheckbox.checked){
       return;
     }

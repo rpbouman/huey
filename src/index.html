@@ -238,10 +238,19 @@
       <option value="unity_catalog" label="Unity Catalog" translate="no" data-duckdb-extension="unity_catalog"></option>
     </datalist>
     
+    <!-- 
+      Known keys for SECRET Options.
+      The secretsDialog uses this data list as list for the key input in keyValueUiTemplate 
+      - data-associated-document-types: list of secret types for which this key is known to be appropriate
+      - data-default-type: the data type (if it is known) for the type input keyValueUiTemplate. Determines how the value is interpreted and whether it should be encrypted when stored.
+      - data-key-value-needs-quotes: set to false of the value is an identifier rather than a string value (determines whether the value will be quoted in the CREATE SECRET statement)
+      - data-values-list: if specified, then that is used as list attribute for the value input
+    -->
     <datalist id="secret-keys">
       <option value="ACCOUNT_ID" translate="no" data-default-type="text" data-associated-document-types="r2"></option>
       <option value="ACCOUNT_NAME" translate="no" data-default-type="text" data-associated-document-types="azure"></option>
       <option value="ASSUME_ROLE_ARN" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="AUTHORIZATION_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
       <option value="AWS_REGION" translate="no" data-default-type="text" data-associated-document-types="s3,unity_catalog"></option>
       <option value="BEARER_TOKEN" translate="no" data-default-type="password" data-associated-document-types="http,iceberg"></option>
       <option value="CHAIN" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
@@ -261,6 +270,7 @@
       <option value="OAUTH2_SERVER_URI" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
       <option value="PROFILE" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
       <option value="PROVIDER" data-key-value-needs-quotes="false" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="REFRESH" data-key-value-needs-quotes="false" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
       <option value="REGION" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
       <option value="REQUESTER_PAYS" translate="no" data-default-type="checkbox" data-associated-document-types="s3"></option>
       <option value="SCOPE" translate="no" data-default-type="list" data-associated-document-types="s3,http"></option>
@@ -275,6 +285,10 @@
       <option value="VERIFY_SSL" translate="no" data-default-type="checkbox" data-associated-document-types="s3,gcs,r2,http"></option>
     </datalist>
     
+    <!-- this gets dynamically populated - see: SecretsDialog.updateDocumentsList and SecretsDialog.updateSecretsDataList -->
+    <datalist id="secrets-list">
+    </datalist>
+    
     <datalist id="attach-types">
       <option value="delta" translate="no" data-duckdb-extension="delta">Delta</option>
       <option value="duckdb" translate="no" >DuckDB</option>
@@ -284,13 +298,24 @@
       <option value="unity_catalog" translate="no" data-duckdb-extension="unity_catalog">Unity Catalog</option>
     </datalist>
     
+    <!-- https://duckdb.org/docs/current/core_extensions/iceberg/iceberg_rest_catalogs#attach-options -->
     <datalist id="catalog-keys">
       <option value="AUTHORIZATION_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="ACCESS_DELEGATION_MODE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="CLIENT_ID" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="CLIENT_SECRET" translate="no" data-default-type="password" data-associated-document-types="iceberg"></option>
+      <option value="DEFAULT_REGION" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
       <option value="ENCRYPTION_CIPHER" translate="no" data-default-type="text" data-associated-document-types="duckdb"></option>
       <option value="ENCRYPTION_KEY" translate="no" data-default-type="password" data-associated-document-types="duckdb"></option>
       <option value="ENDPOINT" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
       <option value="ENDPOINT_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
-      <option value="SECRET" translate="no" data-default-type="text"></option>
+      <option value="EXTRA_HTTP_HEADERS" translate="no" data-default-type="map" data-associated-document-types="iceberg"></option>
+      <option value="MAX_TABLE_STALENESS" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="OAUTH2_SERVER_URI" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="PURGE_REQUESTED" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
+      <option value="SECRET" translate="no" data-default-type="text" data-values-list="secrets-list"></option>
+      <option value="SUPPORT_NESTED_NAMESPACES" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
+      <option value="SUPPORT_STAGE_CREATE" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
     </datalist>
 
     <div id="spinner">
@@ -1538,67 +1563,15 @@
         title="Enter the remote catalog's URL"
       />
     </template>
-    
-    <template id="secretKeyValueUiTemplate">
-      <div>
-        <span>
-          <menu role="toolbar">
-            <label title="Add new field"><button name="add" value="add">Add new Field</button></label>
-            <label title="Remove field"><button name="remove" value="remove">Remove Field</button></label>
-            <label title="Move field up"><button name="up" value="up">Move field up</button></label>
-            <label title="Move field down"><button name="down" value="down">Move field down</button></label>
-            <label title="Toggle subfield"><input type="checkbox" name="indent" value="indent"/></label>
-          </menu>
-        </span>
-        <span>
-          <input 
-            type="text" 
-            placeholder="Enter a key"
-            name="key"
-            list="secret-keys"
-            title="Key field"
-            pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
-            required="true"
-            autocomplete="true"
-            spellcheck="false"
-            autofocus="true"
-          />
-        </span>
-        <span>
-          <select 
-            title="Select the field data type (input method) for the value field"
-            name="type"
-          >
-            <option value="checkbox" title="Boolean">&#x2611;</option>
-            <option value="list" title="List">[&#x2026;]</option>
-            <option value="text" title="Plaintext" selected="true">txt</option>
-            <option value="password" title="Encrypted">***</option> 
-            <option value="map" title="Map">{&#x2026;}</option>
-          </select>
-        </span>
-        <span>
-          <input 
-            type="text"
-            placeholder="Enter the key's value"
-            name="value"
-            title="Value field"
-            required="true"
-            pattern="^(?!\s+).+(?<!\s+)$"
-            autocomplete="true"
-            spellcheck="false"
-          />
-        </span>
-      </div>
-    </template>
 
-    <template id="catalogKeyValueUiTemplate">
+    <template id="keyValueUiTemplate">
       <div>
         <span>
           <menu role="toolbar">
-            <label title="Add new field"><button name="add" value="add">Add new Field</button></label>
-            <label title="Remove field"><button name="remove" value="remove">Remove Field</button></label>
-            <label title="Move field up"><button name="up" value="up">Move field up</button></label>
-            <label title="Move field down"><button name="down" value="down">Move field down</button></label>
+            <label title="Add new field"><button type="button" name="add" value="add">Add new Field</button></label>
+            <label title="Remove field"><button type="button" name="remove" value="remove">Remove Field</button></label>
+            <label title="Move field up"><button type="button" name="up" value="up">Move field up</button></label>
+            <label title="Move field down"><button type="button" name="down" value="down">Move field down</button></label>
             <label title="Toggle subfield"><input type="checkbox" name="indent" value="indent"/></label>
           </menu>
         </span>
@@ -1607,7 +1580,6 @@
             type="text" 
             placeholder="Enter a key"
             name="key"
-            list="catalog-keys"
             title="Key field"
             pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
             autocomplete="true"

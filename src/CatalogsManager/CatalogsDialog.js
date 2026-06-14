@@ -17,10 +17,25 @@ class CatalogsDialog extends DocumentsDialog {
     const fields = documentObject[fieldsPath];
     const secretField = fields.filter(field => field.key === 'SECRET');
     if (secretField.length) {
+      // TODO: make this nice. Should probably be a service performed by the secret dialog
+      // should handle cases where the secret already EXISTS
+      // should detect whether the secret cannot be found at all and prompt whether to continue
       const secretName = secretField[0].value;
-
+      const secretDocument = await secretsDialog.getAndDecryptDocument(secretName);
+      await secretsDialog.createDuckDbDocument(secretDocument);
     }
-    return await super.createDuckDbDocument(documentObject);
+    const result = await super.createDuckDbDocument(documentObject);
+    if (!result) {
+      return result;
+    }
+    const dsConfig = {
+      type: DuckDbDataSource.types.CATALOG,
+      definition: documentObject 
+    };
+    const hueyDb = window.hueyDb;
+    const datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, dsConfig);
+    await datasourcesUi.addDatasource(datasource);
+    return result;
   }
 
   getCreateDocumentSQL(documentObject){
@@ -42,32 +57,10 @@ class CatalogsDialog extends DocumentsDialog {
 
   async handleCreateDuckDbDocumentError(error){
     const message = error.message;
-    const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
+    const regexp = /Invalid Configuration Error: Could not find a valid storage secret ([^)]+)/;
     const match = regexp.exec(message);
-
-    if (!match) {
-      throw error;
-    }
-
-    const secretType = match.groups['secretType'];
-    const extensionName = match.groups['extensionName'];
-
-    try{
-      await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
-    }
-    catch(e) {
-      console.error(e);
-      showErrorDialog({
-        title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
-        description: Internationalization.getText(
-          'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.',
-          secretType,
-          extensionName
-        )
-      });
-      return false;
-    }
-    return true;
+    
+    return false;
   }
 
   async getDuckDbDatabases(){
@@ -125,14 +118,6 @@ class CatalogsDialog extends DocumentsDialog {
     this.documentsList.innerHTML = items.join('\n');
   }
 
-  async handleCreateDuckDbDocumentError(error){
-    const message = error.message;
-    const regexp = /Invalid Configuration Error: Could not find a valid storage secret ([^)]+)/;
-    const match = regexp.exec(message);
-    
-    return false;
-  }
-
   constructor(config){
     config = Object.assign({}, config, {
       dialogId: 'catalogsDialog',
@@ -140,7 +125,7 @@ class CatalogsDialog extends DocumentsDialog {
       title: 'Catalogs Manager',
       toolsTemplateId: 'catalogsDialogToolsTemplate',
       headerTemplateId: 'catalogHeaderTemplate',
-      keyValueTemplateId: 'catalogKeyValueUiTemplate'
+      keysDataListId: 'catalog-keys'
     });
     super(config);
   }

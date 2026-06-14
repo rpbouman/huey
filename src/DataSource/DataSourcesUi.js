@@ -162,11 +162,9 @@ class DataSourcesUi extends EventEmitter {
     return typeSignature;
   }
 
-  async #renderDatasources(){
-    this.clear();
+  async #getDatasourceGroupings(){
     const potentialGroups = {};
     const datasources = this.#datasources;
-
     const groupingPromises = Object.keys(datasources).map(async datasourceId => {
       const datasource = datasources[datasourceId];
       const datasourceType = datasource.getType();
@@ -190,6 +188,7 @@ class DataSourcesUi extends EventEmitter {
         case DuckDbDataSource.types.VIEW:
           // noop. these are rendered by the respective database datasource node.
           return;
+        case DuckDbDataSource.types.CATALOG:
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.SQLITE:
         default:
@@ -204,7 +203,16 @@ class DataSourcesUi extends EventEmitter {
       group.datasources[datasourceId] = datasource;
       return true;
     });
-    const results = await Promise.all(groupingPromises);
+    await Promise.all(groupingPromises);
+    return potentialGroups;
+  }
+
+  async #renderDatasources(){
+    this.clear();
+    const potentialGroups = await this.#getDatasourceGroupings();
+
+    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.CATALOG]);
+    delete potentialGroups[DuckDbDataSource.types.CATALOG];
 
     this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
     delete potentialGroups[DuckDbDataSource.types.DUCKDB];
@@ -245,6 +253,10 @@ class DataSourcesUi extends EventEmitter {
   static getCaptionForDatasource(datasource){
     const type = datasource.getType();
     switch (type){
+      case DuckDbDataSource.types.CATALOG:
+        const catalogDefinition = datasource.getCatalogDefinition();
+        return catalogDefinition.name;
+        break;
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
@@ -351,7 +363,7 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async #loadDatabaseDatasource(databaseDatasource){
-    const catalogName = databaseDatasource.getFileNameWithoutExtension();
+    const catalogName = databaseDatasource.getAttachedName();
     const connection = window.hueyDb.connection;
     const sql = `
       SELECT table_schema, table_name, table_type
@@ -416,6 +428,7 @@ class DataSourcesUi extends EventEmitter {
       case DuckDbDataSource.types.FILE:
         // noop, files can't be expanded.
         break;
+      case DuckDbDataSource.types.CATALOG:
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
         this.#loadDatabaseDatasource(datasource);
@@ -457,6 +470,7 @@ class DataSourcesUi extends EventEmitter {
     }
 
     switch (type) {
+      case DuckDbDataSource.types.CATALOG:
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
         this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
@@ -738,6 +752,9 @@ class DataSourcesUi extends EventEmitter {
 
   #setCaptionForDataSourceGroup(label, datasourceGroup, miscGroup){
     switch (datasourceGroup.type) {
+      case DuckDbDataSource.types.CATALOG:
+        label.textContent = 'Remote Catalogs';
+        break;
       case DuckDbDataSource.types.DUCKDB:
         label.textContent = 'DuckDB';
         break;

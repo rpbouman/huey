@@ -116,7 +116,36 @@ class SecretsDialog extends DocumentsDialog {
     if (items.length) {
       items.push('</optgroup>');
     }
+    
+    this.#updateSecretsDataList(docs);
+    
     this.documentsList.innerHTML = items.join('\n');
+  }
+  
+  #updateSecretsDataList(docs){
+    const secretsList = byId('secrets-list');
+    secretsList.innerHTML = docs.sort((a,b) => {
+      a = a.name
+      const A = a.toUpperCase();
+      b = b.name;
+      const B = b.toUpperCase();
+      if (A > B){
+        return 1;
+      }
+      else 
+      if (A < B) {
+        return -1;
+      }
+      else 
+      if (a > b){
+        return 1;
+      }
+      else 
+      if (a < b) {
+        return -1;
+      }
+      return 0;
+    }).map(doc => createEl('option', {label: doc.name, value: doc.name}, doc.name).outerHTML).join('');
   }
 
   initEvents(){
@@ -132,7 +161,8 @@ class SecretsDialog extends DocumentsDialog {
       title: 'Secrets Manager',
       toolsTemplateId: 'secretsDialogToolsTemplate',
       headerTemplateId: 'secretHeaderTemplate',
-      keyValueTemplateId: 'secretKeyValueUiTemplate'
+      keysDataListId: 'secret-keys',
+      keyValuePairsRequired: true
     });
     super(config);
   }

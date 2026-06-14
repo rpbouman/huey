@@ -135,21 +135,31 @@ nav#sidebar[role=tablist] {
     }
         
     &[data-nodetype=datasourcegroup]:is( 
+      [data-grouptype=catalog], 
       [data-grouptype=duckdb], 
+      [data-grouptype=sqlite], 
       [data-grouptype=file], 
       [data-datasourcetype=duckdb] 
     ) > summary > span.label::before,
-    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > summary > span.label::before
+    &[data-nodetype=datasource]:is(
+      [data-datasourcetype=duckdb],
+      [data-datasourcetype=catalog] 
+    )> details[data-nodetype=duckdb_schema] > summary > span.label::before
     {
       content: var( --icon-folder );
     }
 
     &[data-nodetype=datasourcegroup][open]:is( 
+      [data-grouptype=catalog], 
+      [data-grouptype=duckdb], 
       [data-grouptype=duckdb], 
       [data-grouptype=file], 
       [data-datasourcetype=duckdb] 
     ) > summary > span.label::before,
-    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
+    &[data-nodetype=datasource]:is(
+      [data-datasourcetype=duckdb],
+      [data-datasourcetype=catalog]
+    ) > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
     {
       content: var( --icon-folder-open );
     }
@@ -167,7 +177,10 @@ nav#sidebar[role=tablist] {
       }
     }
     
-    &[data-nodetype=datasource][data-datasourcetype=duckdb] > details[data-nodetype=duckdb_schema] > details > summary,
+    &[data-nodetype=datasource]:is(
+      [data-datasourcetype=duckdb],
+      [data-datasourcetype=catalog]
+    )> details[data-nodetype=duckdb_schema] > details > summary,
     &[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
       list-style: none;
       margin-left: 16px;
@@ -175,7 +188,10 @@ nav#sidebar[role=tablist] {
     
     &[data-nodetype=datasource]{
 
-      &[data-datasourcetype=duckdb] {
+      &:is(
+        [data-datasourcetype=duckdb],
+        [data-datasourcetype=catalog]
+      ){
         > summary > span.label::before {
           content: var( --icon-database );
         }
@@ -194,6 +210,7 @@ nav#sidebar[role=tablist] {
           
         }
       }
+      
       
       &[data-datasourcetype=file] > summary > span.label::before {
         content: var( --icon-file );
