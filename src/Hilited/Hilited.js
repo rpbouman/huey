@@ -754,6 +754,7 @@ class Hilited {
     if (!this.#hasSelection()){
       return;
     }
+    this.#element.focus();
     // document.execCommand has the advantage of keeping the UNDO functionality correct.
     if (document.execCommand('insertText', undefined, text)){
       return;
@@ -762,7 +763,8 @@ class Hilited {
   }
 
   setText(text){
-    this.#element.textContent = '';
+    const editingEnabled = this.editingEnabled;
+    this.editingEnabled = true;
     const selection = document.getSelection();
     selection.setBaseAndExtent(this.#element, 0, this.#element, 0);
     this.#text = text;
@@ -771,6 +773,7 @@ class Hilited {
     this.#insertText(text);
     this.#parseLines();
     this.#updateHighlighting();
+    this.editingEnabled = editingEnabled;
   }
 
   #handleDocumentSelectionChange(){

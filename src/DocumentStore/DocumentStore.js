@@ -68,6 +68,15 @@ class DocumentStoreUtils {
     );
     return DocumentStoreUtils.decode(plain);
   }
+  
+  static hasPasswordFields(doc, fieldsPath){
+    const fields = doc[fieldsPath];
+    if (!fields) {
+      return false;
+    }
+    return fields.some(field => field.type === 'password');
+  }
+  
 }
 
 
@@ -77,8 +86,6 @@ class DocumentStoreUtils {
  * @typedef {Object} StoreDefinition
  * @property {string}          name        - Object store name; expose as a static constant on the subclass.
  * @property {string|string[]} keyPath     - Field name(s) that form the primary key.
- * @property {boolean}         [encrypted] - When `true`, fields with `type === 'password'` are
- *                                           encrypted at rest. Defaults to `false`.
  * @property {string}          [fieldsPath] - Property name that holds the fields array. Defaults to `'fields'`.
  * @property {string[]}        [headerFields] - Field names to include in {@link DocumentStore#list} summaries.
  *                                              Defaults to `['name', 'type']`.
@@ -89,7 +96,6 @@ class DocumentStoreUtils {
  * @property {string} name  - Field name.
  * @property {string} type  - Field type. Use `'password'` to mark a value for encryption.
  * @property {string} value - Field value. Encrypted at rest when `type === 'password'`
- *                            and the containing store has `encrypted: true`.
  */
 
 /**
@@ -104,8 +110,7 @@ class DocumentStoreUtils {
  * per-store field-level encryption.
  *
  * Subclasses must implement {@link _defineStores} to declare their object stores.
- * Encryption (AES-GCM-256, key derived via PBKDF2-SHA-256) is applied
- * transparently to stores marked `encrypted: true`; all other stores are plain.
+ * Encryption (AES-GCM-256, key derived via PBKDF2-SHA-256) is applied for fields with type=password
  *
  * A private `meta` object store is always created alongside the user-defined
  * stores; it holds the PBKDF2 salt and an encrypted sentinel used for password
@@ -119,6 +124,9 @@ class DocumentStore {
 
   /** @type {string} Sentinel plaintext used to verify the encryption password. */
   static #SENTINEL = 'DOCUMENT_STORE_V1_VALID';
+
+  static PASSWORD_REQUIRED_ERROR = 'PasswordRequired';
+  static INCORRECT_PASSWORD_ERROR = 'IncorrectPassword';
 
   /** @type {IDBDatabase|null} */
   #db = null;
@@ -141,8 +149,8 @@ class DocumentStore {
    * @example
    * _defineStores() {
    *   return [
-   *     { name: MyStore.STORE_SECRETS,  keyPath: 'name', encrypted: true  },
-   *     { name: MyStore.STORE_CATALOGS, keyPath: 'name', encrypted: false },
+   *     { name: MyStore.STORE_SECRETS,  keyPath: 'name'},
+   *     { name: MyStore.STORE_CATALOGS, keyPath: 'name'},
    *   ];
    * }
    */
@@ -160,7 +168,6 @@ class DocumentStore {
     if (this.#storeConfig) return this.#storeConfig;
     this.#storeConfig = new Map(
       this._defineStores().map(def => [def.name, {
-        encrypted:    false,
         fieldsPath:   'fields',
         headerFields: ['name', 'type'],
         ...def,
@@ -176,7 +183,7 @@ class DocumentStore {
    * @returns {Required<StoreDefinition>}
    * @throws {Error} If the store name is not declared in {@link _defineStores}.
    */
-  #storeConf(storeName) {
+  getStoreConfig(storeName) {
     const conf = this.#config().get(storeName);
     if (!conf) throw new Error(`Unknown store: '${storeName}'`);
     return conf;
@@ -459,7 +466,7 @@ class DocumentStore {
   }
 
   /**
-   * Re-encrypts every `'password'`-typed field in all encrypted stores from
+   * Re-encrypts every `'password'`-typed field from
    * `oldPassword` to `newPassword`. All crypto runs in memory first; a single
    * IndexedDB transaction then atomically commits the new state.
    * @param {string} oldPassword
@@ -480,22 +487,27 @@ class DocumentStore {
     const newKey     = await DocumentStoreUtils.deriveKey(newPassword, newSalt);
     const newSentinel = await DocumentStoreUtils.encrypt(newKey, DocumentStore.#SENTINEL);
 
-    const encryptedStores = [...this.#config().values()].filter(c => c.encrypted);
+    const stores = [...this.#config().values()];
 
     // Re-encrypt all docs in memory before touching IndexedDB
     const migratedByStore = await Promise.all(
-      encryptedStores.map(async conf => {
-        const raw      = await this.#getAllRaw(conf.name);
-        const migrated = await Promise.all(raw.map(async doc => {
-          const decrypted = await this.#decryptDoc(doc, conf.fieldsPath, oldKey);
-          return this.#encryptDoc(decrypted, conf.fieldsPath, newKey);
-        }));
-        return { conf, migrated };
+      stores.map(async conf => {
+        const raw = await this.#getAllRaw(conf.name);
+        if (DocumentStoreUtils.hasPasswordFields(raw, conf.fieldsPath)){
+          const migrated = await Promise.all(raw.map(async doc => {
+            const decrypted = await this.#decryptDoc(doc, conf.fieldsPath, oldKey);
+            return this.#encryptDoc(decrypted, conf.fieldsPath, newKey);
+          }));
+          return { conf, migrated };
+        }
+        else {
+          return { conf, conf };
+        }
       })
     );
 
     await this.#tx(
-      [DocumentStore.STORE_META, ...encryptedStores.map(c => c.name)],
+      [DocumentStore.STORE_META, ...stores.map(c => c.name)],
       'readwrite',
       tx => {
         const meta = tx.objectStore(DocumentStore.STORE_META);
@@ -519,7 +531,7 @@ class DocumentStore {
    * @returns {Promise<boolean>}
    */
   async exists(storeName, id) {
-    const conf       = this.#storeConf(storeName);
+    const conf       = this.getStoreConfig(storeName);
     const normalisedId = this.#normaliseKey(id, conf.keyPath);
     const db         = await this.#openDB();
     const result     = await this.#idb(
@@ -528,10 +540,45 @@ class DocumentStore {
     );
     return result !== undefined;
   }
+  
+  static #throwNewPasswordRequiredError(message){
+    const error = new Error(message);
+    error.name = DocumentStore.PASSWORD_REQUIRED_ERROR;
+    throw error;
+  }
+  
+  static isPasswordRequiredError(error){
+    return error instanceof Error && error.name === DocumentStore.PASSWORD_REQUIRED_ERROR;
+  }
+
+  static #throwNewIncorrectPasswordError(message){
+    const error = new Error(message);
+    error.name = DocumentStore.INCORRECT_PASSWORD_ERROR;
+    throw error;
+  }
+
+  static isIncorrectPasswordError(error){
+    return error instanceof Error && error.name === DocumentStore.INCORRECT_PASSWORD_ERROR;
+  }
+  
+  async getDocKey(doc, objectStoreConf, password){
+    const fieldsPath = objectStoreConf.fieldsPath;
+    const hasPasswordFields = DocumentStoreUtils.hasPasswordFields(doc, fieldsPath);
+    if (hasPasswordFields) {
+      if (!password) {
+        DocumentStore.#throwNewPasswordRequiredError(`Document for store "${objectStoreConf.name}" has encrypted fields — password required.`);
+      }
+      const key = await this.#getKey(password);
+      if (!await this.#verifySentinel(key)) {
+        DocumentStore.#throwNewIncorrectPasswordError('Incorrect password');
+      }
+      return key;
+    }
+    return null;
+  }
 
   /**
-   * Retrieves a document by key, decrypting `'password'`-typed fields if the
-   * store is encrypted.
+   * Retrieves a document by key, decrypting `'password'`-typed fields 
    * @param {string} storeName
    * @param {*}      id        - Scalar, positional array, or named object.
    * @param {string} [password] - Required for encrypted stores.
@@ -539,31 +586,27 @@ class DocumentStore {
    * @throws {Error} If the store is encrypted and `password` is incorrect or missing.
    */
   async get(storeName, id, password) {
-    const conf       = this.#storeConf(storeName);
-    const normalisedId = this.#normaliseKey(id, conf.keyPath);
-
-    let key;
-    if (conf.encrypted) {
-      if (!password) throw new Error(`Store '${storeName}' is encrypted — password required`);
-      key = await this.#getKey(password);
-      if (!await this.#verifySentinel(key)) throw new Error('Incorrect password');
-    }
+    const objectStoreConf = this.getStoreConfig(storeName);
+    const normalisedId = this.#normaliseKey(id, objectStoreConf.keyPath);
 
     const db  = await this.#openDB();
-    const doc = await this.#idb(
+    let doc = await this.#idb(
       db.transaction(storeName, 'readonly')
         .objectStore(storeName).get(normalisedId)
     );
-    if (!doc) return null;
-
-    return conf.encrypted
-      ? this.#decryptDoc(doc, conf.fieldsPath, key)
-      : doc;
+    if (!doc) {
+      return null;
+    }
+    const key = await this.getDocKey(doc, objectStoreConf, password);
+    if (key) {
+      doc = this.#decryptDoc(doc, objectStoreConf.fieldsPath, key);
+    }
+    return doc;
   }
 
   /**
    * Persists a document, overwriting any existing document with the same key.
-   * `'password'`-typed field values are encrypted when the store is encrypted.
+   * `'password'`-typed field values are encrypted 
    * @param {string} storeName
    * @param {object} doc
    * @param {string} [password] - Required for encrypted stores.
@@ -571,23 +614,15 @@ class DocumentStore {
    * @throws {Error} If the store is encrypted and `password` is incorrect or missing.
    */
   async store(storeName, doc, password) {
-    const conf = this.#storeConf(storeName);
-
-    let key;
-    if (conf.encrypted) {
-      if (!password) throw new Error(`Store '${storeName}' is encrypted — password required`);
-      key = await this.#getKey(password);
-      if (!await this.#verifySentinel(key)) throw new Error('Incorrect password');
+    const objectStoreConf = this.getStoreConfig(storeName);
+    const key = await this.getDocKey(doc, objectStoreConf, password);
+    if (key) {
+      doc = await this.#encryptDoc(doc, objectStoreConf.fieldsPath, key);
     }
-
-    const toWrite = conf.encrypted
-      ? await this.#encryptDoc(doc, conf.fieldsPath, key)
-      : doc;
-
     const db = await this.#openDB();
     return this.#idb(
       db.transaction(storeName, 'readwrite')
-        .objectStore(storeName).put(toWrite)
+        .objectStore(storeName).put(doc)
     );
   }
 
@@ -598,7 +633,7 @@ class DocumentStore {
    * @returns {Promise<void>}
    */
   async remove(storeName, id) {
-    const conf       = this.#storeConf(storeName);
+    const conf       = this.getStoreConfig(storeName);
     const normalisedId = this.#normaliseKey(id, conf.keyPath);
     const db         = await this.#openDB();
     return this.#idb(
@@ -616,7 +651,7 @@ class DocumentStore {
    * @returns {Promise<object[]>}
    */
   async list(storeName) {
-    const conf = this.#storeConf(storeName);
+    const conf = this.getStoreConfig(storeName);
     const docs = await this.#getAllRaw(storeName);
     return docs.map(doc =>
       Object.fromEntries(conf.headerFields.map(f => [f, doc[f]]))
@@ -633,9 +668,13 @@ class DocumentStore {
    */
   async resetCrypto() {
     const encryptedStoreNames = [...this.#config().values()]
-      .filter(c => c.encrypted)
+      .filter(c => {
+        const docs = this.#getAllRaw(c.name);
+        return docs.some( doc => DocumentStoreUtils.hasPasswordFields(doc, c.fieldsPath) )
+      })
       .map(c => c.name);
 
+    // TODO: only remove the encryptd docs.
     await this.#tx(
       [DocumentStore.STORE_META, ...encryptedStoreNames],
       'readwrite',

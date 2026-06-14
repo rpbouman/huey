@@ -22,24 +22,24 @@ function instantiateTemplate(templateId, idOrAttributes) {
   const template = byId(templateId);
   const clone = template.content.cloneNode(true);
   let index = 0, node;
-  do {
-    node = clone.childNodes.item(index++);
-  } while (node && node.nodeType !== node.ELEMENT_NODE);
-    
-  const typeOfIdOrAttributes = typeof idOrAttributes;
-  switch (typeOfIdOrAttributes) {
-    case 'undefined':
-      break;
-    case 'string':
-      node.setAttribute('id', idOrAttributes);
-      break;
-    case 'object':
-      setAttributes(node, idOrAttributes);
-      break;
-    default:
-      throw new Error(`Expected string id or attributes object, not ${typeOfIdOrAttributes}`);
+  if (clone.childElementCount === 1) {
+    const typeOfIdOrAttributes = typeof idOrAttributes;
+    const node = clone.firstElementChild;
+    switch (typeOfIdOrAttributes) {
+      case 'undefined':
+        break;
+      case 'string':
+        node.setAttribute('id', idOrAttributes);
+        break;
+      case 'object':
+        setAttributes(node, idOrAttributes);
+        break;
+      default:
+        throw new Error(`Expected string id or attributes object, not ${typeOfIdOrAttributes}`);
+    }
+    return node;
   }
-  return node;
+  return clone;
 }
 
 function setAttribute(dom, attName, attValue){

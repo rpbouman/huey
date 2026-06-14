@@ -1,1146 +1,70 @@
-class SecretsDialog {
+class SecretsDialog extends DocumentsDialog {
   
-  static #secretsDialogId = 'secretsDialog';
-  static #secretsObjectStore = AppDocumentStore.STORE_SECRETS;
-  #highlited = undefined;
-  #hilitedPerhipherals = undefined;
-  #resizeObserver = undefined;
-  #password = undefined;
-
-
-  static get dialog(){
-    return byId( SecretsDialog.#secretsDialogId );
-  }
-  
-  static get #secretKeyValueUiTemplate(){
-    return byId('secretKeyValueUi');
+  get changePasswordButton(){
+    return this.getMainToolbarControl( 'button[name=changePassword]' );
   }
 
-  static get #secretEditingActiveCheckbox(){
-    return byId('secretEditingActive');
+  get resetSecretsStoreButton(){
+    return this.getMainToolbarControl( 'button[name=resetSecretsStore]' );
   }
-  
-  static get #secretUnsavedChangesCheckbox(){
-    return byId('secretUnsavedChanges');
+    
+  parseDocumentSQL(sql){
+    return CreateSecretParser.parse(sql);
   }
-
-  static get #changePasswordButton(){
-    return byId('changePassword');
-  }
-
-  static get #resetSecretsStoreButton(){
-    return byId('resetSecretsStore');
-  }
-
-  static get #createNewSecretButton(){
-    return byId('createNewSecret');
-  }
-
-  static get #removeCurrentSecretButton(){
-    return byId('removeCurrentSecret');
-  }
-
-  static get #saveCurrentSecretButton(){
-    return byId('saveCurrentSecret');
-  }
-
-  static get #restoreCurrentSecretButton(){
-    return byId('restoreCurrentSecret');
-  }
-
-  static get #activateCurrentSecretRadio(){
-    return byId('activateCurrentSecret');
-  }
-
-  static get #deactivateCurrentSecretRadio(){
-    return byId('deactivateCurrentSecret');
-  }
-
-  static get #secretsList(){
-    return byId('secretsList');
-  }
-
-  static get #keyValuesFieldset(){
-    return byId('secretKeyValueFieldset');
-  }  
-  
-  static get #secretNameEl(){
-    return byId('secretName');
-  }
-
-  static get #secretTypeEl(){
-    return byId('secretType');
-  }
-
-  static get #secretAutoloadEl(){
-    return byId('secretAutoload');
-  }
-
-  static get #formElement(){
-    return byId( 'secretForm' );
-  }
-  
-  static get #secretCode(){
-    return byId('secretCode');
-  }
-  
-  static get #secretCodeTab(){
-    return byId('secretCodeTab');
-  }
-
-  static get #secretFormTab(){
-    return byId('secretFormTab');
-  }
-  
-  static get #secretTypesDatalist(){
-    return byId('secret-types');
-  }
-
-  static get #secretKeysDatalist(){
-    return byId('secret-keys');
-  }
-
-  static getDefaultDataypeForSecretKey(secretKey){
-    const listElement = SecretsDialog.#secretKeysDatalist;
-    for (let option of listElement.options) {
-      const optionValue = option.value;
-      if (optionValue !== secretKey){
-        continue;
-      }
-      const defaultType = option.getAttribute('data-default-type');
-      return defaultType;
-    }
-    return undefined;
-  }
-  
-  static #selectOption(selectElement, value) {
-    const options = selectElement.options;
-    for (let i = 0; i < options.length; i++ ){
-      const option = options[i];
-      if (option.value === value){
-        selectElement.selectedIndex = i;
-        return;
-      }
-    }
-  }
-
-  get #secretDocument(){
-    const secretName = SecretsDialog.#secretNameEl.value;
-    const secretType = SecretsDialog.#secretTypeEl.value;
-    const autoload = SecretsDialog.#secretAutoloadEl.checked;
-    const secretDocument = {
-      name: secretName,
-      type: secretType,
-      autoload: autoload,
-      fields: []
-    };
-    const fieldSet = SecretsDialog.#keyValuesFieldset;
-    const fieldContainers = fieldSet.querySelectorAll('div');
-    const n = fieldContainers.length;
-    for (let i = 0; i < n; i++){
-      let fieldContainer = fieldContainers[i];
-      let indented = SecretsDialog.#isFieldIndented(fieldContainer);
-      if (indented) {
-        throw new Error(`unexpected`);
-      }
-      let fieldType = SecretsDialog.#getFieldType(fieldContainer);
-      let fieldKey = SecretsDialog.#getFieldKey(fieldContainer);
-      let fieldValue = SecretsDialog.#getFieldValue(fieldContainer);
-      let value;
-      switch (fieldType) {
-        case 'checkbox':
-        case 'password':
-        case 'text':
-          value = fieldValue;
-          break;
-        case 'list':
-        case 'map':
-          value = [];
-          break;
-      }
-      secretDocument.fields.push({
-        key: fieldKey,
-        type: fieldType,
-        value: value
-      });
-      
-      if (typeof value !== 'object') {
-        continue;
-      }
-      
-      for (let j = i+1; j < n; j++){
-        fieldContainer = fieldContainers[j];
-        indented = SecretsDialog.#isFieldIndented(fieldContainer);
-        if (!indented) {
-          continue;
-        }
-        i = j;
-        const subValue = SecretsDialog.#getFieldValue(fieldContainer);
-        const subType = SecretsDialog.#getFieldType(fieldContainer);
-        let subKey;
-        switch(fieldType){
-          case 'list':
-            subKey = value.length;
-            SecretsDialog.#setFieldKey(fieldContainer,  String.fromCharCode( 65 + subKey ) );
-            break;
-          case 'map':
-            subKey = SecretsDialog.#getFieldKey(fieldContainer);
-            break;
-        }
-        value.push({
-          key: subKey, 
-          type: subType,
-          value: subValue
-        })
-      }
-    }
-    return secretDocument;
-  }
-  
-  static #fieldValueAsSQL(field){
-    let value;
-    switch (field.type) {
-      case 'checkbox':
-        value = field.value;
-        break;
-      case 'text':
-      case 'password':
-        value = quoteStringLiteral(field.value);
-        break;
-      case 'list':
-        const arrayValue = field.value.map(
-          subField => SecretsDialog.#fieldValueAsSQL(subField)
-        ).join(', ')
-        value = `[${arrayValue}]`;
-        break;
-      case 'map':
-        const objectValue = field.value.map(
-          subField => SecretsDialog.#fieldValuePairAsSQL(subField)
-        ).join('\n, ');
-        value = `MAP { 
-          ${objectValue} 
-        }`;
-        break;
-    }
-    return value;
-  }
-  
-  static #fieldValuePairAsSQL(field){
-    if (/provider/i.test(field.key)){
-      return `PROVIDER ${field.value}`;
-    }
-    return `${quoteIdentifierWhenRequired(field.key)} ${SecretsDialog.#fieldValueAsSQL(field)}`
-  }
-  
-  #getDropSecretSQL(name){
+     
+  getDropDocumentSQL(name){
     if (!name){
-      const secretDocument = this.#secretDocument;
-      name = secretDocument.name;
+      const documentObject = this.documentObject;
+      name = documentObject.name;
     }
     return `DROP SECRET IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
   }
 
-  #getCreateSecretSQL(secretDocument){
-    secretDocument = secretDocument || this.#secretDocument;
-    const fields = secretDocument.fields.map(field => {
-      return `\r\n, ${SecretsDialog.#fieldValuePairAsSQL(field)}`;
+  getCreateDocumentSQL(documentObject){
+    documentObject = documentObject || this.documentObject;
+    const fields = documentObject.fields.map(field => {
+      return `\r\n, ${this.fieldValuePairAsSQL(field)}`;
     });
     
     return [
       'CREATE OR REPLACE',
-      `TEMPORARY SECRET ${quoteIdentifierWhenRequired(secretDocument.name)} (`,
-      `  TYPE ${secretDocument.type}${fields.join('')}`,
+      `TEMPORARY SECRET ${quoteIdentifierWhenRequired(documentObject.name)} (`,
+      `  TYPE ${documentObject.type}${fields.join('')}`,
       ')'
     ].join('\r\n');
   }
-
-  static #setCheckboxState(checkbox, state){
-    if (checkbox.checked !== Boolean(state)){
-      checkbox.click();
-    }
-  }
   
-  #instantiateKeyValueUi(){
-    return instantiateTemplate( SecretsDialog.#secretKeyValueUiTemplate.id );
-  }
-  
-  #newKeyValueUi(beforeElement){
-    const newKeyValueUi = this.#instantiateKeyValueUi();
-    const container = SecretsDialog.#secretKeyValueUiTemplate.parentNode;
-    if (beforeElement){
-      container.insertBefore(newKeyValueUi, beforeElement);
-    }
-    else {
-      container.appendChild(newKeyValueUi);
-    }
-    return newKeyValueUi;
-  }
-  
-  async #handleSecretsListChanged(event){
-    // there is no selection, clean up the form
-    // if there is a selection, then sync the form with the associated document.
-    const list = event.target;
-    const selectedIndex = list.selectedIndex;
-    if (selectedIndex === -1){
-      SecretsDialog.#activateCurrentSecretRadio.checked = true;
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
-    }
-    else {
-      const option = list.options[selectedIndex];
-      if (option.getAttribute('data-loaded') === 'true') {
-        SecretsDialog.#activateCurrentSecretRadio.checked = true;
-      }
-      else {
-        SecretsDialog.#deactivateCurrentSecretRadio.checked = true;
-      }
-      const name = option.value;
-      const loaded = await this.#loadSecret(name);
-      if (!loaded){
-        event.preventDefault();
-        list.selectedIndex = -1;
-      }
-    }
-  }
-  
-  #resetForm(){
-    SecretsDialog.#secretNameEl.value = '';
-    SecretsDialog.#secretTypeEl.value = '';
-    SecretsDialog.#secretAutoloadEl.checked = false;
-    const keyValuesFieldset = SecretsDialog.#keyValuesFieldset;
-    const secretKeyValueUiTemplate = SecretsDialog.#secretKeyValueUiTemplate;
-    while (keyValuesFieldset.lastChild !== secretKeyValueUiTemplate) {
-      keyValuesFieldset.removeChild( keyValuesFieldset.lastChild );
-    };
-  }
-  
-  #loadSecretDocument(secretDocument){
-    this.#resetForm();
-    SecretsDialog.#secretNameEl.value = secretDocument.name;
-    SecretsDialog.#secretTypeEl.value = secretDocument.type;
-    SecretsDialog.#secretAutoloadEl.checked = Boolean(secretDocument.autoload);
-    const fields = secretDocument.fields;
-    const n = fields.length;
-    const keyValuesFieldset = SecretsDialog.#keyValuesFieldset;
-    for (let i = 0; i < n; i++){
-      const field = fields[i];
-      const keyValueUi = this.#newKeyValueUi();
-      keyValuesFieldset.appendChild(keyValueUi);
-      const keyInput = SecretsDialog.#getFieldKeyEl(keyValueUi);
-      keyInput.value = field.key;
-      const typeInput = SecretsDialog.#getFieldTypeEl(keyValueUi);
-      typeInput.value = field.type;
-      const valueInput = SecretsDialog.#getFieldValueEl(keyValueUi);
-      switch (field.type) {
-        case 'checkbox':
-          valueInput.type = field.type;
-          valueInput.checked = field.value;
-          break;
-        case 'text':
-        case 'password':
-          valueInput.type = field.type;
-          valueInput.value = field.value;
-          break;
-        case 'map': 
-        case 'list': {
-          for (let j = 0; j < field.value.length; j++){
-            const entry = field.value[j];
-            const subKeyValueUi = this.#newKeyValueUi();
-            keyValuesFieldset.appendChild(subKeyValueUi);
-            const indentCheckbox = SecretsDialog.#getFieldIndentCheckbox(subKeyValueUi);
-            indentCheckbox.checked = true;
-            const keyInput = SecretsDialog.#getFieldKeyEl(subKeyValueUi);
-            keyInput.value = entry.key;
-            const typeInput = SecretsDialog.#getFieldTypeEl(subKeyValueUi);
-            typeInput.value = entry.type;
-            const valueInput = SecretsDialog.#getFieldValueEl(subKeyValueUi);
-            valueInput.value = entry.value;
-          }
-          break;
-        } 
-      }
-    }
-    this.#syncSecretCode();
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, true);
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
-    SecretsDialog.#secretNameEl.focus();
-    return true;
-  }
-  
-  async #loadSecret(name){
-    const store = AppDocumentStore.store;
-    const password = await this.#getPassword();
-    if (!password){
-      return false;
-    }
-    const secretDocument = await store.get(SecretsDialog.#secretsObjectStore, name, password);
-    return this.#loadSecretDocument(secretDocument);
-  }
-  
-  #handleCreateNewSecretClicked(event){
-    if (SecretsDialog.#secretsList.selectedIndex !== -1){
-      SecretsDialog.#secretsList.selectedIndex = -1;
-    }
-    this.#resetForm();
-    this.#newKeyValueUi();
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, true);
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-  }
-  
-  async #handlerRemoveCurrentSecretClicked(event){
-    const selectedSecretOption = this.#selectedSecretOption;
-    if (!Boolean(selectedSecretOption)) {
-      return;
-    }
-    const secretName = selectedSecretOption.value;
-    const store = AppDocumentStore.store;
+  async handleCreateDuckDbDocumentError(error){
+    const message = error.message;
+    const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
+    const match = regexp.exec(message);
     
-    const exists = await store.exists(SecretsDialog.#secretsObjectStore, secretName);
-    if (!exists){
-      await this.#updateSecretsList();
-      return;
+    if (!match) {
+      throw error;
     }
-
-    const confirmation = await PromptUi.show({
-      title: Internationalization.getText('Confirm remove secret'),
-      contents: Internationalization.getText(
-        'Are you sure you want to delete secret "{1}"? If you conform, it will be permanently removed. This action cannot be undone.', 
-        secretName
-      )
-    });
-    if (confirmation === PromptUi.REJECT) {
-      return;
-    }
-    await store.remove(SecretsDialog.#secretsObjectStore, secretName);
-    await this.#updateSecretsList();
     
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-  }
-  
-  async #handleRestoreCurrentSecretClicked(event){
-    this.#resetForm();
-    const existingItem = this.#selectedSecretOption;
-    if (existingItem) {
-      const loaded = await this.#loadSecret(existingItem.value);
-    }
-    else {
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
-    }
-    this.#syncSecretCode();
-    
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
-  }
-  
-  async #promptOverwriteExistingSecret(name){
-    return await PromptUi.show({
-      title: Internationalization.getText('Overwrite Existing Secret'),
-      contents: Internationalization.getText('Another secret named "{1}" already exists. Do you want to overwrite it?', name)
-    });
-  }
-  
-  async #promptRenameOrCreateSecret(oldName, newName){
-    return await PromptUi.show({
-      title: Internationalization.getText('Rename or Create'),
-      contents: Internationalization.getText(
-        'Secret name changed. Do you want to rename secret "{1}" to "{2}" or create a new one?',
-        oldName,
-        newName
-      )
-    });
-  }
-
-  async #handleResetSecretsStoreClicked(event){
-    const config = {
-      title: Internationalization.getText('Reset Secrets Store'),
-      contents: [
-        Internationalization.getText('This action will completely reset the Secrets Store.'),
-        Internationalization.getText('All your stored secrets will be lost, and the passowrd will be reset.'),
-        Internationalization.getText('If you confirm, this action cannot be undone. Proceed?'),
-      ].join('<br/>')
-    }
-    const result = await PromptUi.show(config);
-    if (result === PromptUi.REJECT) {
-      return;
-    }
-    const store = AppDocumentStore.store;
-    await store.resetCrypto();
-    this.#updateSecretsList();
-  }
-  
-  async #handleChangePasswordClicked(event){
-    try{ 
-      const now = Date.now();
-      const oldPasswordId = `old_password_${now}`;
-      const newPasswordId = `new_password_${now}`;
-      
-      const hint = SecretsDialog.#passwordHint;
-      const invalidPassword = '<div>'  + SecretsDialog.#wrongPasswordHint + '</div>';
-      
-      const passwordForm = `
-        <form>
-          <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
-          ${SecretsDialog.#getPasswordHTML(oldPasswordId, 'password')}
-          <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
-          ${SecretsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
-        </form>
-      `;
-      const store = AppDocumentStore.store;
-      const config = {
-        title: Internationalization.getText('Change Password'),
-        contents: passwordForm
-      };
-      while (true) {
-        let result = await PromptUi.show(config);
-        if (result === PromptUi.REJECT) {
-          return;
-        }
-        const oldPasswordInput = byId(oldPasswordId);
-        const oldPassword = oldPasswordInput.value;
-
-        const newPasswordInput = byId(newPasswordId);
-        const newPassword = newPasswordInput.value;
-
-        const oldPasswordVerified = await store.verifyPassword(oldPassword);
-        if (!oldPasswordVerified) {
-          result = false;
-          config.contents = invalidPassword + passwordForm
-        }
-        if (result){
-          const newPasswordValid = store.isValidPassword(newPassword);
-          if (!newPasswordValid){
-            config.contents = hint + passwordForm
-            result = false;
-          }
-        }
-
-        if (!result){
-          oldPasswordInput.value = '';
-          newPasswordInput.value = '';
-          continue;
-        }
-        await store.changePassword(oldPassword, newPassword);
-        this.#password = newPassword;
-        break;
-      }
-    }
-    catch(error){
-      console.error(error);
-    }
-    finally {
-      PromptUi.clear();
-    }
-  }
-  
-  static get #passwordHint(){
-    const hint = Internationalization.getText('Password must be at least 12 characters long and include uppercase, lowercase, digit, and special character.');
-    return hint;
-  }
-  
-  static get #wrongPasswordHint(){
-    const invalidPassword = Internationalization.getText('Wrong password. Try again');
-    return invalidPassword;
-  }
-  
-  static #getPasswordHTML(id, name) {
-    const hint = SecretsDialog.#passwordHint;
-    const passwordHTML = `<input
-      type="password"
-      name="${name || 'password'}"
-      id="${id}"
-      minlength="12"
-      required
-      pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
-      title="${hint}"
-      autofocus="true"
-    />`;
-    return passwordHTML;
-  }
-  
-  async #getPassword(changePassword){
-    if (this.#password) {
-      return this.#password;
-    }
-    try {
-      const store = AppDocumentStore.store;
-      const id = 'secretsManagerPassword' + Date.now();
-      const hint = SecretsDialog.#passwordHint;
-      const invalidPassword = SecretsDialog.#wrongPasswordHint;
-      const passwordHTML = SecretsDialog.#getPasswordHTML(id);
-      const config = {
-        title: Internationalization.getText('Enter Password'),
-        contents: passwordHTML
-      };
-
-      const isInitialized = await store.isInitialized();
-      do {
-        if (!isInitialized) {
-          const initialPasswordInfo = [
-            Internationalization.getText('Enter a password to initialize the Huey secrets manager.'),
-            hint,
-            Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your duckdb secret.'),
-            '',
-            passwordHTML,
-            '',
-            Internationalization.getText('After initialization of the secrets manager, you can only access your secrets by entering the same password.'),
-            Internationalization.getText('You can change your password later on but also requires you to enter your previous password, so make sure you remember it!')
-          ].join('<br/>');
-          config.contents = initialPasswordInfo;
-        }
-        const result = await PromptUi.show(config);
-        if (result === PromptUi.REJECT) {
-          return null;
-        }
-
-        const password = byId(id).value;
-        if (!store.isValidPassword(password)) {
-          config.contents = `${hint}<br/>${passwordHTML}`;
-        }
+    const secretType = match.groups['secretType'];
+    const extensionName = match.groups['extensionName'];
         
-        if (isInitialized){
-          if (await store.verifyPassword(password)){
-            this.#password = password;
-            return password;
-          }
-          config.contents = `${invalidPassword}<br/>${passwordHTML}`;
-        }
-        else {
-          await store.init(password);
-          this.#password = password;
-          return password;
-        }
-      } while(true);
-    } 
-    catch(error){
-      console.error(error);
+    try{
+      await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
     }
-    finally {
-      PromptUi.clear();
-    }
-  }
-  
-  async #dropDuckDbSecret(name){
-    const dropSecretSql = this.#getDropSecretSQL(name);
-    try {
-      const connection = window.hueyDb.connection;
-      await connection.query( dropSecretSql ); 
-      return true;
-    }
-    catch(e){
+    catch(e) {
       console.error(e);
       showErrorDialog({
-        title: Internationalization.getText('Error dropping secret'),
-        description: Internationalization.getText('The DROP SECRET statement failed.')
+        title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
+        description: Internationalization.getText(
+          'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.', 
+          secretType, 
+          extensionName
+        )
       });
       return false;
     }
-  }
-  
-  async #createDuckDbSecret(secretDocument){
-    const extensions = [];
-    const connection = window.hueyDb.connection;
-    do {
-      try {
-        const createSecretSql = this.#getCreateSecretSQL(secretDocument);
-        await connection.query( createSecretSql ); 
-        return true;
-      }
-      catch(error){
-        const message = error.message;
-        const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
-        const match = regexp.exec(message);
-        
-        if (!match) {
-          throw error;
-        }
-        
-        const secretType = match.groups['secretType'];
-        const extensionName = match.groups['extensionName'];
-        
-        if (extensions.includes(extensionName)){
-          throw error;
-        }
-        
-        extensions.push(extensionName);
-        try{
-          await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
-        }
-        catch(e) {
-          console.error(e);
-          showErrorDialog({
-            title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
-            description: Internationalization.getText(
-              'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.', 
-              secretType, 
-              extensionName
-            )
-          });
-          return false;
-        }
-      }
-    } while(true);
-  }
-  
-  get #selectedSecretOption(){
-    const list = SecretsDialog.#secretsList;
-    const selectedIndex = list.selectedIndex;
-    const existingItem = list.options[selectedIndex];
-    return existingItem;
-  }
-  
-  async #handleSaveCurrentSecretClicked(event){
-    try {
-      const store = AppDocumentStore.store;
-      const existingItem = this.#selectedSecretOption;
-      const secretDocument = this.#secretDocument;
-      
-      const updating = Boolean(existingItem);
-      
-      const newName = secretDocument.name;
-      const oldName = updating ? existingItem.value : secretDocument.name; 
-      
-      const nameChanged = newName !== oldName;
-      const exists = !updating || nameChanged ? await store.exists( SecretsDialog.#secretsObjectStore, newName ) : false;
-
-      if (exists){
-        const result = await this.#promptOverwriteExistingSecret(newName);
-        if (result === PromptUi.REJECT) {
-          const secretName = SecretsDialog.#secretNameEl;
-          secretName.select();
-          secretName.focus();
-          return;
-        }
-      }
-      
-      let removeOldSecret = false;
-      if (nameChanged){
-        const result = await this.#promptRenameOrCreateSecret(oldName, newName);
-        removeOldSecret = result === PromptUi.ACCEPT;
-      }
-
-      const password = await this.#getPassword();
-      if (!password) {
-        return;
-      }
-      
-      const connection = window.hueyDb.connection;
-      
-      if (nameChanged && removeOldSecret || exists){
-        await this.#dropDuckDbSecret();
-      }
-
-      const success = await this.#createDuckDbSecret();
-      if (!success) {
-        return;
-      }
-      
-      await store.store(SecretsDialog.#secretsObjectStore, secretDocument, password);
-      if (removeOldSecret === true) {
-        await store.remove(SecretsDialog.#secretsObjectStore, oldName);
-        await this.#dropDuckDbSecret(oldName);
-      }
-      await this.#updateSecretsList(newName);
-      
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
-    }
-    catch (error) {
-      console.error(error);
-      console.error(error.stack);
-      showErrorDialog(error);
-    }
-  }
-  
-  static #getFieldIndentCheckbox(fieldContainer) {
-    return fieldContainer.querySelector('span > menu > label > input[name=indent]');
+    return true;
   }
 
-  static #isFieldIndented(fieldContainer){
-    return SecretsDialog.#getFieldIndentCheckbox(fieldContainer).checked;
-  }
-  
-  static #indentField(fieldContainer, indent) {
-    SecretsDialog.#getFieldIndentCheckbox(fieldContainer).checked = Boolean(indent);
-  }
-  
-  static #getFieldTypeEl(fieldContainer){
-    return fieldContainer.querySelector('span > select[name=type] ')
-  }
-  
-  static #getFieldType(fieldContainer) {
-    return this.#getFieldTypeEl(fieldContainer).value;
-  }
-
-  static #getFieldKeyEl(fieldContainer){
-    return fieldContainer.querySelector('span > input[name=key] ')
-  }
-
-  static #getFieldKey(fieldContainer) {
-    return this.#getFieldKeyEl(fieldContainer).value;
-  }
-
-  static #getFieldValueEl(fieldContainer){
-    return fieldContainer.querySelector('span > input[name=value] ')
-  }
-
-  static #getFieldValue(fieldContainer) {
-    const element = this.#getFieldValueEl(fieldContainer);
-    return element.type === 'checkbox' ? element.checked : element.value;
-  }
-
-  static #setFieldKey(fieldContainer, value) {
-    return this.#getFieldKeyEl(fieldContainer).value = value;
-  }
-  
-  static #getParentFieldContainer(fieldContainer){
-    if ( !SecretsDialog.#isFieldIndented(fieldContainer) ) {
-      throw new Error(`Getting parent field container requires an indented field.`);
-    }
-    
-    do {
-      let prev = fieldContainer.previousSibling;
-      if (!prev) {
-        throw new Error('Expected a previous sibling for an indented field.');
-      }
-      if ( SecretsDialog.#isFieldIndented(fieldContainer) ) {
-        fieldContainer = prev;
-        continue;
-      }
-      break;
-    } while (true);
-    return fieldContainer;
-  }
-
-  static #getParentFieldContainerType(fieldContainer){
-    const parentFieldContainer = SecretsDialog.#getParentFieldContainer(fieldContainer);
-    return SecretsDialog.#getFieldType( parentFieldContainer );
-  }
-
-  #handleFieldClicked(event) {
-    const target = event.target;
-    if (target.tagName !== 'BUTTON'){
-      return;
-    }
-    //                      button  label     menubar   span        div
-    const fieldContainer = target.parentNode.parentNode.parentNode.parentNode;
-    const fieldsContainer = fieldContainer.parentNode;
-
-    let referenceFieldContainer;
-    switch (target.value) {
-      case 'up':
-        referenceFieldContainer = fieldContainer.previousSibling;
-        break;
-      case 'down':
-        referenceFieldContainer = fieldContainer.nextSibling;
-        if (referenceFieldContainer ) {
-          referenceFieldContainer = referenceFieldContainer.nextSibling;
-        }
-        break;
-    }
-    
-    if (referenceFieldContainer && referenceFieldContainer.tagName !== 'DIV'){
-      referenceFieldContainer = null;
-    }
-
-    let move;
-    switch (target.value) {
-      case 'add':
-        const newKeyValueId = this.#newKeyValueUi( fieldContainer.nextSibling );
-        const fieldType = SecretsDialog.#getFieldType( fieldContainer );
-        
-        // if the field from where we're creating the new field is indented, or is a composite, 
-        // then the new field is automatically indented (i.e. it becomes an item of the previous composite)
-        if (
-          SecretsDialog.#isFieldIndented( fieldContainer ) || 
-          ['list', 'map'].includes( fieldType ) 
-        ) {
-          SecretsDialog.#indentField( newKeyValueId, true );
-          
-          // if the new field is a subfield of a list, special logic applies.
-          if ( fieldType === 'list' || SecretsDialog.#getParentFieldContainerType( fieldContainer ) === 'list') {
-            const subKeyField = SecretsDialog.#getFieldKeyEl( newKeyValueId );
-            // the key is not required (and the css will hide it)
-            // #handleIndentChanged will re-add the attribute if a field below a list is un-indented (= becomes a normal field not owned by the list)
-            subKeyField.removeAttribute('required');
-            SecretsDialog.#getFieldValueEl( newKeyValueId ).focus();
-          }
-        }
-        break;
-      case 'up':
-      case 'down':
-        move = true;
-      case 'remove':
-        fieldsContainer.removeChild(fieldContainer);
-    }
-    
-    if (move) {
-      // TODO: keep items of composites together when moving
-      if (referenceFieldContainer) {
-        fieldsContainer.insertBefore(fieldContainer, referenceFieldContainer);
-      }
-      else {
-        fieldsContainer.appendChild(fieldContainer);
-      }
-    }
-  }
-  
-  #handleFieldTypeChanged(event){
-    const target = event.target;
-    let inputType;
-    switch (target.value) {
-      case 'checkbox':
-      case 'text':
-      case 'password':
-        inputType = target.value;
-        break;
-      case 'list':
-      case 'map':
-        inputType = 'hidden';
-        break;
-    }
-    target.parentNode.nextElementSibling.firstElementChild.type = inputType;
-  }
-    
-  #handleKeyFieldChanged(event){
-    const keyField = event.target;
-    const key = keyField.value;
-    const dataType = SecretsDialog.getDefaultDataypeForSecretKey(key);
-    if (!dataType) {
-      return;
-    }
-    const fieldDiv = keyField.parentNode.parentNode;
-    const fieldTypeSelect = fieldDiv.querySelector('SELECT');
-    SecretsDialog.#selectOption(fieldTypeSelect, dataType);
-    this.#handleFieldTypeChanged({target: fieldTypeSelect});
-  }
-  
-  #handleFieldChanged(event) {
-    // TODO: 
-    // woudld be really nice if we could focus the value control if the user selected a value from the list.
-    // unfortunately thee does not appear to be a reliable way (either through change events or input events) 
-    // to detect this.
-    const target = event.target;
-    switch (target.tagName){
-      case 'INPUT':
-        switch (target.name) {
-          case 'indent':
-            this.#handleIndentChanged(event);
-            break;
-          case 'key':
-            this.#handleKeyFieldChanged(event);
-            break;
-        }
-        break;
-      case 'SELECT':
-        this.#handleFieldTypeChanged(event);
-        break;
-    }
-    if (SecretsDialog.#secretUnsavedChangesCheckbox.checked){
-      return;
-    }
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-  }
-  
-  #handleIndentChanged(event){
-    const target = event.target;
-    if (target.checked) {
-      return;
-    }
-    const fieldContainer = target.parentNode.parentNode.parentNode.parentNode;
-    const previousFieldContainer = fieldContainer.previousSibling;
-    if (
-      SecretsDialog.#getFieldType( previousFieldContainer ) === 'map' || 
-      SecretsDialog.#getParentFieldContainerType( previousFieldContainer ) !== 'list'
-    ) {
-      return;
-    }
-    const subKeyField = SecretsDialog.#getFieldKeyEl( fieldContainer );
-    subKeyField.setAttribute('required', true);
-    subKeyField.focus();
-  }
-  
-  #handleFieldInput(event){
-    if (SecretsDialog.#secretUnsavedChangesCheckbox.checked){
-      return;
-    }
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-  }
-  
-  #handleSecretTypeChanged(event){
-    const secretTypeInput = event.target;
-    const secretType = secretTypeInput.value;
-    const secretKeysDatalist = SecretsDialog.#secretKeysDatalist;
-    const options = secretKeysDatalist.options;
-    for (let i = 0; i < options.length; i++){
-      const option  = options[i];
-      const attribute = option.getAttribute('data-associated-secret-types');
-      const associatedSecretTypes = attribute.split(',');
-      if (associatedSecretTypes.includes(secretType)){
-        option.removeAttribute('disabled');
-      }
-      else {
-        option.setAttribute('disabled', true);
-      }
-    }
-    if (!SecretsDialog.#secretUnsavedChangesCheckbox.checked ){
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-    }
-  }
-  
-  #handleSecretNameInput(event){
-    const secretNameInput = event.target;
-    const selectedSecretOption = this.#selectedSecretOption;
-    if (!SecretsDialog.#secretUnsavedChangesCheckbox.checked ){
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-    }
-  }
-  
-  #handleSecretAutoloadChanged(event){
-    if (!SecretsDialog.#secretUnsavedChangesCheckbox.checked ){
-      SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-    }
-  }
-  
-  #handleSecretCodeTabChanged(event) {
-    const target = event.target;
-    if (!target.checked) {
-      return;
-    }
-    if (!SecretsDialog.#secretEditingActiveCheckbox.checked) {
-      return;
-    }
-    this.#syncSecretCode();
-  }
-  
-  #compareSecretDocuments(secretDocument1, secretDocument2) {
-    return this.#getCreateSecretSQL(secretDocument1) === this.#getCreateSecretSQL(secretDocument2);
-  }
-  
-  #handleSecretCodeInput(event, count){
-    if (count !== undefined){
-      return;
-    }
-    const target = event.target;
-    const enteredText = target.textContent;
-    const selection = SelectionHelper.get(target);
-    let error;
-    try {
-      const parsedSecretDocument = CreateSecretParser.parseCreateSecretSQL(enteredText);
-      const secretDocument = this.#secretDocument;
-      if (!this.#compareSecretDocuments(parsedSecretDocument, secretDocument)){
-        this.#loadSecretDocument(parsedSecretDocument);
-        SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, true);
-        SelectionHelper.create(target, selection.start, selection.end, selection.direction);
-      }
-      
-    }
-    catch(error) {
-      console.error(error);
-      return;
-    }
-  }
-
-  #handleSecretFormTabChanged(event) {
-    const target = event.target;
-    if (target.checked) {
-      this.#syncSecretCode();
-    }
-  }
-  
-  #syncCodeInterval = undefined;
-  #syncCodeIntervalFrequency = 100;
-
-  #syncSecretCode(){
-    const sql = this.#getCreateSecretSQL();
-    this.#highlited.setText(sql);
-  }
-    
-  #handleResize(entries){
-    this.#hilitedPerhipherals.resetGutter();
-  }
-
-  async #handleBeforeToggle(event){
-    if (event.newState === 'open') {
-      return;
-    }
-    this.#cleanupDialog();
-  }
-    
-  #cleanupDialog(){
-    this.#password = undefined;
-    this.#resetForm();
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretEditingActiveCheckbox, false);
-    SecretsDialog.#setCheckboxState(SecretsDialog.#secretUnsavedChangesCheckbox, false);
-    SecretsDialog.#secretsList.selectedIndex = -1;
-  }
-  
-  async #handleActivateCurrentSecretChanged(event){
-    const secretCreated = await this.#createDuckDbSecret();
-    if (!secretCreated){
-      event.preventDefault();
-      return;
-    }
-    const existingItem = this.#selectedSecretOption;
-    if (existingItem) {
-      existingItem.setAttribute('data-loaded', true);
-    }
-  }
-
-  async #handleDeactivateCurrentSecretChanged(event){
-    const secretDropped = await this.#dropDuckDbSecret();
-    if (!secretDropped){
-      event.preventDefault();
-      return;
-    }
-    const existingItem = this.#selectedSecretOption;
-    if (existingItem) {
-      existingItem.setAttribute('data-loaded', false);
-    }
-  }
-  
-  #handleSecretEditingActiveCheckboxChanged(event){
-    const target = event.target;
-    this.#highlited.editingEnabled = target.checked;
-  }
-  
-  #initEvents(){
-    const dialog = SecretsDialog.dialog;
-    dialog.addEventListener('beforetoggle', event => this.#handleBeforeToggle(event) );
-
-    // toolbar buttons
-    SecretsDialog.#createNewSecretButton.addEventListener('click', event => this.#handleCreateNewSecretClicked(event) );
-    SecretsDialog.#removeCurrentSecretButton.addEventListener('click', event => this.#handlerRemoveCurrentSecretClicked(event) );
-    SecretsDialog.#saveCurrentSecretButton.addEventListener('click', event => this.#handleSaveCurrentSecretClicked(event) );
-    SecretsDialog.#restoreCurrentSecretButton.addEventListener('click', event => this.#handleRestoreCurrentSecretClicked(event) );
-    SecretsDialog.#activateCurrentSecretRadio.addEventListener('change', event => this.#handleActivateCurrentSecretChanged(event) );
-    SecretsDialog.#deactivateCurrentSecretRadio.addEventListener('change', event => this.#handleDeactivateCurrentSecretChanged(event) );
-
-    SecretsDialog.#changePasswordButton.addEventListener('click', event => this.#handleChangePasswordClicked(event) );
-    SecretsDialog.#resetSecretsStoreButton.addEventListener('click', event => this.#handleResetSecretsStoreClicked(event) );
-
-    // list (left sidebar)
-    SecretsDialog.#secretsList.addEventListener('change', event => this.#handleSecretsListChanged(event) );
-
-    // header fields
-    SecretsDialog.#secretNameEl.addEventListener('input', event => this.#handleSecretNameInput(event) );
-    SecretsDialog.#secretTypeEl.addEventListener('change', event => this.#handleSecretTypeChanged(event) );
-    SecretsDialog.#secretAutoloadEl.addEventListener('change', event => this.#handleSecretAutoloadChanged(event) );
-
-    // header key/value collection
-    SecretsDialog.#keyValuesFieldset.addEventListener('click', event => this.#handleFieldClicked(event) ); 
-    SecretsDialog.#keyValuesFieldset.addEventListener('change', event => this.#handleFieldChanged(event) ); 
-    SecretsDialog.#keyValuesFieldset.addEventListener('input', event => this.#handleFieldInput(event) ); 
-    SecretsDialog.#secretCodeTab.addEventListener('change', event => this.#handleSecretCodeTabChanged(event) );
-    SecretsDialog.#secretFormTab.addEventListener('change', event => this.#handleSecretFormTabChanged(event) );
-    
-    bufferEvents(SecretsDialog.#secretCode, 'input', this.#handleSecretCodeInput, this, 250);
-    
-    SecretsDialog.#secretEditingActiveCheckbox.addEventListener('change', event => this.#handleSecretEditingActiveCheckboxChanged(event));
-    this.#resizeObserver = new ResizeObserver(this.#handleResize.bind(this));
-    this.#resizeObserver.observe(dialog);
-    
-  }
-  
-  async #getDuckDbSecrets(){
+  async getDuckDbSecrets(){
     const obj = {};
     const connection = window.hueyDb.connection;
     const result = await connection.query('SELECT * FROM duckdb_secrets()');
@@ -1153,13 +77,13 @@ class SecretsDialog {
     }
     return obj;
   }
-  
-  async #updateSecretsList(selectedSecret){
-    const duckdbSecrets = await this.#getDuckDbSecrets();
+   
+  async updateDocumentsList(selectedDocument){
+    const duckdbSecrets = await this.getDuckDbSecrets();
     const store = AppDocumentStore.store;
     
-    let secrets = await store.list( SecretsDialog.#secretsObjectStore );
-    secrets = secrets.sort((a,b) => {
+    let docs = await store.list( this.objectStoreName );
+    docs = docs.sort((a,b) => {
       if (a.type > b.type) {
         return 1;
       }
@@ -1177,64 +101,70 @@ class SecretsDialog {
     
     const items = [];
     let type;
-    secrets.forEach( secretDocument => {
-      if (secretDocument.type !== type) {
+    docs.forEach( documentObject => {
+      if (documentObject.type !== type) {
         if (items.length) {
           items.push('</optgroup>');
         }
-        type = secretDocument.type;
+        type = documentObject.type;
         items.push(`<optgroup label="${type}">`);
       }
-      const loaded = duckdbSecrets[secretDocument.name] !== undefined;
-      const selected = secretDocument.name === selectedSecret ? ' selected="true"' : '';
-      items.push(`<option data-loaded="${loaded}" ${selected}>${secretDocument.name}</option>`);
+      const loaded = duckdbSecrets[documentObject.name] !== undefined;
+      const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';
+      items.push(`<option data-loaded="${loaded}" ${selected}>${documentObject.name}</option>`);
     });
     if (items.length) {
       items.push('</optgroup>');
     }
-    SecretsDialog.#secretsList.innerHTML = items.join('\n');
-  }
- 
-  async #activateAutoloadedSecrets(){
-    const store = AppDocumentStore.store;
-    const list = await store.list(SecretsDialog.#secretsObjectStore);
-    const autoloadEntries = list.filter(secretDocument => secretDocument.autoload);
-    const n = autoloadEntries.length;
-    if (!n) {
-      return;
-    }
-    const password = await this.#getPassword();
-    for (let i = 0; i < n; i++){
-      const secretDocEntry = list[i];
-      const name = secretDocEntry.name;
-      const secretDocument = await store.get(SecretsDialog.#secretsObjectStore, name, password);
-      const loaded = await this.#createDuckDbSecret(secretDocument);
-      if (loaded) {
-        continue;
-      }
-      console.warn(`Secret "${name}" failed to autoload.`);
-    }
-    this.#password = undefined;
-  }
- 
-  constructor(){
-    this.#highlited = new Hilited({
-      element: '#secretCode',
-      text: '',
-      hardTabs: false,
-      highlighterPrefix: 'hilited-duckdb',
-      regexp: window.hueyDb.duckdbTokenizer
-    });
-    this.#highlited.editingEnabled = false;
-    this.#hilitedPerhipherals = new HilitedPeripherals({
-      hilited: this.#highlited
-    });
     
-    this.#initEvents();
-    this.#activateAutoloadedSecrets()
-    .then(() => {
-      this.#updateSecretsList();
+    this.#updateSecretsDataList(docs);
+    
+    this.documentsList.innerHTML = items.join('\n');
+  }
+  
+  #updateSecretsDataList(docs){
+    const secretsList = byId('secrets-list');
+    secretsList.innerHTML = docs.sort((a,b) => {
+      a = a.name
+      const A = a.toUpperCase();
+      b = b.name;
+      const B = b.toUpperCase();
+      if (A > B){
+        return 1;
+      }
+      else 
+      if (A < B) {
+        return -1;
+      }
+      else 
+      if (a > b){
+        return 1;
+      }
+      else 
+      if (a < b) {
+        return -1;
+      }
+      return 0;
+    }).map(doc => createEl('option', {label: doc.name, value: doc.name}, doc.name).outerHTML).join('');
+  }
+
+  initEvents(){
+    super.initEvents();
+    this.changePasswordButton.addEventListener('click', event => this.handleChangePasswordClicked(event) );
+    this.resetSecretsStoreButton.addEventListener('click', event => this.handleResetSecretsStoreClicked(event) );
+  }
+
+  constructor(config){
+    config = Object.assign({}, config, {
+      dialogId: 'secretsDialog',
+      objectStoreName: AppDocumentStore.STORE_SECRETS,
+      title: 'Secrets Manager',
+      toolsTemplateId: 'secretsDialogToolsTemplate',
+      headerTemplateId: 'secretHeaderTemplate',
+      keysDataListId: 'secret-keys',
+      keyValuePairsRequired: true
     });
+    super(config);
   }
     
 }

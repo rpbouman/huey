@@ -3,6 +3,7 @@ class DuckDbDataSource extends EventEmitter {
   static #defaultNumberOfAccessAttempts = 1;
 
   static types = {
+    "CATALOG": 'catalog',
     "DUCKDB": 'duckdb',
     "FILE": 'file',
     "FILES": 'files',
@@ -210,6 +211,7 @@ class DuckDbDataSource extends EventEmitter {
   #duckDb = undefined;
   #duckDbInstance = undefined;
   #connection = undefined;
+  #catalogDefinition = undefined;
   #managedConnection = undefined;
   #catalogName = undefined;
   #schemaName = undefined;
@@ -235,6 +237,29 @@ class DuckDbDataSource extends EventEmitter {
     this.#duckDb = duckDb;
     this.#duckDbInstance = duckDbInstance;
     this.#init(config);
+  }
+  
+  getCatalogDefinition(){
+    if (this.#type !== DuckDbDataSource.types.CATALOG) {
+      throw new Error(`Catalog definition not available for datasources of type "${this.#type}"`);
+    }
+    return Object.assign({}, this.#catalogDefinition);
+  }
+  
+  getAttachedName(){
+    let attachedName;
+    switch (this.#type) {
+      case DuckDbDataSource.types.CATALOG:
+        attachedName = this.#catalogDefinition.name;
+        break;
+      case DuckDbDataSource.types.DUCKDB:
+      case DuckDbDataSource.types.SQLITE:
+        attachedName = this.#alias || this.getFileNameWithoutExtension();
+        break;
+      default:
+        throw new Error(`Attached name not available for datasource of type "${this.#type}".`);
+    }
+    return attachedName;
   }
 
   getOriginalConfig(){
@@ -465,6 +490,9 @@ class DuckDbDataSource extends EventEmitter {
   #init(config){
     const type = config.type;
     switch (type) {
+      case DuckDbDataSource.types.CATALOG:
+        this.#catalogDefinition = config.definition;
+        break;
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
       case DuckDbDataSource.types.FILE:
@@ -552,11 +580,15 @@ class DuckDbDataSource extends EventEmitter {
 
   getId(){
     const type = this.getType();
-    let postFix;
+    let postFix, id;
     switch (type) {
+      case DuckDbDataSource.types.CATALOG:
+        id = `${type}:${this.#catalogDefinition.type}:${this.#catalogDefinition.name}`;
+        return id;
+        break;
       case DuckDbDataSource.types.FILE:
         const fileName = this.getFileName();
-        const id = DuckDbDataSource.getDatasourceIdForFileName(fileName);
+        id = DuckDbDataSource.getDatasourceIdForFileName(fileName);
         return id;
       case DuckDbDataSource.types.FILES:
         postFix = JSON.stringify(this.#fileNames);
@@ -791,7 +823,7 @@ class DuckDbDataSource extends EventEmitter {
         case DuckDbDataSource.types.DUCKDB:
         case DuckDbDataSource.types.SQLITE:
           fileName = this.getFileName();
-          alias = this.#alias || this.getFileNameWithoutExtension();
+          alias = this.getAttachedName();
           quotedAlias = getQuotedIdentifier(alias);
           sql = `ATTACH '${fileName}' AS ${quotedAlias}`;
           if (type === DuckDbDataSource.types.SQLITE){

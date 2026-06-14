@@ -470,7 +470,7 @@ class UploadUi {
 
     dom.setAttribute('aria-busy', false);
     if (datasources.length) {
-      datasourcesUi.addDatasources(datasources);
+      await datasourcesUi.addDatasources(datasources);
     }
     
     let message, datasourcesTab;

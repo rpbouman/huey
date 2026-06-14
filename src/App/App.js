@@ -46,7 +46,9 @@ function initDuckdbVersion(){
     return `${key} AS ${getQuotedIdentifier(columns[key])}`;
   }).join('\n,');
   let sql = `SELECT ${selectListSql}`;
-  sql += `\nFROM duckdb_keywords()\nWHERE keyword_category != 'unreserved'`;
+  sql += [
+    'FROM duckdb_keywords()'
+  ].join('\n');
   const result = connection.query(sql)
   .then(resultset => {
     const row = resultset.get(0);
@@ -60,7 +62,11 @@ function initDuckdbVersion(){
     const duckdbTokenizer = RegXpChef.compile(
       { $flags: 'gysi' }, 
       {
-        keyword: reservedWords,
+        keyword: {
+          $begin: /\b/,
+          $content: reservedWords,
+          $end: /\b/
+        },
         number: /\d+(\.\d*)?|\.\d+/,
         string: {
           $begin: '\'',
@@ -88,6 +94,7 @@ function initDuckdbVersion(){
     );
     window.hueyDb.duckdbTokenizer = duckdbTokenizer;
     initSecretsDialog();
+    initCatalogsDialog();
 
     const duckdbVersionLabel = byId('duckdbVersionLabel');
     duckdbVersionLabel.textContent = `DuckDB ${version}, API: ${api}`;
