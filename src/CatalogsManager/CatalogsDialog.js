@@ -1,5 +1,5 @@
 class CatalogsDialog extends DocumentsDialog {
-  
+
   parseDocumentSQL(sql){
     return AttachParser.parse(sql);
   }
@@ -18,7 +18,7 @@ class CatalogsDialog extends DocumentsDialog {
     const secretField = fields.filter(field => field.key === 'SECRET');
     if (secretField.length) {
       const secretName = secretField[0].value;
-      
+
     }
     return await super.createDuckDbDocument(documentObject);
   }
@@ -31,7 +31,7 @@ class CatalogsDialog extends DocumentsDialog {
       if (!pair || !pair.length) return '';
       return `\r\n, ${pair}`;
     });
-    
+
     return [
       `ATTACH ${quoteStringLiteral(documentObject.url)}`,
       `AS ${quoteIdentifierWhenRequired(documentObject.name)} (`,
@@ -44,14 +44,14 @@ class CatalogsDialog extends DocumentsDialog {
     const message = error.message;
     const regexp = /Secret type '(?<secretType>[^']+)' does not exist, but it exists in the (?<extensionName>[^\s]+) extension/;
     const match = regexp.exec(message);
-    
+
     if (!match) {
       throw error;
     }
-    
+
     const secretType = match.groups['secretType'];
     const extensionName = match.groups['extensionName'];
-        
+
     try{
       await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
     }
@@ -60,8 +60,8 @@ class CatalogsDialog extends DocumentsDialog {
       showErrorDialog({
         title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
         description: Internationalization.getText(
-          'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.', 
-          secretType, 
+          'The secret type "{1}" requires installation of the "{2}" extension, but an attempt to load the extension failed.',
+          secretType,
           extensionName
         )
       });
@@ -69,7 +69,7 @@ class CatalogsDialog extends DocumentsDialog {
     }
     return true;
   }
-   
+
   async getDuckDbDatabases(){
     const obj = {};
     const connection = window.hueyDb.connection;
@@ -87,7 +87,7 @@ class CatalogsDialog extends DocumentsDialog {
   async updateDocumentsList(selectedDocument){
     const duckdbDatabases = await this.getDuckDbDatabases();
     const store = AppDocumentStore.store;
-    
+
     let docs = await store.list( this.objectStoreName );
     docs = docs.sort((a,b) => {
       if (a.type > b.type) {
@@ -104,7 +104,7 @@ class CatalogsDialog extends DocumentsDialog {
       }
       return 0;
     });
-    
+
     const items = [];
     let type;
     docs.forEach( documentObject => {
@@ -124,12 +124,11 @@ class CatalogsDialog extends DocumentsDialog {
     }
     this.documentsList.innerHTML = items.join('\n');
   }
-  
+
   async handleCreateDuckDbDocumentError(error){
     const message = error.message;
     return false;
   }
-  
 
   constructor(config){
     config = Object.assign({}, config, {
@@ -142,7 +141,7 @@ class CatalogsDialog extends DocumentsDialog {
     });
     super(config);
   }
-    
+
 }
 
 let catalogsDialog;

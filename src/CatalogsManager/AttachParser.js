@@ -20,7 +20,7 @@ class AttachParser extends SpecialPurposeParser {
     return match;
   }
 
-  static #urlRe = `(?<url>${SpecialPurposeParser.stringValueRe.source})`;
+  static #urlRe = new RegExp(`(?<url>${SpecialPurposeParser.stringValueRe.source})`);
   static #matchUrl(slice, position) {
     AttachParser.#urlRe.lastIndex = 0;
     const match = AttachParser.#urlRe.exec(slice);
@@ -30,7 +30,7 @@ class AttachParser extends SpecialPurposeParser {
     return match;
   }
 
-  static #asRe = /\s*as\s*/yi;
+  static #asRe = /\s+as\s+/yi;
   static #matchAs(slice, position){
     AttachParser.#asRe.lastIndex = 0;
     const match = AttachParser.#asRe.exec(slice);
@@ -59,8 +59,10 @@ class AttachParser extends SpecialPurposeParser {
     slice = slice.slice(match[0].length);
 
     match = AttachParser.#matchUrl(slice, position);
-    let url = unQuoteStringLiteral( match.groups.url );
-    attachDocument.url = url;
+    let url = match.groups.url;
+    attachDocument.url = unQuoteStringLiteral(url);
+    position += match[0].length;
+    slice = slice.slice(match[0].length);
 
     match = AttachParser.#matchAs(slice, position);
     position += match[0].length;
@@ -68,12 +70,19 @@ class AttachParser extends SpecialPurposeParser {
 
     // parse the database name
     match = AttachParser.#matchDatabaseName(slice, position);
+    position += match[0].length;
+    slice = slice.slice(match[0].length);
+
     let name = match.groups.name;
     if (isQuotedIdentifier(name)){
       name = unQuoteIdentifier(name);
     }
     attachDocument.name = name;
     
+    match = SpecialPurposeParser.matchLParen(slice, position);
+    position += match[0].length;
+    slice = slice.slice(match[0].length);
+
     const result = SpecialPurposeParser.matchFields(slice, position);
     attachDocument.fields = result.fields;
     attachDocument.fields = attachDocument.fields.filter(field => {

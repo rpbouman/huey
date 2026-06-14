@@ -95,7 +95,7 @@ class CreateSecretParser extends SpecialPurposeParser {
     slice = slice.slice(match[0].length);
 
     // parse the secret type
-    match = SpecialPurposeParser.matchType(slice, position);
+    match = SpecialPurposeParser.matchTypeSpec(slice, position);
     let type = match.groups.type;
     if (isQuotedIdentifier(type)){
       type = unQuoteIdentifier(type);

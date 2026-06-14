@@ -896,6 +896,13 @@ class DocumentsDialog {
     let error;
     try {
       const parsedDocument = this.parseDocumentSQL(enteredText);
+      parsedDocument.fields.forEach(field => {
+        const key = field.key;
+        const type = field.type;
+        if (!type || type === 'text') {
+          field.type = this.getDefaultDataypeForKey(key) || type;
+        }
+      });
       const documentObject = this.documentObject;
       if (!this.#compareDocuments(parsedDocument, documentObject)){
         this.loadDocument(parsedDocument);

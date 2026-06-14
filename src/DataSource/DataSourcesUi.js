@@ -844,8 +844,8 @@ class DataSourcesUi extends EventEmitter {
     await this.#renderDatasources();
   }
 
-  addDatasource(datasource){
-    this.addDatasources([datasource]);
+  async addDatasource(datasource){
+    await this.addDatasources([datasource]);
   }
 
   async destroyDatasources(datasourceIds) {

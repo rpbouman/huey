@@ -43,13 +43,15 @@ class SpecialPurposeParser {
     return match;
   }
 
-  static typeRe = RegXpChef.compile(
-    /type/i,
+  static typeRe = /type/i;
+
+  static typeSpecRe = RegXpChef.compile(
+    SpecialPurposeParser.typeRe,
     SpecialPurposeParser.mandatoryWhitespaceRe,
     new RegExp(`(?<type>${SpecialPurposeParser.nameRe.source})`, 'i')
   );
-  static matchType(slice, position){
-    SpecialPurposeParser.typeRe.lastIndex = 0;
+  static matchTypeSpec(slice, position){
+    SpecialPurposeParser.typeSpecRe.lastIndex = 0;
     const match = SpecialPurposeParser.typeRe.exec(slice);
     if (!match){
       SpecialPurposeParser.throwParsingError('TYPE-clause', position);
