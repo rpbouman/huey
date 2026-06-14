@@ -192,8 +192,33 @@ nav#sidebar[role=tablist] {
         [data-datasourcetype=duckdb],
         [data-datasourcetype=catalog]
       ){
+
         > summary > span.label::before {
           content: var( --icon-database );
+        }
+        
+        &[id^="catalog:iceberg"] {
+          > summary > span.label::before {
+            content: var( --icon-iceberg );
+          }
+        }
+
+        &[id^="catalog:delta"] {
+          > summary > span.label::before {
+            content: var( --icon-triangle );
+          }
+        }
+
+        &[id^="catalog:unity_catalog"] {
+          > summary > span.label::before {
+            content: var( --icon-hexagon-letter-u );
+          }
+        }
+
+        &[id^="catalog:ducklake"] {
+          > summary > span.label::before {
+            content: var( --icon-hexagon-letter-d );
+          }
         }
 
         > details[data-nodetype=duckdb_schema] {
@@ -210,7 +235,6 @@ nav#sidebar[role=tablist] {
           
         }
       }
-      
       
       &[data-datasourcetype=file] > summary > span.label::before {
         content: var( --icon-file );
