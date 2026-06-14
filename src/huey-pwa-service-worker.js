@@ -19,7 +19,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v43';
+const CACHE_VERSION = 'v44';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -145,6 +145,7 @@ const APP_SHELL = [
   'src/pwa/screenshot.png',
   'src/spinner/spinner.css',
   'src/spinner/timer.css',
+  'src/util/SpecialPurposeParser/SpecialPurposeParser.js',
   'src/util/clipboard/clipboard.js',
   'src/util/dom/dom.js',
   'src/util/event/EventBuffer.js',
@@ -154,7 +155,6 @@ const APP_SHELL = [
   'src/util/regex/RegXpChef.js',
   'src/util/resize/resize.css',
   'src/util/sql/SQLHelper.js'
-  'src/SpecialPurposeParser/SpecialPurposeParser.js'
 ];
 
 // ─── CDN entry-points to pre-fetch at install time ────────────────────────────
