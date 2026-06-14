@@ -127,6 +127,9 @@ class CatalogsDialog extends DocumentsDialog {
 
   async handleCreateDuckDbDocumentError(error){
     const message = error.message;
+    const regexp = /Invalid Configuration Error: Could not find a valid storage secret ([^)]+)/;
+    const match = regexp.exec(message);
+    
     return false;
   }
 

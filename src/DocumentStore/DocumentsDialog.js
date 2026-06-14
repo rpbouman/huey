@@ -583,7 +583,7 @@ class DocumentsDialog {
     return await PromptUi.show({
       title: Internationalization.getText('Rename or Create'),
       contents: Internationalization.getText(
-        'Name changed. Do you want to rename "{1}" to "{2}" or create a new one?',
+        'Name changed. Choose yes to rename "{1}" to "{2}" or no to create a new one?',
         oldName,
         newName
       )
@@ -859,8 +859,15 @@ class DocumentsDialog {
         return true;
       }
       catch(error){
-        const errorHandlingResult = await this.handleCreateDuckDbDocumentError(error);
-        if (errorHandlingResult === false) {
+        try {
+          const errorHandlingResult = await this.handleCreateDuckDbDocumentError(error);
+          if (errorHandlingResult === false) {
+            showErrorDialog(error);
+            return false;
+          }
+        }
+        catch(error){
+          showErrorDialog(error);
           return false;
         }
       }

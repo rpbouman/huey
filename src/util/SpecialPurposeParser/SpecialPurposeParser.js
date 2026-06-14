@@ -43,7 +43,7 @@ class SpecialPurposeParser {
     return match;
   }
 
-  static typeRe = /type/i;
+  static typeRe = /\btype\b/iy;
 
   static typeSpecRe = RegXpChef.compile(
     SpecialPurposeParser.typeRe,
@@ -52,7 +52,7 @@ class SpecialPurposeParser {
   );
   static matchTypeSpec(slice, position){
     SpecialPurposeParser.typeSpecRe.lastIndex = 0;
-    const match = SpecialPurposeParser.typeRe.exec(slice);
+    const match = SpecialPurposeParser.typeSpecRe.exec(slice);
     if (!match){
       SpecialPurposeParser.throwParsingError('TYPE-clause', position);
     }
