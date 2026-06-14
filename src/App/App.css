@@ -64,7 +64,7 @@ html {
             }
             
             &[for=uploader]::before {
-            content: var( --icon-upload );
+              content: var( --icon-upload );
             }
           }
 

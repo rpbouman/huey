@@ -42,6 +42,11 @@ dialog#filterDialog {
   }
 
   > header[role=toolbar] {
+
+    &::before {
+      content: var( --icon-filter )
+    }
+    
     padding-left: .5em;
   }
 

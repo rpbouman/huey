@@ -17,6 +17,11 @@ dialog#exportDialog {
   }
   
   > header {
+    
+    &::before {
+      content: var( --icon-download );
+    }
+    
     > form {
       > input#exportTitleTemplate {
         width: calc( 100% - 14px);

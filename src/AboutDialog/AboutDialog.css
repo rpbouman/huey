@@ -15,4 +15,11 @@ menu[role=toolbar] {
   left: calc( 50vw - 160px );
   top: calc( 50vh - 160px );
   width: 320px;
+  
+  > header {
+    &::before {
+      content: var( --icon-info-circle );
+    }
+  }
+  
 }

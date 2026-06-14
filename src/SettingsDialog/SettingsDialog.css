@@ -8,7 +8,12 @@
   min-width: 580px;
   width: 650px;
   height: 412px;
-  
+
+  > header {
+    &::before {
+      content: var( --icon-settings );
+    }
+  }
 }
 
 menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {

@@ -80,6 +80,12 @@ dialog#uploadUi {
     }
   }
 
+  > header {
+    &::before {
+      content: var( --icon-upload );
+    }
+  }
+
   header > p#uploadUiDescription > span::after,
   section#uploadProgressList > details[aria-invalid=false] > summary > menu > label[for]::before {
     font-family: var( --huey-icon-font-family );
