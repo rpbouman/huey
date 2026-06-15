@@ -23,6 +23,7 @@ class CatalogsDialog extends DocumentsDialog {
       const secretName = secretField[0].value;
       const secretDocument = await secretsDialog.getAndDecryptDocument(secretName);
       await secretsDialog.createDuckDbDocument(secretDocument);
+      secretsDialog.clearPassword();
     }
     const result = await super.createDuckDbDocument(documentObject);
     if (!result) {
@@ -34,6 +35,7 @@ class CatalogsDialog extends DocumentsDialog {
     };
     const hueyDb = window.hueyDb;
     const datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, dsConfig);
+    datasource.addEventListener('destroy', this.updateDocumentsList.bind(this));
     await datasourcesUi.addDatasource(datasource);
     return result;
   }
@@ -78,6 +80,11 @@ class CatalogsDialog extends DocumentsDialog {
   }
 
   async updateDocumentsList(selectedDocument){
+    const documentsList = this.documentsList;
+    if (!selectedDocument) {
+      const selectedIndex = documentsList.selectedIndex;
+      selectedDocument = selectedIndex === -1 ? undefined : documentsList.options[selectedIndex].value;
+    }
     const duckdbDatabases = await this.getDuckDbDatabases();
     const store = AppDocumentStore.store;
 
@@ -115,7 +122,7 @@ class CatalogsDialog extends DocumentsDialog {
     if (items.length) {
       items.push('</optgroup>');
     }
-    this.documentsList.innerHTML = items.join('\n');
+    documentsList.innerHTML = items.join('\n');
   }
 
   constructor(config){

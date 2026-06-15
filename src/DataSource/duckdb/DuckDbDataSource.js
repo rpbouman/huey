@@ -763,20 +763,30 @@ class DuckDbDataSource extends EventEmitter {
   async destroy(){
     const id = this.getId();
     try {
-      this.fireEvent('destroy', {});
 
       if (this.#file) {
         await this.#duckDbInstance.dropFile(this.#file.name);
       }
 
+      const connection = await this.getConnection();
       if (this.#rejects_tables){
-        const connection = await this.getConnection();
 
         while(this.#rejects_tables.length) {
           const rejectsTable = this.#rejects_tables.pop();
           const sql = `DROP TABLE IF EXISTS ${getQuotedIdentifier(rejectsTable)}`;
           await connection.query(sql);
         }
+      }
+      
+      switch (this.getType()) {
+        case DuckDbDataSource.types.DUCKDB:
+        case DuckDbDataSource.types.SQLITE:
+        case DuckDbDataSource.types.CATALOG:
+          const attachedName = this.getAttachedName();
+          const quotedAttachedName = getQuotedIdentifier(attachedName);
+          const detachSql = `DETACH DATABASE IF EXISTS ${quotedAttachedName}`;
+          await connection.query(detachSql);
+          break;
       }
 
       if (this.#connection){
@@ -788,6 +798,7 @@ class DuckDbDataSource extends EventEmitter {
       console.error(error.stack);
     }
     finally {
+      this.fireEvent('destroy', {});
       super.destroy();
       this.#duckDb = undefined;
       this.#duckDbInstance = undefined;

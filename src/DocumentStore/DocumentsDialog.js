@@ -101,9 +101,17 @@ class DocumentsDialog {
     return await store.get(this.objectStoreName, key, password);
   }
   
+  isPasswordSet(){
+    return Boolean(this.#password);
+  }
+  
+  clearPassword(){
+    this.#password = null;
+  }
+  
   async getAndDecryptDocument(key){
     const store = AppDocumentStore.store;
-    const needToClearPassword = !Boolean(this.#password);
+    const needToClearPassword = !this.isPasswordSet();
     let documentObject;
     try {
       documentObject = await this.getDocumentFromStore(key);
@@ -121,7 +129,7 @@ class DocumentsDialog {
       }
     }
     if (needToClearPassword){
-      this.#password = null;
+      this.clearPassword();
     }
     return documentObject;
   }
@@ -1021,7 +1029,7 @@ class DocumentsDialog {
     this.setCheckboxState(this.editingActiveCheckbox, false);
     this.setCheckboxState(this.unsavedChangesCheckbox, false);
     this.documentsList.selectedIndex = -1;
-    this.#password = undefined;
+    this.clearPassword();
   }
   
   async handleActivateCurrentChanged(event){
