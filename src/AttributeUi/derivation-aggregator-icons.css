@@ -112,7 +112,8 @@
 /* ─── Collection derivations ──────────────────────────────────────────────── */
 
 [data-derivation='unique values'],
-[data-aggregator='unique values']{ --item-icon: var( --icon-letter-u-small ); }
+[data-aggregator='unique values'],
+[data-aggregator='unique values (as CSV)']{ --item-icon: var( --icon-letter-u-small ); }
 
 [data-derivation='sort values']{ --item-icon: var( --icon-sort-ascending-letters ); }
 
@@ -138,7 +139,8 @@
 
 /* ─── Collection aggregators ──────────────────────────────────────────────── */
 
-[data-aggregator=list]{ --item-icon: var( --icon-list ); }
+[data-aggregator=list],
+[data-aggregator="list (as CSV)"]{ --item-icon: var( --icon-list ); }
 
 [data-aggregator=histogram]{ --item-icon: var( --icon-chart-bar ); }
 

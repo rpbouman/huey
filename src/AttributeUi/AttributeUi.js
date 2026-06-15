@@ -82,14 +82,23 @@ class AttributeUi {
       expressionTemplate: 'LIST( ${columnExpression} )',
       isArray: true
     },
+    'list (as CSV)': {
+      folder: "list aggregators",
+      expressionTemplate: 'LIST( ${columnExpression} )',
+      columnType: 'VARCHAR'
+    },
     'unique values': {
       folder: "list aggregators",
       expressionTemplate: 'LIST( DISTINCT ${columnExpression} ORDER BY ${columnExpression} )',
       isArray: true
     },
+    'unique values (as CSV)': {
+      folder: "list aggregators",
+      expressionTemplate: 'STRING_AGG( DISTINCT ${columnExpression} ORDER BY ${columnExpression} )',
+      columnType: 'VARCHAR'
+    },
     'mad': {
       folder: "statistics",
-      columnType: 'INTERVAL',
       forNumeric: true,
       expressionTemplate: 'MAD( ${columnExpression} )'
     },
@@ -110,6 +119,13 @@ class AttributeUi {
           return function(value, field){
             return formatter.format(value, field);
           };
+        }
+        else
+        if (dataTypeInfo.hasDateFields || dataTypeInfo.hasTimeFields){
+          const formatter = createTimestampFormatter(false);
+          return function(value, field) {
+            return formatter(value, field);
+          }
         }
         else {
           return function(value, field){
