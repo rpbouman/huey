@@ -16,6 +16,15 @@ class DocumentsDialog {
   get dialog(){
     return byId( this.dialogId );
   }
+  
+  setBusy(busy){
+    if (Boolean(busy)){
+      this.dialog.setAttribute('aria-busy', true);
+    }
+    else {
+      this.dialog.removeAttribute('aria-busy');
+    }
+  }
    
   constructor(config){
     const dialogId = config.dialogId;
@@ -894,15 +903,17 @@ class DocumentsDialog {
   }
       
   async createDuckDbDocument(documentObject){
+    this.setBusy(true);
     const connection = window.hueyDb.connection;
     documentObject = documentObject || this.documentObject;
     do {
       try {
         const createDocumentSql = this.getCreateDocumentSQL(documentObject);
         await connection.query( createDocumentSql ); 
-        return true;
+        break;
       }
       catch(error){
+        this.setBusy(false);
         try {
           const errorHandlingResult = await this.handleCreateDuckDbDocumentError(error);
           if (errorHandlingResult === false) {
@@ -915,7 +926,9 @@ class DocumentsDialog {
           return false;
         }
       }
+      this.setBusy(true);
     } while(true);
+    this.setBusy(false);
     return true;
   }
 

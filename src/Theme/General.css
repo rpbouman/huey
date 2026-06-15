@@ -184,6 +184,18 @@ fieldset > legend {
   font-size: x-small;
 }
 
+@keyframes spinnging_refresh {
+  0% {
+    content: var( --icon-refresh );
+    transform: rotate(0deg);
+  }
+  100% {
+    content: var( --icon-refresh );
+    transform: rotate(360deg);
+  }
+}
+
+
 dialog {
   background-color: var( --huey-medium-background-color );
   border-style: solid;
@@ -216,8 +228,8 @@ dialog {
     z-index: 1;
 
     &::before {
-      font-family: var(--huey-icon-font-family);
-      font-size: var(--huey-icon-normal);
+      font-family: var( --huey-icon-font-family );
+      font-size: var( --huey-icon-normal );
       vertical-align: bottom;
       color: var( --huey-icon-color-highlight );
       margin: 0px 4px 0px 0px;
@@ -266,7 +278,15 @@ dialog {
       flex-direction: row;
     }
   }
+}
 
+dialog[aria-busy=true] {
+  > header::before {
+    animation-name: spinnging_refresh;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
 }
 
 *[role=toolbar],
