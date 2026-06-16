@@ -5,49 +5,52 @@ nav#sidebar[role=tablist] {
       &:has( > div#datasourcesUi) {
         
         > div:has(
-          > label[for=uploader], 
-          > label[for=loadFromUrl], 
-          > label[for=attachRemote] 
+          > menu > label[for=uploader], 
+          > menu> label[for=loadFromUrl], 
+          > menu> label[for=attachRemote] 
         ) {
-          
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5em;
-          padding: 1em;
 
-          > label:is( 
-            [for=uploader], 
-            [for=loadFromUrl], 
-            [for=attachRemote] 
-          ){
-            position: relative;        /* removed left/top/width overrides */
-            flex: 1 1 0;               /* new: equal-width columns */
-            display: flex;             /* new: column layout for icon + text */
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25em;
-            white-space: normal;
-            cursor: pointer;
-            
-            &::after {
-              display: block;          /* changed from inline-block */
-              font-size: 70px;
-              font-family: var( --huey-icon-font-family );
-              text-align: center;
-              color: var( --huey-icon-color-subtle );
-              order: -1;               /* new: icon renders above the text */
-            }
-            &:hover::after {
-              color: var( --huey-icon-color-highlight );
-            }
-            &[for=uploader]::after {
-              content: var( --icon-upload );
-            }
-            &[for=loadFromUrl]::after {
-              content: var( --icon-cloud-upload );
-            }
-            &[for=attachRemote]::after {
-              content: var( --icon-database );
+          > menu {
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+            padding: 1em;
+
+            > label:is( 
+              [for=uploader], 
+              [for=loadFromUrl], 
+              [for=attachRemote] 
+            ){
+              position: relative;        /* removed left/top/width overrides */
+              flex: 1 1 0;               /* new: equal-width columns */
+              display: flex;             /* new: column layout for icon + text */
+              flex-direction: column;
+              align-items: center;
+              gap: 0.25em;
+              white-space: normal;
+              cursor: pointer;
+              
+              &::after {
+                display: block;          /* changed from inline-block */
+                font-size: 70px;
+                font-family: var( --huey-icon-font-family );
+                text-align: center;
+                color: var( --huey-icon-color-subtle );
+                order: -1;               /* new: icon renders above the text */
+              }
+              &:hover::after {
+                color: var( --huey-icon-color-highlight );
+              }
+              &[for=uploader]::after {
+                content: var( --icon-upload );
+              }
+              &[for=loadFromUrl]::after {
+                content: var( --icon-cloud-upload );
+              }
+              &[for=attachRemote]::after {
+                content: var( --icon-database );
+              }
             }
           }
         }
@@ -55,7 +58,7 @@ nav#sidebar[role=tablist] {
       }
 
       &:has( > div#datasourcesUi details) > div:has( 
-        > label:is( [for=uploader], [for=loadFromUrl], [for="attachRemote"] )
+        menu > label:is( [for=uploader], [for=loadFromUrl], [for="attachRemote"] )
       ) {
         display: none;
       }
