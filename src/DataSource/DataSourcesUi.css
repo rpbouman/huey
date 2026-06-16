@@ -4,7 +4,11 @@ nav#sidebar[role=tablist] {
       
       &:has( > div#datasourcesUi) {
         
-        > label:is( [for=uploader], [for=loadFromUrl] ){
+        > label:is( 
+          [for=uploader], 
+          [for=loadFromUrl], 
+          [for=attachRemote] 
+        ){
           position: relative;
           left: 1em;
           top: 1em;
@@ -14,7 +18,7 @@ nav#sidebar[role=tablist] {
           
           &::after {
             display:inline-block;
-            font-size: 140px;
+            font-size: 70px;
             width: 100%;
             font-family: var( --huey-icon-font-family );
             text-align: center;
@@ -32,12 +36,16 @@ nav#sidebar[role=tablist] {
           &[for=loadFromUrl]::after {
             content: var( --icon-cloud-upload );
           }
+
+          &[for=attachRemote]::after {
+            content: var( --icon-database );
+          }
           
         }
         
       }
 
-      &:has( > div#datasourcesUi details) > label:is( [for=uploader], [for=loadFromUrl] ) {
+      &:has( > div#datasourcesUi details) > label:is( [for=uploader], [for=loadFromUrl], [for="attachRemote"] ) {
         display: none;
       }
             
