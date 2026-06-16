@@ -254,10 +254,10 @@ self.addEventListener('fetch', event => {
   }
 
   // 3. Same-origin requests → Cache-first, fall back to network.
-  if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirst(request, CACHE_STATIC));
-    return;
-  }
+  //if (url.origin === self.location.origin) {
+  //  event.respondWith(cacheFirst(request, CACHE_STATIC));
+  //  return;
+  //}
 
   // 4. Everything else (remote data files the user loads, etc.) → network-only.
 });
