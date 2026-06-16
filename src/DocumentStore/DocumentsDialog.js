@@ -606,7 +606,8 @@ class DocumentsDialog {
     this.resetForm();
     const existingItem = this.selectedDocumentOption;
     if (existingItem) {
-      const loaded = await this.loadDocument(existingItem.value);
+      const documentObject = await this.getDocumentFromStore(existingItem.value);
+      const loaded = await this.loadDocument(documentObject);
     }
     else {
       this.setCheckboxState(this.editingActiveCheckbox, false);
@@ -709,7 +710,7 @@ class DocumentsDialog {
     const parentFieldContainer = this.getParentFieldContainer(fieldContainer);
     return this.getFieldType( parentFieldContainer );
   }
-
+  
   handleFieldClicked(event) {
     const target = event.target;
     if (target.tagName !== 'BUTTON'){
@@ -904,11 +905,26 @@ class DocumentsDialog {
     }
   }
   
-  handleAutoloadChanged(event){
+  handleHeaderFieldInput(event){
     if (!this.unsavedChangesCheckbox.checked ){
       this.setCheckboxState(this.unsavedChangesCheckbox, true);
     }
+    const target = event.target;
+    if (target.name === 'name') {
+      this.handleDocumentNameInput(event);
+    }
   }
+
+  handleHeaderFieldChange(event){
+    if (!this.unsavedChangesCheckbox.checked ){
+      this.setCheckboxState(this.unsavedChangesCheckbox, true);
+    }
+    const target = event.target;
+    if (target.name === 'type') {
+      this.handleDocumentTypeChanged(event);
+    }
+  }
+
       
   async createDuckDbDocument(documentObject){
     this.setBusy(true);
@@ -1247,14 +1263,14 @@ class DocumentsDialog {
     this.documentsList.addEventListener('change', event => this.handleDocumentsListChanged(event) );
 
     // header fields
-    this.nameEl.addEventListener('input', event => this.handleDocumentNameInput(event) );
-    this.typeEl.addEventListener('change', event => this.handleDocumentTypeChanged(event) );
-    this.autoloadEl.addEventListener('change', event => this.handleAutoloadChanged(event) );
+    this.headerFieldset.addEventListener('input', event => this.handleHeaderFieldInput(event));
+    this.headerFieldset.addEventListener('change', event => this.handleHeaderFieldChange(event));
 
     // header key/value collection
     this.keyValuesFieldset.addEventListener('click', event => this.handleFieldClicked(event) ); 
     this.keyValuesFieldset.addEventListener('change', event => this.handleFieldChanged(event) ); 
-    this.keyValuesFieldset.addEventListener('input', event => this.handleFieldInput(event) ); 
+    this.keyValuesFieldset.addEventListener('input', event => this.handleFieldInput(event) );
+    
     this.codeTab.addEventListener('change', event => this.handleCodeTabChanged(event) );
     this.formTab.addEventListener('change', event => this.handleFormTabChanged(event) );
     
