@@ -176,6 +176,7 @@ class QueryUi {
   
   #queryAxisUiItemToggleEnableDataValue(queryAxisItemUi, dataValueKey){
     const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    // make a copy so we can detect change against the original.
     const filter = JSON.parse(JSON.stringify(queryModelItem.filter));
     const values = filter.values;
     const valueObject = values[dataValueKey];
