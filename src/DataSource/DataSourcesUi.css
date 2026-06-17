@@ -9,6 +9,8 @@ nav#sidebar[role=tablist] {
           > menu> label[for=loadFromUrl], 
           > menu> label[for=attachRemote] 
         ) {
+  
+          margin: 1em;
 
           > menu {
             height: 100%;
