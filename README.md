@@ -12,11 +12,11 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
 ## Key features
-- Supports reading and writing ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel). Huey can also read DuckDB database files.
-- Comprehensive Attribute menu to explore the structure of your dataset
-- Intuitive query builder that supports projection, aggregation, filtering, and (sub)totals
+- Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or connect to a remote catalog.
+- Comprehensive [attributes menu](https://github.com/rpbouman/huey#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
+- Intuitive [query builder](#query-builder) that supports projection, [aggregation](#aggregates), [filtering](#filtering), and [(sub)totals](#subtotals)
 - A pivot table to present analysis results
-- Many different aggregate functions for reporting and data exploration
+- Many different [aggregate functions](#aggregates) for reporting and data exploration
 - Automatic breakdown of date/time columns to temporal hierarchy (year, month, quarter etc)
 - Extensive support for array and ```STRUCT``` data types to allow immediate ad-hoc analysis of complex, nested data (typical for JSON data)
 - Export of result data and SQL queries to file or clipboard. 
@@ -46,7 +46,7 @@ All these examples use a URL to a publicly available dataset as datasource.
   The <a href="https://data.lacity.org/api/views/ajiv-uc63/rows.csv?accessType=DOWNLOAD" target="_blank" rel="noopener noreferrer">raw CSV data</a> provides the number of flight operations, as well as a timestamp and various attributes that describe the flight, such as whether it is an arrival or departure; a charter or a scheduled flight, and whether it is a domestic or an international flight.
   The report demonstrates the following Huey features:
   - Reporting Period timestamp is correctly detected from the CSV data as `TIMESTAMP` type by the DuckDB CSV reader
-  - Huey year and month derivations are applied on the row axis to produce a clear temporal breakdown
+  - Huey year and month [derived attributes](#derived-attributes) are applied on the row axis to produce a clear temporal breakdown
   - Flight type and Arrival/Departure are placed on the columns axis
   - Domestic/International is placed on the filters axis, showing all filter values in an expanded state. This lets you slicde the data by checking/unchecking the checkbox for a specific filter value
   - The sum of the flight operations appears in the cells
@@ -65,7 +65,7 @@ All these examples use a URL to a publicly available dataset as datasource.
   The event object itself has scalar properties like `id`, `type`, and `created_at` timestamp, as well object-typed properties `repo`, `actor` and `payload`.
   The report demonstrates the following Huey features:
   - The DuckDB JSON reader correctly extracts the `created_at` string to a `TIMESTAMP` type.
-  - Huey date derivations year, month, and day as well as iso-time derivation are applied on the column axis to produce a clean temporal breakdown
+  - Derived attributes year, month, and day as well as iso-time derivation are applied on the column axis to produce a clean temporal breakdown
   - Event type also appears on the columns axis, showing CreateEvent, DeleteEvent, PushEvent and so on for each timestamp
   - The repo's `id` and `name` properties are extracted from the `repo`-object nested inside the event object and placed on the rows Axis
   - In the cells, the`login` property extracted from the nested `actor`-object is aggregated using the list aggregator. 
@@ -252,14 +252,25 @@ If the "Autorun query" checkbox is not checked, then you can execute the query b
 ### Derived Attributes
 Right before the attribute item, there is a widget to expand the Attribute so its derived Attributes and Aggregates are revealed.
 
-![image](https://github.com/user-attachments/assets/db9e89c5-e7c3-44af-956b-9393dad6723c)
-
 You can think of a derived attribute as an expression (formula) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
 The values that are thus derived from the original attribute values can be thought of as a 'virtual' column. 
 
 Derived attributes may be placed on either the rows or the columns pivot table axis. 
 Derived attributes may be used as filter too, and they can also be aggregated.
+
+The attribute's data type primarily determines which derived attributes are supported. 
+Derived attributes tend to be grouped in folders around a similar use case or topic. 
+Here's a (non-exaustive) list of derived attribute folders:
+- **date fields**: Applies to attributes with temporal data types, like ```DATE``` and ```TIMESTAMP```.
+  Derivations in this category are mainly to present temporal data in a hierarchically organized breakdown, as well as to offer various formats and labels.
+  Typical use cases are to compare data aggreagated in the cells across years, month or day of the week.
+- **time fields**: Similar to date fields, but for those data types that also carry a time part.
+- **string operations**: Applies to attributes with a text type. 
+  This offers different collation variants of the text data to support case-insensitive filtering and/or sorting as well as actual case conversion.
+- **hashes** various hash functions, which may be useful to compare large text fields
+- **array statistics**: for calculating aggregates on the elements of [array-typed attributes](#arrays).
+  [Array statistics](#array-aggregates) are described in more detail along with other types of aggregates.
 
 ### Aggregates
 
@@ -273,7 +284,7 @@ To understand aggregates in Huey, it is useful to distinguish a few different wa
   For example, a count simply returns the number of input values, while summation works by adding all the input values together and returning the total.
   
   The attributes panel of the sidebar has a generic *count* aggregator at the very top.
-  All attributes also have a *count* and *distinct count* aggregator, which appears together with the derivations when you expand the attribute.
+  All attributes also have a *count* and *distinct count* aggregator, which appears together with the [derived attributes](#derived-attributes) when you expand the attribute.
   
   Most attributes have a *statistics* folder which contains basic statistical descriptive operations like *min* (minimum), *max* (maximum), *median* and *mode* (modulo), as well as the special purpose *entropy* aggregator. 
   In particular, numerical attributes have additional aggregators like *sum* (summation), *avg* (average), *stdev* (standard deviation), as well as more sophisticated ones like *skewness* and *kurtosis*.
@@ -335,7 +346,7 @@ All aggregate operations that are available for cell-aggregates are also availab
 While cell-aggregates and axis-aggregates take input values from the underlying rows, array aggregates apply to the elements of a single array-typed value.
 In the Attributes sidebar, array attributes can be found in the array statistics folder.
 
-Array aggregates are technically derivations for array-typed attributes that happen to apply an aggregate function to the array elements.
+Array aggregates are technically [derived attributes](#derived-attributes) for array-typed attributes that happen to apply an aggregate function to the array elements.
 The repetoire of aggregate operations for aggregate elements is largely the same as for cells- and axis- aggregates.
 
 You can 
@@ -352,15 +363,15 @@ Attributes of this type also have a "structure" folder that gives access to its 
 
 ![image](https://github.com/user-attachments/assets/8687b270-6298-4434-8f52-5b32d7d39a53)
 
-Members are also just attributes, and will have their own derivations and aggregates, in accordance with the member type. 
+Members are also just attributes, and will have their own [derived attributes](#derived-attributes) and [aggregates](#aggregates), in accordance with the member type. 
 Of course, members that are themselves of a structured type have their own structure folder that gives access to its members.
 
 ### Arrays
 
 Arrays are also just values and can be treated as such.
 
-Attributes of an array type have a set of "array operations" derivations:
-- elements: unnests the array and projects the element value on a separate tuple. Just like with members of structured types, array elements are just like attributes and may have derivations and aggregates in accordance with their type.
+Attributes of an array type have a set of "array operations" [derived attributes](#derived-attributes):
+- elements: unnests the array and projects the element value on a separate tuple. Just like with members of structured types, array elements are just like attributes and may have [derived attributes](#derived-attributes) and aggregates in accordance with their type.
 - element indices: unnests the array, and projects the element index. If both elements and element indices appear together on the same axis, then they are unrolled at the same level, so that the indices and the element values refer to the same element.
 - length: returns the length of the array.
 - sort values: array value after sorting the elements
@@ -369,13 +380,13 @@ Attributes of an array type have a set of "array operations" derivations:
 
 ![image](https://github.com/user-attachments/assets/5f2acd6e-3ac1-4702-b204-7737fbc9a8f0)
 
-When the elements or element indices derivations are applied to multiple, independent attributes, then they are unrolled independently, in order of appearance on the axis.
+When the elements or element indices derived attributes are applied to multiple, independent attributes, then they are unrolled independently, in order of appearance on the axis.
 
 Arrays also support a collection of "array statistics":
 
 ![image](https://github.com/user-attachments/assets/f9230a17-339d-4598-b8e5-3b92f851b395)
 
-Array statistics are special derivations that calculate an aggregate value over the array's elements. 
+Array statistics are special derived attributes that calculate an aggregate value over the array's elements. 
 
 ### Maps
 
@@ -385,7 +396,8 @@ Maps have a folder with map operations:
 
 ![image](https://github.com/user-attachments/assets/0fbaf936-2e4d-40b3-a57d-fa4ad330b795)
 
-- entries gives access to the key and value derivations. These will unnest the map and project the key and/or value. Like array elements and element indices, the key and value derivations of the same map attribute are not independent but unrolled together.
+- entries gives access to the key- and value- derived attributes. 
+  These will unnest the map and project the key and/or value. Like array elements and element indices, the key- and value- derived attributes of the same map attribute are not independent but unrolled together.
 - entry count: the number of entries in the map
 - keyset: the (sorted) list of keys.
 
