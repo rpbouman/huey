@@ -318,6 +318,16 @@ In this regard they are somewhat similar to the totals feature, but without gene
 
 If we consider the entire pivot table as a SQL query, axis aggregates would be window functions over a partition of items from the axis on which it is placed.
 
+Axis aggregates are created by placing an aggregate item on any axis that is not the cells-axis.
+This can be done either by clicking the rows- or columns- button on an aggregate item in the Attributes panel.
+Alternatively, an aggregate item can be dragged from the Attributes panel to the axis. 
+Finally, items on the cells axis can also be dragged and then dropped on a non-cells axis.
+ 
+Once the item is placed, any non-aggregate items that appear right before the new axis aggregate item are used to define its partition.
+
+Once the axis aggregate is created it can be freely positioned anywhere on its axis - this will not change the partition definition.
+If an item that is used in the partition definition of any axis-aggregates is moved or removed, then that item is removed from the partition definition of those axis-aggregates.
+
 All aggregate operations that are available for cell-aggregates are also available as axis aggregates.
 #### Array aggregates
 While cell-aggregates and axis-aggregates take input values from the underlying rows, array aggregates apply to the elements of a single array-typed value at the axis.
