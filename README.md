@@ -256,8 +256,10 @@ Right before the attribute item, there is a widget to expand the Attribute so it
 
 You can think of a derived attribute as an expression (formula) that calculates some aspect from a single value from the attribute upon which it is based.
 For example, from an attribute that represents timestamp values, we can extract only the date part, or only the time part, or even the individual parts like year, month, and so on.
-The values that are thus derived from the original attribute values can be thought of as a 'virtual' column. Derived attributes may be placed on either the rows or the columns pivot table axis. 
-Derived attributes may be used as filter too.
+The values that are thus derived from the original attribute values can be thought of as a 'virtual' column. 
+
+Derived attributes may be placed on either the rows or the columns pivot table axis. 
+Derived attributes may be used as filter too, and they can also be aggregated.
 
 ### Aggregates
 
@@ -267,7 +269,7 @@ Typical examples of aggregate operations are counts, summation and averaging, bu
 
 To understand aggregates in Huey, it is useful to distinguish a few different ways to categorize aggregates:
 - **aggregation operation**:
-  This categorization refers to the method that is used to produce the output value based on the collectio of input values.
+  This categorization refers to the method that is used to produce the output value based on the collection of input values.
   For example, a count simply returns the number of input values, while summation works by adding all the input values together and returning the total.
   
   The attributes panel of the sidebar has a generic *count* aggregator at the very top.
@@ -288,9 +290,10 @@ To understand aggregates in Huey, it is useful to distinguish a few different wa
   
 #### Cell-aggregates
 
+Cell aggregates are items used to populate the cells of the query result.
 Cells refer to the intersections of the items appearing on the rows- and columns axes.
-These cell aggregates take their inputs from all the rows in the underlying dataset that correspond with the values on the rows- and columns dataset.
 
+Cell aggregates take their inputs from all the rows in the underlying dataset that correspond with the values on the rows- and columns dataset.
 If we consider the entire pivot table as a SQL query, the cell aggregates would be plain aggregate functions in the ```SELECT```-list, while the items on the row- and cells- axes would appear in the ```GROUP BY``` clause.
 
 In Pivot tables, cell contents are always aggregate values.
