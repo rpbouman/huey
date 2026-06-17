@@ -329,11 +329,16 @@ Once the axis aggregate is created it can be freely positioned anywhere on its a
 If an item that is used in the partition definition of any axis-aggregates is moved or removed, then that item is removed from the partition definition of those axis-aggregates.
 
 All aggregate operations that are available for cell-aggregates are also available as axis aggregates.
-#### Array aggregates
-While cell-aggregates and axis-aggregates take input values from the underlying rows, array aggregates apply to the elements of a single array-typed value at the axis.
 
-In the Attributes sidebar, array attributes are technically derivations for array-typed attributes that happen to apply an aggregate function to the array elements.
+#### Array aggregates
+
+While cell-aggregates and axis-aggregates take input values from the underlying rows, array aggregates apply to the elements of a single array-typed value.
+In the Attributes sidebar, array attributes can be found in the array statistics folder.
+
+Array aggregates are technically derivations for array-typed attributes that happen to apply an aggregate function to the array elements.
 The repetoire of aggregate operations for aggregate elements is largely the same as for cells- and axis- aggregates.
+
+You can 
 
 ## Structured types, Arrays, and Maps
 
