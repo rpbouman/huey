@@ -294,7 +294,7 @@ class QueryUi {
     const axisId = queryModelAxisItem.axis;
     let cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName || ''}"]`;
     if (queryModelAxisItem.memberExpressionPath){
-      cssSelector += `[data-member_expression_path='${JSON.stringify(queryModelAxisItem.memberExpressionPath)}']`;
+      cssSelector += `[data-member_expression_path='${CSS.escape(JSON.stringify(queryModelAxisItem.memberExpressionPath))}']`;
     }
     if (queryModelAxisItem.derivation){
       cssSelector += `[data-derivation="${queryModelAxisItem.derivation}"]`;
@@ -302,7 +302,7 @@ class QueryUi {
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
       if (queryModelAxisItem.partitionByItems){
-        cssSelector += `[data-partition-by-items='${JSON.stringify(queryModelAxisItem.partitionByItems)}']`;
+        cssSelector += `[data-partition-by-items='${CSS.escape(JSON.stringify(queryModelAxisItem.partitionByItems))}']`;
       }
     }
     return document.querySelector(cssSelector);
