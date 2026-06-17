@@ -280,7 +280,7 @@ To understand aggregates in Huey, it is useful to distinguish a few different wa
   The aggregators in the list aggregators folder return a structure (like *histogram*) or a list as output value.
   List aggregators are not for general purpose, but can be useful for data exploration or text analysis.
 
-  ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
+  <img width="480" height="695" alt="image" src="https://github.com/user-attachments/assets/84931b36-fbd1-4397-a78e-3a9e2a1a0ad7" />
    
 - **source** or **scope** of the input values for the aggregation. 
   In Huey, we can distinguish the following scopes: cell aggregates, axis aggregates, and array aggregates. 
