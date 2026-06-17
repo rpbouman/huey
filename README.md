@@ -261,11 +261,66 @@ Derived attributes may be used as filter too.
 
 ### Aggregates
 
-Aggregates are special expressions that calculate a result on a group of attribute values. 
-Aggregates cannot be placed on the rows or columns axes of the pivot table. Rather, they can used to create cells appearing at the intersection of the row and column headers.
-Currently, aggregates can also not be used on the filters axis. (Support for filtering on aggregated values is currently under consideration.)
+Aggregates are expressions that calculate a single result on a collection of values.
+In statistics, this concept is also known as data reduction, as it takes many values as input to produce a single output value, which somehow represents the entire group of values.
+Typical examples of aggregate operations are counts, summation and averaging, but there are many more and more sophisticated aggregate operations.
 
-![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
+To understand aggregates in Huey, it is useful to distinguish a few different ways to categorize aggregates:
+- **aggregation operation**:
+  This categorization refers to the method that is used to produce the output value based on the collectio of input values.
+  For example, a count simply returns the number of input values, while summation works by adding all the input values together and returning the total.
+  
+  The attributes panel of the sidebar has a generic *count* aggregator at the very top.
+  All attributes also have a *count* and *distinct count* aggregator, which appears together with the derivations when you expand the attribute.
+  
+  Most attributes have a *statistics* folder which contains basic statistical descriptive operations like *min* (minimum), *max* (maximum), *median* and *mode* (modulo), as well as the special purpose *entropy* aggregator. 
+  In particular, numerical attributes have additional aggregators like *sum* (summation), *avg* (average), *stdev* (standard deviation), as well as more sophisticated ones like *skewness* and *kurtosis*.
+  
+  Most attributes also have a *list aggregators* folder.
+  The aggregators in the list aggregators folder return a structure (like *histogram*) or a list as output value.
+  List aggregators are not for general purpose, but can be useful for data exploration or text analysis.
+
+  ![image](https://github.com/user-attachments/assets/3f27fb2a-6456-49ac-a085-c6c2553d1bfa)
+   
+- **source** or **scope** of the input values for the aggregation. 
+  In Huey, we can distinguish the following scopes: cell aggregates, axis aggregates, and array aggregates. 
+  Each is discussed in more detail below.
+  
+#### Cell-aggregates
+
+Cells refer to the intersections of the items appearing on the rows- and columns axes.
+These cell aggregates take their inputs from all the rows in the underlying dataset that correspond with the values on the rows- and columns dataset.
+
+If we consider the entire pivot table as a SQL query, the cell aggregates would be plain aggregate functions in the ```SELECT```-list, while the items on the row- and cells- axes would appear in the ```GROUP BY``` clause.
+
+In Pivot tables, cell contents are always aggregate values.
+In the Query editor, cell-aggregates are created by simply placing an aggregate on the cells-axis. 
+
+Note that the cells axis only accepts aggregate items.
+This is intentional: the cells-axis is to define the content for the cells, and almost by definition, any given cell corresponds to a collection of rows, and thus requires an aggregator to produce a single value to populate the cell with.
+
+In the context of OLAP and pivot tables, Cell-aggregates are the most common use case. 
+But Huey also defines *axis aggregates* and *array aggregates* (discussed below).
+
+#### Axis-aggregates
+
+Axis aggregates are aggregate items that appear on any other axis than the cells axis.
+
+Just like cell aggregates, axis aggregates also take values from the underlying rows as input values.
+But while cell aggregates are calculated on only the rows corresponding to the intersection of the rows- and columns- axes, 
+axis aggregates are computed with respect to a particular partition of the items from the axis on which it is placed.
+
+Functionally, axis aggregates can be used to calculate (sub)totals. 
+In this regard they are somewhat similar to the totals feature, but without generating super aggregate rows.
+
+If we consider the entire pivot table as a SQL query, axis aggregates would be window functions over a partition of items from the axis on which it is placed.
+
+All aggregate operations that are available for cell-aggregates are also available as axis aggregates.
+#### Array aggregates
+While cell-aggregates and axis-aggregates take input values from the underlying rows, array aggregates apply to the elements of a single array-typed value at the axis.
+
+In the Attributes sidebar, array attributes are technically derivations for array-typed attributes that happen to apply an aggregate function to the array elements.
+The repetoire of aggregate operations for aggregate elements is largely the same as for cells- and axis- aggregates.
 
 ## Structured types, Arrays, and Maps
 
