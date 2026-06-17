@@ -652,6 +652,24 @@ function getDuckDbLiteralForValue(value, type){
   return literal;
 }
 
+function parseDecimalTypeDeclaration(decimalTypeDeclaration){
+  const match = /^\s*(?<typename>DECIMAL|NUMERIC)\s*(?<typeparams>\(\s*(?:(?<width>[1-9]|[1-2]\d|3[0-8])(?:\s*,\s*(?<scale>[0-9]|[1-2]\d|3[0-8])?\s*)?)?\)\s*)?$/i.exec(decimalTypeDeclaration);
+  if (!match){
+    throw new Error(`Couldn't parse '${decimalTypeDeclaration}' as DECIMAL type definition.`)
+  }
+  const declaredWidth = match.groups.width ? parseInt(match.groups.width, 10) : undefined;
+  const impliedWidth = declaredWidth ? declaredWidth : 18;
+  const declaredScale = match.groups.scale ? parseInt(match.groups.scale, 10) : undefined;
+  const impliedScale = match.groups.scale ? declaredScale : (declaredWidth ? 0 : 3);
+  return {
+    typeName: match.groups.typename,
+    declaredWidth: declaredWidth,
+    impliedWidth: impliedWidth,
+    declaredScale: declaredScale,
+    impliedScale: impliedScale
+  };
+}
+
 const dataTypes = {
   'DECIMAL': {
     defaultAnalyticalRole: 'measure',
@@ -660,13 +678,8 @@ const dataTypes = {
       const dataType = item.columnType;
       let factionalDigits;
       if (dataType) {
-        const typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
-        if (!typeParts){
-          throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
-        }
-        if(typeParts[3]){
-          factionalDigits = parseInt(typeParts[3], 10);
-        }
+        const decimalTypeInfo = parseDecimalTypeDeclaration(dataType);
+        factionalDigits = decimalTypeInfo.declaredScale === undefined ? decimalTypeInfo.impliedScale : decimalTypeInfo.declaredScale
       }
       const formatter = createNumberFormatter(true, factionalDigits, factionalDigits);
       return function(value, field){
@@ -674,18 +687,9 @@ const dataTypes = {
       };
     },
     createLiteralWriter: function(dataTypeInfo, dataType){
-      const typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
-      if (!typeParts){
-        throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
-      }
-      let precision, scale;
-      if (typeParts[1]){
-        precision = parseInt(typeParts[1], 10);
-        
-        if(typeParts[3]){
-          scale = parseInt(typeParts[3], 10);
-        }
-      }
+      const decimalTypeInfo = parseDecimalTypeDeclaration(dataType);
+      const precision = decimalTypeInfo.declaredWidth === undefined ? decimalTypeInfo.declaredWidth : decimalTypeInfo.declaredWidth;
+      const scale = decimalTypeInfo.declaredScale === undefined ? decimalTypeInfo.impliedScale : decimalTypeInfo.declaredScale;
       return createDecimalLiteralWriter(precision, scale);
     }
   },
@@ -1662,5 +1666,12 @@ function getSumReturnDataTypeForArgumentDataType(argumentDataType){
     case 'TINYINT':
       return 'HUGEINT';
     default:
+      if (argumentDataType.startsWith('DECIMAL')){
+        const decimalTypeInfo = parseDecimalTypeDeclaration(argumentDataType);
+        const precision = decimalTypeInfo.declaredWidth === undefined ? decimalTypeInfo.declaredWidth : decimalTypeInfo.declaredWidth;
+        const scale = decimalTypeInfo.declaredScale === undefined ? decimalTypeInfo.impliedScale : decimalTypeInfo.declaredScale;
+        return `DECIMAL(${precision},${scale})`;
+      }
+   
   }
 }
