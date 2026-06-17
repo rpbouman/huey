@@ -828,7 +828,6 @@ class QueryUi {
         const queryModelItem = this.#getQueryModelItem(item);
         let index = queryModelItem.index;
         if (dragOverSide  === 'right'){
-          if (queryAxisItem.axis === axisId && (queryAxisItem.index > index || queryAxisItem.index === undefined)) 
           index += 1;
         }
         queryAxisItem.index = index;
