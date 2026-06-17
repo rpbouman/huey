@@ -753,8 +753,8 @@ class SqlQueryGenerator {
         return item;
       }
       const newItem = Object.assign( {}, item );
-      newItem.caption = QueryAxisItem.getCaptionForQueryAxisItem( item )
       if ( QueryAxisItem.isAxisAggregate(item) ){
+        newItem.columnName = QueryAxisItem.getCaptionForQueryAxisItem( item )
         delete newItem['aggregator'];
       }
       return newItem;
