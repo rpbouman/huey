@@ -656,8 +656,19 @@ const dataTypes = {
   'DECIMAL': {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
-    createFormatter: function(){
-      const formatter = createNumberFormatter(true);
+    createFormatter: function(item){
+      const dataType = item.columnType;
+      let factionalDigits;
+      if (dataType) {
+        const typeParts = /DECIMAL\((\d+)(,(\d+))?\)?/.exec(dataType);
+        if (!typeParts){
+          throw new Error(`Couldn't match ${dataType} against regex for DECIMAL`);
+        }
+        if(typeParts[3]){
+          factionalDigits = parseInt(typeParts[3], 10);
+        }
+      }
+      const formatter = createNumberFormatter(true, factionalDigits, factionalDigits);
       return function(value, field){
         return formatter.format(value, field)
       };
