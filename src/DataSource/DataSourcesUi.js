@@ -365,61 +365,72 @@ class DataSourcesUi extends EventEmitter {
   async #loadDatabaseDatasource(databaseDatasource){
     const catalogName = databaseDatasource.getAttachedName();
     const connection = window.hueyDb.connection;
-    const sql = `
-      SELECT table_schema, table_name, table_type
-      FROM    information_schema.tables
-      WHERE table_catalog = ?
-      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
-      ORDER BY table_schema, table_name
-    `;
-    const statement = await connection.prepare(sql);
-    const result = await statement.query(catalogName);
-    statement.close();
+    let statement;
+    try {
+      const sql = `
+        SELECT table_schema, table_name, table_type
+        FROM    information_schema.tables
+        WHERE table_catalog = ?
+        AND   table_schema NOT IN ('information_schema', 'pg_catalog')
+        ORDER BY table_schema, table_name
+      `;
+      
+      statement = await connection.prepare(sql);
+      const result = await statement.query(catalogName);
 
-    const datasourceId = databaseDatasource.getId();
-    const datasourceTreeNode = byId(datasourceId);
+      const datasourceId = databaseDatasource.getId();
+      const datasourceTreeNode = byId(datasourceId);
 
-    const schemaNodes = {};
-    for (let i = 0; i < result.numRows; i++){
-      const row = result.get(i);
-      const schemaName = row.table_schema;
-      let schemaNode = schemaNodes[schemaName];
-      if (schemaNode === undefined) {
-        schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
-        schemaNode.setAttribute('title', schemaName);
-        schemaNode.setAttribute('data-catalog-name', catalogName);
-        schemaNode.setAttribute('data-schema-name', schemaName);
-        schemaNode.querySelector('span.label').textContent = schemaName;
-        schemaNodes[schemaName] = schemaNode;
-        datasourceTreeNode.appendChild(schemaNode);
+      const schemaNodes = {};
+      for (let i = 0; i < result.numRows; i++){
+        const row = result.get(i);
+        const schemaName = row.table_schema;
+        let schemaNode = schemaNodes[schemaName];
+        if (schemaNode === undefined) {
+          schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
+          schemaNode.setAttribute('title', schemaName);
+          schemaNode.setAttribute('data-catalog-name', catalogName);
+          schemaNode.setAttribute('data-schema-name', schemaName);
+          schemaNode.querySelector('span.label').textContent = schemaName;
+          schemaNodes[schemaName] = schemaNode;
+          datasourceTreeNode.appendChild(schemaNode);
+        }
+        const tableName = row.table_name;
+        const tableType = row.table_type;
+        let datasourcetype;
+        switch (tableType){
+          case 'BASE TABLE':
+            datasourcetype = DuckDbDataSource.types.TABLE;
+            break;
+          case 'VIEW':
+            datasourcetype = DuckDbDataSource.types.VIEW;
+            break;
+        }
+
+        const tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
+        let datasource = this.getDatasource(tableDatasourceId);
+        if (!datasource) {
+          const hueyDb = window.hueyDb;
+          datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
+            type: datasourcetype,
+            catalogName: catalogName,
+            schemaName: schemaName,
+            objectName: tableName
+          });
+          this.#addDatasource(datasource);
+        }
+
+        const tableNode = this.#createDatasourceNode(datasource);
+        schemaNode.appendChild(tableNode);
       }
-      const tableName = row.table_name;
-      const tableType = row.table_type;
-      let datasourcetype;
-      switch (tableType){
-        case 'BASE TABLE':
-          datasourcetype = DuckDbDataSource.types.TABLE;
-          break;
-        case 'VIEW':
-          datasourcetype = DuckDbDataSource.types.VIEW;
-          break;
+    }
+    catch (error) {
+      showErrorDialog(error);
+    }
+    finally {
+      if (statement) {
+        statement.close();
       }
-
-      const tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
-      let datasource = this.getDatasource(tableDatasourceId);
-      if (!datasource) {
-        const hueyDb = window.hueyDb;
-        datasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
-          type: datasourcetype,
-          catalogName: catalogName,
-          schemaName: schemaName,
-          objectName: tableName
-        });
-        this.#addDatasource(datasource);
-      }
-
-      const tableNode = this.#createDatasourceNode(datasource);
-      schemaNode.appendChild(tableNode);
     }
   }
 
