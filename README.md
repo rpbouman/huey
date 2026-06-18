@@ -5,7 +5,7 @@ Huey supports reading from multiple file formats, like .csv, .parquet, .json dat
 There's a recording available of me <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">demoing Huey</a> at the 3rd DuckDB Meetup.
 Or, if you like some more background, checkout my <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk on youtube</a>.
 
-Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey?tab=readme-ov-file#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
+Or, __Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
 (Note: this is a live demo that allows you to run Huey without even downloading it. Even though it's available online, it's still a static webapp: any data you load into it is safe, and stays on your local client.)
 
@@ -13,7 +13,7 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 
 ## Key features
 - Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or connect to a remote catalog.
-- Comprehensive [attributes menu](https://github.com/rpbouman/huey#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
+- Comprehensive [attributes menu](#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
 - Intuitive [query builder](#query-builder) that supports projection, [aggregation](#aggregates), [filtering](#filtering), and [(sub)totals](#subtotals)
 - A pivot table to present analysis results
 - Many different [aggregate functions](#aggregates) for reporting and data exploration
@@ -25,7 +25,7 @@ Or, __Try Huey now__ with some [sample reports](https://github.com/rpbouman/huey
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
 - Run it your way! 
   - Huey is a static webapp: you can simply download or checkout the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
-  - The latest stable release is availabe online as [Live demo site](https://rpbouman.github.io/huey/src/index.html). One click and you're up and running! Even in this setup, any data you process with Huey remains local and private. There is no active server-side process.
+  - The latest stable release is available online as [Live demo site](https://rpbouman.github.io/huey/src/index.html). One click and you're up and running! Even in this setup, any data you process with Huey remains local and private. There is no active server-side process.
   - Huey is also a <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps" target="_blank" rel="noopener noreferrer">progressive web app</a> (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-huey-on-your-device-as-progressive-web-app-pwa).
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
 
@@ -48,7 +48,7 @@ All these examples use a URL to a publicly available dataset as datasource.
   - Reporting Period timestamp is correctly detected from the CSV data as `TIMESTAMP` type by the DuckDB CSV reader
   - Huey year and month [derived attributes](#derived-attributes) are applied on the row axis to produce a clear temporal breakdown
   - Flight type and Arrival/Departure are placed on the columns axis
-  - Domestic/International is placed on the filters axis, showing all filter values in an expanded state. This lets you slicde the data by checking/unchecking the checkbox for a specific filter value
+  - Domestic/International is placed on the filters axis, showing all filter values in an expanded state. This lets you slice the data by checking/unchecking the checkbox for a specific filter value
   - The sum of the flight operations appears in the cells
   - (Sub)totals are included at the year, month and flight type level
 - **City of Chicago Energy Benchmarking**: [Use of electricity, gas and steam by district over years 2018 - 2022](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmRhdGEuY2l0eW9mY2hpY2Fnby5vcmclMkZhcGklMkZ2aWV3cyUyRnhxODMtanI4YyUyRnJvd3MuY3N2JTNGYWNjZXNzVHlwZSUzRERPV05MT0FEJTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJFbGVjdHJpY2l0eSUyMFVzZSUyMChrQnR1KSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJET1VCTEUlMjIlMkMlMjJhZ2dyZWdhdG9yJTIyJTNBJTIyc3VtJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMk5hdHVyYWwlMjBHYXMlMjBVc2UlMjAoa0J0dSklMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyRE9VQkxFJTIyJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMnN1bSUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJEaXN0cmljdCUyMFN0ZWFtJTIwVXNlJTIwKGtCdHUpJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkRhdGElMjBZZWFyJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkJJR0lOVCUyMiU3RCU1RCUyQyUyMmZpbHRlcnMlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyRGF0YSUyMFllYXIlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyQklHSU5UJTIyJTJDJTIyZmlsdGVyJTIyJTNBJTdCJTIyZmlsdGVyVHlwZSUyMiUzQSUyMmJldHdlZW4lMjIlMkMlMjJ2YWx1ZXMlMjIlM0ElN0IlMjIyMDE0JTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDE0JTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDE0JTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMTQlMjIlN0QlMkMlMjIyMDE3JTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDE3JTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDE3JTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMTclMjIlN0QlMkMlMjIyMDIxJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjIyMDIxJTIyJTJDJTIybGFiZWwlMjIlM0ElMjIyJTJDMDIxJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMjIwMjElMjIlN0QlN0QlMkMlMjJ0b1ZhbHVlcyUyMiUzQSU3QiUyMjIwMTYlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMTYlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTYlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxNiUyMiU3RCUyQyUyMjIwMjAlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMjAlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMCUyMiU3RCUyQyUyMjIwMjMlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIwMjMlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjMlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMyUyMiU3RCU3RCUyQyUyMnRvZ2dsZVN0YXRlJTIyJTNBJTIyb3BlbiUyMiU3RCU3RCU1RCUyQyUyMnJvd3MlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyQ29tbXVuaXR5JTIwQXJlYSUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMmZpcnN0JTIwbGV0dGVyJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMkNvbW11bml0eSUyMEFyZWElMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVkFSQ0hBUiUyMiU3RCU1RCU3RCU3RCU3RA==).
@@ -59,7 +59,7 @@ All these examples use a URL to a publicly available dataset as datasource.
 - **Montgomery County of Maryland**: [Warehouse and Retail Sales](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmRhdGEubW9udGdvbWVyeWNvdW50eW1kLmdvdiUyRmFwaSUyRnZpZXdzJTJGdjc2aC1yN2JyJTJGcm93cy5jc3YlM0ZhY2Nlc3NUeXBlJTNERE9XTkxPQUQlNUMlMjIlMjIlMkMlMjJjZWxsc0hlYWRlcnMlMjIlM0ElMjJjb2x1bW5zJTIyJTJDJTIyYXhlcyUyMiUzQSU3QiUyMmNlbGxzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMlJFVEFJTCUyMFNBTEVTJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyUkVUQUlMJTIwVFJBTlNGRVJTJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkRPVUJMRSUyMiUyQyUyMmFnZ3JlZ2F0b3IlMjIlM0ElMjJzdW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyV0FSRUhPVVNFJTIwU0FMRVMlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyRE9VQkxFJTIyJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMnN1bSUyMiU3RCU1RCUyQyUyMmNvbHVtbnMlMjIlM0ElNUIlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyWUVBUiUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJCSUdJTlQlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyTU9OVEglMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyQklHSU5UJTIyJTdEJTVEJTJDJTIyZmlsdGVycyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJZRUFSJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMkJJR0lOVCUyMiUyQyUyMmZpbHRlciUyMiUzQSU3QiUyMmZpbHRlclR5cGUlMjIlM0ElMjJpbiUyMiUyQyUyMnZhbHVlcyUyMiUzQSU3QiUyMjIlMkMwMTclMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTclMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTclMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxNyUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMjIlMkMwMTglMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTglMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTglMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxOCUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMjIlMkMwMTklMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMTklMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMTklMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAxOSUyMiU3RCUyQyUyMjIlMkMwMjAlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMjIlMkMwMjAlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyMjAyMCUyMiU3RCU3RCUyQyUyMnRvVmFsdWVzJTIyJTNBJTdCJTdEJTJDJTIydG9nZ2xlU3RhdGUlMjIlM0ElMjJvcGVuJTIyJTdEJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMklURU0lMjBUWVBFJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlMkMlMjJmaWx0ZXIlMjIlM0ElN0IlMjJmaWx0ZXJUeXBlJTIyJTNBJTIyaW4lMjIlMkMlMjJ2YWx1ZXMlMjIlM0ElN0IlMjJCRUVSJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJCRUVSJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJCRUVSJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidCRUVSJyUyMiU3RCUyQyUyMkRVTk5BR0UlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMkRVTk5BR0UlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMkRVTk5BR0UlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ0RVTk5BR0UnJTIyJTdEJTJDJTIyS0VHUyUyMiUzQSU3QiUyMnZhbHVlJTIyJTNBJTIyS0VHUyUyMiUyQyUyMmxhYmVsJTIyJTNBJTIyS0VHUyUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInS0VHUyclMjIlN0QlMkMlMjJMSVFVT1IlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMkxJUVVPUiUyMiUyQyUyMmxhYmVsJTIyJTNBJTIyTElRVU9SJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidMSVFVT1InJTIyJTdEJTJDJTIyTk9OLUFMQ09IT0wlMjIlM0ElN0IlMjJ2YWx1ZSUyMiUzQSUyMk5PTi1BTENPSE9MJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJOT04tQUxDT0hPTCUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInTk9OLUFMQ09IT0wnJTIyJTdEJTJDJTIyUkVGJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJSRUYlMjIlMkMlMjJsYWJlbCUyMiUzQSUyMlJFRiUyMiUyQyUyMmxpdGVyYWwlMjIlM0ElMjInUkVGJyUyMiUyQyUyMmVuYWJsZWQlMjIlM0FmYWxzZSU3RCUyQyUyMlNUUl9TVVBQTElFUyUyMiUzQSU3QiUyMnZhbHVlJTIyJTNBJTIyU1RSX1NVUFBMSUVTJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJTVFJfU1VQUExJRVMlMjIlMkMlMjJsaXRlcmFsJTIyJTNBJTIyJ1NUUl9TVVBQTElFUyclMjIlN0QlMkMlMjJXSU5FJTIyJTNBJTdCJTIydmFsdWUlMjIlM0ElMjJXSU5FJTIyJTJDJTIybGFiZWwlMjIlM0ElMjJXSU5FJTIyJTJDJTIybGl0ZXJhbCUyMiUzQSUyMidXSU5FJyUyMiU3RCU3RCUyQyUyMnRvVmFsdWVzJTIyJTNBJTdCJTdEJTJDJTIydG9nZ2xlU3RhdGUlMjIlM0ElMjJvcGVuJTIyJTdEJTdEJTVEJTJDJTIycm93cyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJTVVBQTElFUiUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJWQVJDSEFSJTIyJTdEJTJDJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMklURU0lMjBUWVBFJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIySVRFTSUyMERFU0NSSVBUSU9OJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlN0QlN0QlN0Q=).
 
 ### JSON Examples
-- **Github Events**: [Actors agasint repo and time and event type](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmFwaS5naXRodWIuY29tJTJGZXZlbnRzJTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJhY3RvciUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjBsb2dpbiUyMFZBUkNIQVIlMkMlMjBkaXNwbGF5X2xvZ2luJTIwVkFSQ0hBUiUyQyUyMGdyYXZhdGFyX2lkJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIlMkMlMjBhdmF0YXJfdXJsJTIwVkFSQ0hBUiklMjIlMkMlMjJtZW1iZXJFeHByZXNzaW9uUGF0aCUyMiUzQSU1QiUyMmxvZ2luJTIyJTVEJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMmxpc3QlMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMmNyZWF0ZWRfYXQlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVElNRVNUQU1QJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMnllYXIlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIybW9udGglMjBudW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIyZGF5JTIwb2YlMjBtb250aCUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJjcmVhdGVkX2F0JTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlRJTUVTVEFNUCUyMiUyQyUyMmRlcml2YXRpb24lMjIlM0ElMjJpc28tdGltZSUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJ0eXBlJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlMkMlMjJyb3dzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnJlcG8lMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyU1RSVUNUKGlkJTIwQklHSU5UJTJDJTIwJTVDJTIybmFtZSU1QyUyMiUyMFZBUkNIQVIlMkMlMjB1cmwlMjBWQVJDSEFSKSUyMiUyQyUyMm1lbWJlckV4cHJlc3Npb25QYXRoJTIyJTNBJTVCJTIyaWQlMjIlNUQlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIycmVwbyUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjAlNUMlMjJuYW1lJTVDJTIyJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIpJTIyJTJDJTIybWVtYmVyRXhwcmVzc2lvblBhdGglMjIlM0ElNUIlMjJuYW1lJTIyJTVEJTdEJTVEJTdEJTdEJTdE).
+- **Github Events**: [Actors against repo and time and event type](https://rpbouman.github.io/huey/src/index.html#JTdCJTIycXVlcnlNb2RlbCUyMiUzQSU3QiUyMmRhdGFzb3VyY2VJZCUyMiUzQSUyMmZpbGUlM0ElNUMlMjJodHRwcyUzQSUyRiUyRmFwaS5naXRodWIuY29tJTJGZXZlbnRzJTVDJTIyJTIyJTJDJTIyY2VsbHNIZWFkZXJzJTIyJTNBJTIyY29sdW1ucyUyMiUyQyUyMmF4ZXMlMjIlM0ElN0IlMjJjZWxscyUyMiUzQSU1QiU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJhY3RvciUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjBsb2dpbiUyMFZBUkNIQVIlMkMlMjBkaXNwbGF5X2xvZ2luJTIwVkFSQ0hBUiUyQyUyMGdyYXZhdGFyX2lkJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIlMkMlMjBhdmF0YXJfdXJsJTIwVkFSQ0hBUiklMjIlMkMlMjJtZW1iZXJFeHByZXNzaW9uUGF0aCUyMiUzQSU1QiUyMmxvZ2luJTIyJTVEJTJDJTIyYWdncmVnYXRvciUyMiUzQSUyMmxpc3QlMjIlN0QlNUQlMkMlMjJjb2x1bW5zJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMmNyZWF0ZWRfYXQlMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyVElNRVNUQU1QJTIyJTJDJTIyZGVyaXZhdGlvbiUyMiUzQSUyMnllYXIlMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIybW9udGglMjBudW0lMjIlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIyY3JlYXRlZF9hdCUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJUSU1FU1RBTVAlMjIlMkMlMjJkZXJpdmF0aW9uJTIyJTNBJTIyZGF5JTIwb2YlMjBtb250aCUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJjcmVhdGVkX2F0JTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlRJTUVTVEFNUCUyMiUyQyUyMmRlcml2YXRpb24lMjIlM0ElMjJpc28tdGltZSUyMiU3RCUyQyU3QiUyMmNvbHVtbk5hbWUlMjIlM0ElMjJ0eXBlJTIyJTJDJTIyY29sdW1uVHlwZSUyMiUzQSUyMlZBUkNIQVIlMjIlN0QlNUQlMkMlMjJyb3dzJTIyJTNBJTVCJTdCJTIyY29sdW1uTmFtZSUyMiUzQSUyMnJlcG8lMjIlMkMlMjJjb2x1bW5UeXBlJTIyJTNBJTIyU1RSVUNUKGlkJTIwQklHSU5UJTJDJTIwJTVDJTIybmFtZSU1QyUyMiUyMFZBUkNIQVIlMkMlMjB1cmwlMjBWQVJDSEFSKSUyMiUyQyUyMm1lbWJlckV4cHJlc3Npb25QYXRoJTIyJTNBJTVCJTIyaWQlMjIlNUQlN0QlMkMlN0IlMjJjb2x1bW5OYW1lJTIyJTNBJTIycmVwbyUyMiUyQyUyMmNvbHVtblR5cGUlMjIlM0ElMjJTVFJVQ1QoaWQlMjBCSUdJTlQlMkMlMjAlNUMlMjJuYW1lJTVDJTIyJTIwVkFSQ0hBUiUyQyUyMHVybCUyMFZBUkNIQVIpJTIyJTJDJTIybWVtYmVyRXhwcmVzc2lvblBhdGglMjIlM0ElNUIlMjJuYW1lJTIyJTVEJTdEJTVEJTdEJTdEJTdE).
   This sample uses "<a href="https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events" target="_blank" rel="noopener noreferrer">github's public events endpoint</a>".
   The <a href="https://docs.github.com/en/rest/activity/events?apiVersion=2026-03-10#list-public-events" target="_blank" rel="noopener noreferrer">raw JSON data</a> is an array of objects representing github events. 
   The event object itself has scalar properties like `id`, `type`, and `created_at` timestamp, as well object-typed properties `repo`, `actor` and `payload`.
@@ -106,7 +106,6 @@ This way, you don't even need to locate the app anymore - you just right click o
 
 #### Uninstalling the PWA
 If you decide the PWA is not for you, that's fine - you can always uninstall it using your operating system's uninstall feature.
-Note that 
 
 ### Running Huey from a folder on your device
 1) Use git to check out the [Huey github repository](https://github.com/rpbouman/huey.git) to a local folder, or [download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) the repository as a .zip file and extract it to a folder.
@@ -146,7 +145,7 @@ A file group has its own explore button, so that you can not only explore the in
 
 ![image](https://github.com/rpbouman/huey/assets/647315/0ad057e0-e4ab-4bd8-b996-d3f50542853d)
 
-Files that cannot be grouped appear in a separate Miscellanous Files group.
+Files that cannot be grouped appear in a separate *Miscellaneous Files* group.
 
 ### Using Remote Datasets
 
@@ -261,10 +260,10 @@ Derived attributes may be used as filter too, and they can also be aggregated.
 
 The attribute's data type primarily determines which derived attributes are supported. 
 Derived attributes tend to be grouped in folders around a similar use case or topic. 
-Here's a (non-exaustive) list of derived attribute folders:
+Here's a (non-exhaustive) list of derived attribute folders:
 - **date fields**: Applies to attributes with temporal data types, like ```DATE``` and ```TIMESTAMP```.
   Derivations in this category are mainly to present temporal data in a hierarchically organized breakdown, as well as to offer various formats and labels.
-  Typical use cases are to compare data aggreagated in the cells across years, month or day of the week.
+  Typical use cases are to compare data aggregated in the cells across years, month or day of the week.
 - **time fields**: Similar to date fields, but for those data types that also carry a time part.
 - **string operations**: Applies to attributes with a text type. 
   This offers different collation variants of the text data to support case-insensitive filtering and/or sorting as well as actual case conversion.
@@ -286,7 +285,7 @@ To understand aggregates in Huey, it is useful to distinguish a few different wa
   The attributes panel of the sidebar has a generic *count* aggregator at the very top.
   All attributes also have a *count* and *distinct count* aggregator, which appears together with the [derived attributes](#derived-attributes) when you expand the attribute.
   
-  Most attributes have a *statistics* folder which contains basic statistical descriptive operations like *min* (minimum), *max* (maximum), *median* and *mode* (modulo), as well as the special purpose *entropy* aggregator. 
+  Most attributes have a *statistics* folder which contains basic statistical descriptive operations like *min* (minimum), *max* (maximum), *median* and *mode*, as well as the special purpose *entropy* aggregator. 
   In particular, numerical attributes have additional aggregators like *sum* (summation), *avg* (average), *stdev* (standard deviation), as well as more sophisticated ones like *skewness* and *kurtosis*.
   
   Most attributes also have a *list aggregators* folder.
@@ -347,9 +346,7 @@ While cell-aggregates and axis-aggregates take input values from the underlying 
 In the Attributes sidebar, array attributes can be found in the array statistics folder.
 
 Array aggregates are technically [derived attributes](#derived-attributes) for array-typed attributes that happen to apply an aggregate function to the array elements.
-The repetoire of aggregate operations for aggregate elements is largely the same as for cells- and axis- aggregates.
-
-You can 
+The repertoire of aggregate operations for aggregate elements is largely the same as for cells- and axis- aggregates.
 
 ## Structured types, Arrays, and Maps
 
@@ -473,7 +470,7 @@ Hitting the Clear All button will remove all applied values.
 
 - The Apply button will actually apply the chosen values to the filter and close the Filter Dialog.
 - The Remove button will remove the filter item entirely from the Filter axis and close the Filter Dialog
-- The Cancel button will close the Filter Dialag without changing the state of the filter item.
+- The Cancel button will close the Filter Dialog without changing the state of the filter item.
 
 #### Hiding, Revealing and Toggling applied Filter Values
 Once the filter values are applied, the Filter Item will show the number of values as well as a collapser/expander.
@@ -579,8 +576,8 @@ The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for 
 
 ### How to Use
 
-- Click the **Secrets** button ![Secrets icon](https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6") in the toolbar to open the dialog. 
-- Click the **create secret** button ![Create Secret](https://github.com/user-attachments/assets/23af91c1-0ab9-41ea-a3ba-620c64b1e3b3")
+- Click the **Secrets** button ![Secrets icon](https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6) in the toolbar to open the dialog. 
+- Click the **create secret** button ![Create Secret](https://github.com/user-attachments/assets/23af91c1-0ab9-41ea-a3ba-620c64b1e3b3)
  to create a new secret.
 
 ### Initialization
@@ -636,15 +633,15 @@ Note that this also gives info on the versions of Huey's dependencies.
 
 Your contributions are welcome! 
 You can contribute in many ways:
-- filing an issue: If something isn't working, or not working the way it's supposed to, please [file an issue](https://github.com/rpbouman/huey/issues/new/choose)!
+- filing an issue: If something isn't working, or not working the way it's supposed to, please [file an issue](https://github.com/rpbouman/Huey/issues/new/choose)!
   To ensure maximum effectivity, clearly describe the component that is having an issue, describe the observed behavior, describe the expected behavior, and describe how this issue may be reproduced. Please include your browserversion and operating system too. If your issue relies on a dataset, and you are at liberty to share that, then please include that too. Please label your issue as "bug".
 - Suggest a feature. You may also file issues to request or suggest features. If you're looking for a feature you know from other tools which Huey doesn't have, then its typically helpful if you name the product and its feature name.
-- Fork the repo and send a pull request. If you filed and issue or feature request, or you found an existing issue and feature request, you can also consider picking it up and send a pull request. There is no guarantee that your PR would be accepted, but in general these would be welcome. Just make sure there is an issue filed already that can be referenced, so that it is clear what the PR is attempting to fix or what feature the PR aims to deliver.
+- Fork the repo and send a pull request. If you filed an issue or feature request, or you found an existing issue and feature request, you can also consider picking it up and send a pull request. There is no guarantee that your PR would be accepted, but in general these would be welcome. Just make sure there is an issue filed already that can be referenced, so that it is clear what the PR is attempting to fix or what feature the PR aims to deliver.
 - Become an advocate. If you like Huey, spread the word! Share it with your friends and colleagues, and help them get set up. If Huey was of some help to you in your daily work, consider writing a blog about it, or maybe present your use case at a meeting.
-- Become a sponsor. Just click the "Sponsor" button at the top of the huey github project page:
+- Become a sponsor. Just click the "Sponsor" button at the top of the Huey github project page:
 
   ![image](https://github.com/user-attachments/assets/a8fb2c41-5286-467b-b1a6-4a06495dcb51)
 
   Alternatively, you can sponsor Huey by <a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_blank" rel="noopener noreferrer">making a donation</a>.
-- Consultatancy: if need help using, installing or deploying Huey, you can always ask for help. If you require professional support, we can work something out too. 
-- Commission a feature. If you need custom development, or would like help building your own custom developement, then contact me with and we'll negotiate the details.
+- Consultancy: if need help using, installing or deploying Huey, you can always ask for help. If you require professional support, we can work something out too. 
+- Commission a feature. If you need custom development, or would like help building your own custom development, then contact me and we'll negotiate the details.
