@@ -134,6 +134,10 @@ function initExecuteQuery(){
   byId('runQueryButton').addEventListener('click', event => {
     pivotTableUi.updatePivotTableUi();
   });
+  
+  byId('sidebarPin').addEventListener('change', event => {
+    Routing.updateRouteFromQueryModel(queryModel);
+  });
 
   const autoRunQuery = byId('autoRunQuery');
   const settingsPath = ['querySettings', 'autoRunQuery'];
