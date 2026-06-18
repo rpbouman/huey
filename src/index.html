@@ -118,11 +118,11 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AboutDialog/AboutDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DocumentStore/DocumentsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SecretsManager/SecretsManager.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="CatalogsManager/CatalogsManager.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttachToRemote/AttachDialog.css"/>
-    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
@@ -1241,6 +1241,31 @@
             </form>
           </div>
         </div>
+        <!--
+          Attributes
+        -->
+        <div>
+          <label
+            role="tab"
+            for="attributesSettingsTab"
+          >
+            Attributes
+          </label>
+          <input
+            id="attributesSettingsTab"
+            type="radio"
+            name="settingsTabs"
+          />
+          <div role="tabpanel">
+            <form id="attributeSettings">
+              <fieldset>
+                <legend></legend>
+                <label for="revealAttributesUsedInQuery">Auto-reveal attributes used in query?</label>
+                <input id="revealAttributesUsedInQuery" type="checkbox"/>
+              </fieldset>
+            </form>
+          </div>
+        </div>
 
         <!--
           Query settings
@@ -1250,7 +1275,7 @@
             role="tab"
             for="querySettingsTab"
           >
-            Query
+            Query Builder
           </label>
           <input
             id="querySettingsTab"
@@ -2772,23 +2797,30 @@
             name="sidebarTabs"
           />
           <div role="tabpanel">
-            <search
-              id="searchAttributeUi"
-            >
-              <fieldset>
-                <legend id="searchAttributesLabel">Search for Attributes</legend>
-                <input
-                  id="searchAttribute"
-                  type="search"
-                  placeholder="Search by Attribute name"
-                  title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
-                  aria-labelledby="searchAttributesLabel"
-                  autofocus="true"
-                  accesskey="F"
-                />
-              </fieldset>
-            </search>
-
+            <header>
+              <!--
+              <menu role="toolbar">
+                <label 
+                  for="revealAttributesUsedInQuery"
+                  title="Toggle auto-reveal attributes used in Query"
+                ></label>
+              </menu>
+              -->
+              <search id="searchAttributeUi">
+                <fieldset>
+                  <legend id="searchAttributesLabel">Search for Attributes</legend>
+                  <input
+                    id="searchAttribute"
+                    type="search"
+                    placeholder="Search by Attribute name"
+                    title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
+                    aria-labelledby="searchAttributesLabel"
+                    autofocus="true"
+                    accesskey="F"
+                  />
+                </fieldset>
+              </search>
+            </header>
             <template id="attribute-node">
               <details role="treeitem" data-nodetype="">
                 <summary>
