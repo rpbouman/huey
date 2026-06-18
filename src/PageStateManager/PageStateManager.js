@@ -249,7 +249,11 @@ class PageStateManager {
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
     analyzeDatasource(datasource);
-    setTimeout(() => attributeUi.revealAllQueryAttributes(), 1000);
+    const attributeSettings = settings.getSettings('attributeSettings');
+    const revealAttributesUsedInQuery = attributeSettings.revealAttributesUsedInQuery;
+    if (revealAttributesUsedInQuery) {
+      setTimeout(() => attributeUi.revealAllQueryAttributes(), 1000);
+    }
   }
 
 }

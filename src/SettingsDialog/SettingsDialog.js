@@ -153,6 +153,9 @@ class Settings extends EventEmitter {
       filterSearchAutoWildcards: true,
       filterSearchCaseSensitive: false
     },
+    attributeSettings:{
+      revealAttributesUsedInQuery: true
+    },
     themeSettings: {
       themes: {
         options: [
