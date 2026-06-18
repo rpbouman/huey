@@ -354,8 +354,16 @@ class FilterDialog {
           return;
         }
       }
-      //const literal = literalWriter ? literalWriter(searchString) : searchString;
-      const literal = searchString;
+      
+      // TODO: this is all seriously messed up. 
+      // need a robust way to handle input values.
+      let literal;
+      if (this.#queryAxisItem.columnType.startsWith('DECIMAL')) {
+        literal = searchString;
+      }
+      else {
+        literal = literalWriter ? literalWriter(searchString) : searchString;
+      }
 
       let options, option;
       if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
