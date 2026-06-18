@@ -84,7 +84,7 @@ class FilterDialog {
   #defaultValuePicklistPageSize = 100;
   #defaultSearchAutoQueryTimeout = 1000;
   #previousFilterTypeIsArrayFilterType = false;
-
+  
   #settings = undefined;
 
   getQueryAxisItem(){
@@ -354,7 +354,8 @@ class FilterDialog {
           return;
         }
       }
-      const literal = literalWriter ? literalWriter(searchString) : searchString;
+      //const literal = literalWriter ? literalWriter(searchString) : searchString;
+      const literal = searchString;
 
       let options, option;
       if (isRangeFilterType && toFilterValuesList.selectedIndex !== -1) {
