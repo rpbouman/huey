@@ -210,6 +210,10 @@ class PageStateManager {
       // TODO: maybe throw an error?
       return;
     }
+    const routeSettings = state.settings;
+    if ( typeof routeSettings.sidebarPin !== undefined) {
+      byId('sidebarPin').checked = Boolean(routeSettings.sidebarPin);
+    }
 
     const queryModelState = state.queryModel;
     const referencedColumns = QueryModel.getReferencedColumns(queryModelState);
@@ -249,6 +253,7 @@ class PageStateManager {
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
     analyzeDatasource(datasource);
+    
     const attributeSettings = settings.getSettings('attributeSettings');
     const revealAttributesUsedInQuery = attributeSettings.revealAttributesUsedInQuery;
     if (revealAttributesUsedInQuery) {

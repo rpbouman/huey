@@ -32,7 +32,10 @@ class Routing {
     }
     
     const routeObject = queryModelState.queryModel ? queryModelState : {
-      queryModel: queryModelState 
+      queryModel: queryModelState,
+      settings: {
+        sidebarPin: byId('sidebarPin').checked
+      }
     };
     const json = JSON.stringify( routeObject );
     const ascii = encodeURIComponent( json );
