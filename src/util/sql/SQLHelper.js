@@ -127,7 +127,7 @@ function createNumberFormatter(hasFractionDigits, minFractionDigits, maxFraction
     locales = navigator.languages;
     options = {};
     if (!hasFractionDigits){
-      options.minimumFractionDigits = 0;
+      options.minimumFractionDigits = options.maximumFractionDigits = 0;
     }
     console.error(`Falling back to default ${JSON.stringify(locales)} and options ${JSON.stringify(options)}`);
     formatter = new Intl.NumberFormat(locales, options);
@@ -324,6 +324,14 @@ function createDecimalLiteralWriter(precision, scale){
   });
   
   return function(value, valueField){
+    if (!valueField) {
+      valueField = {
+        type: {
+          precision: precision,
+          scale: scale
+        }
+      };
+    }
     const decimalString = getArrowDecimalAsString(value, valueField.type);
     // this is mostly to lose the leading zeroes
     const formattedDecimalString = formatter.format(decimalString)
