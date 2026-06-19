@@ -211,7 +211,7 @@ class PageStateManager {
       return;
     }
     const routeSettings = state.settings;
-    if ( typeof routeSettings.sidebarPin !== undefined) {
+    if ( routeSettings && typeof routeSettings.sidebarPin !== undefined) {
       byId('sidebarPin').checked = Boolean(routeSettings.sidebarPin);
     }
 
