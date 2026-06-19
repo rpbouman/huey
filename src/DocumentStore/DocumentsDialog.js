@@ -388,11 +388,9 @@ class DocumentsDialog {
         break;
       case 'map':
         const objectValue = field.value.map(
-          subField => this.fieldValuePairAsSQL(subField)
-        ).filter( pair => pair && pair.length ).join('\n, ');
-        value = `MAP { 
-          ${objectValue} 
-        }`;
+          subField => this.fieldValuePairAsSQLMapEntry(subField)
+        ).filter( pair => pair && pair.length ).join('\n    , ');
+        value = `MAP {\n     ${objectValue}\n    }`;
         break;
     }
     return value;
@@ -410,6 +408,16 @@ class DocumentsDialog {
       value = this.fieldValueAsSQL(field);
     }
     return `${key} ${value}`;
+  }
+  
+  fieldValuePairAsSQLMapEntry(field){
+    let key = field.key;
+    let value = field.value;
+    if ( (key || '').length === 0 && ( value || '' ).length === 0 ){
+      return '';
+    }
+    const quotedKey = `${quoteStringLiteral(key)}: ${this.fieldValueAsSQL(field)}`;
+    return quotedKey
   }
 
   newKeyValueUi(beforeElement){

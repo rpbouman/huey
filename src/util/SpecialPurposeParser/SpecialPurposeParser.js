@@ -73,7 +73,7 @@ class SpecialPurposeParser {
   });
 
   static arrayValueRe = new RegExp(`(?<arrayvalue>\\[(?:\\s*${SpecialPurposeParser.stringValueRe.source}(\\s*,\\s*${SpecialPurposeParser.stringValueRe.source})*\\s*)?\\])`);
-  static mapEntryRe = new RegExp(`${SpecialPurposeParser.stringValueRe.source}\s*:\s*${SpecialPurposeParser.stringValueRe.source}`);
+  static mapEntryRe = new RegExp(`${SpecialPurposeParser.stringValueRe.source}\\s*:\\s*${SpecialPurposeParser.stringValueRe.source}`);
   static mapValueRe = new RegExp(`MAP\\s*(?<mapvalue>\\{\\s*(${SpecialPurposeParser.mapEntryRe.source}(\\s*,\\s*${SpecialPurposeParser.mapEntryRe.source})*)?\\s*\\})`, 'i');
   static booleanValueRe = /true|false/i;
   static fieldValueRe = RegXpChef.compile({
@@ -107,7 +107,7 @@ class SpecialPurposeParser {
     let value = undefined;
     if (match.groups.map){
       dataType = 'map';
-      value = eval(match.groups.mapvalue);
+      value = eval(`(${match.groups.mapvalue})`);
     }
     else
     if (match.groups.array){
