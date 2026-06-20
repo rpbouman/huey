@@ -592,7 +592,7 @@ The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckD
 
 You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar:
 
-<img width="869" height="387" alt="image" src="https://github.com/user-attachments/assets/98548c8a-774f-454d-93d9-9216eda0332c" />
+<img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
 
 - On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
   In the screenshot above, there's one stored secret called 'my_secret'.
@@ -624,7 +624,16 @@ The form is structured thus:
   This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
   
   In the form, a key/value pair consists of the following controls:
-  - Key field. This is the left-most textfield. 
+  - Key field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
+  - Field Type. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
+    - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
+    - […]: Array, indicating the value is a list of string values
+    - txt: Plaintext field, indicating the value is a string value.
+    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are encrypted when the secret is stored.
+    - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
+    If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
+    However, the dialog always lets you manually override the default.  
+  - Value field. This is the right most textfield. For the structured value-types Array and Map, this field does not exist. Rather, the value is made up of key/value pairs that appear indented below the structured key type. 
   
   Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
   In addition, some key/value pairs depend on each other.
