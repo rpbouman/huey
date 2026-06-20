@@ -605,7 +605,8 @@ You can open the Secrets Manager by clicking the Secrets Manager button <img wid
   - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
 
 Selecting a secret in the list loads it from storage and populates the form and code tabs with its details.
-The form is structured thus:
+
+The Form is structured thus:
 - Name and type
   This is the secret's 'header'. It consists of the following items:
   - Name: a unique name for the secret. 
@@ -634,11 +635,18 @@ The form is structured thus:
     If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
     However, the dialog always lets you manually override the default.  
   - Value field. This is the right most textfield. For the structured value-types Array and Map, this field does not exist. Rather, the value is made up of key/value pairs that appear indented below the structured key type. 
+
+THe Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
+
+<img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
+
+The code editor is particularly useful if you already have the SQL for a secret and you want to quickly enter it into the Secrets Manager.
+
+Note that the code editor shows the secret as plaintext.
   
-  Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
-  In addition, some key/value pairs depend on each other.
-  Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.
-  
+Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
+In addition, some key/value pairs depend on each other.
+Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
   
 ### Creating a new Secret
 
