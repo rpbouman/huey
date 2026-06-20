@@ -292,6 +292,7 @@
       <option value="duckdb" translate="no" >DuckDB</option>
       <option value="ducklake" translate="no" data-duckdb-extension="ducklake">DuckLake</option>
       <option value="iceberg" translate="no" data-duckdb-extension="iceberg">Iceberg</option>
+      <option value="motherduck" translate="no" data-duckdb-extension="motherduck">Motherduck</option>
       <option value="quack" translate="no" >Quack</option>
       <option value="sqlite" translate="no" data-duckdb-extension="sqlite">SQLite</option>
       <option value="unity_catalog" translate="no" data-duckdb-extension="unity_catalog">Unity Catalog</option>
@@ -3000,7 +3001,6 @@
           errorConfig.description += 'Visit https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm to lean what versions are available.';
         }
         showErrorDialog( errorConfig );
-        console.error( error );
       })
       .finally(error => {
         document.body.setAttribute('aria-busy', false);

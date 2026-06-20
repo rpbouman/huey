@@ -972,7 +972,6 @@ class DocumentsDialog {
       return true;
     }
     catch(e){
-      console.error(e);
       showErrorDialog(e);
       return false;
     }

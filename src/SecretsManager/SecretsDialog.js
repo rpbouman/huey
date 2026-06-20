@@ -50,7 +50,6 @@ class SecretsDialog extends DocumentsDialog {
       await ensureDuckDbExtensionLoadedAndInstalled(extensionName);
     }
     catch(e) {
-      console.error(e);
       showErrorDialog({
         title: Internationalization.getText('Error loading the "{1}" extension', extensionName),
         description: Internationalization.getText(
