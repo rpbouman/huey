@@ -1,10 +1,10 @@
 dialog#exportDialog {
   /* center the dialog */
-  left: calc( 50vw - 350px );
-  top: calc( 50vh - 230px );
+  left: calc( 50vw - 365px );
+  top: calc( 50vh - 242px );
     
-  width: 700px;
-  height: 460px;
+  width: 730px;
+  height: 484px;
   resize: both;
 
   &[aria-busy=true] > dialog[role=progressbar] {
