@@ -592,7 +592,8 @@ The Huey Secrets Manager lets you create, edit, and manage DuckDB secrets for se
 
 <img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
 
-You can open the secrets manager by clicking the secrets manager button from the right side of the main toolbar.
+You can open the secrets manager by clicking the secrets manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" />
+from the right side of the main toolbar.
 
 ### Creating a new Secret
 
