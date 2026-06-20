@@ -119,18 +119,21 @@ Of course, if you checked out the repository you can use `git pull` to update to
 ## Registering and Analyzing Files with Huey
 
 ### Registering Files
+
 Huey uses <a href="https://duckdb.org/docs/archive/0.9.2/api/wasm/overview" target="_blank" rel="noopener noreferrer">DuckDb WASM</a> to read and analyze data files. 
+
 General browser security policies prevent web applications from autonomously accessing files on the local file system. 
 Web application users need to explicitly select the files they want to analyze. 
 Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
 
 To register one or more files, you can either 
 - Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
-The upload button is always available as the leftmost button on the toolbar at the top of the page. The upload action will pop up a file browser dialog that lets you browse and choose one or more files from your local filesystem.
-In the file browser dialog, navigate to the file or files that you want to explore, select them and then confirm the dialog by clicking the 'Ok' button.
+  The upload button is always available as the leftmost button on the toolbar at the top of the page. The upload action will pop up a file browser dialog that lets you browse and choose one or more files from your local filesystem.
+  In the file browser dialog, navigate to the file or files that you want to explore, select them and then confirm the dialog by clicking the 'Ok' button.
 - Drag 'n Drop one or multiple files unto the "Datasources" tab in the sidebar. 
 
-Either action will open the Upload dialog. The upload dialog will show a progress bar for each file that is being registered. Additional progress items may appear in case a duckdb extension needs to be installed and/or loaded. 
+Either action will open the Upload dialog. 
+The upload dialog will show a progress bar for each file that is being registered. Additional progress items may appear in case a duckdb extension needs to be installed and/or loaded. 
 
 ![image](https://github.com/rpbouman/huey/assets/647315/b0c37783-4b3a-4166-9f3b-7f5a5ff91cd9)
 
@@ -147,7 +150,31 @@ A file group has its own explore button, so that you can not only explore the in
 
 Files that cannot be grouped appear in a separate *Miscellaneous Files* group.
 
+#### Opening DuckDb files
+Apart from directly reading data files, Huey can also open existing DuckDB database files and access its tables and views.
+
+The process for accessing duckdb files is exactly the same as for accessing data files.
+Huey assumes datafiles with a ```.duckdb``` extension are DuckDB database files. 
+
+If your DuckDB database file happens to have another extension - that's totally fine! 
+They just won't appear automatically in the browser's File Browser dialog, because by default, that only lists files with extensions that Huey knows about.
+You can always override that and select "All files (*.*)".
+
+Successfully loaded DuckDB database files appear in the DuckDb Folder, which appears at the top of the DataSources tab. 
+
+![image](https://github.com/rpbouman/huey/assets/647315/c7ca5ed7-7454-4783-8dbc-493244f8bb28)
+
+The schemas in the duckdb database file are presented as folders below the duckdb file entry, and any tables or views in the schema are presented below the schema folder. 
+Each table or view has an explore button which you can click to explore the data.   
+
+Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
+But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
+
 ### Using Remote Datasets
+
+Huey is not just for local files! You can also access remote data by registering a URL or connecting to a remote Catalog.
+
+#### Register URLs
 
 In addition to local files, you can also register URLs. 
 To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-attachments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be). 
@@ -158,18 +185,12 @@ You will be prompted to enter the URL:
 After confirming, the upload dialog appears just like when uploading local files.
 
 Note that loading data from URL is subject to certain restrictions due to browser security policies. 
-Typically the URL needs to be either in the same domain as from where Huey is served, or the remote server needs to pass CORS headers to overcome the same-origin policy. 
+Typically the URL needs to be either in the same domain as from where Huey is served, or the remote server needs to pass CORS headers to overcome the same-origin policy.
 
-### Opening DuckDb files
-Apart from reading data files directly, Huey can also open existing duckdb files and access its tables and views. The process for accessing duckdb files is exactly the same as for accessing data files. Just make sure you give your duckdb file a '.duckdb' extension - that's how Huey knows it's a duckdb file. (DuckDB data files are not required to have any particular name or extension, but Huey currently cannot detect that, so it relies on a file extension convention instead.) Successfully loaded .duckdb files will appear in the DuckDb Folder, which appears at the top of the DataSources tab. 
+In addition, some URLs might require authentication. 
+If that is the case, you can use the [Secrets Manager](#secrets-manager) to create and maintain the secret.
 
-![image](https://github.com/rpbouman/huey/assets/647315/c7ca5ed7-7454-4783-8dbc-493244f8bb28)
-
-The schemas in the duckdb database file are presented as folders below the duckdb file entry, and any tables or views in the schema are presented below the schema folder. 
-Each table or view has an explore button which you can click to explore the data.   
-
-Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
-But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
+#### Remote Catalogs
 
 ## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). 
