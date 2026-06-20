@@ -7,7 +7,7 @@ nav#sidebar[role=tablist] {
   padding: 4px 4px 0px 4px;
   display: flex;
 
-  width: 472px;
+  width: 364px;
   min-width: 170px;
   
   &::-webkit-scrollbar-corner{
