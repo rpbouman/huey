@@ -587,14 +587,50 @@ Settings that control the appearance and behavior of the Pivot Table
 
 ## Secrets Manager
 
-Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>. 
-The Huey Secrets Manager lets you create, edit, and manage DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more 
+Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>.
+The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
+
+You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar:
 
 <img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
 
-You can open the secrets manager by clicking the secrets manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" />
-from the right side of the main toolbar.
+- On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
+  In the screenshot above, there's one stored secret called 'my_secret'.
+  
+  In the list, secrets are organized by type. 
+  In secret in the screenshot above is of the 's3' type.
 
+- On the right side of the Secrets Manager Dialog, there are two tabs:
+  - The **Form tab** presents all the secret's details as a structured form.
+  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
+
+Selecting a secret in the list loads it from storage and populates the form and code tabs with its details.
+The form is structured thus:
+- Name and type
+  This is the secret's 'header'. It consists of the following items:
+  - Name: a unique name for the secret. 
+    This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
+    Note that in Huey, the secret's name is a required field.
+  - Type: the secret's type. 
+    This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
+    
+    In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
+  - Autoload: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
+    This is useful if you're regularly accessing resources that require the secret. 
+
+    Secrets that are not auto-loaded can be manually activated when required.
+- Key/Value Pairs
+  The secret's details are specified as a list of Key/Value pairs.
+  This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
+  
+  In the form, a key/value pair consists of the following controls:
+  - Key field. This is the left-most textfield. 
+  
+  Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
+  In addition, some key/value pairs depend on each other.
+  Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.
+  
+  
 ### Creating a new Secret
 
 
