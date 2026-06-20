@@ -572,10 +572,10 @@ class ExportDialog {
       }
 
       exportSettings.exportType = tabName;
-
+      let uiSettingsToCopyForTab;
       switch (tabName) {
         case 'exportDelimited':
-          copyUiSetting([
+          uiSettingsToCopyForTab = [
             'ColumnDelimiter',
             'NullString',
             'IncludeHeaders',
@@ -584,29 +584,30 @@ class ExportDialog {
             'DateFormat',
             'TimestampFormat',
             'Compression'
-          ], tabName);
+          ];
           break;
         case 'exportJson':
-          copyUiSetting([
+          uiSettingsToCopyForTab = [
             'DateFormat',
             'TimestampFormat',
             'RowDelimiter',
             'Compression'
-          ], tabName);
+          ];
           break;
         case 'exportParquet':
-          copyUiSetting([
+          uiSettingsToCopyForTab = [
             'Compression'
-          ], tabName);
+          ];
           break;
         case 'exportSql':
-          copyUiSetting([
+          uiSettingsToCopyForTab = [
             'KeywordLettercase',
             'AlwaysQuoteIdentifiers',
             'CommaStyle'
-          ], tabName);
+          ];
           break;
       }
+      copyUiSetting( uiSettingsToCopyForTab, tabName );
       copyUiSetting([
         'exportResultShapePivot',
         'exportResultShapeTable',
