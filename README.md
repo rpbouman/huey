@@ -130,6 +130,11 @@ To register one or more files, you can either
 - Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
   The upload button is always available as the leftmost button on the toolbar at the top of the page. The upload action will pop up a file browser dialog that lets you browse and choose one or more files from your local filesystem.
   In the file browser dialog, navigate to the file or files that you want to explore, select them and then confirm the dialog by clicking the 'Ok' button.
+
+  Note that by default, the File Browser dialog only lists files with a extension recognized by Huey.
+  If your file doesn't happen to have one of those known extensions, just choose "All files *.*": 
+  <img width="920" height="495" alt="image" src="https://github.com/user-attachments/assets/b5232b97-124a-4cde-9d82-088c81e80b2a" />
+
 - Drag 'n Drop one or multiple files unto the "Datasources" tab in the sidebar. 
 
 Either action will open the Upload dialog. 
