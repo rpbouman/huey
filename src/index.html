@@ -37,6 +37,7 @@
     <script>
     const manifest = JSON.parse( decodeURIComponent( document.getElementById('manifest').href.substr('data:application/manifest+json,'.length) ) );
     const [hueyName, hueyVersionNumber, hueyVersionName] = manifest.name.split(' ');
+    let duckdbLibraryVersion = '1.33.1-dev56.0';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
@@ -58,9 +59,6 @@
         src: url("${tablerIconsFontUrl}") format("woff2");
       }
     `);
-    
-    const duckdbLibraryVersion = '1.33.1-dev56.0';
-    const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
       const url = element.href || element.src;
@@ -2959,8 +2957,14 @@
 
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
     <script type="module">
+    
+      const duckdbLibraryVersionFromUrl = getSearchParams()['duckdb-wasm'];
+      if (duckdbLibraryVersionFromUrl && /\d+\.\d+\.\d+(?:-dev\d+\.\d+)?/.test(duckdbLibraryVersionFromUrl)) {
+        duckdbLibraryVersion = duckdbLibraryVersionFromUrl;
+      }
+      const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
       import(duckDbLibraryUrl)
-      .then(async function(duckdb){
+      .then(async duckdb => {
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
         const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
@@ -2985,16 +2989,21 @@
 
         initApplication();
       })
-      .catch(function(e){
-        document.body.setAttribute('aria-busy', false);
+      .catch( error => {
         document.body.getElementsByTagName('main')[0].style.display = 'none';
-        showErrorDialog(e);
+        const errorConfig = {
+          title: error.name,
+          description: error.message
+        };
+      
+        if (error.message.startsWith('Failed to fetch dynamically imported module')) {
+          errorConfig.description += 'Visit https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm to lean what versions are available.';
+        }
+        showErrorDialog( errorConfig );
+        console.error( error );
       })
       .finally(error => {
         document.body.setAttribute('aria-busy', false);
-        if (error) {
-          console.error( error );
-        }
       });
     </script>
 
