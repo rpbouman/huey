@@ -199,6 +199,8 @@ If that is the case, you can use the [Secrets Manager](#secrets-manager) to crea
 
 #### Remote Catalogs
 
+DuckDB can access data from remote databases using the [```ATTACH```-syntax](https://duckdb.org/docs/current/sql/statements/attach). 
+
 ## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). 
 After clicking it, the left sidebar switches to the Attributes tab, which is then is populated with a list of the Attributes of the selected Datasource.
@@ -585,13 +587,16 @@ Settings that control the appearance and behavior of the Pivot Table
 
 ## Secrets Manager
 
-Huey now includes a built-in GUI for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>, making it easy to configure credentials for cloud storage and other external services — no SQL required.
+Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>. 
+The Huey Secrets Manager lets you create, edit, and manage DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more 
 
 <img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
 
-### What it does
+You can open the secrets manager by clicking the secrets manager button from the right side of the main toolbar.
 
-The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more — all without writing a `CREATE SECRET` statement by hand.
+### Creating a new Secret
+
+
 
 **Key features:**
 
@@ -605,8 +610,7 @@ The Secrets Manager dialog lets you create, edit, and manage DuckDB secrets for 
 ### How to Use
 
 - Click the **Secrets** button ![Secrets icon](https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6) in the toolbar to open the dialog. 
-- Click the **create secret** button ![Create Secret](https://github.com/user-attachments/assets/23af91c1-0ab9-41ea-a3ba-620c64b1e3b3)
- to create a new secret.
+- Click the **create secret** button ![Create Secret](https://github.com/user-attachments/assets/23af91c1-0ab9-41ea-a3ba-620c64b1e3b3) to create a new secret.
 
 ### Initialization
 
