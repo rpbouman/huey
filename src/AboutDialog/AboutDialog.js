@@ -11,9 +11,6 @@ function initAboutDialog(){
   const iconsUrl = byId('tablerIconsUrl');
   iconsUrl.textContent = `Tabler Icons v${tablerIconsFontVersion}`;
   
-  const libUrl = byId('duckDbLibraryUrl');
-  libUrl.setAttribute('href', duckDbLibraryUrl);
-  libUrl.textContent = `DuckDB WASM ${duckdbLibraryVersion}`;
 }
 
 initAboutDialog();

@@ -30,6 +30,10 @@ function duckDbRowToJSON(object){
 }
 
 function initDuckdbVersion(){
+  const libUrl = byId('duckDbLibraryUrl');
+  libUrl.setAttribute('href', duckDbLibraryUrl);
+  libUrl.textContent = `DuckDB WASM ${duckdbLibraryVersion}`;
+  
   if (!window.hueyDb) {
     return;
   }
@@ -106,7 +110,7 @@ function initDuckdbVersion(){
   .catch(error => {
     console.error(`Error fetching duckdb version info.`);
     console.error(error);
-  })
+  });
 }
 
 async function analyzeDatasource(datasource){
