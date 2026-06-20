@@ -592,7 +592,7 @@ The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckD
 
 You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar:
 
-<img width="864" height="379" alt="image" src="https://github.com/user-attachments/assets/c225d2f1-8e00-41a8-8be2-30d959ce8a8a" />
+<img width="869" height="387" alt="image" src="https://github.com/user-attachments/assets/98548c8a-774f-454d-93d9-9216eda0332c" />
 
 - On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
   In the screenshot above, there's one stored secret called 'my_secret'.
