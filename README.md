@@ -200,20 +200,8 @@ If that is the case, you can use the [Secrets Manager](#secrets-manager) to crea
 
 #### Remote Catalogs
 
-Originally, DuckDB characterized itself not so much as a (A)DMBS, but as an in-process, aka "embedded", "local-first" data engine.
-While DuckDB remains committed to its embedded roots, one can observe an ongoing trend to offer more and more ways to integrate with other external relational datastores, in particular Data Lakes.
-
-From the DuckDB perspective, such external datasources take the form of a database that is "attached" to the current, local (embedded) instance.
-The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore.
-- In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
-- In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
-- In yet other cases, the attached database is more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a central database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
-- A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
-
-The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
-The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
-
-Huey provides a [Catalog Manager](#catalog-manager), wich is essentially a graphical user interface to create, maintain and store these attach configurations, as well as integrate them with [secrets management](#secrets-manager). 
+In Huey, you can use the [Catalogs Manager](#catalogs-manager) to attach to remote databases.
+In this README, the Catalogs Manager is described in detail in its own section.
 
 ## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). 
@@ -599,11 +587,30 @@ Settings that control the appearance and behavior of the Pivot Table
 ### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
 
-## Secrets Manager
+# Catalogs Manager
+Originally, DuckDB advertised itself primarily as an in-process (aka "embedded") local-first data engine, rather than as a fully-fledged analytical relational database system.
+While DuckDB remains committed to its embedded database roots there's an ongoing trend to to integrate more and more with other external relational datastores, in particular Data Lakehouse architectures.
+
+From the DuckDB perspective, such external datasources take the form of a database that is "attached" to the current, local (embedded) instance. 
+
+
+The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore.
+- In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
+- In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
+- In yet other cases, the attached database is more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a central database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
+- A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
+
+The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
+The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
+
+Huey provides a [Catalog Manager](#catalog-manager), wich is essentially a graphical user interface to create, maintain and store these attach configurations, as well as integrate them with [secrets management](#secrets-manager). 
+
+# Secrets Manager
 
 Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>.
 The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
 
+## Opening the Secrets Manager
 You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar:
 
 <img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
@@ -617,8 +624,10 @@ You can open the Secrets Manager by clicking the Secrets Manager button <img wid
   - The **Form tab** presents all the secret's details as a structured form.
   - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
 
-Selecting a secret in the list loads it from storage and populates the form and code tabs with its details.
+## Editing Secrets
+Selecting a secret in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
 
+### Secret Manager Form view
 The Form is structured thus:
 - Name and type
   This is the secret's 'header'. It consists of the following items:
@@ -649,6 +658,7 @@ The Form is structured thus:
     However, the dialog always lets you manually override the default.  
   - Value field. This is the right most textfield. For the structured value-types Array and Map, this field does not exist. Rather, the value is made up of key/value pairs that appear indented below the structured key type. 
 
+### Secret Manager Code view
 The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
 
 <img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
@@ -661,7 +671,7 @@ Which key/value pairs are appropriate or allowed, depends primarily on the secet
 In addition, some key/value pairs depend on each other.
 Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
   
-### Creating a new Secret
+## Creating a new Secret
 
 1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
    This is on the left side of the Secrets Manager toolbar. 
@@ -705,7 +715,7 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
 4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
 will be available in the Secret Manager's toolbar. Click it to store the secret.
 
-### Encryption of password fields
+## Encryption of password fields
 The main purpose of DuckDB secrets is to configure credentials to access datasources that require authentication.
 Naturally, credentials are sensitive data and should therefore be protected. 
 
@@ -728,7 +738,7 @@ This is available on the right side of the Secrets Manager's toolbar.
 If you lose your password, there is no way to recover any of the encrypted fields. 
 In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
 .
-### Activating, Deactivating and auto-loading secrets
+## Activating, Deactivating and auto-loading secrets
 In order to use a secret, it needs to be activated.
 Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
 
@@ -743,11 +753,6 @@ If a secret is selected in the secrets list, the toolbar will show one of these 
 Hovering over the Activate/Deactive button reveals an action to change the state:
 - if the secret is in the active state, clicking the corresponding toolbar button deactivas it
 - if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
-
-## Integrating and/or Embedding Huey
-
-You can embed huey inside a frame on your own webpage and control the application by sending it commands using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">`postMessage()`-method</a>.
-Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
 
 # Development, Releases, and contributions 
 
@@ -776,6 +781,11 @@ You can verify the current Huey version in the about dialog:
 ![image](https://github.com/user-attachments/assets/7a0b8690-4986-4189-8e8c-be3abd9580e6)
 
 Note that this also gives info on the versions of Huey's dependencies.
+
+## Integrating and/or Embedding Huey
+
+You can embed huey inside a frame on your own webpage and control the application by sending it commands using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">`postMessage()`-method</a>.
+Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
 
 ## Contributions
 
