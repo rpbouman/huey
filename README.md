@@ -120,13 +120,13 @@ Of course, if you checked out the repository you can use `git pull` to update to
 
 ## Registering and Analyzing Files with Huey
 
-### Registering Files
-
 Huey uses <a href="https://duckdb.org/docs/archive/0.9.2/api/wasm/overview" target="_blank" rel="noopener noreferrer">DuckDb WASM</a> to read and analyze data files. 
 
 General browser security policies prevent web applications from autonomously accessing files on the local file system. 
 Web application users need to explicitly select the files they want to analyze. 
 Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
+
+### Registering Files
 
 To register one or more files, you can:
 - Click the 'Upload...' button ![upload button icon](https://github.com/rpbouman/huey/assets/647315/8dbae6ad-c4f2-4d5e-bc9a-f15fa9444c89).
