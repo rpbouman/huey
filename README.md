@@ -905,6 +905,34 @@ Hovering over the Activate/Deactive button reveals an action to change the state
 - if the catalog is attached, clicking the button will detach it.
 - if the catalog is detached, clicking the button atteches it. 
 
+## Catalog Examples
+
+Ducklabs exposes 2 catalogs that are used as demo datasets in the online duckdb shell.
+
+### nl_railway Ducklake Catalog
+The nl_railway Ducklake Catalog contains a few tables with dutch railway service data.
+To connect to it from within Huey, follow [the steps for creating a new Catalog](#creating-a-new-catalog) and enter the following details:
+- when using the [Catalog Form](#catalogs-manager-form-view), enter:
+  - name: ```nl_railway```
+  - type: ```ducklake```
+  - url: ```https://blobs.duckdb.org/datalake/nl-railway.ducklake```
+  <img width="863" height="382" alt="image" src="https://github.com/user-attachments/assets/0593ab95-c3be-463f-bd40-55f37f2c9607" />
+- when using the [Catalogs Manager's code view](#catalogs-manager-code-view), enter:
+  ```sql
+  ATTACH 'https://blobs.duckdb.org/datalake/nl-railway.ducklake'
+  AS nl_railway (
+    TYPE ducklake
+  )    
+  ```
+  <img width="864" height="385" alt="image" src="https://github.com/user-attachments/assets/f305cea2-202c-419c-9858-67e2aa9dca21" />
+- Save the catalog.
+
+If all goes well, the Catalog is now added to the Datasources Panel:
+<img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
+
+
+  
+
 # Development, Releases, and contributions 
 
 ## Branches
