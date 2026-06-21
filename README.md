@@ -587,6 +587,153 @@ Settings that control the appearance and behavior of the Pivot Table
 ### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
 
+# Secrets Manager
+
+Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>.
+The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
+
+## Opening the Secrets Manager
+You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar. This is what it looks like:
+
+<img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
+
+- On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
+  In the list, secrets are organized by type.  
+  In the screenshot above, 3 secrets are visible in the list.
+  One is selected: it's the secret called 'my_secret' of the 's3' type.
+
+- On the right side of the Secrets Manager Dialog, there are two tabs:
+  - The **Form tab** presents all the secret's details as a structured form.
+  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
+
+## Editing Secrets
+Selecting a secret in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
+
+### Secret Manager Form view
+The Form is structured thus:
+- **Name and type** fieldset: This is the secret's 'header'. It consists of the following items:
+  - **Name**: a unique name for the secret. 
+    This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
+    Note that in Huey, the secret's name is a required field.
+  - **Type**: the secret's type. 
+    This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
+    
+    In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
+  - **Autoload**: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
+    This is useful if you're regularly accessing resources that require the secret. 
+
+    Secrets that are not auto-loaded can be manually activated when required.
+- **Key/Value Pairs** fieldset: The secret's details are specified as a list of Key/Value pairs.
+  This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
+  
+  A key/value pair consists of the following controls:
+  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
+  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
+    - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
+    - […]: Array, indicating the value is a list of string values
+    - txt: Plaintext field, indicating the value is a string value.
+    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are [encrypted](#encryption-of-password-fields) when the secret is stored.
+    - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
+    If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
+    However, the dialog always lets you manually override the default.  
+  - **Value** field. This is the rightmost textfield. For the structured value-types Array and Map, this field does not exist. In these cases, the value is made up of key/value pairs that appear indented below the structured key type. 
+
+### Secret Manager Code view
+The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
+
+<img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
+
+The code editor is particularly useful if you already have the SQL for a secret and you want to quickly enter it into the Secrets Manager.
+
+Note that the code editor shows the secret as plaintext.
+  
+Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
+In addition, some key/value pairs depend on each other.
+Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
+  
+## Creating a new Secret
+
+1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
+   This is on the left side of the Secrets Manager toolbar. 
+   Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
+
+   You can now use either the Form-tab or the Code-tab to define the secret.
+2) In the form tab, enter a name for your new secret. Each secret has its own, unique name. 
+
+   Then, use the suggestions list to pick one of the well-known secret types.
+   If Huey does not provide a suggestion for a secret type that you know should be valid, then you can always override the type and enter one manually. 
+    
+   If you want the secret to be automatically loaded when Huey starts, also check the Autoload checkbox.
+   
+   <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
+
+   In the key/value fieldset, a new blank entry is automatically created.
+   Fill out at least one key/value entry is required.
+
+   - Fill out the key field.
+     Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
+     If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
+   
+   - Choose the field type.
+     If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
+     Again, you may override the field type if you're sure you need to.
+
+   - Enter the field value. 
+     The choice of field type directly affects what values you can add in the value field.
+     The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
+
+   To work with the existing fields, use the action buttons to the left of the key field:
+   - You can add as many key/value pairs as you like,
+     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+ and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
+ -buttons.
+3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
+   Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
+
+4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+will be available in the Secret Manager's toolbar. Click it to store the secret.
+
+## Encryption of password fields
+The main purpose of DuckDB secrets is to configure credentials to access datasources that require authentication.
+Naturally, credentials are sensitive data and should therefore be protected. 
+
+The Secrets Manager will automatically encrypt the value of all password-typed key/value pairs.
+This is implemented using AES-GCM-256 encryption using the browser's built-in ```crypto``` library.
+
+Encyrption requires a password. 
+You will be automatically prompted whenever a password is required:
+
+<img width="432" height="306" alt="image" src="https://github.com/user-attachments/assets/05016dfd-4098-4d3f-b45e-bc00a246bf2a" />
+
+The first time a password is required, the pasword itself is hashed, and the hashed value is stored so the store can check whether the entered password is correct.
+It is important to realize the password itself is never stored. 
+This means that once the store is initialized with a password, you can only decrypt the documents in the store using that password.
+So, make sure you don't lose it!
+
+You can always change the password later on by clicking the "Change Password"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6925118d-57a3-4703-ab57-d775d02e5d46" />. 
+This is available on the right side of the Secrets Manager's toolbar.
+
+If you lose your password, there is no way to recover any of the encrypted fields. 
+In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
+.
+## Activating, Deactivating and auto-loading secrets
+In order to use a secret, it needs to be activated.
+Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
+
+Secrets are automcatically activated when saving a secret.
+Secrets that are marked for auto-load are also automatically activated on Huey startup.
+Activating a secret may result in a prompt for the password if the secret contains key/value pairs of the password-type.
+
+If a secret is selected in the secrets list, the toolbar will show one of these buttons, depending on its activation status:
+- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
+- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
+, indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
+Hovering over the Activate/Deactive button reveals an action to change the state:
+- if the secret is in the active state, clicking the corresponding toolbar button deactivas it
+- if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
+
 # Catalogs Manager
 Originally, DuckDB advertised itself primarily as an in-process (aka "embedded") local-first data engine, rather than as a fully-fledged analytical relational database system.
 While DuckDB remains committed to its embedded database roots there's an ongoing trend to to integrate more and more with other external relational datastores, in particular Data Lakehouse architectures.
@@ -748,153 +895,6 @@ Catalogs are automcatically activated on save.
 Catalogs marked for auto-load are also automatically activated on Huey startup.
 
 If a catalog is selected in the catalogs list, the toolbar will show one of these buttons, depending on its attachement status:
-- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
-- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
-, indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
-Hovering over the Activate/Deactive button reveals an action to change the state:
-- if the secret is in the active state, clicking the corresponding toolbar button deactivas it
-- if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
-
-# Secrets Manager
-
-Huey includes a graphical user interface for <a href="https://duckdb.org/docs/current/configuration/secrets_manager" target="_blank" rel="noopener noreferrer">DuckDB's Secrets Manager</a>.
-The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
-
-## Opening the Secrets Manager
-You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar. This is what it looks like:
-
-<img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
-
-- On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
-  In the list, secrets are organized by type.  
-  In the screenshot above, 3 secrets are visible in the list.
-  One is selected: it's the secret called 'my_secret' of the 's3' type.
-
-- On the right side of the Secrets Manager Dialog, there are two tabs:
-  - The **Form tab** presents all the secret's details as a structured form.
-  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
-
-## Editing Secrets
-Selecting a secret in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
-
-### Secret Manager Form view
-The Form is structured thus:
-- **Name and type** fieldset: This is the secret's 'header'. It consists of the following items:
-  - **Name**: a unique name for the secret. 
-    This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
-    Note that in Huey, the secret's name is a required field.
-  - **Type**: the secret's type. 
-    This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
-    
-    In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
-  - **Autoload**: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
-    This is useful if you're regularly accessing resources that require the secret. 
-
-    Secrets that are not auto-loaded can be manually activated when required.
-- **Key/Value Pairs** fieldset: The secret's details are specified as a list of Key/Value pairs.
-  This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
-  
-  A key/value pair consists of the following controls:
-  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
-  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
-    - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
-    - […]: Array, indicating the value is a list of string values
-    - txt: Plaintext field, indicating the value is a string value.
-    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are [encrypted](#encryption-of-password-fields) when the secret is stored.
-    - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
-    If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
-    However, the dialog always lets you manually override the default.  
-  - **Value** field. This is the rightmost textfield. For the structured value-types Array and Map, this field does not exist. In these cases, the value is made up of key/value pairs that appear indented below the structured key type. 
-
-### Secret Manager Code view
-The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
-
-<img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
-
-The code editor is particularly useful if you already have the SQL for a secret and you want to quickly enter it into the Secrets Manager.
-
-Note that the code editor shows the secret as plaintext.
-  
-Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
-In addition, some key/value pairs depend on each other.
-Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
-  
-## Creating a new Secret
-
-1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
-   This is on the left side of the Secrets Manager toolbar. 
-   Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
-
-   You can now use either the Form-tab or the Code-tab to define the secret.
-2) In the form tab, enter a name for your new secret. Each secret has its own, unique name. 
-
-   Then, use the suggestions list to pick one of the well-known secret types.
-   If Huey does not provide a suggestion for a secret type that you know should be valid, then you can always override the type and enter one manually. 
-    
-   If you want the secret to be automatically loaded when Huey starts, also check the Autoload checkbox.
-   
-   <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
-
-   In the key/value fieldset, a new blank entry is automatically created.
-   Fill out at least one key/value entry is required.
-
-   - Fill out the key field.
-     Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
-     If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
-   
-   - Choose the field type.
-     If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
-     Again, you may override the field type if you're sure you need to.
-
-   - Enter the field value. 
-     The choice of field type directly affects what values you can add in the value field.
-     The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
-
-   To work with the existing fields, use the action buttons to the left of the key field:
-   - You can add as many key/value pairs as you like,
-     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
-   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
-   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
- and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
- -buttons.
-3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
-   Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
-
-4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
-will be available in the Secret Manager's toolbar. Click it to store the secret.
-
-## Encryption of password fields
-The main purpose of DuckDB secrets is to configure credentials to access datasources that require authentication.
-Naturally, credentials are sensitive data and should therefore be protected. 
-
-The Secrets Manager will automatically encrypt the value of all password-typed key/value pairs.
-This is implemented using AES-GCM-256 encryption using the browser's built-in ```crypto``` library.
-
-Encyrption requires a password. 
-You will be automatically prompted whenever a password is required:
-
-<img width="432" height="306" alt="image" src="https://github.com/user-attachments/assets/05016dfd-4098-4d3f-b45e-bc00a246bf2a" />
-
-The first time a password is required, the pasword itself is hashed, and the hashed value is stored so the store can check whether the entered password is correct.
-It is important to realize the password itself is never stored. 
-This means that once the store is initialized with a password, you can only decrypt the documents in the store using that password.
-So, make sure you don't lose it!
-
-You can always change the password later on by clicking the "Change Password"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6925118d-57a3-4703-ab57-d775d02e5d46" />. 
-This is available on the right side of the Secrets Manager's toolbar.
-
-If you lose your password, there is no way to recover any of the encrypted fields. 
-In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
-.
-## Activating, Deactivating and auto-loading secrets
-In order to use a secret, it needs to be activated.
-Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
-
-Secrets are automcatically activated when saving a secret.
-Secrets that are marked for auto-load are also automatically activated on Huey startup.
-Activating a secret may result in a prompt for the password if the secret contains key/value pairs of the password-type.
-
-If a secret is selected in the secrets list, the toolbar will show one of these buttons, depending on its activation status:
 - Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
 - Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
 , indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
