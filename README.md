@@ -666,24 +666,23 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
    In the key/value fieldset, a new blank entry is automatically created.
    Fill out at least one key/value entry is required.
 
-   1) Fill out the key field.
-      Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
-      If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
+   - Fill out the key field.
+     Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
+     If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
    
-   2) Choose the field type.
-      If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
-      Again, you may override the field type if you're sure you need to.
+   - Choose the field type.
+     If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
+     Again, you may override the field type if you're sure you need to.
 
-   3) Enter the field value. 
-      The choice of field type directly affects what values you can add in the value field.
-      The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
- 
-   You can add as many key/value pairs as you like,
-   Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - Enter the field value. 
+     The choice of field type directly affects what values you can add in the value field.
+     The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
 
-   To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
-
-   You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+   To work with the existing fields, use the action buttons to the left of the key field:
+   - You can add as many key/value pairs as you like,
+     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
  and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
  -buttons.
 3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
@@ -726,8 +725,10 @@ Activating a secret may result in a prompt for the password if the secret contai
 If a secret is selected in the secrets list, the toolbar will show one of these buttons, depending on its activation status:
 - Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
 - Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
-, indicating the secret is currently active.
-- 
+, indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
+Hovering over the Activate/Deactive button reveals an action to change the state:
+- if the secret is in the active state, clicking the corresponding toolbar button deactivas it
+- if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
 
 ## Integrating and/or Embedding Huey
 
