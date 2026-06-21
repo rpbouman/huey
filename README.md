@@ -87,10 +87,10 @@ Alternatively, you can download or checkout the Huey source files and resources 
 ### Running Huey on your Device as Progressive Web App (PWA)
 1) Visit the [live demo](https://rpbouman.github.io/huey/src/index.html)
 2) Use your browser's capabilities to install Huey on your local device. Typically this manifests itself as an installation icon in your browser's URL bar:
-   <img width="773" height="522" alt="image" src="https://github.com/user-ments/assets/1352db5c-96ee-4a8e-b0c6-e406907670fc" />
+   <img width="773" height="522" alt="image" src="https://github.com/user-attachments/assets/1352db5c-96ee-4a8e-b0c6-e406907670fc" />
 
 After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button:
-<img width="777" height="728" alt="image" src="https://github.com/user-ments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
+<img width="777" height="728" alt="image" src="https://github.com/user-attachments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
 
 #### PWA Offline
 The Huey PWA caches itself automatically using your browser's [caching API](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage).
@@ -100,7 +100,7 @@ This requires a modest amount of storage, but the benefit is that this allows Hu
 The Huey PWA explicitly advertises the ability to open certain data files.
 Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser:
 
-<img width="1103" height="742" alt="image" src="https://github.com/user-ments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
+<img width="1103" height="742" alt="image" src="https://github.com/user-attachments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
 
 This way, you don't even need to locate the app anymore - you just right click on a file you want to analyze, and choose "Open with Huey".
 
@@ -133,7 +133,7 @@ To register one or more files, you can:
 
   Note that by default, the File Browser dialog only lists files with a extension recognized by Huey.
   If your file doesn't happen to have one of those known extensions, just choose "All files *.*": 
-  <img width="920" height="495" alt="image" src="https://github.com/user-ments/assets/b5232b97-124a-4cde-9d82-088c81e80b2a" />
+  <img width="920" height="495" alt="image" src="https://github.com/user-attachments/assets/b5232b97-124a-4cde-9d82-088c81e80b2a" />
 
 - If you installed Huey as [PWA](#running-huey-on-your-device-as-progressive-web-app-pwa), and your files have an extension recognized by Huey, then you can typically also open it by right clicking the file and then choosing [Open With](#pwa-file-handler) from the context menu.
 
