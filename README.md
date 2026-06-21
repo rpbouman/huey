@@ -635,7 +635,7 @@ The Form is structured thus:
     However, the dialog always lets you manually override the default.  
   - Value field. This is the right most textfield. For the structured value-types Array and Map, this field does not exist. Rather, the value is made up of key/value pairs that appear indented below the structured key type. 
 
-THe Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
+The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
 
 <img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
 
@@ -690,7 +690,7 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
 4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
 will be available in the Secret Manager's toolbar. Click it to store the secret.
 
-#### Encryption of password fields
+### Encryption of password fields
 The main purpose of DuckDB secrets is to configure credentials to access datasources that require authentication.
 Naturally, credentials are sensitive data and should therefore be protected. 
 
@@ -713,9 +713,19 @@ This is available on the right side of the Secrets Manager's toolbar.
 If you lose your password, there is no way to recover any of the encrypted fields. 
 In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
 .
-#### Activating, Deactivating and auto-loading secrets
-As part of saving the secret, it will be automatically activated.
+### Activating, Deactivating and auto-loading secrets
+In order to use a secret, it needs to be activated.
 Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
+
+Secrets are automcatically activated when saving a secret.
+Secrets that are marked for auto-load are also automatically activated on Huey startup.
+Activating a secret may result in a prompt for the password if the secret contains key/value pairs of the password-type.
+
+If a secret is selected in the secrets list, the toolbar will show one of these buttons, depending on its activation status:
+- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
+- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
+, indicating the secret is currently active.
+- 
 
 ## Integrating and/or Embedding Huey
 
