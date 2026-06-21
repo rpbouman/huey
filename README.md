@@ -12,7 +12,7 @@ Or, __Try Huey now__ with some [sample reports](#getting-started) using the live
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
 ## Key features
-- Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or connect to a remote catalog.
+- Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or [connect to a remote catalog](#catalogs-manager).
 - Comprehensive [attributes menu](#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
 - Intuitive [query builder](#query-builder) that supports projection, [aggregation](#aggregates), [filtering](#filtering), and [(sub)totals](#subtotals)
 - A pivot table to present analysis results
@@ -654,7 +654,7 @@ The Form is structured thus:
     - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
     - […]: Array, indicating the value is a list of string values
     - txt: Plaintext field, indicating the value is a string value.
-    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are encrypted when the secret is stored.
+    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are [encrypted](#encryption-of-password-fields) when the secret is stored.
     - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
     If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
     However, the dialog always lets you manually override the default.  
@@ -663,7 +663,7 @@ The Form is structured thus:
 ### Catalogs Manager Code view
 The Code tab lets you view and edit the secret as a DuckDB ```ATTACH```-statement:
 
-<img width="907" height="389" alt="image" src="https://github.com/user-attachments/assets/fa596507-612b-4948-9729-66dbb6b1bcf1" />
+<img width="910" height="381" alt="image" src="https://github.com/user-attachments/assets/ebd02175-5cfc-4838-a6b3-39ece8355374" />
 
 The code editor is particularly useful if you already have the ```ATTACH```-statement code and you want to quickly enter it into the Catalogs Manager.
 
@@ -693,8 +693,10 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
    <img width="911" height="540" alt="image" src="https://github.com/user-attachments/assets/ca268f96-b4ed-4d20-ad59-b462f8d0086b" />
 
    In the key/value fieldset, a new blank entry is automatically created.
-   Fill out at least one key/value entry is required.
+   You may or may not need to enter key/value pairs, depending upon the type of catalog.
+   Please refer to the documentation of the extension that implements the catalog to discover which key/value pairs are appropriate for your use case. 
 
+   To edit and create key/value pairs, do:
    - Fill out the key field.
      Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
      If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
@@ -714,11 +716,44 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
    - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
  and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
  -buttons.
-4) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
-   Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
+4) You can switch to the Code tab to see the equivalent ```ATTACH```-statement.
+   Alternatively, you can paste or enter an ```ATTACH```-statement, and then switch to the Form-tab. The form will be automatically populated accordingly.
 
-5) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
-will be available in the Secret Manager's toolbar. Click it to store the secret.
+5) If the catalog appears valid, the "Save Catalog"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+will be available in the Catalogs Manager's toolbar. Click it to store the secret.
+
+### Managing Catalog Authentication
+Most Catalog extensions support a ```SECRET``` option in their ```ATTACH```-options. 
+If specified, this should typically refer to an existing DuckDB Secret created with the ```CREATE SECRET```-statement.
+
+In Huey, the Catalogs Manager integrates with the [Secrets Manager](#secrets-manager) by offering suggestions for the value field of a key/value pair with a SECRET key:
+
+<img width="909" height="482" alt="image" src="https://github.com/user-attachments/assets/c62fb722-a4ed-4304-9ff8-9247886a6b38" />
+
+When attaching to the catalog, Huey scans the catalog definition for any occurrence of the SECRET. 
+If it finds one, it will automatically [activate the secret](#activating-deactivating-and-auto-loading-secrets) so DuckDB can use it to connect to the catalog.
+
+As the secret is likely to contain an [encrypted password-type key/value pair](#encryption-of-password-fields), this may in turn prompt you for the password of the secrets store.
+Keep in mind: this is the password that you used to initialize the secrets store - NOT a password specific to your catalog configuration.
+Huey needs the password to the secrets store to decrypt the password fields in the stored secret so it can then run the ```CREATE SECRET``-statement.
+
+## Activating, Deactivating and auto-attaching Catalogs
+In order to use a Catalog, it needs to be activated.
+Activating the Catalog simply means the equivalent ```ATTACH```-statement will be executed so that DuckDB can refer to it by name.
+In Huey, activating the catalog will also add it as a datasource to the Datasources Panel so you can browse its tables and views and select them for data analysis:
+
+<img width="1310" height="581" alt="image" src="https://github.com/user-attachments/assets/d6f0265b-5906-494b-bcc6-7c2dd2ca5406" />
+
+Catalogs are automcatically activated on save.
+Catalogs marked for auto-load are also automatically activated on Huey startup.
+
+If a catalog is selected in the catalogs list, the toolbar will show one of these buttons, depending on its attachement status:
+- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
+- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
+, indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
+Hovering over the Activate/Deactive button reveals an action to change the state:
+- if the secret is in the active state, clicking the corresponding toolbar button deactivas it
+- if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
 
 # Secrets Manager
 
@@ -765,7 +800,7 @@ The Form is structured thus:
     - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
     - […]: Array, indicating the value is a list of string values
     - txt: Plaintext field, indicating the value is a string value.
-    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are encrypted when the secret is stored.
+    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are [encrypted](#encryption-of-password-fields) when the secret is stored.
     - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
     If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
     However, the dialog always lets you manually override the default.  
