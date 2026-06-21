@@ -17,11 +17,11 @@ Or, __Try Huey now__ with some [sample reports](#getting-started) using the live
 - Intuitive [query builder](#query-builder) that supports projection, [aggregation](#aggregates), [filtering](#filtering), and [(sub)totals](#subtotals)
 - A pivot table to present analysis results
 - Many different [aggregate functions](#aggregates) for reporting and data exploration
-- Automatic breakdown of date/time columns to temporal hierarchy (year, month, quarter etc)
-- Extensive support for array and ```STRUCT``` data types to allow immediate ad-hoc analysis of complex, nested data (typical for JSON data)
-- Export of result data and SQL queries to file or clipboard. 
+- Automatic breakdown of date/time columns to temporal hierarchy with [derived attributes](#derived-attributes) for  year, month, quarter etc 
+- Extensive support for [arrays](#arrays) and [```STRUCT```](#structured-types) data types to allow immediate ad-hoc analysis of complex, nested data (typical for JSON data)
+- [Export](#export) of result data and SQL queries to file or clipboard. 
 - Blazing fast, even for large files - courtesy of <a href="https://duckdb.org" target="_blank" rel="noopener noreferrer">DuckDB</a>
-- Truly light-weight. Huey depends on DuckDb-WASM, and Tabler Icons, but nothing more. (Dependencies may be added in the future, but only when strictly necessary.)
+- Truly light-weight. Huey depends on DuckDb-WASM, and a Tabler Icons font, but nothing more. (Dependencies may be added in the future, but only when strictly necessary.)
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
 - Run it your way! 
   - Huey is a static webapp: you can simply download or checkout the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
@@ -65,7 +65,7 @@ All these examples use a URL to a publicly available dataset as datasource.
   The event object itself has scalar properties like `id`, `type`, and `created_at` timestamp, as well object-typed properties `repo`, `actor` and `payload`.
   The report demonstrates the following Huey features:
   - The DuckDB JSON reader correctly extracts the `created_at` string to a `TIMESTAMP` type.
-  - Derived attributes year, month, and day as well as iso-time derivation are applied on the column axis to produce a clean temporal breakdown
+  - Derived attributes year, month, and day as well as iso-time are applied on the column axis to produce a clean temporal breakdown
   - Event type also appears on the columns axis, showing CreateEvent, DeleteEvent, PushEvent and so on for each timestamp
   - The repo's `id` and `name` properties are extracted from the `repo`-object nested inside the event object and placed on the rows Axis
   - In the cells, the`login` property extracted from the nested `actor`-object is aggregated using the list aggregator. 
@@ -76,8 +76,8 @@ All these examples use a URL to a publicly available dataset as datasource.
   The <a href="https://blobs.duckdb.org/train_services.parquet" target="_blank" rel="noopener noreferrer">raw dataset</a> contains trips from the Dutch train network.
   The huey report presents the stations on the rows and the train types on the columns, with the number of trips as cell values.
   It demonstrates the following Huey features:
-  - on the columns, the first letter derivation is used to produce an alphabetic index for the train stations
-  - on the columns the No Case derivation is used for a case-normalized presentation the train types. In the original dataset, the ```type``` column contains both the values ```Stoptrein``` and ```stoptrein```; by using the No Case derivation, both are presented in a single column.
+  - on the columns, the "First letter" derived attribute is used to produce an alphabetic index for the train stations
+  - on the columns the "No Case" derived attribute is used for a case-normalized presentation the train types. In the original dataset, the ```type``` column contains both the values ```Stoptrein``` and ```stoptrein```; by using the "No Case" derived attribute, both are presented in a single column.
 
 ## Running Locally
 Want to run Huey locally? No problem!
@@ -296,7 +296,7 @@ The attribute's data type primarily determines which derived attributes are supp
 Derived attributes tend to be grouped in folders around a similar use case or topic. 
 Here's a (non-exhaustive) list of derived attribute folders:
 - **date fields**: Applies to attributes with temporal data types, like ```DATE``` and ```TIMESTAMP```.
-  Derivations in this category are mainly to present temporal data in a hierarchically organized breakdown, as well as to offer various formats and labels.
+  Derived attributes in this category are mainly to present temporal data in a hierarchically organized breakdown, as well as to offer various formats and labels.
   Typical use cases are to compare data aggregated in the cells across years, month or day of the week.
 - **time fields**: Similar to date fields, but for those data types that also carry a time part.
 - **string operations**: Applies to attributes with a text type. 
