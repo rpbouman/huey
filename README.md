@@ -738,16 +738,16 @@ Hovering over the Activate/Deactive button reveals an action to change the state
 
 # Catalogs Manager
 Originally, DuckDB advertised itself primarily as an in-process (aka "embedded") local-first data engine, rather than as a fully-fledged analytical relational database system.
-While DuckDB remains committed to its embedded database roots there's an ongoing trend to to integrate more and more with other external relational datastores, in particular Data Lakehouse architectures.
+While DuckDB remains committed to its embedded database roots, there's an ongoing trend to integrate with external relational datastores, in particular Data Lakehouses.
 
-From the DuckDB perspective, such external datasources take the form of a database that is "attached" to the current, local (embedded) instance. 
+From the DuckDB perspective, such external datasources take the form of "attached" databases. 
 The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
-The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
+The ```ATTACH``` statment has a flexible, type-dependent options section that's used to define the details of the attached database.
 
 The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore:
-- In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
+- In the most basic case, it's simply a pointer to a static file for the local duckdb engine to access and manage. This is what happens when you attach a DuckDB or SQLIte database file.
 - In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
-- In yet other cases, the attached database is more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a central database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
+- In yet other cases, it's more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a remote database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
 - A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
 
 Huey provides a Catalogs Manager, wich is a graphical user interface to create, maintain and store configuration data required to attach to remote datasources. 
