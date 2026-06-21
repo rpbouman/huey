@@ -184,7 +184,7 @@ Huey is not just for local files! You can also access remote data by registering
 #### Register URLs
 
 In addition to local files, you can also register URLs. 
-To register a URL, click the "Load data from URL" button on the toolbar load data from URL button <img width="240" height="240" alt="image" src="https://github.com/user-attachments/assets/a52332ff-e108-414a-a508-8148a03bbd42" />
+To register a URL, click the "Load data from URL" button on the toolbar load data from URL button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/a52332ff-e108-414a-a508-8148a03bbd42" />
 . 
 You will be prompted to enter the URL:
 
