@@ -595,10 +595,9 @@ You can open the Secrets Manager by clicking the Secrets Manager button <img wid
 <img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
 
 - On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
-  In the screenshot above, there's one stored secret called 'my_secret'.
-  
-  In the list, secrets are organized by type. 
-  In secret in the screenshot above is of the 's3' type.
+  In the list, secrets are organized by type.  
+  In the screenshot above, 3 secrets are visible in the list.
+  One is selected: it's the secret called 'my_secret' of the 's3' type.
 
 - On the right side of the Secrets Manager Dialog, there are two tabs:
   - The **Form tab** presents all the secret's details as a structured form.
@@ -684,15 +683,39 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
 
    You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
  and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
- -buttons. 
-### Initialization
+ -buttons.
+3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
+   Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
 
-The secrets store needs to be initialized for first use. 
+4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+will be available in the Secret Manager's toolbar. Click it to store the secret.
+
+#### Encryption of password fields
+The main purpose of DuckDB secrets is to configure credentials to access datasources that require authentication.
+Naturally, credentials are sensitive data and should therefore be protected. 
+
+The Secrets Manager will automatically encrypt the value of all password-typed key/value pairs.
+This is implemented using AES-GCM-256 encryption using the browser's built-in ```crypto``` library.
+
+Encyrption requires a password. 
+You will be automatically prompted whenever a password is required:
 
 <img width="432" height="306" alt="image" src="https://github.com/user-attachments/assets/05016dfd-4098-4d3f-b45e-bc00a246bf2a" />
 
-Initialization happens automatically if you first try to store a secret.
+The first time a password is required, the pasword itself is hashed, and the hashed value is stored so the store can check whether the entered password is correct.
+It is important to realize the password itself is never stored. 
+This means that once the store is initialized with a password, you can only decrypt the documents in the store using that password.
+So, make sure you don't lose it!
 
+You can always change the password later on by clicking the "Change Password"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6925118d-57a3-4703-ab57-d775d02e5d46" />. 
+This is available on the right side of the Secrets Manager's toolbar.
+
+If you lose your password, there is no way to recover any of the encrypted fields. 
+In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
+.
+#### Activating, Deactivating and auto-loading secrets
+As part of saving the secret, it will be automatically activated.
+Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
 
 ## Integrating and/or Embedding Huey
 
