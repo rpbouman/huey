@@ -137,4 +137,7 @@
   --icon-arrow-narrow-right: '\ea1c';
   --icon-arrow-narrow-left: '\ea1b';
   --icon-refresh: '\eb13';
+  --icon-bolt: '\ea38';
+  --icon-player-pause: '\ed45';
+  --icon-player-play: '\ed46';
 }

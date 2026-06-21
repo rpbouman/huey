@@ -28,6 +28,8 @@ dialog.documentDialog#catalogsDialog {
           content: var( --icon-database-plus );
         }
       }
+      
+      
     }
   }
   

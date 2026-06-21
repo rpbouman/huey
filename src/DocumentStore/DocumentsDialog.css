@@ -47,17 +47,17 @@ dialog.documentDialog {
           content: var( --icon-arrow-back-up );
         }
       }
-      
+
       &:has( > input[type=radio][name=activation][value=activate] ) {
         
         /* the activate action has a "paused" lock... */
         &::before {
-          content: var( --icon-lock-pause );
+          content: var( --icon-player-pause );
         }
         
         /* ...but when we hover over it, it changes to a lock with a firebolt, signaling user to click it to activate.  */
         &:hover::before {
-          content: var( --icon-lock-bolt );
+          content: var( --icon-player-play );
         }
       }
 
@@ -65,12 +65,12 @@ dialog.documentDialog {
         
         /* The deactivate action has the lock icon with the firebolt, indicating the document is "active";... */
         &::before {
-          content: var( --icon-lock-bolt );
+          content: var( --icon-player-play );
         }
 
         /* ...but when hovering over it, it changes to the lock "pause" icon, indicating the user can deactivate. */
         &:hover::before {
-          content: var( --icon-lock-pause );
+          content: var( --icon-player-pause );
         }
       }
       
