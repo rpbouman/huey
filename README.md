@@ -897,12 +897,13 @@ Catalogs are automcatically activated on save.
 Catalogs marked for auto-load are also automatically activated on Huey startup.
 
 If a catalog is selected in the catalogs list, the toolbar will show one of these buttons, depending on its attachement status:
-- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
-- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
-, indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
+- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/c04e588e-c3b2-4fcd-a2d5-fafb9103d21a" />
+, indicating the catalog is currently not attached.
+- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/fcc8a8ef-e9b3-454a-8baf-4b184e70f6fe" />
+, indicating the catalog is currently attached. In addition, active catalogs are marked up bold in the list.
 Hovering over the Activate/Deactive button reveals an action to change the state:
-- if the secret is in the active state, clicking the corresponding toolbar button deactivas it
-- if the secret is in the inactive state, clicking the corresponding toolbar button activates it 
+- if the catalog is attached, clicking the button will detach it.
+- if the catalog is detached, clicking the button atteches it. 
 
 # Development, Releases, and contributions 
 
