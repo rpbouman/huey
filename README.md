@@ -203,7 +203,7 @@ If that is the case, you can use the [Secrets Manager](#secrets-manager) to crea
 Originally, DuckDB characterized itself not so much as a (A)DMBS, but as an in-process, aka "embedded", "local-first" data engine.
 While DuckDB remains committed to its embedded roots, one can observe an ongoing trend to offer more and more ways to integrate with other external relational datastores, in particular Data Lakes.
 
-DuckDB perspective, such external datasources take the form of a RDMBS that is "attached" to the current, local (embedded) instance.
+From the DuckDB perspective, such external datasources take the form of a database that is "attached" to the current, local (embedded) instance.
 The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore.
 - In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
 - In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
@@ -211,7 +211,7 @@ The "attachment" is an abstraction that encapsulates a lot of the details of the
 - A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
 
 The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
-The Attach statment has a flexible type-dependent options section that used to define the details of the exact nature of the attached database.
+The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
 
 Huey provides a [Catalog Manager](#catalog-manager), wich is essentially a graphical user interface to create, maintain and store these attach configurations, as well as integrate them with [secrets management](#secrets-manager). 
 
