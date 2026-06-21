@@ -664,17 +664,19 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
    <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
 
    In the key/value fieldset, a new blank entry is automatically created.
-   It is mandatory to fill out at least one key/value entry.
+   Fill out at least one key/value entry is required.
 
-   Huey provides key suggestions for the known secret types, and selecting one will automatically chooise a default field type.
-   If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
+   1) Fill out the key field.
+      Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
+      If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
    
-   Choose the field type.
-   If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
-   Again, you may override the field type if you're sure you need to.
+   2) Choose the field type.
+      If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
+      Again, you may override the field type if you're sure you need to.
 
-   The choice of field type directly affects what values you can add in the value field.
-   The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
+   3) Enter the field value. 
+      The choice of field type directly affects what values you can add in the value field.
+      The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
  
    You can add as many key/value pairs as you like,
    Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
