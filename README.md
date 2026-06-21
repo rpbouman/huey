@@ -650,22 +650,41 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
   
 ### Creating a new Secret
 
+1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
+   This is on the left side of the Secrets Manager toolbar. 
+   Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
 
+   You can now use either the Form-tab or the Code-tab to define the secret.
+2) In the form tab, enter a name for your new secret. Each secret has its own, unique name. 
 
-**Key features:**
+   Then, use the suggestions list to pick one of the well-known secret types.
+   If Huey does not provide a suggestion for a secret type that you know should be valid, then you can always override the type and enter one manually. 
+    
+   If you want the secret to be automatically loaded when Huey starts, also check the Autoload checkbox.
+   
+   <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
 
-- **Form view** - Edit secrets using a guided form with typed fields
-- **Code view** - Alternatively, create a secret by entering its `CREATE SECRET` SQL
-- **Secure local storage** - Secrets are stored encrypted in your browser using a password you set. They are never sent to any server.
-- **Autoload** - Mark secrets to load automatically when Huey starts, so your cloud sources are ready without any manual steps.
-- **Activate / deactivate** - Load a secret into the active DuckDB session or unload it without deleting it from the store.
-- **Full secret lifecycle** - Create, save, restore unsaved changes, and remove secrets from a single dialog.
+   In the key/value fieldset, a new blank entry is automatically created.
+   It is mandatory to fill out at least one key/value entry.
 
-### How to Use
+   Huey provides key suggestions for the known secret types, and selecting one will automatically chooise a default field type.
+   If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
+   
+   Choose the field type.
+   If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
+   Again, you may override the field type if you're sure you need to.
 
-- Click the **Secrets** button ![Secrets icon](https://github.com/user-attachments/assets/c1e19a35-10e2-4f1a-ae7e-c6b89e23b3a6) in the toolbar to open the dialog. 
-- Click the **create secret** button ![Create Secret](https://github.com/user-attachments/assets/23af91c1-0ab9-41ea-a3ba-620c64b1e3b3) to create a new secret.
+   The choice of field type directly affects what values you can add in the value field.
+   The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
+ 
+   You can add as many key/value pairs as you like,
+   Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
 
+   To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+
+   You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+ and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
+ -buttons. 
 ### Initialization
 
 The secrets store needs to be initialized for first use. 
@@ -674,13 +693,6 @@ The secrets store needs to be initialized for first use.
 
 Initialization happens automatically if you first try to store a secret.
 
-### Notes
-
-> [!WARNING]  
-> Secrets are stored locally in your browser, encrypted with a password of your choosing. To change the password or wipe the store, use the **Change Password** / **Reset Store** controls in the dialog.
-
-> [!NOTE]  
-> Secrets loaded into DuckDB are temporary (session-scoped) and are not written to disk by DuckDB itself.
 
 ## Integrating and/or Embedding Huey
 
