@@ -592,18 +592,120 @@ Originally, DuckDB advertised itself primarily as an in-process (aka "embedded")
 While DuckDB remains committed to its embedded database roots there's an ongoing trend to to integrate more and more with other external relational datastores, in particular Data Lakehouse architectures.
 
 From the DuckDB perspective, such external datasources take the form of a database that is "attached" to the current, local (embedded) instance. 
+The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
+The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
 
-
-The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore.
+The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore:
 - In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
 - In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
 - In yet other cases, the attached database is more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a central database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
 - A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
 
-The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
-The ```ATTACH``` statment has a flexible, type-dependent options section that are used to define the details of the exact nature of the attached database.
+Huey provides a Catalogs Manager, wich is a graphical user interface to create, maintain and store configuration data required to attach to remote datasources. 
+The Catalogs Manager also integrates with the [Secrets Manager](#secrets-manager), as attaching a remote catalog often requires authentication.
 
-Huey provides a [Catalog Manager](#catalog-manager), wich is essentially a graphical user interface to create, maintain and store these attach configurations, as well as integrate them with [secrets management](#secrets-manager). 
+## Opening the Catalogs Manager
+You can open the Catalogs Manager by clicking the Catalogs Manager button  from the left side of the main toolbar:
+
+<img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
+
+- On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
+  In the list, secrets are organized by type.  
+  In the screenshot above, 3 secrets are visible in the list.
+  One is selected: it's the secret called 'my_secret' of the 's3' type.
+
+- On the right side of the Secrets Manager Dialog, there are two tabs:
+  - The **Form tab** presents all the secret's details as a structured form.
+  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
+
+## Editing Secrets
+Selecting a secret in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
+
+### Secret Manager Form view
+The Form is structured thus:
+- **Name and type** fieldset: This is the secret's 'header'. It consists of the following items:
+  - **Name**: a unique name for the secret. 
+    This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
+    Note that in Huey, the secret's name is a required field.
+  - **Type**: the secret's type. 
+    This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
+    
+    In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
+  - **Autoload**: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
+    This is useful if you're regularly accessing resources that require the secret. 
+
+    Secrets that are not auto-loaded can be manually activated when required.
+- **Key/Value Pairs** fieldset: The secret's details are specified as a list of Key/Value pairs.
+  This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
+  
+  A key/value pair consists of the following controls:
+  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
+  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
+    - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
+    - […]: Array, indicating the value is a list of string values
+    - txt: Plaintext field, indicating the value is a string value.
+    - ***: Password field. This indicates a text value that is to be treated as a secret. Password fields use a password input type so their value is not immediately visible when editing. These values are encrypted when the secret is stored.
+    - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
+    If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
+    However, the dialog always lets you manually override the default.  
+  - **Value** field. This is the rightmost textfield. For the structured value-types Array and Map, this field does not exist. In these cases, the value is made up of key/value pairs that appear indented below the structured key type. 
+
+### Secret Manager Code view
+The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
+
+<img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
+
+The code editor is particularly useful if you already have the SQL for a secret and you want to quickly enter it into the Secrets Manager.
+
+Note that the code editor shows the secret as plaintext.
+  
+Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
+In addition, some key/value pairs depend on each other.
+Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
+  
+## Creating a new Secret
+
+1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
+   This is on the left side of the Secrets Manager toolbar. 
+   Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
+
+   You can now use either the Form-tab or the Code-tab to define the secret.
+2) In the form tab, enter a name for your new secret. Each secret has its own, unique name. 
+
+   Then, use the suggestions list to pick one of the well-known secret types.
+   If Huey does not provide a suggestion for a secret type that you know should be valid, then you can always override the type and enter one manually. 
+    
+   If you want the secret to be automatically loaded when Huey starts, also check the Autoload checkbox.
+   
+   <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
+
+   In the key/value fieldset, a new blank entry is automatically created.
+   Fill out at least one key/value entry is required.
+
+   - Fill out the key field.
+     Huey provides suggestions for the key field for any known secret types. Selecting a suggestion, or entering a well-known type, automatically results in choosing a default field type.
+     If you're sure you need a particular key but the Huey suggestions list does not provide it, then you can always enter one manually.
+   
+   - Choose the field type.
+     If you chose a key from the suggestions list, or if you entered a key that is well-known and appropriate for the secret type, a default field type is automatically chosen for you.
+     Again, you may override the field type if you're sure you need to.
+
+   - Enter the field value. 
+     The choice of field type directly affects what values you can add in the value field.
+     The field type directly affects the kind of data you can enter into the value field; for example, choosing the checkbox will turn the value input into a checkbox. 
+
+   To work with the existing fields, use the action buttons to the left of the key field:
+   - You can add as many key/value pairs as you like,
+     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+ and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
+ -buttons.
+3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
+   Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
+
+4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+will be available in the Secret Manager's toolbar. Click it to store the secret.
 
 # Secrets Manager
 
@@ -629,26 +731,24 @@ Selecting a secret in the list loads it from storage and populates the form and 
 
 ### Secret Manager Form view
 The Form is structured thus:
-- Name and type
-  This is the secret's 'header'. It consists of the following items:
-  - Name: a unique name for the secret. 
+- **Name and type** fieldset: This is the secret's 'header'. It consists of the following items:
+  - **Name**: a unique name for the secret. 
     This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
     Note that in Huey, the secret's name is a required field.
-  - Type: the secret's type. 
+  - **Type**: the secret's type. 
     This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
     
     In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
-  - Autoload: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
+  - **Autoload**: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
     This is useful if you're regularly accessing resources that require the secret. 
 
     Secrets that are not auto-loaded can be manually activated when required.
-- Key/Value Pairs
-  The secret's details are specified as a list of Key/Value pairs.
+- **Key/Value Pairs** fieldset: The secret's details are specified as a list of Key/Value pairs.
   This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
   
-  In the form, a key/value pair consists of the following controls:
-  - Key field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
-  - Field Type. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
+  A key/value pair consists of the following controls:
+  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
+  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
     - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
     - […]: Array, indicating the value is a list of string values
     - txt: Plaintext field, indicating the value is a string value.
@@ -656,7 +756,7 @@ The Form is structured thus:
     - {…}: ```MAP```-field. This indicates the value is itself a set of key/value pairs
     If a well-known value is entered in the Key field, then an appropriate default type is automatically selected.
     However, the dialog always lets you manually override the default.  
-  - Value field. This is the right most textfield. For the structured value-types Array and Map, this field does not exist. Rather, the value is made up of key/value pairs that appear indented below the structured key type. 
+  - **Value** field. This is the rightmost textfield. For the structured value-types Array and Map, this field does not exist. In these cases, the value is made up of key/value pairs that appear indented below the structured key type. 
 
 ### Secret Manager Code view
 The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
