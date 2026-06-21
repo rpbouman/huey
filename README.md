@@ -913,9 +913,9 @@ Ducklabs exposes 2 catalogs that are used as demo datasets in the online duckdb 
 The nl_railway Ducklake Catalog contains a few tables with dutch railway service data.
 To connect to it from within Huey, follow [the steps for creating a new Catalog](#creating-a-new-catalog) and enter the following details:
 - when using the [Catalog Form](#catalogs-manager-form-view), enter:
-  - name: ```nl_railway```
-  - type: ```ducklake```
-  - url: ```https://blobs.duckdb.org/datalake/nl-railway.ducklake```
+  - **name**: ```nl_railway```
+  - **type**: ```ducklake```
+  - **url**: ```https://blobs.duckdb.org/datalake/nl-railway.ducklake```
   <img width="863" height="382" alt="image" src="https://github.com/user-attachments/assets/0593ab95-c3be-463f-bd40-55f37f2c9607" />
 - when using the [Catalogs Manager's code view](#catalogs-manager-code-view), enter:
   ```sql
@@ -930,8 +930,55 @@ To connect to it from within Huey, follow [the steps for creating a new Catalog]
 If all goes well, the Catalog is now added to the Datasources Panel:
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
+### TPCH Iceberg Catalog
+The TPCH Iceberg Catalog is the TPCH benchmark dataset, served as Iceberg tables stored on S3.  
 
-  
+To connect to it from within Huey, you first have to create a secret, so follow the [steps for creating a new secret](#creating-a-new-secret): 
+- when using the [Secret Form](#secret-manager-form-view), enter:
+  - **name**: ```my_secret```
+  - **type**: ```s3```
+  Then, enter the following key/value pairs:
+  - **```KEY_ID```**, with type ```txt``` and value ```AKIATZA7ONMDJXWR4UVN```
+  - **```SECRET```**, with type ```***``` (passsword) and value ```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```
+  - **```REGION```**, with type ```txt``` and value ```us-west-1```
+  <img width="868" height="387" alt="image" src="https://github.com/user-attachments/assets/8a97d80e-cda3-46f4-861a-ab56e4cf8e60" />
+- when using the [Secrets Manager Code view](#secret-manager-code-view), enter this statement:
+  ```sql
+  CREATE OR REPLACE TEMPORARY SECRET my_secret (
+    TYPE s3
+  , KEY_ID 'AKIATZA7ONMDJXWR4UVN'
+  , SECRET 'elm876/SqATe455MgkK6RB4fGORgNYep7/0GXajv'
+  , REGION 'us-west-1'
+  )
+  ```
+  <img width="871" height="387" alt="image" src="https://github.com/user-attachments/assets/4257117d-fe81-46bb-a1d9-76eb2d654f97" />
+- Save your secret. You may be prompted to enter your password.
+  If that's the case then enter the password with wich you initialized the store.
+  If you never initialized the store, then the prompt will inform you that you need to initialize the store and provide detailed instructions to do so.  
+
+Once the secret is in place, you can follow [the steps for creating a new Catalog](#creating-a-new-catalog) and enter the following details:
+- when using the [Catalog Form](#catalogs-manager-form-view), enter:
+  - **name**: ```iceberg_dataset```
+  - **type**: ```iceberg```
+  - **url**: ```arn:aws:s3tables:us-east-1:259911478022:bucket/iceberg-on-the-browser```
+  You also need to create and fill out a few key/value pairs:
+  - **```ENDPOINT_TYPE```**, with type ```txt``` and value ```s3_tables```
+  - **```SECRET```**, with type ```txt``` and value ```my_secret```
+  <img width="868" height="380" alt="image" src="https://github.com/user-attachments/assets/770a1e92-3fe8-4508-8a1a-088b737a5acd" />
+ - when using the [Catalogs Manager's code view](#catalogs-manager-code-view), enter:
+  ```sql
+    ATTACH 'arn:aws:s3tables:us-east-1:259911478022:bucket/iceberg-on-the-browser'
+    AS iceberg_dataset (
+      TYPE iceberg 
+    , ENDPOINT_TYPE 's3_tables'
+    , SECRET 'my_secret'
+    )
+  ```
+  <img width="939" height="383" alt="image" src="https://github.com/user-attachments/assets/4a40829f-6d0f-440f-9fd2-0e5fa3b68813" />
+- Save the catalog.
+
+If all goes well, the Catalog is now added to the Datasources Panel:
+<img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 # Development, Releases, and contributions 
 
