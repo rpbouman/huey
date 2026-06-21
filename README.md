@@ -87,10 +87,10 @@ Alternatively, you can download or checkout the Huey source files and resources 
 ### Running Huey on your Device as Progressive Web App (PWA)
 1) Visit the [live demo](https://rpbouman.github.io/huey/src/index.html)
 2) Use your browser's capabilities to install Huey on your local device. Typically this manifests itself as an installation icon in your browser's URL bar:
-   <img width="773" height="522" alt="image" src="https://github.com/user-attachments/assets/1352db5c-96ee-4a8e-b0c6-e406907670fc" />
+   <img width="773" height="522" alt="image" src="https://github.com/user-ments/assets/1352db5c-96ee-4a8e-b0c6-e406907670fc" />
 
 After installing Huey as PWA, it appears just as if it is a local native app, and you should be able to find it using your operating system's launch bar or start button:
-<img width="777" height="728" alt="image" src="https://github.com/user-attachments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
+<img width="777" height="728" alt="image" src="https://github.com/user-ments/assets/3e9d308b-f471-4e4a-8627-26ab0ce53326" />
 
 #### PWA Offline
 The Huey PWA caches itself automatically using your browser's [caching API](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage).
@@ -100,7 +100,7 @@ This requires a modest amount of storage, but the benefit is that this allows Hu
 The Huey PWA explicitly advertises the ability to open certain data files.
 Typically, the operating system picks this up and offer an "Open With" feature in the context menu of the file browser:
 
-<img width="1103" height="742" alt="image" src="https://github.com/user-attachments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
+<img width="1103" height="742" alt="image" src="https://github.com/user-ments/assets/1bbc3aa2-54ca-4a37-b019-ce9f63e95328" />
 
 This way, you don't even need to locate the app anymore - you just right click on a file you want to analyze, and choose "Open with Huey".
 
@@ -133,7 +133,7 @@ To register one or more files, you can:
 
   Note that by default, the File Browser dialog only lists files with a extension recognized by Huey.
   If your file doesn't happen to have one of those known extensions, just choose "All files *.*": 
-  <img width="920" height="495" alt="image" src="https://github.com/user-attachments/assets/b5232b97-124a-4cde-9d82-088c81e80b2a" />
+  <img width="920" height="495" alt="image" src="https://github.com/user-ments/assets/b5232b97-124a-4cde-9d82-088c81e80b2a" />
 
 - If you installed Huey as [PWA](#running-huey-on-your-device-as-progressive-web-app-pwa), and your files have an extension recognized by Huey, then you can typically also open it by right clicking the file and then choosing [Open With](#pwa-file-handler) from the context menu.
 
@@ -184,10 +184,10 @@ Huey is not just for local files! You can also access remote data by registering
 #### Register URLs
 
 In addition to local files, you can also register URLs. 
-To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-attachments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be). 
+To register a URL, click the "Load data from URL" button on the toolbar ![load data from URL button](https://github.com/user-ments/assets/89cea13f-b2a8-4ce9-a5ab-a4184c9c00be). 
 You will be prompted to enter the URL:
 
-![URL prompt](https://github.com/user-attachments/assets/2a11e0ca-a3c1-4b55-9bf9-8cc404332400)
+![URL prompt](https://github.com/user-ments/assets/2a11e0ca-a3c1-4b55-9bf9-8cc404332400)
 
 After confirming, the upload dialog appears just like when uploading local files.
 
@@ -199,7 +199,20 @@ If that is the case, you can use the [Secrets Manager](#secrets-manager) to crea
 
 #### Remote Catalogs
 
-DuckDB can access data from remote databases using the [```ATTACH```-syntax](https://duckdb.org/docs/current/sql/statements/attach). 
+Originally, DuckDB characterized itself not so much as a (A)DMBS, but as an in-process, aka "embedded", "local-first" data engine.
+While DuckDB remains committed to its embedded roots, one can observe an ongoing trend to offer more and more ways to integrate with other external relational datastores, in particular Data Lakes.
+
+DuckDB perspective, such external datasources take the form of a RDMBS that is "attached" to the current, local (embedded) instance.
+The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore.
+- In the most basic case, the attached database is simply a pointer to a static data store that the local duckdb engine gets to manage. This is what happens when you attach a DuckDB or SQLIte database file to the current instance.
+- In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
+- In yet other cases, the attached database is more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a central database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
+- A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
+
+The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
+The Attach statment has a flexible type-dependent options section that used to define the details of the exact nature of the attached database.
+
+Huey provides a [Catalog Manager](#catalog-manager), wich is essentially a graphical user interface to create, maintain and store these attach configurations, as well as integrate them with [secrets management](#secrets-manager). 
 
 ## Exploring Datasources
 The Datasources have an explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). 
