@@ -605,42 +605,52 @@ Huey provides a Catalogs Manager, wich is a graphical user interface to create, 
 The Catalogs Manager also integrates with the [Secrets Manager](#secrets-manager), as attaching a remote catalog often requires authentication.
 
 ## Opening the Catalogs Manager
-You can open the Catalogs Manager by clicking the Catalogs Manager button  from the left side of the main toolbar:
+You can open the Catalogs Manager by clicking the Catalogs Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/044ddba4-d0f1-431a-a5b5-5e3514af52e1" />
+ from the left side of the main toolbar. 
+ 
+This is what it looks like:
 
-<img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
+<img width="905" height="382" alt="image" src="https://github.com/user-attachments/assets/567fa117-46b7-4af8-a0eb-9b2b687a7df7" />
 
-- On the left side of the Secrets Manager Dialog, there's a list that presents the list of stored secrets.
-  In the list, secrets are organized by type.  
-  In the screenshot above, 3 secrets are visible in the list.
-  One is selected: it's the secret called 'my_secret' of the 's3' type.
+- On the left side of the Catalogs Manager Dialog, there's a list that presents the list of stored catalog definitions.
+  In the list, catalogs are organized by type.  
+  In the screenshot above, 4 catalogs are visible in the list.
+  One is selected: it's the catalog called 'nl_railway' of the 'ducklake' type.
 
-- On the right side of the Secrets Manager Dialog, there are two tabs:
-  - The **Form tab** presents all the secret's details as a structured form.
-  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```CREATE SECRET```-syntax](https://duckdb.org/docs/lts/sql/statements/create_secret).
+- On the right side of the Catalogs Manager Dialog, there are two tabs:
+  - The **Form tab** presents catalog details as a structured form.
+  - The **Code tab** has a code editor that lets you view and edit the Secret using DuckDB's [```ATTACH```-syntax](https://duckdb.org/docs/current/sql/statements/attach).
 
-## Editing Secrets
-Selecting a secret in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
+## Editing Catalog Definitions
+Selecting a catalog in the list loads it from storage and populates the form and code tabs with its details so you can edit it.
 
-### Secret Manager Form view
+### Catalogs Manager Form view
 The Form is structured thus:
-- **Name and type** fieldset: This is the secret's 'header'. It consists of the following items:
-  - **Name**: a unique name for the secret. 
-    This corresponds to the ```secret_name``` element of the ```CREATE SECRET```-syntax.
-    Note that in Huey, the secret's name is a required field.
-  - **Type**: the secret's type. 
-    This corresponds to the ```secret_type``` element of the ```CREATE SECRET```-syntax.
-    
-    In the form, the secret type is just a text field, but there's a list of suggestions for all secret types that corresponding to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
-  - **Autoload**: a checkbox to control whether this particular secret ought to be activated when Huey starts up.
-    This is useful if you're regularly accessing resources that require the secret. 
+- **Name and type** fieldset: This is the 'header'. It consists of the following items:
+  - **URL**: a URL that acts as address of the remote catalog. This corresponds to the ```database-path``` element of the ```ATTACH```-statement.
+    The URL typically has a schema and internal syntax that is dependent upon the catalog type.
+    Alternatively, the URL may follow a URL scheme that identifies the object store of a cloud provider.
+    It's also possible that the specific URL syntax depends on the key/value pairs that make up the ```ATTACH```-options. 
+    Please refer to the documentation of the extension that implements the catalog for detailed information about how to construct a URL for a particular kind of catalog.
+  - **Name**: a unique name for the catalog. 
+    This corresponds to the ```database-alias``` element of the ```ATTACH```-statement.
+  - **Type**: the catalog type. 
+    This corresponds to the ```TYPE``` field that appears in the ```attach-options``` of the ```ATTACH```-statement.
 
-    Secrets that are not auto-loaded can be manually activated when required.
-- **Key/Value Pairs** fieldset: The secret's details are specified as a list of Key/Value pairs.
-  This fieldset lets you maintain a list of these key/value pairs that define the particulars of the secret. 
+    In the DuckDB documentation for the ```ATTACH```-statement, only ```sqlite``` is listed as an acceptable value.
+    In practice, ```ATTACH```ing to remote catalogs is managed by specific extensions that introduce their own values for the ```TYPE``` field. 
+
+    In the form, the catalog type is just a text field, but there's a list of suggestions for all catalog types that correspond to DuckDB's [core extensions](https://duckdb.org/docs/lts/core_extensions/overview).
+  - **Autoload**: a checkbox to control whether this particular catalog ought to be attached when Huey starts up.
+    This is useful if you're regularly analyzing data from that catalog. 
+
+    Catalogs that are not auto-loaded can be manually attached when required.
+- **Key/Value Pairs** fieldset: The catalog's details are specified as a list of Key/Value pairs.
+  This fieldset lets you maintain a list of these key/value pairs that define the options for attaching to this catalog. 
   
   A key/value pair consists of the following controls:
-  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected secret type.
-  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the field. The Field types are:
+  - **Key** field. This is the left-most textfield. The key field is mandatory. It's just a text field, but it provides a list of suggestions based on the selected catalog type.
+  - Field **Type**. This is a drop down list that controls what kind of values can be entered for the key/value pair. The Field types are:
     - ☑: Checkbox, indicating the value is ```BOOLEAN``` and can have either a ```TRUE``` or a ```FALSE``` value.
     - […]: Array, indicating the value is a list of string values
     - txt: Plaintext field, indicating the value is a string value.
@@ -650,34 +660,37 @@ The Form is structured thus:
     However, the dialog always lets you manually override the default.  
   - **Value** field. This is the rightmost textfield. For the structured value-types Array and Map, this field does not exist. In these cases, the value is made up of key/value pairs that appear indented below the structured key type. 
 
-### Secret Manager Code view
-The Code tab lets you view and edit the secret as a DuckDB ```CREATE SECRET```-statement:
+### Catalogs Manager Code view
+The Code tab lets you view and edit the secret as a DuckDB ```ATTACH```-statement:
 
-<img width="867" height="390" alt="image" src="https://github.com/user-attachments/assets/bc647232-4cfd-4a29-a0f9-53b1613df754" />
+<img width="907" height="389" alt="image" src="https://github.com/user-attachments/assets/fa596507-612b-4948-9729-66dbb6b1bcf1" />
 
-The code editor is particularly useful if you already have the SQL for a secret and you want to quickly enter it into the Secrets Manager.
+The code editor is particularly useful if you already have the ```ATTACH```-statement code and you want to quickly enter it into the Catalogs Manager.
 
-Note that the code editor shows the secret as plaintext.
+Note that the code editor does not mask or redact any password fields.
   
-Which key/value pairs are appropriate or allowed, depends primarily on the secet type.
+Which key/value pairs are appropriate or allowed, depends primarily on the catalog type.
 In addition, some key/value pairs depend on each other.
-Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs you need to define a secret of a particular type.  
+
+Please refer to the DuckDB documentation of the corresponding extension to learn more about which key/value pairs are appropriate, and what values they should take.  
   
-## Creating a new Secret
+## Creating a new Catalog
 
-1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
-   This is on the left side of the Secrets Manager toolbar. 
-   Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
+1) Open the Catalogs Manager dialog and click the "Add Catalog" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/7a360d5c-5ca4-4090-ac26-941da31e0c90" />. 
+   This is on the left side of the Catalogs Manager toolbar. 
+   Alternatively, you may also click the "Add new remote catalog"-hyperlink, which appears next to that toolbar button if you didn't already select an existing catalog. 
 
-   You can now use either the Form-tab or the Code-tab to define the secret.
-2) In the form tab, enter a name for your new secret. Each secret has its own, unique name. 
+   You can now use either the Form-tab or the Code-tab to define the options for attaching to the catalog.
+2) In the form tab, enter a name for your new Catalog. Each Catalog has its own, unique name. 
 
-   Then, use the suggestions list to pick one of the well-known secret types.
-   If Huey does not provide a suggestion for a secret type that you know should be valid, then you can always override the type and enter one manually. 
+   Then, use the suggestions list to pick one of the well-known catalog types.
+   If Huey does not provide a suggestion for a catalog type that you know should be valid, then you can always override the type and enter one manually.
+
+   Then, enter the URL that serves as extrernal identifier for the remote catalog.
     
-   If you want the secret to be automatically loaded when Huey starts, also check the Autoload checkbox.
+   If you want the catalog to be automatically loaded when Huey starts, also check the Autoload checkbox.
    
-   <img width="930" height="546" alt="image" src="https://github.com/user-attachments/assets/b3c28027-65e4-44c9-9425-c067a3088f04" />
+   <img width="911" height="540" alt="image" src="https://github.com/user-attachments/assets/ca268f96-b4ed-4d20-ad59-b462f8d0086b" />
 
    In the key/value fieldset, a new blank entry is automatically created.
    Fill out at least one key/value entry is required.
@@ -701,10 +714,10 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
    - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
  and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
  -buttons.
-3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
+4) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
    Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
 
-4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+5) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
 will be available in the Secret Manager's toolbar. Click it to store the secret.
 
 # Secrets Manager
@@ -713,7 +726,7 @@ Huey includes a graphical user interface for <a href="https://duckdb.org/docs/cu
 The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
 
 ## Opening the Secrets Manager
-You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar:
+You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar. This is what it looks like:
 
 <img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
 
