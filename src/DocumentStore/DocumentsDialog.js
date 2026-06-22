@@ -522,6 +522,7 @@ class DocumentsDialog {
       this.newKeyValueUi();
     }
     else{
+      const changeEvent = new Event('change', {bubbles: true});
       const keyValuesFieldset = this.keyValuesFieldset;
       for (let i = 0; i < n; i++){
         const field = fields[i];
@@ -560,6 +561,9 @@ class DocumentsDialog {
             break;
           } 
         }
+        keyInput.dispatchEvent(changeEvent);
+        typeInput.dispatchEvent(changeEvent);
+        valueInput.dispatchEvent(changeEvent);
       }
     }
     this.syncDocumentCode();
