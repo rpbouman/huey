@@ -978,7 +978,7 @@ class AttributeUi {
           break;
         }
         else
-        if (analyticalRole === 'measure' && config.type === 'column'){
+        if (analyticalRole === 'measure' && ['column','member'].includes(config.type) ){
           aggregator = aggregator || 'sum';
         }
         
