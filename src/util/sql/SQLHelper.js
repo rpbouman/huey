@@ -683,7 +683,10 @@ const dataTypes = {
     defaultAnalyticalRole: 'measure',
     isNumeric: true,
     createFormatter: function(item){
-      const dataType = item.columnType;
+      let dataType = item.columnType;
+      if (item.memberExpressionPath){
+        dataType = getMemberExpressionType(dataType, item.memberExpressionPath);
+      }
       let factionalDigits;
       if (dataType) {
         const decimalTypeInfo = parseDecimalTypeDeclaration(dataType);
