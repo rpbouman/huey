@@ -108,7 +108,7 @@ class DocumentStoreUtils {
 /**
  * Abstract base class for IndexedDB-backed document stores with optional
  * per-store field-level encryption.
- *
+
  * Subclasses must implement {@link _defineStores} to declare their object stores.
  * Encryption (AES-GCM-256, key derived via PBKDF2-SHA-256) is applied for fields with type=password
  *
@@ -493,7 +493,7 @@ class DocumentStore {
     const migratedByStore = await Promise.all(
       stores.map(async conf => {
         const raw = await this.#getAllRaw(conf.name);
-        if (DocumentStoreUtils.hasPasswordFields(raw, conf.fieldsPath)){
+        if (raw.some(doc => DocumentStoreUtils.hasPasswordFields(doc, conf.fieldsPath))){
           const migrated = await Promise.all(raw.map(async doc => {
             const decrypted = await this.#decryptDoc(doc, conf.fieldsPath, oldKey);
             return this.#encryptDoc(decrypted, conf.fieldsPath, newKey);
@@ -501,7 +501,7 @@ class DocumentStore {
           return { conf, migrated };
         }
         else {
-          return { conf, conf };
+          return { conf, migrated: [] };
         }
       })
     );
@@ -667,12 +667,15 @@ class DocumentStore {
    * @returns {Promise<void>}
    */
   async resetCrypto() {
-    const encryptedStoreNames = [...this.#config().values()]
-      .filter(c => {
-        const docs = this.#getAllRaw(c.name);
-        return docs.some( doc => DocumentStoreUtils.hasPasswordFields(doc, c.fieldsPath) )
-      })
-      .map(c => c.name);
+    const stores = [...this.#config().values()];
+    const encryptedStoreNames = [];
+    for (const conf of stores) {
+      const docs = await this.#getAllRaw(conf.name);
+      const hasPassword = docs.some(doc => DocumentStoreUtils.hasPasswordFields(doc, conf.fieldsPath));
+      if (hasPassword) {
+        encryptedStoreNames.push(conf.name);
+      }
+    }
 
     // TODO: only remove the encryptd docs.
     await this.#tx(
@@ -704,5 +707,3 @@ class DocumentStore {
     );
   }
 }
-
-
