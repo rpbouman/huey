@@ -6,11 +6,28 @@ html > body:has(
     
     > .pivotTableUiTable {
 
+      > .pivotTableUiTableHeader {
+        > .pivotTableUiRow{
+          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"] {
+            filter: brightness( var( --huey-alternating-rows-brightness ) );
+          }
+        }
+      }
+
       > .pivotTableUiTableBody {
+
+        /* alternating group colos*/
+
+        > .pivotTableUiRow{
+          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"] {
+            filter: brightness( var( --huey-alternating-rows-brightness ) );
+          }
+        }
+
 
         /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
         > .pivotTableUiRow:nth-child(even){
-          > .pivotTableUiCell {
+          > .pivotTableUiValueCell {
             filter: brightness( var( --huey-alternating-rows-brightness ) );
           }
         }

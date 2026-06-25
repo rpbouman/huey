@@ -644,7 +644,9 @@ class PivotTableUi extends EventEmitter {
     var numRows = rows.length;
 
     // for each tuple
-    var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
+    const columnsOffset = columnsAxisSizeInfo.headers.columnCount;
+    const repeatingValueEvenOddNumbers = new Array(columnsOffset);
+    repeatingValueEvenOddNumbers.fill(-1);
     for (var i = columnsOffset; i < maxColumnIndex; i++){
       var tuple = tuples[tupleIndex];
       var prevTuple = tuples[tupleIndex - 1];
@@ -733,6 +735,14 @@ class PivotTableUi extends EventEmitter {
             else {
               isRepeatingValue = false;
             }
+            if (!isRepeatingValue) {
+              for (let k = j+1; k < repeatingValueEvenOddNumbers.length; k++){
+                repeatingValueEvenOddNumbers[k] = repeatingValueEvenOddNumbers[j];
+              }
+              repeatingValueEvenOddNumbers[j] += 1;
+            }
+            cell.setAttribute('data-repeating-value-seq', repeatingValueEvenOddNumbers[j] );
+            cell.setAttribute('data-even-odd-repeating-value', repeatingValueEvenOddNumbers[j] % 2);
             cell.setAttribute('data-is-repeating-value', isRepeatingValue);
           }
           else {
@@ -817,7 +827,11 @@ class PivotTableUi extends EventEmitter {
 
     var tableBodyDom = this.#getTableBodyDom();
     var rows = tableBodyDom.childNodes;
+    let alternatingRepeatingValueIndicator = false;
 
+    const columnsOffset = columnsAxisSizeInfo.headers.columnCount;
+    const repeatingValueEvenOddNumbers = new Array(columnsOffset);
+    repeatingValueEvenOddNumbers.fill(-1);
     for (var i = 0; i < rows.length - 1; i++) {
       var row = rows.item(i);
       var cells = row.childNodes;
@@ -835,7 +849,6 @@ class PivotTableUi extends EventEmitter {
       var isTotalsRow = Boolean(groupingId);
       row.setAttribute('data-totals', isTotalsRow);
 
-      var columnsOffset = columnsAxisSizeInfo.headers.columnCount;
       for (var j = 0; j < columnsOffset; j++){
         var queryAxisItem = queryAxisItems[j];
         var cell = cells.item(j);
@@ -914,6 +927,14 @@ class PivotTableUi extends EventEmitter {
             else {
               isRepeatingValue = false;
             }
+            if (!isRepeatingValue) {
+              for (let k = j+1; k < repeatingValueEvenOddNumbers.length; k++){
+                repeatingValueEvenOddNumbers[k] = repeatingValueEvenOddNumbers[j];
+              }
+              repeatingValueEvenOddNumbers[j] += 1;
+            }
+            cell.setAttribute('data-repeating-value-seq', repeatingValueEvenOddNumbers[j] );
+            cell.setAttribute('data-even-odd-repeating-value', repeatingValueEvenOddNumbers[j] % 2);
             cell.setAttribute('data-is-repeating-value', isRepeatingValue);
           }
           else {
