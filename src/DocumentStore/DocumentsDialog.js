@@ -309,12 +309,15 @@ class DocumentsDialog {
     const n = fieldContainers.length;
     for (let i = 0; i < n; i++){
       let fieldContainer = fieldContainers[i];
+      let fieldKey = this.getFieldKey(fieldContainer);
+      if (fieldKey.toUpperCase() === 'TYPE') {
+        continue;
+      }
       let indented = this.isFieldIndented(fieldContainer);
       if (indented) {
         throw new Error(`unexpected`);
       }
       let fieldType = this.getFieldType(fieldContainer);
-      let fieldKey = this.getFieldKey(fieldContainer);
       let fieldValue = this.getFieldValue(fieldContainer);
       let value;
       if (!fieldKey && !fieldValue) {
