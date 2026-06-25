@@ -87,7 +87,7 @@ class AttachParser extends SpecialPurposeParser {
     attachDocument.fields = result.fields;
     attachDocument.fields = attachDocument.fields.filter(field => {
       if (SpecialPurposeParser.typeRe.test(field.key)){
-        const type = field.value;        
+        const type = field.value;
         attachDocument.type = type;
         return false;
       }
@@ -110,6 +110,14 @@ class AttachParser extends SpecialPurposeParser {
       match = SpecialPurposeParser.throwParsingError('no content', position);
     }
     
+    let type;
+    attachDocument.fields = attachDocument.fields.filter(keyValuePair => {
+      if (keyValuePair.key.toUpperCase() === 'TYPE'){
+        attachDocument.type = keyValuePair.value;
+        return false;
+      }
+      return true;
+    });
     return attachDocument;
   }
 

@@ -44,6 +44,9 @@ class CatalogsDialog extends DocumentsDialog {
     documentObject = documentObject || this.documentObject;
     const fieldsPath = this.fieldsPath;
     const fields = documentObject[fieldsPath].map(field => {
+      if (field.key.toUpperCase() === 'TYPE') {
+        return '';
+      }
       const pair = this.fieldValuePairAsSQL(field)
       if (!pair || !pair.length) return '';
       return `\r\n, ${pair}`;
