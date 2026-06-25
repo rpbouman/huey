@@ -109,9 +109,9 @@ class DocumentsDialog {
     this.#password = null;
   }
   
-  async getAndDecryptDocument(key){
+  async getAndDecryptDocument(key, needToClearPassword){
     const store = AppDocumentStore.store;
-    const needToClearPassword = !this.isPasswordSet();
+    needToClearPassword = needToClearPassword === undefined? !this.isPasswordSet() : needToClearPassword;
     let documentObject;
     try {
       documentObject = await this.getDocumentFromStore(key);
@@ -1296,7 +1296,7 @@ class DocumentsDialog {
   }
   
   async load(name){
-    const documentObject = await this.getAndDecryptDocument(name);
+    const documentObject = await this.getAndDecryptDocument(name, false);
     return this.loadDocument(documentObject);
   }
 

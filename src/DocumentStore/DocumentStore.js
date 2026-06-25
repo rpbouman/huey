@@ -490,21 +490,18 @@ class DocumentStore {
     const stores = [...this.#config().values()];
 
     // Re-encrypt all docs in memory before touching IndexedDB
-    const migratedByStore = await Promise.all(
-      stores.map(async conf => {
-        const raw = await this.#getAllRaw(conf.name);
-        if (DocumentStoreUtils.hasPasswordFields(raw, conf.fieldsPath)){
-          const migrated = await Promise.all(raw.map(async doc => {
-            const decrypted = await this.#decryptDoc(doc, conf.fieldsPath, oldKey);
-            return this.#encryptDoc(decrypted, conf.fieldsPath, newKey);
-          }));
-          return { conf, migrated };
-        }
-        else {
-          return { conf, conf };
-        }
-      })
-    );
+    const migratedByStore = await Promise.all( stores.map(async conf => {
+      const raw = await this.#getAllRaw(conf.name);
+      const toBeMigrated = raw.filter(doc => DocumentStoreUtils.hasPasswordFields(doc, conf.fieldsPath));
+      
+      const migrated = await Promise.all(toBeMigrated.map(async doc => {
+        const decrypted = await this.#decryptDoc(doc, conf.fieldsPath, oldKey);
+        const encrypted = await this.#encryptDoc(decrypted, conf.fieldsPath, newKey);
+        return encrypted;
+      }));
+      
+      return {conf, migrated};
+    }));
 
     await this.#tx(
       [DocumentStore.STORE_META, ...stores.map(c => c.name)],
@@ -512,7 +509,7 @@ class DocumentStore {
       tx => {
         const meta = tx.objectStore(DocumentStore.STORE_META);
         meta.put(DocumentStoreUtils.toB64(newSalt), 'salt');
-        meta.put(newSentinel,               'sentinel');
+        meta.put(newSentinel, 'sentinel');
 
         for (const { conf, migrated } of migratedByStore) {
           const store = tx.objectStore(conf.name);
@@ -667,21 +664,31 @@ class DocumentStore {
    * @returns {Promise<void>}
    */
   async resetCrypto() {
-    const encryptedStoreNames = [...this.#config().values()]
-      .filter(c => {
-        const docs = this.#getAllRaw(c.name);
-        return docs.some( doc => DocumentStoreUtils.hasPasswordFields(doc, c.fieldsPath) )
-      })
-      .map(c => c.name);
-
-    // TODO: only remove the encryptd docs.
+    const stores = [...this.#config().values()];
+    const unencryptedDocs = {};
+    for (const conf of stores) {
+      const docs = await this.#getAllRaw(conf.name);
+      const unencrypted = docs.filter(doc => !DocumentStoreUtils.hasPasswordFields(doc, conf.fieldsPath));
+      unencryptedDocs[conf.name] = unencrypted;
+    }
+    const allStoreNames = [...this.#config().keys()];
     await this.#tx(
-      [DocumentStore.STORE_META, ...encryptedStoreNames],
+      [DocumentStore.STORE_META, ...allStoreNames],
       'readwrite',
       tx => {
         tx.objectStore(DocumentStore.STORE_META).clear();
-        for (const name of encryptedStoreNames)
-          tx.objectStore(name).clear();
+        
+        for (const name of allStoreNames){
+          const objectStore = tx.objectStore(name);
+          objectStore.clear();
+          const docs = unencryptedDocs[name];
+          if (!docs || !docs.length){
+            continue;
+          }
+          for (const doc of docs) {
+            objectStore.put(doc);
+          }
+        }
       }
     );
   }
