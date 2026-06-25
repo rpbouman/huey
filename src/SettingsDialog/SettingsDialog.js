@@ -171,7 +171,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(245,245,245)",
               "--huey-dark-background-color": "rgb(210,210,210)",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "99%",
               "--huey-light-border-color": "rgb(222,222,222)",
               "--huey-dark-border-color": "rgb(175,175,175)",
               "--huey-darkest-border-color": "rgb(100,100,100)",
@@ -193,7 +193,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
               "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
               "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
               "--huey-darkest-border-color": "rgb(30,144,255)",
@@ -215,7 +215,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
               "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
               "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
               "--huey-darkest-border-color": "rgb(70,130,180)",
@@ -237,7 +237,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "#A7D3A4",
               "--huey-dark-background-color": "#5B8266",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "#A5B479",
               "--huey-dark-border-color": "#334D56",
               "--huey-darkest-border-color": "#000000",
@@ -259,7 +259,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "#D2B48C",
               "--huey-dark-background-color": "#008080",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "#8B4513",
               "--huey-dark-border-color": "#2F4F4F",
               "--huey-darkest-border-color": "black",
@@ -281,7 +281,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(108,115,183)",
               "--huey-dark-background-color": "rgb(67,71,119)",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "97%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(99,46,64)",
               "--huey-dark-border-color": "rgb(42,34,55)",
               "--huey-darkest-border-color": "rgb(36,36,74)",
@@ -325,7 +325,7 @@ class Settings extends EventEmitter {
           "--huey-medium-background-color": "rgb(245,245,245)",
           "--huey-dark-background-color": "rgb(210,210,210)",
           "--huey-highlight-background-color": "rgb(050, 150, 255)",
-          "--huey-alternating-rows-brightness": "97%",
+          "--huey-alternating-rows-brightness": "99%",
           "--huey-light-border-color": "rgb(222,222,222)",
           "--huey-dark-border-color": "rgb(175,175,175)",
           "--huey-darkest-border-color": "rgb(100,100,100)",

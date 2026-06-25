@@ -7,8 +7,8 @@ html > body:has(
     > .pivotTableUiTable {
 
       > .pivotTableUiTableHeader {
-        > .pivotTableUiRow{
-          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"] {
+        > .pivotTableUiRow {
+          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"]:not( [data-totals=true] ) {
             filter: brightness( var( --huey-alternating-rows-brightness ) );
           }
         }
@@ -19,7 +19,7 @@ html > body:has(
         /* alternating group colos*/
 
         > .pivotTableUiRow{
-          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"] {
+          > .pivotTableUiHeaderCell[data-even-odd-repeating-value="0"]:not( [data-totals=true] ) {
             filter: brightness( var( --huey-alternating-rows-brightness ) );
           }
         }
@@ -27,7 +27,7 @@ html > body:has(
 
         /* https://github.com/rpbouman/huey/issues/431: alternating row colors */
         > .pivotTableUiRow:nth-child(even){
-          > .pivotTableUiValueCell {
+          > .pivotTableUiValueCell:not( [data-totals=true] ) {
             filter: brightness( var( --huey-alternating-rows-brightness ) );
           }
         }
