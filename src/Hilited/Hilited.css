@@ -99,6 +99,16 @@ section.hilited {
     background-color: Canvas;
     font-family: monospace;
     white-space: pre;
+    
+    &:not( [contenteditable] ),
+    &:is( [contenteditable=false] ) {
+      background-color: var( --huey-medium-background-color );
+    }
+
+    &:is( [contenteditable=true], [contenteditable="plaintext-only"] ) {
+      background-color: var( --huey-light-background-color );
+    }
+    
   }
 
 }
