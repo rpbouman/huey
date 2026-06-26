@@ -1170,6 +1170,8 @@ class AttributeUi {
     // for STRUCT columns and members, preload the child nodes (instead of lazy load)
     // this is necessary so that a search will always find all applicable attributes
     // with lazy load it would only find whatever happens to be visited/browsed already.
+    
+    // TODO: https://github.com/rpbouman/huey/issues/817 lazy load STRUCT members
     let typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
