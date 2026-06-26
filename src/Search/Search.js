@@ -33,7 +33,7 @@ function handleAttributeSearch(event, count){
   const attributeNodes = attributeUi.querySelectorAll(`details`);
   const matchingAttributeNodes = [];
   for (let i = 0; i < attributeNodes.length; i++){
-    const attributeNode = attributeNodes.item(i);
+    const attributeNode = attributeNodes[i];
     let match;
     if (searchString === '') {
       match = '';
@@ -44,11 +44,7 @@ function handleAttributeSearch(event, count){
       const labelTextNode = label.firstChild;
       const caption = label.textContent;
       match = regex.test(caption);
-      if (!match) {
-        match = false;
-        attributeNode.removeAttribute('open');
-      }
-      else {
+      if (match) {
         regex.lastIndex = 0;
         do {
           match = regex.exec(caption);
@@ -62,6 +58,11 @@ function handleAttributeSearch(event, count){
           regex.lastIndex = rangeEnd;
           highlight.add(range);
         } while (true);
+        match = true;
+      }
+      else {
+        match = false;
+        attributeNode.removeAttribute('open');
       }
     }
     attributeNode.setAttribute('data-matches-searchstring', match);
@@ -73,13 +74,14 @@ function handleAttributeSearch(event, count){
   
   // ensure the ancestors of the matching nodes are visible too
   for (let j = 0; j < matchingAttributeNodes.length; j++){
-    const parentNode = matchingAttributeNodes[i];
+    let parentNode = matchingAttributeNodes[j];
     while (
       (parentNode = parentNode.parentNode) && 
-      parentNode.nodeName === 'DETAILS' && 
-      parentNode.getAttribute('data-matches-searchstring') !== 'true'
+      parentNode.nodeName === 'DETAILS' 
     ) {
-      parentNode.setAttribute('data-matches-searchstring', 'true');
+      if (parentNode.getAttribute('data-matches-searchstring') !== 'true'){
+        parentNode.setAttribute('data-matches-searchstring', 'true');
+      }
       if (parentNode.getAttribute('open') === null){
         parentNode.setAttribute('open', true);
       }
