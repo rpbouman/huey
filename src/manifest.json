@@ -47,14 +47,35 @@
   "file_handlers": [
     {
       "action": ".",
-      "accept": {
-        "text/csv": [".csv"],
-        "text/tab-separated-values": [".tsv"],
-        "text/json": [".json", ".jsonl"],
-        "application/vnd.apache.parquet": [".parquet"],
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-        "application/duckdb": [".duckdb"],
-        "application/sqlite": [".sqlite"],
+      "accept": { "text/csv": [".csv"] }
+    },
+    {
+      "action": ".",
+      "accept": { "text/tab-separated-values": [".tsv"] }
+    },
+    {
+      "action": ".",
+      "accept": { "text/json": [".json", ".jsonl"] }
+    },
+    {
+      "action": ".",
+      "accept": { "application/vnd.apache.parquet": [".parquet"] }
+    },
+    {
+      "action": ".",
+      "accept": { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] }
+    },
+    {
+      "action": ".",
+      "accept": { "application/duckdb": [".duckdb"] }
+    },
+    {
+      "action": ".",
+      "accept": { "application/sqlite": [".sqlite"] }
+    },
+    {
+      "action": ".",
+      "accept": { 
         "application/hueyqh": [".hueyqh"],
         "application/hueyq": [".hueyq"]
       }
