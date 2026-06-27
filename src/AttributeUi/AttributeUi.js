@@ -1167,11 +1167,6 @@ class AttributeUi {
 
     this.#renderAttributeUiNodeHead(node, config);
 
-    // for STRUCT columns and members, preload the child nodes (instead of lazy load)
-    // this is necessary so that a search will always find all applicable attributes
-    // with lazy load it would only find whatever happens to be visited/browsed already.
-    
-    // TODO: https://github.com/rpbouman/huey/issues/817 lazy load STRUCT members
     let typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
@@ -1187,15 +1182,7 @@ class AttributeUi {
         typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
         break;
     }
-    if (
-      typeToCheckIfChildnodesAreNeeded && (
-        isStructType(typeToCheckIfChildnodesAreNeeded) || 
-        isMapType(typeToCheckIfChildnodesAreNeeded) ||
-        isArrayType(typeToCheckIfChildnodesAreNeeded)
-      )
-    ) {
-      this.#loadChildNodes(node);
-    }
+    
     return node;
   }
 
@@ -1458,7 +1445,7 @@ class AttributeUi {
     }
   }
 
-  #loadChildNodes(node){
+  loadChildNodes(node){
     const columnName = node.getAttribute('data-column_name');
     const columnType = node.getAttribute('data-column_type');
 
@@ -1537,7 +1524,7 @@ class AttributeUi {
     if (node.querySelector('details') !== null){
       return;
     }
-    this.#loadChildNodes(node);
+    this.loadChildNodes(node);
     this.#updateState();
   }
 
@@ -1579,7 +1566,7 @@ class AttributeUi {
       if (descendants.length > 0) {
         continue;
       }
-      this.#loadChildNodes(attributeNode);
+      this.loadChildNodes(attributeNode);
     }
     
     // make sure all the selectors checkboxes are (un)checked according to the query state.
