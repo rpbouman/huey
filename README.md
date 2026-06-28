@@ -316,7 +316,7 @@ To understand aggregates in Huey, it is useful to distinguish a few different wa
   This categorization refers to the method that is used to produce the output value based on the collection of input values.
   For example, a count simply returns the number of input values, while summation works by adding all the input values together and returning the total.
   
-  The attributes panel of the sidebar has a generic *count* aggregator at the very top.
+  The attributes tab of the sidebar has a generic *count* aggregator at the very top.
   All attributes also have a *count* and *distinct count* aggregator, which appears together with the [derived attributes](#derived-attributes) when you expand the attribute.
   
   Most attributes have a *statistics* folder which contains basic statistical descriptive operations like *min* (minimum), *max* (maximum), *median* and *mode*, as well as the special purpose *entropy* aggregator. 
@@ -363,8 +363,8 @@ In this regard they are somewhat similar to the totals feature, but without gene
 If we consider the entire pivot table as a SQL query, axis aggregates would be window functions over a partition of items from the axis on which it is placed.
 
 Axis aggregates are created by placing an aggregate item on any axis that is not the cells-axis.
-This can be done either by clicking the rows- or columns- button on an aggregate item in the Attributes panel.
-Alternatively, an aggregate item can be dragged from the Attributes panel to the axis. 
+This can be done either by clicking the rows- or columns- button on an aggregate item in the Attributes tab.
+Alternatively, an aggregate item can be dragged from the Attributes tab to the axis. 
 Finally, items on the cells axis can also be dragged and then dropped on a non-cells axis.
  
 Once the item is placed, any non-aggregate items that appear right before the new axis aggregate item are used to define its partition.
@@ -953,7 +953,7 @@ Huey needs the password to the secrets store to decrypt the password fields in t
 ## Activating, Deactivating and auto-attaching Catalogs
 In order to use a Catalog, it needs to be activated.
 Activating the Catalog simply means the equivalent ```ATTACH```-statement will be executed so that DuckDB can refer to it by name.
-In Huey, activating the catalog will also add it as a datasource to the Datasources Panel so you can browse its tables and views and select them for data analysis:
+In Huey, activating the catalog will also add it as a datasource to the Datasources tab so you can browse its tables and views and select them for data analysis:
 
 <img width="1310" height="581" alt="image" src="https://github.com/user-attachments/assets/d6f0265b-5906-494b-bcc6-7c2dd2ca5406" />
 
@@ -991,7 +991,7 @@ To connect to it from within Huey, follow [the steps for creating a new Catalog]
   <img width="864" height="385" alt="image" src="https://github.com/user-attachments/assets/f305cea2-202c-419c-9858-67e2aa9dca21" />
 - Save the catalog.
 
-If all goes well, the Catalog is now added to the Datasources Panel:
+If all goes well, the Catalog is now added to the Datasources tab:
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 ### TPCH Iceberg Catalog
@@ -1041,7 +1041,7 @@ Once the secret is in place, you can follow [the steps for creating a new Catalo
   <img width="939" height="383" alt="image" src="https://github.com/user-attachments/assets/4a40829f-6d0f-440f-9fd2-0e5fa3b68813" />
 - Save the catalog.
 
-If all goes well, the Catalog is now added to the Datasources Panel:
+If all goes well, the Catalog is now added to the Datasources tab:
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 # Development, Releases, and contributions 
