@@ -13,7 +13,7 @@ Or, __Try Huey now__ with some [sample reports](#getting-started) using the live
 
 ## Key features
 - Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or [connect to a remote catalog](#catalogs-manager).
-- Comprehensive [attributes menu](#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
+- Comprehensive [attributes tab](#attributes-derived-attributes-and-aggregates) to explore the structure of your dataset
 - Intuitive [query builder](#query-builder) that supports projection, [aggregation](#aggregates), [filtering](#filtering), and [(sub)totals](#subtotals)
 - A pivot table to present analysis results
 - Many different [aggregate functions](#aggregates) for reporting and data exploration
@@ -570,7 +570,7 @@ This button is visible as soon as items are placed unto the [query builder](#que
 
 <img width="761" height="488" alt="image" src="https://github.com/user-attachments/assets/fdf53b05-610e-48a3-a6da-46b775cb9779" />
 
-Note: if you want to export an entire datasource, then you can also go to the [Datasource tab](#datasource-tab) and click the download button on the datasource. 
+Note: if you want to export an entire datasource, then you can also go to the [Datasource tab](#datasource-tab) and click its Download button. 
 
 ### Title and Title template
 In the heder of the export dialog, you can control the title of the query by using the title template.
@@ -645,8 +645,8 @@ This tab bundles all settings that controls the default appearance of values
 - Max. fraction digits: the maximum number of fractional digits to denote
 
 ### Attributes
-Settings for behavior of the attributes menu in the sidebar.
-- Auto-reveal attributes used in query?: Whether to automatcially expand attribute nodes to reveal all items used in the query also in the attributes menu. This is useful when opening a query vi
+Settings for behavior of the Attributes tab in the sidebar.
+- Auto-reveal attributes used in query?: Whether to automatcially expand attribute nodes to reveal all items used in the query also in the Attributes tab. This is useful when opening a query vi
 
 ### Query
 Controls the behavior of the query editor.
@@ -1003,6 +1003,7 @@ To connect to it from within Huey, follow [the steps for creating a new Catalog]
 - Save the catalog.
 
 If all goes well, the Catalog is now added to the Datasources tab:
+
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 ### TPCH Iceberg Catalog
