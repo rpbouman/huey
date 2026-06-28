@@ -140,6 +140,38 @@ class CatalogsDialog extends DocumentsDialog {
     return autoLoadingEntries;
   }
 
+  openForCatalogDatasource(catalogDataSource) {
+    if (! (catalogDataSource instanceof DuckDbDataSource) ){
+      showErrorDialog({
+        'title': 'Not a Datasource',
+        'type': 'Type Error',
+        'description': 'Invalid Object Type: expected DuckDbDataSource.'
+      });
+      return;
+    }
+    if (catalogDataSource.getType() !== DuckDbDataSource.types.CATALOG) {
+      showErrorDialog({
+        'title': 'Not a Catalog',
+        'type': 'Type Error',
+        'description': `Invalid Object Type: expected DuckDbDataSource of type "${DuckDbDataSource.types.CATALOG}".`
+      });
+      return;
+    }
+    const catalogDefinition = catalogDataSource.getCatalogDefinition();
+    const documentsList = this.documentsList;
+    const options = documentsList.options;
+    for (let i = 0; i < options.length; i++ ){
+      const option = options[i];
+      if (option.value !== catalogDefinition.name){
+        continue;
+      }
+      documentsList.selectedIndex = i;
+      documentsList.dispatchEvent(new Event('change'));
+      break;
+    }
+    byId('attachRemote').click();
+  }
+
   constructor(config){
     config = Object.assign({}, config, {
       dialogId: 'catalogsDialog',
