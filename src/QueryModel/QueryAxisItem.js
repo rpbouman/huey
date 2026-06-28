@@ -265,7 +265,7 @@ class QueryAxisItem {
       If items have a member expression path, then we first need to unwrap that and get the type of the path.
       Once we have that, we can evaluate type hints like hasElementDataType, hasKeyArrayDataType, preservesColumnType
     */
-    if (queryAxisItem.memberExpressionPath) {
+    if (queryAxisItem.memberExpressionPath && queryAxisItem.memberExpressionPath.length) {
       const memberExpressionPath = queryAxisItem.memberExpressionPath;
       dataType = getMemberExpressionType(columnType, memberExpressionPath);
       if (memberExpressionPath[memberExpressionPath.length - 1].endsWith('()')){
@@ -292,7 +292,6 @@ class QueryAxisItem {
       }
       else
       if (derivationInfo.hasValueDataType || derivationInfo.hasValueArrayDataType){
-        dataType = getArrayElementType(dataType);
         dataType = getMemberExpressionType(dataType, 'value');
         if (derivationInfo.hasValueArrayDataType) {
           dataType = getArrayType(dataType);
