@@ -24,11 +24,6 @@ nav#sidebar[role=tablist] {
   > menu[role=toolbar] {
     padding: 0px;
     height: 23px;
-    /*
-    border-bottom-style: solid;
-    border-color: var(--huey-light-border-color);
-    border-width: 2px;
-    */
     display: block;
     margin-top: -2px;
 
@@ -74,14 +69,18 @@ nav#sidebar[role=tablist] {
     }*/
   }
   
-  &:has( > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:checked ) > div {
+  &:has( 
+    > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:checked 
+  ) > div {
     
     /**
     *
     * Hide attribute UI by default
     *
     */
-    &:has( > label[for=attributesTab]) {
+    &:has( 
+      > label[for=attributesTab]
+    ) {
       display: none;
     }
     
@@ -92,7 +91,7 @@ nav#sidebar[role=tablist] {
     */
     &:has( 
       > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > *
-    )  {
+    ) {
       display: block;
     }
 

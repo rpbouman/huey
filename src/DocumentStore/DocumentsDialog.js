@@ -503,7 +503,6 @@ class DocumentsDialog {
   
   loadDocument(documentObject){
     this.resetForm();
-    this.syncDocumentCode();
     if (!documentObject) {
       return false;
     }
@@ -941,12 +940,19 @@ class DocumentsDialog {
   }
 
       
-  async createDuckDbDocument(documentObject){
+  async createDuckDbDocument(documentObject, force){
     this.setBusy(true);
     const connection = window.hueyDb.connection;
     documentObject = documentObject || this.documentObject;
     do {
       try {
+        
+        if (force) {
+          const dropDocumentSql = this.getDropDocumentSQL(documentObject, force);
+          await connection.query( createDocumentSql ); 
+          break;
+        }
+        
         const createDocumentSql = this.getCreateDocumentSQL(documentObject);
         await connection.query( createDocumentSql ); 
         break;
@@ -1304,11 +1310,11 @@ class DocumentsDialog {
     throw new Error(`Should be implemented in subclass`);
   }
 
-  getDropDocumentSQL(){
+  getDropDocumentSQL(document, force){
     throw new Error(`Should be implemented in subclass`);
   }
 
-  getCreateDocumentSQL(){
+  getCreateDocumentSQL(document){
     throw new Error(`Should be implemented in subclass`);
   }
   
@@ -1326,7 +1332,7 @@ class DocumentsDialog {
         return;
       }
       for (let i = 0; i < n; i++){
-        const docEntry = list[i];
+        const docEntry = autoloadEntries[i];
         const name = docEntry.name;
         const documentObject = await this.getAndDecryptDocument(name);
         if (documentObject === null) {
@@ -1336,8 +1342,11 @@ class DocumentsDialog {
         if (loaded) {
           continue;
         }
-        console.warn(`Secret "${name}" failed to autoload.`);
+        else {
+          console.warn(`Failed to load document: "${name}"`)
+        }
       }
+      return autoloadEntries;
     }
     catch(error){
       console.log(error);
@@ -1379,8 +1388,8 @@ class DocumentsDialog {
       
       const connection = window.hueyDb.connection;
       
-      if (nameChanged && removeOld || exists){
-        await this.dropDuckDbDocument();
+      if (existingItem && !nameChanged || nameChanged && removeOld || exists){
+        await this.dropDuckDbDocument(oldName);
       }
 
       const success = await this.createDuckDbDocument(documentObject);

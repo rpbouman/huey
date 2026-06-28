@@ -2,7 +2,7 @@ nav#sidebar[role=tablist] {
   > div {
     > div[role=tabpanel]{
       
-      &:has( > div#datasourcesUi) {
+      &:has( > div#datasourcesUi ) {
         
         > div:has(
           > menu > label[for=uploader], 
@@ -56,13 +56,18 @@ nav#sidebar[role=tablist] {
             }
           }
         }
-        
       }
 
-      &:has( > div#datasourcesUi details) > div:has( 
+      &:has( > div#datasourcesUi details, > div#datasourcesUi[aria-busy=true] ) > div:has( 
         menu > label:is( [for=uploader], [for=loadFromUrl], [for="attachRemote"] )
       ) {
         display: none;
+      }
+      
+      &:has( > div#datasourcesUi details, > div#datasourcesUi:not( [aria-busy=true] ) ) {
+        > div.loader {
+          display: none;
+        }
       }
     }
   }
