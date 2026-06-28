@@ -4,9 +4,11 @@ class CatalogsDialog extends DocumentsDialog {
     return AttachParser.parse(sql);
   }
 
-  getDropDocumentSQL(name){
+  getDropDocumentSQL(name, force){
     if (!name){
       const documentObject = this.documentObject;
+    }
+    if (typeof name === 'object'){
       name = documentObject.name;
     }
     return `DETACH DATABASE IF EXISTS ${quoteIdentifierWhenRequired(name)}`;
@@ -126,6 +128,13 @@ class CatalogsDialog extends DocumentsDialog {
       items.push('</optgroup>');
     }
     documentsList.innerHTML = items.join('\n');
+  }
+
+  async activateAutoloadedDocuments(){
+    datasourcesUi.clear(true);
+    const ret = await super.activateAutoloadedDocuments();
+    datasourcesUi.setBusy(false);
+    return ret;
   }
 
   constructor(config){

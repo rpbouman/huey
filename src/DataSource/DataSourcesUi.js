@@ -117,14 +117,22 @@ class DataSourcesUi extends EventEmitter {
     });
     node.removeEventListener('toggle', this.#toggleDataSource);
   }
+  
+  clear(showBusy){
+    const datasourcesUi = this.getDom();
+    datasourcesUi.querySelectorAll('details').forEach(node => this.#freeEventHandlers(node) );
+    datasourcesUi.innerHTML = '';
+    this.setBusy(showBusy);
+  }
 
-  clear(content){
-    const dom = this.getDom();
-    dom.querySelectorAll('details').forEach(node => this.#freeEventHandlers(node) );
-    if (!content){
-      content = '';
+  setBusy(busy){
+    const datasourcesUi = this.getDom();
+    if (busy) {
+      datasourcesUi.setAttribute('aria-busy', busy);
     }
-    dom.innerHTML = content;
+    else {
+      datasourcesUi.removeAttribute('aria-busy');
+    }
   }
 
   #getLooseColumnType(columnType){
@@ -208,46 +216,52 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async #renderDatasources(){
-    this.clear();
-    const potentialGroups = await this.#getDatasourceGroupings();
+    try {
+      this.clear(false);
+      const potentialGroups = await this.#getDatasourceGroupings();
 
-    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.CATALOG]);
-    delete potentialGroups[DuckDbDataSource.types.CATALOG];
+      this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.CATALOG]);
+      delete potentialGroups[DuckDbDataSource.types.CATALOG];
 
-    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
-    delete potentialGroups[DuckDbDataSource.types.DUCKDB];
+      this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.DUCKDB]);
+      delete potentialGroups[DuckDbDataSource.types.DUCKDB];
 
-    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
-    delete potentialGroups[DuckDbDataSource.types.SQLITE];
+      this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.SQLITE]);
+      delete potentialGroups[DuckDbDataSource.types.SQLITE];
 
-    for (let groupId in potentialGroups){
-      const group = potentialGroups[groupId];
-      const groupDatasources = group.datasources;
-      const datasourceKeys = Object.keys(groupDatasources);
-      if (datasourceKeys.length === 1) {
-        const datasourceKey = datasourceKeys[0]
-        const datasource = groupDatasources[datasourceKey];
-        const datasourceType = datasource.getType();
-        let miscGroup = potentialGroups[datasourceType];
-        if (!miscGroup) {
-          miscGroup = potentialGroups[datasourceType] = {
-            type: datasourceType,
-            datasources: {}
+      for (let groupId in potentialGroups){
+        const group = potentialGroups[groupId];
+        const groupDatasources = group.datasources;
+        const datasourceKeys = Object.keys(groupDatasources);
+        if (datasourceKeys.length === 1) {
+          const datasourceKey = datasourceKeys[0]
+          const datasource = groupDatasources[datasourceKey];
+          const datasourceType = datasource.getType();
+          let miscGroup = potentialGroups[datasourceType];
+          if (!miscGroup) {
+            miscGroup = potentialGroups[datasourceType] = {
+              type: datasourceType,
+              datasources: {}
+            }
           }
+          miscGroup.datasources[datasource.getId()] = datasource;
         }
-        miscGroup.datasources[datasource.getId()] = datasource;
+        else {
+          this.#createDataSourceGroupNode(group);
+        }
+        delete potentialGroups[groupId];
       }
-      else {
-        this.#createDataSourceGroupNode(group);
-      }
-      delete potentialGroups[groupId];
-    }
 
-    this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
-    delete potentialGroups[DuckDbDataSource.types.FILE];
-    
-    // TODO: pass some data that tells listeners why we rerendered
-    this.fireEvent('change', {});
+      this.#createDataSourceGroupNode(potentialGroups[DuckDbDataSource.types.FILE], true);
+      delete potentialGroups[DuckDbDataSource.types.FILE];
+      
+      // TODO: pass some data that tells listeners why we rerendered
+      this.fireEvent('change', {});
+    }
+    catch (error){
+    }
+    finally {
+    }
   }
 
   static getCaptionForDatasource(datasource){
@@ -862,12 +876,14 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #addDatasource(datasource) {
+    this.clear(false);
     this.#attachRejectsDetection(datasource);
     const id = datasource.getId();
     this.#datasources[id] = datasource;
   }
 
   async addDatasources(datasources){
+    this.clear(true);
     datasources.forEach( datasource => this.#addDatasource(datasource) );
     await this.#renderDatasources();
   }
