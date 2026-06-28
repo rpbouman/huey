@@ -156,12 +156,12 @@ Successful actions are indicated by green progressbars. Succesfully loaded files
 #### Datasource Tab
 Successfully upload files are added to the Datasource tab.
 Each Datasource has a couple of buttons to work with the datasource:
-- The Download Button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/7e6ac900-b954-4828-9e6f-b59df36f427a" />
+- The Download Button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/7e6ac900-b954-4828-9e6f-b59df36f427a" />
  lets you download the data. You will be prompted to choose the output format. You can read more about data export in the section about the [Export dialog](#export).
-- The Datasource Settings button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/60163c45-6637-4411-b099-43d38e244224" />
+- The Datasource Settings button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/60163c45-6637-4411-b099-43d38e244224" />
 opens the Datasource Settings dialog.
-- The Remove button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/511dadaf-67b8-4a5f-8a69-0a0e4bc7cb48" /> removes the datasource from the tab.
-- The Analyze Datasource button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/0971342f-cb66-4415-9dd7-3e6d7185a2fe" /> loads the datasource attributes into the [Attributes tab](#exploring-datasources) so you can analyze its data using the [Quey builder](#query-builder).
+- The Remove button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/511dadaf-67b8-4a5f-8a69-0a0e4bc7cb48" /> removes the datasource from the tab.
+- The Analyze Datasource button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/0971342f-cb66-4415-9dd7-3e6d7185a2fe" /> loads the datasource attributes into the [Attributes tab](#exploring-datasources) so you can analyze its data using the [Quey builder](#query-builder).
  
 Huey will attempt to group files having similar column signature. The group appears as a separate top-level node in the Datasources tab, with its individual files indented below it. 
 A file group has its own explore button, so that you can not only explore the individual files, but also the UNION of all Files in the group:
@@ -197,7 +197,7 @@ Huey is not just for local files! You can also access remote data by registering
 #### Register URLs
 
 In addition to local files, you can also register URLs. 
-To register a URL, click the "Load data from URL" button on the toolbar load data from URL button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/a52332ff-e108-414a-a508-8148a03bbd42" />
+To register a URL, click the "Load data from URL" button on the toolbar load data from URL button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/a52332ff-e108-414a-a508-8148a03bbd42" />
 . 
 You will be prompted to enter the URL:
 
@@ -565,7 +565,7 @@ Hitting the Clone button on the toolbar will open a new instance of Huey in a ne
 
 ## Export
 Huey provides an export dialog that lets you use the query and/or its results outside Huey.
-The export dialog can be opened by clicking the download button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/5136576c-e3d2-4399-b4b4-5b2dc1454a6b" />.
+The export dialog can be opened by clicking the download button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/5136576c-e3d2-4399-b4b4-5b2dc1454a6b" />.
 This button is visible as soon as items are placed unto the [query builder](#query-builder).
 
 <img width="761" height="488" alt="image" src="https://github.com/user-attachments/assets/fdf53b05-610e-48a3-a6da-46b775cb9779" />
@@ -670,7 +670,7 @@ Huey includes a graphical user interface for <a href="https://duckdb.org/docs/cu
 The Huey Secrets Manager is a dialog that lets you create, edit, and store DuckDB secrets for services like AWS S3, Google Cloud Storage, Azure Blob Storage, Hugging Face, and more.
 
 ## Opening the Secrets Manager
-You can open the Secrets Manager by clicking the Secrets Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar. This is what it looks like:
+You can open the Secrets Manager by clicking the Secrets Manager button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/51965a31-e464-4a2f-b293-7139f3983208" /> from the right side of the main toolbar. This is what it looks like:
 
 <img width="868" height="378" alt="image" src="https://github.com/user-attachments/assets/95352553-51ed-45e0-aa69-3ff2d3906f98" />
 
@@ -730,7 +730,7 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
   
 ## Creating a new Secret
 
-1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
+1) Open the Secrets Manager dialog and click the "Add Secret" button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/249b53a4-ea98-4d97-8feb-3b4710c23b3c" />. 
    This is on the left side of the Secrets Manager toolbar. 
    Alternatively, you may also click the "Create a new secret"-hyperlink, which appears next to that toolbar button if you didn't already select an existing secret. 
 
@@ -761,15 +761,15 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
 
    To work with the existing fields, use the action buttons to the left of the key field:
    - You can add as many key/value pairs as you like,
-     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
-   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
-   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
- and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
+     Just click the "Add key/value pair"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+ and "Move key/value pair down" <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
  -buttons.
 3) You can switch to the Code tab to see the equivalent ```CREATE SECRET```-statement.
    Alternatively, you could have pasted or entered a ```CREATE SECRET```-statement, and then switch to the Form-tab, which would then be populated accordingly.
 
-4) If the secret appears valid, the "Save Secret"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+4) If the secret appears valid, the "Save Secret"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
 will be available in the Secret Manager's toolbar. Click it to store the secret.
 
 ## Encryption of password fields
@@ -789,11 +789,11 @@ It is important to realize the password itself is never stored.
 This means that once the store is initialized with a password, you can only decrypt the documents in the store using that password.
 So, make sure you don't lose it!
 
-You can always change the password later on by clicking the "Change Password"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6925118d-57a3-4703-ab57-d775d02e5d46" />. 
+You can always change the password later on by clicking the "Change Password"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/6925118d-57a3-4703-ab57-d775d02e5d46" />. 
 This is available on the right side of the Secrets Manager's toolbar.
 
 If you lose your password, there is no way to recover any of the encrypted fields. 
-In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
+In this case you can delete all encrypted documents by clicking the "Reset Secrets Store"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/74b69928-fa04-4fdc-87a2-8d881ebe7f3c" />
 .
 ## Activating, Deactivating and auto-loading secrets
 In order to use a secret, it needs to be activated.
@@ -804,8 +804,8 @@ Secrets that are marked for auto-load are also automatically activated on Huey s
 Activating a secret may result in a prompt for the password if the secret contains key/value pairs of the password-type.
 
 If a secret is selected in the secrets list, the toolbar will show one of these buttons, depending on its activation status:
-- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
-- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
+- Deactivated button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/54af7f3b-15a1-48aa-b7c7-a73bc76212d3" />, indicating the secret is currently not active.
+- Activated button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/9b3a747b-bdb1-4dd2-998b-88e3acaef6f1" />
 , indicating the secret is currently active. In addition, active secrets are marked up bold in the list.
 Hovering over the Activate/Deactive button reveals an action to change the state:
 - if the secret is in the active state, clicking the corresponding toolbar button deactivas it
@@ -829,7 +829,7 @@ Huey provides a Catalogs Manager, wich is a graphical user interface to create, 
 The Catalogs Manager also integrates with the [Secrets Manager](#secrets-manager), as attaching a remote catalog often requires authentication.
 
 ## Opening the Catalogs Manager
-You can open the Catalogs Manager by clicking the Catalogs Manager button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/044ddba4-d0f1-431a-a5b5-5e3514af52e1" />
+You can open the Catalogs Manager by clicking the Catalogs Manager button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/044ddba4-d0f1-431a-a5b5-5e3514af52e1" />
  from the left side of the main toolbar. 
  
 This is what it looks like:
@@ -900,7 +900,7 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
   
 ## Creating a new Catalog
 
-1) Open the Catalogs Manager dialog and click the "Add Catalog" button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/7a360d5c-5ca4-4090-ac26-941da31e0c90" />. 
+1) Open the Catalogs Manager dialog and click the "Add Catalog" button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/7a360d5c-5ca4-4090-ac26-941da31e0c90" />. 
    This is on the left side of the Catalogs Manager toolbar. 
    Alternatively, you may also click the "Add new remote catalog"-hyperlink, which appears next to that toolbar button if you didn't already select an existing catalog. 
 
@@ -935,15 +935,15 @@ Please refer to the DuckDB documentation of the corresponding extension to learn
 
    To work with the existing fields, use the action buttons to the left of the key field:
    - You can add as many key/value pairs as you like,
-     Just click the "Add key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
-   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
-   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
- and "Move key/value pair down" <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
+     Just click the "Add key/value pair"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/cc19cbf3-e9bd-490e-ae21-5bb857ecc05c" /> that appears immediately before the key field to create a new one.
+   - To remove a key/value pair, click the "Remove key/value pair"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/ed254611-be25-4e3c-a0d4-842a7c1e9838" />.
+   - You can also move the key/value pairs around using the "Move key/value pair up" <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/6729a7b2-b6e1-484d-a3b2-60f2475d1a68" />
+ and "Move key/value pair down" <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/90cca24d-7ba0-4c02-8879-cc3fad743e75" />
  -buttons.
 4) You can switch to the Code tab to see the equivalent ```ATTACH```-statement.
    Alternatively, you can paste or enter an ```ATTACH```-statement, and then switch to the Form-tab. The form will be automatically populated accordingly.
 
-5) If the catalog appears valid, the "Save Catalog"-button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
+5) If the catalog appears valid, the "Save Catalog"-button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/edd7a839-2751-46f4-8452-bcdf06ef934a" />
 will be available in the Catalogs Manager's toolbar. Click it to store the secret.
 
 ### Managing Catalog Authentication
@@ -972,9 +972,9 @@ Catalogs are automcatically activated on save.
 Catalogs marked for auto-load are also automatically activated on Huey startup.
 
 If a catalog is selected in the catalogs list, the toolbar will show one of these buttons, depending on its attachement status:
-- Deactivated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/c04e588e-c3b2-4fcd-a2d5-fafb9103d21a" />
+- Deactivated button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/c04e588e-c3b2-4fcd-a2d5-fafb9103d21a" />
 , indicating the catalog is currently not attached.
-- Activated button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/fcc8a8ef-e9b3-454a-8baf-4b184e70f6fe" />
+- Activated button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/fcc8a8ef-e9b3-454a-8baf-4b184e70f6fe" />
 , indicating the catalog is currently attached. In addition, active catalogs are marked up bold in the list.
 Hovering over the Activate/Deactive button reveals an action to change the state:
 - if the catalog is attached, clicking the button will detach it.
