@@ -525,11 +525,14 @@ Items on the row or columns axis have a "totals" toggle-icon. When enabled, tota
 
 ## Saving & Restoring your query 
 
+
 ### Saving Queries
-Everytime you make a change to your query it will be encoded and appended to the URL as fragment (a.k.a. hash or anchor). You can bookmark the url and revisit it later, or you can copy the url from your browser's address bar and share it. 
+Everytime you make a change to your query it will be encoded and appended to the URL as fragment (a.k.a. hash or anchor). 
+You can bookmark the url and revisit it later, or you can copy the url from your browser's address bar and share it. 
 
 ### Restoring Queries
-You can load queries simply by navigating to the respective url (including the fragment). The fragment includes the query and a reference to the datasource - not the actual data itself.
+You can load queries simply by navigating to the respective url (including the fragment). 
+The fragment includes the query and a reference to the datasource - not the actual data itself.
 
 When restoring the query, Huey checks if there is currently a datasource present that matches the referenced datasource's name and column signature. If so, it will use it. If there is currently no datasource that matches the referenced one, Huey will prompt you so you can upload it. 
 
@@ -539,7 +542,7 @@ If the referenced datasource does not exist, but there are other datasources tha
 
 ![image](https://github.com/user-attachments/assets/4bed7810-74e9-4080-a6b5-dda478501870)
 
-If the datasource is built on a URL, Huey will attempt to access it directly. If that succeeds, you won't be prompted to confirm: Huey will simply load the remote datasource and restore the query. 
+If the datasource uses an URL as datasource, Huey will attempt to access it directly. If that succeeds, you won't be prompted to confirm: Huey will simply load the remote datasource and restore the query. 
 
 ### Undo & Redo
 
@@ -576,16 +579,24 @@ This tab bundles all settings that controls the default appearance of values
 - Min. integer digits: the minimal number of digits to use to denote the integer part of numbers
 - Min. fraction digits: the minimal number of fractional digits to denote
 - Max. fraction digits: the maximum number of fractional digits to denote
+
+### Attributes
+Settings for behavior of the attributes menu in the sidebar.
+- Auto-reveal attributes used in query?: Whether to automatcially expand attribute nodes to reveal all items used in the query also in the attributes menu. This is useful when opening a query vi
+
 ### Query
 Controls the behavior of the query editor.
 - Autorun: whether queries execute automatically after editing the query
+
 #### Filter
 Settings to control the Query's filter behavior
 - Search timeout (ms): the number of milliseconds to wait after user input before running a query to populate the filter picklist.
 - Picklist pagesize: the number of rows to fetch per query to populate the filter picklist.
+
 ### Pivot Table
 Settings that control the appearance and behavior of the Pivot Table
 - Max. cellwidth (ch): Columns grow according to the largest value, up to this value. The unit is ch - the number of characters.
+
 ### Theme
 - Themes dropdown: a dropdown showing the various themes/color schemes.
 
