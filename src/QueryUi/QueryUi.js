@@ -941,7 +941,7 @@ class QueryUi {
           break;
         case QueryModel.AXIS_COLUMNS:
         case QueryModel.AXIS_ROWS:
-          primaryAxisActionLabelTitle = 'Flip the rows and columns axes';
+          primaryAxisActionLabelTitle = 'Flip the rows and columns axes.';
           break;
         case QueryModel.AXIS_CELLS:
           primaryAxisActionLabelTitle = this.#getCellsAxisPrimaryActionTitle();

@@ -162,7 +162,7 @@
       <option value="&#30;">record separator</option>
       <option value="&#31;">unit separator</option>
       <option value="!">exclamation mark</option>
-      <option value=" ">space</option>
+      <option value=" ">Space</option>
     </datalist>
 
     <datalist id="commonCsvQuoteCharacters">
@@ -388,10 +388,7 @@
           <input
             id="exportTitleTemplate"
             type="text"
-            title="
-              Export filename template. Special fields ${datasource}, ${cells-itms}, ${rows-items}, ${columns-items}, and ${filters-items} are replaced with the respective element from the current query.
-              Use fields ${timestamp} or ${iso-timestamp} to include date/time.
-            "
+            title="Export filename template. Special fields ${datasource}, ${cells-itms}, ${rows-items}, ${columns-items}, and ${filters-items} are replaced with the respective element from the current query. Use fields ${timestamp} or ${iso-timestamp} to include date/time."
             value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
           />
           <label
@@ -448,7 +445,7 @@
               id="exportDestinationClipboard"
               type="radio"
               name="exportDestination"
-              title="Check to copy the data to the clipboard in order to paste it in other applications"
+              title="Check to copy the data to the clipboard so you can paste it in other applications"
             />
           </fieldset>
         </form>
@@ -501,7 +498,7 @@
                 >Date Format</label>
                 <input
                   id="exportDelimitedDateFormat"
-                  title="Enter a valid DuckDB date format string."
+                  title="Enter a valid DuckDB DATE format string."
                   type="text"
                   value="%x"
                   list="commonDateFormats"
@@ -512,7 +509,7 @@
                 >Timestamp Format</label>
                 <input
                   id="exportDelimitedTimestampFormat"
-                  title="Enter a valid DuckDB timestamp format string."
+                  title="Enter a valid DuckDB TIMESTAMP format string."
                   type="text"
                   value="%c"
                   list="commonTimestampFormats"
@@ -590,7 +587,7 @@
               >Include Headers</label>
               <input
                 id="exportXlsxIncludeHeaders"
-                title="Check this to include a header row with column names."
+                title="Check this to include a header line with column names."
                 type="checkbox"
                 checked="true"
               />
@@ -658,7 +655,7 @@
                   id="exportJsonDateFormat"
                   type="text"
                   value="%x"
-                  title="Enter a valid DuckDB date format string."
+                  title="Enter a valid DuckDB DATE format string."
                 />
                 <label
                   for="exportJsonTimestampFormat"
@@ -667,7 +664,7 @@
                 <input
                   id="exportJsonTimestampFormat"
                   type="text"
-                  title="Enter a valid DuckDB timestamp format string."
+                  title="Enter a valid DuckDB TIMESTAMP format string."
                   value="%c"
                 />
               </fieldset>
@@ -869,7 +866,7 @@
         <button
           id="exportDialogExecuteButton"
           autofocus="true"
-        >Export</button>
+        >Export...</button>
         <button
           id="exportDialogCloseButton"
           popovertarget="exportDialog"
@@ -1504,9 +1501,9 @@
       <label title="De-activate the current secret">
         <input type="radio" name="activation" value="deactivate" checked="true"/>
       </label>
-      <output name="usageHint" role="note"><a href="javascript:secretsDialog.createNewButton.click()">Create a new secret</a><span>, or select a secret from the list to edit or remove it</span>.</output>
+      <output name="usageHint" role="note"><a href="javascript:secretsDialog.createNewButton.click()">Create a new secret</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
       <output name="formInvalidHint" role="alert">Fill out all required fields to save the secret.</output>
-      <label title="Change password">
+      <label title="Change Password">
         <button name="changePassword">Change Password</button>
       </label>
       <label title="Reset the secrets store">
@@ -1574,7 +1571,7 @@
       <input
         name="autoload"
         type="checkbox"
-        title="ATTACH this catalog automatically when opening Huey?"
+        title="Attach this catalog automatically when opening Huey?"
       />
       <label>URL</label>
       <input 
@@ -1616,11 +1613,11 @@
             title="Select the field data type (input method) for the value field"
             name="type"
           >
-            <option value="checkbox" title="Boolean">&#x2611;</option>
-            <option value="list" title="List">[&#x2026;]</option>
-            <option value="text" title="Plaintext" selected="true">txt</option>
-            <option value="password" title="Encrypted">***</option> 
-            <option value="map" title="Map">{&#x2026;}</option>
+            <option translate="no" value="checkbox" title="Boolean">&#x2611;</option>
+            <option translate="no" value="list" title="List">[&#x2026;]</option>
+            <option translate="no" value="text" title="Plaintext" selected="true">txt</option>
+            <option translate="no" value="password" title="Encrypted">***</option> 
+            <option translate="no" value="map" title="Map">{&#x2026;}</option>
           </select>
         </span>
         <span>
@@ -1646,7 +1643,7 @@
       </label>
       <output name="usageHint" role="note"><a href="javascript:catalogsDialog.createNewButton.click()">Add a new remote catalog</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
       <output name="formInvalidHint" role="alert">Fill out all required fields to save the remote catalog entry.</output>
-      <label title="Browse Catalog">
+      <label title="Browse Catalog...">
         <button name="browseCatalog">Browse Catalog...</button>
       </label>
     </template>
@@ -1664,25 +1661,26 @@
         <menu role="toolbar">
           <input type="checkbox" name="editingActive" title="editing active"/> 
           <input type="checkbox" name="unsavedChanges" title="unsaved changes"/>
-          <label title="Create new">
+          <label title="Create New">
             <button name="createNew">Create New</button>
           </label>
-          <label title="Remove current">
+          <label title="Remove Current">
             <button name="removeCurrent">Remove Current</button>
           </label>
-          <label title="Save current">
+          <label title="Save Current">
             <button name="saveCurrent">Save Current</button>
           </label>
-          <label title="Restore current">
+          <label title="Restore Current">
             <button name="restoreCurrent">Restore Current</button>
           </label>
         </menu>
         <form>
           <nav>
             <select 
+              translate="no"
               name="documentsList"
               multiple="true"
-              title="Select a secret to edit or remove it."
+              title="Select an item to edit or remove it."
             ></select>
           </nav>
           <section role="tablist">
@@ -2157,7 +2155,7 @@
           />
           <div role="tabpanel">
             <menu role="toolbar">
-              <button id="csvReaderDownloadRejects">Download</button>
+              <button id="csvReaderDownloadRejects">Download...</button>
               <button id="csvReaderClearRejects">Clear</button>
             </menu>
             <section style="height: calc( 100% - 40px ) ">
@@ -2643,12 +2641,12 @@
         <label for="navigateBack" title="Navigate backward (undo)...">
           <button
             id="navigateBack"
-          >Navigate back (undo)</button>
+          >Navigate backward (undo)...</button>
         </label>
         <label for="navigateForward" title="Navigate forward (redo)...">
           <button
             id="navigateForward"
-          >Navigate forward (redo)</button>
+          >Navigate forward (redo)...</button>
         </label>
         
 
