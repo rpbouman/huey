@@ -1008,6 +1008,15 @@ You can verify the current Huey version in the about dialog:
 
 Note that this also gives info on the versions of Huey's dependencies.
 
+## URL Query Parameters
+
+Some Huey settings can be configured via URL query parameters.
+For typical usage it is not recommended to pass these parameters. 
+The main purpose is for development, debugging and to solve compatibility issues.
+
+- `loglevel`: Controls the DuckDB WASM loglevel. Valid values are defined by the [DuckDB/WASM LogLevel Enumeration](https://shell.duckdb.org/docs/enums/index.LogLevel.html). You can pass either the Enumeration keys (`DEBUG`, `ERROR`, `INFO`, `NONE`, `WARNING`) or their corresponding integer values.
+- `duckdb-wasm`: DuckDB WASM version as published on jsdelivr. See [https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm](https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm) for a list of acceptable versions. The ability to control the DuckDB WASM version is mostly to solve compatibility issues around DuckDB extensions, as some extensions required by the user may not yet be available for newer DuckDB WASM versions.
+
 ## Integrating and/or Embedding Huey
 
 You can embed huey inside a frame on your own webpage and control the application by sending it commands using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">`postMessage()`-method</a>.
