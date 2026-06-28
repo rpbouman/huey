@@ -476,9 +476,19 @@ class AttributeUi {
       expressionTemplate: "length( ${columnExpression} )",
       columnType: 'BIGINT'
     },
+    'grapheme count':{
+      folder: 'string operations',
+      expressionTemplate: "length_grapheme( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
     'lowercase': {
       folder: 'string operations',
       expressionTemplate: "LOWER( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'normalize (NFC)':{
+      folder: 'string operations',
+      expressionTemplate: "nfc_normalize( ${columnExpression} )",
       columnType: 'VARCHAR'
     },
     'NOACCENT': {

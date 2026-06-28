@@ -65,6 +65,8 @@
 [data-derivation=NOACCENT]{ --item-icon: var( --icon-letter-case ); }
 [data-derivation=NOCASE]{ --item-icon: var( --icon-letter-case ); }
 [data-derivation='first letter']{ --item-icon: var( --icon-sort-a-z ); }
+[data-derivation='normalize (NFC)']{ --item-icon: var( --icon-language ); }
+
 
 /* ─── Size / length derivations ───────────────────────────────────────────── */
 
@@ -72,6 +74,7 @@
 [data-derivation='cardinality'],
 [data-derivation='unique values length'],
 [data-derivation='length'],
+[data-derivation='grapheme count'],
 [data-derivation='octet-length']{ --item-icon: var( --icon-ruler-3 ); }
 
 /* ─── Index derivations ───────────────────────────────────────────────────── */
