@@ -496,6 +496,7 @@ class DataSourcesUi extends EventEmitter {
 
     switch (type) {
       case DuckDbDataSource.types.CATALOG:
+        this.#createDatasourceNodeEditActionButton(datasourceId, summary);
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
         this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
@@ -647,8 +648,15 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #configureDatasourceClicked(event){
-    const datasource = this.#getDatasourceFromClickEvent(event);
-    datasourceSettingsDialog.open(datasource);
+    const dataSource = this.#getDatasourceFromClickEvent(event);
+    const type = dataSource.getType();
+    switch( type ){
+      case DuckDbDataSource.types.CATALOG:
+        catalogsDialog.openForCatalogDatasource(dataSource);
+        break;
+      default:
+        datasourceSettingsDialog.open(dataSource);
+    }
   }
   
   static #getDownloadMenuHTML(fromFileType, includeFromFileType){
