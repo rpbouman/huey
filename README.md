@@ -155,7 +155,14 @@ Successful actions are indicated by green progressbars. Succesfully loaded files
 
 #### Datasource Tab
 Successfully upload files are added to the Datasource tab.
-
+Each Datasource has a couple of buttons to work with the datasource:
+- The Download Button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/7e6ac900-b954-4828-9e6f-b59df36f427a" />
+ lets you download the data. You will be prompted to choose the output format. You can read more about data export in the section about the [Export dialog](#export).
+- The Datasource Settings button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/60163c45-6637-4411-b099-43d38e244224" />
+opens the Datasource Settings dialog.
+- The Remove button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/511dadaf-67b8-4a5f-8a69-0a0e4bc7cb48" /> removes the datasource from the tab.
+- The Analyze Datasource button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/0971342f-cb66-4415-9dd7-3e6d7185a2fe" /> loads the datasource attributes into the [Attributes tab](#exploring-datasources) so you can analyze its data using the [Quey builder](#query-builder).
+ 
 Huey will attempt to group files having similar column signature. The group appears as a separate top-level node in the Datasources tab, with its individual files indented below it. 
 A file group has its own explore button, so that you can not only explore the individual files, but also the UNION of all Files in the group:
 
@@ -563,7 +570,7 @@ This button is visible as soon as items are placed unto the [query builder](#que
 
 <img width="761" height="488" alt="image" src="https://github.com/user-attachments/assets/fdf53b05-610e-48a3-a6da-46b775cb9779" />
 
-Note: if you want to export an entire datasource, then you can also go to the datasource tab and click the download button on the datasource. 
+Note: if you want to export an entire datasource, then you can also go to the [Datasource tab](#datasource-tab) and click the download button on the datasource. 
 
 ### Title and Title template
 In the heder of the export dialog, you can control the title of the query by using the title template.
@@ -590,7 +597,7 @@ This controls what to do with the exported data:
 The export dialog lets you export query results in various file formats like csv, parquet, or JSON. 
 Each file type has its own tab with settings specific to that format.
 
-Note: the format-specific options configured in the Export dialog are in general also applied when downloading the contents of a datasource from the datasource tab. 
+Note: the format-specific options configured in the Export dialog are in general also applied when downloading the contents of a datasource from the [Datasource tab](#datasource-tab). 
 
 ### Delimited text
 Use this to export delimited text, like CSV and TSV. Delimited text settings:
