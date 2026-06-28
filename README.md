@@ -553,12 +553,65 @@ Because the query state updates the page url, you can use the browser's standard
 Hitting the Clone button on the toolbar will open a new instance of Huey in a new browser tab, while preserving the existing data sources as well as the current query.
 
 ## Export
-Huey provides export capabilities so you can use the results of your analysis outside huey.
-The export dialog lets you export query results by downloading it as csv, parquet, or JSON file, or you can choose to have your results copied to your operating system clipboard.
+Huey provides an export dialog that lets you use the query and/or its results outside Huey.
+The export dialog can be opened by clicking the download button <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/5136576c-e3d2-4399-b4b4-5b2dc1454a6b" />.
+This button is visible as soon as items are placed unto the [query builder](#query-builder).
 
-Apart from the result data, Huey also lets you export the SQL statements that would produce the query result.
+<img width="761" height="488" alt="image" src="https://github.com/user-attachments/assets/fdf53b05-610e-48a3-a6da-46b775cb9779" />
 
-![image](https://github.com/user-attachments/assets/d0cf66e0-9e03-4dd6-a888-c4da3bf46cac)
+Note: if you want to export an entire datasource, then you can also go to the datasource tab and click the download button on the datasource. 
+
+### Title and Title template
+In the heder of the export dialog, you can control the title of the query by using the title template.
+The title template can contain "fields" using `${<field-name>]}` syntax, which will get dynamically replaced.
+The title field shows the resulting text after the replacement. 
+
+The fields are:
+- `${datasource}`: the name of the datasource used by the query.
+- `${<axis>-items}`: the list of captions of the items appearing on that axis, where `<axis>` is the name of the axis. So the actual fields are `${columns-items}`, `${rows-items}`, `${cells-items}` and `${filter-items}`.
+- `${utc-timestamp}`: The UTC timestamp,
+- `${timestamp}`: The local timestamp
+
+### Data structure
+How the result data will be exported. The options are:
+- Pivot: the shape of the result data follows the pivot table.
+- Table: the data is tabular, creating rows containing the values from all query axes. This may be more convenient for further data analysis outside Huey.
+
+### Export Destination
+This controls what to do with the exported data:
+- File: the data will be downloaded to a file
+- Clipboard: the data is copied to the clipboard so you can paste it another application.
+
+## Export Format Tabs
+The export dialog lets you export query results in various file formats like csv, parquet, or JSON. 
+Each file type has its own tab with settings specific to that format.
+
+Note: the format-specific options configured in the Export dialog are in general also applied when downloading the contents of a datasource from the datasource tab. 
+
+### Delimited text
+Use this to export delimited text, like CSV and TSV. Delimited text settings:
+- Formatting: this controls value formatting
+  - Date format: the [DuckDB date format specifier](https://duckdb.org/docs/lts/sql/functions/dateformat#format-specifiers) to use for representing values of the `DATE`-datatype. 
+  - Timestamp format: the [DuckDB date format specifier](https://duckdb.org/docs/lts/sql/functions/dateformat#format-specifiers) to use for representing values of the `TIMESTAMP`-datatype. 
+  - `NULL`-value string: A string to use to represent `NULL`-values. 
+- Delimiters: this controls how rows and fields are represented
+  - Column delimiter: the field delimiter. There's a list of suggestions available. 
+  - Quote character: the character used to quote values in case the value contains some meta-character. 
+  - Escape character: the character used to escape the quote character. 
+### Excel
+Use this to export the data to the Excel `.xlsx`-format.
+### JSON
+Use this to export data to `JSON` or `JSONL`-format.
+### Parquet
+Use this to export data to the `.parquet`-format.
+### SQL
+Use this to export the SQL query that would produce the result dataset.
+
+Note that this option does not export any data; only the SQL statement that would produce the query result. 
+### Query
+This option you export the state of the Querybuilder.
+
+Note that this option does not export any data; only the structure of the Huey query is exported.
 
 ## Settings
 The settings dialog lets you control Huey's behavior. You can open the settings dialog by clicking the "gear" icon, which is on the right in the top toolbar:![Gear icon](https://github.com/user-attachments/assets/c1d53e42-8d41-4128-ab06-12263e284edc)
