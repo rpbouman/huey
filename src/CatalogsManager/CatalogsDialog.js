@@ -131,10 +131,13 @@ class CatalogsDialog extends DocumentsDialog {
   }
 
   async activateAutoloadedDocuments(){
-    datasourcesUi.clear(true);
-    const ret = await super.activateAutoloadedDocuments();
-    datasourcesUi.setBusy(false);
-    return ret;
+    const autoLoadingEntries = await this.getAutoloadingEntries();
+    if (autoLoadingEntries.length){
+      datasourcesUi.clear(true);
+      await super.activateAutoloadedDocuments();
+      datasourcesUi.setBusy(false);
+    }
+    return autoLoadingEntries;
   }
 
   constructor(config){

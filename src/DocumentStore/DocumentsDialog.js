@@ -1322,11 +1322,16 @@ class DocumentsDialog {
     throw new Error(`Should be implemented in subclass`);
   }
   
+  async getAutoloadingEntries(){
+    const store = AppDocumentStore.store;
+    const list = await store.list(this.objectStoreName);
+    const autoloadEntries = list.filter(documentObject => documentObject.autoload);
+    return autoloadEntries;
+  }
+  
   async activateAutoloadedDocuments(){
     try {
-      const store = AppDocumentStore.store;
-      const list = await store.list(this.objectStoreName);
-      const autoloadEntries = list.filter(documentObject => documentObject.autoload);
+      const autoloadEntries = await this.getAutoloadingEntries();
       const n = autoloadEntries.length;
       if (!n) {
         return;

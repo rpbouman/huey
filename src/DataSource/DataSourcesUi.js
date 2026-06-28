@@ -876,7 +876,6 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #addDatasource(datasource) {
-    this.clear(false);
     this.#attachRejectsDetection(datasource);
     const id = datasource.getId();
     this.#datasources[id] = datasource;
