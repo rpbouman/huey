@@ -141,6 +141,7 @@ To register one or more files, you can:
 
 - Drag 'n Drop one or multiple files unto the "Datasources" tab in the sidebar. 
 
+#### Upload Dialog
 Either action will open the Upload dialog. 
 The upload dialog will show a progress bar for each file that is being registered. Additional progress items may appear in case a duckdb extension needs to be installed and/or loaded. 
 
@@ -152,10 +153,13 @@ Items that encountered an error are indicated by red progressbars. In case of er
 
 Successful actions are indicated by green progressbars. Succesfully loaded files are available in the Datasources tab, from where you can start exploring their contents by clicking the explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). As a convenience, the explore button is also present in the upload dialog.
 
+#### Datasource Tab
+Successfully upload files are added to the Datasource tab.
+
 Huey will attempt to group files having similar column signature. The group appears as a separate top-level node in the Datasources tab, with its individual files indented below it. 
 A file group has its own explore button, so that you can not only explore the individual files, but also the UNION of all Files in the group:
 
-![image](https://github.com/rpbouman/huey/assets/647315/0ad057e0-e4ab-4bd8-b996-d3f50542853d)
+<img width="439" height="258" alt="image" src="https://github.com/user-attachments/assets/7c35e006-d763-456c-a7f2-bb2f0d76d464" />
 
 Files that cannot be grouped appear in a separate *Miscellaneous Files* group.
 
