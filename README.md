@@ -3,7 +3,7 @@ Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 There's a recording available of me <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">demoing Huey</a> at the 3rd DuckDB Meetup.
-Or, if you like some more background, checkout my <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk on youtube</a>.
+Or, if you like some more background, check out my <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk on youtube</a>.
 
 Or, __Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
@@ -24,7 +24,7 @@ Or, __Try Huey now__ with some [sample reports](#getting-started) using the live
 - Truly light-weight. Huey depends on DuckDb-WASM, and a Tabler Icons font, but nothing more. (Dependencies may be added in the future, but only when strictly necessary.)
 - Accessible. Huey uses semantic HTML and aria-roles. Please let us know if you find Huey has accessibility issues!
 - Run it your way! 
-  - Huey is a static webapp: you can simply download or checkout the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
+  - Huey is a static webapp: you can simply download or check out the source tree, and open src/index.html in your browser (as ```file://``` - no server required). But if you like, you can serve from any webserver like you would with any web page. 
   - The latest stable release is available online as [Live demo site](https://rpbouman.github.io/huey/src/index.html). One click and you're up and running! Even in this setup, any data you process with Huey remains local and private. There is no active server-side process.
   - Huey is also a <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps" target="_blank" rel="noopener noreferrer">progressive web app</a> (PWA). This lets you install Huey on your device just as if it's a native app. [Running as PWA is described in more detail later in this readme](#running-huey-on-your-device-as-progressive-web-app-pwa).
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
@@ -82,7 +82,7 @@ All these examples use a URL to a publicly available dataset as datasource.
 ## Running Locally
 Want to run Huey locally? No problem!
 From the live demo, you can install the Huey progressive web app on your local device with just one click. 
-Alternatively, you can download or checkout the Huey source files and resources and run it as a local static webpage in your browser.
+Alternatively, you can download or check out the Huey source files and resources and run it as a local static webpage in your browser.
 
 ### Running Huey on your Device as Progressive Web App (PWA)
 1) Visit the [live demo](https://rpbouman.github.io/huey/src/index.html)
@@ -151,7 +151,7 @@ After completion of the upload process, the upload dialog is updated to indicate
 
 Items that encountered an error are indicated by red progressbars. In case of errors, the item is expanded to reveal any information that might help to remedy the issue. 
 
-Successful actions are indicated by green progressbars. Succesfully loaded files are available in the Datasources tab, from where you can start exploring their contents by clicking the explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). As a convenience, the explore button is also present in the upload dialog.
+Successful actions are indicated by green progressbars. Successfully loaded files are available in the Datasources tab, from where you can start exploring their contents by clicking the explore button ![explore button](https://github.com/rpbouman/huey/assets/647315/7b67ff2d-5cec-44e0-91d4-e670d38487c1). As a convenience, the explore button is also present in the upload dialog.
 
 #### Datasource Tab
 Successfully upload files are added to the Datasource tab.
@@ -1064,7 +1064,7 @@ Active development is done on the dev branch.
 
 ## (Pre-)Release
 Once every while, typically every few weeks, ongoing developments are captured in a (pre-)release, which gets its own version number and a nickname.
-You can checkout prior releases here: [https://github.com/rpbouman/huey/releases](https://github.com/rpbouman/huey/releases)
+You can check out prior releases here: [https://github.com/rpbouman/huey/releases](https://github.com/rpbouman/huey/releases)
 
 A new (pre-)release is triggered whenever a dependency is updated (currently, Huey has two dependencies - DuckDB WASM and Tabler Icons).
 Other events that trigger a (pre-)release is when ongoing development of new features and bugfixes is deemed stable - or at least stable enough to focus on new developments.
@@ -1073,7 +1073,7 @@ When a couple of pre-releases have been found stable enough for production usage
 The live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html) is a github page that is created right on top of the main branch.
 So, a merge to the main branch is what updates the version of the live demo.
 
-If you just want to enjoy use of a stable version of Huey, you can either use the live demo, or checkout or download the main branch.
+If you just want to enjoy use of a stable version of Huey, you can either use the live demo, or check out or download the main branch.
 If you want to enjoy the latest developments, then you should use the dev branch.
 
 ## Checking your Huey version
@@ -1096,7 +1096,7 @@ The main purpose is for development, debugging and to solve compatibility issues
 ## Integrating and/or Embedding Huey
 
 You can embed huey inside a frame on your own webpage and control the application by sending it commands using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">`postMessage()`-method</a>.
-Currently this experimental feature is under development and not documented in detail. Please checkout src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
+Currently this experimental feature is under development and not documented in detail. Please check out src/PostMessageInterface/PostMessageTestbed.html for an example that illustrates this feature. 
 
 ## Contributions
 
