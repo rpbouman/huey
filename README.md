@@ -174,7 +174,7 @@ Files that cannot be grouped appear in a separate *Miscellaneous Files* group.
 Apart from directly reading data files, Huey can also open existing DuckDB database files and access its tables and views.
 
 The process for accessing duckdb files is exactly the same as for accessing data files.
-Huey assumes datafiles with a ```.duckdb``` extension are DuckDB database files. 
+Huey assumes data files with a ```.duckdb``` extension are DuckDB database files. 
 
 If your DuckDB database file happens to have another extension - that's totally fine! 
 They just won't appear automatically in the browser's File Browser dialog, because by default, that only lists files with extensions that Huey knows about.
@@ -779,12 +779,12 @@ Naturally, credentials are sensitive data and should therefore be protected.
 The Secrets Manager will automatically encrypt the value of all password-typed key/value pairs.
 This is implemented using AES-GCM-256 encryption using the browser's built-in ```crypto``` library.
 
-Encyrption requires a password. 
+Encryption requires a password. 
 You will be automatically prompted whenever a password is required:
 
 <img width="432" height="306" alt="image" src="https://github.com/user-attachments/assets/05016dfd-4098-4d3f-b45e-bc00a246bf2a" />
 
-The first time a password is required, the pasword itself is hashed, and the hashed value is stored so the store can check whether the entered password is correct.
+The first time a password is required, the password itself is hashed, and the hashed value is stored so the store can check whether the entered password is correct.
 It is important to realize the password itself is never stored. 
 This means that once the store is initialized with a password, you can only decrypt the documents in the store using that password.
 So, make sure you don't lose it!
@@ -799,7 +799,7 @@ In this case you can delete all encrypted documents by clicking the "Reset Secre
 In order to use a secret, it needs to be activated.
 Activating the secret simply means the equivalent ```CREATE SECRET```-statement is executed so that DuckDB will apply it when required.
 
-Secrets are automcatically activated when saving a secret.
+Secrets are automatically activated when saving a secret.
 Secrets that are marked for auto-load are also automatically activated on Huey startup.
 Activating a secret may result in a prompt for the password if the secret contains key/value pairs of the password-type.
 
@@ -821,7 +821,7 @@ The ```ATTACH``` statment has a flexible, type-dependent options section that's 
 
 The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore:
 - In the most basic case, it's simply a pointer to a static file for the local duckdb engine to access and manage. This is what happens when you attach a DuckDB or SQLIte database file.
-- In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat datafiles, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
+- In other cases, the local DuckDB instance acts as engine to a central Data Lake (or rather Data Lakehouse); that is: a collection of essentially static, flat data files, but with an additional bookkeeping protocol on top to represent physical data files as logical table objects. Concrete examples of this are external [Iceberg](https://duckdb.org/docs/current/core_extensions/iceberg/overview) and [Unity](https://duckdb.org/docs/current/core_extensions/unity_catalog) catalogs.
 - In yet other cases, it's more like a federated database, with the local duckdb instance acting no longer as data engine, but rather as a client of a remote database server. The emerging [Quack wire protocol](https://duckdb.org/docs/current/core_extensions/quack) falls into this category, as do the [MySQL](https://duckdb.org/docs/current/core_extensions/mysql) and [PostgreSQL](https://duckdb.org/docs/current/core_extensions/postgres/overview) extensions.
 - A Miscellaneous bag of hybrid solutions that mix some elememnts of the aforementioned cases. [Ducklake](https://duckdb.org/docs/current/core_extensions/ducklake) is an example that mostly resembles the aforementioned external Data Lake example, but where the protocol requires an external server for key elements of the bookkeeping process. [Motherduck](https://github.com/duckdb/duckdb-web/issues/6953) is an example that mostly resembles the federated database example, but where the extension smartly divides the load over the local embedded instance and the remote server. 
 
@@ -959,7 +959,7 @@ If it finds one, it will automatically [activate the secret](#activating-deactiv
 
 As the secret is likely to contain an [encrypted password-type key/value pair](#encryption-of-password-fields), this may in turn prompt you for the password of the secrets store.
 Keep in mind: this is the password that you used to initialize the secrets store - NOT a password specific to your catalog configuration.
-Huey needs the password to the secrets store to decrypt the password fields in the stored secret so it can then run the ```CREATE SECRET``-statement.
+Huey needs the password to the secrets store to decrypt the password fields in the stored secret so it can then run the ```CREATE SECRET```-statement.
 
 ## Activating, Deactivating and auto-attaching Catalogs
 In order to use a Catalog, it needs to be activated.
@@ -978,7 +978,7 @@ If a catalog is selected in the catalogs list, the toolbar will show one of thes
 , indicating the catalog is currently attached. In addition, active catalogs are marked up bold in the list.
 Hovering over the Activate/Deactive button reveals an action to change the state:
 - if the catalog is attached, clicking the button will detach it.
-- if the catalog is detached, clicking the button atteches it. 
+- if the catalog is detached, clicking the button attaches it. 
 
 ## Catalog Examples
 
@@ -1029,7 +1029,7 @@ To connect to it from within Huey, you first have to create a secret, so follow 
   ```
   <img width="871" height="387" alt="image" src="https://github.com/user-attachments/assets/4257117d-fe81-46bb-a1d9-76eb2d654f97" />
 - Save your secret. You may be prompted to enter your password.
-  If that's the case then enter the password with wich you initialized the store.
+  If that's the case then enter the password with which you initialized the store.
   If you never initialized the store, then the prompt will inform you that you need to initialize the store and provide detailed instructions to do so.  
 
 Once the secret is in place, you can follow [the steps for creating a new Catalog](#creating-a-new-catalog) and enter the following details:
