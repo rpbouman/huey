@@ -2,14 +2,15 @@
 Huey is a browser-based application that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
-There's a recording available of me <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">demoing Huey</a> at the 3rd DuckDB Meetup.
-Or, if you like some more background, check out my <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk on youtube</a>.
-
-Or, __Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
+__Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
 (Note: this is a live demo that allows you to run Huey without even downloading it. Even though it's available online, it's still a static webapp: any data you load into it is safe, and stays on your local client.)
 
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
+
+If you prefer to watch a video insted, here's a few: 
+- <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">3rd DuckDB Meetup</a>.
+- <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk</a>.
 
 ## Key features
 - Supports ```.parquet```, ```.csv```, ```.json```, ```.xlsx``` (MS Excel) both for [analysis](#registering-files) as well [exporting results](#export). Huey can also [read DuckDB database files](#opening-duckdb-files), or [connect to a remote catalog](#catalogs-manager).
