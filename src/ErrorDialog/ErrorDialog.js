@@ -1,5 +1,5 @@
 function getDataFromError(error){
-  const newlineRegex = /\r\n|[\r\n]/g;
+  const newlineRegex = /\r\n|[\r\n]|:\s+/g;
   
   const message = error.message;
   let messageLines;
