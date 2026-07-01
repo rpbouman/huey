@@ -13,7 +13,7 @@ Internationalization.setTexts({
   "A URL hash to create a shortcut link to the query": "Een URL-hash om een snelkoppeling naar de query te maken",
   "About Huey...": "Over Huey...",
   "Activate the current Secret so it can be used to access a remote resource": "Het huidige Secret activeren zodat het gebruikt kan worden om een externe bron te benaderen",
-  "Add a new remote catalog": "Een nieuw extern catalogus toevoegen",
+  "Add a new Remote Catalog": "Een nieuwe Remote Catalog toevoegen",
   "Add all columns to the query and preview the data at the detail level.": "Voeg alle kolommen toe aan de query en bekijk de gegevens op detailniveau.",
   "Add filename column?": "Bestandsnaam kolom toevoegen?",
   "Add new Field": "Nieuw veld toevoegen",
