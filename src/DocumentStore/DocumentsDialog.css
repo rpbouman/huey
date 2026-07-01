@@ -183,7 +183,7 @@ dialog.documentDialog > * > *[role=tablist] > div:has(
 
     > fieldset[name=headerFieldset] {
       display: grid;
-      grid-template-columns: 7ch auto 6ch 16ch 9ch 3ch;
+      grid-template-columns: 7ch auto 6ch 16ch 17ch 3ch;
       grid-auto-flow: row;
       grid-gap: 0px;
 
