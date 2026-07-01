@@ -1,7 +1,7 @@
 // ── Example subclass ──────────────────────────────────────────────────────────
 
 /**
- * Concrete store for the app, managing DuckDB secrets and plain catalog entries.
+ * Concrete store for the app, managing DuckDB Secrets and Remote Catalog entries.
  *
  * @example
  * const store = AppStore.store;

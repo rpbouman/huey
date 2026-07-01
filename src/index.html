@@ -304,6 +304,7 @@
       <option value="CLIENT_ID" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
       <option value="CLIENT_SECRET" translate="no" data-default-type="password" data-associated-document-types="iceberg"></option>
       <option value="DEFAULT_REGION" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="DEFAULT_SCHEMA" translate="no" data-default-type="text" data-associated-document-types="unity_catalog"></option>
       <option value="ENCRYPTION_CIPHER" translate="no" data-default-type="text" data-associated-document-types="duckdb"></option>
       <option value="ENCRYPTION_KEY" translate="no" data-default-type="password" data-associated-document-types="duckdb"></option>
       <option value="ENDPOINT" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
@@ -1495,18 +1496,18 @@
     </dialog>
     
     <template id="secretsDialogToolsTemplate">
-      <label title="Activate the current secret so it can be used to access a remote resource">
+      <label title="Activate the current Secret so it can be used to access a remote resource">
         <input type="radio" name="activation" value="activate"/>
       </label>
-      <label title="De-activate the current secret">
+      <label title="De-activate the current Secret">
         <input type="radio" name="activation" value="deactivate" checked="true"/>
       </label>
-      <output name="usageHint" role="note"><a href="javascript:secretsDialog.createNewButton.click()">Create a new secret</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
-      <output name="formInvalidHint" role="alert">Fill out all required fields to save the secret.</output>
+      <output name="usageHint" role="note"><a href="javascript:secretsDialog.createNewButton.click()">Create a new Secret</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
+      <output name="formInvalidHint" role="alert">Fill out all required fields to save the Secret.</output>
       <label title="Change Password">
         <button name="changePassword">Change Password</button>
       </label>
-      <label title="Reset the secrets store">
+      <label title="Reset the Secrets store">
         <button name="resetSecretsStore">Reset Secrets Store</button>
       </label>
     </template>
@@ -1521,7 +1522,7 @@
         required="true"
         autocomplete="true"
         spellcheck="false"
-        title="The unique name of the secret"
+        title="The unique name of the Secret"
       />
       <label for="secretType">Type</label>
       <input 
@@ -1533,7 +1534,7 @@
         list="secret-types"
         autocomplete="true"
         spellcheck="false"
-        title="The secret type"
+        title="The Secret type"
       />
       <label>Autoload</label>
       <input
@@ -1565,7 +1566,7 @@
         list="attach-types"
         autocomplete="true"
         spellcheck="false"
-        title="Enter the catalog type"
+        title="Enter the Remote Catalog type"
       />
       <label>Autoload</label>
       <input
@@ -1576,12 +1577,12 @@
       <label>URL</label>
       <input 
         name="url"
-        placeholder="Remote catalog URL"
+        placeholder="Remote Catalog URL"
         type="text"
         required="true"
         autocomplete="true"
         spellcheck="false"
-        title="Enter the remote catalog's URL"
+        title="Enter the URL of the Remote Catalog"
       />
     </template>
 
@@ -1641,8 +1642,8 @@
       <label title="De-attach the current catalog">
         <input type="radio" name="activation" value="deactivate" checked="true"/>
       </label>
-      <output name="usageHint" role="note"><a href="javascript:catalogsDialog.createNewButton.click()">Add a new remote catalog</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
-      <output name="formInvalidHint" role="alert">Fill out all required fields to save the remote catalog entry.</output>
+      <output name="usageHint" role="note"><a href="javascript:catalogsDialog.createNewButton.click()">Add a new Remote Catalog</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
+      <output name="formInvalidHint" role="alert">Fill out all required fields to save the Remote Catalog entry.</output>
       <label title="Browse Catalog...">
         <button name="browseCatalog">Browse Catalog...</button>
       </label>
@@ -1677,7 +1678,6 @@
         <form>
           <nav>
             <select 
-              translate="no"
               name="documentsList"
               multiple="true"
               title="Select an item to edit or remove it."
@@ -2468,7 +2468,7 @@
         </label>
         <label 
           for="attachRemote" 
-          title="Attach to a remote Catalog or Database"
+          title="Attach to a Remote Catalog or Database"
           accesskey="U"
         >
           <button
@@ -2713,7 +2713,7 @@
               <menu role="toolbar">
                 <label for="uploader" title="Upload files">Local File</label>
                 <label for="loadFromUrl" title="Upload from URL">Fetch Url</label>
-                <label for="attachRemote" title="Connect to a remote catalog">Remote Catalog</label>
+                <label for="attachRemote" title="Connect to a Remote Catalog">Remote Catalog</label>
               </menu>
             </div>
             <div class="loader"></div>
