@@ -377,20 +377,8 @@ class DataSourcesUi extends EventEmitter {
   }
 
   async #loadDatabaseDatasource(databaseDatasource){
-    const catalogName = databaseDatasource.getAttachedName();
-    const connection = window.hueyDb.connection;
-    let statement;
     try {
-      const sql = `
-        SELECT table_schema, table_name, table_type
-        FROM    information_schema.tables
-        WHERE table_catalog = ?
-        AND   table_schema NOT IN ('information_schema', 'pg_catalog')
-        ORDER BY table_schema, table_name
-      `;
-      
-      statement = await connection.prepare(sql);
-      const result = await statement.query(catalogName);
+      const result = await databaseDatasource.getTableObjectResultSetFromCatalog();
 
       const datasourceId = databaseDatasource.getId();
       const datasourceTreeNode = byId(datasourceId);
@@ -398,6 +386,7 @@ class DataSourcesUi extends EventEmitter {
       const schemaNodes = {};
       for (let i = 0; i < result.numRows; i++){
         const row = result.get(i);
+        const catalogName = row.catalog_schema;
         const schemaName = row.table_schema;
         let schemaNode = schemaNodes[schemaName];
         if (schemaNode === undefined) {
@@ -442,9 +431,6 @@ class DataSourcesUi extends EventEmitter {
       showErrorDialog(error);
     }
     finally {
-      if (statement) {
-        statement.close();
-      }
     }
   }
 
@@ -784,29 +770,30 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #setCaptionForDataSourceGroup(label, datasourceGroup, miscGroup){
+    let labelText;
     switch (datasourceGroup.type) {
       case DuckDbDataSource.types.CATALOG:
-        label.textContent = 'Remote Catalogs';
+        labelText = 'Remote Catalogs';
         break;
       case DuckDbDataSource.types.DUCKDB:
-        label.textContent = 'DuckDB';
+        labelText = 'DuckDB';
         break;
       case DuckDbDataSource.types.SQLITE:
-        label.textContent = 'SQLite';
+        labelText = 'SQLite';
         break;
       case DuckDbDataSource.types.FILE:
         const datasources = datasourceGroup.datasources;
-        let caption
         if (miscGroup) {
-          Internationalization.setTextContent(label, 'Files');
+          labelText = 'Files';
         }
         else {
-          label.textContent = Object.keys(datasources).map(datasourceId => {
+          labelText = Object.keys(datasources).map(datasourceId => {
           const datasource = datasources[datasourceId];
           return datasource.getFileNameWithoutExtension();
         }).join(', ');
         }
     }
+    Internationalization.setTextContent(label, labelText);
   }
 
   #createDataSourceGroupNode(datasourceGroup, miscGroup){

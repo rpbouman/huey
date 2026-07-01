@@ -1298,4 +1298,68 @@ class DuckDbDataSource extends EventEmitter {
     this.#columnMetadata = columnMetadata;
     return columnMetadata;
   }
+  
+  async getTableObjectResultSetFromCatalog(){
+    const catalogName = this.getAttachedName();
+    const connection = await this.getManagedConnection();
+    const sql = `
+      SELECT ${quoteStringLiteral(catalogName)} AS catalog_name, table_schema, table_name, table_type
+      FROM    information_schema.tables
+      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
+      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
+      ORDER BY table_schema, table_name
+    `;
+    
+    const result = await connection.query(sql);
+    return result;
+  }
+
+  async getTableObjectResultSetFromDuckDbFile(){
+    const catalogName = this.getAttachedName();
+    const connection = await this.getManagedConnection();
+    const sql = `
+      SELECT ${quoteStringLiteral(catalogName)}, table_schema, table_name, table_type
+      FROM    information_schema.tables
+      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
+      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
+      ORDER BY table_schema, table_name
+    `;
+    
+    const result = await connection.query(sql);
+    return result;
+  }
+
+  async getTableObjectResultSetFromSQLiteFile(){
+    const catalogName = this.getAttachedName();
+    const connection = await this.getManagedConnection();
+    const sql = `
+      SELECT ${quoteStringLiteral(catalogName)}, table_schema, table_name, table_type
+      FROM    information_schema.tables
+      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
+      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
+      ORDER BY table_schema, table_name
+    `;
+    
+    const result = await connection.query(sql);
+    return result;
+  }
+  
+  async getTableObjectsResultset(){
+    const type = this.getType();
+    let resultset;
+    switch (type) {
+      case DuckDbDataSource.type.CATALOG:
+        resultset = await this.getTableObjectResultSetFromCatalog();
+        break;
+      case DuckDbDataSource.type.DUCKDB:
+        resultset = await this.getTableObjectResultSetFromDuckDbFile();
+        break;
+      case DuckDbDataSource.type.SQLITE:
+        resultset = await this.getTableObjectResultSetFromSQLiteFile();
+        break;
+      default:
+        throw new Error(`Invalid for datasources of type "${type}".`);
+    }
+    return resultset;
+  }
 }

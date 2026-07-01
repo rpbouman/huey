@@ -1103,7 +1103,7 @@ class DocumentsDialog {
       title: Internationalization.getText('Reset Secrets Store'),
       contents: [
         Internationalization.getText('This action will completely reset the Secrets Store.'),
-        Internationalization.getText('All your stored secrets will be lost, and the passowrd will be reset.'),
+        Internationalization.getText('All your stored Secrets will be lost, and the passowrd will be reset.'),
         Internationalization.getText('If you confirm, this action cannot be undone. Proceed?'),
       ].join('<br/>')
     }
@@ -1224,13 +1224,13 @@ class DocumentsDialog {
       do {
         if (!isInitialized) {
           const initialPasswordInfo = [
-            Internationalization.getText('Enter a password to initialize the Huey secrets manager.'),
+            Internationalization.getText('Enter a password to initialize the Huey Secrets manager.'),
             hint,
-            Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your duckdb secret.'),
+            Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your DuckDb Secret.'),
             '',
             passwordHTML,
             '',
-            Internationalization.getText('After initialization of the secrets manager, you can only access your secrets by entering the same password.'),
+            Internationalization.getText('After initialization of the Secrets manager, you can only access your Secrets by entering the same password.'),
             Internationalization.getText('You can change your password later on but also requires you to enter your previous password, so make sure you remember it!')
           ].join('<br/>');
           config.contents = initialPasswordInfo;

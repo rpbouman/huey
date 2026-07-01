@@ -118,11 +118,11 @@ class CatalogsDialog extends DocumentsDialog {
           items.push('</optgroup>');
         }
         type = documentObject.type;
-        items.push(`<optgroup label="${type}">`);
+        items.push(`<optgroup translate="no" label="${type}">`);
       }
       const loaded = duckdbDatabases[documentObject.name] !== undefined;
       const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';
-      items.push(`<option data-loaded="${loaded}" ${selected}>${documentObject.name}</option>`);
+      items.push(`<option translate="no" data-loaded="${loaded}" ${selected}>${documentObject.name}</option>`);
     });
     if (items.length) {
       items.push('</optgroup>');
