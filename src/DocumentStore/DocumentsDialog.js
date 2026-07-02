@@ -596,6 +596,8 @@ class DocumentsDialog {
     const exists = await store.exists(this.objectStoreName, documentName);
     if (!exists){
       await this.updateDocumentsList();
+      this.resetForm();
+      this.syncDocumentCode();
       return;
     }
 
@@ -612,6 +614,7 @@ class DocumentsDialog {
     await store.remove(this.objectStoreName, documentName);
     await this.updateDocumentsList();
     this.resetForm();
+    this.syncDocumentCode();
     this.setCheckboxState(this.editingActiveCheckbox, false);
     this.setCheckboxState(this.unsavedChangesCheckbox, false);
   }
@@ -792,22 +795,36 @@ class DocumentsDialog {
       }
     }
   }
-  
+
   handleFieldTypeChanged(event){
-    const target = event.target;
+    const typeField = event.target;
     let inputType;
-    switch (target.value) {
+    let required;
+    switch (typeField.value) {
       case 'checkbox':
+        inputType = typeField.value;
+        required = false;
+        break;
       case 'text':
       case 'password':
-        inputType = target.value;
+        inputType = typeField.value;
+        required = this.keyValuePairsRequired;
         break;
       case 'list':
       case 'map':
+        required = false;
         inputType = 'hidden';
         break;
     }
-    target.parentNode.nextElementSibling.firstElementChild.type = inputType;
+    const valueField = typeField.parentNode.nextElementSibling.firstElementChild;
+    if (required) {
+      valueField.setAttribute('required', true);
+    }
+    else {
+      valueField.removeAttribute('required');
+    }
+    valueField.type = inputType;
+    
   }
     
   handleKeyFieldChanged(event){

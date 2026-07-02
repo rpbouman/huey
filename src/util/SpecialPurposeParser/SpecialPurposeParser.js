@@ -21,7 +21,7 @@ class SpecialPurposeParser {
     return match;
   }
 
-  static nameRe = /[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?|"[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"/;
+  static nameRe = /[A-Za-z](?:[\-_A-Za-z0-9]*[A-Za-z0-9])?|"[A-Za-z](?:[\-_A-Za-z0-9]*[A-Za-z0-9])?"/;
   
   static lParenRe = /\s*\(\s*/;
   static matchLParen(slice, position){
