@@ -524,17 +524,18 @@ class DocumentsDialog {
       this.newKeyValueUi();
     }
     else{
-      const changeEvent = new Event('change', {bubbles: true});
       const keyValuesFieldset = this.keyValuesFieldset;
       for (let i = 0; i < n; i++){
+        const eventDetail = {};
         const field = fields[i];
         const keyValueUi = this.newKeyValueUi();
         keyValuesFieldset.appendChild(keyValueUi);
         const keyInput = this.getFieldKeyEl(keyValueUi);
-        keyInput.value = field.key;
+        eventDetail.key = keyInput.value = field.key;
         const typeInput = this.getFieldTypeEl(keyValueUi);
-        typeInput.value = field.type;
+        eventDetail.type = typeInput.value = field.type;
         const valueInput = this.getFieldValueEl(keyValueUi);
+        eventDetail.value = field.value;
         switch (field.type) {
           case 'checkbox':
             valueInput.type = field.type;
@@ -563,6 +564,10 @@ class DocumentsDialog {
             break;
           } 
         }
+        const changeEvent = new CustomEvent('change', {
+          bubbles: true,
+          detail: eventDetail
+        });
         keyInput.dispatchEvent(changeEvent);
         typeInput.dispatchEvent(changeEvent);
         valueInput.dispatchEvent(changeEvent);
@@ -842,6 +847,10 @@ class DocumentsDialog {
       valueEl.removeAttribute('list');
     }
 
+    if (!event.isTrusted){
+      return;
+    }
+
     const dataType = this.getDefaultDataypeForKey(key);
     if (dataType) {
       const fieldTypeSelect = this.getFieldTypeEl(fieldContainer);
@@ -1023,10 +1032,32 @@ class DocumentsDialog {
       const parsedDocument = this.parseDocumentSQL(enteredText);
       parsedDocument.fields.forEach(field => {
         const key = field.key;
-        const type = field.type;
-        if (!type || type === 'text') {
-          field.type = this.getDefaultDataypeForKey(key) || type;
+        let type = field.type;
+        const value = field.value;
+        // the field type is primarily determined by the type of the parsed value
+        switch( typeof value ) {
+          case 'boolean':
+            type = 'checkbox';
+            break;
+          case 'object':
+            if (value instanceof Array) {
+              type = 'list';
+            }
+            else {
+              type = 'map';
+            }
+            break;
+          case 'string':
+          default:
+            //in the case of text, we check the default type based on the key
+            if (!type || type === 'text') {
+              const defaultType = this.getDefaultDataypeForKey(key);
+              if (defaultType !== type && defaultType === 'password') {
+                type = defaultType;
+              }
+            }
         }
+        field.type = type;
       });
       const documentObject = this.documentObject;
       if (!this.#compareDocuments(parsedDocument, documentObject)){
