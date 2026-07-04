@@ -1309,19 +1309,27 @@ function getQualifiedIdentifier(){
   }
 }
 
-async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName){
+async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName, skipExistsCheck){
   const connection = hueyDb.connection;
+  
   let sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
   const statement = await connection.prepare(sql);
   let result = await statement.query(extensionName);
   statement.close();
-  if (result.numRows === 0) {
-    return;
-  }
 
-  let row = result.get(0);
-  const loaded = row.loaded;
-  const installed = row.installed;
+  let loaded, installed;
+  if (skipExistsCheck !== true) {
+    if (result.numRows === 0) {
+      throw new Error(`Extension check for "${extensionName}" failed.`);
+    }
+    loaded = false;
+    installed = false;
+  }
+  else {
+    const row = result.get(0);
+    loaded = row.loaded;
+    installed = row.installed;
+  }
   
   if (!installed) {
     sql = `INSTALL ${extensionName}`;
