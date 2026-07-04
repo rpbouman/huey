@@ -7,6 +7,7 @@ class CatalogsDialog extends DocumentsDialog {
   getDropDocumentSQL(name, force){
     if (!name){
       const documentObject = this.documentObject;
+      name = documentObject;
     }
     if (typeof name === 'object'){
       name = documentObject.name;
