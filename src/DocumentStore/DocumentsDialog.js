@@ -964,12 +964,33 @@ class DocumentsDialog {
       this.handleDocumentTypeChanged(event);
     }
   }
+  
+  async #loadRequiredExtensions(documentObject){
+    const typeInput = this.headerFieldset.querySelector('input[name=type]');
+    const list = typeInput.getAttribute('list');
+    const dataList = byId(list);
+    const options = dataList.options;
 
-      
+    const type = documentObject.type;
+    for (let i = 0; i < options.length; i++){
+      const option = options[i];
+      if (option.value !== type) {
+        continue;
+      }
+      const extension = option.getAttribute('data-duckdb-extension');
+      if (extension) {
+        const repo = option.getAttribute('data-duckdb-extension-repo');
+        await ensureDuckDbExtensionLoadedAndInstalled(extension, repo);
+      }
+      break;
+    }
+  }
+
   async createDuckDbDocument(documentObject, force){
     this.setBusy(true);
     const connection = window.hueyDb.connection;
     documentObject = documentObject || this.documentObject;
+    const type = documentObject.type;
     do {
       try {
         
@@ -978,6 +999,8 @@ class DocumentsDialog {
           await connection.query( createDocumentSql ); 
           break;
         }
+        
+        await this.#loadRequiredExtensions(documentObject);
         
         const createDocumentSql = this.getCreateDocumentSQL(documentObject);
         await connection.query( createDocumentSql ); 
