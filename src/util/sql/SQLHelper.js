@@ -1310,6 +1310,13 @@ function getQualifiedIdentifier(){
 }
 
 async function ensureDuckDbExtensionLoadedAndInstalled(extensionName, repositoryName, skipExistsCheck){
+  if (skipExistsCheck === undefined || skipExistsCheck === null){
+    // if skipExistsCheck is not specified, then default to 
+    // - false when no repository was explicitly specified. -> don't skip check for core extensions
+    // - true when repository was explicitly specified -> skip when not a core extension
+    skipExistsCheck = !(repositoryName === undefined || repositoryName === null);
+  }
+  
   const connection = hueyDb.connection;
   
   let sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
