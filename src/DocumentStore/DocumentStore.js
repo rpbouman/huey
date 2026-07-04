@@ -596,7 +596,7 @@ class DocumentStore {
     }
     const key = await this.getDocKey(doc, objectStoreConf, password);
     if (key) {
-      doc = this.#decryptDoc(doc, objectStoreConf.fieldsPath, key);
+      doc = await this.#decryptDoc(doc, objectStoreConf.fieldsPath, key);
     }
     return doc;
   }
