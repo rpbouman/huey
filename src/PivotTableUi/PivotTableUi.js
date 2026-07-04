@@ -1047,7 +1047,7 @@ class PivotTableUi extends EventEmitter {
     var label = getChildWithClassName(cellElement, 'pivotTableUiCellLabel');
     if (!cell || !cellsAxisItem){
       label.title = '';
-      return label.textContant = '';
+      return label.textContent = '';
     }
 
     var values = cell.values;
@@ -1075,7 +1075,7 @@ class PivotTableUi extends EventEmitter {
 
     var caption = QueryAxisItem.getCaptionForQueryAxisItem(cellsAxisItem);
     label.title = `${caption}: ${labelText}`;
-    return labelText
+    return labelText;
   }
 
   async #updateCellData(physicalColumnsAxisTupleIndex, physicalRowsAxisTupleIndex){
