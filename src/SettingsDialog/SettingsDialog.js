@@ -263,7 +263,7 @@ class Settings extends EventEmitter {
               "--huey-light-border-color": "#8B4513",
               "--huey-dark-border-color": "#2F4F4F",
               "--huey-darkest-border-color": "black",
-              "--huey-icon-color-subtle": "##50AEbA",
+              "--huey-icon-color-subtle": "#50AEbA",
               "--huey-icon-color": "#FFFFFF",
               "--huey-icon-color-highlight": "#8B4513"
             },
@@ -301,7 +301,7 @@ class Settings extends EventEmitter {
               "--huey-placeholder-color": "rgb(100, 100, 100)",
               "--huey-light-background-color": "rgb(30, 30, 30)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
-              "--huey-dark-background-color": "rgb(110 110, 110)",
+              "--huey-dark-background-color": "rgb(110, 110, 110)",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
               "--huey-alternating-rows-brightness": "97%",
               "--huey-light-border-color": "rgb(80, 80, 80)",
