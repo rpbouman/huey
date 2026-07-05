@@ -712,8 +712,8 @@ class FilterDialog {
             ){
               currentValues[rangeStart.value] = rangeStart;
               currentToValues[rangeStart.value] = rangeEnd;
-              if (option.previousSlibling){
-                option.previousSlibling.setAttribute('data-in-to-values-list', true);
+              if (option.previousSibling){
+                option.previousSibling.setAttribute('data-in-to-values-list', true);
               }
             }
 
