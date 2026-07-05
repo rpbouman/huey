@@ -592,7 +592,6 @@ class PivotTableUi extends EventEmitter {
   #getTupleGroupingId(tuple){
     return tuple ? tuple[TupleSet.groupingIdAlias] : undefined;
   }
-  
 
   async #updateColumnsAxisTupleData(physicalColumnsAxisTupleIndex){
     if (isNaN(physicalColumnsAxisTupleIndex)) {
