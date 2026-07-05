@@ -251,13 +251,13 @@ class ExportUi {
 
           copyStatementOptions = {
             "FORMAT": 'CSV',
-            "DELIMITER": `'${columnDelimiter.replace('\'', "''")}'`,
-            "NULL": `'${nullValueString.replace('\'', "''")}'`,
+            "DELIMITER": `'${columnDelimiter.replaceAll('\'', "''")}'`,
+            "NULL": `'${nullValueString.replaceAll('\'', "''")}'`,
             "HEADER": includeHeaders ? 'TRUE' : 'FALSE',
-            "QUOTE": `'${quote.replace('\'', "''")}'`,
-            "ESCAPE": `'${escape.replace('\'', "''")}'`,
-            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
-            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+            "QUOTE": `'${quote.replaceAll('\'', "''")}'`,
+            "ESCAPE": `'${escape.replaceAll('\'', "''")}'`,
+            "DATEFORMAT": `'${dateFormat.replaceAll('\'', "''")}'`,
+            "TIMESTAMPFORMAT": `'${timestampFormat.replaceAll('\'', "''")}'`,
             "COMPRESSION": compression.value,
           };
           if (columnDelimiter === '\\t') {
@@ -274,8 +274,8 @@ class ExportUi {
           rowDelimiter = exportSettings[exportType + 'RowDelimiter'];
           copyStatementOptions = {
             "FORMAT": 'JSON',
-            "DATEFORMAT": `'${dateFormat.replace('\'', "''")}'`,
-            "TIMESTAMPFORMAT": `'${timestampFormat.replace('\'', "''")}'`,
+            "DATEFORMAT": `'${dateFormat.replaceAll('\'', "''")}'`,
+            "TIMESTAMPFORMAT": `'${timestampFormat.replaceAll('\'', "''")}'`,
             "COMPRESSION": compression.value,
             "ARRAY": rowDelimiter.value
           };
