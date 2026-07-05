@@ -107,7 +107,7 @@ function createNumberFormatter(hasFractionDigits, minFractionDigits, maxFraction
   let locales = getLocales();
   if (hasFractionDigits){
     if (maxFractionDigits === undefined){
-      minFractionDigits = maxFractionDigits;
+      maxFractionDigits = minFractionDigits;
     }
     options.minimumFractionDigits = minFractionDigits === undefined ? localeSettings.minimumFractionDigits : minFractionDigits;
     options.maximumFractionDigits = maxFractionDigits === undefined ? (localeSettings.linkMinimumAndMaximumDecimals ? localeSettings.minimumFractionDigits : localeSettings.maximumFractionDigits) : maxFractionDigits;
