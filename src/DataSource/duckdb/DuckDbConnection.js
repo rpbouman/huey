@@ -1,12 +1,21 @@
 class DuckDbConnection extends EventEmitter {
 
+  #config = undefined;
   #duckDbInstance = undefined;
   #physicalConnection = undefined;
   #state = 'unconnected';
 
-  constructor(duckDbInstance) {
+  constructor(duckDbInstance, config) {
     super(['beforequery','afterquery']);
+    this.#config = config;
     this.#duckDbInstance = duckDbInstance;
+  }
+
+  #rewriteSql(sql) {
+    if (this.#config && typeof this.#config.sqlRewriter === 'function'){
+      sql = this.#config.sqlRewriter(sql);
+    }
+    return sql;
   }
 
   async getPhysicalConnection(){
@@ -35,7 +44,7 @@ class DuckDbConnection extends EventEmitter {
 
   async query(sql){
     const connection = await this.getPhysicalConnection();
-
+    
     // TODO: allow query to be canceled?
     this.fireEvent('beforequery', {
       physicalConnection: connection,
@@ -43,6 +52,7 @@ class DuckDbConnection extends EventEmitter {
     });
 
     this.#state = 'querying';
+    sql = this.#rewriteSql(sql);
     const msg = `Executing ${sql} on connection ${this.getConnectionId()}`;
     console.time(msg);
     const result = await connection.query(sql);

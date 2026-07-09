@@ -172,25 +172,17 @@ nav#sidebar[role=tablist] {
     &[data-nodetype=datasource]:is(
       [data-datasourcetype=duckdb],
       [data-datasourcetype=catalog] 
-    )> details[data-nodetype=duckdb_schema] > summary > span.label::before
-    {
-      content: var( --icon-folder );
+    ) {
+      
+      details[data-nodetype=duckdb_schema] > summary > span.label::before {
+        content: var( --icon-folder );
+      }
+      details[data-nodetype=duckdb_schema][open] > summary > span.label::before {
+        content: var( --icon-folder-open );
+      }
     }
-
-    &[data-nodetype=datasourcegroup][open]:is( 
-      [data-grouptype=catalog], 
-      [data-grouptype=duckdb], 
-      [data-grouptype=duckdb], 
-      [data-grouptype=file], 
-      [data-datasourcetype=duckdb] 
-    ) > summary > span.label::before,
-    &[data-nodetype=datasource]:is(
-      [data-datasourcetype=duckdb],
-      [data-datasourcetype=catalog]
-    ) > details[data-nodetype=duckdb_schema][open] > summary > span.label::before
-    {
-      content: var( --icon-folder-open );
-    }
+    
+    
     
     &[data-nodetype=datasourcegroup][data-grouptype=file][data-filetype] {
       
@@ -208,7 +200,9 @@ nav#sidebar[role=tablist] {
     &[data-nodetype=datasource]:is(
       [data-datasourcetype=duckdb],
       [data-datasourcetype=catalog]
-    )> details[data-nodetype=duckdb_schema] > details > summary,
+    )> details[data-nodetype=duckdb_schema] > details:not( 
+      &[data-nodetype=duckdb_schema] 
+    ) > summary,
     &[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
       list-style: none;
       margin-left: 16px;
@@ -237,19 +231,25 @@ nav#sidebar[role=tablist] {
           }
         }
 
-        &[id^="catalog:unity_catalog"] {
-          > summary > span.label::before {
-            content: var( --icon-hexagon-letter-u );
-          }
-        }
-
         &[id^="catalog:ducklake"] {
           > summary > span.label::before {
             content: var( --icon-hexagon-letter-d );
           }
         }
 
-        > details[data-nodetype=duckdb_schema] {
+        &[id^="catalog:quack"] {
+          > summary > span.label::before {
+            content: var( --icon-hexagon-letter-q );
+          }
+        }
+
+        &[id^="catalog:unity_catalog"] {
+          > summary > span.label::before {
+            content: var( --icon-hexagon-letter-u );
+          }
+        }
+
+        details[data-nodetype=duckdb_schema] {
 
           > details[data-nodetype=datasource] {
             &[data-datasourcetype=table] summary > span.label::before {

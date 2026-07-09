@@ -15,6 +15,8 @@ class DataSourcesUi extends EventEmitter {
     domParent.addEventListener('dragleave', event => this.#dragLeaveHandler( event ) );
     domParent.addEventListener('dragover', event => this.#dragOverHandler( event ) );
     domParent.addEventListener('drop', event => this.#dropHandler( event ) );
+    dom.addEventListener('click', event => this.#datasourcesUiClicked( event ) )
+    dom.addEventListener('toggle', event => this.#toggleDataSource( event ), { capture: true } );
   }
 
   #dragEnterHandler(event) {
@@ -92,35 +94,9 @@ class DataSourcesUi extends EventEmitter {
   getDom(){
     return byId(this.#id);
   }
-
-  #freeEventHandlers(node) {
-    node.querySelectorAll('button').forEach( button => {
-      let handler;
-      if (button.id.endsWith('_analyze')){
-        handler = this.#analyzeDatasourceClicked;
-      }
-      else 
-      if (button.id.endsWith('_remove')){
-        handler = this.#removeDatasourceClicked;
-      }
-      else 
-      if (button.id.endsWith('_edit')){
-        handler = this.#configureDatasourceClicked;
-      }
-      else 
-      if (button.id.endsWith('_download')){
-        handler = this.#downloadDatasourceClicked;
-      }
-      if (handler){
-        button.removeEventListener('click', handler);
-      }
-    });
-    node.removeEventListener('toggle', this.#toggleDataSource);
-  }
   
   clear(showBusy){
     const datasourcesUi = this.getDom();
-    datasourcesUi.querySelectorAll('details').forEach(node => this.#freeEventHandlers(node) );
     datasourcesUi.innerHTML = '';
     this.setBusy(showBusy);
   }
@@ -295,14 +271,32 @@ class DataSourcesUi extends EventEmitter {
     const button = actionButton.querySelector('button');
     button.setAttribute('id', config.id);
     
-    const events = config.events;
-    if (events) {
-      for (let eventName in events) {
-        const handler = events[eventName].bind(this);
-        button.addEventListener(eventName, event => handler(event) );
-      }
-    }
     return actionButton;
+  }
+  
+  #datasourcesUiClicked(event) {
+    const target = event.target;
+    if (target.tagName !== 'BUTTON') {
+      return;
+    }
+    const datasource = this.#getDatasourceFromEvent(event);
+    const datasourceId = datasource.getId();
+    const id = target.getAttribute('id');
+    if (id === datasourceId + '_analyze') {
+      this.#analyzeDatasourceClicked( event );
+    }
+    else
+    if (id === datasourceId + '_remove') {
+      this.#removeDatasourceClicked( event );
+    }
+    else
+    if (id === datasourceId + '_edit') {
+      this.#configureDatasourceClicked( event );
+    }
+    else
+    if (id === datasourceId + '_download') {
+      this.#downloadDatasourceClicked(event);
+    }
   }
 
   #createDatasourceNodeAnalyzeActionButton(datasourceId, summaryElement){
@@ -312,8 +306,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "analyzeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Open {1} in the Query editor',
-      events: { click: this.#analyzeDatasourceClicked }
+      title: 'Open {1} in the Query editor'
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -328,8 +321,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "removeActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Remove datasource {1}',
-      events: { click: this.#removeDatasourceClicked }
+      title: 'Remove datasource {1}'
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -344,8 +336,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "editActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Configure datasource details of {1}',
-      events: { click: this.#configureDatasourceClicked }
+      title: 'Configure datasource details of {1}'
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -360,8 +351,7 @@ class DataSourcesUi extends EventEmitter {
       "className": "downloadActionButton",
       popovertarget: 'uploadUi',
       popovertargetaction: 'hide',
-      title: 'Download the contents of datasource {1} to a file.',
-      events: { click: this.#downloadDatasourceClicked }
+      title: 'Download the contents of datasource {1} to a file.'
     });
     if (summaryElement) {
       summaryElement.appendChild(actionButton);
@@ -376,9 +366,61 @@ class DataSourcesUi extends EventEmitter {
     this.#createDatasourceNodeDownloadActionButton(datasourceId, summaryElement);
   }
 
-  async #loadDatabaseDatasource(databaseDatasource){
+  async #loadSchemaNode(schemaTreeNode) {
+    let datasourceTreeNode = schemaTreeNode;
+    while (datasourceTreeNode && datasourceTreeNode.getAttribute('data-nodetype') !== 'datasource') {
+      datasourceTreeNode = this.#getTreeNodeFromElement(datasourceTreeNode.parentNode);
+    }
+    if ( !datasourceTreeNode ){
+      throw new Error(`couldn't find datasource node.`);
+    }
+    const databaseDatasource = this.#getDatasourceForTreeNode( datasourceTreeNode );
+    
+    const datasourceId = databaseDatasource.getId();
+    const catalogName = schemaTreeNode.getAttribute('data-catalog-name');
+    const schemaName = schemaTreeNode.getAttribute('data-schema-name');
+    const tablesResult = await databaseDatasource.getTableObjectsResultset({
+      catalogName,
+      schemaName
+    });
+    for (let i = 0; i < tablesResult.numRows; i++){
+      const row = tablesResult.get(i);
+      const catalogName = row.table_catalog || row.database;
+      const schemaName = row.table_schema || row.schema;
+      const tableName = row.table_name || row.name;
+      const tableType = row.table_type || 'BASE TABLE';
+      let datasourcetype;
+      switch (tableType){
+        case 'BASE TABLE':
+          datasourcetype = DuckDbDataSource.types.TABLE;
+          break;
+        case 'VIEW':
+          datasourcetype = DuckDbDataSource.types.VIEW;
+          break;
+      }
+      const tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
+      let tableDatasource = this.getDatasource(tableDatasourceId);
+      if (!tableDatasource) {
+        const hueyDb = window.hueyDb;
+        tableDatasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
+          databaseDatasource: databaseDatasource,
+          type: datasourcetype,
+          catalogName: catalogName,
+          schemaName: schemaName,
+          objectName: tableName
+        });
+        this.#addDatasource(tableDatasource);
+      }
+
+      const tableTreeNode = this.#createDatasourceNode(tableDatasource);
+      schemaTreeNode.appendChild( tableTreeNode );
+    }
+    
+  }
+
+  async #loadDatabaseDatasource1(databaseDatasource){
     try {
-      const result = await databaseDatasource.getTableObjectResultSetFromCatalog();
+      const result = await databaseDatasource.getTableObjectsResultset();
 
       const datasourceId = databaseDatasource.getId();
       const datasourceTreeNode = byId(datasourceId);
@@ -386,8 +428,8 @@ class DataSourcesUi extends EventEmitter {
       const schemaNodes = {};
       for (let i = 0; i < result.numRows; i++){
         const row = result.get(i);
-        const catalogName = row.catalog_schema;
-        const schemaName = row.table_schema;
+        const catalogName = row.table_catalog || row.database;
+        const schemaName = row.table_schema || row.schema;
         let schemaNode = schemaNodes[schemaName];
         if (schemaNode === undefined) {
           schemaNode = instantiateTemplate('dataSourceSchemaNode', datasourceId + ':' + schemaName);
@@ -398,8 +440,8 @@ class DataSourcesUi extends EventEmitter {
           schemaNodes[schemaName] = schemaNode;
           datasourceTreeNode.appendChild(schemaNode);
         }
-        const tableName = row.table_name;
-        const tableType = row.table_type;
+        const tableName = row.table_name || row.name;
+        const tableType = row.table_type || 'BASE TABLE';
         let datasourcetype;
         switch (tableType){
           case 'BASE TABLE':
@@ -434,6 +476,52 @@ class DataSourcesUi extends EventEmitter {
     }
   }
 
+  async #loadDatabaseDatasource(databaseDatasource){
+    const datasourceId = databaseDatasource.getId();
+    const datasourceTreeNode = byId(datasourceId);
+    
+    const type = databaseDatasource.getType();
+    let attachedName, catalogType;
+    if (type === DuckDbDataSource.types.CATALOG) {
+      attachedName = databaseDatasource.getAttachedName();
+      catalogType = databaseDatasource.getCatalogType();
+    }
+    let prevCatalogName;
+    let nodeId;
+    let catalogNode;
+    const result = await databaseDatasource.getSchemaResultsetFromCatalog();
+    for (let i = 0; i < result.numRows; i++){
+      nodeId = datasourceId;
+      const row = result.get(i);
+      const catalogName = row['table_catalog'];
+      const schemaName = row['table_schema'];
+      if (catalogType === 'quack') {
+        nodeId += ':' + catalogName;
+        if ( catalogName !== prevCatalogName ) {
+          catalogNode = instantiateTemplate('dataSourceSchemaNode', nodeId);
+          catalogNode.setAttribute('title', catalogName);
+          catalogNode.setAttribute('data-remote-catalog-name', catalogName);
+          catalogNode.querySelector('span.label').textContent = catalogName;
+          datasourceTreeNode.appendChild(catalogNode);
+        }
+        prevCatalogName = catalogName;
+      }
+      nodeId += ':' + schemaName;
+      const schemaNode = instantiateTemplate('dataSourceSchemaNode', nodeId);
+      schemaNode.setAttribute('title', schemaName);
+      schemaNode.setAttribute('data-catalog-name', catalogName);
+      schemaNode.setAttribute('data-schema-name', schemaName);
+      schemaNode.querySelector('span.label').textContent = schemaName;
+      if (catalogNode) {
+        catalogNode.appendChild(schemaNode);
+      }
+      else {
+        datasourceTreeNode.appendChild(schemaNode);
+      }
+    }
+    
+  }
+  
   async #loadDatasource(datasource) {
     switch (datasource.getType()){
       case DuckDbDataSource.types.FILE:
@@ -448,16 +536,31 @@ class DataSourcesUi extends EventEmitter {
         console.error(`Don't know how to load datasource ${datasource.getId()} of type ${datasource.getType()}`);
     }
   }
-
+  
   #toggleDataSource(event){
     const target = event.target;
-
-    if (event.oldState !== 'closed' || event.newState !== 'open' || target.getElementsByTagName('details').length !== 0) {
+    const treeNode = this.#getTreeNodeFromEvent( event );
+    if ( 
+      event.oldState !== 'closed' || 
+      event.newState !== 'open' || 
+      treeNode.querySelector( 'details' )
+    ) {
       return;
     }
+    const nodeType = treeNode.getAttribute( 'data-nodetype' );
+    switch ( nodeType ) {
+      case 'datasource':
+        const datasource = this.#getDatasourceFromEvent( event );
+        // note: not awaited, but that's ok.
+        this.#loadDatasource( datasource );
+        break;
+      case 'duckdb_schema':
+        this.#loadSchemaNode( treeNode );
+        break;
+      default:
+        debugger;
+    }
 
-    const datasource = this.#getDatasourceForTreeNode(target);
-    this.#loadDatasource(datasource);
   }
 
   #createDatasourceNode(datasource, attributes){
@@ -486,7 +589,6 @@ class DataSourcesUi extends EventEmitter {
       case DuckDbDataSource.types.DUCKDB:
       case DuckDbDataSource.types.SQLITE:
         this.#createDatasourceNodeRemoveActionButton(datasourceId, summary);
-        datasourceNode.addEventListener('toggle', event => this.#toggleDataSource( event ) );
         break;
       case DuckDbDataSource.types.TABLE:
       case DuckDbDataSource.types.VIEW:
@@ -503,11 +605,13 @@ class DataSourcesUi extends EventEmitter {
     return datasourceNode;
   }
 
-  #getTreeNodeFromClickEvent(event){
-    const button = event.target;
-    const label = button.parentNode;
-    const summary = label.parentNode;
-    const node = summary.parentNode;
+  #getTreeNodeFromElement(element) {
+    return element.closest('details');
+  }
+
+  #getTreeNodeFromEvent(event){
+    const target = event.target;
+    const node = this.#getTreeNodeFromElement(target);
     return node;
   }
 
@@ -566,9 +670,9 @@ class DataSourcesUi extends EventEmitter {
     duckdbDataSource.addEventListener('rejectsdetected', event => this.#rejectsDetectedHandler( event ) );
   }
 
-  #getDatasourceFromClickEvent(event){
+  #getDatasourceFromEvent(event){
     let datasource;
-    const node = this.#getTreeNodeFromClickEvent(event);
+    const node = this.#getTreeNodeFromEvent(event);
     const nodeType = node.getAttribute('data-nodetype');
     switch (nodeType) {
       case 'datasource':
@@ -603,13 +707,13 @@ class DataSourcesUi extends EventEmitter {
   }
 
   #analyzeDatasourceClicked(event){
-    const datasource = this.#getDatasourceFromClickEvent(event);
+    const datasource = this.#getDatasourceFromEvent(event);
     // todo: replace direct call to global analyze with fireEvent
     analyzeDatasource(datasource);
   }
 
   #removeDatasourceClicked(event){
-    const node = this.#getTreeNodeFromClickEvent(event);
+    const node = this.#getTreeNodeFromEvent(event);
     const nodeType = node.getAttribute('data-nodetype');
     let datasourceIdsList;
     switch (nodeType) {
@@ -629,12 +733,11 @@ class DataSourcesUi extends EventEmitter {
         }
         break;
     }
-    this.#freeEventHandlers(node);
     this.destroyDatasources(datasourceIdsList);
   }
 
   #configureDatasourceClicked(event){
-    const dataSource = this.#getDatasourceFromClickEvent(event);
+    const dataSource = this.#getDatasourceFromEvent(event);
     const type = dataSource.getType();
     switch( type ){
       case DuckDbDataSource.types.CATALOG:
@@ -745,7 +848,7 @@ class DataSourcesUi extends EventEmitter {
       return;
     }
     
-    const datasource = this.#getDatasourceFromClickEvent(event);
+    const datasource = this.#getDatasourceFromEvent(event);
     let datasourceFileType, includeFromFileType = false;
     switch (datasource.getType()){
       case DuckDbDataSource.types.FILES:
