@@ -1,7 +1,6 @@
 class DataSetComponent {
 
   #queryModel = undefined;
-  #managedConnection = undefined;
   #settings = undefined;
   
   constructor(queryModel, settings){
@@ -28,10 +27,7 @@ class DataSetComponent {
   }
 
   getManagedConnection(){
-    if (this.#managedConnection === undefined) {
-      this.#managedConnection = this.#getDatasouceManagedConnection();
-    }
-    return this.#managedConnection;
+    return this.#getDatasouceManagedConnection();
   }
   
   async cancelPendingQuery(){
