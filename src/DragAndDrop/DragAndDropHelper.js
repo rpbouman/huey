@@ -131,7 +131,7 @@ class DragAndDropHelper {
             storedValue = rawData;
           }
           else
-          if (property.startsWith('text') && noKeydata) {
+          if (noKeydata) {
             storedValue = rawData;
           }
           else {
