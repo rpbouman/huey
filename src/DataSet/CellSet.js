@@ -298,7 +298,7 @@ class CellSet extends DataSetComponent {
       tuplesFields,
       cellsAxisItemsToFetch
     );
-    const connection = await this.getManagedConnection();
+    const connection = this.getManagedConnection();
     const resultSet = await connection.query(sql);
     return resultSet;
   }

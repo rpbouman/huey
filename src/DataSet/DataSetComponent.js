@@ -13,13 +13,13 @@ class DataSetComponent {
     return this.#settings;
   }
 
-  async #getDatasouceManagedConnection(){
+  #getDatasouceManagedConnection(){
     const queryModel = this.#queryModel;
     const datasource = queryModel.getDatasource();
     if (!datasource){
       return undefined;
     }
-    const managedConnection = await datasource.getManagedConnection();
+    const managedConnection = datasource.getManagedConnection();
     return managedConnection;
   }
   
@@ -27,15 +27,15 @@ class DataSetComponent {
     return this.#queryModel;
   }
 
-  async getManagedConnection(){
+  getManagedConnection(){
     if (this.#managedConnection === undefined) {
-      this.#managedConnection = await this.#getDatasouceManagedConnection();
+      this.#managedConnection = this.#getDatasouceManagedConnection();
     }
     return this.#managedConnection;
   }
   
   async cancelPendingQuery(){
-    const connection = await this.getManagedConnection();
+    const connection = this.getManagedConnection();
     return await connection.cancelPendingQuery();
   }  
 }

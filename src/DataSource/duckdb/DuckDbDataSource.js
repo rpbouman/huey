@@ -212,6 +212,7 @@ class DuckDbDataSource extends EventEmitter {
   #duckDbInstance = undefined;
   #connection = undefined;
   #catalogDefinition = undefined;
+  #databaseDatasource = undefined;
   #managedConnection = undefined;
   #catalogName = undefined;
   #schemaName = undefined;
@@ -232,6 +233,7 @@ class DuckDbDataSource extends EventEmitter {
 
   constructor(duckDb, duckDbInstance, config){
     super(['destroy', 'rejectsdetected', 'change']);
+    this.#databaseDatasource = config.databaseDatasource;
     this.#originalConfig = Object.assign({}, config);
     this.#datasource_uid = ++DuckDbDataSource.#datasource_uid_generator;
     this.#duckDb = duckDb;
@@ -244,6 +246,13 @@ class DuckDbDataSource extends EventEmitter {
       throw new Error(`Catalog definition not available for datasources of type "${this.#type}"`);
     }
     return Object.assign({}, this.#catalogDefinition);
+  }
+  
+  getCatalogType(){
+    if (this.#type !== DuckDbDataSource.types.CATALOG) {
+      throw new Error(`Catalog definition not available for datasources of type "${this.#type}"`);
+    }
+    return this.#catalogDefinition.type;
   }
   
   getAttachedName(){
@@ -726,7 +735,7 @@ class DuckDbDataSource extends EventEmitter {
       return undefined;
     }
     try {
-      const connection = await this.getManagedConnection();
+      const connection = this.getManagedConnection();
       const physicalConnection = await connection.getPhysicalConnection();
 
       const result = await physicalConnection.query(sql);
@@ -742,7 +751,7 @@ class DuckDbDataSource extends EventEmitter {
       return undefined;
     }
     try {
-      const connection = await this.getManagedConnection();
+      const connection = this.getManagedConnection();
       const physicalConnection = await connection.getPhysicalConnection();
 
       const promises = [];
@@ -836,7 +845,7 @@ class DuckDbDataSource extends EventEmitter {
           fileName = this.getFileName();
           alias = this.getAttachedName();
           quotedAlias = getQuotedIdentifier(alias);
-          sql = `ATTACH '${fileName}' AS ${quotedAlias}`;
+          sql = `ATTACH ${quoteStringLiteral(fileName)} AS ${quotedAlias}`;
           if (type === DuckDbDataSource.types.SQLITE){
             sql += ` (TYPE SQLITE)`;
           }
@@ -1131,8 +1140,8 @@ class DuckDbDataSource extends EventEmitter {
     return this.#duckDbInstance.connect();
   }
 
-  createManagedConnection(){
-    const managedConnection = new DuckDbConnection(this.#duckDbInstance);
+  createManagedConnection(config){
+    const managedConnection = new DuckDbConnection(this.#duckDbInstance, config);
     return managedConnection;
   }
 
@@ -1215,7 +1224,25 @@ class DuckDbDataSource extends EventEmitter {
 
   getManagedConnection(){
     if (this.#managedConnection === undefined){
-      this.#managedConnection = this.createManagedConnection();
+
+      let config;
+      if (this.#databaseDatasource) {
+        this.#managedConnection = this.#databaseDatasource.getManagedConnection();
+        return this.#managedConnection;
+      }
+      if (
+        this.getType() === DuckDbDataSource.types.CATALOG && 
+        this.#catalogDefinition.type === 'quack'
+      ) {
+        const attachedName = this.getAttachedName();
+        config = {
+          sqlRewriter: function(sql){
+            return `SELECT * FROM "${attachedName}".query(${quoteStringLiteral(sql)})`;
+          }
+        };
+      }
+      
+      this.#managedConnection = this.createManagedConnection(config);
       if (this.supportsRejectsDetection()){
         this.#managedConnection.addEventListener('beforequery', event => this.#queryExecutionListener( event ) );
         this.#managedConnection.addEventListener('afterquery', event => this.#queryExecutionListener( event ) );
@@ -1268,7 +1295,7 @@ class DuckDbDataSource extends EventEmitter {
       sampleSize = this.#defaultSampleSize;
     }
     const sql = this.#getSqlForDataProfile(sampleSize);
-    const connection = await this.getConnection();
+    const connection = this.getManagedConnection();
     const resultset = connection.query(sql);
     return resultset;
   }
@@ -1285,7 +1312,7 @@ class DuckDbDataSource extends EventEmitter {
     }
 
     const sql = this.getSqlForTableSchema();
-    const connection = await this.getConnection();
+    const connection = this.getManagedConnection();
     await this.registerFile();
     let columnMetadata;
     try {
@@ -1299,63 +1326,121 @@ class DuckDbDataSource extends EventEmitter {
     return columnMetadata;
   }
   
-  async getTableObjectResultSetFromCatalog(){
-    const catalogName = this.getAttachedName();
-    const connection = await this.getManagedConnection();
-    const sql = `
-      SELECT ${quoteStringLiteral(catalogName)} AS catalog_name, table_schema, table_name, table_type
-      FROM    information_schema.tables
-      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
-      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
-      ORDER BY table_schema, table_name
-    `;
+  async getSchemaResultsetFromCatalog(){
+    const catalogDefinition = this.#catalogDefinition;
     
-    const result = await connection.query(sql);
-    return result;
-  }
-
-  async getTableObjectResultSetFromDuckDbFile(){
-    const catalogName = this.getAttachedName();
-    const connection = await this.getManagedConnection();
-    const sql = `
-      SELECT ${quoteStringLiteral(catalogName)}, table_schema, table_name, table_type
-      FROM    information_schema.tables
-      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
-      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
-      ORDER BY table_schema, table_name
-    `;
-    
-    const result = await connection.query(sql);
-    return result;
-  }
-
-  async getTableObjectResultSetFromSQLiteFile(){
-    const catalogName = this.getAttachedName();
-    const connection = await this.getManagedConnection();
-    const sql = `
-      SELECT ${quoteStringLiteral(catalogName)}, table_schema, table_name, table_type
-      FROM    information_schema.tables
-      WHERE table_catalog = ${quoteStringLiteral(catalogName)}
-      AND   table_schema NOT IN ('information_schema', 'pg_catalog')
-      ORDER BY table_schema, table_name
-    `;
-    
-    const result = await connection.query(sql);
+    const sql = [
+      'SELECT   table_catalog, table_schema, count(*)',
+      'FROM     information_schema.tables',
+      `WHERE    table_schema NOT IN ('information_schema', 'pg_catalog')`
+    ];
+    if( !catalogDefinition || catalogDefinition.type !== 'quack'){
+      const catalogName = this.getAttachedName();
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(catalogName)}`);
+    }
+    sql.push('GROUP BY table_catalog, table_schema');
+    sql.push('ORDER BY table_catalog, table_schema');
+    const connection = this.getManagedConnection();
+    const result = await connection.query(sql.join('\n'));
     return result;
   }
   
-  async getTableObjectsResultset(){
+  async getTableObjectResultSetFromCatalog(params){
+    const catalogDefinition = this.#catalogDefinition;
+    
+    const sql = [
+      'SELECT   table_catalog, table_schema, table_name',
+      'FROM     information_schema.tables',
+      `WHERE    table_schema NOT IN ('information_schema', 'pg_catalog')`
+    ];
+    switch (catalogDefinition.type) {
+      case 'quack':
+        break;
+      default:
+    }
+    if (params.catalogName){
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(params.catalogName)}`);
+    }
+    else {
+      const catalogName = this.getAttachedName();
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(catalogName)}`);
+    }
+    if (params.schemaName){
+      sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
+    }
+    sql.push('ORDER BY table_catalog, table_schema, table_name');
+    const connection = this.getManagedConnection();
+    const result = await connection.query(sql.join('\n'));
+    return result;
+  }
+
+  async getTableObjectResultSetFromDuckDbFile(params){
+    const catalogName = this.getAttachedName();
+    const connection = this.getManagedConnection();
+    const sql = [
+      'SELECT   table_catalog, table_schema, table_name',
+      'FROM     information_schema.tables',
+      `WHERE    table_schema NOT IN ('information_schema', 'pg_catalog')`
+    ];
+    if (params.catalogName){
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(params.catalogName)}`);
+    }
+    else {
+      const catalogName = this.getAttachedName();
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(catalogName)}`);
+    }
+    if (params.schemaName){
+      sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
+    }
+    sql.push('ORDER BY table_catalog, table_schema, table_name');
+    const result = await connection.query(sql.join('\n'));
+    return result;
+  }
+
+  // TODO: I just can't get SQLite working.
+  // What I tried:
+  // information_schema.tables
+  // show all tables
+  // use <catalog>, then show all tables
+  // I just can't get a break. 
+  // It works fine for  attached DuckDB Databases, and remote catalogs.
+  async getTableObjectResultSetFromSQLiteFile(params){
+    const catalogName = this.getAttachedName();
+    const connection = this.getManagedConnection();
+
+    const sql = [
+      'SELECT   table_catalog, table_schema, table_name',
+      'FROM     information_schema.tables',
+      `WHERE    table_schema NOT IN ('information_schema', 'pg_catalog')`
+    ];
+    if (params.catalogName){
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(params.catalogName)}`);
+    }
+    else {
+      const catalogName = this.getAttachedName();
+      sql.push(`AND      table_catalog = ${quoteStringLiteral(catalogName)}`);
+    }
+    if (params.schemaName){
+      sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
+    }
+    sql.push('ORDER BY table_catalog, table_schema, table_name');
+
+    const result = await connection.query(sql.join('\n'));
+    return result;
+  }
+  
+  async getTableObjectsResultset(params){
     const type = this.getType();
     let resultset;
     switch (type) {
-      case DuckDbDataSource.type.CATALOG:
-        resultset = await this.getTableObjectResultSetFromCatalog();
+      case DuckDbDataSource.types.CATALOG:
+        resultset = await this.getTableObjectResultSetFromCatalog(params);
         break;
-      case DuckDbDataSource.type.DUCKDB:
-        resultset = await this.getTableObjectResultSetFromDuckDbFile();
+      case DuckDbDataSource.types.DUCKDB:
+        resultset = await this.getTableObjectResultSetFromDuckDbFile(params);
         break;
-      case DuckDbDataSource.type.SQLITE:
-        resultset = await this.getTableObjectResultSetFromSQLiteFile();
+      case DuckDbDataSource.types.SQLITE:
+        resultset = await this.getTableObjectResultSetFromSQLiteFile(params);
         break;
       default:
         throw new Error(`Invalid for datasources of type "${type}".`);
