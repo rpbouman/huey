@@ -31,9 +31,19 @@ If you prefer to watch a video insted, here's a few:
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
 
 ### Limitations
-- Huey is based on DuckDB WASM. DuckDB is awesome! 
+- Huey is based on [DuckDB/WASM](https://duckdb.org/docs/current/clients/wasm/overview) (a DuckDB instance compiled to [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)). DuckDB is awesome, and WASM is too! 
   However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. 
+  Most notably:
+  - WASM in general is limited to a theoretical 4Gb memoery limit. In practice this may be closer to 3Gb. 
+    However, it's complicated: DuckDB (and DuckDB/WASM) empploys advance streaming analytics, which often can process and aggregate datasets with volumes that exceed this limit.
+  - WASM is confined to a single thread, eliminating some of DuckDB's optimizations.
   That said, DuckDB WASM is still incredibly fast when compared to any in-browser alternative. 
+  If you find that your use case is stretching WASM's limits, then you might try to use Huey as a client and [connect to a DuckDB Quack Server](#connecting-to-a-quack-server).
+- Huey is subject to typical restrictions of a web application. 
+  In particular, [URL datasources](#register-urls) may not be directly accessible due to [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy) and/or missing [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS).
+  If these issues are hampering your use case, the obvious step would be to server Huey over HTTP(S), and configure your webserver to pass the right headers.
+  This is a common scenario for any web application; it's just Huey is built in a way that also gets a lot done in completely static, offline scenarios. 
+  But that alone doesn't mean you can't or shouldn't host Huey over HTTP(S)!
 
 ## Getting started
 For a super quick start, the following sections present sample reports using the [live demo](https://rpbouman.github.io/huey/src/index.html).
@@ -193,11 +203,11 @@ But native duckdb tables, as well as views based on duckdb base tables work marv
 
 ### Using Remote Datasets
 
-Huey is not just for local files! You can also access remote data by registering a URL or connecting to a remote Catalog.
+Huey is not just for local files! You can also access remote data by [registering a URL](#register-urls) or [connecting to a remote Catalog](#remote-catalogs.
 
 #### Register URLs
 
-In addition to local files, you can also register URLs. 
+In addition to opening and registering local files, you can also register URLs. 
 To register a URL, click the "Load data from URL" button on the toolbar load data from URL button <img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/a52332ff-e108-414a-a508-8148a03bbd42" />
 . 
 You will be prompted to enter the URL:
@@ -1008,7 +1018,7 @@ If all goes well, the Catalog is now added to the Datasources tab:
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 ### TPCH Iceberg Catalog
-The TPCH Iceberg Catalog is the TPCH benchmark dataset, served as Iceberg tables stored on S3.  
+The TPCH Iceberg Catalog is the TPCH benchmark dataset, served as Iceberg tables stored on S3.
 
 To connect to it from within Huey, you first have to create a secret, so follow the [steps for creating a new secret](#creating-a-new-secret): 
 - when using the [Secret Form](#secret-manager-form-view), enter:
@@ -1056,6 +1066,64 @@ Once the secret is in place, you can follow [the steps for creating a new Catalo
 
 If all goes well, the Catalog is now added to the Datasources tab:
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
+
+### Connecting to a Quack Server
+
+Huey can also be used as a client to a [Quack](https://duckdb.org/quack/) server. 
+To get started, follow these steps: 
+- create a duckdb process that is to be server; for example, by running the DuckDB commeand line client.
+- ```INSTALL``` the [quack extension](https://duckdb.org/docs/current/core_extensions/quack). ```LOAD``` it too:
+  ```sql
+  INSTALL quack;
+  LOAD quack;
+  ```
+- ```CALL``` the ```quack_serve()``` macro, passing the url and secret token:
+  ```sql
+  CALL quack_serve(
+    'quack:localhost'
+  , token = 'super_secret'
+  )
+  ```
+- Be sure to create some tables. For example, use the [TPCH extension](https://duckdb.org/docs/current/core_extensions/tpch).
+  ```sql
+  INSTALL tpch;
+  LOAD tpch;
+  CALL dbgen( sf = 1 );
+  ```
+  Or attach the ```nl_railway``` ducklake:
+  ```sql
+  ATTACH 'https://blobs.duckdb.org/datalake/nl-railway.ducklake'
+  AS nl_railway (
+    TYPE ducklake
+  )    
+  ```
+After setting up the server, 
+- open Huey
+- Open the Huey [Secrets Manager](#secrets-manager) and [create a Secret](#creating-a-new-secret) for the same token that was passed to ```quack_serve()```:
+  ```sql
+  CREATE OR REPLACE
+  SECRET quack_localhost (
+     TYPE quack
+  , TOKEN 'super_secret'
+  )  
+  ```
+- Open the Hue [Catalogs Manager](#opening-the-catalogs-manager) to [create a catalog entry](#creating-a-new-catalog) for the Quack server:
+  ```sql
+  ATTACH 'quack:localhost:9494'
+  AS try_quack (
+    TYPE quack
+  , SECRET 'quack_localhost'
+  )  
+  ```
+- [Activate](#activating-deactivating-and-auto-attaching-catalogs) the Quack server entry.
+
+If all goes well, the Quack server will be added to the Datasource Panel.
+From there, you can expanmd the node to reveal the attached catalog, and the schemas within it. 
+Finally, expanding the schema folders reveals the tables or views so you can analyze them like any other Huey Datasource.
+
+Note that for Quack catalogs, Huey delegates execution to the server.
+So in this particular scenario, Huey is really a client that allows the server to do all the heavy lifting.
+This can be useful in particular to overcome memoery and trheading limitations specific to DuckDb/WASM.
 
 # Development, Releases, and contributions 
 
