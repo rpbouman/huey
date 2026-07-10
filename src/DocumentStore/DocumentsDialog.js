@@ -1198,10 +1198,8 @@ class DocumentsDialog {
       
       const passwordForm = `
         <form>
-          <label for="${oldPasswordId}">${Internationalization.getText('Old Password')}</label>
-          ${DocumentsDialog.#getPasswordHTML(oldPasswordId, 'password')}
-          <label for="${newPasswordId}">${Internationalization.getText('New Password')}</label>
-          ${DocumentsDialog.#getPasswordHTML(newPasswordId, 'new-password')}
+          ${DocumentsDialog.#getPasswordHTML(oldPasswordId, 'Password', 'Old Password')}
+          ${DocumentsDialog.#getPasswordHTML(newPasswordId, 'new-password', 'New Password')}
         </form>
       `;
       const store = AppDocumentStore.store;
@@ -1261,19 +1259,30 @@ class DocumentsDialog {
     return invalidPassword;
   }
   
-  static #getPasswordHTML(id, name) {
+  static #getPasswordHTML(id, name, labelText) {
+    const translatedLabelText = Internationalization.getText( labelText || 'password' );
     const hint = DocumentsDialog.#passwordHint;
-    const passwordHTML = `<input
-      type="password"
-      name="${name || 'password'}"
-      id="${id}"
-      minlength="12"
-      required
-      pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
-      title="${hint}"
-      autofocus="true"
-    />`;
-    return passwordHTML;
+    const labelHTML = `
+      <label 
+        title="${hint}"
+        for="${id}"
+      >
+        ${translatedLabelText}
+      </label>`
+    ;
+    const passwordHTML = 
+      `<input
+        type="password"
+        name="${name || 'password'}"
+        id="${id}"
+        minlength="12"
+        required
+        pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}"
+        title="${hint}"
+        autofocus="true"
+      />`
+    ;
+    return labelHTML + passwordHTML;
   }
   
   async #getPassword(){
@@ -1285,7 +1294,7 @@ class DocumentsDialog {
       const id = 'secretsManagerPassword' + Date.now();
       const hint = DocumentsDialog.#passwordHint;
       const invalidPassword = DocumentsDialog.#wrongPasswordHint;
-      const passwordHTML = DocumentsDialog.#getPasswordHTML(id);
+      const passwordHTML = DocumentsDialog.#getPasswordHTML(id, 'password', 'Password');
       const config = {
         title: Internationalization.getText('Enter Password'),
         contents: passwordHTML
@@ -1295,16 +1304,23 @@ class DocumentsDialog {
       do {
         if (!isInitialized) {
           const initialPasswordInfo = [
-            Internationalization.getText('Enter a password to initialize the Huey Secrets manager.'),
+            Internationalization.getText('Enter a password to initialize the Huey Secrets Manager.'),
             hint,
             Internationalization.getText('This password will be used to encrypt sensitive fields you enter into your DuckDb Secret.'),
             '',
             passwordHTML,
             '',
-            Internationalization.getText('After initialization of the Secrets manager, you can only access your Secrets by entering the same password.'),
+            Internationalization.getText('After initialization of the Secrets Manager, you can only access your Secrets by entering the same password.'),
             Internationalization.getText('You can change your password later on but also requires you to enter your previous password, so make sure you remember it!')
           ].join('<br/>');
           config.contents = initialPasswordInfo;
+        }
+        else {
+          config.contents = [
+            Internationalization.getText('Enter your Huey Secrets Manager password:'),
+            '<br/>',
+            passwordHTML
+          ].join('<br/>')
         }
         const result = await PromptUi.show(config);
         if (result === PromptUi.REJECT) {
