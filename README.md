@@ -1,5 +1,5 @@
 # 🦆 Huey
-Huey is a browser-based application that lets you explore and analyze data.
+Huey is a static browser-based app that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files.
 
 __Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
