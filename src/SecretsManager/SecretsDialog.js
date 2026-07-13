@@ -106,11 +106,11 @@ class SecretsDialog extends DocumentsDialog {
           items.push('</optgroup>');
         }
         type = documentObject.type;
-        items.push(`<optgroup label="${type}">`);
+        items.push(`<optgroup label="${escapeHtmlText(type)}">`);
       }
       const loaded = duckdbSecrets[documentObject.name] !== undefined;
       const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';
-      items.push(`<option data-loaded="${loaded}" ${selected}>${documentObject.name}</option>`);
+      items.push(`<option data-loaded="${loaded}" ${selected}>${escapeHtmlText(documentObject.name)}</option>`);
     });
     if (items.length) {
       items.push('</optgroup>');
@@ -144,7 +144,14 @@ class SecretsDialog extends DocumentsDialog {
         return -1;
       }
       return 0;
-    }).map(doc => createEl('option', {label: doc.name, value: doc.name}, doc.name).outerHTML).join('');
+    }).map(doc => createEl(
+      'option', 
+      {
+        label: doc.name
+      , value: doc.name
+      }, 
+      escapeHtmlText(doc.name)
+    ).outerHTML).join('');
   }
 
   initEvents(){
