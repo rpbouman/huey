@@ -32,7 +32,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v46';
+const CACHE_VERSION = 'v47';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -189,22 +189,6 @@ const APP_SHELL_URLS = new Set(
 APP_SHELL_URLS.add(new URL('./', self.registration.scope).href);
 APP_SHELL_URLS.add(new URL('index.html', self.registration.scope).href);
 
-// ─── CDN entry-points to pre-fetch at install time ────────────────────────────
-// Versions read from src/index.html (Huey v1.0.16 "Hungarian").
-// Secondary sub-resources fetched by DuckDB at runtime (WASM blobs, worker JS)
-// are cached automatically by the runtime Cache-first handler below.
-// When upgrading a dependency, update the URL here AND bump CACHE_VERSION.
-const CDN_PREFETCH = [
-  // Tabler Icons: Huey injects a @font-face rule via inline JS and fetches
-  // only this single woff2 – there is no separate CSS entry-point.
-  'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.40.0/dist/fonts/tabler-icons.woff2?v3.40.0',
-
-  // DuckDB WASM ESM bundle entry-point.
-  // Worker scripts and WASM binaries are fetched by DuckDB itself at runtime
-  // and will be cached on first load via the cdn.jsdelivr.net handler below.
-  'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev39.0/+esm',
-];
-
 // Origins that must never be cached (DuckDB extension servers).
 // Extensions can be very large, change independently of Huey, and the app
 // handles extension-load failures gracefully.
@@ -223,21 +207,7 @@ self.addEventListener('install', event => {
         cache.addAll([...APP_SHELL_URLS]).catch(err =>
           console.warn('[huey-sw] Some app-shell assets failed to pre-cache:', err)
         )
-      ),
-      caches.open(CACHE_CDN).then(cache =>
-        Promise.allSettled(
-          CDN_PREFETCH.map(url =>
-            fetch(url, { mode: 'cors' })
-              .then(res => {
-                if (res.ok) return cache.put(url, res);
-                console.warn(`[huey-sw] CDN pre-fetch failed (${res.status}): ${url}`);
-              })
-              .catch(err =>
-                console.warn(`[huey-sw] CDN pre-fetch network error: ${url}`, err)
-              )
-          )
-        )
-      ),
+      )
     ]).then(() => self.skipWaiting())
   );
 });
