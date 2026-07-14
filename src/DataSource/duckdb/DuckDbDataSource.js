@@ -864,7 +864,7 @@ class DuckDbDataSource extends EventEmitter {
       if (ducklake_metadata_result.numRows > 0){ 
         const detachSql = `DETACH ${quotedAlias}`;
         await connection.query(detachSql);
-        const attachSql = `ATTACH '${fileName}' AS ${quotedAlias} (TYPE ducklake)`;
+        const attachSql = `ATTACH ${quoteStringLiteral(fileName)} AS ${quotedAlias} (TYPE ducklake)`;
         await connection.query(attachSql);
       }
       
