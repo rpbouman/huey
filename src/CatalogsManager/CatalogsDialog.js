@@ -119,7 +119,7 @@ class CatalogsDialog extends DocumentsDialog {
           items.push('</optgroup>');
         }
         type = documentObject.type;
-        items.push(`<optgroup translate="no" label="${escapeHtmlText(type)}">`);
+        items.push(`<optgroup translate="no" label="${escapeHtml(type)}">`);
       }
       const loaded = duckdbDatabases[documentObject.name] !== undefined;
       const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';

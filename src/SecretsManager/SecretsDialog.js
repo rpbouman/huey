@@ -106,7 +106,7 @@ class SecretsDialog extends DocumentsDialog {
           items.push('</optgroup>');
         }
         type = documentObject.type;
-        items.push(`<optgroup label="${escapeHtmlText(type)}">`);
+        items.push(`<optgroup label="${escapeHtml(type)}">`);
       }
       const loaded = duckdbSecrets[documentObject.name] !== undefined;
       const selected = documentObject.name === selectedDocument ? ' selected="true"' : '';
