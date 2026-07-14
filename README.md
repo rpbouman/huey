@@ -44,6 +44,9 @@ If you prefer to watch a video insted, here's a few:
   If these issues are hampering your use case, the obvious step would be to server Huey over HTTP(S), and configure your webserver to pass the right headers.
   This is a common scenario for any web application; it's just Huey is built in a way that also gets a lot done in completely static, offline scenarios. 
   But that alone doesn't mean you can't or shouldn't host Huey over HTTP(S)!
+- Huey is best enjoyed on the desktop. Huey ought to work on a modern tablet. If you find it doesn't, please submit an issue so this can be worked on.
+  Huey does not work on your phone. If it does, then you just got lucky, but the experence will likely be frustrating because of the small screen size.
+  There are currently no plans to make Huey work on a phone.
 
 ## Getting started
 For a super quick start, the following sections present sample reports using the [live demo](https://rpbouman.github.io/huey/src/index.html).
