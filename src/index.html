@@ -2956,7 +2956,7 @@
     <script type="module">
     
       const duckdbLibraryVersionFromUrl = getSearchParams()['duckdb-wasm'];
-      if (duckdbLibraryVersionFromUrl && /\d+\.\d+\.\d+(?:-dev\d+\.\d+)?/.test(duckdbLibraryVersionFromUrl)) {
+      if (duckdbLibraryVersionFromUrl && /^\d+\.\d+\.\d+(?:-dev\d+\.\d+)?$/.test(duckdbLibraryVersionFromUrl)) {
         duckdbLibraryVersion = duckdbLibraryVersionFromUrl;
       }
       const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
