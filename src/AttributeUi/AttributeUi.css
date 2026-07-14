@@ -229,7 +229,9 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
         [data-member_expression_type$=INT],
         [data-member_expression_type$=INTEGER],
         [data-member_expression_type=BIGNUM]
-      ) 
+      ):is(
+        [data-nodetype=member]
+      )
     ) > summary > span.label::before {
       content: var( --icon-number-123 );
     }

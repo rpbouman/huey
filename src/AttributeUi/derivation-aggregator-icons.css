@@ -15,6 +15,10 @@
 
 [data-derivation='row number']{ --item-icon: var( --icon-hash ); }
 
+/* number derivations */
+[data-derivation="sign"]{ --item-icon: var( --icon-plus-minus ); }
+[data-derivation="absolute"]{ --item-icon: var( --icon-text-color ); }
+
 /* ─── Date derivations ────────────────────────────────────────────────────── */
 
 [data-derivation="iso-date"],
@@ -189,4 +193,3 @@
 
 [data-derivation=or],
 [data-aggregator=or]{ --item-icon: var( --icon-logical-or ); }
-

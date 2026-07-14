@@ -553,6 +553,34 @@ class AttributeUi {
     },
   };
 
+  static numberDerivations = {
+    "absolute": {
+      folder: 'number operations',
+      expressionTemplate: "abs( ${columnExpression} )",
+      preservesColumnType: true,
+      forNumeric: true,
+      createFormatter: function(axisItem){
+        const columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+        const dataTypeInfo = getDataTypeInfo(columnType);
+        const formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
+    "sign": {
+      folder: 'number operations',
+      expressionTemplate: [
+        "case",
+        "  when ${columnExpression} < 0 then '-'",
+        "  else '+'",
+        "end"
+      ].join(' '),
+      columnType: 'VARCHAR',
+      forNumeric: true
+    }
+  }
+
   static arrayDerivations = {
     "elements": {
       folder: 'array operations',
@@ -646,6 +674,7 @@ class AttributeUi {
       Boolean(typeInfo.hasBlobDerivations) ? AttributeUi.blobDerivations : undefined,
       Boolean(typeInfo.hasEnumDerivations) ? AttributeUi.enumDerivations : undefined,
       Boolean(typeInfo.hasUUIDDerivations) ? AttributeUi.uuidDerivations : undefined,
+      Boolean(typeInfo.isNumeric) ? AttributeUi.numberDerivations : undefined,
       geometryType ? AttributeUi.geometryDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
@@ -659,6 +688,7 @@ class AttributeUi {
       AttributeUi.timeFields,
       AttributeUi.timestampFields,
       AttributeUi.textDerivations,
+      AttributeUi.numberDerivations,
       AttributeUi.blobDerivations,
       AttributeUi.enumDerivations,
       AttributeUi.hashDerivations,
