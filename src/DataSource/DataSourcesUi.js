@@ -637,25 +637,24 @@ class DataSourcesUi extends EventEmitter {
       balanceAttribute = 0;
       datasourceNode.removeAttribute('data-reject_count');
     }
-    //TODO: I18N
     if (new_reject_balance > old_reject_balance){
       let title, description;
       if (old_reject_balance === 0n){
-        title = 'Errors found in Data file';
+        title = Internationalization.getText('Errors found in Data file');
         description = [
-          'Errors were encountered while executing the previous query.',
-          `${new_reject_balance} offending records were excluded from the results.`
+          Internationalization.getText('Errors were encountered while executing the previous query.'),
+          Internationalization.getText('{1} offending records were excluded from the results.', new_reject_balance)
         ];
       }
       else {
-        title = 'New errors found in Data file';
+        title = Internationalization.getText('New errors found in Data file');
         const diff = new_reject_balance - old_reject_balance;
         description = [
-          `${diff} new errors were encountered while executing the previous query and skipped from the results.`,
-          `The total number of skipped records so far is ${new_reject_balance}.`
+          Internationalization.getText('{1} new errors were encountered while executing the previous query and skipped from the results.', diff),
+          Internationalization.getText('The total number of skipped records so far is {1}.', new_reject_balance)
         ];
       }
-      description.push('Review datasource settings to inspect and fix the errors.');
+      description.push(Internationalization.getText('Review datasource settings to inspect and fix the errors.'));
       showErrorDialog({
         title: title,
         description: description.join('<br/>\n')
