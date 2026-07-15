@@ -492,9 +492,6 @@ class SqlQueryGenerator {
       
       selectListExpressions.push(`${columnExpression} AS ${columnAlias}`);
 
-      // TODO: see https://github.com/rpbouman/huey/issues/401
-      // we should check if it's safe to use a column alias. 
-      // if the alias is identical to the name of a column, then we probably shouldn't use an alias
       const columnExpressionReference = useLateralColumnAlias ? columnAlias : columnExpression;
 
       const queryAxisItem = queryAxisItems[i];
