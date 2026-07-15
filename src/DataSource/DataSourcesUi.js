@@ -366,6 +366,30 @@ class DataSourcesUi extends EventEmitter {
     this.#createDatasourceNodeDownloadActionButton(datasourceId, summaryElement);
   }
 
+  #createTableDatasource(
+    databaseDatasource, 
+    datasourcetype, 
+    catalogName, 
+    schemaName, 
+    tableName
+  ){
+    const datbaaseDatasourceId = databaseDatasource.getId();
+    const tableDatasourceId = `${datbaaseDatasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
+    let tableDatasource = this.getDatasource(tableDatasourceId);
+    if (!tableDatasource) {
+      const hueyDb = window.hueyDb;
+      tableDatasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
+        databaseDatasource: databaseDatasource,
+        type: datasourcetype,
+        catalogName: catalogName,
+        schemaName: schemaName,
+        objectName: tableName
+      });
+      this.#addDatasource(tableDatasource);
+    }
+    return tableDatasource;
+  }
+
   async #loadSchemaNode(schemaTreeNode) {
     let datasourceTreeNode = schemaTreeNode;
     while (datasourceTreeNode && datasourceTreeNode.getAttribute('data-nodetype') !== 'datasource') {
@@ -398,20 +422,13 @@ class DataSourcesUi extends EventEmitter {
           datasourcetype = DuckDbDataSource.types.VIEW;
           break;
       }
-      const tableDatasourceId = `${datasourceId}:${getQuotedIdentifier(schemaName)}:${getQuotedIdentifier(tableName)}`;
-      let tableDatasource = this.getDatasource(tableDatasourceId);
-      if (!tableDatasource) {
-        const hueyDb = window.hueyDb;
-        tableDatasource = new DuckDbDataSource(hueyDb.duckdb, hueyDb.instance, {
-          databaseDatasource: databaseDatasource,
-          type: datasourcetype,
-          catalogName: catalogName,
-          schemaName: schemaName,
-          objectName: tableName
-        });
-        this.#addDatasource(tableDatasource);
-      }
-
+      const tableDatasource = this.#createTableDatasource(
+        databaseDatasource, 
+        datasourcetype, 
+        catalogName,
+        schemaName, 
+        tableName
+      );
       const tableTreeNode = this.#createDatasourceNode(tableDatasource);
       schemaTreeNode.appendChild( tableTreeNode );
     }
@@ -1076,11 +1093,55 @@ class DataSourcesUi extends EventEmitter {
     }
     return columnNames;
   }
+  
+  async #ensureDatabaseDatasourceLoaded(parsedDatasourceId) {
+    const parts = parsedDatasourceId.localId.split('.');
+    const datasources = this.#datasources;
+    _datasources: for (let datasourceId in datasources){
+      const datasource = datasources[datasourceId];
+      const datasourceType = datasource.getType();
+      switch (datasourceType) {
+        case DuckDbDataSource.types.DUCKDB:
+        case DuckDbDataSource.types.SQLITE:
+        case DuckDbDataSource.types.CATALOG:
+          const attachedName = datasource.getAttachedName();
+          if (parts[0] === getQuotedIdentifier(attachedName)) {
+            const schemaName = unQuoteIdentifier(parts[1]);
+            const tableName = unQuoteIdentifier(parts[2]);
+            const tableResult = await datasource.getTableObjectsResultset({
+              schemaName: schemaName,
+              tableName: tableName
+            });
+            if (tableResult.numRows === 0) {
+              continue;
+            }
+            this.#createTableDatasource(
+              datasource, 
+              parsedDatasourceId.type,
+              attachedName,
+              schemaName, 
+              tableName
+            );
+          }
+          break;
+      }
+    }
+  }
 
-  async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType){
+  async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType, preferredDatasourceId){
     let foundDatasources = {};
 
     const datasources = this.#datasources;
+    
+    if (preferredDatasourceId && datasources[preferredDatasourceId] === undefined) {
+      const parsedDatasourceId = DuckDbDataSource.parseId(preferredDatasourceId);
+      switch (parsedDatasourceId.type) {
+        case DuckDbDataSource.types.TABLE:
+        case DuckDbDataSource.types.VIEW:
+          await this.#ensureDatabaseDatasourceLoaded(parsedDatasourceId);
+      }
+    }
+    
     _datasources: for (let datasourceId in datasources){
       const datasource = datasources[datasourceId];
       const isCompatible = await this.isDatasourceCompatibleWithColumnsSpec(datasourceId, columnsSpec, useLooseColumnComparisonType);
