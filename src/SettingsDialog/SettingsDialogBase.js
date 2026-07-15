@@ -13,6 +13,16 @@ class SettingsDialogBase {
     this.updateDialogFromSettings();
   }
 
+  setBusy(busyState) {
+    const dialog = this.getDialog();
+    if (busyState){
+      dialog.setAttribute('aria-busy', true);
+    }
+    else {
+      dialog.removeAttribute('aria-busy');
+    }
+  }
+
   getDialog(){
     const settingsDialog = byId(this.#id);
     return settingsDialog;

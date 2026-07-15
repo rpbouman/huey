@@ -95,9 +95,9 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
     const snifferSql = `SELECT * FROM ${sniffer}('${fileName}'${csvReaderArgumentsSql})`;
 
     const managedConnection = datasource.getManagedConnection();
-    // TODO: show a busy spinner
+    this.setBusy(true);
     const result = await managedConnection.query(snifferSql);
-    // TODO: hide the busy spinner
+    this.setBusy(false);
     const row = result.get(0);
 
     function escapeDelimiter(delim){
@@ -183,8 +183,10 @@ class DatasourceSettingsDialog extends SettingsDialogBase {
   }
 
   async #clearCsvReaderRejectsHandler(event){
+    this.setBusy(true);
     await this.#datasource.clearRejects();
     this.#updateRejectsTabData();
+    this.setBusy(false);
   }
 
   #initRejectsTab(){
