@@ -20,9 +20,6 @@ class CatalogsDialog extends DocumentsDialog {
     const fields = documentObject[fieldsPath];
     const secretField = fields.filter(field => field.key === 'SECRET');
     if (secretField.length) {
-      // TODO: make this nice. Should probably be a service performed by the secret dialog
-      // should handle cases where the secret already EXISTS
-      // should detect whether the secret cannot be found at all and prompt whether to continue
       const secretName = secretField[0].value;
       const secretDocument = await secretsDialog.getAndDecryptDocument(secretName);
       await secretsDialog.createDuckDbDocument(secretDocument);

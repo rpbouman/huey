@@ -1634,7 +1634,6 @@ class AttributeUi {
   }
 
   revealAllQueryAttributes() {
-    // TODO: ensure all query attributes are rendered
     const dom = this.getDom();
     const detailsList = document.querySelectorAll('.attributeUi details:has( details > summary > label > input[type=checkbox]:checked )');
     for (const details of detailsList) {
