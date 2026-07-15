@@ -1368,6 +1368,9 @@ class DuckDbDataSource extends EventEmitter {
     if (params.schemaName){
       sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
     }
+    if (params.tableName) {
+      sql.push(`AND      table_name = ${quoteStringLiteral(params.tableName)}`);
+    }
     sql.push('ORDER BY table_catalog, table_schema, table_name');
     const connection = this.getManagedConnection();
     const result = await connection.query(sql.join('\n'));
@@ -1391,6 +1394,9 @@ class DuckDbDataSource extends EventEmitter {
     }
     if (params.schemaName){
       sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
+    }
+    if (params.tableName) {
+      sql.push(`AND      table_name = ${quoteStringLiteral(params.tableName)}`);
     }
     sql.push('ORDER BY table_catalog, table_schema, table_name');
     const result = await connection.query(sql.join('\n'));
@@ -1422,6 +1428,9 @@ class DuckDbDataSource extends EventEmitter {
     }
     if (params.schemaName){
       sql.push(`AND      table_schema = ${quoteStringLiteral(params.schemaName)}`);
+    }
+    if (params.tableName) {
+      sql.push(`AND      table_name = ${quoteStringLiteral(params.tableName)}`);
     }
     sql.push('ORDER BY table_catalog, table_schema, table_name');
 

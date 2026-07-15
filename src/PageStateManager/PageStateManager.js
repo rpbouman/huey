@@ -219,7 +219,7 @@ class PageStateManager {
     const referencedColumns = QueryModel.getReferencedColumns(queryModelState);
 
     const datasourceId = queryModelState.datasourceId;
-    const compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
+    const compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true, datasourceId);
 
     let datasource;
     if (compatibleDatasources && compatibleDatasources[datasourceId]) {
