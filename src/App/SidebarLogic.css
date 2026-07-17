@@ -1,42 +1,145 @@
-/**
-*
-* Hide attribute UI by default
-*
-*/
-nav#sidebar[role=tablist] > div:has( > label[for=attributesTab]) {
-  display: none;
-}
-/**
-*
-* Show attribute UI if there is at least one data source
-*
-*/
-nav#sidebar[role=tablist]:has( > div > div[role=tabpanel] > div#datasourcesUi details ) > div:has( > label[for=attributesTab]) {
-  display: block;
-}
+nav#sidebar[role=tablist] {
 
-/**
-*
-* If the Attribute UI is not visible, then we won't see the "filler" tab at the end (which draws the tabstrip line). 
-* The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
-*
-*/
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ){
-  flex-grow: 1;
-}
+  height: calc(100vh - 40px);
+  max-width: calc(100vw - 14px);
+  grid-column: 1/1;
+  grid-row: 2/ span 2;
+  padding: 4px 4px 0px 4px;
+  display: flex;
 
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi details ){
-  flex-grow: 0;
-}
+  width: 364px;
+  min-width: 170px;
+  
+  &::-webkit-scrollbar-corner{
+    background-color: var( --huey-medium-background-color );
+  }
+  
+  > div > div[role=tabpanel] {
+    height: calc( 100% - 40px );
+  }
 
-nav#sidebar[role=tablist] > div:has( > label[role=tab] + input[type=radio] + *[role=tabpanel] > div#datasourcesUi ):after {
-    content: ' ';
-    width: 100%;
-    border-bottom-style: solid;
-    border-color: var(--huey-light-border-color);
-    border-width: 2px;
+  /**
+  * Collapse/expand sidebar
+  */
+  > menu[role=toolbar] {
+    padding: 0px;
+    height: 23px;
     display: block;
-    margin-top: 2px;
+    margin-top: -2px;
+
+    > label[for=sidebarPin] {
+      
+      > input#sidebarPin[type=checkbox] {
+        appearance: none;
+        display: none;
+      }
+
+      /**
+      * By default, it's collapsed
+      */
+      &::before {
+        margin-right: -2px;
+        content: var( --icon-layout-sidebar-right-collapse );
+      }
+      
+      /**
+      * if checked, it's expanded
+      */
+      &:has( > input[type=checkbox]:checked )::before {
+        content: var( --icon-layout-sidebar-left-collapse );
+      }
+    }
+  }
+
+  /**
+  * when the sidebar is collapsed, the tabs inside it are hidden
+  */
+  &:has( > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:not( :checked ) ) {
+
+    width: 24px !important;
+    min-width: 24px !important;
+    resize: none;
+
+    > div:has( > label[role=tab] ) {
+      display: none;
+    }
+
+    /* > menu[role=toolbar] {
+      border-bottom-style: none;
+    }*/
+  }
+  
+  &:has( 
+    > menu > label[for=sidebarPin] > input#sidebarPin[type=checkbox]:checked 
+  ) > div {
+    
+    /**
+    *
+    * Hide attribute UI by default
+    *
+    */
+    &:has( 
+      > label[for=attributesTab]
+    ) {
+      display: none;
+    }
+    
+    /**
+    *
+    * Show attribute UI if there is at least one item in the Attribute UI
+    *
+    */
+    &:has( 
+      > label[for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > *
+    ) {
+      display: block;
+    }
+
+    /**
+    *
+    * If the Attribute UI is not visible, then we won't see the "filler" tab at the end (which draws the tabstrip line). 
+    * The following rules compensate for this, and draw the line in case there are no datasources in the DataSourceUi
+    *
+    */
+    
+    /* default: show the filler  */
+    &:has( > label[role=tab][for=datasourcesTab] ),
+    &:has( > label[role=tab][for=attributesTab] ){
+      flex-grow: 1;
+    }
+
+    /* override default and hide the filler of we have attributes.  */
+    &:has( 
+      > label[role=tab][for=datasourcesTab]
+    ):has( 
+      + div > label[role=tab][for=attributesTab] + input#attributesTab + div[role=tabpanel] > div#attributeUi[role=tree] > *
+    ) {
+      flex-grow: 0;
+    }
+
+    &:has( > label[role=tab] )::after {
+      content: ' ';
+      width: 100%;
+      border-bottom-style: solid;
+      border-color: var(--huey-light-border-color);
+      border-width: 2px;
+      display: block;
+    }
+    
+    &:has( > label[role=tab][for=attributesTab] )::after {
+      content: ' ';
+      width: 100%;
+      border-bottom-style: solid;
+      border-color: var(--huey-light-border-color);
+      border-width: 2px;
+      display: block;
+    }
+
+    &:has( > label[role=tab][for=attributesTab] + input#attributesTab:checked  )::after {
+      margin-top: -2px;
+    }
+  }
+  
 }
 
 /**

@@ -1,5 +1,5 @@
 function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
-  var defaultTimeout = 100;
+  const defaultTimeout = 100;
 
   if (typeof eventEmitter === 'string'){
     eventEmitter = byId(eventEmitter);
@@ -17,7 +17,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
     throw new Error(`Invalid argument 3: handler should be a function, not "${typeof handler}".`);
   }
   
-  var typeofScope = typeof scope;
+  const typeofScope = typeof scope;
   switch (typeofScope) {
     case 'object':
       break;
@@ -38,11 +38,10 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
   if (timeout === undefined) {
     timeout = defaultTimeout;
   }
-  var typeOfTimeout = typeof timeout;
-  var timeoutGetter;
+  const typeOfTimeout = typeof timeout;
+  let timeoutGetter;
   switch (typeOfTimeout) {
     case 'number':
-      var timeoutValue = timeout;
       timeoutGetter = function(){
         return timeout;
       }
@@ -54,10 +53,10 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
       throw new Error(`Invalid value for timeout: should be a number or callback, not "${typeOfTimeout}".`);
   }
   
-  var timeoutId = undefined;
-  var count = 0;
+  let timeoutId;
+  let count = 0;
   
-  var listener = function(event){
+  const listener = function(event){
     if (timeoutId === undefined){
       count = 0;
     }
@@ -72,7 +71,7 @@ function bufferEvents(eventEmitter, eventId, handler, scope, timeout){
     handler.call(scope ? scope : null, event, count);
 
     // Set a timeout for the final call to the handler - this kicks in after the timeout after the last event has expired.
-    timeoutId = setTimeout(function(){
+    timeoutId = setTimeout(() => { 
       timeoutId = undefined;
       handler.call(scope ? scope : null, event, undefined);
     }, timeoutGetter.call());

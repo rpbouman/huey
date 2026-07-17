@@ -6,36 +6,42 @@ dialog#errorDialog {
   height: 400px;
 
   resize: both;
-}
+  
+  > header {
 
-dialog#errorDialog > header > #errorDialogTitle::before {
-  font-family: var( --huey-icon-font-family );
-  font-size: var( --huey-icon-large );
-  margin-right: .2em;
-  position:relative;
-  top:.2em;
-  color: red;
-  content: var( --icon-exclamation-circle );
-}
+    > #errorDialogTitle::before {
+      font-family: var( --huey-icon-font-family );
+      font-size: var( --huey-icon-large );
+      margin-right: .2em;
+      position:relative;
+      top:.2em;
+      color: red;
+      content: var( --icon-exclamation-circle );
+    }
 
+  }
 
-dialog#errorDialog > header > #errorDialogTitle {
-}
+  > section {
 
-dialog#errorDialog > section#errorDialogDescription {
-}
+    &#errorDialogDescription {
+    }
 
-dialog#errorDialog > details#errorDialogDetails {
-}
+  }
 
-dialog#errorDialog > details#errorDialogDetails > summary {
-}
+  > details {
 
-dialog#errorDialog > details#errorDialogDetails > pre {
-  overflow: scroll;
-}
-
-
-dialog#errorDialog > details#errorDialogDetails:has( > pre:empty ) {
-  display: none;
+    &#errorDialogDetails {
+      
+      &:has( > pre:empty ) {
+        display: none;
+      }
+      
+      > summary {
+      }
+      
+      > pre {
+        overflow: scroll;
+      }
+    }
+  }
 }

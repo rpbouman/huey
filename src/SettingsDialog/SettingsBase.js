@@ -4,7 +4,7 @@ class SettingsBase extends EventEmitter {
   
   constructor(config){
     config = config || {};
-    var events = ['change'];
+    let events = ['change'];
     if (config.events instanceof Array){
       events = events.concat(config.events);
     }
@@ -17,8 +17,8 @@ class SettingsBase extends EventEmitter {
   }
   
   getTemplateClone(obj){
-    var template = this.getTemplate();
-    var clone = SettingsBase.updateDataFromTemplate(obj || {}, template);
+    const template = this.getTemplate();
+    const clone = SettingsBase.updateDataFromTemplate(obj || {}, template);
     return clone;
   }
   
@@ -47,11 +47,11 @@ class SettingsBase extends EventEmitter {
   }
   
   #getSettings(path){
-    var settings = this.#settings;
+    const settings = this.#settings;
     path = SettingsBase.#normalizePath(path);
-    var value = settings;
-    for (var i = 0; i < path.length; i++) {
-      var pathElement = path[i];
+    let value = settings;
+    for (let i = 0; i < path.length; i++) {
+      const pathElement = path[i];
       value = value[pathElement];
       if (value === undefined){
         return undefined;
@@ -62,7 +62,7 @@ class SettingsBase extends EventEmitter {
   
   // return a safe copy of a setting (one that can be abused by the receiver without messing up the actual settings)
   getSettings(path){
-    var value = this.#getSettings(path);
+    let value = this.#getSettings(path);
     if (typeof value === 'object'){
       value = JSON.parse(JSON.stringify(value));
     }
@@ -71,8 +71,9 @@ class SettingsBase extends EventEmitter {
 
   assignSettings(path, value){ 
     function deepAssign(target, source){
-      for (var property in source){
-        var sourceValue = source[property];
+      let property;
+      for (property in source){
+        const sourceValue = source[property];
         if (typeof sourceValue === 'object') {
           deepAssign(target[property], sourceValue);
         }
@@ -84,9 +85,9 @@ class SettingsBase extends EventEmitter {
 
     path = SettingsBase.#normalizePath(path);
   
-    var settings;
+    let settings;
     if (path.length) {
-      var property = path.pop();
+      const property = path.pop();
       settings = this.#getSettings(path);
     }
     else {
@@ -98,7 +99,7 @@ class SettingsBase extends EventEmitter {
       settings[property] = value;
     }
     else {
-      var currentValue = settings[property];
+      const currentValue = settings[property];
       switch (typeof(currentValue)) {
         case 'object':
           if (currentValue === null){
@@ -127,10 +128,10 @@ class SettingsBase extends EventEmitter {
   }
   
   #synchronize(settingsOrDialog, dialogClass){
-    var settings = this.#settings;
-    Settings.synchronize(dialog, settings, settingsOrDialog);
+    const settings = this.#settings;
+    Settings.synchronize(settingsOrDialog, settings, settingsOrDialog);
     if (settingsOrDialog === 'settings') {
-      var settingsCopy = Object.assign({}, settings);
+      const settingsCopy = Object.assign({}, settings);
       this.#examineChangesAndSendEvent(settingsCopy);
     }
   }
@@ -161,10 +162,10 @@ class SettingsBase extends EventEmitter {
     //now, copy stuff from data to the template
     
     function copyData(source, target){
-      var keys = Object.keys(source);
+      const keys = Object.keys(source);
       keys.forEach(function(propertyName){
-        var sourceValue = source[propertyName];
-        var targetValue = target[propertyName];          
+        const sourceValue = source[propertyName];
+        let targetValue = target[propertyName];          
         if (targetValue === undefined || targetValue === null || targetValue === '') {
           //target either does not have this key at all, or it is null or the empty string (which we deem safe to overwrite)
           //so we create it and simply assign the value.
@@ -184,14 +185,17 @@ class SettingsBase extends EventEmitter {
           //do the actual assignment to the missing key.
           target[propertyName] = targetValue;
         }
-        else if (sourceValue === null) {
+        else 
+        if (sourceValue === null) {
           // we won't overwrite with null from template.
         }
-        else if (typeof targetValue === 'object' && targetValue.constructor === sourceValue.constructor){
+        else 
+        if (typeof targetValue === 'object' && targetValue.constructor === sourceValue.constructor){
           // only if the sourceValue is not null, and both targetValue and sourceValue are reference types, copy the contents.
           copyData(sourceValue, targetValue);
         }
-        else if (typeof sourceValue !== typeof targetValue){
+        else 
+        if (typeof sourceValue !== typeof targetValue){
           console.error('Property ' + propertyName + ' exists in source and target but have different types (' + (typeof sourceValue) + ';' + (typeof targetValue) +')');
         }
         else {
@@ -199,7 +203,7 @@ class SettingsBase extends EventEmitter {
         }
       });
     }
-    copyData(template, data);      
+    copyData(template, data);
     return data;
   }  
 

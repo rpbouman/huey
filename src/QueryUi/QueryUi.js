@@ -23,8 +23,8 @@ class QueryUi {
   }
 
   #queryUiClickHandler(event){
-    var target = event.target;
-    var tagName = target.tagName;
+    const target = event.target;
+    const tagName = target.tagName;
     switch (tagName){
       case 'BUTTON':
       case 'INPUT':
@@ -34,12 +34,10 @@ class QueryUi {
       default:
         return;
     }
-    var node = target;
-    var axis, queryAxisItemUi;
-    var isClearAxisAction, isPrimaryAxisAction, isAxisItemAction;
-    var dom = this.getDom();
-    var dataValueKey = null, dataValueEnabled;
-    
+    let axis, queryAxisItemUi;
+    let dataValueKey = null, dataValueEnabled;
+    let node = target;
+    const dom = this.getDom();
     while (node && node !== dom){
       switch (node.tagName){
         case 'SECTION':
@@ -59,7 +57,7 @@ class QueryUi {
       return;
     }
 
-    var targetId = target.getAttribute('id');
+    const targetId = target.getAttribute('id');
     if (targetId) {
       if (targetId.endsWith('-axis-primary-action')) {
         this.#axisPrimaryActionButtonClicked(axis);
@@ -109,20 +107,17 @@ class QueryUi {
   }
 
   #openFilterDialogForQueryAxisItemUi(queryAxisItemUi){
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
-    this.#filterDialogStateChanged();
   }
 
   openFilterDialogForQueryModelItem(queryModelItem){
-    var queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
+    const queryAxisItemUi = this.#getQueryAxisItemUi(queryModelItem);
     // when we're restoring page state, the queryUi may be populated but hidden.
     // in this case we need to wait a bit until the query ui is rendered
     // else the filter dialog will pop up at the entirely wrong position.
     if (queryAxisItemUi.clientWidth === 0){
-      setTimeout(function(){
-        this.openFilterDialogForQueryModelItem(queryModelItem);
-      }.bind(this), 100);
+      setTimeout(() => this.openFilterDialogForQueryModelItem(queryModelItem), 100);
     }
     else {
       //this.#filterDialog.openFilterDialog(this.#queryModel, queryModelItem, queryAxisItemUi);
@@ -131,22 +126,29 @@ class QueryUi {
   }
 
   #queryAxisUiItemMoveToAxisClicked(queryAxisItemUi){
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     delete queryModelItem.index;
+    let hasAggregator = Boolean(queryModelItem.aggregator);
+    let axisId;
     switch (queryModelItem.axis) {
       case QueryModel.AXIS_COLUMNS:
-        queryModelItem.axis = QueryModel.AXIS_ROWS;
+        axisId = QueryModel.AXIS_ROWS;
         break;
       case QueryModel.AXIS_ROWS:
-        queryModelItem.axis = QueryModel.AXIS_COLUMNS;
+        axisId = QueryModel.AXIS_COLUMNS;
         break;
+      default:
     }
+    if (axisId && hasAggregator) {
+      this.#queryModel.removeItem(queryModelItem);
+    }
+    queryModelItem.axis = axisId;
     this.#queryModel.addItem(queryModelItem);
   }
 
   #moveQueryAxisItemUi(queryAxisItemUi, direction) {
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
-    var itemIndex = queryModelItem.index;
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    let itemIndex = queryModelItem.index;
     itemIndex += direction;
     queryModelItem.index = itemIndex;
     this.#queryModel.addItem(queryModelItem);
@@ -161,24 +163,23 @@ class QueryUi {
   }
 
   #queryAxisUiItemRemoveClicked(queryAxisItemUi){
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     queryModel.removeItem(queryModelItem);
   }
 
   #queryAxisUiItemToggleTotals(queryAxisItemUi){
-    var id = queryAxisItemUi.getAttribute('id');
-    var toggleTotalsCheckbox = queryAxisItemUi.querySelector(`menu > label > input[type=checkbox]`);
-    var value = toggleTotalsCheckbox.checked;
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    const toggleTotalsCheckbox = queryAxisItemUi.querySelector(`menu > label > input[type=checkbox]`);
+    const value = toggleTotalsCheckbox.checked;
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
     queryModel.toggleTotals(queryModelItem, value);
   }
   
   #queryAxisUiItemToggleEnableDataValue(queryAxisItemUi, dataValueKey){
-    var id = queryAxisItemUi.getAttribute('id');
-    var queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
-    var filter = queryModelItem.filter;
-    var values = filter.values;
-    var valueObject = values[dataValueKey];
+    const queryModelItem = this.#getQueryModelItem(queryAxisItemUi);
+    // make a copy so we can detect change against the original.
+    const filter = JSON.parse(JSON.stringify(queryModelItem.filter));
+    const values = filter.values;
+    const valueObject = values[dataValueKey];
     if (valueObject.enabled === false) {
       delete valueObject.enabled;
     }
@@ -189,20 +190,20 @@ class QueryUi {
   }
   
   #getAxisUiElements(){
-    var dom = this.getDom();
-    var axisUiElements = dom.querySelectorAll('SECTION[data-axis]');
+    const dom = this.getDom();
+    const axisUiElements = dom.querySelectorAll('SECTION[data-axis]');
     return axisUiElements;
   }
 
   #checkOverflowTimeout = undefined;
   #updateQueryUi(){
-    var dom = this.getDom();
+    const dom = this.getDom();
     dom.setAttribute('data-cellheadersaxis', this.#queryModel.getCellHeadersAxis());
-    var axes = this.#getAxisUiElements();
-    for (var i = 0; i < axes.length; i++){
-      var axis = axes.item(i);
-      var axisId = axis.getAttribute('data-axis');
-      var queryModelAxis = queryModel.getQueryAxis(axisId);
+    const axes = this.#getAxisUiElements();
+    for (let i = 0; i < axes.length; i++){
+      const axis = axes.item(i);
+      const axisId = axis.getAttribute('data-axis');
+      const queryModelAxis = queryModel.getQueryAxis(axisId);
       this.#updateQueryAxisUi(axis, queryModelAxis);
     }
     
@@ -213,27 +214,22 @@ class QueryUi {
     if (dom.clientHeight === 0) {
       return;
     }
-    setTimeout(function(){
-      this.#checkOverflow();
-    }.bind(this), 100);
+    setTimeout(() => this.#checkOverflow(), 100);
   }
 
   #checkOverflow(axisUi){
     if (axisUi) {
-      var ol = axisUi.getElementsByTagName('OL').item(0);
+      const ol = axisUi.getElementsByTagName('OL').item(0);
       // this is the explicitly set height. If it is not NaN, it means the element has been resized.
-      var style = ol.style;
-      var height = parseInt(style.height, 10);
+      const style = ol.style;
+      const height = parseInt(style.height, 10);
 
       // this is the minimum height.
-      var computedStyle = getComputedStyle(ol);
-      var minHeight = parseInt(computedStyle.minHeight, 10);
-
-      // this is the actual, runtime height of the element
-      var clientHeight = ol.clientHeight;
+      const computedStyle = getComputedStyle(ol);
+      const minHeight = parseInt(computedStyle.minHeight, 10);
 
       style.height = '';
-      var resize, overflow;
+      let resize, overflow;
       if (ol.clientHeight > minHeight) {
         // restor height
         if (!isNaN(height)) {
@@ -252,66 +248,68 @@ class QueryUi {
       return;
     }
     
-    var axes = this.#getAxisUiElements();
-    for (var i = 0; i < axes.length; i++){
-      var axisUi = axes.item(i);
+    const axes = this.#getAxisUiElements();
+    for (let i = 0; i < axes.length; i++){
+      const axisUi = axes.item(i);
       this.#checkOverflow(axisUi);
     }
   }
 
   #getQueryAxisItemUiCaption(axisItem){
-    var caption;
-    if (axisItem.caption) {
-      caption = axisItem.caption;
-    }
-    else {
-      caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
-    }
-    return caption;
+    return axisItem.caption ? axisItem.caption : QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
   }
 
   #getQueryModelItem(queryAxisItemUi){
-    var searchItem = {
+    const aggregator = queryAxisItemUi.getAttribute('data-aggregator');
+    const searchItem = {
       columnName: queryAxisItemUi.getAttribute('data-column_name'),
       memberExpressionPath: queryAxisItemUi.getAttribute('data-member_expression_path'),
       derivation: queryAxisItemUi.getAttribute('data-derivation'),
-      aggregator: queryAxisItemUi.getAttribute('data-aggregator')
+      aggregator: aggregator,
     };
 
-    var axisUi = queryAxisItemUi.parentNode.parentNode;
-    var axisId = axisUi.getAttribute('data-axis');
-    if (axisId === QueryModel.AXIS_FILTERS){
-      searchItem.axis = axisId;
+    const axisUi = queryAxisItemUi.parentNode.parentNode;
+    const axisId = axisUi.getAttribute('data-axis');
+    switch (axisId){
+      case QueryModel.AXIS_FILTERS:
+        searchItem.axis = axisId;
+      case QueryModel.AXIS_COLUMNS:
+      case QueryModel.AXIS_ROWS:
+        if (aggregator) {
+          const partitionByItemsAttValue = queryAxisItemUi.getAttribute('data-partition-by-items');
+          const partitionByItems = JSON.parse(partitionByItemsAttValue);
+          searchItem.partitionByItems = partitionByItems;
+        }
     }
-
-    var item = this.#queryModel.findItem(searchItem);
+    const item = this.#queryModel.findItem(searchItem);
     if (!item) {
-      throw new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      const error = new Error(`Unexpected error: could not find item ${JSON.stringify(searchItem)} in query model`);
+      console.error(error);
+      throw error;
     }
     return item;
   }
 
   #getQueryAxisItemUi(queryModelAxisItem){
-    var axisId = queryModelAxisItem.axis;
-    var cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName || ''}"]`;
-    
+    const axisId = queryModelAxisItem.axis;
+    let cssSelector = `#${this.#id}-${axisId} > ol > li[data-column_name="${queryModelAxisItem.columnName || ''}"]`;
     if (queryModelAxisItem.memberExpressionPath){
-      cssSelector += `[data-member_expression_path='${JSON.stringify(queryModelAxisItem.memberExpressionPath)}']`;
+      cssSelector += `[data-member_expression_path='${CSS.escape(JSON.stringify(queryModelAxisItem.memberExpressionPath))}']`;
     }
-    
     if (queryModelAxisItem.derivation){
       cssSelector += `[data-derivation="${queryModelAxisItem.derivation}"]`;
     }
-    
     if (queryModelAxisItem.aggregator){
       cssSelector += `[data-aggregator="${queryModelAxisItem.aggregator}"]`;
+      if (queryModelAxisItem.partitionByItems){
+        cssSelector += `[data-partition-by-items='${CSS.escape(JSON.stringify(queryModelAxisItem.partitionByItems))}']`;
+      }
     }
-    
     return document.querySelector(cssSelector);
   }
   
   static #getQueryAxisItemUiTitle(axisItem){
-    var title;
+    let title;
     if (
       axisItem.axis === QueryModel.AXIS_FILTERS && !axisItem.filter || 
       axisItem.filter && Object.keys(axisItem.filter.values).length === 0
@@ -320,25 +318,24 @@ class QueryUi {
       title = Internationalization.getText(title) || title;
     }
     else {
-      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem);
+      title = QueryAxisItem.getCaptionForQueryAxisItem(axisItem, true);
     }
     return title;
   }
   
   #getCaptionUi(itemUi){
-    var captionUi = itemUi.getElementsByTagName('span').item(0);
-    return captionUi;
+    return itemUi.getElementsByTagName('span').item(0);
   }
 
   #createQueryAxisItemUi(axisItem){
-    var axisId = axisItem.axis;
-    var id = this.#id
+    const axisId = axisItem.axis;
+    let id = this.#id
     if (axisId === QueryModel.AXIS_FILTERS) {
       id += `-${axisId}`;
     }
     id += `-${QueryAxisItem.getIdForQueryAxisItem(axisItem)}`;
 
-    var itemUi, itemUiTemplateId;
+    let itemUiTemplateId;
     switch (axisId) {
       case QueryModel.AXIS_FILTERS:
         itemUiTemplateId = QueryUi.#queryUiFilterAxisItemTemplateId;
@@ -346,13 +343,13 @@ class QueryUi {
       default:
         itemUiTemplateId = QueryUi.#queryUiAxisItemTemplateId;
     }
-    itemUi = this.#instantiateQueryUiTemplate(itemUiTemplateId, id);
+    const itemUi = this.#instantiateQueryUiTemplate(itemUiTemplateId, id);
     
-    var title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
+    const title = QueryUi.#getQueryAxisItemUiTitle(axisItem);
     itemUi.setAttribute('title', title);
     itemUi.setAttribute('data-column_name', axisItem.columnName || '');
 
-    var memberExpressionPath = axisItem.memberExpressionPath;
+    let memberExpressionPath = axisItem.memberExpressionPath;
     if (memberExpressionPath) {
       if (memberExpressionPath instanceof Array) {
         memberExpressionPath = JSON.stringify(memberExpressionPath);
@@ -360,21 +357,24 @@ class QueryUi {
       itemUi.setAttribute('data-member_expression_path', memberExpressionPath);
     }
 
-    var derivation = axisItem.derivation;
+    const derivation = axisItem.derivation;
     if (derivation) {
       itemUi.setAttribute('data-derivation', derivation);
     }
 
-    var aggregator = axisItem.aggregator;
+    const aggregator = axisItem.aggregator;
     if (aggregator) {
       itemUi.setAttribute('data-aggregator', aggregator);
+      if (QueryAxisItem.isAxisAggregate(axisItem)){
+        const partitionByItems = axisItem.partitionByItems;
+        itemUi.setAttribute('data-partition-by-items', JSON.stringify(partitionByItems));
+      }
     }
+    
+    const captionUi = this.#getCaptionUi(itemUi);
+    captionUi.textContent = this.#getQueryAxisItemUiCaption(axisItem);
 
-    var captionText = this.#getQueryAxisItemUiCaption(axisItem);
-    var captionUi = this.#getCaptionUi(itemUi);
-    captionUi.textContent = captionText;
-
-    var toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
+    const toggleTotalsCheckbox = itemUi.querySelector(`menu > label > input[type=checkbox]`);
     if (toggleTotalsCheckbox) {
       toggleTotalsCheckbox.checked = axisItem.includeTotals === true;
     }
@@ -387,101 +387,96 @@ class QueryUi {
   }
   
   #createQueryAxisItemFilterUi(itemUi, axisItem){
-    var valuesUi = itemUi.getElementsByTagName('ol')[0];
-    var filter = axisItem.filter;
-
-    var filterType = filter.filterType;
+    const filter = axisItem.filter;
+    const filterType = filter.filterType;
     itemUi.setAttribute('data-filterType', filterType);
 
-    var filterTypeLabel = FilterDialog.getLabelForFilterType(filterType);
+    const header = itemUi.querySelector('details > header');
+    header.textContent = FilterDialog.getLabelForFilterType(filterType);
 
-    var header = itemUi.querySelector('details > header');
-    header.textContent = filterTypeLabel;
-
-    
-    var detailsElement = itemUi.getElementsByTagName('details')[0];
+    const detailsElement = itemUi.getElementsByTagName('details')[0];
     if (filter.toggleState === 'open') {
       detailsElement.setAttribute('open', String(true) );
     }
-    setTimeout(function(){
-      detailsElement.addEventListener('toggle', this.#filterItemToggleHandler.bind(this));
-    }.bind(this), 1000)
+    // TODO: remove this and create 1 single toggle handler for the entire query ui.
+    setTimeout(() => detailsElement.addEventListener('toggle', event => this.#filterItemToggleHandler(event) ), 1000)
           
-    var values = filter.values;
-    var valueKeys = Object.keys(values);
+    const values = filter.values;
+    const valueKeys = Object.keys(values);
     
-    var captionUi = this.#getCaptionUi(itemUi);
+    const captionUi = this.#getCaptionUi(itemUi);
     captionUi.textContent += ` (${valueKeys.length})`;
     
-    var toValues = filter.toValues;
-    var toValueKeys = toValues? Object.keys(toValues) : undefined;
+    const toValues = filter.toValues;
+    const toValueKeys = toValues? Object.keys(toValues) : undefined;
 
-    for (var i = 0; i < valueKeys.length; i++){
-      var valueKey = valueKeys[i];
-      var valueObject = values[valueKey];
+    const valuesUi = itemUi.getElementsByTagName('ol')[0];
+    for (let i = 0; i < valueKeys.length; i++){
+      const valueKey = valueKeys[i];
+      const valueObject = values[valueKey];
       
-      var valueId = itemUi.id + '-' + i;
-      var valueLabel = valueObject.label;
+      const valueId = itemUi.id + '-' + i;
+      let valueLabel = valueObject.label;
       
-      var valueUi = instantiateTemplate(QueryUi.#queryUiFilterAxisItemValueTemplateId);
-      var label = valueUi.querySelector('label:has( > input[type=checkbox] )');
+      const valueUi = instantiateTemplate(QueryUi.#queryUiFilterAxisItemValueTemplateId);
+      let label = valueUi.querySelector('label:has( > input[type=checkbox] )');
       label.setAttribute('for', valueId);
       valueUi.setAttribute('data-value-index', i);
       valueUi.setAttribute('data-value', valueKey);
-      var checkbox = label.querySelector('input[type=checkbox]');
+      const checkbox = label.querySelector('input[type=checkbox]');
       checkbox.setAttribute('id', valueId);
       checkbox.checked = valueObject.enabled !== false;
       if (toValueKeys && i < toValueKeys.length){
-        var toValueKey = toValueKeys[i];
-        var toValueObject = toValues[toValueKey];
+        const toValueKey = toValueKeys[i];
+        const toValueObject = toValues[toValueKey];
         valueUi.setAttribute('data-to-value', toValueKey);
         valueLabel += ` - ${toValueObject.label}`;
       }
 
-      var labelSpan = label.querySelector('span');
+      const labelSpan = label.querySelector('span');
       labelSpan.textContent = valueLabel;
       valuesUi.appendChild(valueUi);
       
-      var deleteValueId = valueId + '-delete'; 
+      const deleteValueId = valueId + '-delete'; 
       label = valueUi.querySelector('label:has( > button )');
       label.setAttribute('for', deleteValueId);
-      var button = label.querySelector('button');
+      const button = label.querySelector('button');
       button.setAttribute('id', deleteValueId);
-      button.addEventListener('click', this.#deleteFilterValueClickHandler.bind(this));
+      // TODO: handle this from the central click handler
+      button.addEventListener('click', event => this.#deleteFilterValueClickHandler( event ) );
     }
-    
   }
   
   #deleteFilterValueClickHandler(event){
     event.stopPropagation();
-    var button = event.target;
-    var label = button.parentNode;
-    var item = label.parentNode;
-    var list = item.parentNode;
-    var details = list.parentNode;
-    var queryUiItem = details.parentNode;
-    var queryModelItem = this.#getQueryModelItem(queryUiItem);
-    var filter = queryModelItem.filter;
-    var values = filter.values;
-    var value = item.getAttribute('data-value');
+    const button = event.target;
+    const label = button.parentNode;
+    const item = label.parentNode;
+    const list = item.parentNode;
+    const details = list.parentNode;
+    const queryUiItem = details.parentNode;
+    const queryModelItem = this.#getQueryModelItem(queryUiItem);
+    const filter = queryModelItem.filter;
+    const values = filter.values;
+    const value = item.getAttribute('data-value');
     delete values[value];
     this.#queryModel.setQueryAxisItemFilter(queryModelItem, filter);
   }
   
   #filterItemToggleHandler(event){
-    var target = event.target;
-    var queryModelItem = this.#getQueryModelItem(target.parentNode);
-    var toggleState = event.newState;
+    const target = event.target;
+    const queryModelItem = this.#getQueryModelItem(target.parentNode);
+    const toggleState = event.newState;
     this.#queryModel.setQueryAxisItemFilterToggleState(queryModelItem, toggleState);
   }
   
   #updateQueryAxisUi(axisUi, queryModelAxis) {
-    var axisItemsUi = axisUi.getElementsByTagName('ol').item(0);
+    const axisItemsUi = axisUi.getElementsByTagName('ol').item(0);
     axisItemsUi.innerHTML = '';
-    var items = queryModelAxis.getItems();
-    var n = items.length;
-    var separator, item, queryAxisItemUi;
-    for (var i = 0; i < n; i++){
+    const items = queryModelAxis.getItems();
+    const n = items.length;
+    let item, queryAxisItemUi;
+    for (let i = 0; i < n; i++){
       item = items[i];
       queryAxisItemUi = this.#createQueryAxisItemUi(item);
       axisItemsUi.appendChild(queryAxisItemUi);
@@ -491,14 +486,14 @@ class QueryUi {
   #updateTimeout = undefined;
   #openFilterUiTimeout = undefined;
   #queryModelChangeHandler(event) {
-    var eventData = event.eventData;
-    var needsUpdate = false;
+    const eventData = event.eventData;
+    let needsUpdate = false;
     if (eventData.propertiesChanged) {
       needsUpdate = true;
     }
     else
     if (eventData.axesChanged){
-      var axisChangeInfo = eventData.axesChanged[QueryModel.AXIS_FILTERS];
+      const axisChangeInfo = eventData.axesChanged[QueryModel.AXIS_FILTERS];
       if (axisChangeInfo){
         if (
           axisChangeInfo.added && axisChangeInfo.added.length ||
@@ -508,8 +503,8 @@ class QueryUi {
         }
         else
         if (axisChangeInfo.changed){
-          for (var itemId in axisChangeInfo.changed){
-            var itemChangeInfo = axisChangeInfo.changed[itemId];
+          for (let itemId in axisChangeInfo.changed){
+            const itemChangeInfo = axisChangeInfo.changed[itemId];
             if (itemChangeInfo.filter){
               needsUpdate = true;
             }
@@ -526,76 +521,84 @@ class QueryUi {
         clearTimeout(this.#updateTimeout);
         this.#updateTimeout = undefined;
       }
-      this.#updateTimeout = setTimeout(function(){
+      this.#updateTimeout = setTimeout(() => {
         this.#updateTimeout = undefined;
         this.#updateQueryUi();
-      }.bind(this), 100);
+      }, 100);
     }
     
     // if a filter was added by the user, then we want to pop up the filter Dialog
     // we can't really distinguish between the user adding them, or them being added because of page state restore
     // but we're assuming that if there is a filter item without any values, it must have been added by the user.
     // so, in that case, we pop up the filter dialog.
-    var axesChanged = eventData.axesChanged;
-    if (axesChanged) {
-      var filters = axesChanged[QueryModel.AXIS_FILTERS];
-      if (filters) {
-        var filterItems = filters.added;
-        if (filterItems && filterItems.length === 1) {
-          filterItems = filterItems.filter(function(filterItem){
-            var filter = filterItem.filter;
-            if (!filter) {
-              return true;
-            }
-            var values = filter.values;
-            if (!values) {
-              return true;
-            }
-            if (!Object.keys(values).length){
-              return true;
-            }
-            return false;
-          });
-          if (filterItems.length) {
-            var lastFilterItem = filterItems[filterItems.length - 1];
-            if (this.#openFilterUiTimeout !== undefined){
-              clearTimeout(this.#openFilterUiTimeout);
-              this.#openFilterUiTimeout = undefined;
-            }
-            this.#openFilterUiTimeout = setTimeout(function(){
-              this.#openFilterUiTimeout = undefined;
-              this.openFilterDialogForQueryModelItem(lastFilterItem);
-            }.bind(this), 250);
-          }
-        }
-      }
+    const axesChanged = eventData.axesChanged;
+    if (!axesChanged) {
+      return;
     }
+
+    const filters = axesChanged[QueryModel.AXIS_FILTERS];
+    if (!filters) {
+      return;
+    }
+
+    let filterItems = filters.added;
+    if (!filterItems || filterItems.length !== 1) {
+      return;
+    }
+    
+    filterItems = filterItems.filter(filterItem => {
+      const filter = filterItem.filter;
+      if (!filter) {
+        return true;
+      }
+      const values = filter.values;
+      if (!values) {
+        return true;
+      }
+      if (!Object.keys(values).length){
+        return true;
+      }
+      return false;
+    });
+    
+    if (!filterItems.length) {
+      return;
+    }
+    
+    if (this.#openFilterUiTimeout !== undefined){
+      clearTimeout(this.#openFilterUiTimeout);
+      this.#openFilterUiTimeout = undefined;
+    }
+    
+    const lastFilterItem = filterItems[filterItems.length - 1];
+    this.#openFilterUiTimeout = setTimeout(() => {
+      this.#openFilterUiTimeout = undefined;
+      this.openFilterDialogForQueryModelItem(lastFilterItem);
+    }, 250);
   }
 
   #initEvents(){
-    var dom = this.getDom();
-    dom.addEventListener('click', this.#queryUiClickHandler.bind(this));
-
-    this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
-    
+    const dom = this.getDom();
+    dom.addEventListener('click', event => this.#queryUiClickHandler( event ) );
+    this.#queryModel.addEventListener('change', event => this.#queryModelChangeHandler( event ) );
     this.#initDragAndDrop();
-    
     this.#initFilterUiEvents();
   }
   
   #initFilterUiEvents(){
-    var filterUi = this.#filterDialog;
-    var filterDialog = filterUi.getDom();
-    filterDialog.addEventListener('close', this.#filterDialogStateChanged.bind(this));
+    const filterUi = this.#filterDialog;
+    const filterDialog = filterUi.getDom();
+    filterDialog.addEventListener('open', event => this.#filterDialogStateChanged( event ) );
+    filterDialog.addEventListener('close', event => this.#filterDialogStateChanged( event ) );
   }
   
   #filterDialogStateChanged(){
-    var filterUi = this.#filterDialog;
-    var filterDialog = filterUi.getDom();
-    var queryAxisItem = filterUi.getQueryAxisItem();
-    var queryAxisItemUi = this.#getQueryAxisItemUi(queryAxisItem);
-    var opened = filterDialog.hasAttribute('open');
-    var attribute = 'data-is-being-edited-by-filter-dialog';
+    const filterUi = this.#filterDialog;
+    const filterDialog = filterUi.getDom();
+    const queryAxisItem = filterUi.getQueryAxisItem();
+    const opened = filterDialog.hasAttribute('open');
+    const queryAxisItemUi = this.#getQueryAxisItemUi(queryAxisItem);
+    const attribute = 'data-is-being-edited-by-filter-dialog';
     if (opened) {
       queryAxisItemUi.setAttribute(attribute, true);
     }
@@ -604,52 +607,44 @@ class QueryUi {
     }
   }
   
+  #handleDragStart(event) {
+    const queryAxisItemUi = event.target;
+    const queryAxisItemsUi = queryAxisItemUi.parentNode;
+    const axisUi = queryAxisItemsUi.parentNode;
+    const axisId = axisUi.getAttribute('data-axis');
+    
+    const queryAxisItem = this.#getQueryModelItem(queryAxisItemUi);
+    const data = {};
+    
+    if (queryAxisItem.aggregator){
+      data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
+      if  (queryAxisItem.partitionByItems){
+        data.partitionbyitems = { key: 'partitionbyitems', value: queryAxisItem.partitionByItems};
+      }
+    }
+
+    data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
+    data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
+    const id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    data.id = {key: id, value: id};
+    
+    if (axisId === QueryModel.AXIS_FILTERS){
+      data.filters = {key: queryAxisItem.index, value: queryAxisItem.index};
+    }
+
+    data['application/json'] = queryAxisItem;
+    DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
+
+    DragAndDropHelper.setData(event, data);
+    const dataTransfer = event.dataTransfer;
+    dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
+    dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
+  }
+  
   #initDragAndDrop(){
-    this.#initDrag();
-    this.#initDrop();
-  }
-  
-  #initDrag(){
-    var dom = this.getDom();
+    const dom = this.getDom();
     
-    dom.addEventListener('dragstart', function(event){
-      var queryAxisItemUi = event.target;
-      var queryAxisItemsUi = queryAxisItemUi.parentNode;
-      var axisUi = queryAxisItemsUi.parentNode;
-      var axisId = axisUi.getAttribute('data-axis');
-      
-      var queryAxisItem = this.#getQueryModelItem(queryAxisItemUi);
-      var data = {};
-      
-      if (queryAxisItem.aggregator){
-        data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
-      }
-
-      data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
-      data.index = {key: queryAxisItem.index, value: queryAxisItem.index};
-      var id = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
-      data.id = {key: id, value: id};
-      
-      if (axisId === QueryModel.AXIS_FILTERS){
-        data.filters = {key: queryAxisItem.index, value: queryAxisItem.index};
-      }
-
-      data['application/json'] = queryAxisItem;
-      DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
-
-      DragAndDropHelper.setData(event, data);
-      var dataTransfer = event.dataTransfer;
-      dataTransfer.dropEffect = dataTransfer.effectAllowed = 'move';
-      dataTransfer.setDragImage(queryAxisItemUi, -20, 0);
-      
-    }.bind(this));
-    
-  }
-  
-  #initDrop(){
-    var dom = this.getDom();
-    
-    var prevElements = undefined;
+    let prevElements = undefined;
     function cleanupPrevElements(){
       if (!prevElements) {
         return;
@@ -663,36 +658,31 @@ class QueryUi {
       prevElements = undefined;
     }
     
+    dom.addEventListener('dragstart', event => this.#handleDragStart(event) );
     
-    dom.addEventListener('dragend', function(event){
+    dom.addEventListener('dragend', event => {
       event.preventDefault();
       cleanupPrevElements();
     });
 
-    dom.addEventListener('dragover', function(event){
+    dom.addEventListener('dragover', event => {
       event.preventDefault();
-      var dataTransfer = event.dataTransfer;
-      var queryUiElements = QueryUi.#findQueryUiElements(event);
+      const dataTransfer = event.dataTransfer;
+      const queryUiElements = QueryUi.#findQueryUiElements(event);
 
-      var axis = queryUiElements.axis;
+      const axis = queryUiElements.axis;
       if (!axis){
         dataTransfer.effectAllowed = dataTransfer.dropEffect = 'none';
         cleanupPrevElements();
         return;
       }
-
-      var items = queryUiElements.items;
-      var item = queryUiElements.item;
       
-      var axisId = axis.getAttribute('data-axis');
-      var info = DragAndDropHelper.getData(event);
-      
-      var isAggregator = Boolean(info.aggregator);
-      var isDefaultAggregator = Boolean(info.defaultaggregator);
+      const info = DragAndDropHelper.getData(event);
 
-      var existingId = this.#id;
-      var isSameAxis = Boolean(info.axis) && info.axis.key === axisId;
-      var isCellsAxis;
+      let existingId = this.#id;
+      const axisId = axis.getAttribute('data-axis');
+      let isSameAxis = Boolean(info.axis) && info.axis.key === axisId;
+      let isCellsAxis;
       switch (axisId) {
         case QueryModel.AXIS_CELLS:
           isCellsAxis = true;
@@ -715,24 +705,27 @@ class QueryUi {
           }
       }
       
-      var dropEffect;
+      let dropEffect;
+      const isAggregator = Boolean(info.aggregator);
+      const hasPartionByItems = Boolean(info.partitionbyitems);
+      const isDefaultAggregator = Boolean(info.defaultaggregator);
       if (isCellsAxis){
-        if (! (isAggregator || isDefaultAggregator) ){
+        if (! (isAggregator || isDefaultAggregator) || hasPartionByItems ){
           // if this is the cells axis, but this item cannot be an aggregator, then drop is forbidden.
+          // also, if this is an axis aggregate, then it can't be dropped on the cells axis.
           dropEffect = 'none';
         }
       }
-      else
-      if (isAggregator) {
-        // if this is not the cells axis, but the item is an aggregator, drop is forbidden
-        dropEffect = 'none';
+      else {
+        dropEffect = 'move';
       }
       
       // if we're dragging over an existing query ui item
+      const item = queryUiElements.item;
       if (item) {
         if (dropEffect !== 'none') {
-          var middle = item.offsetLeft + item.clientWidth/2;
-          var dragOverSide = event.clientX <= middle ? 'left' : 'right';
+          const middle = item.offsetLeft + item.clientWidth/2;
+          const dragOverSide = event.clientX <= middle ? 'left' : 'right';
           if (isSameAxis) {
             dropEffect = 'move';
             if (
@@ -756,6 +749,7 @@ class QueryUi {
         }
       }
       else {
+        const items = queryUiElements.items;
         // if we're not dragging over an item but are dragging over an axis,
         // and the axis' last item is the same as  the dragged item,
         // then dropping wouldn't change the query, so indicate drop is not allowed.
@@ -770,7 +764,6 @@ class QueryUi {
       if (prevElements && prevElements.axis && prevElements.axis !== axis) {
         prevElements.axis.removeAttribute('data-dragover');
       }
-      
       if (dropEffect) {
         dataTransfer.effectAllowed = dataTransfer.dropEffect = dropEffect;
       }
@@ -780,32 +773,29 @@ class QueryUi {
       else {
         axis.setAttribute('data-dragover', item ? 1 : 0);
       }
-      
       prevElements = queryUiElements;
-
-    }.bind(this));
+    });
     
-    dom.addEventListener('drop', function(event){
+    dom.addEventListener('drop', event => {
       event.preventDefault();
-      var queryUiElements = QueryUi.#findQueryUiElements(event);
+      const queryUiElements = QueryUi.#findQueryUiElements(event);
       if (!queryUiElements.axis){
         return;
       }
 
-      var dataTransfer = event.dataTransfer;
+      const dataTransfer = event.dataTransfer;
       if (dataTransfer.effectAllowed === 'none') {
         return;
       }
 
-      var axisId = queryUiElements.axis.getAttribute('data-axis');
-      
-      var info = DragAndDropHelper.getData(event);
-      var queryAxisItem = info['application/json'];
+      const axisId = queryUiElements.axis.getAttribute('data-axis');
+      const info = DragAndDropHelper.getData(event);
+      const queryAxisItem = info['application/json'];
       
       switch (axisId) {
         case QueryModel.AXIS_CELLS:
           if (!Boolean(queryAxisItem.aggregator)) {
-            var defaultAggregator = info.defaultaggregator.value;
+            const defaultAggregator = info.defaultaggregator.value;
             queryAxisItem.aggregator = defaultAggregator;
           }
           delete queryAxisItem.includeTotals;
@@ -817,23 +807,27 @@ class QueryUi {
         case QueryModel.AXIS_ROWS:
         case QueryModel.AXIS_COLUMNS:
           delete queryAxisItem.filter;
+          if (
+            info.axis && 
+            ![axisId, QueryModel.AXIS_CELLS, QueryModel.AXIS_FILTERS].includes(info.axis.key)
+          ) {
+            this.#queryModel.removeItem(queryAxisItem);
+          }
           break;
         default:
       }
       
       queryAxisItem.axis = axisId;
       
-      var item = queryUiElements.item; //prevElements ? prevElements.item : undefined;
-      
+      const item = queryUiElements.item; //prevElements ? prevElements.item : undefined;
       // assign the dropped item an index to position it on the axis.
       if (item) {
-        var dragOverSide = item.getAttribute('data-dragoverside');
+        const dragOverSide = item.getAttribute('data-dragoverside');
         // if dragging over an existing item, then we need to update to index to that item's index
         // (the drag over code already figured out that this new item comes behind this one)
-        var queryModelItem = this.#getQueryModelItem(item);
-        var index = queryModelItem.index;
+        const queryModelItem = this.#getQueryModelItem(item);
+        let index = queryModelItem.index;
         if (dragOverSide  === 'right'){
-          if (queryAxisItem.axis === axisId && (queryAxisItem.index > index || queryAxisItem.index === undefined)) 
           index += 1;
         }
         queryAxisItem.index = index;
@@ -846,25 +840,24 @@ class QueryUi {
         delete queryAxisItem.index;
       }
       cleanupPrevElements();
-      
       this.#queryModel.addItem(queryAxisItem);
-    }.bind(this));
+    });
   }
 
   #axisClearButtonClicked(axis){
-    var axisId = axis.getAttribute('data-axis');
+    const axisId = axis.getAttribute('data-axis');
     this.#queryModel.clear(axisId);
   }
 
   #axisPrimaryActionButtonClicked(axis){
-    var axisId = axis.getAttribute('data-axis');
+    const axisId = axis.getAttribute('data-axis');
     switch (axisId){
       case QueryModel.AXIS_COLUMNS:
       case QueryModel.AXIS_ROWS:
         this.#queryModel.flipAxes(QueryModel.AXIS_COLUMNS, QueryModel.AXIS_ROWS);
         break;
       case QueryModel.AXIS_CELLS:
-        var cellheadersaxis = this.#queryModel.getCellHeadersAxis();
+        let cellheadersaxis = this.#queryModel.getCellHeadersAxis();
         switch (cellheadersaxis) {
           case QueryModel.AXIS_COLUMNS:
             cellheadersaxis = QueryModel.AXIS_ROWS;
@@ -881,12 +874,12 @@ class QueryUi {
   }
 
   #instantiateQueryUiTemplate(templateId, instanceId) {
-    var node = instantiateTemplate(templateId, instanceId);
+    const node = instantiateTemplate(templateId, instanceId);
     //
-    var buttons = node.querySelectorAll('menu > label > button, menu > label > input[type=checkbox]');
-    for (var i = 0; i < buttons.length; i++){
-      var button = buttons.item(i);
-      var buttonId = instanceId + button.getAttribute('id');
+    const buttons = node.querySelectorAll('menu > label > button, menu > label > input[type=checkbox]');
+    for (let i = 0; i < buttons.length; i++){
+      const button = buttons.item(i);
+      const buttonId = instanceId + button.getAttribute('id');
       button.setAttribute('id', buttonId);
       button.parentNode.setAttribute('for', buttonId);
     }
@@ -894,9 +887,8 @@ class QueryUi {
   }
 
   #getCellsAxisPrimaryActionTitle(){
-    var cellsAxisPrimaryActionTitle;
-    var targetAxis;
-    var cellHeadersAxis = this.#queryModel.getCellHeadersAxis();
+    let targetAxis;
+    const cellHeadersAxis = this.#queryModel.getCellHeadersAxis();
     switch (cellHeadersAxis){
       case QueryModel.AXIS_COLUMNS:
         targetAxis = QueryModel.AXIS_ROWS;
@@ -905,15 +897,15 @@ class QueryUi {
         targetAxis = QueryModel.AXIS_COLUMNS;
         break;
     }
-    var cellsAxisPrimaryActionTitle = `Move the cell headers to the ${targetAxis} axis`;
+    const cellsAxisPrimaryActionTitle = `Move the cell headers to the ${targetAxis} axis`;
     return cellsAxisPrimaryActionTitle;
   }
   
   static #findQueryUiElements(event){
-    var queryUi = event.currentTarget;
-    var el = event.target;
+    const queryUi = event.currentTarget;
+    let el = event.target;
     
-    var elements = {};
+    const elements = {};
     while (el && el !== queryUi){
       switch (el.tagName) {
         case 'LI':
@@ -923,7 +915,7 @@ class QueryUi {
           elements.items = el;
           break;
         case 'SECTION':
-          var axisId = el.getAttribute('data-axis');
+          const axisId = el.getAttribute('data-axis');
           if (axisId) {
             elements.axis = el;
           }
@@ -935,12 +927,10 @@ class QueryUi {
   }
 
   #renderAxis(config){
-    var axisId = config.axisId;
-    var axis = this.#instantiateQueryUiTemplate(QueryUi.#queryUiAxisTemplateId, this.#id + '-' + axisId);
+    const axisId = config.axisId;
+    const axis = this.#instantiateQueryUiTemplate(QueryUi.#queryUiAxisTemplateId, this.#id + '-' + axisId);
     
-    var itemArea = axis.querySelector('ol');
-
-    var primaryAxisActionLabelTitle;
+    let primaryAxisActionLabelTitle;
     if (config.primaryAxisActionLabelTitle){
       primaryAxisActionLabelTitle = config.primaryAxisActionLabelTitle;
     }
@@ -951,37 +941,34 @@ class QueryUi {
           break;
         case QueryModel.AXIS_COLUMNS:
         case QueryModel.AXIS_ROWS:
-          primaryAxisActionLabelTitle = 'Flip the rows and columns axes';
+          primaryAxisActionLabelTitle = 'Flip the rows and columns axes.';
           break;
         case QueryModel.AXIS_CELLS:
           primaryAxisActionLabelTitle = this.#getCellsAxisPrimaryActionTitle();
           break;
       }
     }
-    var labels = axis.getElementsByTagName('label');
-
-    var primaryAxisActionLabel = labels.item(0);
+    const labels = axis.getElementsByTagName('label');
+    const primaryAxisActionLabel = labels.item(0);
     Internationalization.setAttributes(primaryAxisActionLabel, 'title', primaryAxisActionLabelTitle);
 
-    var removeTitle = `Clear all items from the ${axisId} axis.`;
+    const removeTitle = `Clear all items from the ${axisId} axis.`;
     Internationalization.setAttributes(labels.item(1), 'title', removeTitle);
 
     axis.setAttribute('data-axis', axisId);
-    var heading = axis.getElementsByTagName('h1').item(0);
-    var caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
+    const heading = axis.getElementsByTagName('h1').item(0);
+    const caption = config.caption || (axisId.charAt(0).toUpperCase() + axisId.substr(1));
     Internationalization.setTextContent(heading, caption);
     this.getDom().appendChild(axis);
   }
 
   #initDom(config) {
-    var dom = instantiateTemplate(QueryUi.#templateId, config.id)
-
-    var container = config.container;
+    const dom = instantiateTemplate(QueryUi.#templateId, config.id)
+    let container = config.container;
     switch (typeof container){
       case 'string':
         container = byId(config.container);
     }
-
     container.appendChild(dom);
   }
 
@@ -1005,7 +992,7 @@ class QueryUi {
   }
 }
 
-var queryUi;
+let queryUi;
 function initQueryUi(){
   queryUi = new QueryUi({
     id: 'queryUi',

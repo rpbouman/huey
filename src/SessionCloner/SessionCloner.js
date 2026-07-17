@@ -5,13 +5,13 @@ class SessionCloner {
   }
 
   #init(){
-    window.addEventListener('message', this.#messageHandler.bind(this));
+    window.addEventListener('message', event => this.#messageHandler( event ) );
     this.#initCloneHueySession();
   }
   
   #messageHandler(event){
-    var request = event.data;
-    var requestType = request.messageType;
+    const request = event.data;
+    const requestType = request.messageType;
     
     if (requestType) {
       return;
@@ -31,49 +31,51 @@ class SessionCloner {
   }
   
   #copyWindowStateToHueyClone(clonedWindow){
-    var datasourceIds = datasourcesUi.getDatasourceIds();
-    for (var i = 0; i < datasourceIds.length; i++) {
-      var datasourceId = datasourceIds[i];
-      var datasource = datasourcesUi.getDatasource(datasourceId);
-      var originalConfig = datasource.getOriginalConfig();
-      var request = {
+    const datasourceIds = datasourcesUi.getDatasourceIds();
+    let i;
+    for (i = 0; i < datasourceIds.length; i++) {
+      const datasourceId = datasourceIds[i];
+      const datasource = datasourcesUi.getDatasource(datasourceId);
+      const originalConfig = datasource.getOriginalConfig();
+      const request = {
         requestId: i,
         messageType: PostMessageProtocol.REQUEST_CREATE_DATASOURCE,
         body: {
           datasourceConfig: originalConfig
-        }        
+        }
       };
       clonedWindow.postMessage(request, {targetOrigin: '*'});
     }
-    var route = Routing.getCurrentRoute();
+    const route = Routing.getCurrentRoute();
     if (route) {
-      var request = {
+      const request = {
         requestId: i+1,
         messageType: PostMessageProtocol.REQUEST_SET_ROUTE,
         body: {
           route: route
-        }        
+        }
       };
       clonedWindow.postMessage(request, {targetOrigin: '*'});
     }
   }
 
   #initCloneHueySession(){
-    byId('cloneHueySession').addEventListener('click', function(event){
-      var location = document.location;
-      var url = `${location.protocol}//${location.hostname}${location.pathname}?cloneHueySession=true`;
+    byId('cloneHueySession').addEventListener('click', event => {
+      const location = document.location;
+      const port = location.port ? `:${location.port}` : '';
+      const url = `${location.protocol}//${location.hostname}${port}${location.pathname}?cloneHueySession=true`;
       
       if (!postMessageInterface) {
         initPostMessageInterface(true);
       }
       
-      var windowProxy = window.open(url);
+      const windowProxy = window.open(url);
     });
   }
 
 }
 
-var sessionCloner = undefined;
+let sessionCloner = undefined;
 function initSessionCloner() {
   sessionCloner = new SessionCloner();
 }

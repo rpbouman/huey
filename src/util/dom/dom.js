@@ -3,7 +3,7 @@ function byId(id){
 }
 
 function createEl(tagName, attributes, content){
-  var el = document.createElement(tagName);
+  const el = document.createElement(tagName);
   if (content) {
     switch (typeof content){
       case 'string':
@@ -19,27 +19,27 @@ function createEl(tagName, attributes, content){
 }
 
 function instantiateTemplate(templateId, idOrAttributes) {
-  var template = byId(templateId);
-  var clone = template.content.cloneNode(true);
-  var index = 0, node;
-  do {
-    node = clone.childNodes.item(index++);
-  } while (node && node.nodeType !== node.ELEMENT_NODE);
-    
-  var typeOfIdOrAttributes = typeof idOrAttributes;
-  switch (typeOfIdOrAttributes) {
-    case 'undefined':
-      break;
-    case 'string':
-      node.setAttribute('id', idOrAttributes);
-      break;
-    case 'object':
-      setAttributes(node, idOrAttributes);
-      break;
-    default:
-      throw new Error(`Expected string id or attributes object, not ${typeOfIdOrAttributes}`);
+  const template = byId(templateId);
+  const clone = template.content.cloneNode(true);
+  let index = 0, node;
+  if (clone.childElementCount === 1) {
+    const typeOfIdOrAttributes = typeof idOrAttributes;
+    const node = clone.firstElementChild;
+    switch (typeOfIdOrAttributes) {
+      case 'undefined':
+        break;
+      case 'string':
+        node.setAttribute('id', idOrAttributes);
+        break;
+      case 'object':
+        setAttributes(node, idOrAttributes);
+        break;
+      default:
+        throw new Error(`Expected string id or attributes object, not ${typeOfIdOrAttributes}`);
+    }
+    return node;
   }
-  return node;
+  return clone;
 }
 
 function setAttribute(dom, attName, attValue){
@@ -100,18 +100,18 @@ function setClass(dom, classNames){
 }
 
 function setAttributes(dom, attributes){
-  for (var attName in attributes) {
-    var attValue = attributes[attName];
+  for (let attName in attributes) {
+    const attValue = attributes[attName];
     setAttribute(dom, attName, attValue);
   }
 }
 
 function getClassNames(dom){
-  var className = dom.className;
+  const className = dom.className;
   if (!className) {
     return undefined;
   }
-  var classNames = className.split(/\s+/);
+  const classNames = className.split(/\s+/);
   return classNames.length ? classNames : undefined;
 }
 
@@ -122,13 +122,13 @@ function hasClass(dom, classNames, allOrSome){
   if (! (classNames instanceof Array) ) {
     throw new Error(`Invalid classname argument`);
   }
-  var domClassNames = getClassNames(dom);
+  const domClassNames = getClassNames(dom);
   if (domClassNames === undefined) {
     return false;
   }
-  var noMatch;
-  for (var i = 0; i < classNames.length; i++){
-    noMatch = domClassNames.indexOf(classNames[i]) === -1;
+  let noMatch;
+  for (let i = 0; i < classNames.length; i++){
+    noMatch = !domClassNames.includes(classNames[i]);
     
     if (allOrSome && noMatch) {
       return false;
@@ -142,13 +142,13 @@ function hasClass(dom, classNames, allOrSome){
 }
 
 function replaceClass(dom, oldClass, newClass){
-  var classNames = getClassNames(dom);
-  var indexOfOldClass = classNames.indexOf(oldClass);
+  const classNames = getClassNames(dom);
+  const indexOfOldClass = classNames.indexOf(oldClass);
   if (indexOfOldClass === -1){
     return;
   }
-  var args = [indexOfOldClass, 1];
-  if (classNames.indexOf(newClass) === -1) {
+  const args = [indexOfOldClass, 1];
+  if ( !classNames.includes(newClass) ) {
     args.push(newClass);
   }
   Array.prototype.splice.apply(classNames, args);
@@ -165,7 +165,7 @@ function getAncestorWithTagName(dom, tagName, includeSelf){
   }
 
   tagName = tagName.toUpperCase();
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
     if (node.tagName === tagName){
       return node;
@@ -184,7 +184,7 @@ function getAncestorWithClassName(dom, classNames, allOrSome, includeSelf){
     includeSelf = true;
   }
   
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
     if (hasClass(node, classNames, allOrSome)){
       return node;
@@ -203,9 +203,9 @@ function getAncestorWithAttributeValue(dom, attributeName, attributeValue, inclu
     includeSelf = true;
   }
   
-  var node = includeSelf ? dom : dom.parentNode;
+  let node = includeSelf ? dom : dom.parentNode;
   while(isEl(node)) {
-    var value = node.getAttribute(attributeName);
+    const value = node.getAttribute(attributeName);
     if (value === attributeValue) {
       return node;
     }
@@ -219,9 +219,9 @@ function isEl(node){
 }
 
 function getChildWithClassName(dom, className){
-  var childNodes = dom.childNodes;
-  for (var i = 0; i < childNodes.length; i++){
-    var childNode = childNodes.item(i);
+  const childNodes = dom.childNodes;
+  for (let i = 0; i < childNodes.length; i++){
+    const childNode = childNodes.item(i);
     if (!isEl(childNode)) {
       continue;
     }
@@ -233,17 +233,18 @@ function getChildWithClassName(dom, className){
   //throw new Error(`Couldn't find element with classname ${className}`);
 }
 
+const htmlReplacements = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&amp;',
+  "'": '&apos;',
+  '"': '&quot;',
+};
+
 function escapeHtmlText(text){
-  return text.replace(/[&<>]/g, function(match){
-    switch(match) {
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;'
-      default:
-        return match;
-    }
-  });
+  return text.replace(/[&<>]/g, match => htmlReplacements[match]);
+}
+
+function escapeHtml(text){
+  return text.replace(/[&<>'"]/g, match => htmlReplacements[match]);
 }

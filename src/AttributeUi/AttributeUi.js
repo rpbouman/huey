@@ -16,7 +16,7 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'AVG( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
+        const formatter = createNumberFormatter(true);
         return function(value, field){
           return formatter.format(value, field);
         };
@@ -58,7 +58,7 @@ class AttributeUi {
       forNumeric: true,
       expressionTemplate: 'GEOMEAN( ${columnExpression} )',
       createFormatter: function(axisItem){
-        var formatter = createNumberFormatter(true);
+        const formatter = createNumberFormatter(true);
         return function(value, field){
           return formatter.format(value, field);
         };
@@ -82,14 +82,23 @@ class AttributeUi {
       expressionTemplate: 'LIST( ${columnExpression} )',
       isArray: true
     },
+    'list (as CSV)': {
+      folder: "list aggregators",
+      expressionTemplate: 'LIST( ${columnExpression} )',
+      columnType: 'VARCHAR'
+    },
     'unique values': {
       folder: "list aggregators",
       expressionTemplate: 'LIST( DISTINCT ${columnExpression} ORDER BY ${columnExpression} )',
       isArray: true
     },
+    'unique values (as CSV)': {
+      folder: "list aggregators",
+      expressionTemplate: 'STRING_AGG( DISTINCT ${columnExpression} ORDER BY ${columnExpression} )',
+      columnType: 'VARCHAR'
+    },
     'mad': {
       folder: "statistics",
-      columnType: 'INTERVAL',
       forNumeric: true,
       expressionTemplate: 'MAD( ${columnExpression} )'
     },
@@ -103,14 +112,20 @@ class AttributeUi {
       expressionTemplate: 'MEDIAN( ${columnExpression} )',
       getReturnDataTypeForArgumentDataType: getMedianReturnDataTypeForArgumentDataType,
       createFormatter: function(axisItem){
-        var columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var formatter;
+        const columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+        const dataTypeInfo = getDataTypeInfo(columnType);
         if (dataTypeInfo.isNumeric) {
-          formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+          const formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
           return function(value, field){
             return formatter.format(value, field);
           };
+        }
+        else
+        if (dataTypeInfo.hasDateFields || dataTypeInfo.hasTimeFields){
+          const formatter = createTimestampFormatter(false);
+          return function(value, field) {
+            return formatter(value, field);
+          }
         }
         else {
           return function(value, field){
@@ -154,11 +169,12 @@ class AttributeUi {
       isNumeric: true,
       forNumeric: true,
       expressionTemplate: 'SUM( ${columnExpression} )',
+      getReturnDataTypeForArgumentDataType: getSumReturnDataTypeForArgumentDataType,
       createFormatter: function(axisItem){
-        var columnType = axisItem.columnType;
-        var dataTypeInfo = getDataTypeInfo(columnType);
-        var isInteger = dataTypeInfo.isInteger;
-        var formatter = createNumberFormatter(isInteger !== true);
+        const columnType = axisItem.columnType;
+        const dataTypeInfo = getDataTypeInfo(columnType);
+        const isInteger = dataTypeInfo.isInteger;
+        const formatter = createNumberFormatter(isInteger !== true);
 
         return function(value, field){
           return formatter.format(value, field);
@@ -177,20 +193,20 @@ class AttributeUi {
   
   static arrayStatisticsDerivations = Object
   .keys(AttributeUi.aggregators)
-  .filter(function(aggregator){
-    var aggregatorInfo = AttributeUi.aggregators[aggregator];
+  .filter(aggregator => {
+    const aggregatorInfo = AttributeUi.aggregators[aggregator];
     return aggregatorInfo.folder !== 'list aggregators';
   })
-  .reduce(function(arrayStatisticsDerivations, aggregator){
-    var aggregatorInfo = AttributeUi.aggregators[aggregator];
-    var aggregateFunction = aggregatorInfo.expressionTemplate.split('(')[0];
-    var derivationInfo = Object.assign({}, aggregatorInfo);
+  .reduce((arrayStatisticsDerivations, aggregator) => {
+    const aggregatorInfo = AttributeUi.aggregators[aggregator];
+    const aggregateFunction = aggregatorInfo.expressionTemplate.split('(')[0];
+    const derivationInfo = Object.assign({}, aggregatorInfo);
     if (derivationInfo.preservesColumnType){
       derivationInfo.hasElementDataType = true; 
       delete derivationInfo.preservesColumnType;
     }
     derivationInfo.folder = `array statistics`;
-    var expressionTemplate;
+    let expressionTemplate;
     switch (aggregator) {
       case 'distinct count':
         expressionTemplate = 'list_unique( ${columnExpression} )';
@@ -318,7 +334,33 @@ class AttributeUi {
       createFormatter: createDayShortNameFormatter,
       createParser: createDayShortNameParser,
       dataValueTypeOverride: 'Utf8'
+    }
+  };
+  
+  static geometryDerivations = {
+    'Dim. qualifier': {
+      folder: 'Geometry',
+      expressionTemplate: 'regexp_extract( ST_asWKT( ${columnExpression} ), \'^[^ ]+ ?([ZM]+)? ?\', 1)',
+      columnType: 'VARCHAR'
     },
+    'Geo Type': {
+      folder: 'Geometry',
+      expressionTemplate: 'regexp_extract( ST_asWKT( ${columnExpression} ), \'^[^ ]+\' )',
+      columnType: 'VARCHAR'
+    },
+    WKB: {
+      folder: 'Geometry',
+      expressionTemplate: 'ST_AsWKB( ${columnExpression} )',
+      columnType: 'BLOB'
+    },
+    WKT: {
+      folder: 'Geometry',
+      expressionTemplate: 'ST_AsWKT( ${columnExpression} )',
+      columnType: 'VARCHAR'
+    }
+  };
+  
+  static timestampFields = {
     'timestamp (secs)': {
       folder: 'timestamps',
       expressionTemplate: 'epoch( ${columnExpression} )',
@@ -338,13 +380,17 @@ class AttributeUi {
       folder: 'timestamps',
       expressionTemplate: 'epoch_ns( ${columnExpression} )',
       columnType: 'BIGINT'
-    }      
-  };
+    }
+  }
 
   static timeFields = {
     'iso-time': {
       folder: 'time fields',
-      expressionTemplate: "strftime( ${columnExpression}, '%H:%M:%S' )",
+      expressionTemplate: [
+        'HOUR( ${columnExpression} )',
+        'MINUTE( ${columnExpression} )',
+        'SECOND( ${columnExpression} )',
+      ].map( expression => `RIGHT( '0'||${expression}, 2 )`).join(`||':'||`),
       columnType: 'VARCHAR'
     },
     'hour': {
@@ -371,42 +417,42 @@ class AttributeUi {
   };
   
   static hashDerivations = {
-    "hash": {
+    'hash': {
       folder: 'hashes',
       expressionTemplate: 'hash( ${columnExpression} )',
       columnType: 'UBIGINT'
     },
-    "md5 (hex)": {
+    'md5 (hex)': {
       folder: 'hashes',
       expressionTemplate: 'md5( ${columnExpression} )',
       columnType: 'VARCHAR',
       forString: true
     },
-    "md5": {
+    'md5': {
       folder: 'hashes',
       expressionTemplate: 'md5_number( ${columnExpression} )',
       columnType: 'HUGEINT',
       forString: true
     },
-    "md5 low": {
+    'md5 low': {
       folder: 'hashes',
       expressionTemplate: 'md5_number_lower( ${columnExpression} )',
       columnType: 'UBIGINT',
       forString: true
     },
-    "md5 high": {
+    'md5 high': {
       folder: 'hashes',
       expressionTemplate: 'md5_number_upper( ${columnExpression} )',
       columnType: 'UBIGINT',
       forString: true
     },
-    "sha-1": {
+    'sha-1': {
       folder: 'hashes',
       expressionTemplate: 'sha1( ${columnExpression} )',
       columnType: 'VARCHAR',
       forString: true
     },
-    "sha-256": {
+    'sha-256': {
       folder: 'hashes',
       expressionTemplate: 'sha256( ${columnExpression} )',
       columnType: 'VARCHAR',
@@ -415,19 +461,34 @@ class AttributeUi {
   };
 
   static textDerivations = {
-    "first letter": {
+    'base64': {
+      folder: 'string operations',
+      expressionTemplate: "base64( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'first letter': {
       folder: 'string operations',
       expressionTemplate: "upper( ${columnExpression}[1] )",
       columnType: 'VARCHAR'
     },
-    "length": {
+    'length': {
       folder: 'string operations',
       expressionTemplate: "length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    'grapheme count':{
+      folder: 'string operations',
+      expressionTemplate: "length_grapheme( ${columnExpression} )",
       columnType: 'BIGINT'
     },
     'lowercase': {
       folder: 'string operations',
       expressionTemplate: "LOWER( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'normalize (NFC)':{
+      folder: 'string operations',
+      expressionTemplate: "nfc_normalize( ${columnExpression} )",
       columnType: 'VARCHAR'
     },
     'NOACCENT': {
@@ -446,6 +507,37 @@ class AttributeUi {
       columnType: 'VARCHAR'
     }
   };
+
+  static blobDerivations = {
+    'base64': {
+      folder: 'BLOB operations',
+      expressionTemplate: "base64( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'hex': {
+      folder: 'BLOB operations',
+      expressionTemplate: "hex( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+    'octet-length': {
+      folder: 'BLOB operations',
+      expressionTemplate: "octet_length( ${columnExpression} )",
+      columnType: 'BIGINT'
+    },
+    'string': {
+      folder: 'BLOB operations',
+      expressionTemplate: "decode( ${columnExpression} )",
+      columnType: 'VARCHAR'
+    },
+  };
+
+  static enumDerivations = {
+    'code': {
+      folder: 'enum',
+      expressionTemplate: 'enum_code( ${columnExpression} )',
+      columnType: 'INTEGER'
+    }
+  };
   
   /* https://github.com/rpbouman/huey/issues/612 */
   static uuidDerivations = {
@@ -460,6 +552,34 @@ class AttributeUi {
       columnType: 'TIMESTAMP WITH TIME ZONE'
     },
   };
+
+  static numberDerivations = {
+    "absolute": {
+      folder: 'number operations',
+      expressionTemplate: "abs( ${columnExpression} )",
+      preservesColumnType: true,
+      forNumeric: true,
+      createFormatter: function(axisItem){
+        const columnType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
+        const dataTypeInfo = getDataTypeInfo(columnType);
+        const formatter = createNumberFormatter(dataTypeInfo.isInteger !== true);
+        return function(value, field){
+          return formatter.format(value, field);
+        };
+      }
+    },
+    "sign": {
+      folder: 'number operations',
+      expressionTemplate: [
+        "case",
+        "  when ${columnExpression} < 0 then '-'",
+        "  else '+'",
+        "end"
+      ].join(' '),
+      columnType: 'VARCHAR',
+      forNumeric: true
+    }
+  }
 
   static arrayDerivations = {
     "elements": {
@@ -521,76 +641,79 @@ class AttributeUi {
   };
     
   static getApplicableDerivations(typeName){
-    var typeInfo = getDataTypeInfo(typeName);
-
-    var hasTimeFields = Boolean(typeInfo.hasTimeFields);
-    var hasDateFields = Boolean(typeInfo.hasDateFields);
-    var hasTextDerivations = Boolean(typeInfo.hasTextDerivations);
-    var hasUUIDDerivations = Boolean(typeInfo.hasUUIDDerivations);
+    const typeInfo = getDataTypeInfo(typeName) || {};
     
-    var hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
+    const hashDerivations = Object.assign({}, AttributeUi.hashDerivations);
     
-    var arrayType = typeName === 'ARRAY';
-    var mapType = typeName === 'MAP';
-    var structType = typeName === 'STRUCT';
-    // note: for this purpose, JSON is treated as string.
-    var stringType = isStringType(typeName) || typeName === 'JSON';
-    var objectType;
+    const geometryType = typeName === 'GEOMETRY';
+    const arrayType = typeName === 'ARRAY';
+    const mapType = typeName === 'MAP';
+    const structType = typeName === 'STRUCT';
+    // note: for this purpose, the JSON data type is treated as string.
+    const stringType = isStringType(typeName) || typeName === 'JSON';
+    let objectType;
     if (!stringType) {
       objectType =  arrayType || mapType || structType;
     }
     
     if (objectType){
       Object.keys(hashDerivations).forEach(function(hashDerivationKey){
-        var hashDerivation = hashDerivations[hashDerivationKey];
+        const hashDerivation = hashDerivations[hashDerivationKey];
         if (hashDerivation.forString) {
           delete hashDerivations[hashDerivationKey];
         }
       });
     }
     
-    var needHashDerivations = stringType || objectType;
-
-    var applicableDerivations = Object.assign({},
-      hasDateFields ? AttributeUi.dateFields : undefined,
-      hasTimeFields ? AttributeUi.timeFields : undefined,
-      hasTextDerivations ? AttributeUi.textDerivations : undefined,
-      hasUUIDDerivations ? AttributeUi.uuidDerivations : undefined,
+    const needHashDerivations = stringType || objectType;
+    const applicableDerivations = Object.assign({},
+      Boolean(typeInfo.hasDateFields) ? AttributeUi.dateFields : undefined,
+      Boolean(typeInfo.hasTimeFields) ? AttributeUi.timeFields : undefined,
+      Boolean(typeInfo.hasTimestampFields) ? AttributeUi.timestampFields : undefined,
+      Boolean(typeInfo.hasTextDerivations) ? AttributeUi.textDerivations : undefined,
+      Boolean(typeInfo.hasBlobDerivations) ? AttributeUi.blobDerivations : undefined,
+      Boolean(typeInfo.hasEnumDerivations) ? AttributeUi.enumDerivations : undefined,
+      Boolean(typeInfo.hasUUIDDerivations) ? AttributeUi.uuidDerivations : undefined,
+      Boolean(typeInfo.isNumeric) ? AttributeUi.numberDerivations : undefined,
+      geometryType ? AttributeUi.geometryDerivations : undefined,
       needHashDerivations ? hashDerivations : undefined
     );
     return applicableDerivations;
   }
 
   static getDerivationInfo(derivationName){
-    var derivations = Object.assign({},
+    const derivations = Object.assign({},
       AttributeUi.tupleNumberDerivations,
       AttributeUi.dateFields,
       AttributeUi.timeFields,
+      AttributeUi.timestampFields,
       AttributeUi.textDerivations,
+      AttributeUi.numberDerivations,
+      AttributeUi.blobDerivations,
+      AttributeUi.enumDerivations,
       AttributeUi.hashDerivations,
       AttributeUi.uuidDerivations,
       AttributeUi.arrayDerivations,
       AttributeUi.arrayStatisticsDerivations,
-      AttributeUi.mapDerivations
+      AttributeUi.mapDerivations,
+      AttributeUi.geometryDerivations
     );
-    var derivationInfo = derivations[derivationName];
+    const derivationInfo = derivations[derivationName];
     return derivationInfo;
   }
 
   static getAggregatorInfo(aggregatorName){
-    var aggregatorInfo = AttributeUi.aggregators[aggregatorName];
+    const aggregatorInfo = AttributeUi.aggregators[aggregatorName];
     return aggregatorInfo;
   }
 
   static getApplicableAggregators(typeName) {
-    var typeInfo = getDataTypeInfo(typeName);
+    const typeInfo = getDataTypeInfo(typeName) || {};
+    const isNumeric = Boolean(typeInfo.isNumeric);
 
-    var isNumeric = Boolean(typeInfo.isNumeric);
-    var isInteger = Boolean(typeInfo.isInteger);
-
-    var applicableAggregators = {};
-    for (var aggregationName in AttributeUi.aggregators) {
-      var aggregator = AttributeUi.aggregators[aggregationName];
+    const applicableAggregators = {};
+    for (let aggregationName in AttributeUi.aggregators) {
+      const aggregator = AttributeUi.aggregators[aggregationName];
       if (aggregator.forNumeric && !isNumeric) {
         continue;
       }
@@ -603,11 +726,11 @@ class AttributeUi {
   }
 
   static getArrayDerivations(typeName){
-    var arrayDerivations = Object.assign(AttributeUi.arrayDerivations);
-    var arrayStatisticsDerivations = AttributeUi.arrayStatisticsDerivations;
-    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    const arrayDerivations = Object.assign({}, AttributeUi.arrayDerivations);
+    const arrayStatisticsDerivations = AttributeUi.arrayStatisticsDerivations;
+    const applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
     Object.keys(applicableAggregators).forEach(function(aggregator){
-      var arrayStatisticsDerivation = arrayStatisticsDerivations[aggregator];
+      const arrayStatisticsDerivation = arrayStatisticsDerivations[aggregator];
       if (!arrayStatisticsDerivation) {
         return;
       }
@@ -617,20 +740,20 @@ class AttributeUi {
   }
   
   static getMapDerivations(typeName){
-    var mapDerivations = Object.assign(AttributeUi.mapDerivations);
+    const mapDerivations = Object.assign(AttributeUi.mapDerivations);
     return mapDerivations;
   }
 
   static #getUiNodeCaption(config){
-    var nodeType = config.type; 
-    var caption;
+    const nodeType = config.type; 
+    let caption;
     switch ( nodeType ){
       case 'column':
         caption = config.profile.column_name;
         break;
       case 'member':
-        var memberExpressionPath = config.profile.memberExpressionPath;
-        var tmp = [].concat(memberExpressionPath);
+        const memberExpressionPath = config.profile.memberExpressionPath;
+        const tmp = [].concat(memberExpressionPath);
         caption = tmp.pop();
         break;
       case 'derived':
@@ -646,9 +769,9 @@ class AttributeUi {
   }
   
   static #getUiNodeColumnExpression(config){
-    var columnExpression = config.profile.column_name;
+    let columnExpression = config.profile.column_name;
     columnExpression = quoteIdentifierWhenRequired(columnExpression);
-    var memberExpressionPath = config.profile.memberExpressionPath;
+    const memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
     }
@@ -656,9 +779,9 @@ class AttributeUi {
   }
   
   static #getUiNodeTitle(config){
-    var columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
+    const columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
     
-    var title = config.title;
+    let title = config.title;
     if (title){
       return title;
     }
@@ -673,16 +796,16 @@ class AttributeUi {
       case 'aggregate':
       case 'derived':
         title = columnExpression;
-        var expressionTemplate;
-        var derivation = config.derivation;
+        let expressionTemplate;
+        const derivation = config.derivation;
         if (derivation) {
-          var derivationInfo = AttributeUi.getDerivationInfo(derivation);
+          const derivationInfo = AttributeUi.getDerivationInfo(derivation);
           expressionTemplate = derivationInfo.expressionTemplate;
           title = extrapolateColumnExpression(expressionTemplate, title);
         }
-        var aggregator = config.aggregator;
+        const aggregator = config.aggregator;
         if (aggregator){
-          var aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
+          const aggregatorInfo = AttributeUi.getAggregatorInfo(aggregator);
           expressionTemplate = aggregatorInfo.expressionTemplate;
           title = extrapolateColumnExpression(expressionTemplate, title);
         }
@@ -691,15 +814,15 @@ class AttributeUi {
     return title;
   }
   
-  static #getAttributeCaptionForAxisButton(config, aggregator){
-    if (aggregator && !config.aggregator) {
-      var aggregatorInfo = AttributeUi.aggregators[aggregator];
+  static #getAttributeCaptionForAxisButton(config, aggregator, axisId){
+    if (axisId === QueryModel.AXIS_CELLS && aggregator && !config.aggregator) {
+      const aggregatorInfo = AttributeUi.aggregators[aggregator];
       config = Object.assign({}, config);
       config.aggregator = aggregator;
       config.expressionTemplate = aggregatorInfo.expressionTemplate;
       config.type = 'aggregate';
     }
-    var caption;
+    let caption;
     switch (config.type) {
       case 'column':
       case 'member':
@@ -715,27 +838,28 @@ class AttributeUi {
     this.#id = id;
     this.#queryModel = queryModel;
 
-    var dom = this.getDom();
-    dom.addEventListener('click', this.#clickHandler.bind(this));
-    dom.addEventListener('dragstart', this.#dragStartHandler.bind(this));
-    this.#queryModel.addEventListener('change', this.#queryModelChangeHandler.bind(this));
+    const dom = this.getDom();
+    dom.addEventListener('click', event => this.#clickHandler(event) );
+    dom.addEventListener('dragstart', event => this.#dragStartHandler(event) );
+    dom.addEventListener('toggle', event => this.#toggleNodeState(event), { capture: true });
+    this.#queryModel.addEventListener('change', event => this.#queryModelChangeHandler(event) );
   }
 
   async #queryModelChangeHandler(event){
     try {
-      var eventData = event.eventData;
-      var propertiesChanged = eventData.propertiesChanged;
+      const eventData = event.eventData;
+      const propertiesChanged = eventData.propertiesChanged;
       if (!propertiesChanged) {
         return;
       }
-      var datasourceChanged = eventData.propertiesChanged.datasource;
+      const datasourceChanged = eventData.propertiesChanged.datasource;
       if (!datasourceChanged){
         return;
       }
-      var newDatasource = eventData.propertiesChanged.datasource.newValue;
+      const newDatasource = eventData.propertiesChanged.datasource.newValue;
       if (newDatasource) {
         this.clear(true);
-        var columnMetadata = await newDatasource.getColumnMetadata();
+        const columnMetadata = await newDatasource.getColumnMetadata();
         this.render(columnMetadata);
       }
       else {
@@ -753,39 +877,42 @@ class AttributeUi {
 
   #clickHandler(event){
     event.stopPropagation();
-    var target = event.target;
-    var node = getAncestorWithTagName(target, 'details');
+    const target = event.target;
+    if (target.tagName !== 'LABEL'){
+      return; 
+    }
+    const node = getAncestorWithTagName(target, 'details');
     if (!node) {
       return;
     }
 
-    var classNames = getClassNames(target);
+    const classNames = getClassNames(target);
     if (!classNames) {
       return;
     }
-    if (classNames.indexOf('attributeUiAxisButton') === -1){
+    if ( !classNames.includes('attributeUiAxisButton') ){
       return;
     }
-    var input = target.getElementsByTagName('input').item(0);
-    var axisId = target.getAttribute('data-axis');
-    setTimeout(function(){
-      this.#axisButtonClicked(node, axisId, input.checked);
-    }.bind(this), 0);
+    const input = target.getElementsByTagName('input').item(0);
+    const axisId = target.getAttribute('data-axis');
+    setTimeout(() => {
+      this.#axisButtonClicked(node, axisId, input.type === 'button' || input.checked);
+    }, 0);
   }
   
   #createQueryAxisItemForAttributeUiNode(node){
-    var columnName = node.getAttribute('data-column_name');
-    var columnType = node.getAttribute('data-column_type');
+    const columnName = node.getAttribute('data-column_name');
+    const columnType = node.getAttribute('data-column_type');
 
-    var memberExpressionPath = node.getAttribute('data-member_expression_path');
+    let memberExpressionPath = node.getAttribute('data-member_expression_path');
     if (memberExpressionPath) {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
 
-    var derivation = node.getAttribute('data-derivation');
-    var aggregator = node.getAttribute('data-aggregator');
+    const derivation = node.getAttribute('data-derivation');
+    const aggregator = node.getAttribute('data-aggregator');
 
-    var itemConfig = {
+    const itemConfig = {
       columnName: columnName,
       columnType: columnType,
       derivation: derivation,
@@ -796,45 +923,50 @@ class AttributeUi {
   }
 
   #updateAxisButtonTitle(input){
-    var label = input.parentNode;
-    var title = label.getAttribute(`data-title-${input.checked ? '' : 'un'}checked`);
-    label.setAttribute('title', title);
+    const label = input.parentNode;
+    const argsAttribute = label.getAttribute('data-i18n-native-title-args');
+    const args = JSON.parse(argsAttribute);
+    const titleTemplate = label.getAttribute(`data-title-${input.checked ? '' : 'un'}checked`);
+    args.unshift(titleTemplate)
+    const translatedTitle = Internationalization.getText.apply(Internationalization, args);
+    label.setAttribute( 'title', translatedTitle );
   }
 
-  async #axisButtonClicked(node, axis, checked){
-    var head = node.querySelector('summary');
-    var inputs = head.querySelectorAll('input');
-    var aggregator;
-    switch (axis){
+  async #axisButtonClicked(node, axisId, checked){
+    const queryModel = this.#queryModel;
+    const head = node.querySelector('summary');
+    const inputs = head.querySelectorAll('input');
+    let aggregator;
+    switch (axisId){
       case QueryModel.AXIS_ROWS:
       case QueryModel.AXIS_COLUMNS:
       case QueryModel.AXIS_CELLS:
         // implement mutual exclusive axes (either rows or columns, not both)
-        for (var i = 0; i < inputs.length; i++){
-          var input = inputs.item(i);
-          var inputAxis = input.getAttribute('data-axis');
-          if (input.checked && inputAxis !== axis) {
-            input.checked = false;
+        for (let i = 0; i < inputs.length; i++){
+          const input = inputs.item(i);
+          const inputAxis = input.getAttribute('data-axis');
+          if (input.type === 'checkbox'){
+            if (input.checked && inputAxis !== axisId) {
+              input.checked = false;
+            }
+    
+            this.#updateAxisButtonTitle(input);
           }
   
-          this.#updateAxisButtonTitle(input);
-  
-          if (axis === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
+          if (axisId === QueryModel.AXIS_CELLS && inputAxis === QueryModel.AXIS_CELLS) {
             aggregator = input.getAttribute('data-aggregator');
           }
         }
         break;
     }
 
-    var itemConfig = this.#createQueryAxisItemForAttributeUiNode(node);
-    itemConfig.axis = axis;
+    const itemConfig = this.#createQueryAxisItemForAttributeUiNode(node);
+    itemConfig.axis = axisId;
 
     if (aggregator) {
       itemConfig.aggregator = aggregator;
     }
 
-    var queryModel = this.#queryModel;
-    var title;
     if (checked) {
       await queryModel.addItem(itemConfig);
     }
@@ -844,34 +976,33 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeAxisButton(config, head, axisId){
-    var columnExpression = config.profile.column_name;
-    var memberExpressionPath = config.profile.memberExpressionPath;
+    let columnExpression = config.profile.column_name;
+    const memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
       columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
     }
 
-    var name = `${config.type}_${columnExpression}`;
-    var id = `${name}`;
+    const name = `${config.type}_${columnExpression}`;
+    let id = `${name}`;
 
-    var derivation = config.derivation;
+    const derivation = config.derivation;
     if (derivation){
       id += `_${derivation}`;
     }
-    var aggregator = config.aggregator;
+    let aggregator = config.aggregator;
     if (aggregator){
       id += `_${aggregator}`;
     }
 
-    var analyticalRole = 'attribute';
+    let analyticalRole = 'attribute';
 
-    var dummyButtonTemplate = 'attribute-node-axis-dummybutton';
-    var axisButtonTemplate = dummyButtonTemplate;
+    const dummyButtonTemplate = 'attribute-node-axis-dummybutton';
+    let axisButtonTemplate = dummyButtonTemplate;
     switch (config.type) {
       case 'column':
       case 'member':
-        var profile = config.profile;
-        var columnType = config.columnType || config.profile.column_type;
-        var dataTypeInfo = getDataTypeInfo(columnType);
+        const columnType = config.columnType || config.profile.column_type;
+        const dataTypeInfo = getDataTypeInfo(columnType);
         analyticalRole = dataTypeInfo && dataTypeInfo.defaultAnalyticalRole ? dataTypeInfo.defaultAnalyticalRole : analyticalRole;
       case 'derived':
         switch (axisId){
@@ -887,46 +1018,53 @@ class AttributeUi {
           break;
         }
         else
-        if (analyticalRole === 'measure' && config.type === 'column'){
+        if (analyticalRole === 'measure' && ['column','member'].includes(config.type) ){
           aggregator = aggregator || 'sum';
         }
+        
       case 'aggregate':
         switch (axisId){
           case QueryModel.AXIS_CELLS:
             axisButtonTemplate = 'attribute-node-axis-checkbox';
             break;
+          case QueryModel.AXIS_FILTERS:
+          case QueryModel.AXIS_COLUMNS:
+          case QueryModel.AXIS_ROWS:
+            if (config.type === 'aggregate'){
+              id += `_${axisId}`;
+              axisButtonTemplate = 'attribute-node-axis-button';
+              break;
+            }
           default:
         }
         break;
       default:
     }
 
-    var axisButton = instantiateTemplate(axisButtonTemplate);
+    const axisButton = instantiateTemplate(axisButtonTemplate);
     axisButton.setAttribute('data-axis', axisId);
     if (axisButtonTemplate === dummyButtonTemplate){
       return axisButton;
     }
 
-    var attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator);
+    const attributeCaption = AttributeUi.#getAttributeCaptionForAxisButton(config, aggregator, axisId);
     
-    var translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
+    const translatedAttributeCaption = Internationalization.getText(attributeCaption) || attributeCaption;
     
-    var checkedTitleKey = `Click to remove {1} from the ${axisId}-axis`;
-    var checkedTitle = Internationalization.getText(checkedTitleKey, translatedAttributeCaption);
-    axisButton.setAttribute('data-title-checked', checkedTitle);
+    const checkedTitleKey = `Click to remove {1} from the ${axisId}-axis`;
+    axisButton.setAttribute('data-title-checked', checkedTitleKey);
     
-    var uncheckedTitleKey = `Click to add {1} to the ${axisId}-axis`;
-    var uncheckedTitle = Internationalization.getText(uncheckedTitleKey, translatedAttributeCaption);
-    axisButton.setAttribute('data-title-unchecked', uncheckedTitle);
-    
-    axisButton.setAttribute('title', uncheckedTitle);
+    const uncheckedTitleKey = `Click to add {1} to the ${axisId}-axis`;
+    axisButton.setAttribute('data-title-unchecked', uncheckedTitleKey);
+
+    Internationalization.setAttributes(axisButton, 'title', uncheckedTitleKey, attributeCaption);
 
     axisButton.setAttribute('for', id);
-    var axisButtonInput = axisButton.querySelector('input');
+    const axisButtonInput = axisButton.querySelector('input');
     axisButtonInput.setAttribute('id', id);
     axisButtonInput.setAttribute('data-axis', axisId);
 
-    if (aggregator && axisId === QueryModel.AXIS_CELLS) {
+    if (aggregator && axisId === QueryModel.AXIS_CELLS || config.type === 'aggregate') {
       axisButtonInput.setAttribute('data-aggregator', aggregator);
     }
 
@@ -937,26 +1075,26 @@ class AttributeUi {
   }
 
   #renderAttributeUiNodeAxisButtons(config, head){
-    var rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
+    const rowButton = this.#renderAttributeUiNodeAxisButton(config, head, 'rows');
     head.appendChild(rowButton);
 
-    var columnButton = this.#renderAttributeUiNodeAxisButton(config, head, 'columns');
+    const columnButton = this.#renderAttributeUiNodeAxisButton(config, head, 'columns');
     head.appendChild(columnButton);
 
-    var cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
+    const cellsButton = this.#renderAttributeUiNodeAxisButton(config, head, 'cells');
     head.appendChild(cellsButton);
 
-    var filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
+    const filterButton = this.#renderAttributeUiNodeAxisButton(config, head, 'filters');
     head.appendChild(filterButton);
   }
 
   #renderAttributeUiNodeHead(node, config) {
-    var head = node.querySelector('summary');
+    const head = node.querySelector('summary');
 
-    var caption = AttributeUi.#getUiNodeCaption(config);
-    var title = AttributeUi.#getUiNodeTitle(config);
+    let caption = AttributeUi.#getUiNodeCaption(config);
+    const title = AttributeUi.#getUiNodeTitle(config);
     
-    var label = head.querySelector('span');
+    const label = head.querySelector('span');
     switch (config.type) {
       case 'derived':
       case 'aggregate':
@@ -978,37 +1116,36 @@ class AttributeUi {
   }
 
   #dragStartHandler(event){
-    var dataTransfer = event.dataTransfer;
-    var data = {};
+    const data = {};
     
-    var element = event.target;
-    var summary = element.parentNode;
-    var details = summary.parentNode;
-    var queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
+    const element = event.target;
+    const summary = element.parentNode;
+    const details = summary.parentNode;
+    const queryAxisItem = this.#createQueryAxisItemForAttributeUiNode(details);
         
-    var itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
+    let itemId = QueryAxisItem.getIdForQueryAxisItem(queryAxisItem);
     // if this is an aggregat item, mark that
     if (queryAxisItem.aggregator) {
       data.aggregator = {key: queryAxisItem.aggregator, value: queryAxisItem.aggregator};
     }
     else {
       // if this is not an aggregate item, then this attribute ui item could have a default aggregator
-      var defaultAggregatorInput = summary.querySelector('label[data-axis=cells] > input[type=checkbox]');
+      const defaultAggregatorInput = summary.querySelector('label[data-axis=cells] > input[type=checkbox]');
       if (defaultAggregatorInput) {
-        var defaultAggregator = defaultAggregatorInput.getAttribute('data-aggregator');
+        const defaultAggregator = defaultAggregatorInput.getAttribute('data-aggregator');
         // since this item could be dropped on the cells axis,
         // we should check if the cells axis already contains an item that would result from applying the default aggregator
-        var copyOfQueryAxisItem = Object.assign({}, queryAxisItem);
+        const copyOfQueryAxisItem = Object.assign({}, queryAxisItem);
         copyOfQueryAxisItem.axis = QueryModel.AXIS_CELLS;
         copyOfQueryAxisItem.aggregator = defaultAggregator;
-        var cellsAxisItem = this.#queryModel.findItem(copyOfQueryAxisItem);
+        const cellsAxisItem = this.#queryModel.findItem(copyOfQueryAxisItem);
         itemId = cellsAxisItem ? QueryAxisItem.getIdForQueryAxisItem(cellsAxisItem) : '';
         data.defaultaggregator = {key: itemId, value: defaultAggregator};
       }
     }
      
     // see if this item is already part of the query model
-    var queryModelItem = this.#queryModel.findItem(queryAxisItem);
+    const queryModelItem = this.#queryModel.findItem(queryAxisItem);
     if (queryModelItem) {
       queryAxisItem.axis = queryModelItem.axis;
       data.axis = {key: queryAxisItem.axis, value: queryAxisItem.axis};
@@ -1017,8 +1154,8 @@ class AttributeUi {
       data.id = {key: itemId, value: itemId};
     }
     
-    var filtersAxis = this.#queryModel.getFiltersAxis();
-    var filtersAxisItem = filtersAxis.findItem(queryAxisItem);
+    const filtersAxis = this.#queryModel.getFiltersAxis();
+    const filtersAxisItem = filtersAxis.findItem(queryAxisItem);
     if (filtersAxisItem){
       data.filters = {key: filtersAxisItem.index, value: filtersAxisItem.index};
       if (!queryModelItem) {
@@ -1030,30 +1167,30 @@ class AttributeUi {
     DragAndDropHelper.addTextDataForQueryItem(queryAxisItem, data);
     
     DragAndDropHelper.setData(event, data);
+    const dataTransfer = event.dataTransfer;
     dataTransfer.dropEffect = dataTransfer.effectAllowed = queryModelItem ? 'move' : 'all';
     dataTransfer.setDragImage(element, -20, 0);
   }
 
   #renderAttributeUiNode(config){
-    var columnType = config.profile.column_type;
-    var attributes = {
+    const columnType = config.profile.column_type;
+    const attributes = {
       role: 'treeitem',
       'data-nodetype': config.type,
       'data-column_name': config.profile.column_name,
       'data-column_type': columnType
     };
-    var memberExpressionPath = config.profile.memberExpressionPath;
+    const memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath) {
       attributes['data-member_expression_path'] = JSON.stringify(memberExpressionPath);
       attributes['data-member_expression_type'] = config.profile.memberExpressionType;
     }
-    var node = instantiateTemplate('attribute-node', attributes);
+    const node = instantiateTemplate('attribute-node', attributes);
 
-    var derivation = config.derivation;
+    const derivation = config.derivation;
     switch (config.type){
       case 'column':
       case 'member':
-        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       case 'aggregate':
         node.setAttribute('data-aggregator', config.aggregator);
@@ -1063,7 +1200,6 @@ class AttributeUi {
         break;
       case 'derived':
         node.setAttribute('data-derivation', derivation);
-        node.addEventListener('toggle', this.#toggleNodeState.bind(this) );
         break;
       default:
         throw new Error(`Invalid node type "${config.type}".`);
@@ -1071,13 +1207,10 @@ class AttributeUi {
 
     this.#renderAttributeUiNodeHead(node, config);
 
-    // for STRUCT columns and members, preload the child nodes (instead of lazy load)
-    // this is necessary so that a search will always find all applicable attributes
-    // with lazy load it would only find whatever happens to be visited/browsed already.
-    var typeToCheckIfChildnodesAreNeeded;
+    let typeToCheckIfChildnodesAreNeeded;
     switch (config.type){
       case 'derived':
-        if (['elements'].indexOf(derivation) === -1) {
+        if ( derivation !== 'elements' ) {
           break;
         }
         typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
@@ -1089,36 +1222,22 @@ class AttributeUi {
         typeToCheckIfChildnodesAreNeeded = config.profile.memberExpressionType;
         break;
     }
-    if (
-      typeToCheckIfChildnodesAreNeeded && (
-        isStructType(typeToCheckIfChildnodesAreNeeded) || 
-        isMapType(typeToCheckIfChildnodesAreNeeded) ||
-        isArrayType(typeToCheckIfChildnodesAreNeeded)
-      )
-    ) {
-      this.#loadChildNodes(node);
-    }
+    
     return node;
   }
 
   clear(showBusy){
-    var attributesUi = this.getDom();
-    var content;
-    if (showBusy) {
-      content = '<div class="loader loader-medium"></div>';
-    }
-    else {
-      content = '';
-    }
+    const attributesUi = this.getDom();
+    const content = showBusy ? '<div class="loader loader-medium"></div>' : '';
     attributesUi.innerHTML = content;
   }
 
   render(columnSummary){
     this.clear();
-    var attributesUi = this.getDom();
+    const attributesUi = this.getDom();
 
     // generic count(*) node
-    var countAllNode = this.#renderAttributeUiNode({
+    const countAllNode = this.#renderAttributeUiNode({
       type: 'aggregate',
       aggregator: 'count',
       title: 'Generic rowcount',
@@ -1130,7 +1249,7 @@ class AttributeUi {
     attributesUi.appendChild(countAllNode);
     
     // generic rownum
-    var rownumNode = this.#renderAttributeUiNode({
+    const rownumNode = this.#renderAttributeUiNode({
       type: 'derived',
       title: 'row number',
       derivation: 'row number',
@@ -1142,9 +1261,9 @@ class AttributeUi {
     attributesUi.appendChild(rownumNode);
     
     // nodes for each column
-    for (var i = 0; i < columnSummary.numRows; i++){
-      var row = columnSummary.get(i);
-      var node = this.#renderAttributeUiNode({
+    for (let i = 0; i < columnSummary.numRows; i++){
+      const row = columnSummary.get(i);
+      const node = this.#renderAttributeUiNode({
         type: 'column',
         profile: row.toJSON()
       });
@@ -1153,13 +1272,13 @@ class AttributeUi {
   }
 
   #renderFolderNode(config){
-    var node = instantiateTemplate('attribute-node', {
+    const node = instantiateTemplate('attribute-node', {
       'data-nodetype': 'folder'
     });
-    var label = node.querySelector('span.label');
+    const label = node.querySelector('span.label');
     Internationalization.setTextContent(label, config.caption);
 
-    var filler = instantiateTemplate('attribute-node-axis-dummybutton', {
+    const filler = instantiateTemplate('attribute-node-axis-dummybutton', {
       'data-axis': 'none'
     });
     node.querySelector('summary').appendChild(filler);
@@ -1168,9 +1287,9 @@ class AttributeUi {
   }
 
   #createFolders(itemsObject, node){
-    var folders = Object.keys(itemsObject).reduce(function(acc, curr){
-      var object = itemsObject[curr];
-      var folder = object.folder;
+    const folders = Object.keys(itemsObject).reduce((acc, curr) => {
+      const object = itemsObject[curr];
+      const folder = object.folder;
       if (!folder) {
         return acc;
       }
@@ -1179,10 +1298,11 @@ class AttributeUi {
         return acc;
       }
 
-      var folderNode = this.#renderFolderNode({caption: folder});
+      const folderNode = this.#renderFolderNode({caption: folder});
       acc[folder] = folderNode;
 
-      var afterLastFolder = node.querySelector(':scope > [data-nodetype=folder] + *:not( [data-nodetype=folder] )');
+      const selector = ':scope > [data-nodetype=folder] + *:not( [data-nodetype=folder] )';
+      const afterLastFolder = node.querySelector(selector);
       if (afterLastFolder){
         node.insertBefore(folderNode, afterLastFolder);
       }
@@ -1190,19 +1310,18 @@ class AttributeUi {
         node.appendChild(folderNode);
       }
       return acc;
-    }.bind(this), {});
+    }, {});
     return folders;
   }
 
   #loadMemberChildNodes(node, typeName, profile, noFolder){
-    var folderNode = noFolder ? undefined : this.#renderFolderNode({caption: 'structure'});
-    var columnType = profile.memberExpressionType || profile.column_type;
-    var memberExpressionPath = profile.memberExpressionPath || [];
-    var structure = getStructTypeDescriptor(columnType);
-    var columnName = profile.column_name
-    for (var memberName in  structure){
-      var memberType = structure[memberName];
-      var config = {
+    const folderNode = noFolder ? undefined : this.#renderFolderNode({caption: 'structure'});
+    const columnType = profile.memberExpressionType || profile.column_type;
+    const memberExpressionPath = profile.memberExpressionPath || [];
+    const structure = getStructTypeDescriptor(columnType);
+    for (let memberName in  structure){
+      const memberType = structure[memberName];
+      const config = {
         type: 'member',
         columnType: memberType,
         profile: {
@@ -1212,7 +1331,7 @@ class AttributeUi {
           memberExpressionType: memberType
         }
       }
-      var memberNode = this.#renderAttributeUiNode(config);
+      const memberNode = this.#renderAttributeUiNode(config);
       (folderNode || node).appendChild(memberNode);
     }
     if (folderNode) {
@@ -1221,17 +1340,17 @@ class AttributeUi {
   }
 
   #loadDerivationChildNodes(node, typeName, profile){
-    var applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
-    var folders = this.#createFolders(applicableDerivations, node);
-    for (var derivationName in applicableDerivations) {
-      var derivation = applicableDerivations[derivationName];
-      var config = {
+    const applicableDerivations = AttributeUi.getApplicableDerivations(typeName);
+    const folders = this.#createFolders(applicableDerivations, node);
+    for (let derivationName in applicableDerivations) {
+      const derivation = applicableDerivations[derivationName];
+      const config = {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
         profile: profile
       };
-      var childNode = this.#renderAttributeUiNode(config);
+      const childNode = this.#renderAttributeUiNode(config);
       if (derivation.folder) {
         folders[derivation.folder].appendChild(childNode);
       }
@@ -1242,18 +1361,17 @@ class AttributeUi {
   }
 
   #loadArrayChildNodes(node, typeName, profile){
-    var arrayDerivations = AttributeUi.getArrayDerivations(typeName);
-    var folders = this.#createFolders(arrayDerivations, node);
-    var memberExpressionPath = profile.memberExpressionPath || [];
-    for (var derivationName in arrayDerivations) {
-      var derivation = arrayDerivations[derivationName];
-      var nodeProfile;
+    const arrayDerivations = AttributeUi.getArrayDerivations(typeName);
+    const folders = this.#createFolders(arrayDerivations, node);
+    for (let derivationName in arrayDerivations) {
+      const derivation = arrayDerivations[derivationName];
+      let nodeProfile;
       if (derivation.unnestingFunction) {
         nodeProfile = JSON.parse(JSON.stringify(profile));
-        var memberExpressionPath = nodeProfile.memberExpressionPath || [];
+        const memberExpressionPath = nodeProfile.memberExpressionPath || [];
         memberExpressionPath.push(derivation.unnestingFunction + '()');
         nodeProfile.memberExpressionPath = memberExpressionPath;
-        var memberExpressionType = derivation.columnType;
+        let memberExpressionType = derivation.columnType;
         if (!memberExpressionType){
           memberExpressionType = profile.memberExpressionType || profile.column_type;
           memberExpressionType = getArrayElementType(memberExpressionType);
@@ -1264,13 +1382,13 @@ class AttributeUi {
       else {
         nodeProfile = profile;
       }
-      var config = {
+      const config = {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
         profile: nodeProfile
       };
-      var childNode = this.#renderAttributeUiNode(config);
+      const childNode = this.#renderAttributeUiNode(config);
       if (derivation.folder) {
         folders[derivation.folder].appendChild(childNode);
       }
@@ -1281,13 +1399,12 @@ class AttributeUi {
   }
 
   #loadMapChildNodes(node, typeName, profile){
-    var mapDerivations = AttributeUi.getMapDerivations(typeName);
-    var folders = this.#createFolders(mapDerivations, node);
-    for (var derivationName in mapDerivations) {
-      var derivation = mapDerivations[derivationName];
-      var nodeProfile; 
-      var memberExpressionType = profile.memberExpressionType || profile.column_type;
-      var memberExpressionPath;
+    const mapDerivations = AttributeUi.getMapDerivations(typeName);
+    const folders = this.#createFolders(mapDerivations, node);
+    for (const derivationName in mapDerivations) {
+      const derivation = mapDerivations[derivationName];
+      let nodeProfile; 
+      let memberExpressionType = profile.memberExpressionType || profile.column_type;
       switch (derivationName) {
         case 'entries':
         case 'entry keys':
@@ -1326,13 +1443,13 @@ class AttributeUi {
           break;
       }
 
-      var config = {
+      const config = {
         type: 'derived',
         derivation: derivationName,
         title: derivation.title,
         profile: nodeProfile
       };
-      var childNode = this.#renderAttributeUiNode(config);
+      const childNode = this.#renderAttributeUiNode(config);
       if (derivationName === 'entries'){
         this.#loadMemberChildNodes(childNode, nodeProfile.memberExpressionType, nodeProfile, true);
       }
@@ -1347,18 +1464,18 @@ class AttributeUi {
   }
 
   #loadAggregatorChildNodes(node, typeName, profile) {
-    var applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
-    var folders = this.#createFolders(applicableAggregators, node);
-    for (var aggregationName in applicableAggregators) {
-      var aggregator = applicableAggregators[aggregationName];
-      var config = {
+    const applicableAggregators = AttributeUi.getApplicableAggregators(typeName);
+    const folders = this.#createFolders(applicableAggregators, node);
+    for (const aggregationName in applicableAggregators) {
+      const aggregator = applicableAggregators[aggregationName];
+      const config = {
         type: 'aggregate',
         aggregator: aggregationName,
         derivation: profile.derivation,
         title: aggregator.title,
         profile: profile
       };
-      var childNode = this.#renderAttributeUiNode(config);
+      const childNode = this.#renderAttributeUiNode(config);
       if (aggregator.folder) {
         folders[aggregator.folder].appendChild(childNode);
       }
@@ -1368,39 +1485,39 @@ class AttributeUi {
     }
   }
 
-  #loadChildNodes(node){
-    var columnName = node.getAttribute('data-column_name');
-    var columnType = node.getAttribute('data-column_type');
+  loadChildNodes(node){
+    const columnName = node.getAttribute('data-column_name');
+    const columnType = node.getAttribute('data-column_type');
 
-    var memberExpressionPath;
-    var memberExpressionType = node.getAttribute('data-member_expression_type');
+    let memberExpressionPath;
+    let memberExpressionType = node.getAttribute('data-member_expression_type');
     if (memberExpressionType) {
       memberExpressionPath = node.getAttribute('data-member_expression_path');
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
 
-    var elementType = node.getAttribute('data-element_type');
+    const elementType = node.getAttribute('data-element_type');
 
-    var profile = {
+    const profile = {
       column_name: columnName,
       column_type: columnType,
       memberExpressionType: memberExpressionType,
       memberExpressionPath: memberExpressionPath
     };
 
-    var nodeType = node.getAttribute('data-nodetype');
-    var derivation;
+    const nodeType = node.getAttribute('data-nodetype');
+    let derivation;
     if (nodeType === 'derived'){
       derivation = node.getAttribute('data-derivation');
       profile.derivation = derivation;
     }
 
-    var expressionType = memberExpressionType || columnType;
-    var typeName = getDataTypeNameFromColumnType(expressionType);
+    const expressionType = memberExpressionType || columnType;
+    const typeName = getDataTypeNameFromColumnType(expressionType);
 
     if (
       nodeType !== 'derived' ||
-      ['elements'].indexOf(derivation) !== -1
+      derivation === 'elements'
     ){
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
@@ -1418,7 +1535,7 @@ class AttributeUi {
 
     switch (nodeType){
       case 'derived':
-        if (['elements'].indexOf(derivation) === -1){
+        if (derivation !== 'elements'){
           break;
         }
       case 'column':
@@ -1436,32 +1553,34 @@ class AttributeUi {
   }
 
   #toggleNodeState(event){
-    var node = event.target;
+    const node = event.target;
+    const nodeType = node.getAttribute?.('data-nodetype');
+    if (!['column', 'member', 'derived'].includes( nodeType )) {
+      return;
+    }  
     if (event.newState !== 'open'){
       return;
     }
     if (node.querySelector('details') !== null){
       return;
     }
-    this.#loadChildNodes(node);
+    this.loadChildNodes(node);
     this.#updateState();
   }
 
   #updateState(){
-    var queryModel = this.#queryModel;
+    const queryModel = this.#queryModel;
 
     // to satisfy https://github.com/rpbouman/huey/issues/220, 
     // we need to ensure derivations and aggregates are loaded.
     
     // First we get the column names of those query items that have a derivation or aggregator
-    var referencedColumns = {};
-    var axisIds = queryModel.getAxisIds();
-    for (var i = 0; i < axisIds.length; i++) {
-      var axisId = axisIds[i];
-      var queryAxis = queryModel.getQueryAxis(axisId);
-      var items = queryAxis.getItems();
-      for (var j = 0; j < items.length; j++){
-        var item = items[j];
+    const referencedColumns = {};
+    const axisIds = queryModel.getAxisIds();
+    for (const axisId of axisIds) {
+      const queryAxis = queryModel.getQueryAxis(axisId);
+      const items = queryAxis.getItems();
+      for (const item of items) {
         if (!item.columnName) {
           continue;
         }
@@ -1474,36 +1593,34 @@ class AttributeUi {
     
     // then, check all top-level attribute nodes that don't have child nodes
     // if the associated column name is referenced in the query, then load its childnodes.
-    var attributeNodes = this.getDom().childNodes;
-    for (var i = 0; i < attributeNodes.length; i++){
-      var attributeNode = attributeNodes.item(i);
+    const attributeNodes = this.getDom().childNodes;
+    for (const attributeNode of attributeNodes) {
       if (attributeNode.nodeType !== 1 || attributeNode.nodeName !== 'DETAILS') {
         continue;
       }
-      var columnName = attributeNode.getAttribute('data-column_name');
+      const columnName = attributeNode.getAttribute('data-column_name');
       if (referencedColumns[columnName] === undefined) {
         continue;
       }
-      var descendants = attributeNode.querySelectorAll('details');
+      const descendants = attributeNode.querySelectorAll('details');
       if (descendants.length > 0) {
         continue;
       }
-      this.#loadChildNodes(attributeNode);
+      this.loadChildNodes(attributeNode);
     }
     
     // make sure all the selectors checkboxes are (un)checked according to the query state.
-    var inputs = this.getDom().getElementsByTagName('input');
-    for (var i = 0; i < inputs.length; i++){
-      var input = inputs.item(i);
-      var axisId = input.getAttribute('data-axis');
+    const inputs = this.getDom().getElementsByTagName('input');
+    for (const input of inputs) {
+      const axisId = input.getAttribute('data-axis');
 
-      var node = getAncestorWithTagName(input, 'details')
-      var columnName = node.getAttribute('data-column_name');
-      var aggregator = input.getAttribute('data-aggregator');
-      var derivation = node.getAttribute('data-derivation');
-      var memberExpressionPath = node.getAttribute('data-member_expression_path');
+      const node = getAncestorWithTagName(input, 'details')
+      const columnName = node.getAttribute('data-column_name');
+      const aggregator = input.getAttribute('data-aggregator');
+      const derivation = node.getAttribute('data-derivation');
+      const memberExpressionPath = node.getAttribute('data-member_expression_path');
 
-      var item = queryModel.findItem({
+      const item = queryModel.findItem({
         columnName: columnName,
         axis: axisId,
         aggregator: aggregator,
@@ -1517,11 +1634,9 @@ class AttributeUi {
   }
 
   revealAllQueryAttributes() {
-    // TODO: ensure all query attributes are rendered
-    var dom = this.getDom();
-    var detailsList = document.querySelectorAll('.attributeUi details:has( details > summary > label > input[type=checkbox]:checked )');
-    for (var i = 0; i < detailsList.length; i++){
-      var details = detailsList.item(i);
+    const dom = this.getDom();
+    const detailsList = document.querySelectorAll('.attributeUi details:has( details > summary > label > input[type=checkbox]:checked )');
+    for (const details of detailsList) {
       details.setAttribute('open', 'true');
     }
   }
@@ -1529,10 +1644,9 @@ class AttributeUi {
   getDom(){
     return byId(this.#id);
   }
-
 }
 
-var attributeUi;
+let attributeUi;
 function initAttributeUi(){
   attributeUi = new AttributeUi('attributeUi', queryModel);
 }

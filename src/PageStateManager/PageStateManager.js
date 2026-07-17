@@ -2,36 +2,42 @@ class PageStateManager {
 
   constructor(){
     this.#initPopStateHandler();
+    this.#initNavigationButtons();
     //this.#initHashChangeHandler();
   }
 
   #initPopStateHandler(){
-    window.addEventListener('popstate', this.#popStateHandler.bind(this));
+    window.addEventListener('popstate', event => this.#popStateHandler( event ) );
   }
 
   #initHashChangeHandler(){
-    window.addEventListener('hashchange', this.#hashChangeHandler.bind(this));
+    window.addEventListener('hashchange', event => this.#hashChangeHandler( event ) );
+  }
+
+  #initNavigationButtons(){
+    byId('navigateBack').addEventListener('click', event => window.history.back());
+    byId('navigateForward').addEventListener('click', event => window.history.forward());
   }
 
   // this basically means: load the query
   #hashChangeHandler(event){
-    var currentRoute = Routing.getCurrentRoute();
+    const currentRoute = Routing.getCurrentRoute();
     // TODO: check if the current state already matches the route, if it does we're done.
     this.setPageState(currentRoute);
   }
 
   // this basically means: load the query
   #popStateHandler(event){
-    var newRoute = event.state;
+    const newRoute = event.state;
     // TODO: check if the current state already matches the route, if it does we're done.
     this.setPageState(newRoute);
   }
 
   async chooseDataSourceForPageStateChangeDialog(referencedColumns, desiredDatasourceId, compatibleDatasources, newDatasources){
-    return new Promise(async function(resolve, reject){
+    return new Promise(async (resolve, reject) => {
 
       // do we have the referenced datasource?
-      var desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
+      let desiredDataSource = compatibleDatasources ? compatibleDatasources[desiredDatasourceId] : undefined;
       if (desiredDataSource){
         // yes! we're done.
         resolve(desiredDataSource);
@@ -39,14 +45,14 @@ class PageStateManager {
       }
 
       // figure out what kind of datasource is referenced
-      var desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
+      const desiredDatasourceIdParts = DuckDbDataSource.parseId(desiredDatasourceId);
       
       if (desiredDatasourceIdParts.isUrl) {
-        var url = desiredDatasourceIdParts.resource;
+        const url = desiredDatasourceIdParts.resource;
         await uploadUi.uploadFiles([url]);
         desiredDataSource = datasourcesUi.getDatasource(desiredDatasourceId);
         if (desiredDataSource) {
-          var isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
+          const isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
             desiredDatasourceId,
             referencedColumns,
             true
@@ -59,10 +65,10 @@ class PageStateManager {
         }
       }
 
-      var title;
-      var message;;
-      var existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
-      var openNewDatasourceItem;
+      let title;
+      let message;;
+      const existingDatasource = datasourcesUi.getDatasource(desiredDatasourceId);
+      let openNewDatasourceItem;
       if (existingDatasource) {
         openNewDatasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
           value: -1,
@@ -76,13 +82,13 @@ class PageStateManager {
         );
         
         if (newDatasources && newDatasources.length) {
-          var mismatchedColumns = [];
-          var datasourceSettings = settings.getSettings('datasourceSettings');
-          var useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
-          for (var i = 0; i < newDatasources.length; i++){
-            var newDatasource = newDatasources[i];
-            var datasourceId = newDatasource.getId();
-            var isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
+          const mismatchedColumns = [];
+          const datasourceSettings = settings.getSettings('datasourceSettings');
+          const useLooseColumnComparisonType = datasourceSettings.useLooseColumnTypeComparison;
+          for (let i = 0; i < newDatasources.length; i++){
+            const newDatasource = newDatasources[i];
+            const datasourceId = newDatasource.getId();
+            const isCompatible = await datasourcesUi.isDatasourceCompatibleWithColumnsSpec(
               datasourceId, 
               referencedColumns, 
               useLooseColumnComparisonType
@@ -92,13 +98,13 @@ class PageStateManager {
               continue;
             }
             isCompatible.forEach(function(columnName){
-              if (mismatchedColumns.indexOf(columnName) === -1) {
+              if ( !mismatchedColumns.includes(columnName) ) {
                 mismatchedColumns.push(columnName);
               }
             })
           }
-          var mismatchedColumnsString = mismatchedColumns.map(function(mismatchedColumnName){
-            var columnDef = referencedColumns[mismatchedColumnName];
+          const mismatchedColumnsString = mismatchedColumns.map(function(mismatchedColumnName){
+            const columnDef = referencedColumns[mismatchedColumnName];
             return `${mismatchedColumnName} ${columnDef.columnType}`;
           }).join(', ');
           message += '\n' + Internationalization.getText('Missing or unmatched columns: {1}', mismatchedColumnsString);
@@ -118,23 +124,24 @@ class PageStateManager {
         title = 'Datasource not found';
       }
 
-      var list = '<menu class="dataSources">';
-      var datasourceType;
-      var compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
+      let list = '<menu class="dataSources">';
+      let datasourceType;
+      const compatibleDatasourceIds = compatibleDatasources ? Object.keys(compatibleDatasources) : [];
       if (compatibleDatasourceIds.length) {
         message += '<br/>' + Internationalization.getText('Choose any of the compatible datasources instead, or browse for a new one:');
-        list += compatibleDatasourceIds.map(function(compatibleDatasourceId, index){
-          var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
+        list += compatibleDatasourceIds.map((compatibleDatasourceId, index) => {
+          const compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
           datasourceType = compatibleDatasource.getType();
+          let fileNameParts;
           switch (datasourceType) {
             case DuckDbDataSource.types.FILE:
-              var fileName = compatibleDatasource.getFileName();
-              var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
+              const fileName = compatibleDatasource.getFileName();
+              fileNameParts = FileUtils.getFileNameParts(fileName);
               break;
             default:
           }
-          var caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
-          var datasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
+          const caption = DataSourcesUi.getCaptionForDatasource(compatibleDatasource);
+          const datasourceItem = DataSourceMenu.getDatasourceMenuItemHTML({
             datasourceType: datasourceType,
             fileType: fileNameParts ? fileNameParts.lowerCaseExtension : undefined,
             index: index,
@@ -142,29 +149,29 @@ class PageStateManager {
             labelText: caption
           });
           return datasourceItem;
-        }.bind(this)).join('\n');
+        }).join('\n');
       }
 
       list += openNewDatasourceItem;
       list += "</menu>";
       message += list;
 
-      var choice = PromptUi.show({
+      const choice = PromptUi.show({
         title: Internationalization.getText(title),
         contents: message
       });
 
       choice
-      .then(function(choice){
+      .then(choice => {
         switch (choice) {
           case 'accept':
             if (compatibleDatasources) {
-              var promptUi = byId('promptUi');
-              var radio = promptUi.querySelector('input[name=compatibleDatasources]:checked');
-              var chosenOption = parseInt(radio.value, 10);
+              const promptUi = byId('promptUi');
+              const radio = promptUi.querySelector('input[name=compatibleDatasources]:checked');
+              const chosenOption = parseInt(radio.value, 10);
               if (chosenOption !== -1) {
-                var compatibleDatasourceId = radio ? compatibleDatasourceIds[chosenOption] : null;
-                var compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
+                const compatibleDatasourceId = radio ? compatibleDatasourceIds[chosenOption] : null;
+                const compatibleDatasource = compatibleDatasources[compatibleDatasourceId];
                 resolve(compatibleDatasource);
                 return;
               }
@@ -180,10 +187,10 @@ class PageStateManager {
             break;
         }
       })
-      .catch(function(error){
+      .catch(error => {
         reject();
       });
-    }.bind(this));
+    });
   }
 
   async setPageState(newRoute, newUploadResults){
@@ -193,24 +200,28 @@ class PageStateManager {
       return;
     }
 
-    var currentRoute = Routing.getRouteForQueryModel(queryModel);
+    const currentRoute = Routing.getRouteForQueryModel(queryModel);
     if (newRoute === currentRoute) {
       return;
     }
 
-    var state = Routing.getQueryModelStateFromRoute(newRoute);
+    const state = Routing.getQueryModelStateFromRoute(newRoute);
     if (!state) {
       // TODO: maybe throw an error?
       return;
     }
+    const routeSettings = state.settings;
+    if ( routeSettings && routeSettings.sidebarPin !== undefined) {
+      byId('sidebarPin').checked = Boolean(routeSettings.sidebarPin);
+    }
 
-    var queryModelState = state.queryModel;
-    var referencedColumns = QueryModel.getReferencedColumns(queryModelState);
+    const queryModelState = state.queryModel;
+    const referencedColumns = QueryModel.getReferencedColumns(queryModelState);
 
-    var datasourceId = queryModelState.datasourceId;
-    var compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true);
+    const datasourceId = queryModelState.datasourceId;
+    const compatibleDatasources = await datasourcesUi.findDataSourcesWithColumns(referencedColumns, true, datasourceId);
 
-    var datasource;
+    let datasource;
     if (compatibleDatasources && compatibleDatasources[datasourceId]) {
       datasource = datasourcesUi.getDatasource(datasourceId);
     }
@@ -242,14 +253,17 @@ class PageStateManager {
     queryModelState.datasourceId = datasource.getId();
     queryModel.setState(queryModelState);
     analyzeDatasource(datasource);
-    setTimeout(function(){
-      attributeUi.revealAllQueryAttributes();
-    }, 1000);
+    
+    const attributeSettings = settings.getSettings('attributeSettings');
+    const revealAttributesUsedInQuery = attributeSettings.revealAttributesUsedInQuery;
+    if (revealAttributesUsedInQuery) {
+      setTimeout(() => attributeUi.revealAllQueryAttributes(), 1000);
+    }
   }
 
 }
 
-var pageStateManager;
+let pageStateManager;
 function initPageStateManager(){
   pageStateManager = new PageStateManager();
 }

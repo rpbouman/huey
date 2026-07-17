@@ -1,20 +1,25 @@
 #settingsDialog {  
   /* center the dialog */
-  left: calc( 50vw - 320px );
-  top: calc( 50vh - 186px );
+  left: calc( 50vw - 325px );
+  top: calc( 50vh - 206px );
   resize: both;
   padding: 0px .5em .25em 1em;
-  min-height: 372px;
-  min-width: 372px;
+  min-height: 412px;
+  min-width: 580px;
   width: 650px;
-  height: 372px;
-  
+  height: 412px;
+
+  > header {
+    &::before {
+      content: var( --icon-settings );
+    }
+  }
 }
 
 menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton ) {
   float: right;
-}
 
-menu[role=toolbar] > label[for=settingsButton]:has( > button#settingsButton )::before {
-  content: var( --icon-settings );
+  &::before {
+    content: var( --icon-settings );
+  }
 }

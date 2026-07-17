@@ -1,24 +1,47 @@
-search#searchAttributeUi {
-  position: sticky;
-  flex-grow: 0;
-  top: 0px;
-  background-color: var( --huey-medium-background-color );
-  height: 62px;
-  padding-top: 1px;
-  
-  /* by default, the search panel is hidden */
-  display: none;
-  
-  /* need this else the attribute axis icons will bleed through.*/
-  z-index: 1;
+main > nav#sidebar[role=tablist] > div:has(
+  > label[role=tab][for=attributesTab] 
+) > div[role=tabpanel] {
 
-  > fieldset > input[type=search]{
-    width: 100%;
+  > header {
+    position: sticky;
+    flex-grow: 0;
+    top: 0px;
+    background-color: var( --huey-medium-background-color );
+    padding-top: 1px;
+    
+    /* by default, the search panel is hidden */
+    display: none;
+    
+    /* need this else the attribute axis icons will bleed through.*/
+    z-index: 1;
+
+    > menu[role=toolbar] {
+      
+      > label[for=revealAttributesUsedInQuery] {
+        ::before {
+        }
+      }
+      
+    }
+    
+    > search#searchAttributeUi {
+      background-color: var( --huey-medium-background-color );
+
+      > fieldset > input[type=search]{
+        width: 100%;
+      }
+    }
+
   }
+
 }
 
 /* if there are attributes in the attribute ui, then the search panel is visible */
-main > nav#sidebar > div:has( > label[role=tab][for=attributesTab] ) > div[role=tabpanel]:has( > #attributeUi[role=tree] > details[role=treeitem] ) > search#searchAttributeUi {
+main > nav#sidebar[role=tablist] > div:has(
+  > label[role=tab][for=attributesTab] 
+) > div[role=tabpanel]:has( 
+  > #attributeUi[role=tree] > details[role=treeitem] 
+) > header {
   display: block;
 }
 

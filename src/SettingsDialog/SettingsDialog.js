@@ -54,7 +54,7 @@ class Settings extends EventEmitter {
       commaStyle: 'newlineBefore'
     },
     querySettings: {
-      autoRunQuery: false,
+      autoRunQuery: true,
       autoRunQueryTimeout: 1000,
       filterValuePicklistPageSize: 100,
       filterSearchAutoQueryTimeoutInMilliseconds: 1000,
@@ -73,7 +73,21 @@ class Settings extends EventEmitter {
       dittoMark: '〃',
       alternatingRowColors: true,
       hoverRowHighlight: true,
-      hoverColumnHighlight: true
+      hoverColumnHighlight: true,
+      hoverHighlightHeaderStyle: {
+        value: 'fill',
+        options: [
+          { value: 'fill', label: 'fill' },
+          { value: 'outline', label: 'outline' }
+        ]
+      },
+      hoverHighlightCellStyle: {
+        value: 'outline',
+        options: [
+          { value: 'fill', label: 'fill' },
+          { value: 'outline', label: 'outline' }
+        ]
+      }
     },
     exportUi: {
       exportTitleTemplate: '${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns',
@@ -139,6 +153,9 @@ class Settings extends EventEmitter {
       filterSearchAutoWildcards: true,
       filterSearchCaseSensitive: false
     },
+    attributeSettings:{
+      revealAttributesUsedInQuery: true
+    },
     themeSettings: {
       themes: {
         options: [
@@ -176,7 +193,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(224,255,255)", // Light Cyan
               "--huey-dark-background-color": "rgb(175,238,238)", // Pale Turquoise
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "99%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(176,224,230)", // Powder Blue
               "--huey-dark-border-color": "rgb(135,206,250)", // Light Sky Blue
               "--huey-darkest-border-color": "rgb(30,144,255)",
@@ -198,7 +215,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(230,230,250)", // Lavender Blue
               "--huey-dark-background-color": "rgb(173,216,230)", // Light Blue
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "99%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(200,220,240)", // Light Sky Blue
               "--huey-dark-border-color": "rgb(135,206,235)", // Sky Blue
               "--huey-darkest-border-color": "rgb(70,130,180)",
@@ -220,7 +237,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "#A7D3A4",
               "--huey-dark-background-color": "#5B8266",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "80%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "#A5B479",
               "--huey-dark-border-color": "#334D56",
               "--huey-darkest-border-color": "#000000",
@@ -242,11 +259,11 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "#D2B48C",
               "--huey-dark-background-color": "#008080",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "80%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "#8B4513",
               "--huey-dark-border-color": "#2F4F4F",
               "--huey-darkest-border-color": "black",
-              "--huey-icon-color-subtle": "##50AEbA",
+              "--huey-icon-color-subtle": "#50AEbA",
               "--huey-icon-color": "#FFFFFF",
               "--huey-icon-color-highlight": "#8B4513"
             },
@@ -264,7 +281,7 @@ class Settings extends EventEmitter {
               "--huey-medium-background-color": "rgb(108,115,183)",
               "--huey-dark-background-color": "rgb(67,71,119)",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "80%",
+              "--huey-alternating-rows-brightness": "98%",
               "--huey-light-border-color": "rgb(99,46,64)",
               "--huey-dark-border-color": "rgb(42,34,55)",
               "--huey-darkest-border-color": "rgb(36,36,74)",
@@ -284,9 +301,9 @@ class Settings extends EventEmitter {
               "--huey-placeholder-color": "rgb(100, 100, 100)",
               "--huey-light-background-color": "rgb(30, 30, 30)",
               "--huey-medium-background-color": "rgb(50, 50, 50)",
-              "--huey-dark-background-color": "rgb(110 110, 110)",
+              "--huey-dark-background-color": "rgb(110, 110, 110)",
               "--huey-highlight-background-color": "rgb(050, 150, 255)",
-              "--huey-alternating-rows-brightness": "80%",
+              "--huey-alternating-rows-brightness": "97%",
               "--huey-light-border-color": "rgb(80, 80, 80)",
               "--huey-dark-border-color": "rgb(110, 110, 110)",
               "--huey-darkest-border-color": "rgb(220, 220, 220)",
@@ -328,22 +345,20 @@ class Settings extends EventEmitter {
     this.#loadFromLocalStorage();
     this.#initDialog();
 
-    window.addEventListener('beforeunload', function(){
-      this.#storeToLocalStorage();
-    }.bind(this));
+    window.addEventListener('beforeunload', event => this.#storeToLocalStorage( event ) );
   }
 
   #getSettings(path){
-    var settings = this.#settings;
+    const settings = this.#settings;
     if (typeof path === 'string'){
       path = [path];
     }
     if (!(path instanceof Array)) {
       throw new Error('Invalid path');
     }
-    var value = settings;
-    for (var i = 0; i < path.length; i++) {
-      var pathElement = path[i];
+    let value = settings;
+    for (let i = 0; i < path.length; i++) {
+      const pathElement = path[i];
       value = value[pathElement];
       if (value === undefined){
         return undefined;
@@ -354,7 +369,7 @@ class Settings extends EventEmitter {
 
   // return a safe copy of a setting (one that can be abused by the receiver without messing up the actual settings)
   getSettings(path){
-    var value = this.#getSettings(path);
+    let value = this.#getSettings(path);
     if (typeof value === 'object'){
       value = Object.assign({}, value);
     }
@@ -363,8 +378,8 @@ class Settings extends EventEmitter {
 
   assignSettings(path, value){
     function deepAssign(target, source){
-      for (var property in source){
-        var sourceValue = source[property];
+      for (let property in source){
+        const sourceValue = source[property];
         if (typeof sourceValue === 'object') {
           deepAssign(target[property], sourceValue);
         }
@@ -381,14 +396,14 @@ class Settings extends EventEmitter {
       throw new Error('Invalid path');
     }
 
-    var property = path.pop();
-    var settings = this.#getSettings(path);
+    const property = path.pop();
+    const settings = this.#getSettings(path);
 
     if (value === null || value === undefined){
       settings[property] = value;
     }
     else {
-      var currentValue = settings[property];
+      const currentValue = settings[property];
       switch (typeof(currentValue)) {
         case 'object':
           if (currentValue === null){
@@ -411,31 +426,30 @@ class Settings extends EventEmitter {
   }
 
   #getDialog(){
-    var settingsDialog = byId(this.#id);
+    const settingsDialog = byId(this.#id);
     return settingsDialog;
   }
 
   #initDialog(){
-    var settingsDialog = this.#getDialog();
+    const settingsDialog = this.#getDialog();
 
-    byId('settingsDialogOkButton').addEventListener('click', function(event){
+    byId('settingsDialogOkButton').addEventListener('click', event => {
       event.cancelBubble = true;
       this.#updateSettingsFromDialog();
       this.#storeToLocalStorage();
-    }.bind(this));
+    });
 
-    byId('settingsDialogCancelButton').addEventListener('click', function(event){
+    byId('settingsDialogCancelButton').addEventListener('click', event => {
       event.cancelBubble = true;
-    }.bind(this));
+    });
 
-    byId('settingsDialogResetButton').addEventListener('click', function(event){
+    byId('settingsDialogResetButton').addEventListener('click', event => {
       this.#resetSettings();
       this.fireEvent('change', this);
-    }.bind(this));
+    });
 
-    byId('settingsButton').addEventListener('click', function(){
-      this.#updateDialogFromSettings();
-    }.bind(this));
+    byId('settingsButton').addEventListener('click', event => this.#updateDialogFromSettings() );
+    this.#updateDialogFromSettings();
   }
 
   #resetSettings(){
@@ -453,25 +467,29 @@ class Settings extends EventEmitter {
   }
 
   #synchronize(settingsOrDialog){
-    var dialog = this.#getDialog();
-    var settings = this.#settings;
+    const dialog = this.#getDialog();
+    const settings = this.#settings;
     Settings.synchronize(dialog, settings, settingsOrDialog);
     if (settingsOrDialog === 'settings') {
-      var settingsCopy = Object.assign({}, settings);
+      const settingsCopy = Object.assign({}, settings);
       this.#examineChangesAndSendEvent(settingsCopy);
     }
   }
 
   static synchronize(dialog, settings, settingsOrDialog){
-    var settingsCopy = Object.assign({}, settings);
-    for (var sectionName in settings) {
-      var section = settings[sectionName];
-      for (var property in section) {
-        var control = byId(property);
+    const settingsCopy = Object.assign({}, settings);
+    for (let sectionName in settings) {
+      const section = settings[sectionName];
+      for (let property in section) {
+        const control = byId(property);
         if (!control){
           continue;
         }
-        if (settingsOrDialog === 'settings' && typeof control.checkValidity === 'function' && !control.checkValidity()){
+        if (
+          settingsOrDialog === 'settings' && 
+          typeof control.checkValidity === 'function' && 
+          !control.checkValidity()
+        ){
           console.error(`Settings persistence issue: ${control.nodeName} for property ${property} in section ${sectionName} has invalid value.`);
           continue;
         }
@@ -498,8 +516,8 @@ class Settings extends EventEmitter {
   }
 
   static #synchronizeInput(settingsOrDialog, settings, property, control){
-    var valueProperty = 'value';
-    var defaultValueGetter, defaultValueSetter;
+    let valueProperty = 'value';
+    let defaultValueGetter, defaultValueSetter;
     switch (control.type) {
       case 'radio':
       case 'checkbox':
@@ -508,20 +526,23 @@ class Settings extends EventEmitter {
       case 'text':
         break;
       case 'number':
-        defaultValueGetter = function(control){var num = parseFloat(control.value, 10); return isNaN(num) ? undefined : num;}
+        defaultValueGetter = function(control){
+          const num = parseFloat(control.value, 10); 
+          return isNaN(num) ? undefined : num;
+        }
         break;
       default:
         console.error(`Don't know how to get value from INPUT of type ${control.type}, defaulting to "value".`);
         break;
     }
 
-    var value;
+    let value;
     switch (settingsOrDialog){
       case 'settings':
         if (control.validityState && control.valid === false){
           break;
         }
-        var valueGetter = control.getAttribute('data-value-getter');
+        let valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
           value = valueGetter.call(null, control, this);
@@ -537,7 +558,7 @@ class Settings extends EventEmitter {
         break;
       case 'dialog':
         value = settings[property];
-        var valueSetter = control.getAttribute('data-value-setter');
+        let valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
           valueSetter = eval(valueSetter);
           valueSetter.call(null, control, value, this);
@@ -554,14 +575,14 @@ class Settings extends EventEmitter {
   }
 
   static #synchronizeSelect(settingsOrDialog, settings, property, control){
-    var optionsFromControl = control.options;
-    var optionsFromSettings = settings[property].options;
-    var index = 0;
-    var numOptions = optionsFromSettings ? optionsFromSettings.length : optionsFromControl.length;
-    var exists = {};
+    const optionsFromControl = control.options;
+    let optionsFromSettings = settings[property].options;
+    let index = 0;
+    const numOptions = optionsFromSettings ? optionsFromSettings.length : optionsFromControl.length;
+    const exists = {};
     switch (settingsOrDialog) {
       case 'settings':
-        var valueGetter = control.getAttribute('data-value-getter');
+        let valueGetter = control.getAttribute('data-value-getter');
         if (valueGetter){
           valueGetter = eval(valueGetter);
         }
@@ -569,17 +590,13 @@ class Settings extends EventEmitter {
         if (optionsFromControl) {
           optionsFromSettings = [];
           for (; index < numOptions; index++){
-            var optionFromControl = optionsFromControl[index];
-            var value = optionFromControl.value;
-
+            const optionFromControl = optionsFromControl[index];
+            let value = optionFromControl.value;
             if (exists[value]) {
               continue;
             }
-            else {
-              exists[value] = true;
-            }
-            
-            var label = optionFromControl.label || value;
+            exists[value] = true;
+            const label = optionFromControl.label || value;
             if (valueGetter){
               value = valueGetter.call(null, optionFromControl, this);
             }
@@ -596,9 +613,9 @@ class Settings extends EventEmitter {
         }
         break;
       case 'dialog':
-        var valueFromSettings = settings[property].value;
+        const valueFromSettings = settings[property].value;
 
-        var valueSetter = control.getAttribute('data-value-setter');
+        let valueSetter = control.getAttribute('data-value-setter');
         if (valueSetter){
           valueSetter = eval(valueSetter);
         }
@@ -606,12 +623,12 @@ class Settings extends EventEmitter {
         if (optionsFromSettings) {
           control.options.length = 0;
           for (; index < numOptions; index++){
-            var optionFromSettings = optionsFromSettings[index];
-            var value = optionFromSettings.value;
+            const optionFromSettings = optionsFromSettings[index];
+            let value = optionFromSettings.value;
 
-            var label = optionFromSettings.label || value;
-            var title = optionFromSettings.title || label;
-            var option = createEl('option', {
+            const label = optionFromSettings.label || value;
+            const title = optionFromSettings.title || label;
+            const option = createEl('option', {
               label: label,
               title: title
             }, label);
@@ -670,10 +687,10 @@ class Settings extends EventEmitter {
     //now, copy stuff from data to the template
 
     function copyData(source, target){
-      var keys = Object.keys(source);
-      keys.forEach(function(propertyName){
-        var sourceValue = source[propertyName];
-        var targetValue = target[propertyName];
+      const keys = Object.keys(source);
+      keys.forEach(propertyName => {
+        const sourceValue = source[propertyName];
+        let targetValue = target[propertyName];
         if (targetValue === undefined){
           //target either does not have this key at all, or it is null or the empty string (which we deem safe to overwrite)
           //so we create it and simply assign the value.
@@ -714,23 +731,23 @@ class Settings extends EventEmitter {
         }
       });
     }
+    
     copyData(template, data);
     return data;
   }
 
   #loadFromLocalStorage(){
-    var settingsTemplate = Settings.#settingsTemplate;
-    var storedSettingsJSON = localStorage.getItem(Settings.localStorageKey);
-    var storedSettings = JSON.parse(storedSettingsJSON);
-    var settings = this.#updateDataFromTemplate(storedSettings, settingsTemplate);
+    const storedSettingsJSON = localStorage.getItem(Settings.localStorageKey);
+    const storedSettings = JSON.parse(storedSettingsJSON);
+    const settingsTemplate = Settings.#settingsTemplate;
+    const settings = this.#updateDataFromTemplate(storedSettings, settingsTemplate);
     this.#init(settings);
   }
 
   #storeToLocalStorage(){
-    var settings = this.#settings;
-    var settingsJSON = JSON.stringify(settings);
+    const settings = this.#settings;
+    const settingsJSON = JSON.stringify(settings);
     localStorage.setItem(Settings.localStorageKey, settingsJSON);
   }
 }
-
-var settings = new Settings('settingsDialog');
+const settings = new Settings('settingsDialog');

@@ -1,7 +1,6 @@
 class DataSetComponent {
 
   #queryModel = undefined;
-  #managedConnection = undefined;
   #settings = undefined;
   
   constructor(queryModel, settings){
@@ -13,13 +12,13 @@ class DataSetComponent {
     return this.#settings;
   }
 
-  async #getDatasouceManagedConnection(){
-    var queryModel = this.#queryModel;
-    var datasource = queryModel.getDatasource();
+  #getDatasouceManagedConnection(){
+    const queryModel = this.#queryModel;
+    const datasource = queryModel.getDatasource();
     if (!datasource){
       return undefined;
     }
-    var managedConnection = await datasource.getManagedConnection();
+    const managedConnection = datasource.getManagedConnection();
     return managedConnection;
   }
   
@@ -27,15 +26,12 @@ class DataSetComponent {
     return this.#queryModel;
   }
 
-  async getManagedConnection(){
-    if (this.#managedConnection === undefined) {
-      this.#managedConnection = await this.#getDatasouceManagedConnection();
-    }
-    return this.#managedConnection;
+  getManagedConnection(){
+    return this.#getDatasouceManagedConnection();
   }
   
   async cancelPendingQuery(){
-    var connection = await this.getManagedConnection();
+    const connection = this.getManagedConnection();
     return await connection.cancelPendingQuery();
   }  
 }

@@ -96,7 +96,7 @@
       left: 0px;
       bottom: 0px;
       right: 0px;
-
+      line-height: 1;
 
       .pivotTableUiRow {
         display: table-row;
@@ -119,7 +119,7 @@
             white-space: nowrap;
             position: relative;
             margin: 0px;
-            padding: 0px 2px 0px 2px;
+            padding: 2px;
             border: 0px;
             display: block;
           }

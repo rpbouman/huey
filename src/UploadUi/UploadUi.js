@@ -1,14 +1,5 @@
 class UploadUi {
 
-  static #fileSizeFormatter = new Intl.NumberFormat(
-    navigator.language, {
-      style: 'unit',
-      notation: 'compact',
-      unit: 'byte',
-      unitDisplay: 'narrow'
-    }
-  );
-
   #id = undefined;
   #pendingUploads = undefined;
   #cancelPendingUploads = false;
@@ -20,14 +11,11 @@ class UploadUi {
   }
 
   init(){
-    this.#getCancelButton().addEventListener('click', async function(){
+    this.#getCancelButton().addEventListener('click', async event => {
       await this.#cancelUploads();
       this.getDialog().close();
-    }.bind(this));
-
-    this.#getOkButton().addEventListener('click', function(){
-      this.getDialog().close();
-    }.bind(this));
+    });
+    this.#getOkButton().addEventListener('click', event => this.getDialog().close() );
   }
 
   async #cancelUploads(){
@@ -35,13 +23,13 @@ class UploadUi {
   }
 
   static #handleHueyFileContents(contents, extension){
-    var queryModelState;
+    let queryModelState;
     switch (extension) {
       case 'hueyqh':
         if (!contents.startsWith('#')){
           throw new Error(`No hash found!`);
         }
-        var route = contents.slice(1);
+        const route = contents.slice(1);
         queryModelState = Routing.getQueryModelStateFromRoute(route);
         break;
       case 'hueyq':
@@ -52,32 +40,33 @@ class UploadUi {
   }
 
   static async #handleHueyFile(file, uploadItem){
-    var fileName = file.name;
-    var extension = fileName.split('.').pop().toLowerCase();
-    var fileContents = await file.text();
+    const fileName = file.name;
+    const extension = fileName.split('.').pop().toLowerCase();
+    const fileContents = await file.text();
     return UploadUi.#handleHueyFileContents(fileContents, extension);
   }
 
   static async #handleHueyFileUrl(url, uploadItem){
-    var extension = url.split('.').pop().toLowerCase();
-    var contents = await fetch(url);
+    const extension = url.split('.').pop().toLowerCase();
+    const contents = await fetch(url);
     return UploadUi.#handleHueyFileContents(contents, extension);
   }
 
   async #uploadFile(file, uploadItem){
 
-    var progressBar = uploadItem.getElementsByTagName('progress').item(0);
+    const progressBar = uploadItem.getElementsByTagName('progress').item(0);
 
-    var hueyDb = window.hueyDb;
-    var duckdb = hueyDb.duckdb;
-    var instance = hueyDb.instance;
+    const hueyDb = window.hueyDb;
+    const duckdb = hueyDb.duckdb;
+    const instance = hueyDb.instance;
 
-    var duckDbDataSource;
-    var destroyDatasource = false;
+    let duckDbDataSource;
+    let destroyDatasource = false;
     
-    var hueyFileRegex = /\.hueyqh?$/i;
-    var hueyQueryState;
+    const hueyFileRegex = /\.hueyqh?$/i;
+    let hueyQueryState;
     try {
+      
       if (typeof file === 'string'){
         
         if (hueyFileRegex.test(file)){
@@ -98,7 +87,7 @@ class UploadUi {
           hueyQueryState = await UploadUi.#handleHueyFile(file, uploadItem);
         }
         else {
-          duckDbDataSource = DuckDbDataSource.createFromFile(duckdb, instance, file);
+          duckDbDataSource = await DuckDbDataSource.createFromFile(duckdb, instance, file);
           progressBar.value = parseInt(progressBar.value, 10) + 20;
 
           await duckDbDataSource.registerFile();
@@ -106,7 +95,7 @@ class UploadUi {
         }
       }
 
-      var tryResult, isAccessible;
+      let tryResult, isAccessible;
       if (duckDbDataSource) {
         tryResult = await duckDbDataSource.tryAccess(100);
         isAccessible = tryResult.success;
@@ -119,14 +108,14 @@ class UploadUi {
 
       if (isAccessible !== true) {
         destroyDatasource = true;
-        var errorMessage = tryResult.lastAttempt.message;
+        const errorMessage = tryResult.lastAttempt.message;
         throw new Error(`Error uploading file ${file.name}: ${errorMessage}.`);
       }
 
       if (duckDbDataSource) {
         switch (duckDbDataSource.getType()){
           case DuckDbDataSource.types.FILE:
-            var columnMetadata = await duckDbDataSource.getColumnMetadata();
+            const columnMetadata = await duckDbDataSource.getColumnMetadata();
             break;
           case DuckDbDataSource.types.DUCKDB:
           case DuckDbDataSource.types.SQLITE:
@@ -151,31 +140,28 @@ class UploadUi {
   }
 
   #createLoadExtensionItem(extensionId){
-    var loadExtensionItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, extensionId);
+    const loadExtensionItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, extensionId);
     loadExtensionItem.getElementsByTagName('p').item(0).setAttribute('id', extensionId + '_message');
     return loadExtensionItem;
   }
 
   #createUploadItem(file){
-    var fileName, fileSize;
+    let fileName, fileSize;
     if (typeof file === 'string'){
       fileName = file;
     }
     else
     if (file instanceof File) {
       fileName = file.name;
-      fileSize = UploadUi.#fileSizeFormatter.format(file.size);
-      if (fileSize.endsWith('BB')){
-        fileSize = fileSize.replace(/BB/, 'GB');
-      }
+      fileSize = FileUtils.formatFileSize(file);
     }
     else {
       throw new Error(`Don't know how to handle item of type ${typeof file}`);
     }
 
-    var uploadItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, fileName);
+    const uploadItem = instantiateTemplate(UploadUi.#uploadItemTemplateId, fileName);
     uploadItem.getElementsByTagName('p').item(0).setAttribute('id', fileName + '_message');
-    var labelSpan = uploadItem.getElementsByTagName('span').item(0);
+    const labelSpan = uploadItem.getElementsByTagName('span').item(0);
     labelSpan.textContent = fileName;
     labelSpan.setAttribute('title', fileName);
     if (fileSize){
@@ -186,20 +172,30 @@ class UploadUi {
   }
 
   #createInstallExtensionItem(extensionName, extensionRepository){
-    var extensionItemId = `duckdb_extension:${extensionName}`;
-    var uploadItem = this.#createLoadExtensionItem(extensionItemId);
-    var label = uploadItem.getElementsByTagName('span').item(0);
+    const extensionItemId = `duckdb_extension:${extensionName}`;
+    const uploadItem = this.#createLoadExtensionItem(extensionItemId);
+    const label = uploadItem.getElementsByTagName('span').item(0);
     label.textContent = `Extension: ${extensionName}`;
     return uploadItem;
   }
 
   getRequiredDuckDbExtensions(files){
-    var requiredExtensions = []
-    for (var i = 0; i < files.length; i++){
-      var file = files[i];
+    const requiredExtensions = []
+    const addRequiredExtension = function(extensionName, repositoryName){
+      if ( !requiredExtensions.find(item => item.extensionName === extensionName) ) {
+        requiredExtensions.push({
+          extensionName: extensionName,
+          extensionRepository: repositoryName
+        });
+      }
+    }
+    
+    for (let i = 0; i < files.length; i++){
+      const file = files[i];
 
-      var fileName;
-      if (typeof file === 'string') {
+      let fileName;
+      const isString = typeof file === 'string';
+      if (isString) {
         fileName = file;
       }
       else
@@ -207,36 +203,57 @@ class UploadUi {
         fileName = file.name;
       }
       else {
-        throw new Error(`Don't know how to handle item of type ${typeof file}.`);
+        const typeOfFile = typeof file;
+        throw new Error(`Don't know how to handle item of type ${typeOfFile === 'object' ? file.constructor.name : typeOfFile}.`);
+      }
+      
+      const fileNameParts = FileUtils.getFileNameParts(fileName);
+      let fileType;
+      if (fileNameParts) {
+        const fileExtension = fileNameParts.lowerCaseExtension;
+
+        fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
+        if (!fileType){
+          continue;
+        }
+        if (!fileType.duckdb_extension){
+          continue;
+        }
+        addRequiredExtension(fileType.duckdb_extension, fileType.duckdb_extension_repository);
+      }
+      else
+      if ( isString ) {
+        const parsedUrl = URL.parse(fileName);
+        let extensionName = undefined;
+        switch (parsedUrl.protocol) {
+          // azure
+          case 'az':
+            extensionName = 'azure';
+            break;
+          // huggingface
+          case 'hf':
+          case 'http':
+          case 'https':
+            extensionName = 'httpfs';
+            break;
+          // AWS S3
+          case 's3':
+            extensionName = 'aws';
+            break;
+        }
+        if (extensionName) {
+          addRequiredExtension(extensionName);
+        }
+        
       }
 
-      var fileNameParts = DuckDbDataSource.getFileNameParts(fileName);
-      var fileExtension = fileNameParts.lowerCaseExtension;
-
-      var fileType = DuckDbDataSource.getFileTypeInfo(fileExtension);
-      if (!fileType){
-        continue;
-      }
-
-      var requiredDuckDbExtension = fileType.duckdb_extension;
-      if (!requiredDuckDbExtension){
-        continue;
-      }
-
-      if (requiredExtensions.indexOf(requiredDuckDbExtension) === -1) {
-        var extensionRepository = fileType.duckdb_extension_repository;
-        requiredExtensions.push({
-          extensionName: requiredDuckDbExtension,
-          extensionRepository: extensionRepository
-        });
-      }
     }
     return requiredExtensions;
   }
 
   async loadDuckDbExtension(extensionName){
     
-    var extensionRepository;
+    let extensionRepository;
     switch (typeof extensionName){
       case 'string':
         break;
@@ -245,25 +262,25 @@ class UploadUi {
         extensionName = extensionName.extensionName;
     }
     
-    var invalid = true;
-    var body = this.#getBody();
-    var installExtensionItem = this.#createInstallExtensionItem(extensionName);
+    let invalid = true;
+    const body = this.#getBody();
+    const installExtensionItem = this.#createInstallExtensionItem(extensionName);
     body.appendChild(installExtensionItem);
 
     try {
 
-      var progressbar = installExtensionItem.getElementsByTagName('progress').item(0);
-      var message = installExtensionItem.getElementsByTagName('p').item(0);
+      const progressbar = installExtensionItem.getElementsByTagName('progress').item(0);
+      const message = installExtensionItem.getElementsByTagName('p').item(0);
 
-      var connection = hueyDb.connection;
+      const connection = hueyDb.connection;
 
       message.innerHTML += Internationalization.getText('Preparing extension check') + '<br/>';
-      var sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
-      var statement = await connection.prepare(sql);
+      const sql = `SELECT * FROM duckdb_extensions() WHERE extension_name = ?`;
+      const statement = await connection.prepare(sql);
       progressbar.value = parseInt(progressbar.value, 10) + 20;
 
       message.innerHTML += Internationalization.getText('Checking extension {1}', extensionName) + '<br/>';
-      var result = await statement.query(extensionName);
+      let result = await statement.query(extensionName);
       statement.close();
       progressbar.value = parseInt(progressbar.value, 10) + 20;
 
@@ -275,20 +292,20 @@ class UploadUi {
         message.innerHTML += Internationalization.getText('Extension {1} exists', extensionName) + '<br/>';
       }
 
-      var row = result.get(0);
+      const row = result.get(0);
       if (row['installed']){
         message.innerHTML += Internationalization.getText('Extension {1} already installed', extensionName) + '<br/>';
       }
       else {
         message.innerHTML += Internationalization.getText('Extension {1} not installed', extensionName) + '<br/>';
 
-        var installSql = `INSTALL ${extensionName}`;
+        const installSql = `INSTALL ${extensionName}`;
         if (extensionRepository){
           message.innerHTML += Internationalization.getText('Extension {1} comes from non-standard location {2}', extensionName, extensionRepository) + '<br/>';          
           installSql += ` FROM ${extensionRepository}`;
         }
         message.innerHTML += Internationalization.getText('Installing extension {1}', extensionName) + '<br/>';
-        var result = await connection.query(installSql);
+        result = await connection.query(installSql);
         message.innerHTML += Internationalization.getText('Extension {1} is now installed', extensionName) + '<br/>';
         progressbar.value = parseInt(progressbar.value, 10) + 20;
       }
@@ -321,15 +338,15 @@ class UploadUi {
   }
 
   loadRequiredDuckDbExtensions(requiredDuckDbExtensions){
-    var extensionInstallationItems = requiredDuckDbExtensions.map(this.loadDuckDbExtension.bind(this));
+    const extensionInstallationItems = requiredDuckDbExtensions.map(extensionName => this.loadDuckDbExtension(extensionName) );
     return extensionInstallationItems;
   }
 
   #updateUploadItem(uploadItem, uploadResult){
-    var summary = uploadItem.getElementsByTagName('summary').item(0);
+    const summary = uploadItem.getElementsByTagName('summary').item(0);
 
-    var messageText;
-    var message = uploadItem.getElementsByTagName('p').item(0);
+    let messageText;
+    const message = uploadItem.getElementsByTagName('p').item(0);
     if (uploadResult instanceof Error){
       messageText = uploadResult.message;
       uploadItem.setAttribute('open', true);
@@ -341,21 +358,21 @@ class UploadUi {
     }
     else
     if (uploadResult instanceof DuckDbDataSource) {
-      var datasourceId = uploadResult.getId();
-      var type = uploadResult.getType();
+      const datasourceId = uploadResult.getId();
+      const type = uploadResult.getType();
       switch (type){
         case DuckDbDataSource.types.FILE:
         case DuckDbDataSource.types.URL:
-          var menu = summary.getElementsByTagName('menu').item(0);
-          var objectName = uploadResult.getObjectName();
-          var analyzeButton = createEl('label', {
+          const menu = summary.getElementsByTagName('menu').item(0);
+          const objectName = uploadResult.getObjectName();
+          const analyzeButton = createEl('label', {
             "class": 'analyzeActionButton',
             "for": `${datasourceId}_analyze`,
           });
           Internationalization.setAttributes(analyzeButton, 'title', 'Start exploring data from {1}', objectName);
           menu.appendChild(analyzeButton);
 
-          var settingsButton = createEl('label', {
+          const settingsButton = createEl('label', {
             "class": 'editActionButton',
             "for": `${datasourceId}_edit`,
           });
@@ -369,19 +386,19 @@ class UploadUi {
     }
     else
     if (typeof uploadResult === 'object') {
-      var route = Routing.getRouteForQueryModel(uploadResult);
-      var menu = summary.getElementsByTagName('menu').item(0);
-      var objectName = 'the query';
+      const route = Routing.getRouteForQueryModel(uploadResult);
+      const menu = summary.getElementsByTagName('menu').item(0);
+      const objectName = 'the query';
       
-      var id = `link_to_route_${route}`;
-      var analyzeButton = createEl('button', {
+      const id = `link_to_route_${route}`;
+      const analyzeButton = createEl('button', {
         id: id,
         'data-route': route
       });
       analyzeButton.addEventListener('click', async function(event){
         await pageStateManager.setPageState(route);
       });
-      var analyzeButtonLabel = createEl('label', {
+      const analyzeButtonLabel = createEl('label', {
         "class": 'analyzeActionButton',
         "for": id
       });
@@ -396,40 +413,40 @@ class UploadUi {
 
   async uploadFiles(files){
     this.#cancelPendingUploads = false;
-    var dom = this.getDialog();
+    const dom = this.getDialog();
     dom.setAttribute('aria-busy', true);
 
-    var numFiles = files.length;
-    var header = this.#getHeader();
+    const numFiles = files.length;
+    const header = this.#getHeader();
     Internationalization.setTextContent(header, `Uploading {1} file${numFiles === 1 ? '' : 's'}.`, numFiles);
-    var description = this.#getDescription();
+    let description = this.#getDescription();
     Internationalization.setTextContent(description, 'Upload in progress. This will take a few moments...');
 
-    var body = this.#getBody();
+    const body = this.#getBody();
     body.innerHTML = '';
 
     dom.showModal();
 
-    var requiredDuckDbExtensions = this.getRequiredDuckDbExtensions(files);
-    var loadExtensionsPromises = this.loadRequiredDuckDbExtensions(requiredDuckDbExtensions);
-    var loadExtensionsPromiseResults = await Promise.all(loadExtensionsPromises);
+    const requiredDuckDbExtensions = this.getRequiredDuckDbExtensions(files);
+    const loadExtensionsPromises = this.loadRequiredDuckDbExtensions(requiredDuckDbExtensions);
+    const loadExtensionsPromiseResults = await Promise.all(loadExtensionsPromises);
 
     this.#pendingUploads = [];
-    for (var i = 0; i < numFiles; i++){
-      var file = files[i];
-      var uploadItem = this.#createUploadItem(file);
+    for (let i = 0; i < numFiles; i++){
+      const file = files[i];
+      const uploadItem = this.#createUploadItem(file);
       body.appendChild(uploadItem);
-      var uploadPromise = this.#uploadFile(file, uploadItem);
+      const uploadPromise = this.#uploadFile(file, uploadItem);
       this.#pendingUploads.push( uploadPromise );
     }
-    var uploadResults = await Promise.all(this.#pendingUploads);
+    const uploadResults = await Promise.all(this.#pendingUploads);
 
-    var countFail = 0;
-    var datasourceTypes = {}
-    var datasources = [];
-    for (var i = 0; i < uploadResults.length; i++){
-      var uploadResult = uploadResults[i];
-      var uploadItem = body.childNodes.item(i + requiredDuckDbExtensions.length);
+    let countFail = 0;
+    let datasourceTypes = {}
+    const datasources = [];
+    for (let i = 0; i < uploadResults.length; i++){
+      const uploadResult = uploadResults[i];
+      const uploadItem = body.childNodes.item(i + requiredDuckDbExtensions.length);
       this.#updateUploadItem(uploadItem, uploadResult);
       if (uploadResult instanceof Error) {
         countFail += 1;
@@ -437,8 +454,8 @@ class UploadUi {
       else 
       if (uploadResult instanceof DuckDbDataSource ) {
         datasources.push(uploadResult);
-        var type = uploadResult.getType();
-        var ofTypeCount = datasourceTypes[type];
+        const type = uploadResult.getType();
+        let ofTypeCount = datasourceTypes[type];
         if (ofTypeCount === undefined) {
           ofTypeCount = 0;
         }
@@ -453,15 +470,15 @@ class UploadUi {
 
     dom.setAttribute('aria-busy', false);
     if (datasources.length) {
-      datasourcesUi.addDatasources(datasources);
+      await datasourcesUi.addDatasources(datasources);
     }
     
-    var message, description;
-    var countSuccess = uploadResults.length - countFail;
+    let message, datasourcesTab;
+    const countSuccess = uploadResults.length - countFail;
     if (countFail) {
       if (countSuccess){
         message = Internationalization.getText(`{1} file${countSuccess > 1 ? 's' : ''} succesfully uploaded, {2} failed.`, countSuccess, countFail);
-        var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
+        datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
         description = Internationalization.getText('Some uploads failed. Successful uploads are available in the {1}.', datasourcesTab);
       }
       else {
@@ -471,7 +488,7 @@ class UploadUi {
     }
     else {
       message = `${uploadResults.length} file${uploadResults.length > 1 ? 's' : ''} succesfully uploaded.`
-      var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
+      datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
       description = Internationalization.getText('Your uploads are available in the {1}.', datasourcesTab);
     }
 
@@ -486,7 +503,7 @@ class UploadUi {
       }
       
       if (datasourceTypes[DuckDbDataSource.types.DUCKDB] || datasourceTypes[DuckDbDataSource.types.SQLITE]){
-        var datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
+        datasourcesTab = '<label for="datasourcesTab">' + Internationalization.getText('Datasources tab') + '</label>';
         description = [
           description,
           '<br/>',
@@ -514,44 +531,42 @@ class UploadUi {
   }
 
   #getHeader(){
-    var dom = this.getDialog();
+    const dom = this.getDialog();
     return byId(dom.getAttribute('aria-labelledby'));
   }
 
   #getDescription(){
-    var dom = this.getDialog();
+    const dom = this.getDialog();
     return byId(dom.getAttribute('aria-describedby'));
   }
 
   #getBody(){
-    var dom = this.getDialog();
-    var article = dom.getElementsByTagName('section').item(0);
+    const dom = this.getDialog();
+    const article = dom.getElementsByTagName('section').item(0);
     return article;
   }
 
   #getFooter(){
-    var dom = this.getDialog();
-    var footer = dom.getElementsByTagName('footer').item(0);
+    const dom = this.getDialog();
+    const footer = dom.getElementsByTagName('footer').item(0);
     return footer;
   }
 
   #getOkButton(){
-    var footer = this.#getFooter();
-    var okButton = footer.getElementsByTagName('button').item(0);
+    const footer = this.#getFooter();
+    const okButton = footer.getElementsByTagName('button').item(0);
     return okButton;
   }
 
   #getCancelButton(){
-    var footer = this.#getFooter();
-    var okButton = footer.getElementsByTagName('button').item(1);
+    const footer = this.#getFooter();
+    const okButton = footer.getElementsByTagName('button').item(1);
     return okButton;
   }
 }
 
-var uploadUi;
-
 function afterUploaded(uploadResults){
-  var currentRoute = Routing.getCurrentRoute();
+  const currentRoute = Routing.getCurrentRoute();
   if (!Routing.isSynced(queryModel)) {
     pageStateManager.setPageState(currentRoute, uploadResults);
     return;
@@ -575,13 +590,13 @@ function afterUploaded(uploadResults){
   }
   
   // try to start analyzing the new datasource.
-  var datasources = uploadResults.datasources.filter(function(datasource){
+  const datasources = uploadResults.datasources.filter(function(datasource){
     return datasource instanceof DuckDbDataSource;
   });
   if (datasources.length === 0) {
     return;
   }
-  var datasource = datasources[0];
+  const datasource = datasources[0];
   switch (datasource.getType()){
     case DuckDbDataSource.types.FILE:
     case DuckDbDataSource.types.FILES:
@@ -592,36 +607,36 @@ function afterUploaded(uploadResults){
   }
 }
 
+let uploadUi;
 function initUploadUi(){
   uploadUi = new UploadUi('uploadUi');
 
-  var uploader = byId('uploader');
-  var acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(function(fileType){
+  const uploader = byId('uploader');
+  let acceptFileTypes = Object.keys(DuckDbDataSource.fileTypes).sort().map(fileType => {
     return `.${fileType}`;
   }).join(', ');
+  
   acceptFileTypes = [].concat(acceptFileTypes, [
     '.hueyq',
     '.hueyqh'
   ]);
   uploader.setAttribute('accept', acceptFileTypes);
   
-  uploader
-  .addEventListener('change', async function(event){
-    var fileControl = event.target;
-    var files = fileControl.files;
-    var uploadResults = await uploadUi.uploadFiles(files);
+  uploader.addEventListener('change', async event => {
+    const fileControl = event.target;
+    const files = fileControl.files;
+    const uploadResults = await uploadUi.uploadFiles(files);
     fileControl.value = '';
     afterUploaded(uploadResults);
   }, false);  // third arg is 'useCapture'
 
 
-  byId('loadFromUrl')
-  .addEventListener('click', async function(event){
-    var url = prompt('Enter URL');
+  byId('loadFromUrl').addEventListener('click', async event => {
+    const url = prompt('Enter URL');
     if (!url || !url.length){
       return;
     }
-    var uploadResults = await uploadUi.uploadFiles([url]);
+    const uploadResults = await uploadUi.uploadFiles([url]);
     afterUploaded(uploadResults);
   });
 

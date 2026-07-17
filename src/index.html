@@ -1,34 +1,55 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title translate="no">Huey</title>
+    <title translate="no">Huey - Blazing fast Pivot Tables</title>
     <meta charset="UTF-8"/>
+    <meta name="description" content="Huey is a free, browser-based OLAP pivot table tool powered by DuckDB-WASM. Analyze CSV, Parquet, JSON, and DuckDB files directly in your browser — no install required."/>
+    <meta property="og:title" content="Huey – Browser-Based Pivot Tables powered by DuckDB">
+    <meta property="og:description" content="Free, zero-install data analysis in your browser. Drag in CSV, Parquet, or JSON files and build pivot tables instantly.">
+    <meta property="og:url" content="https://rpbouman.github.io/huey/src/index.html">
+    <meta property="og:type" content="website">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Huey",
+      "applicationCategory": "DataVisualization",
+      "operatingSystem": "Any (browser-based)",
+      "description": "Browser-based OLAP pivot table and data analysis tool powered by DuckDB-WASM",
+      "url": "https://rpbouman.github.io/huey/src/index.html",
+      "author": { "@type": "Person", "name": "Roland Bouman" },
+      "license": "https://opensource.org/licenses/MIT",
+      "offers": { "@type": "Offer", "price": "0" }
+    }
+    </script>
+    <link rel="canonical" href="https://rpbouman.github.io/huey/src/index.html">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" content="Huey is an open-source browser-based application that lets you make crosstabs/pivot tables on large datasets."/>
+    <link id="manifest" rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Huey%201.1.00%20Indian Runner%22%2C%22short_name%22%3A%22Huey%22%2C%22description%22%3A%22Browser-based%20ROLAP%20pivot%20tables%20powered%20by%20DuckDB%2FWASM.%20Analyze%20CSV%2C%20Excel%20xlsx%2C%20Parquet%2C%20JSON%20and%20DuckDB%20files%20locally%20%E2%80%93%20no%20server%20required.%22%2C%22start_url%22%3A%22index.html%22%2C%22scope%22%3A%22.%22%2C%22display_override%22%3A%5B%22window-controls-overlay%22%2C%22minimal-ui%22%2C%22standalone%22%5D%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%231a1a2e%22%2C%22theme_color%22%3A%22%23f5a623%22%2C%22categories%22%3A%5B%22productivity%22%2C%22business%22%2C%22utilities%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22pwa%2Ficon-192.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22pwa%2Ficon-512.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22pwa%2Ficon-maskable-192.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22maskable%22%7D%2C%7B%22src%22%3A%22pwa%2Ficon-maskable-512.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22maskable%22%7D%5D%2C%22screenshots%22%3A%5B%7B%22src%22%3A%22pwa%2Fscreenshot.png%22%2C%22sizes%22%3A%221280x726%22%2C%22type%22%3A%22image%2Fpng%22%2C%22label%22%3A%22Screenshot%20showing%20a%20Huey%20Pivot%20Table%22%7D%5D%2C%22file_handlers%22%3A%5B%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22text%2Fcsv%22%3A%5B%22.csv%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22text%2Ftab-separated-values%22%3A%5B%22.tsv%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22text%2Fjson%22%3A%5B%22.json%22%2C%22.jsonl%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22application%2Fvnd.apache.parquet%22%3A%5B%22.parquet%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22application%2Fvnd.openxmlformats-officedocument.spreadsheetml.sheet%22%3A%5B%22.xlsx%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22application%2Fduckdb%22%3A%5B%22.duckdb%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22application%2Fsqlite%22%3A%5B%22.sqlite%22%5D%7D%7D%2C%7B%22action%22%3A%22.%22%2C%22accept%22%3A%7B%22application%2Fhueyqh%22%3A%5B%22.hueyqh%22%5D%2C%22application%2Fhueyq%22%3A%5B%22.hueyq%22%5D%7D%7D%5D%2C%22launch_handler%22%3A%7B%22client_mode%22%3A%22navigate-new%22%7D%7D">
+    <link rel="apple-touch-icon" href="./pwa/icon-192.png">
     <link
       rel="icon"
       href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIGljb24tdGFibGVyIGljb24tdGFibGVyLXRhYmxlIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2U9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMyA1YTIgMiAwIDAgMSAyIC0yaDE0YTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxIC0yIDJoLTE0YTIgMiAwIDAgMSAtMiAtMnYtMTR6IiAvPjxwYXRoIGQ9Ik0zIDEwaDE4IiAvPjxwYXRoIGQ9Ik0xMCAzdjE4IiAvPjwvc3ZnPg=="
     />
+    
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-
     <style id="tabler-font"></style>
 
     <script>
-    var hueyVersionNumber = '1.0.14';
-    var hueyVersionName = 'Hook Bill';
+    const manifest = JSON.parse( decodeURIComponent( document.getElementById('manifest').href.substr('data:application/manifest+json,'.length) ) );
+    const [hueyName, hueyVersionNumber, hueyVersionName] = manifest.name.split(' ');
+    let duckdbLibraryVersion = '1.33.1-dev58.0';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    var tablerIconsFontVersion = '3.40.0';
+    const tablerIconsFontVersion = '3.44.0';
     
-    var tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
-    var preloadLink = document.createElement('link');
+    const tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
+    const preloadLink = document.createElement('link');
     preloadLink.setAttribute('rel', 'preload');
     preloadLink.setAttribute('as', 'font');
     preloadLink.setAttribute('href', tablerIconsFontUrl);
     preloadLink.setAttribute('crossorigin', 'true');
     document.head.insertBefore(preloadLink, document.getElementById('tabler-font'));
-    var tablerFontStyleSheet = document.getElementById('tabler-font');
     document.styleSheets[0].insertRule(`
       @font-face {
         font-family: "tabler-icons";
@@ -38,19 +59,16 @@
         src: url("${tablerIconsFontUrl}") format("woff2");
       }
     `);
-    
-    var duckdbLibraryVersion = '1.33.1-dev36.0';
-    var duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
 
     function resourceLoaded(element){
-      var url = element.href || element.src;
+      const url = element.href || element.src;
       console.log(`Loaded ${url}`);
-      var list = document.getElementById('resources');
+      const list = document.getElementById('resources');
       if (!list) {
         return;
       }
-      var item = document.createElement('li');
-      item.className = 'i18nIgnore';
+      const item = document.createElement('li');
+      item.setAttribute('translate', 'no');
       item.setAttribute('data-element', element.tagName);
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
       item.textContent = url;
@@ -64,19 +82,25 @@
       Markup for resource loading
     -->
     <style type="text/css">
-      ul#resources > li::marker {
-        font-family: "tabler-icons";
-        content: var( --icon-file );
-      }
-
-      ul#resources > li[data-resource-type=css]::marker {
-        content: var( --icon-file-type-css );
-      }
-      ul#resources > li[data-resource-type=js]::marker {
-        content: var( --icon-file-type-js );
-      }
-      ul#resources > li[data-resource-type=woff2]::marker {
-        content: var( --icon-file-typography );
+      ul#resources {
+        > li {
+          &::marker {
+            font-family: "tabler-icons";
+            content: var( --icon-file );
+          }
+          
+          &[data-resource-type=css]::marker {
+            content: var( --icon-file-type-css );
+          }
+          
+          &[data-resource-type=js]::marker {
+            content: var( --icon-file-type-js );
+          }
+          
+          &[data-resource-type=woff2]::marker {
+            content: var( --icon-file-typography );
+          }
+        }
       }
     </style>
 
@@ -84,6 +108,8 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/spinner.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="spinner/timer.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tabs/Tabs.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/Hilited.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Hilited/duckdbsql.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DragAndDrop/DragableDialogs.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/App.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QuickQueryMenu/QuickQueryMenu.css"/>
@@ -91,6 +117,10 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ErrorDialog/ErrorDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SettingsDialog/SettingsDialogLogic.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="DocumentStore/DocumentsDialog.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="SecretsManager/SecretsManager.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="CatalogsManager/CatalogsManager.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttachToRemote/AttachDialog.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="ExportUi/ExportUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="UploadUi/UploadUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Tree/Tree.css"/>
@@ -101,6 +131,7 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="util/resize/resize.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Search/Search.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/AttributeUi.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="AttributeUi/derivation-aggregator-icons.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="QueryUi/QueryUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="FilterUi/FilterUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUi.css"/>
@@ -108,6 +139,18 @@
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PivotTableUi/PivotTableUiContextMenu.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PromptUi/PromptUi.css"/>
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="App/SidebarLogic.css"/>
+    <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="PageStateManager/PageState.css"/>
+    
+    <meta name="theme-color" content="rgb(250,250,250)"/>
+
+  </head>
+
+  <body aria-busy="true">
+    <noscript>
+      <h1>Huey — Browser-Based Pivot Tables</h1>
+      <p>Huey is a free, open-source web application for exploring and analyzing data using pivot tables and crosstabs, powered by DuckDB-WASM. Supports CSV, Parquet, JSON, and .duckdb files. No installation required.</p>
+      <p>Huey requires JavaScript to run</p>
+    </noscript>
 
     <datalist id="commonCsvFieldDelimiters">
       <option data-auto="true" value="(default)">(default)</option>
@@ -119,7 +162,7 @@
       <option value="&#30;">record separator</option>
       <option value="&#31;">unit separator</option>
       <option value="!">exclamation mark</option>
-      <option value=" ">space</option>
+      <option value=" ">Space</option>
     </datalist>
 
     <datalist id="commonCsvQuoteCharacters">
@@ -165,35 +208,116 @@
     
     <!-- see: https://en.wikipedia.org/wiki/Ditto_mark -->
     <datalist id="commonDittoMarks">
-      <!-- non breaking space -->
-      <option value="&nbsp;" translate="no">&nbsp;</option>
-      <!-- one single quote (apostrophe) -->
-      <option value="&apos;" translate="no">'</option>
-      <!-- two single quotes (apostrophes) -->
-      <option value="&apos;&apos;" translate="no">''</option>
-      <!-- double quote -->
-      <option value="&quot;" translate="no">"</option>
-      <!-- Right-Pointing Double Angle Quotation Mark » -->
-      <option value="&#xBB;" translate="no">&#xBB;</option>
-      <!-- Horizontal bar ― -->
-      <option value="&#x2015;" translate="no">&#x2015;</option>
-      <!-- left double quotation mark: “ -->
-      <option value="&#x201C;" translate="no">&#x201C;</option>
-      <!-- right double quotation mark: ” -->
-      <option value="&#x201D;" translate="no">&#x201D;</option>
-      <!-- double low-9 quotation mark: ” -->
-      <option value="&#x201E;" translate="no">&#x201E;</option>
-      <!-- double high-9 quotation mark: ” -->
-      <option value="&#x201F;" translate="no">&#x201E;</option>
-      <!--  DOUBLE PRIME -->
-      <option value="&#x2033;" translate="no">&#x2033;</option>
-      — „ — 
-      <!-- ditto mark: 〃-->
-      <option value="&#x3003;" translate="no">&#x3003;</option>
+      <option value="&nbsp;">&amp;nbsp; - non breaking space</option>
+      <option value="&apos;">' - single quote</option>
+      <option value="&apos;&apos;">'' - two single quotes</option>
+      <option value="&quot;">" - double quote</option>
+      <option value="&#xBB;">&#xBB; - Right-Pointing Double Angle Quotation Mark</option>
+      <option value="&#x2015;">&#x2015; - Horizontal Bar</option>
+      <option value="&#x201C;">&#x201C; - left double quotation mark</option>
+      <option value="&#x201D;">&#x201D; - right double quotation mark</option>
+      <option value="&#x201E;">&#x201E; - double low-9 quotation mark</option>
+      <option value="&#x201F;">&#x201E; - double high-9 quotation mark</option>
+      <option value="&#x2033;">&#x2033; - double prime</option>
+      <option value="&#x3003;">&#x3003; - ditto mark</option>
     </datalist>
-  </head>
+    
+    <!-- https://duckdb.org/docs/lts/configuration/secrets_manager#types-of-secrets -->
+    <datalist id="secret-types">
+      <option value="azure" label="Azure Blob Storage" translate="no" data-duckdb-extension="azure"></option>
+      <option value="s3" label="AWS S3" translate="no" data-duckdb-extension="httpfs"></option>
+      <option value="r2" label="Cloudflare R2" translate="no" data-duckdb-extension="httpfs"></option>
+      <option value="ducklake" label="Ducklake" translate="no" data-duckdb-extension="ducklake"></option>
+      <option value="gcs" label="Google Cloud Storage" translate="no" data-duckdb-extension="httpfs"></option>
+      <option value="http" label="HTTP and HTTPS" translate="no" data-duckdb-extension="httpfs"></option>
+      <option value="huggingface" label="Hugging Face" translate="no" data-duckdb-extension="httpfs"></option>
+      <option value="iceberg" label="Iceberg REST Catalog" translate="no" data-duckdb-extension="iceberg"></option>
+      <option value="quack" label="DuckDB Quack Server" translate="no" data-duckdb-extension="quack"></option>
+      <option value="unity_catalog" label="Unity Catalog" translate="no" data-duckdb-extension="unity_catalog"></option>
+    </datalist>
+    
+    <!-- 
+      Known keys for SECRET Options.
+      The secretsDialog uses this data list as list for the key input in keyValueUiTemplate 
+      - data-associated-document-types: list of secret types for which this key is known to be appropriate
+      - data-default-type: the data type (if it is known) for the type input keyValueUiTemplate. Determines how the value is interpreted and whether it should be encrypted when stored.
+      - data-key-value-needs-quotes: set to false of the value is an identifier rather than a string value (determines whether the value will be quoted in the CREATE SECRET statement)
+      - data-values-list: if specified, then that is used as list attribute for the value input
+    -->
+    <datalist id="secret-keys">
+      <option value="ACCOUNT_ID" translate="no" data-default-type="text" data-associated-document-types="r2"></option>
+      <option value="ACCOUNT_NAME" translate="no" data-default-type="text" data-associated-document-types="azure"></option>
+      <option value="ASSUME_ROLE_ARN" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="AUTHORIZATION_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="AWS_REGION" translate="no" data-default-type="text" data-associated-document-types="s3,unity_catalog"></option>
+      <option value="BEARER_TOKEN" translate="no" data-default-type="password" data-associated-document-types="http,iceberg"></option>
+      <option value="CHAIN" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="CLIENT_ID" translate="no" data-default-type="text" data-associated-document-types="azure,iceberg"></option>
+      <option value="CLIENT_SECRET" translate="no" data-default-type="password" data-associated-document-types="azure,iceberg"></option>
+      <option value="CONNECTION_STRING" translate="no" data-default-type="text" data-associated-document-types="azure"></option>
+      <option value="ENDPOINT" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="ENDPOINT_TYPE" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2,iceberg,unity_catalog"></option>
+      <option value="EXTRA_HTTP_HEADERS" translate="no" data-default-type="map" data-associated-document-types="http"></option>
+      <option value="HTTP_PROXY" translate="no" data-default-type="text" data-associated-document-types="http"></option>
+      <option value="HTTP_PROXY_PASSWORD" translate="no" data-default-type="password" data-associated-document-types="http"></option>
+      <option value="HTTP_PROXY_USERNAME" translate="no" data-default-type="text" data-associated-document-types="http"></option>
+      <option value="KEY_ID" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="KMS_KEY_ID" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="OAUTH2_GRANT_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="OAUTH2_SCOPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="OAUTH2_SERVER_URI" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="PROFILE" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="PROVIDER" data-key-value-needs-quotes="false" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="REFRESH" data-key-value-needs-quotes="false" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="REGION" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="REQUESTER_PAYS" translate="no" data-default-type="checkbox" data-associated-document-types="s3"></option>
+      <option value="SCOPE" translate="no" data-default-type="list" data-associated-document-types="s3,http"></option>
+      <option value="SECRET" translate="no" data-default-type="password" data-associated-document-types="s3,gcs,r2,iceberg"></option>
+      <option value="SESSION_TOKEN" translate="no" data-default-type="password" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="TENANT_ID" translate="no" data-default-type="text" data-associated-document-types="azure"></option>
+      <option value="TOKEN" translate="no" data-default-type="password" data-associated-document-types="http,huggingface,iceberg,quack,unity_catalog"></option>
+      <option value="URL_COMPATIBILITY_MODE" translate="no" data-default-type="checkbox" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="URL_STYLE" translate="no" data-default-type="text" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="USE_SSL" translate="no" data-default-type="checkbox" data-associated-document-types="s3,gcs,r2"></option>
+      <option value="VALIDATION" translate="no" data-default-type="text" data-associated-document-types="s3"></option>
+      <option value="VERIFY_SSL" translate="no" data-default-type="checkbox" data-associated-document-types="s3,gcs,r2,http"></option>
+    </datalist>
+    
+    <!-- this gets dynamically populated - see: SecretsDialog.updateDocumentsList and SecretsDialog.updateSecretsDataList -->
+    <datalist id="secrets-list">
+    </datalist>
+    
+    <datalist id="attach-types">
+      <option value="delta" translate="no" data-duckdb-extension="delta">Delta</option>
+      <option value="duckdb" translate="no" >DuckDB</option>
+      <option value="ducklake" translate="no" data-duckdb-extension="ducklake">DuckLake</option>
+      <option value="iceberg" translate="no" data-duckdb-extension="iceberg">Iceberg</option>
+      <option value="quack" translate="no" >Quack</option>
+      <option value="sqlite" translate="no" data-duckdb-extension="sqlite">SQLite</option>
+      <option value="unity_catalog" translate="no" data-duckdb-extension="unity_catalog">Unity Catalog</option>
+    </datalist>
+    
+    <!-- https://duckdb.org/docs/current/core_extensions/iceberg/iceberg_rest_catalogs#attach-options -->
+    <datalist id="catalog-keys">
+      <option value="AUTHORIZATION_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="ACCESS_DELEGATION_MODE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="CLIENT_ID" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="CLIENT_SECRET" translate="no" data-default-type="password" data-associated-document-types="iceberg"></option>
+      <option value="DEFAULT_REGION" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="DEFAULT_SCHEMA" translate="no" data-default-type="text" data-associated-document-types="unity_catalog"></option>
+      <option value="ENCRYPTION_CIPHER" translate="no" data-default-type="text" data-associated-document-types="duckdb"></option>
+      <option value="ENCRYPTION_KEY" translate="no" data-default-type="password" data-associated-document-types="duckdb"></option>
+      <option value="ENDPOINT" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="ENDPOINT_TYPE" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="EXTRA_HTTP_HEADERS" translate="no" data-default-type="map" data-associated-document-types="iceberg"></option>
+      <option value="MAX_TABLE_STALENESS" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="OAUTH2_SERVER_URI" translate="no" data-default-type="text" data-associated-document-types="iceberg"></option>
+      <option value="PURGE_REQUESTED" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
+      <option value="SECRET" translate="no" data-default-type="text" data-values-list="secrets-list"></option>
+      <option value="SUPPORT_NESTED_NAMESPACES" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
+      <option value="SUPPORT_STAGE_CREATE" translate="no" data-default-type="checkbox" data-associated-document-types="iceberg"></option>
+    </datalist>
 
-  <body aria-busy="true">
     <div id="spinner">
       <div class="loader">Loading...</div>
       <header id="logo" translate="no">Huey</header>
@@ -265,10 +389,7 @@
           <input
             id="exportTitleTemplate"
             type="text"
-            title="
-              Export filename template. Special fields ${datasource}, ${cells-itms}, ${rows-items}, ${columns-items}, and ${filters-items} are replaced with the respective element from the current query.
-              Use fields ${timestamp} or ${iso-timestamp} to include date/time.
-            "
+            title="Export filename template. Special fields ${datasource}, ${cells-itms}, ${rows-items}, ${columns-items}, and ${filters-items} are replaced with the respective element from the current query. Use fields ${timestamp} or ${iso-timestamp} to include date/time."
             value="${cells-items} from ${datasource} with ${rows-items} on rows and ${columns-items} on columns"
           />
           <label
@@ -325,7 +446,7 @@
               id="exportDestinationClipboard"
               type="radio"
               name="exportDestination"
-              title="Check to copy the data to the clipboard in order to paste it in other applications"
+              title="Check to copy the data to the clipboard so you can paste it in other applications"
             />
           </fieldset>
         </form>
@@ -378,7 +499,7 @@
                 >Date Format</label>
                 <input
                   id="exportDelimitedDateFormat"
-                  title="Enter a valid DuckDB date format string."
+                  title="Enter a valid DuckDB DATE format string."
                   type="text"
                   value="%x"
                   list="commonDateFormats"
@@ -389,7 +510,7 @@
                 >Timestamp Format</label>
                 <input
                   id="exportDelimitedTimestampFormat"
-                  title="Enter a valid DuckDB timestamp format string."
+                  title="Enter a valid DuckDB TIMESTAMP format string."
                   type="text"
                   value="%c"
                   list="commonTimestampFormats"
@@ -467,7 +588,7 @@
               >Include Headers</label>
               <input
                 id="exportXlsxIncludeHeaders"
-                title="Check this to include a header row with column names."
+                title="Check this to include a header line with column names."
                 type="checkbox"
                 checked="true"
               />
@@ -535,7 +656,7 @@
                   id="exportJsonDateFormat"
                   type="text"
                   value="%x"
-                  title="Enter a valid DuckDB date format string."
+                  title="Enter a valid DuckDB DATE format string."
                 />
                 <label
                   for="exportJsonTimestampFormat"
@@ -544,7 +665,7 @@
                 <input
                   id="exportJsonTimestampFormat"
                   type="text"
-                  title="Enter a valid DuckDB timestamp format string."
+                  title="Enter a valid DuckDB TIMESTAMP format string."
                   value="%c"
                 />
               </fieldset>
@@ -746,7 +867,7 @@
         <button
           id="exportDialogExecuteButton"
           autofocus="true"
-        >Export</button>
+        >Export...</button>
         <button
           id="exportDialogCloseButton"
           popovertarget="exportDialog"
@@ -883,7 +1004,7 @@
             <select
               id="toFilterValueList"
               multiple="true"
-              size="7"
+              size="4"
               title="Values in this list will be used to filter the results. Add items to the list by choosing from the picklist above; click items in the list to remove them."
             >
             </select>
@@ -894,7 +1015,7 @@
           <li role="menuitemcheckbox">
             <label 
               for="filterDialogShowRawCheckbox"
-              title="Check to display raw values. Uncheck to display formatter values."
+              title="Check to display raw values. Uncheck to display formatted values."
             >
               <span>Reveal raw values</span>
               <input 
@@ -1116,6 +1237,31 @@
             </form>
           </div>
         </div>
+        <!--
+          Attributes
+        -->
+        <div>
+          <label
+            role="tab"
+            for="attributesSettingsTab"
+          >
+            Attributes
+          </label>
+          <input
+            id="attributesSettingsTab"
+            type="radio"
+            name="settingsTabs"
+          />
+          <div role="tabpanel">
+            <form id="attributeSettings">
+              <fieldset>
+                <legend></legend>
+                <label for="revealAttributesUsedInQuery">Auto-reveal attributes used in query?</label>
+                <input id="revealAttributesUsedInQuery" type="checkbox"/>
+              </fieldset>
+            </form>
+          </div>
+        </div>
 
         <!--
           Query settings
@@ -1125,7 +1271,7 @@
             role="tab"
             for="querySettingsTab"
           >
-            Query
+            Query Builder
           </label>
           <input
             id="querySettingsTab"
@@ -1275,6 +1421,28 @@
                   for="hoverColumnHighlight"
                 >Hover Column Highlighting</label>
                 <input type="checkbox" id="hoverColumnHighlight"/>
+                <label
+                  for="hoverHighlightHeaderStyle"
+                  title="Hover highlight style for the column and row headers"
+                >Hover Highlight Header Style</label>
+                <select 
+                  id="hoverHighlightHeaderStyle"
+                  title="Hover highlight style for the column and row headers"
+                >
+                  <option value="fill" label="fill">fill</option>
+                  <option value="outline" label="outline">outline</option>
+                </select>
+                <label
+                  for="hoverHighlightCellStyle"
+                  title="Hover highlight style for the cells"
+                >Hover Highlight Cell Style</label>
+                <select
+                  id="hoverHighlightCellStyle"
+                  title="Hover highlight style for the cells"
+                >
+                  <option value="fill" label="fill">fill</option>
+                  <option value="outline" label="outline">outline</option>
+                </select>
               </fieldset>
             </form>
           </div>
@@ -1326,6 +1494,272 @@
         >Cancel</button>
       </footer>
     </dialog>
+    
+    <template id="secretsDialogToolsTemplate">
+      <label title="Activate the current Secret so it can be used to access a remote resource">
+        <input type="radio" name="activation" value="activate"/>
+      </label>
+      <label title="De-activate the current Secret">
+        <input type="radio" name="activation" value="deactivate" checked="true"/>
+      </label>
+      <output name="usageHint" role="note"><a href="javascript:secretsDialog.createNewButton.click()">Create a new Secret</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
+      <output name="formInvalidHint" role="alert">Fill out all required fields to save the Secret.</output>
+      <label title="Change Password">
+        <button name="changePassword">Change Password</button>
+      </label>
+      <label title="Reset the Secrets store">
+        <button name="resetSecretsStore">Reset Secrets Store</button>
+      </label>
+    </template>
+    
+    <template id="secretHeaderTemplate">
+      <label>Name</label>
+      <input 
+        name="name"
+        placeholder="Secret identifier"
+        type="text"
+        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+        required="true"
+        autocomplete="true"
+        spellcheck="false"
+        title="The unique name of the Secret"
+      />
+      <label for="secretType">Type</label>
+      <input 
+        name="type"
+        placeholder="Secret type"
+        type="text"
+        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+        required="true"
+        list="secret-types"
+        autocomplete="true"
+        spellcheck="false"
+        title="The Secret type"
+      />
+      <label>Autoload</label>
+      <input
+        name="autoload"
+        type="checkbox"
+        title="Run CREATE SECRET automatically when opening Huey?"
+      />
+    </template>
+    
+    <template id="catalogHeaderTemplate">
+      <label>Name</label>
+      <input 
+        name="name"
+        placeholder="Catalog name"
+        type="text"
+        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+        required="true"
+        autocomplete="true"
+        spellcheck="false"
+        title="Enter a unique name to refer to this catalog"
+      />
+      <label for="secretType">Type</label>
+      <input 
+        name="type"
+        placeholder="Catalog type"
+        type="text"
+        pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+        required="true"
+        list="attach-types"
+        autocomplete="true"
+        spellcheck="false"
+        title="Enter the Remote Catalog type"
+      />
+      <label>Autoload</label>
+      <input
+        name="autoload"
+        type="checkbox"
+        title="Attach this catalog automatically when opening Huey?"
+      />
+      <label>URL</label>
+      <input 
+        name="url"
+        placeholder="Remote Catalog URL"
+        type="text"
+        required="true"
+        autocomplete="true"
+        spellcheck="false"
+        title="Enter the URL of the Remote Catalog"
+      />
+    </template>
+
+    <template id="keyValueUiTemplate">
+      <div>
+        <span>
+          <menu role="toolbar">
+            <label title="Add new key/value pair"><button type="button" name="add" value="add">Add new Field</button></label>
+            <label title="Remove key/value pair"><button type="button" name="remove" value="remove">Remove Field</button></label>
+            <label title="Move key/valye pair up"><button type="button" name="up" value="up">Move field up</button></label>
+            <label title="Move key/valye pair down"><button type="button" name="down" value="down">Move field down</button></label>
+            <label title="Toggle subfield"><input type="checkbox" name="indent" value="indent"/></label>
+          </menu>
+        </span>
+        <span>
+          <input 
+            type="text" 
+            placeholder="Enter a key"
+            name="key"
+            title="Key field"
+            pattern="[A-Za-z]([\-_A-Za-z0-9]*[A-Za-z0-9])?"
+            autocomplete="true"
+            spellcheck="false"
+            autofocus="true"
+          />
+        </span>
+        <span>
+          <select 
+            title="Select the field data type (input method) for the value field"
+            name="type"
+          >
+            <option translate="no" value="checkbox" title="Boolean">&#x2611;</option>
+            <option translate="no" value="list" title="List">[&#x2026;]</option>
+            <option translate="no" value="text" title="Plaintext" selected="true">txt</option>
+            <option translate="no" value="password" title="Encrypted">***</option> 
+            <option translate="no" value="map" title="Map">{&#x2026;}</option>
+          </select>
+        </span>
+        <span>
+          <input 
+            type="text"
+            placeholder="Enter the key's value"
+            name="value"
+            title="Value field"
+            pattern="^(?!\s+).+(?<!\s+)$"
+            autocomplete="true"
+            spellcheck="false"
+          />
+        </span>
+      </div>
+    </template>
+    
+    <template id="catalogsDialogToolsTemplate">
+      <label title="Attach the current catalog so you can browse and query its tables">
+        <input type="radio" name="activation" value="activate"/>
+      </label>
+      <label title="De-attach the current catalog">
+        <input type="radio" name="activation" value="deactivate" checked="true"/>
+      </label>
+      <output name="usageHint" role="note"><a href="javascript:catalogsDialog.createNewButton.click()">Add a new Remote Catalog</a><span>, or select an existing one from the list to edit or remove it</span>.</output>
+      <output name="formInvalidHint" role="alert">Fill out all required fields to save the Remote Catalog entry.</output>
+      <label title="Browse Catalog...">
+        <button name="browseCatalog">Browse Catalog...</button>
+      </label>
+    </template>
+
+    <template id="documentDialogTemplate">
+      <dialog 
+        class="documentDialog"
+        draggable="true"
+        aria-labelledby=""
+        popover="manual"
+      >
+        <header>
+          <h3 id="secretsDialogTitle"></h3>
+        </header>
+        <menu role="toolbar">
+          <input type="checkbox" name="editingActive" title="editing active"/> 
+          <input type="checkbox" name="unsavedChanges" title="unsaved changes"/>
+          <label title="Create New">
+            <button name="createNew">Create New</button>
+          </label>
+          <label title="Remove Current">
+            <button name="removeCurrent">Remove Current</button>
+          </label>
+          <label title="Save Current">
+            <button name="saveCurrent">Save Current</button>
+          </label>
+          <label title="Restore Current">
+            <button name="restoreCurrent">Restore Current</button>
+          </label>
+        </menu>
+        <form>
+          <nav>
+            <select 
+              name="documentsList"
+              multiple="true"
+              title="Select an item to edit or remove it."
+            ></select>
+          </nav>
+          <section role="tablist">
+            <div>
+              <label role="tab">Form<input type="radio" name="tabs" value="formTab" checked="true"/></label>
+              <section role="tabpanel" id="secretForm">
+                <header>
+                  <fieldset name="headerFieldset">
+                    <legend>Name and Type</legend>
+                  </fieldset>
+                </header>
+                <fieldset name="keyValuesFieldset">
+                  <legend>Key/Value Pairs</legend>
+                </fieldset>
+              </section>
+            </div>
+            <div>
+              <label role="tab">Code<input type="radio" name="tabs" value="codeTab"/></label>
+              <div role="tabpanel">
+                <section class="hilited">
+                  <pre
+                    class="hilited-gutter"
+                    style="
+                      display: inline-block;
+                      position: relative;
+                      width: 8ch;
+                    "
+                  >
+                  </pre>
+                  <code
+                    class="hilited-editor"
+                    style="
+                      tab-size:2;
+                    "
+                  ></code>
+                  <menu role="toolbar">
+                    <li>
+                      <label>length</label>
+                      <output name="length"></output>
+                    </li>
+                    <li>
+                      <label>lines</label>
+                      <output name="lines"></output>
+                    </li>
+                    <li>
+                      <label>Ln</label>
+                      <output name="line"></output>
+                    </li>
+                    <li>
+                      <label>Col</label>
+                      <output name="column"></output>
+                    </li>
+                    <li>
+                      <label>Pos</label>
+                      <output name="position"></output>
+                    </li>
+                  </menu>
+                </section>
+              </div>
+            </div>
+          </section>
+        </form>
+        <footer role="toolbar">
+          <button
+            name="ok"
+            value="ok"
+            autofocus="true" 
+            popovertarget=""
+            popovertargetaction="hide"
+          >Ok</button>
+          <button
+            name="cancel"
+            value="cancel"
+            popovertarget=""
+            popovertargetaction="hide"
+          >Cancel</button>
+        </footer>
+      </dialog>
+    </template>
 
     <dialog
       id="promptUi"
@@ -1721,7 +2155,7 @@
           />
           <div role="tabpanel">
             <menu role="toolbar">
-              <button id="csvReaderDownloadRejects">Download</button>
+              <button id="csvReaderDownloadRejects">Download...</button>
               <button id="csvReaderClearRejects">Clear</button>
             </menu>
             <section style="height: calc( 100% - 40px ) ">
@@ -2011,7 +2445,11 @@
       class="layout"
     >
       <menu role="toolbar">
-        <label for="uploader" title="Register local data files to explore their contents with Huey">
+        <label 
+          for="uploader" 
+          title="Register local data files to explore their contents with Huey"
+          accesskey="O"
+        >
           <input
             id="uploader"
             type="file"
@@ -2019,10 +2457,24 @@
             accept=".csv,.duckdb,.json,.jsonl,.parquet,.sql,.sqlite,.tsv,.xlsx"
           />
         </label>
-        <label for="loadFromUrl" title="Load data from URL">
+        <label 
+          for="loadFromUrl" 
+          title="Load data from URL"
+          accesskey="U"
+        >
           <button
             id="loadFromUrl"
           >Data from URL</button>
+        </label>
+        <label 
+          for="attachRemote" 
+          title="Attach to a Remote Catalog or Database"
+          accesskey="U"
+        >
+          <button
+            id="attachRemote"
+            popovertarget="catalogsDialog"
+          >Attach</button>
         </label>
 
         <label for="cloneHueySession" title="Open a new Huey browser tab including the currently loaded datasources and query">
@@ -2179,11 +2631,24 @@
 
         <!-- info about the last executed query -->
         <label for="queryResultRowsInfo" title="The total number of tuples on the rows axis.">
-          <output id="queryResultRowsInfo"/>
+          <output id="queryResultRowsInfo"></output>
         </label>
         <label for="queryResultColumnsInfo" title="The total number of tuples on the columns axis.">
-          <output id="queryResultColumnsInfo"/>
+          <output id="queryResultColumnsInfo"></output>
         </label>
+
+        <!-- back/forward navigation -->
+        <label for="navigateBack" title="Navigate backward (undo)...">
+          <button
+            id="navigateBack"
+          >Navigate backward (undo)...</button>
+        </label>
+        <label for="navigateForward" title="Navigate forward (redo)...">
+          <button
+            id="navigateForward"
+          >Navigate forward (redo)...</button>
+        </label>
+        
 
         <label for="aboutButton" title="About Huey...">
           <button
@@ -2199,6 +2664,14 @@
             popovertarget="settingsDialog"
             popovertargetaction="show"
           >Settings...</button>
+        </label>
+
+        <label for="secretsButton" title="Open the Huey Secrets Manager dialog.">
+          <button
+            id="secretsButton"
+            popovertarget="secretsDialog"
+            popovertargetaction="show"
+          >Secrets...</button>
         </label>
 
         <label
@@ -2224,6 +2697,7 @@
             for="datasourcesTab"
             role="tab"
             title="Files, database tables and so on that provide data you'd like to explore."
+            accesskey="D"
           >Datasources</label>
           <input
             id="datasourcesTab"
@@ -2234,8 +2708,15 @@
           <div
             role="tabpanel"
           >
-            <label for="uploader">Drop some files here, or click the Upload button:</label>
-            
+            <div>
+              <div>Drop some files here, or use the buttons below:</div>
+              <menu role="toolbar">
+                <label for="uploader" title="Upload files">Local File</label>
+                <label for="loadFromUrl" title="Upload from URL">Fetch Url</label>
+                <label for="attachRemote" title="Connect to a Remote Catalog">Remote Catalog</label>
+              </menu>
+            </div>
+            <div class="loader"></div>
             <template id="dataSourceGroupNodeActionButton">
               <label
                 class="${class}"
@@ -2254,7 +2735,7 @@
                 title="${title}"
               >
                 <summary>
-                  <span class="label i18nIgnore">${caption}</span>
+                  <span translate="no" class="label">${caption}</span>
                 </summary>
               </details>
             </template>
@@ -2283,10 +2764,9 @@
                 data-datasourceids="${datasource-list}"
                 data-catalog-name="${catalogName}"
                 data-schema-name="${schemaName}"
-                open="true"
               >
                 <summary>
-                  <span class="label i18nIgnore">${caption}</span>
+                  <span translate="no" class="label">${caption}</span>
                 </summary>
               </details>
             </template>
@@ -2304,6 +2784,7 @@
             for="attributesTab"
             role="tab"
             title="Columns, formulas and aggregates to query and pivot"
+            accesskey="A"
           >Attributes</label>
           <input
             id="attributesTab"
@@ -2311,22 +2792,30 @@
             name="sidebarTabs"
           />
           <div role="tabpanel">
-            <search
-              id="searchAttributeUi"
-            >
-              <fieldset>
-                <legend id="searchAttributesLabel">Search for Attributes</legend>
-                <input
-                  id="searchAttribute"
-                  type="search"
-                  placeholder="Search by Attribute name"
-                  title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
-                  aria-labelledby="searchAttributesLabel"
-                  autofocus="true"
-                />
-              </fieldset>
-            </search>
-
+            <header>
+              <!--
+              <menu role="toolbar">
+                <label 
+                  for="revealAttributesUsedInQuery"
+                  title="Toggle auto-reveal attributes used in Query"
+                ></label>
+              </menu>
+              -->
+              <search id="searchAttributeUi">
+                <fieldset>
+                  <legend id="searchAttributesLabel">Search for Attributes</legend>
+                  <input
+                    id="searchAttribute"
+                    type="search"
+                    placeholder="Search by Attribute name"
+                    title="Enter a search term to find matching attributes. You can use % as wildcard to match arbitrary character sequences."
+                    aria-labelledby="searchAttributesLabel"
+                    autofocus="true"
+                    accesskey="F"
+                  />
+                </fieldset>
+              </search>
+            </header>
             <template id="attribute-node">
               <details role="treeitem" data-nodetype="">
                 <summary>
@@ -2352,6 +2841,19 @@
               </label>
             </template>
             
+            <template id="attribute-node-axis-button">
+              <label 
+                class="attributeUiAxisButton" 
+                data-axis=""
+                data-title-checked=""
+                data-title-unchecked=""
+                title=""
+                for=""
+              >
+                <input type="button"/>
+              </label>
+            </template>
+            
             <div
               id="attributeUi"
               class="attributeUi"
@@ -2360,6 +2862,20 @@
             ></div>
           </div>
         </div>
+        
+        <menu role="toolbar">
+          <label 
+            for="sidebarPin" 
+            title="Toggle expand/collapse sidebar"
+          >
+            <input 
+              id="sidebarPin" 
+              title="Toggle expand/collapse sidebar"
+              type="checkbox"
+              checked="true"
+            />
+          </label>
+        </menu>
       </nav>
 
       <div id="workarea" class="workarea"></div>
@@ -2371,11 +2887,16 @@
     <script onload="resourceLoaded(this)" src="util/misc/misc.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventEmitter.js"></script>
     <script onload="resourceLoaded(this)" src="util/event/EventBuffer.js"></script>
+    <script onload="resourceLoaded(this)" src="util/file/FileUtils.js"></script>
+    <script onload="resourceLoaded(this)" src="util/regex/RegXpChef.js"></script>
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragAndDropHelper.js"></script>
     <script onload="resourceLoaded(this)" src="Internationalization/Internationalization.js"></script>
 
     <script onload="resourceLoaded(this)" src="DragAndDrop/DragableDialogs.js"></script>
     <script onload="resourceLoaded(this)" src="Tabs/Tabs.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/Hilited.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/HilitedPeripherals.js"></script>
+    <script onload="resourceLoaded(this)" src="Hilited/SelectionHelper.js"></script>
     <script onload="resourceLoaded(this)" src="ContextMenu/ContextMenu.js"></script>
 
     <script onload="resourceLoaded(this)" src="SettingsDialog/SettingsBase.js"></script>
@@ -2386,6 +2907,9 @@
     <script onload="resourceLoaded(this)" src="AboutDialog/AboutDialog.js"></script>
 
     <script onload="resourceLoaded(this)" src="util/sql/SQLHelper.js"></script>
+    <script onload="resourceLoaded(this)" src="DocumentStore/DocumentStore.js"></script>
+    <script onload="resourceLoaded(this)" src="DocumentStore/DocumentsDialog.js"></script>
+    <script onload="resourceLoaded(this)" src="DocumentStore/AppDocumentStore.js"></script>
 
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbConnection.js"></script>
     <script onload="resourceLoaded(this)" src="DataSource/duckdb/DuckDbDataSource.js"></script>
@@ -2403,6 +2927,8 @@
     <script onload="resourceLoaded(this)" src="DatasourceSettingsDialog/DatasourceSettingsDialog.js"></script>
     <script onload="resourceLoaded(this)" src="AttributeUi/AttributeUi.js"></script>
     <script onload="resourceLoaded(this)" src="Search/Search.js"></script>
+    <script onload="resourceLoaded(this)" src="QueryModel/QueryAxisItem.js"></script>
+    <script onload="resourceLoaded(this)" src="QueryModel/QueryAxis.js"></script>
     <script onload="resourceLoaded(this)" src="QueryModel/QueryModel.js"></script>
     <script onload="resourceLoaded(this)" src="DataSourceMenu/DataSourceMenu.js"></script>
     <script onload="resourceLoaded(this)" src="QueryUi/QueryUi.js"></script>
@@ -2414,14 +2940,28 @@
     <script onload="resourceLoaded(this)" src="PageStateManager/PageStateManager.js"></script>
     <script onload="resourceLoaded(this)" src="QuickQueryMenu/QuickQueryMenu.js"></script>
 
+    <script onload="resourceLoaded(this)" src="util/SpecialPurposeParser/SpecialPurposeParser.js"></script>
+    <script onload="resourceLoaded(this)" src="CatalogsManager/AttachParser.js"></script>
+    <script onload="resourceLoaded(this)" src="CatalogsManager/CatalogsDialog.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/CreateSecretParser.js"></script>
+    <script onload="resourceLoaded(this)" src="SecretsManager/SecretsDialog.js"></script>
+
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageProtocol.js"></script>
     <script onload="resourceLoaded(this)" src="PostMessageInterface/PostMessageInterface.js"></script>
     <script onload="resourceLoaded(this)" src="SessionCloner/SessionCloner.js"></script>
 
+    <script onload="resourceLoaded(this)" src="pwa/pwa.js"></script>
+
     <script onload="resourceLoaded(this)" src="App/App.js"></script>
-    <script type="module">      
+    <script type="module">
+    
+      const duckdbLibraryVersionFromUrl = getSearchParams()['duckdb-wasm'];
+      if (duckdbLibraryVersionFromUrl && /^\d+\.\d+\.\d+(?:-dev\d+\.\d+)?$/.test(duckdbLibraryVersionFromUrl)) {
+        duckdbLibraryVersion = duckdbLibraryVersionFromUrl;
+      }
+      const duckDbLibraryUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${duckdbLibraryVersion}/+esm`;
       import(duckDbLibraryUrl)
-      .then(async function(duckdb){
+      .then(async duckdb => {
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
         const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
@@ -2438,7 +2978,6 @@
 
         await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
         const connection = await db.connect();
-
         window.hueyDb = {
           duckdb: duckdb,
           instance: db,
@@ -2447,14 +2986,29 @@
 
         initApplication();
       })
-      .catch(function(e){
-        document.body.setAttribute('aria-busy', false);
+      .catch( error => {
         document.body.getElementsByTagName('main')[0].style.display = 'none';
-        showErrorDialog(e);
+        const errorConfig = {
+          title: error.name,
+          description: error.message
+        };
+      
+        if (error.message.startsWith('Failed to fetch dynamically imported module')) {
+          errorConfig.description += 'Visit https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm to lean what versions are available.';
+        }
+        showErrorDialog( errorConfig );
       })
-      .finally(function(){
+      .finally(error => {
         document.body.setAttribute('aria-busy', false);
       });
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./huey-pwa-service-worker.js', { scope: './' })
+          .then(reg => console.log('[huey] SW registered:', reg.scope))
+          .catch(err => console.warn('[huey] SW registration failed:', err));
+      }
     </script>
   </body>
 </html>

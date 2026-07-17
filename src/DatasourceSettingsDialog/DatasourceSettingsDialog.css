@@ -2,6 +2,12 @@ dialog#datasourceSettingsDialog {
   width: 700px;
   height: 725px;
   resize: both;
+  
+  > header {
+    &::before {
+      content: var( --icon-settings );
+    }
+  }
 }
 
 

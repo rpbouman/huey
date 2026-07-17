@@ -1,0 +1,63 @@
+menu[role=toolbar] > label[for=attachRemote]:has(
+  > button#attachRemote
+) {
+
+  &::before {
+    content: var( --icon-database );
+  }
+  &::after{
+    content: '';
+  }
+}
+
+dialog.documentDialog#catalogsDialog {
+  
+  > header {
+    &::before {
+      content: var( --icon-database );
+    }
+  }
+  
+  
+  > menu[role=toolbar] {
+    
+    > label {
+
+      &:has( > button[name=createNew] ){
+        &::before {
+          content: var( --icon-database-plus );
+        }
+      }
+      
+      
+    }
+  }
+  
+  > * > *[role=tablist] > div:has( 
+    > label > input[type=radio][name=tabs][value=formTab] 
+  ) > *[role=tabpanel] {
+
+    > header {
+      display: block;
+
+      > fieldset[name=headerFieldset] {
+
+        label:has(+ input[name="url"]) {
+          grid-column: 1;
+        }
+
+        /* URL input */
+        input[name="url"] {
+          grid-column: 2 / -1;
+          width: calc( 100% - 1em );
+        }
+      }
+    }
+
+    > fieldset[name=keyValuesFieldset] {
+      height: calc( 100% - 118px );
+    }
+
+  }
+  
+}
