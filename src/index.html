@@ -74,7 +74,10 @@
       item.textContent = url;
       list.appendChild(item);
     }
-    
+
+    if (location.protocol !== 'file:') {
+      document.getElementById('manifest').href = 'manifest.json';
+    }
     </script>
 
     <link onload="resourceLoaded(this)" rel="stylesheet" type="text/css" href="Theme/icons.css"/>

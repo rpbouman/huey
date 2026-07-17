@@ -1,15 +1,23 @@
 {
-  "name": "Huey 1.0.17 Huttegem",
+  "name": "Huey 1.1.00 Indian Runner",
   "short_name": "Huey",
   "description": "Browser-based ROLAP pivot tables powered by DuckDB/WASM. Analyze CSV, Excel xlsx, Parquet, JSON and DuckDB files locally – no server required.",
   "start_url": "index.html",
   "scope": ".",
-  "display_override": ["window-controls-overlay", "minimal-ui", "standalone"], 
+  "display_override": [
+    "window-controls-overlay",
+    "minimal-ui",
+    "standalone"
+  ],
   "display": "standalone",
   "orientation": "any",
   "background_color": "#1a1a2e",
   "theme_color": "#f5a623",
-  "categories": ["productivity", "business", "utilities"],
+  "categories": [
+    "productivity",
+    "business",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "pwa/icon-192.png",
@@ -47,41 +55,74 @@
   "file_handlers": [
     {
       "action": ".",
-      "accept": { "text/csv": [".csv"] }
+      "accept": {
+        "text/csv": [
+          ".csv"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "text/tab-separated-values": [".tsv"] }
+      "accept": {
+        "text/tab-separated-values": [
+          ".tsv"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "text/json": [".json", ".jsonl"] }
+      "accept": {
+        "text/json": [
+          ".json",
+          ".jsonl"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "application/vnd.apache.parquet": [".parquet"] }
+      "accept": {
+        "application/vnd.apache.parquet": [
+          ".parquet"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] }
+      "accept": {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+          ".xlsx"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "application/duckdb": [".duckdb"] }
+      "accept": {
+        "application/duckdb": [
+          ".duckdb"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { "application/sqlite": [".sqlite"] }
+      "accept": {
+        "application/sqlite": [
+          ".sqlite"
+        ]
+      }
     },
     {
       "action": ".",
-      "accept": { 
-        "application/hueyqh": [".hueyqh"],
-        "application/hueyq": [".hueyq"]
+      "accept": {
+        "application/hueyqh": [
+          ".hueyqh"
+        ],
+        "application/hueyq": [
+          ".hueyq"
+        ]
       }
     }
   ],
   "launch_handler": {
-    "client_mode":  "navigate-new"
+    "client_mode": "navigate-new"
   }
 }
