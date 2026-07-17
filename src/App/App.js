@@ -99,7 +99,7 @@ function initDuckdbVersion(){
     window.hueyDb.duckdbTokenizer = duckdbTokenizer;
     initSecretsDialog();
     initCatalogsDialog();
-
+    initAppPageState();  
     const duckdbVersionLabel = byId('duckdbVersionLabel');
     duckdbVersionLabel.textContent = `DuckDB ${version}, API: ${api}`;
     
@@ -258,7 +258,6 @@ function initApplication(){
   initDataSourceMenu();
   initPwa();
 
-  initAppPageState();
   initAppQueryModelEvents();
   initAppPivotTableEvents();
 

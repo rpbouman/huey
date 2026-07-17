@@ -1096,7 +1096,28 @@ class DataSourcesUi extends EventEmitter {
   
   async #ensureDatabaseDatasourceLoaded(parsedDatasourceId) {
     const parts = parsedDatasourceId.localId.split('.');
+
+    const catalogName = unQuoteIdentifier(parts[0]);
+    const schemaName = unQuoteIdentifier(parts[1]);
+    const tableName = unQuoteIdentifier(parts[2]);
+
+    const store = AppDocumentStore.store;
+    const catalogs = await store.list( AppDocumentStore.STORE_CATALOGS );
+    const existingCatalog = catalogs.find(catalog => catalog.name === catalogName );
+    
     const datasources = this.#datasources;
+    if (existingCatalog) {
+      const existingCatalogDatasource = Object.keys(datasources).find(datasourceKey => {
+        const datasource = datasources[datasourceKey]; 
+        return  datasource.getType() === DuckDbDataSource.types.CATALOG && 
+                datasource.getAttachedName() === catalogName
+      });
+      if (!existingCatalogDatasource){
+        const documentObject = await catalogsDialog.getAndDecryptDocument(catalogName);
+        const duckdbDocument = await catalogsDialog.createDuckDbDocument(documentObject);
+      }
+    }
+    
     _datasources: for (let datasourceId in datasources){
       const datasource = datasources[datasourceId];
       const datasourceType = datasource.getType();
@@ -1106,8 +1127,6 @@ class DataSourcesUi extends EventEmitter {
         case DuckDbDataSource.types.CATALOG:
           const attachedName = datasource.getAttachedName();
           if (parts[0] === getQuotedIdentifier(attachedName)) {
-            const schemaName = unQuoteIdentifier(parts[1]);
-            const tableName = unQuoteIdentifier(parts[2]);
             const tableResult = await datasource.getTableObjectsResultset({
               schemaName: schemaName,
               tableName: tableName
@@ -1130,9 +1149,7 @@ class DataSourcesUi extends EventEmitter {
 
   async findDataSourcesWithColumns(columnsSpec, useLooseColumnComparisonType, preferredDatasourceId){
     let foundDatasources = {};
-
     const datasources = this.#datasources;
-    
     if (preferredDatasourceId && datasources[preferredDatasourceId] === undefined) {
       const parsedDatasourceId = DuckDbDataSource.parseId(preferredDatasourceId);
       switch (parsedDatasourceId.type) {
