@@ -32,7 +32,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v47';
+const CACHE_VERSION = 'v48';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -107,8 +107,13 @@ const APP_SHELL = [
   'src/Hilited/duckdbsql.css',
   'src/Internationalization/Internationalization.js',
   'src/Internationalization/huey.i18n.labels.template.js',
+  'src/Internationalization/i18n/de.js',
+  'src/Internationalization/i18n/es.js',
+  'src/Internationalization/i18n/fr.js',
+  'src/Internationalization/i18n/ja.js',
   'src/Internationalization/i18n/nl.js',
   'src/Internationalization/i18n/pt-BR.js',
+  'src/Internationalization/i18n/zh-CN.js',
   'src/PageStateManager/PageState.css',
   'src/PageStateManager/PageStateManager.js',
   'src/PivotTableUi/PivotTableUi.css',
