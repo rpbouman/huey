@@ -84,7 +84,7 @@ class AttributeUi {
     },
     'list (as CSV)': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( ${columnExpression} )',
+      expressionTemplate: 'STRING_AGG( ${columnExpression} ORDER BY ${columnExpression} )',
       columnType: 'VARCHAR'
     },
     'unique values': {
