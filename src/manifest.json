@@ -1,4 +1,6 @@
 {
+  "lang": "en",
+  "dir": "ltr",
   "name": "Huey 1.1.00 Indian Runner",
   "short_name": "Huey",
   "description": "Browser-based ROLAP pivot tables powered by DuckDB/WASM. Analyze CSV, Excel xlsx, Parquet, JSON and DuckDB files locally – no server required.",
