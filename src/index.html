@@ -36,12 +36,18 @@
 
     <script>
     const manifest = JSON.parse( decodeURIComponent( document.getElementById('manifest').href.substr('data:application/manifest+json,'.length) ) );
-    const [hueyName, hueyVersionNumber, hueyVersionName] = manifest.name.split(' ');
-    let duckdbLibraryVersion = '1.33.1-dev58.0';
+    if (location.protocol !== 'file:') {
+      document.getElementById('manifest').href = 'manifest.json';
+    }
+    const hueyName = 'Huey';
+    const hueyVersionNumber = '1.1.001';
+    const hueyVersionName = 'Japanice Criollo';
+    
+    let duckdbLibraryVersion = '1.33.1-dev61.0';
     
     // see: https://cdn.jsdelivr.net/npm/@tabler/icons@3.24.0/
     // see: https://github.com/tabler/tabler-icons/issues/1310
-    const tablerIconsFontVersion = '3.44.0';
+    const tablerIconsFontVersion = '3.45.0';
     
     const tablerIconsFontUrl = `https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${tablerIconsFontVersion}/dist/fonts/tabler-icons.woff2?v${tablerIconsFontVersion}`;
     const preloadLink = document.createElement('link');
@@ -73,10 +79,6 @@
       item.setAttribute('data-resource-type', url.split('?')[0].split('.').pop());
       item.textContent = url;
       list.appendChild(item);
-    }
-
-    if (location.protocol !== 'file:') {
-      document.getElementById('manifest').href = 'manifest.json';
     }
     </script>
 
