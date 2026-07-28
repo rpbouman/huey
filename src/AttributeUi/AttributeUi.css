@@ -309,14 +309,20 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     }
         
     &:is(
-      &[data-column_type^=STRUCT][data-nodetype=column]:not( [data-derivation],[data-aggregator] ),
+      &[data-column_type^=STRUCT][data-nodetype=column]:not( [data-derivation],[data-aggregator=count] ),
       &[data-member_expression_type^=STRUCT]:not( [data-derivation],[data-aggregator] ),
       &[data-member_expression_type^=STRUCT]:is(
         [data-nodetype=derived]:is(
           [data-derivation='entries'],
           [data-derivation='elements']
         )
-      ) 
+      ),
+      &[data-column_type^=STRUCT][data-nodetype=derived]:is( 
+        [data-derivation=max],
+        [data-derivation=median],
+        [data-derivation=min],
+        [data-derivation=mode]
+      )
     ) > summary > span.label::before {
       content: var( --icon-code-dots );
     }
