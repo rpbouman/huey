@@ -309,11 +309,9 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     }
         
     &:is(
-      &[data-column_type^=STRUCT][data-nodetype=column],
-      &[data-member_expression_type^=STRUCT],
-      &:is(
-        [data-member_expression_type^=STRUCT]
-      ):is(
+      &[data-column_type^=STRUCT][data-nodetype=column]:not( [data-derivation],[data-aggregator] ),
+      &[data-member_expression_type^=STRUCT]:not( [data-derivation],[data-aggregator] ),
+      &[data-member_expression_type^=STRUCT]:is(
         [data-nodetype=derived]:is(
           [data-derivation='entries'],
           [data-derivation='elements']
