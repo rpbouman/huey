@@ -1569,14 +1569,15 @@ class AttributeUi {
   }
 
   #updateState(){
+    const dom = this.getDom();
     const queryModel = this.#queryModel;
 
     // to satisfy https://github.com/rpbouman/huey/issues/220, 
     // we need to ensure derivations and aggregates are loaded.
     
     // First we get the column names of those query items that have a derivation or aggregator
-    const referencedColumns = {};
     const axisIds = queryModel.getAxisIds();
+    let node;
     for (const axisId of axisIds) {
       const queryAxis = queryModel.getQueryAxis(axisId);
       const items = queryAxis.getItems();
@@ -1584,33 +1585,42 @@ class AttributeUi {
         if (!item.columnName) {
           continue;
         }
-        if (!item.derivation && !item.aggregator){
+        if (!item.derivation && !item.aggregator && !item.memberExpressionPath){
           continue;
         }
-        referencedColumns[item.columnName] = true;
+        const columnSelector = `details[data-column_name="${CSS.escape(item.columnName)}"]`;
+        const columnAttributeNodeSelector = columnSelector + '[data-nodetype=column]';
+        const columnAttributeNode = dom.querySelector(columnAttributeNodeSelector);
+        if (!columnAttributeNode) {
+          continue;
+        }
+        node = columnAttributeNode;
+        if (item.memberExpressionPath) {
+          if (columnAttributeNode.querySelector('details') === null) {
+            this.loadChildNodes(columnAttributeNode);
+          }
+          let memberSelector = columnSelector + '[data-nodetype=member]';
+          for (let i = 0; i < item.memberExpressionPath.length; i++){
+            memberSelector += `[data-member_expression_path="${CSS.escape(JSON.stringify(item.memberExpressionPath.slice(0,i+1)))}"]`;
+            const memberAttributeNode = dom.querySelector(memberSelector);
+            node = memberAttributeNode;
+            if (memberAttributeNode.querySelector('details') === null) {
+              this.loadChildNodes(memberAttributeNode);
+            }
+          }
+        }
+        if (!item.derivation && !item.aggregator) {
+          continue;
+        }
+        if (node.querySelector('details') !== null) {
+          continue;
+        }
+        this.loadChildNodes(node);
       }
     }
-    
-    // then, check all top-level attribute nodes that don't have child nodes
-    // if the associated column name is referenced in the query, then load its childnodes.
-    const attributeNodes = this.getDom().childNodes;
-    for (const attributeNode of attributeNodes) {
-      if (attributeNode.nodeType !== 1 || attributeNode.nodeName !== 'DETAILS') {
-        continue;
-      }
-      const columnName = attributeNode.getAttribute('data-column_name');
-      if (referencedColumns[columnName] === undefined) {
-        continue;
-      }
-      const descendants = attributeNode.querySelectorAll('details');
-      if (descendants.length > 0) {
-        continue;
-      }
-      this.loadChildNodes(attributeNode);
-    }
-    
+
     // make sure all the selectors checkboxes are (un)checked according to the query state.
-    const inputs = this.getDom().getElementsByTagName('input');
+    const inputs = dom.getElementsByTagName('input');
     for (const input of inputs) {
       const axisId = input.getAttribute('data-axis');
 
