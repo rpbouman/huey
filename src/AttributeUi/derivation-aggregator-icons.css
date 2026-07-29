@@ -124,18 +124,6 @@
 
 [data-derivation='sort values']{ --item-icon: var( --icon-sort-ascending-letters ); }
 
-/* ─── Count ───────────────────────────────────────────────────────────────── */
-
-[data-derivation=count],
-[data-derivation="count if true"],
-[data-derivation="count if false"],
-[data-aggregator=count],
-[data-aggregator="count if true"],
-[data-aggregator="count if false"]{ --item-icon: var( --icon-tallymarks ); }
-
-[data-derivation="distinct count"],
-[data-aggregator="distinct count"]{ --item-icon: var( --icon-tallymark-4 ); }
-
 /* ─── Min / max ───────────────────────────────────────────────────────────── */
 
 [data-derivation=max],
@@ -193,3 +181,16 @@
 
 [data-derivation=or],
 [data-aggregator=or]{ --item-icon: var( --icon-logical-or ); }
+
+/* ─── Count ───────────────────────────────────────────────────────────────── */
+
+[data-derivation=count],
+[data-derivation="count if true"],
+[data-derivation="count if false"],
+[data-aggregator=count],
+[data-aggregator="count if true"],
+[data-aggregator="count if false"]{ --item-icon: var( --icon-tallymarks ); }
+
+[data-derivation="distinct count"],
+[data-aggregator="distinct count"]{ --item-icon: var( --icon-tallymark-4 ); }
+

@@ -1496,8 +1496,6 @@ class AttributeUi {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
 
-    const elementType = node.getAttribute('data-element_type');
-
     const profile = {
       column_name: columnName,
       column_type: columnType,
@@ -1512,13 +1510,20 @@ class AttributeUi {
       profile.derivation = derivation;
     }
 
-    const expressionType = memberExpressionType || columnType;
+    let expressionType = memberExpressionType || columnType;
     const typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (
-      nodeType !== 'derived' ||
-      derivation === 'elements'
-    ){
+    let arrayAggregatorInfo;
+    const isArray = isArrayType(expressionType);
+    if (typeName === 'STRUCT' && isArray) {
+      arrayAggregatorInfo = AttributeUi.getAggregatorInfo(derivation);
+    }
+
+    if ( nodeType !== 'derived' || derivation === 'elements' || arrayAggregatorInfo && arrayAggregatorInfo.preservesColumnType){
+      if (arrayAggregatorInfo){ 
+        expressionType = getArrayElementType(expressionType);
+      }
+
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
         this.#loadArrayChildNodes(node, typeName, profile);

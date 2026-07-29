@@ -13,8 +13,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     * hide the expand/collapse widget for these attribute nodes.
     */
     &:is( 
-      [data-nodetype=derived][data-member_expression_type=JSON], 
-      [data-nodetype=derived][data-derivation="row number"], 
+      [data-nodetype=derived]:is( 
+        [data-member_expression_type=JSON], 
+        [data-derivation="row number"],
+        [data-derivation="distinct count"],
+        [data-derivation="entropy"],
+        [data-derivation="count"] 
+      ),
       [data-nodetype=aggregate]
     ) {
       > summary {
