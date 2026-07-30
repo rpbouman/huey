@@ -1522,6 +1522,8 @@ class AttributeUi {
     if ( nodeType !== 'derived' || derivation === 'elements' || arrayAggregatorInfo && arrayAggregatorInfo.preservesColumnType){
       if (arrayAggregatorInfo){ 
         expressionType = getArrayElementType(expressionType);
+        delete profile.derivation;
+        profile.memberExpressionPath.push(`list_aggregate(${derivation})`);
       }
 
       // only load these derivations if we're not ourself a derived node.
@@ -1608,6 +1610,9 @@ class AttributeUi {
           for (let i = 0; i < item.memberExpressionPath.length; i++){
             memberSelector += `[data-member_expression_path="${CSS.escape(JSON.stringify(item.memberExpressionPath.slice(0,i+1)))}"]`;
             const memberAttributeNode = dom.querySelector(memberSelector);
+            if (!memberAttributeNode) {
+              continue;
+            }
             node = memberAttributeNode;
             if (memberAttributeNode.querySelector('details') === null) {
               this.loadChildNodes(memberAttributeNode);
