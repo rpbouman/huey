@@ -1496,8 +1496,6 @@ class AttributeUi {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
 
-    const elementType = node.getAttribute('data-element_type');
-
     const profile = {
       column_name: columnName,
       column_type: columnType,
@@ -1512,13 +1510,22 @@ class AttributeUi {
       profile.derivation = derivation;
     }
 
-    const expressionType = memberExpressionType || columnType;
+    let expressionType = memberExpressionType || columnType;
     const typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (
-      nodeType !== 'derived' ||
-      derivation === 'elements'
-    ){
+    let arrayAggregatorInfo;
+    const isArray = isArrayType(expressionType);
+    if (typeName === 'STRUCT' && isArray) {
+      arrayAggregatorInfo = AttributeUi.getAggregatorInfo(derivation);
+    }
+
+    if ( nodeType !== 'derived' || derivation === 'elements' || arrayAggregatorInfo && arrayAggregatorInfo.preservesColumnType){
+      if (arrayAggregatorInfo){ 
+        expressionType = getArrayElementType(expressionType);
+        delete profile.derivation;
+        profile.memberExpressionPath.push(`list_aggregate(${derivation})`);
+      }
+
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
         this.#loadArrayChildNodes(node, typeName, profile);
@@ -1603,6 +1610,9 @@ class AttributeUi {
           for (let i = 0; i < item.memberExpressionPath.length; i++){
             memberSelector += `[data-member_expression_path="${CSS.escape(JSON.stringify(item.memberExpressionPath.slice(0,i+1)))}"]`;
             const memberAttributeNode = dom.querySelector(memberSelector);
+            if (!memberAttributeNode) {
+              continue;
+            }
             node = memberAttributeNode;
             if (memberAttributeNode.querySelector('details') === null) {
               this.loadChildNodes(memberAttributeNode);

@@ -1,5 +1,9 @@
 class QueryAxisItem {
 
+  static parseMemberExpressionFunc(memberExpression){
+    return /^(?<funcname>[^(]+)\((?<args>[^)]*)\)$/.exec( memberExpression );
+  }
+
   static createFormatter(axisItem){
     let dataType = QueryAxisItem.getQueryAxisItemDataType(axisItem);
     if (axisItem.aggregator) {
@@ -185,8 +189,15 @@ class QueryAxisItem {
 
     if (item.memberExpressionPath) {
       sqlExpression = item.memberExpressionPath.reduce((acc, curr) => {
-        if ( curr.endsWith('()') ) {
-          acc = `${curr.slice(0, -2)}( ${acc} )`;
+        const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc(curr);
+        if ( funcCallMatch ) {
+          const funcName = funcCallMatch.groups.funcname;
+          const args = [acc];
+          if (funcCallMatch.groups.args){
+            // right now we only expect array aggregate function names here
+            args.push( `'${funcCallMatch.groups.args}'` );
+          }
+          acc = `${funcName}( ${args.join(', ')} )`;
         }
         else {
           acc += `['${curr}']`;
@@ -268,7 +279,8 @@ class QueryAxisItem {
     if (queryAxisItem.memberExpressionPath && queryAxisItem.memberExpressionPath.length) {
       const memberExpressionPath = queryAxisItem.memberExpressionPath;
       dataType = getMemberExpressionType(columnType, memberExpressionPath);
-      if (memberExpressionPath[memberExpressionPath.length - 1].endsWith('()')){
+      const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc( memberExpressionPath[memberExpressionPath.length - 1] );
+      if (funcCallMatch){
         return dataType;
       }
     }
@@ -305,9 +317,8 @@ class QueryAxisItem {
         }
       }
       else
-      if (derivation === 'median'){
-        dataType = getArrayElementType(dataType);
-        dataType = getMedianReturnDataTypeForArgumentDataType(dataType);
+      if (typeof derivationInfo.getReturnDataTypeForArgumentDataType === 'function') {
+        dataType = derivationInfo.getReturnDataTypeForArgumentDataType(dataType);
       }
       else
       if (!derivationInfo.preservesColumnType){

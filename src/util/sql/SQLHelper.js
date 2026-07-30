@@ -1595,28 +1595,37 @@ function getMemberExpressionType(type, memberExpressionPath){
         // we should be looking up the corresponding derivation
         // and extract the type info from there.
         const memberExpression = memberExpressionPath[0];
+        const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc( memberExpression );
+        const funcName = funcCallMatch ? funcCallMatch.groups.funcname : undefined;
         let memberExpressionType;
-        switch (memberExpression) {
-          case 'unnest()':
+        switch (funcName) {
+          case 'unnest':
             memberExpressionType = getArrayElementType(type);
             break;
-          case 'generate_subscripts()':
+          case 'generate_subscripts':
             memberExpressionType = 'BIGINT';
             break;
-          case 'map_entries()':
+          case 'map_entries':
             memberExpressionType = getMapEntriesType(type);
             break;
-          case 'map_keys()':
-            //memberExpressionType = getArrayElementType(type);
-            //memberExpressionType = getMapKeyType(memberExpressionType);
+          case 'map_keys':
             memberExpressionType = getMapKeyType(type);
             memberExpressionType = getArrayType(memberExpressionType);
             break;
-          case 'map_values()':
-            //memberExpressionType = getArrayElementType(type);
-            //memberExpressionType = getMapValueType(memberExpressionType);
+          case 'map_values':
             memberExpressionType = getMapValueType(type);
             memberExpressionType = getArrayType(memberExpressionType);
+            break;
+          case 'list_aggregate':
+            const arg = funcCallMatch.groups.args;
+            const aggregatorInfo = AttributeUi.getAggregatorInfo(arg);
+            if (aggregatorInfo.columnType) {
+              memberExpressionType = aggregatorInfo.columnType;
+            }
+            else 
+            if (aggregatorInfo.preservesColumnType) {
+              memberExpressionType = getArrayElementType(type);
+            }
             break;
           default:
             const typeDescriptor = getStructTypeDescriptor(type);
