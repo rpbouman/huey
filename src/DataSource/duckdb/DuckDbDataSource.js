@@ -388,8 +388,22 @@ class DuckDbDataSource extends EventEmitter {
         }
       }
     }
-    // if we couldn't identify a file type then we can try to examine the file to read a magic number.
-    if (!config.fileType){
+
+    if (config.fileType){
+      if (config.fileType === 'txt') {
+        const lowerURL = url.toLowerCase();
+        Object.keys(DuckDbDataSource.fileTypes).some(fileTypeKey => {
+          if (lowerURL.endsWith(`.${fileTypeKey}`)){
+            const fileType = DuckDbDataSource.fileTypes[fileTypeKey];
+            config.fileType = fileTypeKey;
+            config.contentType = fileType.mimeType;
+            return true;
+          }
+        });
+      }
+    }
+    else {
+      // if we couldn't identify a file type then we can try to examine the file to read a magic number.
       const headers = { "Accept": contentType };
       
       switch (response.headers['accept-ranges']) {
