@@ -3,7 +3,7 @@ class PageStateManager {
   constructor(){
     this.#initPopStateHandler();
     this.#initNavigationButtons();
-    //this.#initHashChangeHandler();
+    this.#initHashChangeHandler();
   }
 
   #initPopStateHandler(){
@@ -21,9 +21,12 @@ class PageStateManager {
 
   // this basically means: load the query
   #hashChangeHandler(event){
-    const currentRoute = Routing.getCurrentRoute();
-    // TODO: check if the current state already matches the route, if it does we're done.
-    this.setPageState(currentRoute);
+    const newURL = event.newURL;
+    const newURLObject = new URL(newURL);
+    const newRoute = newURLObject.hash;
+    if (newRoute.length) {
+      this.setPageState( newRoute.substr(1) ); 
+    }
   }
 
   // this basically means: load the query
