@@ -2,7 +2,7 @@
 Huey is a static browser-based app that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files. 
 
-You can either [load these files from your local workstation](#registering-and-analyzing-files-with-huey), or from a [remote location via a URL](#register-urls); Or you can [connect Huey to an external Data Lake or Quack server](#remote-catalogs).
+You can either [load these files from your local workstation](#registering-and-analyzing-files-with-huey), or from a [remote location via a URL](#register-urls); Or you can [connect Huey to an external Data Lake or Quack server](#catalogs-manager).
 
 __Try Huey now__ with some [sample reports](#getting-started) using the live demo at [https://rpbouman.github.io/huey/src/index.html](https://rpbouman.github.io/huey/src/index.html)
 
