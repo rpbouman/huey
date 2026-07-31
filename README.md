@@ -31,14 +31,15 @@ If you prefer to watch a video insted, here's a few:
 - It's free! Huey is released under the [MIT license](https://github.com/rpbouman/huey?tab=MIT-1-ov-file#readme), just like DuckDB.
 
 ### Limitations
-- Huey is based on [DuckDB/WASM](https://duckdb.org/docs/current/clients/wasm/overview) (a DuckDB instance compiled to [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)). DuckDB is awesome, and WASM is too! 
-  However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. 
+- Huey is based on [DuckDB-WASM](https://duckdb.org/docs/current/clients/wasm/overview) (a DuckDB instance compiled to [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)). DuckDB is awesome, and WASM is too! 
+  However, the WASM runtime imposes some limits which result in a poorer performance as compared to native DuckDB. (Note: this is not about DuckDB or DuckDB-WASM, the following limitations are mainly related to the WASM runtime)
   Most notably:
   - WASM in general is limited to a theoretical 4Gb memoery limit. In practice this may be closer to 3Gb. 
-    However, it's complicated: DuckDB (and DuckDB/WASM) empploys advance streaming analytics, which often can process and aggregate datasets with volumes that exceed this limit.
+    However, it's complicated: DuckDB (and thus, DuckDB-WASM) uses advance streaming analytics, which often can process and aggregate datasets with volumes that exceed this limit.
   - WASM is confined to a single thread, eliminating some of DuckDB's optimizations.
-  That said, DuckDB WASM is still incredibly fast when compared to any in-browser alternative. 
-  If you find that your use case is stretching WASM's limits, then you might try to use Huey as a client and [connect to a DuckDB Quack Server](#connecting-to-a-quack-server).
+  - Some of the most interesting DuckDB capabilities, such as access to external remote databases such as MySQL, PostgreSQL, and the Unity Catalog rely on extensions that are not readily available to DuckDB-WASM 
+  That said, DuckDB-WASM is still incredibly fast when compared to any in-browser alternative. 
+  If you find that your use-case is stretching WASM's limits or downright blocked, then you might try to use Huey as a client and [connect to a DuckDB  Server](#connecting-to-a--server).
 - Huey is subject to typical restrictions of a web application. 
   In particular, [URL datasources](#register-urls) may not be directly accessible due to [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy) and/or missing [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS).
   If these issues are hampering your use case, the obvious step would be to server Huey over HTTP(S), and configure your webserver to pass the right headers.
@@ -126,7 +127,7 @@ If you decide the PWA is not for you, that's fine - you can always uninstall it 
 ### Running Huey from a folder on your device
 1) Use git to check out the [Huey github repository](https://github.com/rpbouman/huey.git) to a local folder, or [download](https://github.com/rpbouman/huey/archive/refs/heads/dev.zip) the repository as a .zip file and extract it to a folder.
 2) Open [index.html](https://github.com/rpbouman/huey/blob/dev/index.html) in your web browser. 
-   Note that although Huey runs locally, it depends on DuckDB WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. 
+   Note that although Huey runs locally, it depends on DuckDB-WASM and Tabler Icons, which are served by the jsdelivr.com CDN, so make sure you're connected to the internet. 
    Once these resources are downloaded, they are typically cached by your browser, often allowing you to run Huey even without an internet connection. 
 
 With either approach, the Huey files and resources are available in a folder of your choosing.
@@ -134,11 +135,11 @@ Of course, if you checked out the repository you can use `git pull` to update to
 
 ## Registering and Analyzing Files with Huey
 
-Huey uses <a href="https://duckdb.org/docs/archive/0.9.2/api/wasm/overview" target="_blank" rel="noopener noreferrer">DuckDb WASM</a> to read and analyze data files. 
+Huey uses <a href="https://duckdb.org/docs/archive/0.9.2/api/wasm/overview" target="_blank" rel="noopener noreferrer">DuckDb-WASM</a> to read and analyze data files. 
 
 General browser security policies prevent web applications from autonomously accessing files on the local file system. 
 Web application users need to explicitly select the files they want to analyze. 
-Huey then registers them in DuckDB WASM's virtual file system so they become available for analysis. 
+Huey then registers them in DuckDB-WASM's virtual file system so they become available for analysis. 
 
 ### Registering Files
 
@@ -201,7 +202,7 @@ Successfully loaded DuckDB database files appear in the DuckDb Folder, which app
 The schemas in the duckdb database file are presented as folders below the duckdb file entry, and any tables or views in the schema are presented below the schema folder. 
 Each table or view has an explore button which you can click to explore the data.   
 
-Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB WASM) won't be able to find them.
+Note: We ran into a limitation - when the duckdb file itself refers to external files, then it's likely that Huey (or rather, DuckDB-WASM) won't be able to find them.
 But native duckdb tables, as well as views based on duckdb base tables work marvelously and are quite a bit faster than querying bare data files.
 
 ### Using Remote Datasets
@@ -1124,9 +1125,29 @@ If all goes well, the Quack server will be added to the Datasource Panel.
 From there, you can expanmd the node to reveal the attached catalog, and the schemas within it. 
 Finally, expanding the schema folders reveals the tables or views so you can analyze them like any other Huey Datasource.
 
-Note that for Quack catalogs, Huey delegates execution to the server.
+Note that for Quack catalogs, Huey delegates execution to the remote Quack server.
 So in this particular scenario, Huey is really a client that allows the server to do all the heavy lifting.
-This can be useful in particular to overcome memoery and trheading limitations specific to DuckDb/WASM.
+This can be useful in particular to overcome [memory and trheading limitations](#limitations) specific to DuckDb-WASM.
+
+### Using Quack to connect to a DuckDB Data Hub 
+It was just mentioned that Quack can overcome some limitations of the WASM environment.
+The previous sections also explained how the Huey Catalogs Manager relies on specific extensions that allow access to remote, 'foreign' datasources through the `ATTACH` statement.
+
+Unfortunately, not all DuckDB extensions are available to DuckDB-WASM. Not even all core extensions.
+For example, the extensions to `ATTACH` popular RDBMS products like MySQL and PostgreSQL are not available directly to DuckDB-WASM.
+
+For such use-cases, this limitation may be overcome by running a central DuckDB instance that acts as a hub to the external datasources. 
+In this scenario, a regular (non-WASM) DuckDB instance, for which all necessary extensions are available and installed and `ATTACH`-ed, would be setup as a Quack server.  
+This DuckDB instance acts as a hub (or proxy) to access such remote datasources.
+
+Huey would simply create a Quack catalog entry for the hub and connect to it as client. 
+The following diagram illustrates the approach:
+
+<img width="1280" height="758" alt="image" src="https://github.com/user-attachments/assets/8bfcbd2e-4dab-42d3-aaf7-8dd21d64934f" />
+
+(Please note that the image above is simply an illustration - you can set up your data hub in any way you like. 
+If it is a DuckDB instance, it can be set up to attach any remote datasource for which an extensions is installed and configured.
+In theory, the hub need not even be a DuckDB instance, it could be kind of Quack implementation, not necessarily DuckDB's)
 
 # Development, Releases, and contributions 
 
@@ -1138,7 +1159,7 @@ Active development is done on the dev branch.
 Once every while, typically every few weeks, ongoing developments are captured in a (pre-)release, which gets its own version number and a nickname.
 You can check out prior releases here: [https://github.com/rpbouman/huey/releases](https://github.com/rpbouman/huey/releases)
 
-A new (pre-)release is triggered whenever a dependency is updated (currently, Huey has two dependencies - DuckDB WASM and Tabler Icons).
+A new (pre-)release is triggered whenever a dependency is updated (currently, Huey has two dependencies - DuckDB-WASM and Tabler Icons).
 Other events that trigger a (pre-)release is when ongoing development of new features and bugfixes is deemed stable - or at least stable enough to focus on new developments.
 
 When a couple of pre-releases have been found stable enough for production usage, a release is made and the work from the dev branch is merged into the main branch.
@@ -1162,8 +1183,8 @@ Some Huey settings can be configured via URL query parameters.
 For typical usage it is not recommended to pass these parameters. 
 The main purpose is for development, debugging and to solve compatibility issues.
 
-- `loglevel`: Controls the DuckDB WASM loglevel. Valid values are defined by the [DuckDB/WASM LogLevel Enumeration](https://shell.duckdb.org/docs/enums/index.LogLevel.html). You can pass either the Enumeration keys (`DEBUG`, `ERROR`, `INFO`, `NONE`, `WARNING`) or their corresponding integer values.
-- `duckdb-wasm`: DuckDB WASM version as published on jsdelivr. See [https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm](https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm) for a list of acceptable versions. The ability to control the DuckDB WASM version is mostly to solve compatibility issues around DuckDB extensions, as some extensions required by the user may not yet be available for newer DuckDB WASM versions.
+- `loglevel`: Controls the DuckDB-WASM loglevel. Valid values are defined by the [DuckDB-WASM LogLevel Enumeration](https://shell.duckdb.org/docs/enums/index.LogLevel.html). You can pass either the Enumeration keys (`DEBUG`, `ERROR`, `INFO`, `NONE`, `WARNING`) or their corresponding integer values.
+- `duckdb-wasm`: DuckDB-WASM version as published on jsdelivr. See [https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm](https://data.jsdelivr.com/v1/packages/npm/@duckdb/duckdb-wasm) for a list of acceptable versions. The ability to control the DuckDB-WASM version is mostly to solve compatibility issues around DuckDB extensions, as some extensions required by the user may not yet be available for newer DuckDB-WASM versions.
 
 ## Integrating and/or Embedding Huey
 
