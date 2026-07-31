@@ -802,9 +802,10 @@ class DataSourcesUi extends EventEmitter {
   
   static async #promptExportDataFormat(fromFileType, includeFromFileType){
     const menu = DataSourcesUi.#getDownloadMenuHTML(fromFileType, includeFromFileType);
+    const exportDataContent = `<div>${Internationalization.getText('Choose an output format')}:</div>${menu}`;
     const result = await PromptUi.show({
       title: 'Export Datasource',
-      contents: menu
+      contents: exportDataContent
     });
 
     if (result !== 'accept'){
