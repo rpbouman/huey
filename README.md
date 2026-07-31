@@ -1131,7 +1131,7 @@ This can be useful in particular to overcome [memory and trheading limitations](
 
 ### Using Quack to connect to a DuckDB Data Hub 
 It was just mentioned that Quack can overcome some limitations of the WASM environment.
-The previous sections also explained how the Huey Catalogs Manager relies on specific extensions that allow access to remote, 'foreigh' datasources through the `ATTACH` statement.
+The previous sections also explained how the Huey Catalogs Manager relies on specific extensions that allow access to remote, 'foreign' datasources through the `ATTACH` statement.
 
 Unfortunately, not all DuckDB extensions are available to DuckDB-WASM. Not even all core extensions.
 For example, the extensions to `ATTACH` popular RDBMS products like MySQL and PostgreSQL are not available directly to DuckDB-WASM.
@@ -1141,9 +1141,13 @@ In this scenario, a regular (non-WASM) DuckDB instance, for which all necessary 
 This DuckDB instance acts as a hub (or proxy) to access such remote datasources.
 
 Huey would simply create a Quack catalog entry for the hub and connect to it as client. 
-The following diagram may further illustrate the approach:
+The following diagram illustrates the approach:
 
 <img width="1280" height="758" alt="image" src="https://github.com/user-attachments/assets/8bfcbd2e-4dab-42d3-aaf7-8dd21d64934f" />
+
+(Please note that the image above is simply an illustration - you can set up your data hub in any way you like. 
+If it is a DuckDB instance, it can be set up to attach any remote datasource for which an extensions is installed and configured.
+In theory, the hub need not even be a DuckDB instance, it could be kind of Quack implementation, not necessarily DuckDB's)
 
 # Development, Releases, and contributions 
 
