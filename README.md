@@ -1019,9 +1019,9 @@ To connect to it from within Huey, follow [the steps for creating a new Catalog]
   <img width="864" height="385" alt="image" src="https://github.com/user-attachments/assets/f305cea2-202c-419c-9858-67e2aa9dca21" />
 - Save the catalog.
 
-If all goes well, the Catalog is now added to the Datasources tab:
+  If all goes well, the Catalog is now added to the Datasources tab:
 
-<img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
+  <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 ### TPCH Iceberg Catalog
 The TPCH Iceberg Catalog is the TPCH benchmark dataset, served as Iceberg tables stored on S3.
