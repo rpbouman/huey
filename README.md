@@ -1071,6 +1071,7 @@ Once the secret is in place, you can follow [the steps for creating a new Catalo
 - Save the catalog.
 
 If all goes well, the Catalog is now added to the Datasources tab:
+
 <img width="370" height="225" alt="image" src="https://github.com/user-attachments/assets/2f5334f5-a390-474f-84f3-b0f368138c05" />
 
 ### Connecting to a Quack Server
