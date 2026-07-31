@@ -80,6 +80,7 @@ Internationalization.setTexts({
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "选中以在填充选择列表时包含其他筛选项（除搜索字符串外）",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "选中以使用浏览器的默认区域设置，取消选中以输入自定义区域设置。",
   "Checking extension {1}": "正在检查扩展 {1}",
+  "Choose an output format": "选择输出格式",
   "Choose any of the compatible datasources instead, or browse for a new one:": "改为选择其他兼容的数据源，或浏览新的数据源：",
   "Clear": "清除",
   "Clear All": "全部清除",
