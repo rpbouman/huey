@@ -80,6 +80,7 @@ Internationalization.setTexts({
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "Vink aan om de andere filteritems (naast de zoekstring) op te nemen om de keuzelijst te vullen",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "Vink aan om de standaard locatie van de browser te gebruiken, vink af om een aangepaste locatie in te voeren.",
   "Checking extension {1}": "Extensie {1} controleren",
+  "Choose an output format": "Kies een uitvoerformaat",
   "Choose any of the compatible datasources instead, or browse for a new one:": "Kies één van de compatibele databronnen, of open een nieuwe:",
   "Clear": "Wissen",
   "Clear All": "Alles wissen",

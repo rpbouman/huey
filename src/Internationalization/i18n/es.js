@@ -80,6 +80,7 @@ Internationalization.setTexts({
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "Marque esta opción para incluir los demás elementos del filtro (además de la cadena de búsqueda) al generar la lista de selección",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "Marque esta opción para usar la configuración regional predeterminada del navegador; desmárquela para introducir una configuración regional personalizada.",
   "Checking extension {1}": "Comprobando la extensión {1}",
+  "Choose an output format": "Elija un formato de salida",
   "Choose any of the compatible datasources instead, or browse for a new one:": "Elija alguna de las fuentes de datos compatibles, o busque una nueva:",
   "Clear": "Borrar",
   "Clear All": "Borrar todo",
