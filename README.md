@@ -1,4 +1,5 @@
 # 🦆 Huey
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rpbouman/huey)
 Huey is a static browser-based app that lets you explore and analyze data.
 Huey supports reading from multiple file formats, like .csv, .parquet, .json data files as well as .duckdb database files. 
 
