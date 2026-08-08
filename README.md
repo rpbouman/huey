@@ -1211,3 +1211,20 @@ You can contribute in many ways:
   Alternatively, you can sponsor Huey by <a href="https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84" target="_blank" rel="noopener noreferrer">making a donation</a>.
 - Consultancy: if need help using, installing or deploying Huey, you can always ask for help. If you require professional support, we can work something out too. 
 - Commission a feature. If you need custom development, or would like help building your own custom development, then contact me and we'll negotiate the details.
+
+## Sponsorship & Commercial Support
+
+If your organization relies on Huey, corporate sponsorship helps ensure long-term stability and maintenance. 
+Huey values its partners and commits to reliability so your teams can depend on it.
+
+Huey offers corporate procurement and invoiced billing via GitHub:
+
+| Tier | Monthly | Benefits |
+| :--- | :--- | :--- |
+| **Bronze Backer** | $100 | Company identifier listed in project documentation. |
+| **Silver Partner** | $250 | Logo placement; prioritized issue review. |
+| **Gold Sponsor** | $500 | Prominent logo placement; direct roadmap consultation. |
+
+[**View Sponsorship Tiers**](https://github.com/sponsors/rpbouman)
+
+For custom vendor agreements or inquiries, contact us directly.
