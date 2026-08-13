@@ -91,6 +91,7 @@ class QueryAxisItem {
     if (caption){
       return caption;
     }
+    
     caption = QueryAxisItem.createCaptionForQueryAxisItem(axisItem);
     if (axisItem.axis !== QueryModel.AXIS_FILTERS || includeFilterCaption !== true) {
       return caption;
@@ -134,7 +135,9 @@ class QueryAxisItem {
         case 'element indices':
           path.pop();
       }
-      caption = `${caption}.${path.join('.')}`;
+      caption = `${caption}.${path.map(
+        member => isQuoted( member, "'" ) ? unQuoteStringLiteral( member ) : member
+      ).join('.')}`;
     }
 
     if (axisItem.derivation) {
@@ -200,7 +203,7 @@ class QueryAxisItem {
           acc = `${funcName}( ${args.join(', ')} )`;
         }
         else {
-          acc += `['${curr}']`;
+          acc += `[${curr}]`;
         }
         return acc;
       }, sqlExpression);
@@ -279,7 +282,7 @@ class QueryAxisItem {
     if (queryAxisItem.memberExpressionPath && queryAxisItem.memberExpressionPath.length) {
       const memberExpressionPath = queryAxisItem.memberExpressionPath;
       dataType = getMemberExpressionType(columnType, memberExpressionPath);
-      const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc( memberExpressionPath[memberExpressionPath.length - 1] );
+      const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc( memberExpressionPath[ memberExpressionPath.length - 1 ] );
       if (funcCallMatch){
         return dataType;
       }
