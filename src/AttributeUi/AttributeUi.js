@@ -755,6 +755,9 @@ class AttributeUi {
         const memberExpressionPath = config.profile.memberExpressionPath;
         const tmp = [].concat(memberExpressionPath);
         caption = tmp.pop();
+        if ( isQuoted( caption, "'" ) ) {
+          caption = unQuoteStringLiteral( caption );
+        }
         break;
       case 'derived':
         caption = config.derivation;
@@ -768,24 +771,26 @@ class AttributeUi {
     return caption;
   }
   
+  // note: this is not intended to get a SQL expression, it's only used to generate captions
   static #getUiNodeColumnExpression(config){
     let columnExpression = config.profile.column_name;
     columnExpression = quoteIdentifierWhenRequired(columnExpression);
     const memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
-      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+      columnExpression = `${columnExpression}.${memberExpressionPath.map( 
+        member => isQuoted(member, "'") ? unQuoteStringLiteral( member ) : member
+      ).join('.')}`;
     }
     return columnExpression;
   }
   
   static #getUiNodeTitle(config){
-    const columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
-    
     let title = config.title;
     if (title){
       return title;
     }
     
+    const columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
     switch (config.type) {
       case 'column':
         title = `${config.profile.column_type}`;
@@ -1327,7 +1332,7 @@ class AttributeUi {
         profile: {
           column_name: profile.column_name,
           column_type: profile.column_type,
-          memberExpressionPath: memberExpressionPath.concat([memberName]),
+          memberExpressionPath: memberExpressionPath.concat( [ quoteStringLiteral( memberName ) ] ),
           memberExpressionType: memberType
         }
       }

@@ -1594,7 +1594,7 @@ function getMemberExpressionType(type, memberExpressionPath){
         // for all the cases where the member expression path element has parenthesis, 
         // we should be looking up the corresponding derivation
         // and extract the type info from there.
-        const memberExpression = memberExpressionPath[0];
+        let memberExpression = memberExpressionPath[0];
         const funcCallMatch = QueryAxisItem.parseMemberExpressionFunc( memberExpression );
         const funcName = funcCallMatch ? funcCallMatch.groups.funcname : undefined;
         let memberExpressionType;
@@ -1629,7 +1629,10 @@ function getMemberExpressionType(type, memberExpressionPath){
             break;
           default:
             const typeDescriptor = getStructTypeDescriptor(type);
-            memberExpressionType = typeDescriptor[memberExpression];
+            if ( isQuoted( memberExpression, "'" ) ) {
+              memberExpression = unQuoteStringLiteral( memberExpression );
+            }
+            memberExpressionType = typeDescriptor[ memberExpression ];
         }
         return getMemberExpressionType(memberExpressionType, memberExpressionPath.slice(1));
       case 'string':
