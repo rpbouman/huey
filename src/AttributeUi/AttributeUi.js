@@ -1523,7 +1523,11 @@ class AttributeUi {
       if (arrayAggregatorInfo){ 
         expressionType = getArrayElementType(expressionType);
         delete profile.derivation;
+        if (! profile.memberExpressionPath ) {
+          profile.memberExpressionPath = [];
+        }
         profile.memberExpressionPath.push(`list_aggregate(${derivation})`);
+        profile.memberExpressionType = expressionType;
       }
 
       // only load these derivations if we're not ourself a derived node.
