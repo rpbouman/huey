@@ -143,10 +143,10 @@
           padding: 0px 2px 0px 4px;
         }
 
-        > .pivotTableUiCell[data-value-type^=Decimal] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Float] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Int] > .pivotTableUiCellLabel,
-        > .pivotTableUiCell[data-value-type^=Uint] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="Decimal"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="Float"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="Int"] > .pivotTableUiCellLabel,
+        > .pivotTableUiCell[data-value-type^="Uint"] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^="List<Decimal>"] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^="List<Float>"] > .pivotTableUiCellLabel,
         > .pivotTableUiCell[data-value-type^="List<Int>"] > .pivotTableUiCellLabel,
