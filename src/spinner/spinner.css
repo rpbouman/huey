@@ -90,7 +90,7 @@ div#powered-by {
   &::before {
     display: block;
     font-size: xx-small;
-    content: 'p o w e r e d   b y:'
+    content: 'p o w e r e d\00A0\00A0\00A0 b y'
   }
   
   &::after {

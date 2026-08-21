@@ -7,7 +7,6 @@
   "start_url": "index.html",
   "scope": ".",
   "display_override": [
-    "window-controls-overlay",
     "minimal-ui",
     "standalone"
   ],

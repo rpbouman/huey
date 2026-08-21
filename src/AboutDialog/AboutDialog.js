@@ -3,10 +3,11 @@ function initAboutDialog(){
   logo.textContent = hueyName;
   
   const logoVersion  = byId('logoVersion');
-  logoVersion.textContent = `v ${hueyVersionNumber} (${hueyVersionName})` ;
+  const versionName = `v${hueyVersionNumber} (${hueyVersionName})`
+  logoVersion.textContent = versionName;
 
   const hueyVersion = byId('hueyVersion');
-  hueyVersion.textContent = manifest.name;
+  hueyVersion.textContent = `${hueyName} ${versionName}`;
 
   const iconsUrl = byId('tablerIconsUrl');
   iconsUrl.textContent = `Tabler Icons v${tablerIconsFontVersion}`;

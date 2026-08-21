@@ -197,13 +197,11 @@ nav#sidebar[role=tablist] {
       }
     }
     
-    &[data-nodetype=datasource]:is(
-      [data-datasourcetype=duckdb],
-      [data-datasourcetype=catalog]
-    )> details[data-nodetype=duckdb_schema] > details:not( 
-      &[data-nodetype=duckdb_schema] 
-    ) > summary,
-    &[data-nodetype=datasourcegroup][data-grouptype=file] > details[data-nodetype=datasource][data-datasourcetype=file] > summary {
+    [data-nodetype=datasource]:is(
+      [data-datasourcetype=table],
+      [data-datasourcetype=view],
+      [data-datasourcetype=file]
+    ) > summary {
       list-style: none;
       margin-left: 16px;
     }

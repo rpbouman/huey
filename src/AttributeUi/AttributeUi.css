@@ -13,8 +13,13 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     * hide the expand/collapse widget for these attribute nodes.
     */
     &:is( 
-      [data-nodetype=derived][data-member_expression_type=JSON], 
-      [data-nodetype=derived][data-derivation="row number"], 
+      [data-nodetype=derived]:is( 
+        [data-member_expression_type=JSON], 
+        [data-derivation="row number"],
+        [data-derivation="distinct count"],
+        [data-derivation="entropy"],
+        [data-derivation="count"] 
+      ),
       [data-nodetype=aggregate]
     ) {
       > summary {
@@ -309,16 +314,20 @@ main.layout:has( .workarea > .pivotTableUiContainer[aria-busy=true] ) > nav#side
     }
         
     &:is(
-      &[data-column_type^=STRUCT][data-nodetype=column],
-      &[data-member_expression_type^=STRUCT],
-      &:is(
-        [data-member_expression_type^=STRUCT]
-      ):is(
+      &[data-column_type^=STRUCT][data-nodetype=column]:not( [data-derivation],[data-aggregator=count] ),
+      &[data-member_expression_type^=STRUCT]:not( [data-derivation],[data-aggregator] ),
+      &[data-member_expression_type^=STRUCT]:is(
         [data-nodetype=derived]:is(
           [data-derivation='entries'],
           [data-derivation='elements']
         )
-      ) 
+      ),
+      &[data-column_type^=STRUCT][data-nodetype=derived]:is( 
+        [data-derivation=max],
+        [data-derivation=median],
+        [data-derivation=min],
+        [data-derivation=mode]
+      )
     ) > summary > span.label::before {
       content: var( --icon-code-dots );
     }

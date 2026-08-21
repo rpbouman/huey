@@ -1186,7 +1186,8 @@ class FilterDialog {
     const timeMessage = `Executing filter dialog picklist query.`;
     console.time(timeMessage);
     const datasource = this.#queryModel.getDatasource();
-    const result = await datasource.query(sql);
+    const managedConnection = await datasource.getManagedConnection();
+    const result = await managedConnection.query(sql);
     console.timeEnd(timeMessage);
     return result;
   }

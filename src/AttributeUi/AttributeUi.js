@@ -84,7 +84,7 @@ class AttributeUi {
     },
     'list (as CSV)': {
       folder: "list aggregators",
-      expressionTemplate: 'LIST( ${columnExpression} )',
+      expressionTemplate: 'STRING_AGG( ${columnExpression} ORDER BY ${columnExpression} )',
       columnType: 'VARCHAR'
     },
     'unique values': {
@@ -755,6 +755,9 @@ class AttributeUi {
         const memberExpressionPath = config.profile.memberExpressionPath;
         const tmp = [].concat(memberExpressionPath);
         caption = tmp.pop();
+        if ( isQuoted( caption, "'" ) ) {
+          caption = unQuoteStringLiteral( caption );
+        }
         break;
       case 'derived':
         caption = config.derivation;
@@ -768,24 +771,26 @@ class AttributeUi {
     return caption;
   }
   
+  // note: this is not intended to get a SQL expression, it's only used to generate captions
   static #getUiNodeColumnExpression(config){
     let columnExpression = config.profile.column_name;
     columnExpression = quoteIdentifierWhenRequired(columnExpression);
     const memberExpressionPath = config.profile.memberExpressionPath;
     if (memberExpressionPath){
-      columnExpression = `${columnExpression}.${memberExpressionPath.join('.')}`;
+      columnExpression = `${columnExpression}.${memberExpressionPath.map( 
+        member => isQuoted(member, "'") ? unQuoteStringLiteral( member ) : member
+      ).join('.')}`;
     }
     return columnExpression;
   }
   
   static #getUiNodeTitle(config){
-    const columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
-    
     let title = config.title;
     if (title){
       return title;
     }
     
+    const columnExpression = AttributeUi.#getUiNodeColumnExpression(config);
     switch (config.type) {
       case 'column':
         title = `${config.profile.column_type}`;
@@ -1327,7 +1332,7 @@ class AttributeUi {
         profile: {
           column_name: profile.column_name,
           column_type: profile.column_type,
-          memberExpressionPath: memberExpressionPath.concat([memberName]),
+          memberExpressionPath: memberExpressionPath.concat( [ quoteStringLiteral( memberName ) ] ),
           memberExpressionType: memberType
         }
       }
@@ -1496,8 +1501,6 @@ class AttributeUi {
       memberExpressionPath = JSON.parse(memberExpressionPath);
     }
 
-    const elementType = node.getAttribute('data-element_type');
-
     const profile = {
       column_name: columnName,
       column_type: columnType,
@@ -1512,13 +1515,26 @@ class AttributeUi {
       profile.derivation = derivation;
     }
 
-    const expressionType = memberExpressionType || columnType;
+    let expressionType = memberExpressionType || columnType;
     const typeName = getDataTypeNameFromColumnType(expressionType);
 
-    if (
-      nodeType !== 'derived' ||
-      derivation === 'elements'
-    ){
+    let arrayAggregatorInfo;
+    const isArray = isArrayType(expressionType);
+    if (typeName === 'STRUCT' && isArray) {
+      arrayAggregatorInfo = AttributeUi.getAggregatorInfo(derivation);
+    }
+
+    if ( nodeType !== 'derived' || derivation === 'elements' || arrayAggregatorInfo && arrayAggregatorInfo.preservesColumnType){
+      if (arrayAggregatorInfo){ 
+        expressionType = getArrayElementType(expressionType);
+        delete profile.derivation;
+        if (! profile.memberExpressionPath ) {
+          profile.memberExpressionPath = [];
+        }
+        profile.memberExpressionPath.push(`list_aggregate(${derivation})`);
+        profile.memberExpressionType = expressionType;
+      }
+
       // only load these derivations if we're not ourself a derived node.
       if (isArrayType(expressionType)){
         this.#loadArrayChildNodes(node, typeName, profile);
@@ -1569,14 +1585,15 @@ class AttributeUi {
   }
 
   #updateState(){
+    const dom = this.getDom();
     const queryModel = this.#queryModel;
 
     // to satisfy https://github.com/rpbouman/huey/issues/220, 
     // we need to ensure derivations and aggregates are loaded.
     
     // First we get the column names of those query items that have a derivation or aggregator
-    const referencedColumns = {};
     const axisIds = queryModel.getAxisIds();
+    let node;
     for (const axisId of axisIds) {
       const queryAxis = queryModel.getQueryAxis(axisId);
       const items = queryAxis.getItems();
@@ -1584,33 +1601,45 @@ class AttributeUi {
         if (!item.columnName) {
           continue;
         }
-        if (!item.derivation && !item.aggregator){
+        if (!item.derivation && !item.aggregator && !item.memberExpressionPath){
           continue;
         }
-        referencedColumns[item.columnName] = true;
+        const columnSelector = `details[data-column_name="${CSS.escape(item.columnName)}"]`;
+        const columnAttributeNodeSelector = columnSelector + '[data-nodetype=column]';
+        const columnAttributeNode = dom.querySelector(columnAttributeNodeSelector);
+        if (!columnAttributeNode) {
+          continue;
+        }
+        node = columnAttributeNode;
+        if (item.memberExpressionPath) {
+          if (columnAttributeNode.querySelector('details') === null) {
+            this.loadChildNodes(columnAttributeNode);
+          }
+          let memberSelector = columnSelector + '[data-nodetype=member]';
+          for (let i = 0; i < item.memberExpressionPath.length; i++){
+            memberSelector += `[data-member_expression_path="${CSS.escape(JSON.stringify(item.memberExpressionPath.slice(0,i+1)))}"]`;
+            const memberAttributeNode = dom.querySelector(memberSelector);
+            if (!memberAttributeNode) {
+              continue;
+            }
+            node = memberAttributeNode;
+            if (memberAttributeNode.querySelector('details') === null) {
+              this.loadChildNodes(memberAttributeNode);
+            }
+          }
+        }
+        if (!item.derivation && !item.aggregator) {
+          continue;
+        }
+        if (node.querySelector('details') !== null) {
+          continue;
+        }
+        this.loadChildNodes(node);
       }
     }
-    
-    // then, check all top-level attribute nodes that don't have child nodes
-    // if the associated column name is referenced in the query, then load its childnodes.
-    const attributeNodes = this.getDom().childNodes;
-    for (const attributeNode of attributeNodes) {
-      if (attributeNode.nodeType !== 1 || attributeNode.nodeName !== 'DETAILS') {
-        continue;
-      }
-      const columnName = attributeNode.getAttribute('data-column_name');
-      if (referencedColumns[columnName] === undefined) {
-        continue;
-      }
-      const descendants = attributeNode.querySelectorAll('details');
-      if (descendants.length > 0) {
-        continue;
-      }
-      this.loadChildNodes(attributeNode);
-    }
-    
+
     // make sure all the selectors checkboxes are (un)checked according to the query state.
-    const inputs = this.getDom().getElementsByTagName('input');
+    const inputs = dom.getElementsByTagName('input');
     for (const input of inputs) {
       const axisId = input.getAttribute('data-axis');
 

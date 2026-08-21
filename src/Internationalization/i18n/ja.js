@@ -80,6 +80,7 @@ Internationalization.setTexts({
   "Check to include the other filter items (in addition to the search string) to populate the picklist": "選択リストの生成時に（検索文字列に加えて）他のフィルター項目を含める場合はチェックします",
   "Check to use the browser's default locale, uncheck to enter a custom locale.": "ブラウザーの既定のロケールを使用する場合はチェックし、カスタムロケールを入力する場合はチェックを外します。",
   "Checking extension {1}": "拡張機能 {1} を確認中",
+  "Choose an output format": "出力形式を選択します",
   "Choose any of the compatible datasources instead, or browse for a new one:": "代わりに互換性のあるデータソースのいずれかを選択するか、新しいものを参照してください：",
   "Clear": "クリア",
   "Clear All": "すべてクリア",
