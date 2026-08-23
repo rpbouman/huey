@@ -9,7 +9,7 @@ __Try Huey now__ with some [sample reports](#getting-started) using the live dem
 
 ![image](https://github.com/user-attachments/assets/f9d49b89-f29e-49b4-accf-64545b3e4c62)
 
-If you prefer to watch a video insted, here's a few: 
+If you prefer to watch a video instead, here's a few: 
 - <a href="https://www.youtube.com/watch?v=qCx4hG9J3O8" target="_blank" rel="noopener noreferrer">3rd DuckDB Meetup</a>.
 - <a href="https://www.youtube.com/watch?v=1A0r4CbLSaI" target="_blank" rel="noopener noreferrer">DataZen talk</a>.
 
@@ -833,7 +833,7 @@ While DuckDB remains committed to its embedded database roots, there's an ongoin
 
 From the DuckDB perspective, such external datasources take the form of "attached" databases. 
 The SQL syntax to achieve this is the [```ATTACH```-statement](https://duckdb.org/docs/current/sql/statements/attach).
-The ```ATTACH``` statment has a flexible, type-dependent options section that's used to define the details of the attached database.
+The ```ATTACH``` statement has a flexible, type-dependent options section that's used to define the details of the attached database.
 
 The "attachment" is an abstraction that encapsulates a lot of the details of the external datastore:
 - In the most basic case, it's simply a pointer to a static file for the local duckdb engine to access and manage. This is what happens when you attach a DuckDB or SQLIte database file.
