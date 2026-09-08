@@ -64,8 +64,6 @@ const APP_SHELL = [
   'src/App/App.css',
   'src/App/App.js',
   'src/App/SidebarLogic.css',
-  'src/AttachToRemote/AttachDialog.css',
-  'src/AttachToRemote/AttachDialog.js',
   'src/AttributeUi/AttributeUi.css',
   'src/AttributeUi/AttributeUi.js',
   'src/AttributeUi/derivation-aggregator-icons.css',
