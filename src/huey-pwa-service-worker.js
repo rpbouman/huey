@@ -32,7 +32,7 @@
 // ─── Version ──────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION whenever you deploy a new version of Huey so that all
 // stale caches are deleted on the next activate phase.
-const CACHE_VERSION = 'v55';
+const CACHE_VERSION = 'v56';
 
 const CACHE_STATIC = `huey-static-${CACHE_VERSION}`;
 const CACHE_CDN    = `huey-cdn-${CACHE_VERSION}`;
@@ -64,8 +64,6 @@ const APP_SHELL = [
   'src/App/App.css',
   'src/App/App.js',
   'src/App/SidebarLogic.css',
-  'src/AttachToRemote/AttachDialog.css',
-  'src/AttachToRemote/AttachDialog.js',
   'src/AttributeUi/AttributeUi.css',
   'src/AttributeUi/AttributeUi.js',
   'src/AttributeUi/derivation-aggregator-icons.css',
