@@ -236,7 +236,7 @@ function getChildWithClassName(dom, className){
 const htmlReplacements = {
   '&': '&amp;',
   '<': '&lt;',
-  '>': '&amp;',
+  '>': '&gt;',
   "'": '&apos;',
   '"': '&quot;',
 };
